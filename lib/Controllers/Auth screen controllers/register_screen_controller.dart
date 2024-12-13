@@ -92,7 +92,7 @@ class RegisterController extends GetxController {
         "email": email.text,
         "user_id": uid,
         "users_tokens": [token],
-        "expiry_date": selectedDate.value,
+        "expiry_date": '${selectedDate.value}',
         "roles":selectedRoles
       });
       sigupgInProcess.value = false;

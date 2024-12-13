@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreenController extends GetxController {
@@ -19,8 +20,6 @@ class LoginScreenController extends GetxController {
   var height = Get.height;
 
   var isPermissionGranted = false.obs; // حالة الإذن
-
-  
 
 // this function is to change the obscureText value:
   void changeObscureTextValue() {
@@ -76,25 +75,54 @@ class LoginScreenController extends GetxController {
     // final String? action = prefs.getString('devideToken');
   }
 
+// this functon is to check if the date of the user has been expired or not
+  bool isDateTodayOrOlder(String selectedDate) {
+    DateFormat dateFormat = DateFormat("yyyy-MM-dd"); // Fix typo in year format
+    DateTime dateTime = dateFormat.parse(selectedDate);
+
+    final DateTime today = DateTime.now();
+    final DateTime todayOnly = DateTime(today.year, today.month, today.day);
+
+    // Compare if the selected date is before or equal to today
+    return dateTime.isBefore(todayOnly) || dateTime.isAtSameMomentAs(todayOnly);
+  }
+
 // this function is to sigin in
   void singIn() async {
     try {
       sigingInProcess.value = true;
 
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email.text,
-        password: pass.text,
-      );
-      User? user = userCredential.user;
+      var userDataSnapshot = await FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('email', isEqualTo: email.text)
+          .get();
+      List userData = userDataSnapshot.docs.map((doc) {
+        return {...doc.data()};
+      }).toList();
 
-      // Get the user ID
-      userId = user!.uid;
-      await saveToken(userId);
-      await saveTokenInSharedPref();
-      sigingInProcess.value = false;
-      showSnackBar('Login Success', 'Welcome');
-      Get.offAllNamed('/mainScreen');
+      var isExpire = userData[0]['expiry_date'];
+      if (isDateTodayOrOlder(isExpire)) {
+        showSnackBar('Login failed', 'Your session has been expired');
+        sigingInProcess.value = false;
+      } else {
+        showSnackBar('Login ssssssssssssss', '');
+        sigingInProcess.value = false;
+
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email.text,
+          password: pass.text,
+        );
+        User? user = userCredential.user;
+
+        // Get the user ID
+        userId = user!.uid;
+        await saveToken(userId);
+        await saveTokenInSharedPref();
+        sigingInProcess.value = false;
+        showSnackBar('Login Success', 'Welcome');
+        Get.offAllNamed('/mainScreen');
+      }
     } on FirebaseAuthException catch (e) {
       sigingInProcess.value = false;
 
@@ -108,6 +136,4 @@ class LoginScreenController extends GetxController {
       }
     }
   }
-
- 
 }
