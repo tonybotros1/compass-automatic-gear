@@ -33,15 +33,90 @@ class RegisterScreen extends StatelessWidget {
                 mainAxisAlignment: constraints.maxWidth > 774
                     ? MainAxisAlignment.spaceAround
                     : MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  constraints.maxWidth > 774
-                      ? Image.asset(
-                          'assets/COMPASS_LOGO.jpg',
-                          width: constraints.maxWidth / 3,
+                  constraints.maxWidth > 1000
+                      ? SingleChildScrollView(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 50),
+                            constraints: BoxConstraints(
+                                maxHeight: constraints.maxHeight,
+                                maxWidth: constraints.maxWidth / 1.9),
+                            child: Obx(
+                              () => registerController.allUsers.isNotEmpty
+                                  ? DataTable(
+                                      columns: const [
+                                          DataColumn(
+                                              label: Text(
+                                            "Email",
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold),
+                                          )),
+                                          DataColumn(
+                                              label: Text("Added Date",
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.bold))),
+                                          DataColumn(
+                                              label: Text("Expiry Date",
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.bold))),
+                                          DataColumn(
+                                              label: Text("   Action",
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.bold))),
+                                        ],
+                                      rows: registerController.allUsers
+                                          .map((user) {
+                                        final userData =
+                                            user.data() as Map<String, dynamic>;
+
+                                        return DataRow(cells: [
+                                          DataCell(
+                                              Text('${userData['email']}')),
+                                          DataCell(
+                                            Text(
+                                              userData['added_date'] != null
+                                                  ? userData['added_date']
+                                                      .substring(0, 10) //
+                                                  : 'N/A',
+                                            ),
+                                          ),
+                                          DataCell(
+                                            Text(
+                                              userData['expiry_date'] != null
+                                                  ? userData['expiry_date']
+                                                      .substring(0, 10)
+                                                  : 'N/A',
+                                            ),
+                                          ),
+                                          DataCell(TextButton(
+                                              onPressed: () {},
+                                              child: Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                    color: mainColor,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ))),
+                                        ]);
+                                      }).toList())
+                                  : Center(
+                                      child: CircularProgressIndicator(
+                                      color: mainColor,
+                                    )),
+                            ),
+                          ),
                         )
                       : const SizedBox(),
                   Container(
+                    padding: const EdgeInsets.symmetric(vertical: 30),
                     constraints:
                         BoxConstraints(maxHeight: constraints.maxHeight),
                     child: SingleChildScrollView(

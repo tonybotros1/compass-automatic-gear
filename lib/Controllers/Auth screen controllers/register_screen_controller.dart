@@ -8,21 +8,22 @@ import 'package:intl/intl.dart';
 class RegisterController extends GetxController {
   late TextEditingController email = TextEditingController();
   late TextEditingController pass = TextEditingController();
-  final FocusNode focusNode = FocusNode(); // To keep track of focus
+  final FocusNode focusNode = FocusNode();
   RxBool obscureText = RxBool(true);
   RxBool sigupgInProcess = RxBool(false);
   var selectedDate = DateTime.now().obs;
   RxString theDate = RxString('');
   RxList sysRoles = RxList([]);
   List<String> areaName = [];
-  String selectedAreaValue = '';
   RxList<bool> isSelected = RxList([]);
   RxBool isLoading = RxBool(false);
-  RxList selectedRoles =RxList([]);
+  RxList selectedRoles = RxList([]);
+  final RxList<DocumentSnapshot> allUsers = RxList<DocumentSnapshot>([]);
 
   @override
   void onInit() async {
     await getRoles();
+    await getAllUsers();
     super.onInit();
   }
 
@@ -93,7 +94,8 @@ class RegisterController extends GetxController {
         "user_id": uid,
         "users_tokens": [token],
         "expiry_date": '${selectedDate.value}',
-        "roles":selectedRoles
+        "roles": selectedRoles,
+        "added_date": DateTime.now().toString()
       });
       sigupgInProcess.value = false;
       showSnackBar('Done', 'New user added successfully');
@@ -128,8 +130,18 @@ class RegisterController extends GetxController {
       sysRoles.assignAll(roles);
       isLoading.value = false;
     } catch (e) {
-    
-      return []; // Return an empty list on error
+      return [];
     }
+  }
+
+  // this function is to get all users in the system
+  getAllUsers() {
+    FirebaseFirestore.instance
+        .collection('sys-users')
+        .snapshots()
+        .listen((event) {
+      allUsers.assignAll(event.docs);
+      print(allUsers);
+    });
   }
 }
