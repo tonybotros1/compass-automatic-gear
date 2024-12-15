@@ -61,7 +61,7 @@ class LoginScreenController extends GetxController {
       if (!tokens.contains(currentUserToken)) {
         tokens.add(currentUserToken);
         FirebaseFirestore.instance
-            .collection('users')
+            .collection('sys-users')
             .doc(documentId)
             .update({'users_tokens': tokens});
       }
@@ -105,8 +105,6 @@ class LoginScreenController extends GetxController {
         showSnackBar('Login failed', 'Your session has been expired');
         sigingInProcess.value = false;
       } else {
-        showSnackBar('Login ssssssssssssss', '');
-        sigingInProcess.value = false;
 
         UserCredential userCredential =
             await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -122,6 +120,8 @@ class LoginScreenController extends GetxController {
         sigingInProcess.value = false;
         showSnackBar('Login Success', 'Welcome');
         Get.offAllNamed('/mainScreen');
+        sigingInProcess.value = false;
+
       }
     } on FirebaseAuthException catch (e) {
       sigingInProcess.value = false;

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
 import '../../Models/screen_tree_model.dart';
@@ -7,6 +8,8 @@ class MainScreenController extends GetxController {
   late TreeController<MyTreeNode> treeController;
   RxList<MyTreeNode> roots = <MyTreeNode>[].obs;
   RxBool isLoading = RxBool(true);
+  RxString uid = RxString('');
+  RxList userScreens = RxList([]);
   @override
   void onInit() {
     // init();
@@ -14,39 +17,57 @@ class MainScreenController extends GetxController {
     super.onInit();
   }
 
-  
-
   getScreens() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      uid.value = currentUser.uid;
+      await FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('user_id', isEqualTo: uid.value)
+          .get()
+          .then((details) {
+        for (var element in details.docs.first.data()['roles']) {
+          userScreens.add(element);
+        }
+      });
+    }
     await FirebaseFirestore.instance.collection('screens').get().then((screen) {
       // Step 1: Create a map to temporarily store nodes by their unique titles/IDs
       Map<String, MyTreeNode> nodeMap = {};
 
       // Step 2: Populate the node map
       for (var element in screen.docs) {
-        String title = element.data()['title'];
-        String? parentTitle = element.data()['parent'];
+        if (userScreens.contains(element.data()['title']) ||
+            element.data()['parent'] != null) {
+          String title = element.data()['title'];
+          String? parentTitle = element.data()['parent'];
 
-        MyTreeNode newNode = MyTreeNode(
-          title: title,
-          children: [],
-          nodeP: parentTitle,
-        );
+          MyTreeNode newNode = MyTreeNode(
+            title: title,
+            children: [],
+            nodeP: parentTitle,
+          );
 
-        nodeMap[title] = newNode;
+          nodeMap[title] = newNode;
+        }
       }
 
-      // Step 3: Link children to their parents
-      nodeMap.forEach((title, node) {
-        String? parentTitle = node.nodeP;
-        if (parentTitle != null) {
-          nodeMap[parentTitle]?.children.add(node);
-          node.parent = nodeMap[parentTitle]; // Establish reverse link
-        } else {
-          // If no parent exists, it's a root node
-          roots.add(node);
-        }
-      });
+      if (nodeMap.isNotEmpty) {
+        // Step 3: Link children to their parents
+        nodeMap.forEach((title, node) {
+          String? parentTitle = node.nodeP;
+          if (parentTitle != null) {
+            nodeMap[parentTitle]?.children.add(node);
+            node.parent = nodeMap[parentTitle]; // Establish reverse link
+          } else {
+            // If no parent exists, it's a root node
+            roots.add(node);
+          }
+        });
+      }
 
+      print(roots);
       // Step 4: Configure the TreeController
       treeController = TreeController<MyTreeNode>(
         roots: roots,
@@ -55,8 +76,6 @@ class MainScreenController extends GetxController {
       );
       isLoading.value = false;
     });
-
-    print(roots);
   }
 
 // init the tree
