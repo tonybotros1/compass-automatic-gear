@@ -21,7 +21,7 @@ class MainScreen extends StatelessWidget {
       body: Row(
         children: [
           Container(
-              width: 200,
+              width: 250,
               color: mainColorForWeb,
               child: Obx(() => mainScreenController.isLoading.value == false
                   ? leftTree()
@@ -55,7 +55,33 @@ class MainScreen extends StatelessWidget {
           builder: (context, details) {
             Widget myTreeNodeTile = Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(entry.node.title),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  // color: mainColor,//const Color(0xffA294F9),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: Text(
+                        entry.node.title,
+                        style: const TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    entry.node.children.isNotEmpty
+                        ? const Expanded(
+                            flex: 1,
+                            child: Icon(
+                              Icons.arrow_drop_down_circle,
+                              color: Colors.black38,
+                            ))
+                        : const SizedBox()
+                  ],
+                ),
+              ),
             );
 
             // If details is not null, a dragging tree node is hovering this

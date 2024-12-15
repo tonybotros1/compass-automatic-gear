@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
-        GetPage(name: '/', page: () =>  const LoadingScreen()),
+        GetPage(name: '/', page: () =>   RegisterScreen()),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
         GetPage(name: '/mainScreen', page: () =>  MainScreen())
       ],
