@@ -15,6 +15,11 @@ var containerColor = const Color(0xffF5F5F5);
 // new colors
 var mainColorForWeb = const Color(0xFFF4F4F8);
 
+//=========================================================
+var appBarColor = const Color(0xffEB5B00);
+
+//=========================================================
+
 const iconColor = Color(0xFF969BA9);
 const menuSelectionColor = Color(0xffEA2027);
 const backgroundColor2 = Color(0xFFFFFFFF);
@@ -24,4 +29,3 @@ Widget verticalSpace({int space = 20}) {
     height: Get.height / space,
   );
 }
-

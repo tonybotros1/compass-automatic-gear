@@ -67,7 +67,6 @@ class MainScreenController extends GetxController {
         });
       }
 
-      print(roots);
       // Step 4: Configure the TreeController
       treeController = TreeController<MyTreeNode>(
         roots: roots,

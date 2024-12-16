@@ -25,9 +25,8 @@ class AddNewScreenController extends GetxController {
         'parent': parent, // Null if it's a top-level screen
       });
 
-      print('Screen added successfully!');
     } catch (e) {
-      print('Error adding screen: $e');
+      // print('Error adding screen: $e');
     }
   }
 }

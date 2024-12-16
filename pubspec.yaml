@@ -46,6 +46,7 @@ dependencies:
   intl: ^0.20.1
   msh_checkbox: ^2.0.1
   flutter_fancy_tree_view: ^1.6.0
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:

@@ -141,7 +141,6 @@ class RegisterController extends GetxController {
         .snapshots()
         .listen((event) {
       allUsers.assignAll(event.docs);
-      print(allUsers);
     });
   }
 }
