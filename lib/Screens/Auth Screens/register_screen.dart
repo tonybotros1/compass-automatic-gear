@@ -28,38 +28,45 @@ class RegisterScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
-          return Obx(
-            () => registerController.allUsers.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 20),
-                    child: SingleChildScrollView(
-                      child: Container(
-                        height: null,
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: SingleChildScrollView(
+              child: Container(
+                height: null,
+                width: constraints.maxWidth,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Column(
+                  children: [
+                    searchBar(
+                        constraints: constraints,
+                        context: context,
+                        registerController: registerController),
+                    SizedBox(
                         width: constraints.maxWidth,
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Column(
-                          children: [
-                            searchBar(
-                                constraints: constraints,
-                                context: context,
-                                registerController: registerController),
-                            SizedBox(
-                                width: constraints.maxWidth,
-                                child: tableOfUsers(
-                                    constraints: constraints,
-                                    context: context)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                : Center(
-                    child: CircularProgressIndicator(
-                    color: mainColor,
-                  )),
+                        child: Obx(() =>
+                            registerController.isScreenLoding.value == false
+                                ? registerController.allUsers.isNotEmpty
+                                    ? tableOfUsers(
+                                        constraints: constraints,
+                                        context: context)
+                                    : const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      )
+                                : const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text('No users'),
+                                    ),
+                                  ))),
+                  ],
+                ),
+              ),
+            ),
           );
         },
       ),
@@ -174,30 +181,29 @@ class RegisterScreen extends StatelessWidget {
                         constraints: constraints,
                         context: context,
                         email: registerController.email,
-                        userExpiryDate: userData['expiry_date']),
+                        userExpiryDate:userData['expiry_date'],activeStatus:true),
                     actions: [
-                      Obx(() => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ElevatedButton(
-                              onPressed:
-                                  registerController.sigupgInProcess.value
-                                      ? null
-                                      : () {
-                                          registerController.register();
-                                          if (registerController
-                                                  .sigupgInProcess.value ==
-                                              false) {
-                                            Get.back();
-                                          }
-                                        },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
-                              child: registerController.sigupgInProcess.value ==
-                                      false
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: ElevatedButton(
+                          onPressed: registerController.sigupgInProcess.value
+                              ? null
+                              : () {
+                                  registerController.register();
+                                  if (registerController
+                                          .sigupgInProcess.value ==
+                                      false) {
+                                    Get.back();
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                          child:
+                              registerController.sigupgInProcess.value == false
                                   ? const Text(
                                       'Save',
                                       style: TextStyle(color: Colors.white),
@@ -208,8 +214,8 @@ class RegisterScreen extends StatelessWidget {
                                         color: Colors.white,
                                       ),
                                     ),
-                            ),
-                          )),
+                        ),
+                      ),
                       ElevatedButton(
                         onPressed: () {
                           Get.back();

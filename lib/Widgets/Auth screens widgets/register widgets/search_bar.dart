@@ -80,6 +80,8 @@ Row searchBar({
                       registerController: registerController,
                       constraints: constraints,
                       context: context,
+                      userExpiryDate: '',
+                      activeStatus:false,
                     ),
                     actions: [
                       Obx(() => Padding(

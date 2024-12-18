@@ -19,7 +19,7 @@ class RegisterController extends GetxController {
   List<String> areaName = [];
   RxBool isLoading = RxBool(false);
   RxMap selectedRoles = RxMap({});
-  // RxList<bool> isSelected = RxList([]);
+  RxBool isScreenLoding = RxBool(true);
   final RxList<DocumentSnapshot> allUsers = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredUsers = RxList<DocumentSnapshot>([]);
   RxString query = RxString('');
@@ -174,12 +174,18 @@ class RegisterController extends GetxController {
 
   // this function is to get all users in the system
   getAllUsers() {
+    try {
     FirebaseFirestore.instance
         .collection('sys-users')
         .snapshots()
         .listen((event) {
       allUsers.assignAll(event.docs);
     });
+    isScreenLoding.value = false;
+    } catch (e) {
+      //
+    }
+   
   }
 
   // get user status

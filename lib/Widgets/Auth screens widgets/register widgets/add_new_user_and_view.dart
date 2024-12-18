@@ -11,9 +11,9 @@ Widget addNewUserAndView({
     required BuildContext context,
     required registerController,
     TextEditingController? email,
-    pass,
     userExpiryDate,
     status,
+    activeStatus
   }) {
     return SizedBox(
       width: constraints.maxWidth / 2,
@@ -46,13 +46,15 @@ Widget addNewUserAndView({
                   hintText: 'Enter your password',
                   validate: true,
                 )),
-            Obx(
-              () => expiryDateAndActiveStatus(
+            // Obx(
+            //   () => 
+              expiryDateAndActiveStatus(
+                activeStatus: activeStatus,
                 registerController:registerController,
                   context: context,
                   constraints: constraints,
                   date: userExpiryDate),
-            ),
+            // ),
             Container(
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),

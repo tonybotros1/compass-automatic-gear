@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../../consts.dart';
@@ -7,7 +8,14 @@ Widget expiryDateAndActiveStatus(
     {required BuildContext context,
     required constraints,
     required date,
-    required registerController}) {
+    required registerController,
+    activeStatus,
+    }) {
+  if (date != '') {
+    registerController.selectedDate.value = DateTime.parse(date);
+  } else {
+    registerController.selectedDate.value = DateTime.now();
+  }
   return Container(
     constraints: BoxConstraints(
         maxHeight: constraints.maxHeight > 400
@@ -19,7 +27,7 @@ Widget expiryDateAndActiveStatus(
                 ? constraints.maxWidth / 2
                 : constraints.maxWidth / 1.5),
     child: ListTile(
-      trailing: ToggleSwitch(
+      trailing:activeStatus == true? ToggleSwitch(
         activeBgColors: const [
           [Colors.blue],
           [Colors.red]
@@ -33,7 +41,7 @@ Widget expiryDateAndActiveStatus(
         onToggle: (index) {
           print('switched to: $index');
         },
-      ),
+      ):const SizedBox(),
       contentPadding: const EdgeInsets.all(0),
       title: Text(
         "Expiry Date ",
@@ -41,8 +49,12 @@ Widget expiryDateAndActiveStatus(
       ),
       subtitle: Row(
         children: [
-          Text(registerController
-              .formatDate(registerController.selectedDate.value)),
+          Obx(
+            () => Text(
+              registerController
+                  .formatDate(registerController.selectedDate.value),
+            ),
+          ),
           const SizedBox(
             width: 10,
           ),
