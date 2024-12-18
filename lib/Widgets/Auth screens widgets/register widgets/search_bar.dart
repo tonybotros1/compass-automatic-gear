@@ -4,10 +4,11 @@ import 'package:get/get.dart';
 import '../../../consts.dart';
 import 'add_new_user_and_view.dart';
 
-Row searchBar(
-    {required BoxConstraints constraints,
-    required context,
-    required registerController}) {
+Row searchBar({
+  required BoxConstraints constraints,
+  required context,
+  required registerController,
+}) {
   return Row(
     children: [
       Expanded(
@@ -34,11 +35,11 @@ Row searchBar(
                     child: SizedBox(
                       width: constraints.maxWidth / 2,
                       child: TextFormField(
-                        // controller: controller,
+                        controller: registerController.search.value,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           hintStyle: TextStyle(color: iconColor),
-                          hintText: 'Search for users',
+                          hintText: 'Search for users by email',
                         ),
                         style: const TextStyle(color: iconColor),
                       ),
@@ -47,7 +48,9 @@ Row searchBar(
                   Expanded(
                     flex: 1,
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                       registerController.search.value.clear();
+                      },
                       icon: const Icon(
                         Icons.close,
                         color: iconColor,

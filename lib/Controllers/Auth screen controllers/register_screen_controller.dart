@@ -4,6 +4,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // For JSON encoding/decoding
 
 class RegisterController extends GetxController {
   late TextEditingController email = TextEditingController();
@@ -19,13 +21,38 @@ class RegisterController extends GetxController {
   RxMap selectedRoles = RxMap({});
   // RxList<bool> isSelected = RxList([]);
   final RxList<DocumentSnapshot> allUsers = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredUsers = RxList<DocumentSnapshot>([]);
+  RxString query = RxString('');
+  Rx<TextEditingController> search = TextEditingController().obs;
 
   @override
   void onInit() async {
     await getRoles();
     await getAllUsers();
-
+    // getUserStatus('OXugS6xlxhdk5mq48uPwpZilA672');
+    search.value.addListener(() {
+      filterCards();
+    });
     super.onInit();
+  }
+
+  // this function is to filter the search results for web
+  void filterCards() {
+    query.value = search.value.text.toLowerCase();
+    if (query.value.isEmpty) {
+      filteredUsers.clear();
+    } else {
+      filteredUsers.assignAll(
+        allUsers.where((user) {
+          return user['email'].toString().toLowerCase().contains(query);
+          // ||
+          // car['car_brand'].toString().toLowerCase().contains(query) ||
+          // car['car_model'].toString().toLowerCase().contains(query) ||
+          // car['plate_number'].toString().toLowerCase().contains(query) ||
+          // car['date'].toString().toLowerCase().contains(query);
+        }).toList(),
+      );
+    }
   }
 
   // Function to format the date
@@ -153,5 +180,36 @@ class RegisterController extends GetxController {
         .listen((event) {
       allUsers.assignAll(event.docs);
     });
+  }
+
+  // get user status
+  Future<void> getUserStatus(uid) async {
+    var flaskUrl = Uri.parse('http://127.0.0.1:5000/getUserData');
+    try {
+      // Prepare the request headers and body
+      final headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+      final body = jsonEncode({'uid': uid});
+
+      var response = await http.post(
+        flaskUrl,
+        headers: headers,
+        body: body,
+      );
+      print(response.statusCode);
+
+      // Handle the response
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('User Status: ${data['status']}'); // Output the user status
+      } else {
+        final error = jsonDecode(response.body);
+        print('Error: ${error['error']}');
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+    }
   }
 }

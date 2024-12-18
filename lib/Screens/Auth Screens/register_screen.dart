@@ -107,108 +107,91 @@ class RegisterScreen extends StatelessWidget {
             ),
           ),
         ],
-        rows: registerController.allUsers.map((user) {
-          final userData = user.data() as Map<String, dynamic>;
+        rows: registerController.filteredUsers.isEmpty
+            ? registerController.allUsers.map((user) {
+                final userData = user.data() as Map<String, dynamic>;
 
-          return DataRow(cells: [
-            DataCell(Text('${userData['email']}')),
-            DataCell(
-              Text(
-                userData['added_date'] != null
-                    ? userData['added_date'].substring(0, 10) //
-                    : 'N/A',
-              ),
+                return dataRowForTheTable(userData, context, constraints);
+              }).toList()
+            : registerController.filteredUsers.map((user) {
+                final userData = user.data() as Map<String, dynamic>;
+
+                return dataRowForTheTable(userData, context, constraints);
+              }).toList());
+  }
+
+  DataRow dataRowForTheTable(
+      Map<String, dynamic> userData, context, constraints) {
+    return DataRow(cells: [
+      DataCell(Text('${userData['email']}')),
+      DataCell(
+        Text(
+          userData['added_date'] != null
+              ? userData['added_date'].substring(0, 10) //
+              : 'N/A',
+        ),
+      ),
+      DataCell(
+        Text(
+          userData['expiry_date'] != null
+              ? userData['expiry_date'].substring(0, 10)
+              : 'N/A',
+        ),
+      ),
+      DataCell(ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
             ),
-            DataCell(
-              Text(
-                userData['expiry_date'] != null
-                    ? userData['expiry_date'].substring(0, 10)
-                    : 'N/A',
-              ),
-            ),
-            DataCell(ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  elevation: 5,
-                ),
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        registerController.email.text = userData['email'];
-                        for (var role in userData['roles']) {
-                          registerController.selectedRoles.update(
-                            role,
-                            (value) => true,
-                            ifAbsent: () =>
-                                false, // Optional: handle if the key doesn't exist
-                          );
-                        }
-                        // Set the rest of the keys to false
-                        registerController.selectedRoles.forEach((key, value) {
-                          if (!userData['roles'].contains(key)) {
-                            registerController.selectedRoles
-                                .update(key, (value) => false);
-                          }
-                        });
-                        return AlertDialog(
-                          actionsPadding:
-                              const EdgeInsets.symmetric(horizontal: 20),
-                          content: addNewUserAndView(
-                              registerController: registerController,
-                              constraints: constraints,
-                              context: context,
-                              email: registerController.email,
-                              userExpiryDate: userData['expiry_date']),
-                          actions: [
-                            Obx(() => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  child: ElevatedButton(
-                                    onPressed:
-                                        registerController.sigupgInProcess.value
-                                            ? null
-                                            : () {
-                                                registerController.register();
-                                                if (registerController
-                                                        .sigupgInProcess
-                                                        .value ==
-                                                    false) {
-                                                  Get.back();
-                                                }
-                                              },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                    ),
-                                    child: registerController
-                                                .sigupgInProcess.value ==
-                                            false
-                                        ? const Text(
-                                            'Save',
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          )
-                                        : const Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                  ),
-                                )),
-                            ElevatedButton(
-                              onPressed: () {
-                                Get.back();
-                              },
+            elevation: 5,
+          ),
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (context) {
+                  registerController.email.text = userData['email'];
+                  for (var role in userData['roles']) {
+                    registerController.selectedRoles.update(
+                      role,
+                      (value) => true,
+                      ifAbsent: () =>
+                          false, // Optional: handle if the key doesn't exist
+                    );
+                  }
+                  // Set the rest of the keys to false
+                  registerController.selectedRoles.forEach((key, value) {
+                    if (!userData['roles'].contains(key)) {
+                      registerController.selectedRoles
+                          .update(key, (value) => false);
+                    }
+                  });
+                  return AlertDialog(
+                    actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    content: addNewUserAndView(
+                        registerController: registerController,
+                        constraints: constraints,
+                        context: context,
+                        email: registerController.email,
+                        userExpiryDate: userData['expiry_date']),
+                    actions: [
+                      Obx(() => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: ElevatedButton(
+                              onPressed:
+                                  registerController.sigupgInProcess.value
+                                      ? null
+                                      : () {
+                                          registerController.register();
+                                          if (registerController
+                                                  .sigupgInProcess.value ==
+                                              false) {
+                                            Get.back();
+                                          }
+                                        },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: mainColor,
+                                backgroundColor: Colors.green,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5),
                                 ),
@@ -216,7 +199,7 @@ class RegisterScreen extends StatelessWidget {
                               child: registerController.sigupgInProcess.value ==
                                       false
                                   ? const Text(
-                                      'Cancel',
+                                      'Save',
                                       style: TextStyle(color: Colors.white),
                                     )
                                   : const Padding(
@@ -226,12 +209,34 @@ class RegisterScreen extends StatelessWidget {
                                       ),
                                     ),
                             ),
-                          ],
-                        );
-                      });
-                },
-                child: const Text('View'))),
-          ]);
-        }).toList());
+                          )),
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: mainColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        child: registerController.sigupgInProcess.value == false
+                            ? const Text(
+                                'Cancel',
+                                style: TextStyle(color: Colors.white),
+                              )
+                            : const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ],
+                  );
+                });
+          },
+          child: const Text('View'))),
+    ]);
   }
 }
