@@ -15,15 +15,16 @@ class RegisterController extends GetxController {
   RxString theDate = RxString('');
   RxList sysRoles = RxList([]);
   List<String> areaName = [];
-  RxList<bool> isSelected = RxList([]);
   RxBool isLoading = RxBool(false);
-  RxList selectedRoles = RxList([]);
+  RxMap selectedRoles = RxMap({});
+  // RxList<bool> isSelected = RxList([]);
   final RxList<DocumentSnapshot> allUsers = RxList<DocumentSnapshot>([]);
 
   @override
   void onInit() async {
     await getRoles();
     await getAllUsers();
+
     super.onInit();
   }
 
@@ -71,6 +72,7 @@ class RegisterController extends GetxController {
     );
   }
 
+// this function is to add new user
   register() async {
     try {
       if (email.text.isEmpty || pass.text.isEmpty) {
@@ -94,7 +96,9 @@ class RegisterController extends GetxController {
         "user_id": uid,
         "users_tokens": [token],
         "expiry_date": '${selectedDate.value}',
-        "roles": selectedRoles,
+        "roles": selectedRoles.entries
+            .where((entry) => entry.value == true)
+            .map((entry) => entry.key),
         "added_date": DateTime.now().toString()
       });
       sigupgInProcess.value = false;
@@ -113,6 +117,9 @@ class RegisterController extends GetxController {
     }
   }
 
+  // this function is to update user details
+  updateUserDetails() {}
+
   // this function is to get roles from DB
   getRoles() async {
     try {
@@ -128,6 +135,10 @@ class RegisterController extends GetxController {
         };
       }).toList();
       sysRoles.assignAll(roles);
+      for (var role in roles) {
+        selectedRoles.addAll({role['role_name']: false});
+      }
+
       isLoading.value = false;
     } catch (e) {
       return [];
