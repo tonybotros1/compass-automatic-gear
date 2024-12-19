@@ -25,10 +25,23 @@ class RegisterController extends GetxController {
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
 
+  // value = true:
+  // For dates: From the most recent to the oldest.
+  // For numbers: From the highest to the lowest.
+  // For strings: In reverse alphabetical order (Z to A).
+  //
+  // value = false:
+  // For dates: From the oldest to the most recent.
+  // For numbers: From the lowest to the highest.
+  // For strings: In alphabetical order (A to Z).
+  RxBool sortByEmailType = RxBool(false);
+  RxBool sortByAddedDateType = RxBool(false);
+  RxBool sortByExpiryDateType = RxBool(false);
+
   @override
   void onInit() async {
     await getRoles();
-    await getAllUsers();
+    await getAllUsers('');
     // getUserStatus('OXugS6xlxhdk5mq48uPwpZilA672');
     search.value.addListener(() {
       filterCards();
@@ -45,11 +58,6 @@ class RegisterController extends GetxController {
       filteredUsers.assignAll(
         allUsers.where((user) {
           return user['email'].toString().toLowerCase().contains(query);
-          // ||
-          // car['car_brand'].toString().toLowerCase().contains(query) ||
-          // car['car_model'].toString().toLowerCase().contains(query) ||
-          // car['plate_number'].toString().toLowerCase().contains(query) ||
-          // car['date'].toString().toLowerCase().contains(query);
         }).toList(),
       );
     }
@@ -76,6 +84,20 @@ class RegisterController extends GetxController {
 
     if (picked != null && picked != selectedDate.value) {
       selectDate(picked);
+    }
+  }
+
+  // function to convert text to date and make the format dd-mm-yyyy
+  textToDate(inputDate) {
+    if (inputDate is String) {
+      DateTime parsedDate = DateFormat("yyyy-MM-dd").parse(inputDate);
+      String formattedDate = DateFormat("dd-MM-yyyy").format(parsedDate);
+
+      return formattedDate;
+    } else if (inputDate is DateTime) {
+      String formattedDate = DateFormat("dd-MM-yyyy").format(inputDate);
+
+      return formattedDate;
     }
   }
 
@@ -173,19 +195,69 @@ class RegisterController extends GetxController {
   }
 
   // this function is to get all users in the system
-  getAllUsers() {
-    try {
-    FirebaseFirestore.instance
-        .collection('sys-users')
-        .snapshots()
-        .listen((event) {
-      allUsers.assignAll(event.docs);
-    });
-    isScreenLoding.value = false;
-    } catch (e) {
-      //
+  getAllUsers(sortBy) {
+    if (sortBy == 'email') {
+      try {
+        sortByAddedDateType.value = false;
+        sortByExpiryDateType.value = false;
+        FirebaseFirestore.instance
+            .collection('sys-users')
+            .orderBy(sortBy, descending: sortByEmailType.value)
+            .snapshots()
+            .listen((event) {
+          allUsers.assignAll(event.docs);
+        });
+        isScreenLoding.value = false;
+      } catch (e) {
+        //
+      }
+    } else if (sortBy == 'added_date') {
+      try {
+        sortByEmailType.value = false;
+        sortByExpiryDateType.value = false;
+        FirebaseFirestore.instance
+            .collection('sys-users')
+            .orderBy(sortBy, descending: sortByAddedDateType.value)
+            .snapshots()
+            .listen((event) {
+          allUsers.assignAll(event.docs);
+        });
+        isScreenLoding.value = false;
+      } catch (e) {
+        //
+      }
+    } else if (sortBy == 'expiry_date') {
+      try {
+        sortByEmailType.value = false;
+        sortByAddedDateType.value = false;
+        FirebaseFirestore.instance
+            .collection('sys-users')
+            .orderBy(sortBy, descending: sortByExpiryDateType.value)
+            .snapshots()
+            .listen((event) {
+          allUsers.assignAll(event.docs);
+        });
+        isScreenLoding.value = false;
+      } catch (e) {
+        //
+      }
+    } else {
+      try {
+        sortByEmailType.value = false;
+        sortByAddedDateType.value = false;
+        sortByExpiryDateType.value = false;
+
+        FirebaseFirestore.instance
+            .collection('sys-users')
+            .snapshots()
+            .listen((event) {
+          allUsers.assignAll(event.docs);
+        });
+        isScreenLoding.value = false;
+      } catch (e) {
+        //
+      }
     }
-   
   }
 
   // get user status

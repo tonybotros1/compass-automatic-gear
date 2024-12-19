@@ -4,13 +4,13 @@ import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../../consts.dart';
 
-Widget expiryDateAndActiveStatus(
-    {required BuildContext context,
-    required constraints,
-    required date,
-    required registerController,
-    activeStatus,
-    }) {
+Widget expiryDateAndActiveStatus({
+  required BuildContext context,
+  required constraints,
+  required date,
+  required registerController,
+  activeStatus,
+}) {
   if (date != '') {
     registerController.selectedDate.value = DateTime.parse(date);
   } else {
@@ -27,33 +27,33 @@ Widget expiryDateAndActiveStatus(
                 ? constraints.maxWidth / 2
                 : constraints.maxWidth / 1.5),
     child: ListTile(
-      trailing:activeStatus == true? ToggleSwitch(
-        activeBgColors: const [
-          [Colors.blue],
-          [Colors.red]
-        ],
-        activeFgColor: Colors.white,
-        inactiveBgColor: Colors.grey,
-        inactiveFgColor: Colors.white,
-        initialLabelIndex: 0,
-        totalSwitches: 2,
-        labels: const ['Enable', 'Disable'],
-        onToggle: (index) {
-          print('switched to: $index');
-        },
-      ):const SizedBox(),
+      trailing: activeStatus == true
+          ? ToggleSwitch(
+              activeBgColors: const [
+                [Colors.blue],
+                [Colors.red]
+              ],
+              activeFgColor: Colors.white,
+              inactiveBgColor: Colors.grey,
+              inactiveFgColor: Colors.white,
+              initialLabelIndex: 0,
+              totalSwitches: 2,
+              labels: const ['Enable', 'Disable'],
+              onToggle: (index) {
+                print('switched to: $index');
+              },
+            )
+          : const SizedBox(),
       contentPadding: const EdgeInsets.all(0),
       title: Text(
         "Expiry Date ",
-        style: fontStyle2,
+        style: regTextStyle,
       ),
       subtitle: Row(
         children: [
           Obx(
-            () => Text(
-              registerController
-                  .formatDate(registerController.selectedDate.value),
-            ),
+            () => Text(registerController.textToDate(registerController
+                .formatDate(registerController.selectedDate.value))),
           ),
           const SizedBox(
             width: 10,

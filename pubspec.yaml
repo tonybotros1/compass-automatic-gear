@@ -50,7 +50,7 @@ dependencies:
   intl: ^0.20.1
   msh_checkbox: ^2.0.1
   flutter_fancy_tree_view: ^1.6.0
-  google_fonts: ^6.2.1
+  # google_fonts: ^6.2.1
   toggle_switch: ^2.3.0
   http: ^1.2.2
   

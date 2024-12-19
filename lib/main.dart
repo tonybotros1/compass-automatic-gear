@@ -1,11 +1,11 @@
 import 'package:compass_automatic_gear/Screens/Auth%20Screens/loading_screen.dart';
+import 'package:compass_automatic_gear/Screens/Auth%20Screens/register_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'Screens/Auth Screens/login_screen.dart';
-import 'Screens/Auth Screens/register_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
 
 void main() async {
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
-        GetPage(name: '/', page: () =>   const LoadingScreen()),
+        GetPage(name: '/', page: () =>   RegisterScreen()),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
         GetPage(name: '/mainScreen', page: () =>  MainScreen())
       ],

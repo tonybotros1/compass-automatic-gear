@@ -4,7 +4,6 @@ import '../../Controllers/Auth screen controllers/register_screen_controller.dar
 import '../../Widgets/Auth screens widgets/register widgets/add_new_user_and_view.dart';
 import '../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../consts.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
@@ -15,35 +14,27 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 90,
         backgroundColor: Colors.white,
-        title: Text(
-          'User management',
-          style: GoogleFonts.mooli(
-              // decoration: TextDecoration.underline,
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700]),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2.0), // Divider height
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                width: 350,
-                color: Colors.grey,
-                height: 2.0,
-              ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text('User Management', style: fontStyleForAppBar),
+            const SizedBox(
+              height: 15,
             ),
-          ),
+            Divider(
+              color: Colors.grey[700],
+            )
+          ],
         ),
       ),
       backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: SingleChildScrollView(
               child: Container(
                 height: null,
@@ -92,39 +83,78 @@ class RegisterScreen extends StatelessWidget {
         headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           DataColumn(
-            label: Text(
-              'Email',
-              style: TextStyle(
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
+            label: Row(
+              children: [
+                Text(
+                  'Email',
+                  style: fontStyleForTableHeader,
+                ),
+                IconButton(
+                    onPressed: () {
+                      if (registerController.sortByEmailType.value == true) {
+                        registerController.sortByEmailType.value = false;
+                        registerController.getAllUsers('email');
+                      } else {
+                        registerController.sortByEmailType.value = true;
+                        registerController.getAllUsers('email');
+                      }
+                    },
+                    icon: registerController.sortByEmailType.value == true
+                        ? iconStyleForTableHeaderDown
+                        : iconStyleForTableHeaderUp)
+              ],
             ),
           ),
           DataColumn(
-            label: Text(
-              'Added Date',
-              style: TextStyle(
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
+            label: Row(
+              children: [
+                Text(
+                  'Added Date',
+                  style: fontStyleForTableHeader,
+                ),
+                IconButton(
+                    onPressed: () {
+                      if (registerController.sortByAddedDateType.value ==
+                          true) {
+                        registerController.sortByAddedDateType.value = false;
+                        registerController.getAllUsers('added_date');
+                      } else {
+                        registerController.sortByAddedDateType.value = true;
+                        registerController.getAllUsers('added_date');
+                      }
+                    },
+                    icon: registerController.sortByAddedDateType.value == true
+                        ? iconStyleForTableHeaderDown
+                        : iconStyleForTableHeaderUp)
+              ],
             ),
           ),
           DataColumn(
-            label: Text(
-              'Expiry Date',
-              style: TextStyle(
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
+            label: Row(
+              children: [
+                Text(
+                  'Expiry Date',
+                  style: fontStyleForTableHeader,
+                ),
+                IconButton(onPressed: () {
+                   if (registerController.sortByExpiryDateType.value ==
+                          true) {
+                        registerController.sortByExpiryDateType.value = false;
+                        registerController.getAllUsers('expiry_date');
+                      } else {
+                        registerController.sortByExpiryDateType.value = true;
+                        registerController.getAllUsers('expiry_date');
+                      }
+                }, icon: registerController.sortByExpiryDateType.value == true
+                        ? iconStyleForTableHeaderDown
+                        : iconStyleForTableHeaderUp)
+              ],
             ),
           ),
           DataColumn(
             label: Text(
               '   Action',
-              style: TextStyle(
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
+              style: fontStyleForTableHeader,
             ),
           ),
         ],
@@ -144,19 +174,24 @@ class RegisterScreen extends StatelessWidget {
   DataRow dataRowForTheTable(
       Map<String, dynamic> userData, context, constraints) {
     return DataRow(cells: [
-      DataCell(Text('${userData['email']}')),
+      DataCell(Text(
+        '${userData['email']}',
+        style: regTextStyle,
+      )),
       DataCell(
         Text(
           userData['added_date'] != null
-              ? userData['added_date'].substring(0, 10) //
+              ? registerController.textToDate(userData['added_date']) //
               : 'N/A',
+          style: regTextStyle,
         ),
       ),
       DataCell(
         Text(
           userData['expiry_date'] != null
-              ? userData['expiry_date'].substring(0, 10)
+              ? registerController.textToDate(userData['expiry_date'])
               : 'N/A',
+          style: regTextStyle,
         ),
       ),
       DataCell(ElevatedButton(

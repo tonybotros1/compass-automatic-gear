@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-var fontStyle = TextStyle(fontSize: 20, color: Colors.grey.shade700);
-var fontStyle2 = TextStyle(fontSize: 16, color: Colors.grey.shade700);
+var fontStyleForAppBar = TextStyle(
+    fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
+var fontStyleForTableHeader = TextStyle(
+    color: Colors.grey[700], fontWeight: FontWeight.bold, fontSize: 16);
+var iconStyleForTableHeaderDown =
+    Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade700);
+var iconStyleForTableHeaderUp =
+    Icon(Icons.keyboard_arrow_up, color: Colors.grey.shade700);
+var regTextStyle =
+    TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w500);
+
 var fontStyle3 = const TextStyle(fontSize: 16, color: Colors.white);
 // var mainColor = const Color.fromARGB(255, 228, 200, 233);
 

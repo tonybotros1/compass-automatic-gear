@@ -131,7 +131,7 @@ Widget myTextFormField({
         hintStyle: const TextStyle(color: Colors.grey),
         labelText: labelText,
         hintText: hintText,
-        labelStyle: TextStyle(color: Colors.grey.shade700),
+        labelStyle: regTextStyle,
         focusedBorder: const UnderlineInputBorder(
           borderSide: BorderSide(color: Colors.grey, width: 2.0),
         ),
