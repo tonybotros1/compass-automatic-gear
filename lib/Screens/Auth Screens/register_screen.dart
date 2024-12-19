@@ -22,7 +22,7 @@ class RegisterScreen extends StatelessWidget {
           children: [
             Text('User Management', style: fontStyleForAppBar),
             const SizedBox(
-              height: 15,
+              height: 5,
             ),
             Divider(
               color: Colors.grey[700],
@@ -136,8 +136,9 @@ class RegisterScreen extends StatelessWidget {
                   'Expiry Date',
                   style: fontStyleForTableHeader,
                 ),
-                IconButton(onPressed: () {
-                   if (registerController.sortByExpiryDateType.value ==
+                IconButton(
+                    onPressed: () {
+                      if (registerController.sortByExpiryDateType.value ==
                           true) {
                         registerController.sortByExpiryDateType.value = false;
                         registerController.getAllUsers('expiry_date');
@@ -145,7 +146,8 @@ class RegisterScreen extends StatelessWidget {
                         registerController.sortByExpiryDateType.value = true;
                         registerController.getAllUsers('expiry_date');
                       }
-                }, icon: registerController.sortByExpiryDateType.value == true
+                    },
+                    icon: registerController.sortByExpiryDateType.value == true
                         ? iconStyleForTableHeaderDown
                         : iconStyleForTableHeaderUp)
               ],

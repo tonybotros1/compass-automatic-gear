@@ -12,15 +12,15 @@ Widget myTextFormField({
   keyboardType,
 }) {
   return Container(
-    constraints: BoxConstraints(
-        maxHeight: constraints.maxHeight > 400
-            ? constraints.maxHeight / 3
-            : constraints.maxHeight / 1.3,
-        maxWidth: constraints.maxWidth > 796
-            ? constraints.maxWidth / 3
-            : constraints.maxWidth < 796 && constraints.maxWidth > 400
-                ? constraints.maxWidth / 2
-                : constraints.maxWidth / 1.5),
+    // constraints: BoxConstraints(
+    //     maxHeight: constraints.maxHeight > 400
+    //         ? constraints.maxHeight / 3
+    //         : constraints.maxHeight / 1.3,
+    //     maxWidth: constraints.maxWidth > 796
+    //         ? constraints.maxWidth / 3
+    //         : constraints.maxWidth < 796 && constraints.maxWidth > 400
+    //             ? constraints.maxWidth / 2
+    //             : constraints.maxWidth / 1.5),
     child: TextFormField(
       obscureText: obscureText,
       keyboardType: keyboardType,

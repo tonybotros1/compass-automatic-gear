@@ -16,56 +16,45 @@ Widget expiryDateAndActiveStatus({
   } else {
     registerController.selectedDate.value = DateTime.now();
   }
-  return Container(
-    constraints: BoxConstraints(
-        maxHeight: constraints.maxHeight > 400
-            ? constraints.maxHeight / 3
-            : constraints.maxHeight / 1.3,
-        maxWidth: constraints.maxWidth > 796
-            ? constraints.maxWidth / 3
-            : constraints.maxWidth < 796 && constraints.maxWidth > 400
-                ? constraints.maxWidth / 2
-                : constraints.maxWidth / 1.5),
-    child: ListTile(
-      trailing: activeStatus == true
-          ? ToggleSwitch(
-              activeBgColors: const [
-                [Colors.blue],
-                [Colors.red]
-              ],
-              activeFgColor: Colors.white,
-              inactiveBgColor: Colors.grey,
-              inactiveFgColor: Colors.white,
-              initialLabelIndex: 0,
-              totalSwitches: 2,
-              labels: const ['Enable', 'Disable'],
-              onToggle: (index) {
-                print('switched to: $index');
-              },
-            )
-          : const SizedBox(),
-      contentPadding: const EdgeInsets.all(0),
-      title: Text(
-        "Expiry Date ",
-        style: regTextStyle,
-      ),
-      subtitle: Row(
-        children: [
-          Obx(
-            () => Text(registerController.textToDate(registerController
-                .formatDate(registerController.selectedDate.value))),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-          IconButton(
-              onPressed: () => registerController.selectDateContext(context),
-              icon: const Icon(
-                Icons.calendar_month,
-                color: Colors.blue,
-              ))
-        ],
-      ),
+  return ListTile(
+    trailing: activeStatus == true
+        ? ToggleSwitch(
+            activeBgColors: const [
+              [Colors.blue],
+              [Colors.red]
+            ],
+            activeFgColor: Colors.white,
+            inactiveBgColor: Colors.grey,
+            inactiveFgColor: Colors.white,
+            initialLabelIndex: 0,
+            totalSwitches: 2,
+            labels: const ['Enable', 'Disable'],
+            onToggle: (index) {
+              print('switched to: $index');
+            },
+          )
+        : const SizedBox(),
+    contentPadding: const EdgeInsets.all(0),
+    title: Text(
+      "Expiry Date ",
+      style: regTextStyle,
+    ),
+    subtitle: Row(
+      children: [
+        Obx(
+          () => Text(registerController.textToDate(registerController
+              .formatDate(registerController.selectedDate.value))),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        IconButton(
+            onPressed: () => registerController.selectDateContext(context),
+            icon: const Icon(
+              Icons.calendar_month,
+              color: Colors.blue,
+            ))
+      ],
     ),
   );
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import '../../Controllers/Auth screen controllers/login_screen_controller.dart';
+import '../../Widgets/Auth screens widgets/register widgets/my_text_form_field.dart';
 import '../../consts.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -17,10 +18,12 @@ class LoginScreen extends StatelessWidget {
       body: KeyboardListener(
         autofocus: true,
         focusNode: loginScreenController.focusNode,
-          onKeyEvent: (KeyEvent event) {
+        onKeyEvent: (KeyEvent event) {
           // if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-          if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
-            loginScreenController.singIn(); // Call the login function when "Enter" is pressed
+          if (event is KeyDownEvent &&
+              event.logicalKey == LogicalKeyboardKey.enter) {
+            loginScreenController
+                .singIn(); // Call the login function when "Enter" is pressed
           }
         },
         child: LayoutBuilder(
@@ -72,8 +75,8 @@ class LoginScreen extends StatelessWidget {
                           hintText: 'Enter your password',
                           validate: true,
                         )),
-                     SizedBox(
-                      height:  constraints.maxHeight / 10,
+                    SizedBox(
+                      height: constraints.maxHeight / 10,
                     ),
                     Obx(() => ElevatedButton(
                           onPressed: loginScreenController.sigingInProcess.value
@@ -84,18 +87,18 @@ class LoginScreen extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: mainColor,
                           ),
-                          child:
-                              loginScreenController.sigingInProcess.value == false
-                                  ? const Text(
-                                      'Login',
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  : const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                      ),
-                                    ),
+                          child: loginScreenController.sigingInProcess.value ==
+                                  false
+                              ? const Text(
+                                  'Login',
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              : const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
                         )),
                   ],
                 ),
@@ -108,42 +111,3 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-Widget myTextFormField({
-  required String labelText,
-  required String hintText,
-  required TextEditingController controller,
-  required validate,
-  required obscureText,
-  IconButton? icon,
-  required constraints,
-  keyboardType,
-}) {
-  return Container(
-    constraints: BoxConstraints(
-        maxHeight:constraints.maxHeight > 400 ? constraints.maxHeight / 3: constraints.maxHeight / 1.3,
-        maxWidth:constraints.maxWidth > 600 ? constraints.maxWidth / 3: constraints.maxWidth / 1.3),
-    child: TextFormField(
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      controller: controller,
-      decoration: InputDecoration(
-        suffixIcon: icon,
-        hintStyle: const TextStyle(color: Colors.grey),
-        labelText: labelText,
-        hintText: hintText,
-        labelStyle: regTextStyle,
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey, width: 2.0),
-        ),
-      ),
-      validator: validate != false
-          ? (value) {
-              if (value!.isEmpty) {
-                return 'Please Enter $labelText';
-              }
-              return null;
-            }
-          : null,
-    ),
-  );
-}
