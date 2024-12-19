@@ -163,18 +163,21 @@ class RegisterScreen extends StatelessWidget {
         rows: registerController.filteredUsers.isEmpty
             ? registerController.allUsers.map((user) {
                 final userData = user.data() as Map<String, dynamic>;
-
-                return dataRowForTheTable(userData, context, constraints);
+                final userId = user.id;
+                return dataRowForTheTable(
+                    userData, context, constraints, userId);
               }).toList()
             : registerController.filteredUsers.map((user) {
                 final userData = user.data() as Map<String, dynamic>;
+                final userId = user.id;
 
-                return dataRowForTheTable(userData, context, constraints);
+                return dataRowForTheTable(
+                    userData, context, constraints, userId);
               }).toList());
   }
 
   DataRow dataRowForTheTable(
-      Map<String, dynamic> userData, context, constraints) {
+      Map<String, dynamic> userData, context, constraints, uid) {
     return DataRow(cells: [
       DataCell(Text(
         '${userData['email']}',
@@ -241,7 +244,7 @@ class RegisterScreen extends StatelessWidget {
                           onPressed: registerController.sigupgInProcess.value
                               ? null
                               : () {
-                                  registerController.register();
+                                  registerController.updateUserDetails(uid);
                                   if (registerController
                                           .sigupgInProcess.value ==
                                       false) {

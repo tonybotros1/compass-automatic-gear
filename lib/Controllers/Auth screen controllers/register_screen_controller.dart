@@ -167,7 +167,24 @@ class RegisterController extends GetxController {
   }
 
   // this function is to update user details
-  updateUserDetails() {}
+  updateUserDetails(userId) async {
+    try {
+      // Reference the document by its ID
+      await FirebaseFirestore.instance
+          .collection('sys-users') // Replace with your collection name
+          .doc(userId) // The document ID you want to update
+          .update({
+        'roles': selectedRoles.entries
+            .where((entry) => entry.value == true)
+            .map((entry) => entry.key),
+        'expiry_date': '${selectedDate.value}'
+      }); // Pass the updated data as a map
+
+      print('Document updated successfully.');
+    } catch (e) {
+      print('Error updating document: $e');
+    }
+  }
 
   // this function is to get roles from DB
   getRoles() async {
