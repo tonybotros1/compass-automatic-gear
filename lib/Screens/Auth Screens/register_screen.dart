@@ -19,10 +19,24 @@ class RegisterScreen extends StatelessWidget {
         title: Text(
           'User management',
           style: GoogleFonts.mooli(
-              decoration: TextDecoration.underline,
+              // decoration: TextDecoration.underline,
               fontSize: 30,
               fontWeight: FontWeight.bold,
               color: Colors.grey[700]),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(2.0), // Divider height
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                width: 350,
+                color: Colors.grey,
+                height: 2.0,
+              ),
+            ),
+          ),
         ),
       ),
       backgroundColor: Colors.white,
@@ -181,7 +195,8 @@ class RegisterScreen extends StatelessWidget {
                         constraints: constraints,
                         context: context,
                         email: registerController.email,
-                        userExpiryDate:userData['expiry_date'],activeStatus:true),
+                        userExpiryDate: userData['expiry_date'],
+                        activeStatus: true),
                     actions: [
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
