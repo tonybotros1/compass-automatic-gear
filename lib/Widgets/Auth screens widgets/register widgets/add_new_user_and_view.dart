@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../Screens/Auth Screens/login_screen.dart';
 import '../../../consts.dart';
 import 'expiry_date_and_active_status.dart';
 import 'my_text_form_field.dart';
@@ -55,11 +54,10 @@ Widget addNewUserAndView(
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(15)),
-             
               child: Obx(
                 () => registerController.isLoading.value == false
                     ? ListView.builder(
-                        itemCount: registerController.sysRoles.length,
+                        itemCount: registerController.selectedRoles.length,
                         shrinkWrap: true,
                         itemBuilder: (context, i) {
                           return ListTile(
@@ -68,16 +66,20 @@ Widget addNewUserAndView(
                                     activeColor: Colors.blue,
                                     value: registerController
                                         .selectedRoles.values
-                                        .elementAt(i),
+                                        .elementAt(i)[1],
                                     onChanged: (selected) {
-                                      registerController.selectedRoles[
-                                          registerController.selectedRoles.keys
-                                              .elementAt(i)] = selected;
+                                      var key = registerController
+                                          .selectedRoles.keys
+                                          .elementAt(i); // Get the key
+                                      registerController.selectedRoles[key] = [
+                                        registerController.selectedRoles[key]![
+                                            0], 
+                                        selected!, 
+                                      ];
                                     }),
                               ),
-                              
                               title: Text(
-                                  '${registerController.sysRoles[i]['role_name']}'));
+                                  '${registerController.selectedRoles.keys.elementAt(i)}'));
                         })
                     : CircularProgressIndicator(
                         color: mainColor,

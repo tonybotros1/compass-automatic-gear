@@ -72,7 +72,7 @@ Row searchBar({
                   registerController.email.clear();
                   registerController.pass.clear();
                   registerController.selectedRoles.updateAll(
-                    (key, value) => false,
+                    (key, value) => [value[0],false],
                   );
                   return AlertDialog(
                     actionsPadding: const EdgeInsets.symmetric(horizontal: 20),

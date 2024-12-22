@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import '../../Controllers/Auth screen controllers/login_screen_controller.dart';
-import '../../Widgets/Auth screens widgets/register widgets/my_text_form_field.dart';
 import '../../consts.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -51,7 +50,7 @@ class LoginScreen extends StatelessWidget {
                         'assets/COMPASS_LOGO.jpg',
                       ),
                     ),
-                    myTextFormField(
+                    myTextFormField1(
                       constraints: constraints,
                       obscureText: false,
                       controller: loginScreenController.email,
@@ -60,7 +59,7 @@ class LoginScreen extends StatelessWidget {
                       keyboardType: TextInputType.emailAddress,
                       validate: true,
                     ),
-                    Obx(() => myTextFormField(
+                    Obx(() => myTextFormField1(
                           constraints: constraints,
                           icon: IconButton(
                               onPressed: () {
@@ -111,3 +110,46 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
+Widget myTextFormField1({
+  required String labelText,
+  required String hintText,
+  required TextEditingController controller,
+  required validate,
+  required obscureText,
+  IconButton? icon,
+  required constraints,
+  keyboardType,
+}) {
+  return Container(
+    constraints: BoxConstraints(
+        maxHeight: constraints.maxHeight > 400
+            ? constraints.maxHeight / 3
+            : constraints.maxHeight / 1.3,
+        maxWidth: constraints.maxWidth > 600
+            ? constraints.maxWidth / 3
+            : constraints.maxWidth / 1.3),
+    child: TextFormField(
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      controller: controller,
+      decoration: InputDecoration(
+        suffixIcon: icon,
+        hintStyle: const TextStyle(color: Colors.grey),
+        labelText: labelText,
+        hintText: hintText,
+        labelStyle: regTextStyle,
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey, width: 2.0),
+        ),
+      ),
+      validator: validate != false
+          ? (value) {
+              if (value!.isEmpty) {
+                return 'Please Enter $labelText';
+              }
+              return null;
+            }
+          : null,
+    ),
+  );
+}

@@ -15,7 +15,7 @@ class RegisterController extends GetxController {
   RxBool sigupgInProcess = RxBool(false);
   var selectedDate = DateTime.now().obs;
   RxString theDate = RxString('');
-  RxList sysRoles = RxList([]);
+  // RxList sysRoles = RxList([]);
   List<String> areaName = [];
   RxBool isLoading = RxBool(false);
   RxMap selectedRoles = RxMap({});
@@ -146,8 +146,9 @@ class RegisterController extends GetxController {
         "users_tokens": [token],
         "expiry_date": '${selectedDate.value}',
         "roles": selectedRoles.entries
-            .where((entry) => entry.value == true)
-            .map((entry) => entry.key),
+            .where((entry) => entry.value[1] == true)
+            .map((entry) => entry.value[0])
+            .toList(),
         "added_date": DateTime.now().toString()
       });
       sigupgInProcess.value = false;
@@ -162,6 +163,8 @@ class RegisterController extends GetxController {
         showSnackBar('warning', 'The account already exists for that email');
       }
     } catch (e) {
+      sigupgInProcess.value = false;
+      print(e);
       showSnackBar('warning', e.toString());
     }
   }
@@ -169,14 +172,18 @@ class RegisterController extends GetxController {
   // this function is to update user details
   updateUserDetails(userId) async {
     try {
+      var updatedRoles = selectedRoles.entries
+          .where((entry) =>
+              entry.value is List &&
+              entry.value[1] == true) // Check if the second element is true
+          .map((entry) => entry.value[0]) // Extract the ID (first element)
+          .toList();
       // Reference the document by its ID
       await FirebaseFirestore.instance
           .collection('sys-users') // Replace with your collection name
           .doc(userId) // The document ID you want to update
           .update({
-        'roles': selectedRoles.entries
-            .where((entry) => entry.value == true)
-            .map((entry) => entry.key),
+        'roles': updatedRoles,
         'expiry_date': '${selectedDate.value}'
       }); // Pass the updated data as a map
 
@@ -197,16 +204,21 @@ class RegisterController extends GetxController {
       // Map documents to a list of roles
       var roles = rolesSnapshot.docs.map((doc) {
         return {
-          ...doc.data(), // Document data (e.g., name, description)
+          ...doc.data(),
+          'id': doc.id,
         };
       }).toList();
-      sysRoles.assignAll(roles);
+      // sysRoles.assignAll(roles);
       for (var role in roles) {
-        selectedRoles.addAll({role['role_name']: false});
+        selectedRoles.addAll({
+          role['role_name']: [role['id'], false]
+        });
       }
 
       isLoading.value = false;
     } catch (e) {
+      isLoading.value = false;
+
       return [];
     }
   }

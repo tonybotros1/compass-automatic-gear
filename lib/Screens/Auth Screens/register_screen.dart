@@ -213,21 +213,28 @@ class RegisterScreen extends StatelessWidget {
                 context: context,
                 builder: (context) {
                   registerController.email.text = userData['email'];
-                  for (var role in userData['roles']) {
-                    registerController.selectedRoles.update(
-                      role,
-                      (value) => true,
-                      ifAbsent: () =>
-                          false, // Optional: handle if the key doesn't exist
-                    );
+
+                  for (var roleId in userData['roles']) {
+                    registerController.selectedRoles.forEach((key, value) {
+                      if (value[0] == roleId) {
+                        registerController.selectedRoles.update(
+                          key,
+                          (value) => [value[0], true],
+                        );
+                      }
+                    });
                   }
-                  // Set the rest of the keys to false
+
+                  // Reset roles not in userData['roles'] to false
                   registerController.selectedRoles.forEach((key, value) {
-                    if (!userData['roles'].contains(key)) {
-                      registerController.selectedRoles
-                          .update(key, (value) => false);
+                    if (!userData['roles'].contains(value[0])) {
+                      registerController.selectedRoles.update(
+                        key,
+                        (value) => [value[0], false],
+                      );
                     }
                   });
+                  
                   return AlertDialog(
                     actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                     content: addNewUserAndView(
