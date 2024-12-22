@@ -14,10 +14,10 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: mainColorForWeb,
-        // toolbarHeight: 80,
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: mainColorForWeb,
+      //   // toolbarHeight: 80,
+      // ),
       body: Row(
         children: [
           Container(
@@ -58,7 +58,9 @@ class MainScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  // color: mainColor,//const Color(0xffA294F9),
+                  color: entry.node.children.isNotEmpty
+                      ? Colors.grey.shade700
+                      : const Color(0xff7E99A3),
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Row(
@@ -68,15 +70,21 @@ class MainScreen extends StatelessWidget {
                       child: Text(
                         entry.node.title,
                         style: const TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold),
+                            color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
                     entry.node.children.isNotEmpty
-                        ? const Expanded(
+                        ? Expanded(
                             flex: 1,
-                            child: Icon(
-                              Icons.arrow_drop_down_circle,
-                              color: Colors.black38,
+                            child: ExpandIcon(
+                              key: GlobalObjectKey(entry.node),
+                              isExpanded: entry.isExpanded,
+
+                              // Icons.keyboard_arrow_down,
+                              color: Colors.grey,
+                              onPressed: (_) => mainScreenController
+                                  .treeController
+                                  .toggleExpansion(entry.node),
                             ))
                         : const SizedBox()
                   ],
@@ -105,14 +113,20 @@ class MainScreen extends StatelessWidget {
                 ),
               ),
 
-              child: InkWell(
-                onTap: () => mainScreenController.treeController
-                    .toggleExpansion(entry.node),
-                child: TreeIndentation(
-                  entry: entry,
-                  child: myTreeNodeTile,
-                ),
-              ),
+              child: entry.node.children.isNotEmpty
+                  ? TreeIndentation(
+                      entry: entry,
+                      child: myTreeNodeTile,
+                    )
+                  : InkWell(
+                      onTap: () {
+                        print(entry.node.routeName);
+                      },
+                      child: TreeIndentation(
+                        entry: entry,
+                        child: myTreeNodeTile,
+                      ),
+                    ),
             );
           },
         );

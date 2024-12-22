@@ -12,6 +12,7 @@ class MainScreenController extends GetxController {
   RxList userRoles = RxList([]);
   RxList roleMenus = RxList([]);
   RxList<MyTreeNode> finalMenu = RxList([]);
+  RxBool arrow = RxBool(false);
 
   @override
   void onInit() {
@@ -20,96 +21,97 @@ class MainScreenController extends GetxController {
     super.onInit();
   }
 
-
   Future<void> getScreens() async {
-  try {
-    User? currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return;
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) return;
 
-    uid.value = currentUser.uid;
+      uid.value = currentUser.uid;
 
-    // Fetch user roles
-    final userSnapshot = await FirebaseFirestore.instance
-        .collection('sys-users')
-        .where('user_id', isEqualTo: uid.value)
-        .limit(1)
-        .get();
+      // Fetch user roles
+      final userSnapshot = await FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('user_id', isEqualTo: uid.value)
+          .limit(1)
+          .get();
 
-    if (userSnapshot.docs.isEmpty) return;
+      if (userSnapshot.docs.isEmpty) return;
 
-    userRoles.assignAll(userSnapshot.docs.first.data()['roles']);
+      userRoles.assignAll(userSnapshot.docs.first.data()['roles']);
 
-    // Fetch role menus
-    final roleSnapshot = await FirebaseFirestore.instance
-        .collection('sys-roles')
-        .where(FieldPath.documentId, whereIn: userRoles)
-        .get();
+      // Fetch role menus
+      final roleSnapshot = await FirebaseFirestore.instance
+          .collection('sys-roles')
+          .where(FieldPath.documentId, whereIn: userRoles)
+          .get();
 
-    roleMenus.assignAll(roleSnapshot.docs.first.data()['menuID']);
+      roleMenus.assignAll(roleSnapshot.docs.first.data()['menuID']);
 
-    // Build tree structure
+      // Build tree structure
+      final menuSnapshot = await FirebaseFirestore.instance
+          .collection('menus ')
+          .where(FieldPath.documentId, whereIn: roleMenus)
+          .get();
+
+      final roots = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
+        final children = await buildMenus(menuDoc.data());
+        return MyTreeNode(
+          title: menuDoc.data()['name'],
+          children: children,
+          routeName: menuDoc.data()['routeName'],
+        );
+      }));
+
+      treeController = TreeController<MyTreeNode>(
+        roots: roots,
+        childrenProvider: (node) => node.children,
+        parentProvider: (node) => node.parent,
+      );
+
+      isLoading.value = false;
+    } catch (e) {
+      isLoading.value = false;
+      // print(e);
+    }
+  }
+
+  Future<List<MyTreeNode>> buildMenus(Map<String, dynamic> menuDetail) async {
+    List<String> childrenIds = List<String>.from(menuDetail['children'] ?? []);
+
+    if (childrenIds.isEmpty) return [];
+
+    // Fetch child menus
     final menuSnapshot = await FirebaseFirestore.instance
         .collection('menus ')
-        .where(FieldPath.documentId, whereIn: roleMenus)
+        .where(FieldPath.documentId, whereIn: childrenIds)
         .get();
 
-    final roots = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
+    // Fetch child screens
+    final screenSnapshot = await FirebaseFirestore.instance
+        .collection('screens')
+        .where(FieldPath.documentId, whereIn: childrenIds)
+        .get();
+
+    // Build nodes for menus and screens
+    final menuNodes = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
       final children = await buildMenus(menuDoc.data());
       return MyTreeNode(
         title: menuDoc.data()['name'],
         children: children,
+        routeName: menuDoc.data()['routeName'],
       );
     }));
 
-    treeController = TreeController<MyTreeNode>(
-      roots: roots,
-      childrenProvider: (node) => node.children,
-      parentProvider: (node) => node.parent,
-    );
+    final screenNodes = screenSnapshot.docs.map((screenDoc) {
+      return MyTreeNode(
+        title: screenDoc.data()['name'],
+        children: [],
+        routeName: screenDoc.data()['routeName'],
+      );
+    }).toList();
 
-    isLoading.value = false;
-  } catch (e) {
-    isLoading.value = false;
-    // print(e);
+    return [...menuNodes, ...screenNodes];
   }
-}
-
-Future<List<MyTreeNode>> buildMenus(Map<String, dynamic> menuDetail) async {
-  List<String> childrenIds = List<String>.from(menuDetail['children'] ?? []);
-
-  if (childrenIds.isEmpty) return [];
-
-  // Fetch child menus
-  final menuSnapshot = await FirebaseFirestore.instance
-      .collection('menus ')
-      .where(FieldPath.documentId, whereIn: childrenIds)
-      .get();
-
-  // Fetch child screens
-  final screenSnapshot = await FirebaseFirestore.instance
-      .collection('screens')
-      .where(FieldPath.documentId, whereIn: childrenIds)
-      .get();
-
-  // Build nodes for menus and screens
-  final menuNodes = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
-    final children = await buildMenus(menuDoc.data());
-    return MyTreeNode(
-      title: menuDoc.data()['name'],
-      children: children,
-    );
-  }));
-
-  final screenNodes = screenSnapshot.docs.map((screenDoc) {
-    return MyTreeNode(
-      title: screenDoc.data()['name'],
-      children: [],
-    );
-  }).toList();
-
-  return [...menuNodes, ...screenNodes];
-}
-
 
 // init the tree
   init() {
