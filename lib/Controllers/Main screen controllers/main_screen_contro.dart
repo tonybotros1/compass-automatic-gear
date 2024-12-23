@@ -1,8 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
 import '../../Models/screen_tree_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../Screens/Auth Screens/register_screen.dart';
 
 class MainScreenController extends GetxController {
   late TreeController<MyTreeNode> treeController;
@@ -13,12 +16,26 @@ class MainScreenController extends GetxController {
   RxList roleMenus = RxList([]);
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
+  Rx<Widget> selectedScreen = const SizedBox().obs;
 
   @override
   void onInit() {
     // init();
     getScreens();
     super.onInit();
+  }
+
+  Widget getScreenFromRoute(String? routeName) {
+    switch (routeName) {
+      case '/node1':
+        return SizedBox(
+            child: RegisterScreen()); // Replace with your actual screen widget
+      // case 'screen2':
+      //   return Screen2();
+      // Add more cases as needed
+      default:
+        return const SizedBox(child:  Center(child: Text('Screen not found')));
+    }
   }
 
   Future<void> getScreens() async {

@@ -21,19 +21,18 @@ class MainScreen extends StatelessWidget {
       body: Row(
         children: [
           Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                      right: BorderSide(color: mainColorForWeb, width: 2))),
               width: 250,
-              color: mainColorForWeb,
               child: Obx(() => mainScreenController.isLoading.value == false
                   ? leftTree()
                   : const Center(child: CircularProgressIndicator()))),
           Expanded(
-              flex: 5,
-              child: Container(
-                color: Colors.white,
-                child: const Column(
-                  children: [],
-                ),
-              )),
+            flex: 5,
+            child: Obx(() => mainScreenController.selectedScreen.value),
+          )
         ],
       ),
     );
@@ -56,11 +55,11 @@ class MainScreen extends StatelessWidget {
             Widget myTreeNodeTile = Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   color: entry.node.children.isNotEmpty
-                      ? Colors.grey.shade700
-                      : const Color(0xff7E99A3),
+                      ? const Color(0xff2E5077)
+                      : const Color(0xff4DA1A9),
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Row(
@@ -70,13 +69,16 @@ class MainScreen extends StatelessWidget {
                       child: Text(
                         entry.node.title,
                         style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12),
                       ),
                     ),
                     entry.node.children.isNotEmpty
                         ? Expanded(
                             flex: 1,
                             child: ExpandIcon(
+                              padding: const EdgeInsets.all(0),
                               key: GlobalObjectKey(entry.node),
                               isExpanded: entry.isExpanded,
 
@@ -121,6 +123,9 @@ class MainScreen extends StatelessWidget {
                   : InkWell(
                       onTap: () {
                         print(entry.node.routeName);
+                        mainScreenController.selectedScreen.value =
+                            mainScreenController
+                                .getScreenFromRoute(entry.node.routeName);
                       },
                       child: TreeIndentation(
                         entry: entry,
