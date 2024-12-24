@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // For JSON encoding/decoding
 
-class RegisterController extends GetxController {
+class UsersController extends GetxController {
   late TextEditingController email = TextEditingController();
   late TextEditingController pass = TextEditingController();
   final FocusNode focusNode = FocusNode();

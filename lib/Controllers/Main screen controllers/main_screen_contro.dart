@@ -4,8 +4,7 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
 import '../../Models/screen_tree_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../../Screens/Auth Screens/register_screen.dart';
+import '../../Screens/Main screens/users.dart';
 
 class MainScreenController extends GetxController {
   late TreeController<MyTreeNode> treeController;
@@ -27,9 +26,9 @@ class MainScreenController extends GetxController {
 
   Widget getScreenFromRoute(String? routeName) {
     switch (routeName) {
-      case '/node1':
+      case '/users':
         return SizedBox(
-            child: RegisterScreen()); // Replace with your actual screen widget
+            child: Users()); // Replace with your actual screen widget
       // case 'screen2':
       //   return Screen2();
       // Add more cases as needed

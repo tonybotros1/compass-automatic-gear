@@ -1,4 +1,3 @@
-import 'package:compass_automatic_gear/Screens/Auth%20Screens/register_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

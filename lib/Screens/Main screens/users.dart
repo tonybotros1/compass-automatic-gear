@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../Controllers/Auth screen controllers/register_screen_controller.dart';
+import '../../Controllers/Main screen controllers/users_controller.dart';
 import '../../Widgets/Auth screens widgets/register widgets/add_new_user_and_view.dart';
 import '../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../consts.dart';
 
-class RegisterScreen extends StatelessWidget {
-  RegisterScreen({super.key});
+class Users extends StatelessWidget {
+  Users({super.key});
 
-  final RegisterController registerController = Get.put(RegisterController());
+  final UsersController registerController = Get.put(UsersController());
 
   @override
   Widget build(BuildContext context) {
