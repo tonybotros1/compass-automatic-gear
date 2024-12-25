@@ -16,6 +16,7 @@ class MainScreenController extends GetxController {
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
   Rx<Widget> selectedScreen = const SizedBox().obs;
+  RxString userName = RxString('');
 
   @override
   void onInit() {
@@ -33,7 +34,7 @@ class MainScreenController extends GetxController {
       //   return Screen2();
       // Add more cases as needed
       default:
-        return const SizedBox(child:  Center(child: Text('Screen not found')));
+        return const SizedBox(child: Center(child: Text('Screen not found')));
     }
   }
 
@@ -54,6 +55,7 @@ class MainScreenController extends GetxController {
       if (userSnapshot.docs.isEmpty) return;
 
       userRoles.assignAll(userSnapshot.docs.first.data()['roles']);
+      userName.value = userSnapshot.docs.first.data()['user_name'];
 
       // Fetch role menus
       final roleSnapshot = await FirebaseFirestore.instance

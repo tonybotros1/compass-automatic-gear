@@ -14,24 +14,60 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: mainColorForWeb,
-      //   // toolbarHeight: 80,
-      // ),
       body: Row(
         children: [
           Container(
               decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                      right: BorderSide(color: mainColorForWeb, width: 2))),
-              width: 250,
-              child: Obx(() => mainScreenController.isLoading.value == false
-                  ? leftTree()
-                  : const Center(child: CircularProgressIndicator()))),
+                color: mainColorForWeb,
+                // border: Border(
+                //     right: BorderSide(color: mainColorForWeb, width: 2)),
+              ),
+              width: 200,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16, bottom: 10),
+                    child: Image.asset('assets/logo2.png'),
+                  ),
+                  Expanded(
+                    child: Obx(() =>
+                        mainScreenController.isLoading.value == false
+                            ? leftTree()
+                            : const Center(child: CircularProgressIndicator())),
+                  ),
+                ],
+              )),
           Expanded(
             flex: 5,
-            child: Obx(() => mainScreenController.selectedScreen.value),
+            child: Column(
+              children: [
+                Container(
+                  width: Get.width,
+                  color: mainColorForWeb,
+                  height: 80,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Compass Automatic Gear',
+                        style: fontStyleForAppBar,
+                      ),
+                      Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: Obx(
+                            () => Text(
+                              'Welcome ${mainScreenController.userName}',
+                              style: userNameStyle,
+                            ),
+                          ))
+                    ],
+                  ),
+                ),
+                Expanded(
+                    child:
+                        Obx(() => mainScreenController.selectedScreen.value)),
+              ],
+            ),
           )
         ],
       ),
@@ -120,16 +156,20 @@ class MainScreen extends StatelessWidget {
                       entry: entry,
                       child: myTreeNodeTile,
                     )
-                  : InkWell(
-                      onTap: () {
-                        print(entry.node.routeName);
-                        mainScreenController.selectedScreen.value =
-                            mainScreenController
-                                .getScreenFromRoute(entry.node.routeName);
-                      },
-                      child: TreeIndentation(
-                        entry: entry,
-                        child: myTreeNodeTile,
+                  : Container(
+                      width: 250,
+                      color: Colors.grey.withOpacity(0.5),
+                      child: InkWell(
+                        onTap: () {
+                          print(entry.node.routeName);
+                          mainScreenController.selectedScreen.value =
+                              mainScreenController
+                                  .getScreenFromRoute(entry.node.routeName);
+                        },
+                        child: TreeIndentation(
+                          entry: entry,
+                          child: myTreeNodeTile,
+                        ),
                       ),
                     ),
             );
