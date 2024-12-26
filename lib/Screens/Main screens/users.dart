@@ -37,8 +37,8 @@ class Users extends StatelessWidget {
             padding: const EdgeInsets.only(
                 left: 14,
                 right: 14,
-                bottom:
-                    10), //EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                bottom: 10,
+                top: 0), //EdgeInsets.symmetric(horizontal: 14, vertical: 0),
             child: Container(
               height: null,
               width: constraints.maxWidth,
@@ -51,29 +51,25 @@ class Users extends StatelessWidget {
                       constraints: constraints,
                       context: context,
                       usersController: usersController),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: SizedBox(
-                          width: constraints.maxWidth,
-                          child: Obx(() =>
-                              usersController.isScreenLoding.value == false &&
-                                      usersController.allUsers.isNotEmpty
-                                  ? tableOfUsers(
-                                      constraints: constraints,
-                                      context: context)
-                                  : usersController.isScreenLoding.value ==
-                                              false &&
-                                          usersController.allUsers.isEmpty
-                                      ? const Center(
-                                          child: Text('No Element'),
-                                        )
-                                      : const Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        ))),
-                    ),
+                  SingleChildScrollView(
+                    child: SizedBox(
+                        width: constraints.maxWidth,
+                        child: Obx(() => usersController.isScreenLoding.value ==
+                                    false &&
+                                usersController.allUsers.isNotEmpty
+                            ? tableOfUsers(
+                                constraints: constraints, context: context)
+                            : usersController.isScreenLoding.value == false &&
+                                    usersController.allUsers.isEmpty
+                                ? const Center(
+                                    child: Text('No Element'),
+                                  )
+                                : const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ))),
                   ),
                 ],
               ),
@@ -86,81 +82,33 @@ class Users extends StatelessWidget {
 
   Widget tableOfUsers({required constraints, required context}) {
     return DataTable(
+      headingTextStyle: fontStyleForTableHeader,
+      sortColumnIndex: usersController.sortColumnIndex.value,
+      sortAscending: usersController.isAscending.value,
       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
       columns: [
         DataColumn(
-          label: Row(
-            children: [
-              Text(
-                'Email',
-                style: fontStyleForTableHeader,
-              ),
-              IconButton(
-                  onPressed: () {
-                    if (usersController.sortByEmailType.value == true) {
-                      usersController.sortByEmailType.value = false;
-                      usersController.getAllUsers('email');
-                    } else {
-                      usersController.sortByEmailType.value = true;
-                      usersController.getAllUsers('email');
-                    }
-                  },
-                  icon: usersController.sortByEmailType.value == true
-                      ? iconStyleForTableHeaderDown
-                      : iconStyleForTableHeaderUp)
-            ],
+          label: const Text(
+            'Email',
           ),
+          onSort: usersController.onSort,
+          
         ),
         DataColumn(
-          label: Row(
-            children: [
-              Text(
-                'Added Date',
-                style: fontStyleForTableHeader,
-              ),
-              IconButton(
-                  onPressed: () {
-                    if (usersController.sortByAddedDateType.value == true) {
-                      usersController.sortByAddedDateType.value = false;
-                      usersController.getAllUsers('added_date');
-                    } else {
-                      usersController.sortByAddedDateType.value = true;
-                      usersController.getAllUsers('added_date');
-                    }
-                  },
-                  icon: usersController.sortByAddedDateType.value == true
-                      ? iconStyleForTableHeaderDown
-                      : iconStyleForTableHeaderUp)
-            ],
+          label: const Text(
+            'Added Date',
           ),
+          onSort: usersController.onSort,
         ),
         DataColumn(
-          label: Row(
-            children: [
-              Text(
-                'Expiry Date',
-                style: fontStyleForTableHeader,
-              ),
-              IconButton(
-                  onPressed: () {
-                    if (usersController.sortByExpiryDateType.value == true) {
-                      usersController.sortByExpiryDateType.value = false;
-                      usersController.getAllUsers('expiry_date');
-                    } else {
-                      usersController.sortByExpiryDateType.value = true;
-                      usersController.getAllUsers('expiry_date');
-                    }
-                  },
-                  icon: usersController.sortByExpiryDateType.value == true
-                      ? iconStyleForTableHeaderDown
-                      : iconStyleForTableHeaderUp)
-            ],
+          label: const Text(
+            'Expiry Date',
           ),
+          onSort: usersController.onSort,
         ),
-        DataColumn(
+        const DataColumn(
           label: Text(
-            '   Action',
-            style: fontStyleForTableHeader,
+            'Action',
           ),
         ),
       ],
@@ -312,3 +260,94 @@ class Users extends StatelessWidget {
     ]);
   }
 }
+
+
+
+
+//  DataColumn(
+//           label: Container(
+//             color: Colors.red,
+//             child: Row(
+//               children: [
+//                 Text(
+//                   'Email',
+//                   style: fontStyleForTableHeader,
+//                 ),
+//                 // IconButton(
+//                 //     onPressed: () {
+//                 //       if (usersController.sortByEmailType.value == true) {
+//                 //         usersController.sortByEmailType.value = false;
+//                 //         usersController.getAllUsers('email');
+//                 //       } else {
+//                 //         usersController.sortByEmailType.value = true;
+//                 //         usersController.getAllUsers('email');
+//                 //       }
+//                 //     },
+//                 //     icon: usersController.sortByEmailType.value == true
+//                 //         ? iconStyleForTableHeaderDown
+//                 //         : iconStyleForTableHeaderUp)
+//               ],
+//             ),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Container(
+//             color: Colors.green,
+//             child: Row(
+//               children: [
+//                 Text(
+//                   'Added Date',
+//                   style: fontStyleForTableHeader,
+//                 ),
+//                 // IconButton(
+//                 //     onPressed: () {
+//                 //       if (usersController.sortByAddedDateType.value == true) {
+//                 //         usersController.sortByAddedDateType.value = false;
+//                 //         usersController.getAllUsers('added_date');
+//                 //       } else {
+//                 //         usersController.sortByAddedDateType.value = true;
+//                 //         usersController.getAllUsers('added_date');
+//                 //       }
+//                 //     },
+//                 //     icon: usersController.sortByAddedDateType.value == true
+//                 //         ? iconStyleForTableHeaderDown
+//                 //         : iconStyleForTableHeaderUp)
+//               ],
+//             ),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Container(
+//             color: Colors.blue,
+//             child: Row(
+//               children: [
+//                 Text(
+//                   'Expiry Date',
+//                   style: fontStyleForTableHeader,
+//                 ),
+//                 // IconButton(
+//                 //     onPressed: () {
+//                 //       if (usersController.sortByExpiryDateType.value == true) {
+//                 //         usersController.sortByExpiryDateType.value = false;
+//                 //         usersController.getAllUsers('expiry_date');
+//                 //       } else {
+//                 //         usersController.sortByExpiryDateType.value = true;
+//                 //         usersController.getAllUsers('expiry_date');
+//                 //       }
+//                 //     },
+//                 //     icon: usersController.sortByExpiryDateType.value == true
+//                 //         ? iconStyleForTableHeaderDown
+//                 //         : iconStyleForTableHeaderUp)
+//               ],
+//             ),
+//           ),
+//         ),
+//         DataColumn(
+//           label: Container(
+//             color: Colors.amber,
+//             child: Text(
+//               'Action',
+//               style: fontStyleForTableHeader,
+//             ),
+//           ),
+//         ),

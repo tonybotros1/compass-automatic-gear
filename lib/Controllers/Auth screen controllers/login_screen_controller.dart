@@ -105,7 +105,8 @@ class LoginScreenController extends GetxController {
       }).toList();
 
       var isExpire = userData[0]['expiry_date'];
-      if (isDateTodayOrOlder(isExpire)) {
+      var userActiveStatus = userData[0]['status'];
+      if (userActiveStatus == false || isDateTodayOrOlder(isExpire)) {
         showSnackBar('Login failed', 'Your session has been expired');
         sigingInProcess.value = false;
       } else {

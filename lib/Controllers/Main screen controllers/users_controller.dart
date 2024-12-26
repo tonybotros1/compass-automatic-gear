@@ -24,29 +24,66 @@ class UsersController extends GetxController {
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool userStatus = RxBool(true);
-
-  // value = true:
-  // For dates: From the most recent to the oldest.
-  // For numbers: From the highest to the lowest.
-  // For strings: In reverse alphabetical order (Z to A).
-  //
-  // value = false:
-  // For dates: From the oldest to the most recent.
-  // For numbers: From the lowest to the highest.
-  // For strings: In alphabetical order (A to Z).
-  RxBool sortByEmailType = RxBool(false);
-  RxBool sortByAddedDateType = RxBool(false);
-  RxBool sortByExpiryDateType = RxBool(false);
+  RxInt sortColumnIndex = RxInt(0);
+  RxBool isAscending = RxBool(true);
 
   @override
   void onInit() async {
     await getRoles();
-    await getAllUsers('');
+    await getAllUsers();
     // getUserStatus('OXugS6xlxhdk5mq48uPwpZilA672');
     search.value.addListener(() {
       filterCards();
     });
     super.onInit();
+  }
+
+// this function is to sort data in table
+  void onSort(int columnIndex, bool ascending) {
+    if (columnIndex == 0) {
+      allUsers.sort((user1, user2) {
+        final String? value1 = user1.get('email');
+        final String? value2 = user2.get('email');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 1) {
+      allUsers.sort((user1, user2) {
+        final String? value1 = user1.get('added_date');
+        final String? value2 = user2.get('added_date');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 2) {
+      allUsers.sort((user1, user2) {
+        final String? value1 = user1.get('expiry_date');
+        final String? value2 = user2.get('expiry_date');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    }
+    sortColumnIndex.value = columnIndex;
+    isAscending.value = ascending;
+  }
+
+  int compareString(bool ascending, String value1, String value2) {
+    int comparison = value1.compareTo(value2);
+    return ascending ? comparison : -comparison; // Reverse if descending
   }
 
   // this function is to filter the search results for web
@@ -225,73 +262,18 @@ class UsersController extends GetxController {
   }
 
   // this function is to get all users in the system
-  getAllUsers(sortBy) {
-    if (sortBy == 'email') {
-      try {
-        sortByAddedDateType.value = false;
-        sortByExpiryDateType.value = false;
-        FirebaseFirestore.instance
-            .collection('sys-users')
-            .orderBy(sortBy, descending: sortByEmailType.value)
-            .snapshots()
-            .listen((event) {
-          allUsers.assignAll(event.docs);
-          isScreenLoding.value = false;
-        });
-      } catch (e) {
-        //
+  getAllUsers() {
+    try {
+      FirebaseFirestore.instance
+          .collection('sys-users')
+          .snapshots()
+          .listen((event) {
+        allUsers.assignAll(event.docs);
         isScreenLoding.value = false;
-      }
-    } else if (sortBy == 'added_date') {
-      try {
-        sortByEmailType.value = false;
-        sortByExpiryDateType.value = false;
-        FirebaseFirestore.instance
-            .collection('sys-users')
-            .orderBy(sortBy, descending: sortByAddedDateType.value)
-            .snapshots()
-            .listen((event) {
-          allUsers.assignAll(event.docs);
-          isScreenLoding.value = false;
-        });
-      } catch (e) {
-        //
-        isScreenLoding.value = false;
-      }
-    } else if (sortBy == 'expiry_date') {
-      try {
-        sortByEmailType.value = false;
-        sortByAddedDateType.value = false;
-        FirebaseFirestore.instance
-            .collection('sys-users')
-            .orderBy(sortBy, descending: sortByExpiryDateType.value)
-            .snapshots()
-            .listen((event) {
-          allUsers.assignAll(event.docs);
-          isScreenLoding.value = false;
-        });
-      } catch (e) {
-        //
-        isScreenLoding.value = false;
-      }
-    } else {
-      try {
-        sortByEmailType.value = false;
-        sortByAddedDateType.value = false;
-        sortByExpiryDateType.value = false;
-
-        FirebaseFirestore.instance
-            .collection('sys-users')
-            .snapshots()
-            .listen((event) {
-          allUsers.assignAll(event.docs);
-          isScreenLoding.value = false;
-        });
-      } catch (e) {
-        isScreenLoding.value = false;
-        //
-      }
+      });
+    } catch (e) {
+      isScreenLoding.value = false;
+      //
     }
   }
-
 }

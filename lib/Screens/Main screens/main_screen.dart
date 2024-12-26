@@ -1,3 +1,4 @@
+import 'package:compass_automatic_gear/Responsive/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
@@ -15,34 +16,10 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: sideMenuWidget(),
       body: Row(
         children: [
-          Container(
-              decoration: BoxDecoration(
-                color: mainColorForWeb,
-                // border: Border(
-                //     right: BorderSide(color: mainColorForWeb, width: 2)),
-              ),
-              width: 200,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16, bottom: 10),
-                    child: Image.asset('assets/logo2.png'),
-                  ),
-                  Expanded(
-                    child: Obx(() => mainScreenController.isLoading.value ==
-                                false &&
-                            mainScreenController.errorLoading.value != true
-                        ? leftTree()
-                        : mainScreenController.isLoading.value == true &&
-                                mainScreenController.errorLoading.value != true
-                            ? const Center(child: CircularProgressIndicator())
-                            : const Center(
-                                child: Text('Network error please try again'))),
-                  ),
-                ],
-              )),
+          if (ScreenSize.isWeb(context)) sideMenuWidget(),
           Expanded(
             flex: 5,
             child: Column(
@@ -54,6 +31,14 @@ class MainScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      if (!ScreenSize.isWeb(context))
+                        Builder(
+                          builder: (context) => IconButton(
+                              onPressed: () {
+                                Scaffold.of(context).openDrawer();
+                              },
+                              icon: const Icon(Icons.menu)),
+                        ),
                       Text(
                         'Compass Automatic Gear',
                         style: fontStyleForAppBar,
@@ -78,6 +63,34 @@ class MainScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Container sideMenuWidget() {
+    return Container(
+        decoration: BoxDecoration(
+          color: mainColorForWeb,
+          // border: Border(
+          //     right: BorderSide(color: mainColorForWeb, width: 2)),
+        ),
+        width: 200,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 16, bottom: 10),
+              child: Image.asset('assets/logo2.png'),
+            ),
+            Expanded(
+              child: Obx(() => mainScreenController.isLoading.value == false &&
+                      mainScreenController.errorLoading.value != true
+                  ? leftTree()
+                  : mainScreenController.isLoading.value == true &&
+                          mainScreenController.errorLoading.value != true
+                      ? const Center(child: CircularProgressIndicator())
+                      : const Center(
+                          child: Text('Network error please try again'))),
+            ),
+          ],
+        ));
   }
 
   AnimatedTreeView<MyTreeNode> leftTree() {
@@ -160,9 +173,9 @@ class MainScreen extends StatelessWidget {
                     )
                   : Container(
                       width: null,
-                      color: entry.node.isPressed == true
-                          ? Colors.grey.withOpacity(0.5)
-                          : null,
+                      // color: entry.node.isPressed == true
+                      //     ? Colors.grey.withOpacity(0.5)
+                      //     : null,
                       child: InkWell(
                         onTap: () {
                           entry.node.isPressed = true;
