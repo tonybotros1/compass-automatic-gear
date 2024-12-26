@@ -17,6 +17,7 @@ class MainScreenController extends GetxController {
   RxBool arrow = RxBool(false);
   Rx<Widget> selectedScreen = const SizedBox().obs;
   RxString userName = RxString('');
+  RxBool errorLoading = RxBool(false);
 
   @override
   void onInit() {
@@ -88,6 +89,7 @@ class MainScreenController extends GetxController {
 
       isLoading.value = false;
     } catch (e) {
+      errorLoading.value = true;
       isLoading.value = false;
       // print(e);
     }

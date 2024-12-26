@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import '../../Controllers/Main screen controllers/main_screen_contro.dart';
 import '../../Models/screen_tree_model.dart';
+import '../../Widgets/main screen widgets/expand_icon.dart';
 import '../../consts.dart';
 
 class MainScreen extends StatelessWidget {
@@ -30,10 +31,15 @@ class MainScreen extends StatelessWidget {
                     child: Image.asset('assets/logo2.png'),
                   ),
                   Expanded(
-                    child: Obx(() =>
-                        mainScreenController.isLoading.value == false
-                            ? leftTree()
-                            : const Center(child: CircularProgressIndicator())),
+                    child: Obx(() => mainScreenController.isLoading.value ==
+                                false &&
+                            mainScreenController.errorLoading.value != true
+                        ? leftTree()
+                        : mainScreenController.isLoading.value == true &&
+                                mainScreenController.errorLoading.value != true
+                            ? const Center(child: CircularProgressIndicator())
+                            : const Center(
+                                child: Text('Network error please try again'))),
                   ),
                 ],
               )),
@@ -107,23 +113,19 @@ class MainScreen extends StatelessWidget {
                         style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12),
+                            fontSize: 10),
                       ),
                     ),
                     entry.node.children.isNotEmpty
-                        ? Expanded(
-                            flex: 1,
-                            child: ExpandIcon(
-                              padding: const EdgeInsets.all(0),
-                              key: GlobalObjectKey(entry.node),
-                              isExpanded: entry.isExpanded,
-
-                              // Icons.keyboard_arrow_down,
-                              color: Colors.grey,
-                              onPressed: (_) => mainScreenController
-                                  .treeController
-                                  .toggleExpansion(entry.node),
-                            ))
+                        ? CustomExpandIcon(
+                            key: GlobalObjectKey(entry.node),
+                            isExpanded: entry.isExpanded,
+                            color: Colors.grey,
+                            expandedColor: Colors.grey.shade500,
+                            onPressed: (_) => mainScreenController
+                                .treeController
+                                .toggleExpansion(entry.node),
+                          )
                         : const SizedBox()
                   ],
                 ),
@@ -163,7 +165,6 @@ class MainScreen extends StatelessWidget {
                           : null,
                       child: InkWell(
                         onTap: () {
-                         
                           entry.node.isPressed = true;
 
                           mainScreenController.treeController.rebuild();

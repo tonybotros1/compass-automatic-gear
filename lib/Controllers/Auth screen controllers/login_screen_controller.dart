@@ -44,27 +44,31 @@ class LoginScreenController extends GetxController {
 
   // this function to save the token for the user device in DB:
   saveToken(userId) async {
-    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
-        .collection('sys-users')
-        .where('user_id', isEqualTo: userId)
-        .get();
+    try {
+      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('user_id', isEqualTo: userId)
+          .get();
 
-    if (userSnapshot.docs.isNotEmpty) {
-      // Get the document ID of the first document (assuming there's only one match)
-      String documentId = userSnapshot.docs.first.id;
-      // print('Document ID: $documentId');
-      var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
-      var tokens = userData['users_tokens'];
+      if (userSnapshot.docs.isNotEmpty) {
+        // Get the document ID of the first document (assuming there's only one match)
+        String documentId = userSnapshot.docs.first.id;
+        // print('Document ID: $documentId');
+        var userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
+        var tokens = userData['users_tokens'];
 
-      currentUserToken = (await FirebaseMessaging.instance.getToken())!;
+        currentUserToken = (await FirebaseMessaging.instance.getToken())!;
 
-      if (!tokens.contains(currentUserToken)) {
-        tokens.add(currentUserToken);
-        FirebaseFirestore.instance
-            .collection('sys-users')
-            .doc(documentId)
-            .update({'users_tokens': tokens});
+        if (!tokens.contains(currentUserToken)) {
+          tokens.add(currentUserToken);
+          FirebaseFirestore.instance
+              .collection('sys-users')
+              .doc(documentId)
+              .update({'users_tokens': tokens});
+        }
       }
+    } catch (e) {
+      sigingInProcess.value = false;
     }
   }
 
@@ -105,7 +109,6 @@ class LoginScreenController extends GetxController {
         showSnackBar('Login failed', 'Your session has been expired');
         sigingInProcess.value = false;
       } else {
-
         UserCredential userCredential =
             await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email.text,
@@ -121,7 +124,6 @@ class LoginScreenController extends GetxController {
         showSnackBar('Login Success', 'Welcome');
         Get.offAllNamed('/mainScreen');
         sigingInProcess.value = false;
-
       }
     } on FirebaseAuthException catch (e) {
       sigingInProcess.value = false;

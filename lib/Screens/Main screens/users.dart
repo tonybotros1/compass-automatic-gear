@@ -14,7 +14,7 @@ class Users extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 90,
+        toolbarHeight: 60,
         backgroundColor: Colors.white,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +34,11 @@ class Users extends StatelessWidget {
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.only(
+                left: 14,
+                right: 14,
+                bottom:
+                    10), //EdgeInsets.symmetric(horizontal: 14, vertical: 0),
             child: Container(
               height: null,
               width: constraints.maxWidth,
