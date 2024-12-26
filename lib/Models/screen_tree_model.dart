@@ -39,6 +39,7 @@
 class MyTreeNode {
   MyTreeNode({
     this.routeName,
+    this.isPressed = false,
     required this.title,
     Iterable<MyTreeNode>? children,
   }) : children = <MyTreeNode>[] {
@@ -54,4 +55,5 @@ class MyTreeNode {
   String? routeName;
   final List<MyTreeNode> children;
   MyTreeNode? parent;
+   bool isPressed;
 }

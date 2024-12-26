@@ -157,11 +157,16 @@ class MainScreen extends StatelessWidget {
                       child: myTreeNodeTile,
                     )
                   : Container(
-                      width: 250,
-                      color: Colors.grey.withOpacity(0.5),
+                      width: null,
+                      color: entry.node.isPressed == true
+                          ? Colors.grey.withOpacity(0.5)
+                          : null,
                       child: InkWell(
                         onTap: () {
-                          print(entry.node.routeName);
+                         
+                          entry.node.isPressed = true;
+
+                          mainScreenController.treeController.rebuild();
                           mainScreenController.selectedScreen.value =
                               mainScreenController
                                   .getScreenFromRoute(entry.node.routeName);

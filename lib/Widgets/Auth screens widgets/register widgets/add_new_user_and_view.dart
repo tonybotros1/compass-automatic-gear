@@ -8,85 +8,94 @@ import 'my_text_form_field.dart';
 Widget addNewUserAndView(
     {required BoxConstraints constraints,
     required BuildContext context,
-    required registerController,
+    required usersController,
     TextEditingController? email,
+    TextEditingController? name,
     userExpiryDate,
     status,
-    activeStatus}) {
+    showActiveStatus}) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
     height: constraints.maxHeight,
-    child: SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          myTextFormField(
-            constraints: constraints,
-            obscureText: false,
-            controller: email ?? registerController.email,
-            labelText: 'Email',
-            hintText: 'Enter your email',
-            keyboardType: TextInputType.emailAddress,
-            validate: true,
-          ),
-          Obx(() => myTextFormField(
-                constraints: constraints,
-                icon: IconButton(
-                    onPressed: () {
-                      registerController.changeObscureTextValue();
-                    },
-                    icon: Icon(registerController.obscureText.value
-                        ? Icons.remove_red_eye_outlined
-                        : Icons.visibility_off)),
-                obscureText: registerController.obscureText.value,
-                controller: registerController.pass,
-                labelText: 'Password',
-                hintText: 'Enter your password',
-                validate: true,
-              )),
-          expiryDateAndActiveStatus(
-              activeStatus: activeStatus,
-              registerController: registerController,
-              context: context,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        myTextFormField(
+          constraints: constraints,
+          obscureText: false,
+          controller: name ?? usersController.name,
+          labelText: 'User Name',
+          hintText: 'Enter your name',
+          keyboardType: TextInputType.name,
+          validate: true,
+        ),
+        myTextFormField(
+          constraints: constraints,
+          obscureText: false,
+          controller: email ?? usersController.email,
+          labelText: 'Email',
+          hintText: 'Enter your email',
+          keyboardType: TextInputType.emailAddress,
+          validate: true,
+        ),
+        Obx(() => myTextFormField(
               constraints: constraints,
-              date: userExpiryDate),
-          Container(
+              icon: IconButton(
+                  onPressed: () {
+                    usersController.changeObscureTextValue();
+                  },
+                  icon: Icon(usersController.obscureText.value
+                      ? Icons.remove_red_eye_outlined
+                      : Icons.visibility_off)),
+              obscureText: usersController.obscureText.value,
+              controller: usersController.pass,
+              labelText: 'Password',
+              hintText: 'Enter your password',
+              validate: true,
+            )),
+        expiryDateAndActiveStatus(
+            activeStatusValue: status,
+            showActiveStatus: showActiveStatus,
+            usersController: usersController,
+            context: context,
+            constraints: constraints,
+            date: userExpiryDate),
+        Expanded(
+          child: Container(
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(15)),
               child: Obx(
-                () => registerController.isLoading.value == false
+                () => usersController.isLoading.value == false
                     ? ListView.builder(
-                        itemCount: registerController.selectedRoles.length,
+                        itemCount: usersController.selectedRoles.length,
                         shrinkWrap: true,
                         itemBuilder: (context, i) {
                           return ListTile(
                               leading: Obx(
                                 () => Checkbox(
                                     activeColor: Colors.blue,
-                                    value: registerController
-                                        .selectedRoles.values
+                                    value: usersController.selectedRoles.values
                                         .elementAt(i)[1],
                                     onChanged: (selected) {
-                                      var key = registerController
+                                      var key = usersController
                                           .selectedRoles.keys
                                           .elementAt(i); // Get the key
-                                      registerController.selectedRoles[key] = [
-                                        registerController.selectedRoles[key]![
-                                            0], 
-                                        selected!, 
+                                      usersController.selectedRoles[key] = [
+                                        usersController.selectedRoles[key]![0],
+                                        selected!,
                                       ];
                                     }),
                               ),
                               title: Text(
-                                  '${registerController.selectedRoles.keys.elementAt(i)}'));
+                                  '${usersController.selectedRoles.keys.elementAt(i)}'));
                         })
                     : CircularProgressIndicator(
                         color: mainColor,
                       ),
               )),
-        ],
-      ),
+        ),
+      ],
     ),
   );
 }

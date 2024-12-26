@@ -8,7 +8,7 @@ import '../../consts.dart';
 class Users extends StatelessWidget {
   Users({super.key});
 
-  final UsersController registerController = Get.put(UsersController());
+  final UsersController usersController = Get.put(UsersController());
 
   @override
   Widget build(BuildContext context) {
@@ -35,41 +35,43 @@ class Users extends StatelessWidget {
         builder: (context, constraints) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: SingleChildScrollView(
-              child: Container(
-                height: null,
-                width: constraints.maxWidth,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10)),
-                child: Column(
-                  children: [
-                    searchBar(
-                        constraints: constraints,
-                        context: context,
-                        registerController: registerController),
-                    SizedBox(
-                        width: constraints.maxWidth,
-                        child: Obx(() =>
-                            registerController.isScreenLoding.value == false
-                                ? registerController.allUsers.isNotEmpty
-                                    ? tableOfUsers(
-                                        constraints: constraints,
-                                        context: context)
-                                    : const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      )
-                                : const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('No users'),
-                                    ),
-                                  ))),
-                  ],
-                ),
+            child: Container(
+              height: null,
+              width: constraints.maxWidth,
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10)),
+              child: Column(
+                children: [
+                  searchBar(
+                      constraints: constraints,
+                      context: context,
+                      usersController: usersController),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: Obx(() =>
+                              usersController.isScreenLoding.value == false &&
+                                      usersController.allUsers.isNotEmpty
+                                  ? tableOfUsers(
+                                      constraints: constraints,
+                                      context: context)
+                                  : usersController.isScreenLoding.value ==
+                                              false &&
+                                          usersController.allUsers.isEmpty
+                                      ? const Center(
+                                          child: Text('No Element'),
+                                        )
+                                      : const Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        ))),
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -80,100 +82,97 @@ class Users extends StatelessWidget {
 
   Widget tableOfUsers({required constraints, required context}) {
     return DataTable(
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-        columns: [
-          DataColumn(
-            label: Row(
-              children: [
-                Text(
-                  'Email',
-                  style: fontStyleForTableHeader,
-                ),
-                IconButton(
-                    onPressed: () {
-                      if (registerController.sortByEmailType.value == true) {
-                        registerController.sortByEmailType.value = false;
-                        registerController.getAllUsers('email');
-                      } else {
-                        registerController.sortByEmailType.value = true;
-                        registerController.getAllUsers('email');
-                      }
-                    },
-                    icon: registerController.sortByEmailType.value == true
-                        ? iconStyleForTableHeaderDown
-                        : iconStyleForTableHeaderUp)
-              ],
-            ),
+      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+      columns: [
+        DataColumn(
+          label: Row(
+            children: [
+              Text(
+                'Email',
+                style: fontStyleForTableHeader,
+              ),
+              IconButton(
+                  onPressed: () {
+                    if (usersController.sortByEmailType.value == true) {
+                      usersController.sortByEmailType.value = false;
+                      usersController.getAllUsers('email');
+                    } else {
+                      usersController.sortByEmailType.value = true;
+                      usersController.getAllUsers('email');
+                    }
+                  },
+                  icon: usersController.sortByEmailType.value == true
+                      ? iconStyleForTableHeaderDown
+                      : iconStyleForTableHeaderUp)
+            ],
           ),
-          DataColumn(
-            label: Row(
-              children: [
-                Text(
-                  'Added Date',
-                  style: fontStyleForTableHeader,
-                ),
-                IconButton(
-                    onPressed: () {
-                      if (registerController.sortByAddedDateType.value ==
-                          true) {
-                        registerController.sortByAddedDateType.value = false;
-                        registerController.getAllUsers('added_date');
-                      } else {
-                        registerController.sortByAddedDateType.value = true;
-                        registerController.getAllUsers('added_date');
-                      }
-                    },
-                    icon: registerController.sortByAddedDateType.value == true
-                        ? iconStyleForTableHeaderDown
-                        : iconStyleForTableHeaderUp)
-              ],
-            ),
+        ),
+        DataColumn(
+          label: Row(
+            children: [
+              Text(
+                'Added Date',
+                style: fontStyleForTableHeader,
+              ),
+              IconButton(
+                  onPressed: () {
+                    if (usersController.sortByAddedDateType.value == true) {
+                      usersController.sortByAddedDateType.value = false;
+                      usersController.getAllUsers('added_date');
+                    } else {
+                      usersController.sortByAddedDateType.value = true;
+                      usersController.getAllUsers('added_date');
+                    }
+                  },
+                  icon: usersController.sortByAddedDateType.value == true
+                      ? iconStyleForTableHeaderDown
+                      : iconStyleForTableHeaderUp)
+            ],
           ),
-          DataColumn(
-            label: Row(
-              children: [
-                Text(
-                  'Expiry Date',
-                  style: fontStyleForTableHeader,
-                ),
-                IconButton(
-                    onPressed: () {
-                      if (registerController.sortByExpiryDateType.value ==
-                          true) {
-                        registerController.sortByExpiryDateType.value = false;
-                        registerController.getAllUsers('expiry_date');
-                      } else {
-                        registerController.sortByExpiryDateType.value = true;
-                        registerController.getAllUsers('expiry_date');
-                      }
-                    },
-                    icon: registerController.sortByExpiryDateType.value == true
-                        ? iconStyleForTableHeaderDown
-                        : iconStyleForTableHeaderUp)
-              ],
-            ),
+        ),
+        DataColumn(
+          label: Row(
+            children: [
+              Text(
+                'Expiry Date',
+                style: fontStyleForTableHeader,
+              ),
+              IconButton(
+                  onPressed: () {
+                    if (usersController.sortByExpiryDateType.value == true) {
+                      usersController.sortByExpiryDateType.value = false;
+                      usersController.getAllUsers('expiry_date');
+                    } else {
+                      usersController.sortByExpiryDateType.value = true;
+                      usersController.getAllUsers('expiry_date');
+                    }
+                  },
+                  icon: usersController.sortByExpiryDateType.value == true
+                      ? iconStyleForTableHeaderDown
+                      : iconStyleForTableHeaderUp)
+            ],
           ),
-          DataColumn(
-            label: Text(
-              '   Action',
-              style: fontStyleForTableHeader,
-            ),
+        ),
+        DataColumn(
+          label: Text(
+            '   Action',
+            style: fontStyleForTableHeader,
           ),
-        ],
-        rows: registerController.filteredUsers.isEmpty
-            ? registerController.allUsers.map((user) {
-                final userData = user.data() as Map<String, dynamic>;
-                final userId = user.id;
-                return dataRowForTheTable(
-                    userData, context, constraints, userId);
-              }).toList()
-            : registerController.filteredUsers.map((user) {
-                final userData = user.data() as Map<String, dynamic>;
-                final userId = user.id;
-
-                return dataRowForTheTable(
-                    userData, context, constraints, userId);
-              }).toList());
+        ),
+      ],
+      rows: usersController.filteredUsers.isEmpty &&
+              usersController.search.value.text.isEmpty
+          ? usersController.allUsers.map((user) {
+              final userData = user.data() as Map<String, dynamic>;
+              final userId = user.id;
+              return dataRowForTheTable(userData, context, constraints, userId);
+            }).toList()
+          : usersController.filteredUsers.map((user) {
+              final userData = user.data() as Map<String, dynamic>;
+              final userId = user.id;
+              return dataRowForTheTable(userData, context, constraints, userId);
+            }).toList(),
+    );
   }
 
   DataRow dataRowForTheTable(
@@ -186,7 +185,7 @@ class Users extends StatelessWidget {
       DataCell(
         Text(
           userData['added_date'] != null
-              ? registerController.textToDate(userData['added_date']) //
+              ? usersController.textToDate(userData['added_date']) //
               : 'N/A',
           style: regTextStyle,
         ),
@@ -194,7 +193,7 @@ class Users extends StatelessWidget {
       DataCell(
         Text(
           userData['expiry_date'] != null
-              ? registerController.textToDate(userData['expiry_date'])
+              ? usersController.textToDate(userData['expiry_date'])
               : 'N/A',
           style: regTextStyle,
         ),
@@ -212,12 +211,13 @@ class Users extends StatelessWidget {
             showDialog(
                 context: context,
                 builder: (context) {
-                  registerController.email.text = userData['email'];
-
+                  usersController.email.text = userData['email'];
+                  usersController.name.text = userData['user_name'];
+                  usersController.userStatus.value = userData['status'];
                   for (var roleId in userData['roles']) {
-                    registerController.selectedRoles.forEach((key, value) {
+                    usersController.selectedRoles.forEach((key, value) {
                       if (value[0] == roleId) {
-                        registerController.selectedRoles.update(
+                        usersController.selectedRoles.update(
                           key,
                           (value) => [value[0], true],
                         );
@@ -226,34 +226,35 @@ class Users extends StatelessWidget {
                   }
 
                   // Reset roles not in userData['roles'] to false
-                  registerController.selectedRoles.forEach((key, value) {
+                  usersController.selectedRoles.forEach((key, value) {
                     if (!userData['roles'].contains(value[0])) {
-                      registerController.selectedRoles.update(
+                      usersController.selectedRoles.update(
                         key,
                         (value) => [value[0], false],
                       );
                     }
                   });
-                  
+
                   return AlertDialog(
                     actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                     content: addNewUserAndView(
-                        registerController: registerController,
+                        status: usersController.userStatus,
+                        usersController: usersController,
                         constraints: constraints,
                         context: context,
-                        email: registerController.email,
+                        email: usersController.email,
+                        name: usersController.name,
                         userExpiryDate: userData['expiry_date'],
-                        activeStatus: true),
+                        showActiveStatus: true),
                     actions: [
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: ElevatedButton(
-                          onPressed: registerController.sigupgInProcess.value
+                          onPressed: usersController.sigupgInProcess.value
                               ? null
                               : () {
-                                  registerController.updateUserDetails(uid);
-                                  if (registerController
-                                          .sigupgInProcess.value ==
+                                  usersController.updateUserDetails(uid);
+                                  if (usersController.sigupgInProcess.value ==
                                       false) {
                                     Get.back();
                                   }
@@ -264,18 +265,17 @@ class Users extends StatelessWidget {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          child:
-                              registerController.sigupgInProcess.value == false
-                                  ? const Text(
-                                      'Save',
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  : const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                      ),
-                                    ),
+                          child: usersController.sigupgInProcess.value == false
+                              ? const Text(
+                                  'Save',
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              : const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                       ElevatedButton(
@@ -288,7 +288,7 @@ class Users extends StatelessWidget {
                             borderRadius: BorderRadius.circular(5),
                           ),
                         ),
-                        child: registerController.sigupgInProcess.value == false
+                        child: usersController.sigupgInProcess.value == false
                             ? const Text(
                                 'Cancel',
                                 style: TextStyle(color: Colors.white),

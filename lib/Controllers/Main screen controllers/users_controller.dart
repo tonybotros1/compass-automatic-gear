@@ -4,11 +4,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert'; // For JSON encoding/decoding
 
 class UsersController extends GetxController {
   late TextEditingController email = TextEditingController();
+  late TextEditingController name = TextEditingController();
   late TextEditingController pass = TextEditingController();
   final FocusNode focusNode = FocusNode();
   RxBool obscureText = RxBool(true);
@@ -24,6 +23,7 @@ class UsersController extends GetxController {
   final RxList<DocumentSnapshot> filteredUsers = RxList<DocumentSnapshot>([]);
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
+  RxBool userStatus = RxBool(true);
 
   // value = true:
   // For dates: From the most recent to the oldest.
@@ -141,6 +141,7 @@ class UsersController extends GetxController {
         uid = user.uid;
       }
       FirebaseFirestore.instance.collection('sys-users').add({
+        "user_name": name.text,
         "email": email.text,
         "user_id": uid,
         "users_tokens": [token],
@@ -149,7 +150,8 @@ class UsersController extends GetxController {
             .where((entry) => entry.value[1] == true)
             .map((entry) => entry.value[0])
             .toList(),
-        "added_date": DateTime.now().toString()
+        "added_date": DateTime.now().toString(),
+        "status": true
       });
       sigupgInProcess.value = false;
       showSnackBar('Done', 'New user added successfully');
@@ -164,7 +166,6 @@ class UsersController extends GetxController {
       }
     } catch (e) {
       sigupgInProcess.value = false;
-      print(e);
       showSnackBar('warning', e.toString());
     }
   }
@@ -184,12 +185,12 @@ class UsersController extends GetxController {
           .doc(userId) // The document ID you want to update
           .update({
         'roles': updatedRoles,
-        'expiry_date': '${selectedDate.value}'
+        'expiry_date': '${selectedDate.value}',
+        'status': userStatus.value,
+        'user_name': name.text,
       }); // Pass the updated data as a map
-
-      print('Document updated successfully.');
     } catch (e) {
-      print('Error updating document: $e');
+//
     }
   }
 
@@ -235,10 +236,11 @@ class UsersController extends GetxController {
             .snapshots()
             .listen((event) {
           allUsers.assignAll(event.docs);
+          isScreenLoding.value = false;
         });
-        isScreenLoding.value = false;
       } catch (e) {
         //
+        isScreenLoding.value = false;
       }
     } else if (sortBy == 'added_date') {
       try {
@@ -250,10 +252,11 @@ class UsersController extends GetxController {
             .snapshots()
             .listen((event) {
           allUsers.assignAll(event.docs);
+          isScreenLoding.value = false;
         });
-        isScreenLoding.value = false;
       } catch (e) {
         //
+        isScreenLoding.value = false;
       }
     } else if (sortBy == 'expiry_date') {
       try {
@@ -265,10 +268,11 @@ class UsersController extends GetxController {
             .snapshots()
             .listen((event) {
           allUsers.assignAll(event.docs);
+          isScreenLoding.value = false;
         });
-        isScreenLoding.value = false;
       } catch (e) {
         //
+        isScreenLoding.value = false;
       }
     } else {
       try {
@@ -281,42 +285,13 @@ class UsersController extends GetxController {
             .snapshots()
             .listen((event) {
           allUsers.assignAll(event.docs);
+          isScreenLoding.value = false;
         });
-        isScreenLoding.value = false;
       } catch (e) {
+        isScreenLoding.value = false;
         //
       }
     }
   }
 
-  // get user status
-  Future<void> getUserStatus(uid) async {
-    var flaskUrl = Uri.parse('http://127.0.0.1:5000/getUserData');
-    try {
-      // Prepare the request headers and body
-      final headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      };
-      final body = jsonEncode({'uid': uid});
-
-      var response = await http.post(
-        flaskUrl,
-        headers: headers,
-        body: body,
-      );
-      print(response.statusCode);
-
-      // Handle the response
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        print('User Status: ${data['status']}'); // Output the user status
-      } else {
-        final error = jsonDecode(response.body);
-        print('Error: ${error['error']}');
-      }
-    } catch (e) {
-      print('An error occurred: $e');
-    }
-  }
 }

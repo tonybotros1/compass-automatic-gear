@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../../consts.dart';
 
@@ -8,31 +8,22 @@ Widget expiryDateAndActiveStatus({
   required BuildContext context,
   required constraints,
   required date,
-  required registerController,
-  activeStatus,
+  required usersController,
+  showActiveStatus,
+  activeStatusValue,
 }) {
   if (date != '') {
-    registerController.selectedDate.value = DateTime.parse(date);
+    usersController.selectedDate.value = DateTime.parse(date);
   } else {
-    registerController.selectedDate.value = DateTime.now();
+    usersController.selectedDate.value = DateTime.now();
   }
   return ListTile(
-    trailing: activeStatus == true
-        ? ToggleSwitch(
-            activeBgColors: const [
-              [Colors.blue],
-              [Colors.red]
-            ],
-            activeFgColor: Colors.white,
-            inactiveBgColor: Colors.grey,
-            inactiveFgColor: Colors.white,
-            initialLabelIndex: 0,
-            totalSwitches: 2,
-            labels: const ['Enable', 'Disable'],
-            onToggle: (index) {
-              print('switched to: $index');
-            },
-          )
+    trailing: showActiveStatus == true
+        ? Obx(() => CupertinoSwitch(
+            value: activeStatusValue.value,
+            onChanged: (status) {
+              usersController.userStatus.value = status;
+            }))
         : const SizedBox(),
     contentPadding: const EdgeInsets.all(0),
     title: Text(
@@ -42,14 +33,14 @@ Widget expiryDateAndActiveStatus({
     subtitle: Row(
       children: [
         Obx(
-          () => Text(registerController.textToDate(registerController
-              .formatDate(registerController.selectedDate.value))),
+          () => Text(usersController.textToDate(
+              usersController.formatDate(usersController.selectedDate.value))),
         ),
         const SizedBox(
           width: 10,
         ),
         IconButton(
-            onPressed: () => registerController.selectDateContext(context),
+            onPressed: () => usersController.selectDateContext(context),
             icon: const Icon(
               Icons.calendar_month,
               color: Colors.blue,

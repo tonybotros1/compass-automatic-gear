@@ -7,7 +7,7 @@ import 'add_new_user_and_view.dart';
 Row searchBar({
   required BoxConstraints constraints,
   required context,
-  required registerController,
+  required usersController,
 }) {
   return Row(
     children: [
@@ -35,7 +35,7 @@ Row searchBar({
                     child: SizedBox(
                       width: constraints.maxWidth / 2,
                       child: TextFormField(
-                        controller: registerController.search.value,
+                        controller: usersController.search.value,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           hintStyle: TextStyle(color: iconColor),
@@ -49,7 +49,7 @@ Row searchBar({
                     flex: 1,
                     child: IconButton(
                       onPressed: () {
-                       registerController.search.value.clear();
+                       usersController.search.value.clear();
                       },
                       icon: const Icon(
                         Icons.close,
@@ -69,30 +69,30 @@ Row searchBar({
             showDialog(
                 context: context,
                 builder: (context) {
-                  registerController.email.clear();
-                  registerController.pass.clear();
-                  registerController.selectedRoles.updateAll(
+                  usersController.email.clear();
+                  usersController.pass.clear();
+                  usersController.selectedRoles.updateAll(
                     (key, value) => [value[0],false],
                   );
                   return AlertDialog(
                     actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                     content: addNewUserAndView(
-                      registerController: registerController,
+                      usersController: usersController,
                       constraints: constraints,
                       context: context,
                       userExpiryDate: '',
-                      activeStatus:false,
+                      showActiveStatus:false,
                     ),
                     actions: [
                       Obx(() => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: ElevatedButton(
                               onPressed:
-                                  registerController.sigupgInProcess.value
+                                  usersController.sigupgInProcess.value
                                       ? null
                                       : () {
-                                          registerController.register();
-                                          if (registerController
+                                          usersController.register();
+                                          if (usersController
                                                   .sigupgInProcess.value ==
                                               false) {
                                             Get.back();
@@ -104,7 +104,7 @@ Row searchBar({
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                               ),
-                              child: registerController.sigupgInProcess.value ==
+                              child: usersController.sigupgInProcess.value ==
                                       false
                                   ? const Text(
                                       'Save',
@@ -128,7 +128,7 @@ Row searchBar({
                             borderRadius: BorderRadius.circular(5),
                           ),
                         ),
-                        child: registerController.sigupgInProcess.value == false
+                        child: usersController.sigupgInProcess.value == false
                             ? const Text(
                                 'Cancel',
                                 style: TextStyle(color: Colors.white),
@@ -159,7 +159,7 @@ Row searchBar({
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
             onPressed: () {
-              registerController.getAllUsers('');
+              usersController.getAllUsers('');
             },
             icon: const Icon(
               Icons.refresh,
