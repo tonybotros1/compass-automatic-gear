@@ -4,7 +4,8 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
 import '../../Models/screen_tree_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../Screens/Main screens/users.dart';
+import '../../Screens/Main screens/System Administrator/User Management/users.dart';
+import '../../consts.dart';
 
 class MainScreenController extends GetxController {
   late TreeController<MyTreeNode> treeController;
@@ -16,6 +17,7 @@ class MainScreenController extends GetxController {
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
   Rx<Widget> selectedScreen = const SizedBox().obs;
+  Rx<Text> selectedScreenName = const Text('').obs;
   RxString userName = RxString('');
   RxBool errorLoading = RxBool(false);
 
@@ -26,6 +28,7 @@ class MainScreenController extends GetxController {
     super.onInit();
   }
 
+// this function is to get the screen and show it on the right side of the main screen
   Widget getScreenFromRoute(String? routeName) {
     switch (routeName) {
       case '/users':
@@ -37,6 +40,11 @@ class MainScreenController extends GetxController {
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }
+  }
+
+  // this function is to get the name of the screen of the right side of the main screen
+ Text getScreenName(name) {
+    return Text(name,style: fontStyleForAppBar,);
   }
 
   Future<void> getScreens() async {

@@ -1,4 +1,3 @@
-import 'package:compass_automatic_gear/Screens/Main%20screens/users.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,7 +32,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
-        GetPage(name: '/', page: () =>   Users()),
+        GetPage(name: '/', page: () =>  const LoadingScreen()),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
         GetPage(name: '/mainScreen', page: () =>  MainScreen())
       ],

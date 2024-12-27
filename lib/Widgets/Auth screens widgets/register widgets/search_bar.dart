@@ -159,7 +159,7 @@ Row searchBar({
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
             onPressed: () {
-              usersController.getAllUsers('');
+              usersController.getAllUsers();
             },
             icon: const Icon(
               Icons.refresh,

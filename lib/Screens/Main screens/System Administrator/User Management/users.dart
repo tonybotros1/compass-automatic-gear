@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../Controllers/Main screen controllers/users_controller.dart';
-import '../../Widgets/Auth screens widgets/register widgets/add_new_user_and_view.dart';
-import '../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../consts.dart';
+import '../../../../Controllers/Main screen controllers/users_controller.dart';
+import '../../../../Widgets/Auth screens widgets/register widgets/add_new_user_and_view.dart';
+import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
+import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../consts.dart';
 
 class Users extends StatelessWidget {
   Users({super.key});
@@ -14,23 +14,23 @@ class Users extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 60,
-        backgroundColor: Colors.white,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text('User Management', style: fontStyleForAppBar),
-            const SizedBox(
-              height: 5,
-            ),
-            Divider(
-              color: Colors.grey[700],
-            )
-          ],
-        ),
-      ),
+      // appBar: AppBar(
+      //   toolbarHeight: 60,
+      //   backgroundColor: Colors.white,
+      //   title: Column(
+      //     crossAxisAlignment: CrossAxisAlignment.start,
+      //     mainAxisAlignment: MainAxisAlignment.end,
+      //     children: [
+      //       Text('User Management', style: fontStyleForAppBar),
+      //       const SizedBox(
+      //         height: 5,
+      //       ),
+      //       Divider(
+      //         color: Colors.grey[700],
+      //       )
+      //     ],
+      //   ),
+      // ),
       backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -39,7 +39,7 @@ class Users extends StatelessWidget {
                 left: 14,
                 right: 14,
                 bottom: 10,
-                top: 0), //EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                top: 10), //EdgeInsets.symmetric(horizontal: 14, vertical: 0),
             child: Container(
               height: null,
               width: constraints.maxWidth,

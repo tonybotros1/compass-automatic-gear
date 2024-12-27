@@ -4,7 +4,7 @@ class AutoSizedText extends StatelessWidget {
   final String text;
   final TextStyle? style;
   final int maxLines;
-  final constraints;
+  final BoxConstraints constraints;
 
   const AutoSizedText({
     super.key,

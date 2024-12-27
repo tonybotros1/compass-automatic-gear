@@ -16,6 +16,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       drawer: sideMenuWidget(),
       body: Row(
         children: [
@@ -26,7 +27,7 @@ class MainScreen extends StatelessWidget {
               children: [
                 Container(
                   width: Get.width,
-                  color: mainColorForWeb,
+                  color: Colors.white,
                   height: 80,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -39,18 +40,35 @@ class MainScreen extends StatelessWidget {
                               },
                               icon: const Icon(Icons.menu)),
                         ),
-                      Text(
-                        'Compass Automatic Gear',
-                        style: fontStyleForAppBar,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 15),
+                        child: Obx(() =>
+                            mainScreenController.selectedScreenName.value),
                       ),
                       Padding(
                           padding: const EdgeInsets.only(right: 16),
-                          child: Obx(
-                            () => Text(
-                              'Welcome ${mainScreenController.userName}',
-                              style: userNameStyle,
-                            ),
-                          ))
+                          child: Obx(() => 
+                          ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    elevation: 5,
+                                  ),
+                                  onPressed: () {},
+                                  child: Text(
+                                      'Welcome ${mainScreenController.userName}'))
+                              //  TextButton(
+                              //   onPressed: () {},
+                              //   child: Text(
+                              //     'Welcome ${mainScreenController.userName}',
+                              //     style: userNameStyle,
+                              //   ),
+                              //   // style: userNameStyle,
+                              // ),
+                              ))
                     ],
                   ),
                 ),
@@ -77,7 +95,10 @@ class MainScreen extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 16, bottom: 10),
-              child: Image.asset('assets/logo2.png'),
+              child: Image.asset(
+                'assets/logo2.png',
+                width: 90,
+              ),
             ),
             Expanded(
               child: Obx(() => mainScreenController.isLoading.value == false &&
@@ -89,6 +110,13 @@ class MainScreen extends StatelessWidget {
                       : const Center(
                           child: Text('Network error please try again'))),
             ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Compass Automatic Gear',
+                style: footerTextStylr,
+              ),
+            )
           ],
         ));
   }
@@ -184,6 +212,9 @@ class MainScreen extends StatelessWidget {
                           mainScreenController.selectedScreen.value =
                               mainScreenController
                                   .getScreenFromRoute(entry.node.routeName);
+                          mainScreenController.selectedScreenName.value =
+                              mainScreenController
+                                  .getScreenName(entry.node.title);
                         },
                         child: TreeIndentation(
                           entry: entry,

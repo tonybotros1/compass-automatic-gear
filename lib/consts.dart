@@ -11,8 +11,14 @@ var iconStyleForTableHeaderUp =
     Icon(Icons.keyboard_arrow_up, color: Colors.grey.shade700);
 var regTextStyle =
     TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w500);
-var userNameStyle = TextStyle(
-    color: Colors.grey[600], fontWeight: FontWeight.bold, fontSize: 16);
+var userNameStyle = const TextStyle(
+    color: Colors.blue,
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
+    decoration: TextDecoration.underline,
+    decorationColor: Colors.blue);
+var footerTextStylr = TextStyle(
+    color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 12);
 
 var fontStyle3 = const TextStyle(fontSize: 16, color: Colors.white);
 // var mainColor = const Color.fromARGB(255, 228, 200, 233);
