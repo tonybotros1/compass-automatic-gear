@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../Controllers/Main screen controllers/users_controller.dart';
 import '../../Widgets/Auth screens widgets/register widgets/add_new_user_and_view.dart';
 import '../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
+import '../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../consts.dart';
 
 class Users extends StatelessWidget {
@@ -88,27 +89,30 @@ class Users extends StatelessWidget {
       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
       columns: [
         DataColumn(
-          label: const Text(
-            'Email',
-          ),
-          onSort: usersController.onSort,
-          
-        ),
-        DataColumn(
-          label: const Text(
-            'Added Date',
+          label: AutoSizedText(
+            text: 'Email',
+            constraints: constraints,
           ),
           onSort: usersController.onSort,
         ),
         DataColumn(
-          label: const Text(
-            'Expiry Date',
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'Added Date',
           ),
           onSort: usersController.onSort,
         ),
-        const DataColumn(
-          label: Text(
-            'Action',
+        DataColumn(
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'Expiry Date',
+          ),
+          onSort: usersController.onSort,
+        ),
+        DataColumn(
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'Action',
           ),
         ),
       ],
