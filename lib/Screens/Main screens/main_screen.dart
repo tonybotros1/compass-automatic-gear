@@ -47,21 +47,18 @@ class MainScreen extends StatelessWidget {
                       ),
                       Padding(
                           padding: const EdgeInsets.only(right: 16),
-                          child: Obx(() => 
-                          ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    elevation: 5,
-                                  ),
-                                  onPressed: () {},
-                                  child: Text(
-                                      'Welcome ${mainScreenController.userName}'))
-                              
-                              ))
+                          child: Obx(() => ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                elevation: 5,
+                              ),
+                              onPressed: () {},
+                              child: Text(
+                                  'Welcome ${mainScreenController.userName}'))))
                     ],
                   ),
                 ),
@@ -88,9 +85,49 @@ class MainScreen extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 16, bottom: 10),
-              child: Image.asset(
-                'assets/logo2.png',
-                width: 90,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const SizedBox(
+                    width: 45,
+                  ),
+                  Image.asset(
+                    'assets/logo2.png',
+                    width: 90,
+                  ),
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          mainScreenController.treeController.collapseAll();
+                        },
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        child: const Icon(
+                          color: Colors.grey,
+                          Icons.close_fullscreen_rounded,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      InkWell(
+                        onTap: () {
+                          mainScreenController.getScreens();
+                        },
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        child: const Icon(
+                          color: Colors.grey,
+                          Icons.replay,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
               ),
             ),
             Expanded(
