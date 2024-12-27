@@ -89,6 +89,25 @@ class FunctionsController extends GetxController {
     }
   }
 
+  // this function is to update screen details
+  updateScreen(screenID) async {
+    try {
+      addingNewScreenProcess.value = true;
+      await FirebaseFirestore.instance
+          .collection('screens')
+          .doc(screenID)
+          .update({
+        'name': screenName.text,
+        'routeName': route.text,
+      });
+      addingNewScreenProcess.value = true;
+      showSnackBar('Done', 'Screen Updated successfully');
+    } catch (e) {
+      addingNewScreenProcess.value = true;
+      showSnackBar('failed', 'Please try again');
+    }
+  }
+
   // this function is to filter the search results for web
   void filterScreens() {
     query.value = search.value.text.toLowerCase();
@@ -128,7 +147,7 @@ class FunctionsController extends GetxController {
         "added_date": DateTime.now().toString(),
       });
       addingNewScreenProcess.value = false;
-      showSnackBar('Done', 'New user added successfully');
+      showSnackBar('Done', 'New Screen added successfully');
     } on FirebaseAuthException catch (e) {
       addingNewScreenProcess.value = false;
       showSnackBar('warning', e);

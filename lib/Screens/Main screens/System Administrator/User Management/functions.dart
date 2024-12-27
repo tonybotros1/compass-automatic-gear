@@ -106,7 +106,6 @@ ElevatedButton newScreenButton(
                                         false) {
                                       Get.back();
                                     }
-                                   
                                   },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
@@ -251,29 +250,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
           showDialog(
               context: context,
               builder: (context) {
-                controller.email.text = screenData['email'];
-                controller.name.text = screenData['user_name'];
-                controller.userStatus.value = screenData['status'];
-                for (var roleId in screenData['roles']) {
-                  controller.selectedRoles.forEach((key, value) {
-                    if (value[0] == roleId) {
-                      controller.selectedRoles.update(
-                        key,
-                        (value) => [value[0], true],
-                      );
-                    }
-                  });
-                }
-
-                // Reset roles not in userData['roles'] to false
-                controller.selectedRoles.forEach((key, value) {
-                  if (!screenData['roles'].contains(value[0])) {
-                    controller.selectedRoles.update(
-                      key,
-                      (value) => [value[0], false],
-                    );
-                  }
-                });
+                controller.screenName.text = screenData['name'];
+                controller.route.text = screenData['routeName'];
 
                 return AlertDialog(
                   actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -288,11 +266,12 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: ElevatedButton(
-                        onPressed: controller.sigupgInProcess.value
+                        onPressed: controller.addingNewScreenProcess.value
                             ? null
                             : () {
-                                controller.updateUserDetails(screenId);
-                                if (controller.sigupgInProcess.value == false) {
+                                controller.updateScreen(screenId);
+                                if (controller.addingNewScreenProcess.value ==
+                                    false) {
                                   Get.back();
                                 }
                               },
@@ -302,7 +281,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
                             borderRadius: BorderRadius.circular(5),
                           ),
                         ),
-                        child: controller.sigupgInProcess.value == false
+                        child: controller.addingNewScreenProcess.value == false
                             ? const Text(
                                 'Save',
                                 style: TextStyle(color: Colors.white),
@@ -325,7 +304,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                      child: controller.sigupgInProcess.value == false
+                      child: controller.addingNewScreenProcess.value == false
                           ? const Text(
                               'Cancel',
                               style: TextStyle(color: Colors.white),
