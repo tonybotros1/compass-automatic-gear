@@ -53,6 +53,7 @@ dependencies:
   # google_fonts: ^6.2.1
   # toggle_switch: ^2.3.0
   http: ^1.2.2
+  crypto: ^3.0.6
   # auto_size_text: ^3.0.0
   
 dev_dependencies:

@@ -8,7 +8,7 @@ import 'my_text_form_field.dart';
 Widget addNewUserAndView(
     {required BoxConstraints constraints,
     required BuildContext context,
-    required usersController,
+    required controller,
     TextEditingController? email,
     TextEditingController? name,
     userExpiryDate,
@@ -23,7 +23,7 @@ Widget addNewUserAndView(
         myTextFormField(
           constraints: constraints,
           obscureText: false,
-          controller: name ?? usersController.name,
+          controller: name ?? controller.name,
           labelText: 'User Name',
           hintText: 'Enter your name',
           keyboardType: TextInputType.name,
@@ -32,7 +32,7 @@ Widget addNewUserAndView(
         myTextFormField(
           constraints: constraints,
           obscureText: false,
-          controller: email ?? usersController.email,
+          controller: email ?? controller.email,
           labelText: 'Email',
           hintText: 'Enter your email',
           keyboardType: TextInputType.emailAddress,
@@ -42,13 +42,13 @@ Widget addNewUserAndView(
               constraints: constraints,
               icon: IconButton(
                   onPressed: () {
-                    usersController.changeObscureTextValue();
+                    controller.changeObscureTextValue();
                   },
-                  icon: Icon(usersController.obscureText.value
+                  icon: Icon(controller.obscureText.value
                       ? Icons.remove_red_eye_outlined
                       : Icons.visibility_off)),
-              obscureText: usersController.obscureText.value,
-              controller: usersController.pass,
+              obscureText: controller.obscureText.value,
+              controller: controller.pass,
               labelText: 'Password',
               hintText: 'Enter your password',
               validate: true,
@@ -56,7 +56,7 @@ Widget addNewUserAndView(
         expiryDateAndActiveStatus(
             activeStatusValue: status,
             showActiveStatus: showActiveStatus,
-            usersController: usersController,
+            controller: controller,
             context: context,
             constraints: constraints,
             date: userExpiryDate),
@@ -66,29 +66,29 @@ Widget addNewUserAndView(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(15)),
               child: Obx(
-                () => usersController.isLoading.value == false
+                () => controller.isLoading.value == false
                     ? ListView.builder(
-                        itemCount: usersController.selectedRoles.length,
+                        itemCount: controller.selectedRoles.length,
                         shrinkWrap: true,
                         itemBuilder: (context, i) {
                           return ListTile(
                               leading: Obx(
                                 () => Checkbox(
                                     activeColor: Colors.blue,
-                                    value: usersController.selectedRoles.values
+                                    value: controller.selectedRoles.values
                                         .elementAt(i)[1],
                                     onChanged: (selected) {
-                                      var key = usersController
+                                      var key = controller
                                           .selectedRoles.keys
                                           .elementAt(i); // Get the key
-                                      usersController.selectedRoles[key] = [
-                                        usersController.selectedRoles[key]![0],
+                                      controller.selectedRoles[key] = [
+                                        controller.selectedRoles[key]![0],
                                         selected!,
                                       ];
                                     }),
                               ),
                               title: Text(
-                                  '${usersController.selectedRoles.keys.elementAt(i)}'));
+                                  '${controller.selectedRoles.keys.elementAt(i)}'));
                         })
                     : CircularProgressIndicator(
                         color: mainColor,

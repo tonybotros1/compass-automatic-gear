@@ -60,14 +60,7 @@ class MainScreen extends StatelessWidget {
                                   onPressed: () {},
                                   child: Text(
                                       'Welcome ${mainScreenController.userName}'))
-                              //  TextButton(
-                              //   onPressed: () {},
-                              //   child: Text(
-                              //     'Welcome ${mainScreenController.userName}',
-                              //     style: userNameStyle,
-                              //   ),
-                              //   // style: userNameStyle,
-                              // ),
+                              
                               ))
                     ],
                   ),

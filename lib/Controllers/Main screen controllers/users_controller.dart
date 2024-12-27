@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart'; // For password hashing
 
 class UsersController extends GetxController {
   late TextEditingController email = TextEditingController();
@@ -159,48 +161,100 @@ class UsersController extends GetxController {
   }
 
 // this function is to add new user
+  // register() async {
+  //   try {
+  //     if (email.text.isEmpty || pass.text.isEmpty) {
+  //       throw Exception('Please fill all fields');
+  //     }
+  //     sigupgInProcess.value = true;
+  //     UserCredential userCredential =
+  //         await FirebaseAuth.instance.createUserWithEmailAndPassword(
+  //       email: email.text,
+  //       password: pass.text,
+  //     );
+  //     User? user = userCredential.user;
+  //     String? token;
+  //     String? uid;
+  //     if (user != null) {
+  //       token = await FirebaseMessaging.instance.getToken();
+  //       uid = user.uid;
+  //     }
+  //     FirebaseFirestore.instance.collection('sys-users').add({
+  //       "user_name": name.text,
+  //       "email": email.text,
+  //       "user_id": uid,
+  //       "users_tokens": [token],
+  //       "expiry_date": '${selectedDate.value}',
+  //       "roles": selectedRoles.entries
+  //           .where((entry) => entry.value[1] == true)
+  //           .map((entry) => entry.value[0])
+  //           .toList(),
+  //       "added_date": DateTime.now().toString(),
+  //       "status": true
+  //     });
+  //     sigupgInProcess.value = false;
+  //     showSnackBar('Done', 'New user added successfully');
+  //   } on FirebaseAuthException catch (e) {
+  //     if (e.code == 'weak-password') {
+  //       sigupgInProcess.value = false;
+  //       showSnackBar('warning', 'The password provided is too weak');
+  //     } else if (e.code == 'email-already-in-use') {
+  //       sigupgInProcess.value = false;
+
+  //       showSnackBar('warning', 'The account already exists for that email');
+  //     }
+  //   } catch (e) {
+  //     sigupgInProcess.value = false;
+  //     showSnackBar('warning', e.toString());
+  //   }
+  // }
+
   register() async {
     try {
-      if (email.text.isEmpty || pass.text.isEmpty) {
+      if (name.text.isEmpty ||
+          email.text.isEmpty ||
+          pass.text.isEmpty ||
+          selectedRoles.isEmpty) {
+        showSnackBar('Note', 'Please fill all fields');
+
         throw Exception('Please fill all fields');
       }
       sigupgInProcess.value = true;
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email.text,
-        password: pass.text,
-      );
-      User? user = userCredential.user;
-      String? token;
-      String? uid;
-      if (user != null) {
-        token = await FirebaseMessaging.instance.getToken();
-        uid = user.uid;
+
+      // Hash the password using SHA-256
+      var bytes = utf8.encode(pass.text); // Convert password to bytes
+      var digest = sha256.convert(bytes); // Hash the password
+      String hashedPassword = digest.toString();
+
+      // Check if the email already exists in Firestore
+      var userDataSnapshot = await FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('email', isEqualTo: email.text) // Check for existing email
+          .get();
+
+      if (userDataSnapshot.docs.isNotEmpty) {
+        sigupgInProcess.value = false;
+        showSnackBar(
+            'Email already in use', 'This email is already registered');
+        return;
       }
-      FirebaseFirestore.instance.collection('sys-users').add({
+
+      // Save the user details in Firestore with an auto-generated document ID
+      await FirebaseFirestore.instance.collection('sys-users').add({
         "user_name": name.text,
         "email": email.text,
-        "user_id": uid,
-        "users_tokens": [token],
-        "expiry_date": '${selectedDate.value}',
+        "password": hashedPassword, // Store hashed password
         "roles": selectedRoles.entries
             .where((entry) => entry.value[1] == true)
             .map((entry) => entry.value[0])
             .toList(),
+        "expiry_date": '${selectedDate.value}',
         "added_date": DateTime.now().toString(),
         "status": true
       });
+
       sigupgInProcess.value = false;
       showSnackBar('Done', 'New user added successfully');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        sigupgInProcess.value = false;
-        showSnackBar('warning', 'The password provided is too weak');
-      } else if (e.code == 'email-already-in-use') {
-        sigupgInProcess.value = false;
-
-        showSnackBar('warning', 'The account already exists for that email');
-      }
     } catch (e) {
       sigupgInProcess.value = false;
       showSnackBar('warning', e.toString());
@@ -208,26 +262,44 @@ class UsersController extends GetxController {
   }
 
   // this function is to update user details
-  updateUserDetails(userId) async {
+  updateUserDetails(String userId) async {
     try {
-      var updatedRoles = selectedRoles.entries
-          .where((entry) =>
-              entry.value is List &&
-              entry.value[1] == true) // Check if the second element is true
-          .map((entry) => entry.value[0]) // Extract the ID (first element)
-          .toList();
-      // Reference the document by its ID
-      await FirebaseFirestore.instance
-          .collection('sys-users') // Replace with your collection name
-          .doc(userId) // The document ID you want to update
-          .update({
-        'roles': updatedRoles,
+      // Prepare the update data
+      Map<String, dynamic> updateData = {
+        'roles': selectedRoles.entries
+            .where((entry) =>
+                entry.value is List &&
+                entry.value[1] == true) // Check the role status
+            .map((entry) => entry.value[0]) // Extract the role name
+            .toList(),
         'expiry_date': '${selectedDate.value}',
         'status': userStatus.value,
         'user_name': name.text,
-      }); // Pass the updated data as a map
+        'email': email.text,
+      };
+
+      // Add the hashed password only if pass.text is not empty
+      if (pass.text.isNotEmpty) {
+        // Hash the password
+        var bytes = utf8.encode(pass.text); // Convert password to bytes
+        var digest = sha256.convert(bytes); // Hash the password
+        String hashedPassword = digest.toString();
+
+        // Add the hashed password to the update data
+        updateData['password'] = hashedPassword;
+      }
+
+      // Update the Firestore document
+      await FirebaseFirestore.instance
+          .collection('sys-users') // Replace with your collection name
+          .doc(userId) // The document ID you want to update
+          .update(updateData);
+
+      // Success message
+      showSnackBar('Success', 'User details updated successfully');
     } catch (e) {
-//
+      // Handle errors
+      showSnackBar('Error', 'Failed to update user details: $e');
     }
   }
 

@@ -1,7 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/screen_tree_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
@@ -34,8 +35,8 @@ class MainScreenController extends GetxController {
       case '/users':
         return SizedBox(
             child: Users()); // Replace with your actual screen widget
-      // case 'screen2':
-      //   return Screen2();
+      case '/functions':
+        return const SizedBox(child: Functions());
       // Add more cases as needed
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
@@ -43,28 +44,31 @@ class MainScreenController extends GetxController {
   }
 
   // this function is to get the name of the screen of the right side of the main screen
- Text getScreenName(name) {
-    return Text(name,style: fontStyleForAppBar,);
+  Text getScreenName(name) {
+    return Text(
+      name,
+      style: fontStyleForAppBar,
+    );
   }
 
   Future<void> getScreens() async {
     try {
-      User? currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) return;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      uid.value = currentUser.uid;
+    String? action = prefs.getString('userId');
+      if (action == null || action == '') return;
+
+      uid.value = action;
 
       // Fetch user roles
       final userSnapshot = await FirebaseFirestore.instance
-          .collection('sys-users')
-          .where('user_id', isEqualTo: uid.value)
-          .limit(1)
+          .collection('sys-users').doc(uid.value) 
           .get();
 
-      if (userSnapshot.docs.isEmpty) return;
+      if (!userSnapshot.exists) return;
 
-      userRoles.assignAll(userSnapshot.docs.first.data()['roles']);
-      userName.value = userSnapshot.docs.first.data()['user_name'];
+      userRoles.assignAll(userSnapshot.data()!['roles']);
+      userName.value = userSnapshot.data()!['user_name'];
 
       // Fetch role menus
       final roleSnapshot = await FirebaseFirestore.instance

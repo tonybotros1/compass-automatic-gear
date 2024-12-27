@@ -14,63 +14,53 @@ class Users extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   toolbarHeight: 60,
-      //   backgroundColor: Colors.white,
-      //   title: Column(
-      //     crossAxisAlignment: CrossAxisAlignment.start,
-      //     mainAxisAlignment: MainAxisAlignment.end,
-      //     children: [
-      //       Text('User Management', style: fontStyleForAppBar),
-      //       const SizedBox(
-      //         height: 5,
-      //       ),
-      //       Divider(
-      //         color: Colors.grey[700],
-      //       )
-      //     ],
-      //   ),
-      // ),
       backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Padding(
-            padding: const EdgeInsets.only(
-                left: 14,
-                right: 14,
-                bottom: 10,
-                top: 10), //EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+            padding: screenPadding,
             child: Container(
-              height: null,
               width: constraints.maxWidth,
               decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10)),
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Column(
                 children: [
                   searchBar(
-                      constraints: constraints,
-                      context: context,
-                      usersController: usersController),
-                  SingleChildScrollView(
-                    child: SizedBox(
-                        width: constraints.maxWidth,
-                        child: Obx(() => usersController.isScreenLoding.value ==
-                                    false &&
-                                usersController.allUsers.isNotEmpty
-                            ? tableOfUsers(
-                                constraints: constraints, context: context)
-                            : usersController.isScreenLoding.value == false &&
-                                    usersController.allUsers.isEmpty
-                                ? const Center(
-                                    child: Text('No Element'),
-                                  )
-                                : const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ))),
+                    constraints: constraints,
+                    context: context,
+                    controller: usersController,
+                    title: 'Search for users by email',
+                    buttonTitle: 'New User',
+                    button: newUserButton(context, constraints),
+                  ),
+                  Expanded(
+                    child: Obx(
+                      () {
+                        if (usersController.isScreenLoding.value) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (usersController.allUsers.isEmpty) {
+                          return const Center(
+                            child: Text('No Element'),
+                          );
+                        }
+                        return SingleChildScrollView(
+                          scrollDirection: Axis
+                              .vertical, // Allow horizontal scrolling for table
+                          child: SizedBox(
+                            width: constraints.maxWidth,
+                            child: tableOfUsers(
+                              constraints: constraints,
+                              context: context,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -81,8 +71,103 @@ class Users extends StatelessWidget {
     );
   }
 
+  ElevatedButton newUserButton(
+      BuildContext context, BoxConstraints constraints) {
+    return ElevatedButton(
+      onPressed: () {
+        usersController.name.clear();
+        usersController.pass.clear();
+        usersController.email.clear();
+        showDialog(
+            context: context,
+            builder: (context) {
+              usersController.email.clear();
+              usersController.pass.clear();
+              usersController.selectedRoles.updateAll(
+                (key, value) => [value[0], false],
+              );
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: addNewUserAndView(
+                  controller: usersController,
+                  constraints: constraints,
+                  context: context,
+                  userExpiryDate: '',
+                  showActiveStatus: false,
+                ),
+                actions: [
+                  Obx(() => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: ElevatedButton(
+                          onPressed: usersController.sigupgInProcess.value
+                              ? null
+                              : () {
+                                  usersController.register();
+                                  if (usersController.sigupgInProcess.value ==
+                                      false) {
+                                    Get.back();
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                          child: usersController.sigupgInProcess.value == false
+                              ? const Text(
+                                  'Save',
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              : const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      )),
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: mainColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    child: usersController.sigupgInProcess.value == false
+                        ? const Text(
+                            'Cancel',
+                            style: TextStyle(color: Colors.white),
+                          )
+                        : const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ],
+              );
+            });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+        elevation: 5,
+      ),
+      child: const Text('New User'),
+    );
+  }
+
   Widget tableOfUsers({required constraints, required context}) {
     return DataTable(
+      dataTextStyle: regTextStyle,
       headingTextStyle: fontStyleForTableHeader,
       sortColumnIndex: usersController.sortColumnIndex.value,
       sortAscending: usersController.isAscending.value,
@@ -136,14 +221,12 @@ class Users extends StatelessWidget {
     return DataRow(cells: [
       DataCell(Text(
         '${userData['email']}',
-        style: regTextStyle,
       )),
       DataCell(
         Text(
           userData['added_date'] != null
               ? usersController.textToDate(userData['added_date']) //
               : 'N/A',
-          style: regTextStyle,
         ),
       ),
       DataCell(
@@ -151,7 +234,6 @@ class Users extends StatelessWidget {
           userData['expiry_date'] != null
               ? usersController.textToDate(userData['expiry_date'])
               : 'N/A',
-          style: regTextStyle,
         ),
       ),
       DataCell(ElevatedButton(
@@ -195,7 +277,7 @@ class Users extends StatelessWidget {
                     actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                     content: addNewUserAndView(
                         status: usersController.userStatus,
-                        usersController: usersController,
+                        controller: usersController,
                         constraints: constraints,
                         context: context,
                         email: usersController.email,
@@ -264,94 +346,3 @@ class Users extends StatelessWidget {
     ]);
   }
 }
-
-
-
-
-//  DataColumn(
-//           label: Container(
-//             color: Colors.red,
-//             child: Row(
-//               children: [
-//                 Text(
-//                   'Email',
-//                   style: fontStyleForTableHeader,
-//                 ),
-//                 // IconButton(
-//                 //     onPressed: () {
-//                 //       if (usersController.sortByEmailType.value == true) {
-//                 //         usersController.sortByEmailType.value = false;
-//                 //         usersController.getAllUsers('email');
-//                 //       } else {
-//                 //         usersController.sortByEmailType.value = true;
-//                 //         usersController.getAllUsers('email');
-//                 //       }
-//                 //     },
-//                 //     icon: usersController.sortByEmailType.value == true
-//                 //         ? iconStyleForTableHeaderDown
-//                 //         : iconStyleForTableHeaderUp)
-//               ],
-//             ),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Container(
-//             color: Colors.green,
-//             child: Row(
-//               children: [
-//                 Text(
-//                   'Added Date',
-//                   style: fontStyleForTableHeader,
-//                 ),
-//                 // IconButton(
-//                 //     onPressed: () {
-//                 //       if (usersController.sortByAddedDateType.value == true) {
-//                 //         usersController.sortByAddedDateType.value = false;
-//                 //         usersController.getAllUsers('added_date');
-//                 //       } else {
-//                 //         usersController.sortByAddedDateType.value = true;
-//                 //         usersController.getAllUsers('added_date');
-//                 //       }
-//                 //     },
-//                 //     icon: usersController.sortByAddedDateType.value == true
-//                 //         ? iconStyleForTableHeaderDown
-//                 //         : iconStyleForTableHeaderUp)
-//               ],
-//             ),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Container(
-//             color: Colors.blue,
-//             child: Row(
-//               children: [
-//                 Text(
-//                   'Expiry Date',
-//                   style: fontStyleForTableHeader,
-//                 ),
-//                 // IconButton(
-//                 //     onPressed: () {
-//                 //       if (usersController.sortByExpiryDateType.value == true) {
-//                 //         usersController.sortByExpiryDateType.value = false;
-//                 //         usersController.getAllUsers('expiry_date');
-//                 //       } else {
-//                 //         usersController.sortByExpiryDateType.value = true;
-//                 //         usersController.getAllUsers('expiry_date');
-//                 //       }
-//                 //     },
-//                 //     icon: usersController.sortByExpiryDateType.value == true
-//                 //         ? iconStyleForTableHeaderDown
-//                 //         : iconStyleForTableHeaderUp)
-//               ],
-//             ),
-//           ),
-//         ),
-//         DataColumn(
-//           label: Container(
-//             color: Colors.amber,
-//             child: Text(
-//               'Action',
-//               style: fontStyleForTableHeader,
-//             ),
-//           ),
-//         ),

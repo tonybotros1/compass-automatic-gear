@@ -8,21 +8,21 @@ Widget expiryDateAndActiveStatus({
   required BuildContext context,
   required constraints,
   required date,
-  required usersController,
+  required controller,
   showActiveStatus,
   activeStatusValue,
 }) {
   if (date != '') {
-    usersController.selectedDate.value = DateTime.parse(date);
+    controller.selectedDate.value = DateTime.parse(date);
   } else {
-    usersController.selectedDate.value = DateTime.now();
+    controller.selectedDate.value = DateTime.now();
   }
   return ListTile(
     trailing: showActiveStatus == true
         ? Obx(() => CupertinoSwitch(
             value: activeStatusValue.value,
             onChanged: (status) {
-              usersController.userStatus.value = status;
+              controller.userStatus.value = status;
             }))
         : const SizedBox(),
     contentPadding: const EdgeInsets.all(0),
@@ -33,14 +33,14 @@ Widget expiryDateAndActiveStatus({
     subtitle: Row(
       children: [
         Obx(
-          () => Text(usersController.textToDate(
-              usersController.formatDate(usersController.selectedDate.value))),
+          () => Text(controller.textToDate(
+              controller.formatDate(controller.selectedDate.value))),
         ),
         const SizedBox(
           width: 10,
         ),
         IconButton(
-            onPressed: () => usersController.selectDateContext(context),
+            onPressed: () => controller.selectDateContext(context),
             icon: const Icon(
               Icons.calendar_month,
               color: Colors.blue,

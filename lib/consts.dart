@@ -20,6 +20,13 @@ var userNameStyle = const TextStyle(
 var footerTextStylr = TextStyle(
     color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 12);
 
+var screenPadding = const EdgeInsets.only(
+  left: 14,
+  right: 14,
+  bottom: 10,
+  top: 10,
+);
+
 var fontStyle3 = const TextStyle(fontSize: 16, color: Colors.white);
 // var mainColor = const Color.fromARGB(255, 228, 200, 233);
 

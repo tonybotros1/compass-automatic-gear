@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../../consts.dart';
-import 'add_new_user_and_view.dart';
 
 Row searchBar({
   required BoxConstraints constraints,
   required context,
-  required usersController,
+  required controller,
+  required title,
+  required buttonTitle,
+   Widget? button,
 }) {
   return Row(
     children: [
@@ -37,11 +38,11 @@ Row searchBar({
                 child: SizedBox(
                   width: constraints.maxWidth / 2,
                   child: TextFormField(
-                    controller: usersController.search.value,
-                    decoration: const InputDecoration(
+                    controller: controller.search.value,
+                    decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintStyle: TextStyle(color: iconColor),
-                      hintText: 'Search for users by email',
+                      hintStyle: const TextStyle(color: iconColor),
+                      hintText: title,
                     ),
                     style: const TextStyle(color: iconColor),
                   ),
@@ -50,7 +51,7 @@ Row searchBar({
               FittedBox(
                 child: IconButton(
                   onPressed: () {
-                    usersController.search.value.clear();
+                    controller.search.value.clear();
                   },
                   icon: const Icon(
                     Icons.close,
@@ -65,101 +66,13 @@ Row searchBar({
       const Expanded(flex: 1, child: SizedBox()),
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ElevatedButton(
-          onPressed: () {
-            showDialog(
-                context: context,
-                builder: (context) {
-                  usersController.email.clear();
-                  usersController.pass.clear();
-                  usersController.selectedRoles.updateAll(
-                    (key, value) => [value[0], false],
-                  );
-                  return AlertDialog(
-                    actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    content: addNewUserAndView(
-                      usersController: usersController,
-                      constraints: constraints,
-                      context: context,
-                      userExpiryDate: '',
-                      showActiveStatus: false,
-                    ),
-                    actions: [
-                      Obx(() => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ElevatedButton(
-                              onPressed: usersController.sigupgInProcess.value
-                                  ? null
-                                  : () {
-                                      usersController.register();
-                                      if (usersController
-                                              .sigupgInProcess.value ==
-                                          false) {
-                                        Get.back();
-                                      }
-                                    },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
-                              child:
-                                  usersController.sigupgInProcess.value == false
-                                      ? const Text(
-                                          'Save',
-                                          style: TextStyle(color: Colors.white),
-                                        )
-                                      : const Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                            ),
-                          )),
-                      ElevatedButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: mainColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        child: usersController.sigupgInProcess.value == false
-                            ? const Text(
-                                'Cancel',
-                                style: TextStyle(color: Colors.white),
-                              )
-                            : const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-                    ],
-                  );
-                });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            elevation: 5,
-          ),
-          child: const Text('New User'),
-        ),
+        child: button
       ),
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
             onPressed: () {
-              usersController.getAllUsers();
+              controller.getAllUsers();
             },
             icon: const Icon(
               Icons.refresh,
