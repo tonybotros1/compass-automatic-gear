@@ -18,7 +18,7 @@ Widget addNewScreenOrView({
           constraints: constraints,
           obscureText: false,
           controller: screenName ?? controller.screenName,
-          labelText: 'User Screen',
+          labelText: 'Screen Name',
           hintText: 'Enter Screen name',
           keyboardType: TextInputType.name,
           validate: true,
