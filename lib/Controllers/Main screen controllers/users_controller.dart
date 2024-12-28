@@ -44,6 +44,18 @@ class UsersController extends GetxController {
   void onSort(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
       allUsers.sort((user1, user2) {
+        final String? value1 = user1.get('user_name');
+        final String? value2 = user2.get('user_name');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 1) {
+      allUsers.sort((user1, user2) {
         final String? value1 = user1.get('email');
         final String? value2 = user2.get('email');
 
@@ -54,7 +66,7 @@ class UsersController extends GetxController {
 
         return compareString(ascending, value1, value2);
       });
-    } else if (columnIndex == 1) {
+    } else if (columnIndex == 2) {
       allUsers.sort((user1, user2) {
         final String? value1 = user1.get('added_date');
         final String? value2 = user2.get('added_date');
@@ -66,7 +78,7 @@ class UsersController extends GetxController {
 
         return compareString(ascending, value1, value2);
       });
-    } else if (columnIndex == 2) {
+    } else if (columnIndex == 3) {
       allUsers.sort((user1, user2) {
         final String? value1 = user1.get('expiry_date');
         final String? value2 = user2.get('expiry_date');

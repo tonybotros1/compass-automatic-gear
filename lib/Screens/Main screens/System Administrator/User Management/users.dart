@@ -175,6 +175,13 @@ class Users extends StatelessWidget {
       columns: [
         DataColumn(
           label: AutoSizedText(
+            text: 'Name',
+            constraints: constraints,
+          ),
+          onSort: usersController.onSort,
+        ),
+        DataColumn(
+          label: AutoSizedText(
             text: 'Email',
             constraints: constraints,
           ),
@@ -219,6 +226,9 @@ class Users extends StatelessWidget {
   DataRow dataRowForTheTable(
       Map<String, dynamic> userData, context, constraints, uid) {
     return DataRow(cells: [
+      DataCell(Text(
+        '${userData['user_name']}',
+      )),
       DataCell(Text(
         '${userData['email']}',
       )),

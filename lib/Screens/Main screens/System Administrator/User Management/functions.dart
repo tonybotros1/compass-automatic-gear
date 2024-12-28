@@ -184,14 +184,14 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Added Date',
+          text: 'Route',
         ),
         onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Route',
+          text: 'Added Date',
         ),
         onSort: controller.onSort,
       ),
@@ -227,14 +227,14 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
     )),
     DataCell(
       Text(
-        screenData['added_date'] != null
-            ? controller.textToDate(screenData['added_date']) //
-            : 'N/A',
+        screenData['routeName'] ?? 'no route',
       ),
     ),
     DataCell(
       Text(
-        screenData['routeName'] ?? 'no route',
+        screenData['added_date'] != null
+            ? controller.textToDate(screenData['added_date']) //
+            : 'N/A',
       ),
     ),
     DataCell(ElevatedButton(

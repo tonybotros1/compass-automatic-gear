@@ -42,8 +42,8 @@ class FunctionsController extends GetxController {
       });
     } else if (columnIndex == 1) {
       allScreens.sort((screen1, screen2) {
-        final String? value1 = screen1.get('added_date');
-        final String? value2 = screen2.get('added_date');
+        final String? value1 = screen1.get('routeName');
+        final String? value2 = screen2.get('routeName');
 
         // Handle nulls: put nulls at the end
         if (value1 == null && value2 == null) return 0;
@@ -54,8 +54,8 @@ class FunctionsController extends GetxController {
       });
     } else if (columnIndex == 2) {
       allScreens.sort((screen1, screen2) {
-        final String? value1 = screen1.get('routeName');
-        final String? value2 = screen2.get('routeName');
+        final String? value1 = screen1.get('added_date');
+        final String? value2 = screen2.get('added_date');
 
         // Handle nulls: put nulls at the end
         if (value1 == null && value2 == null) return 0;
