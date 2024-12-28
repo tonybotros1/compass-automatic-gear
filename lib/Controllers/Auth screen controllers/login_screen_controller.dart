@@ -162,4 +162,11 @@ class LoginScreenController extends GetxController {
       showSnackBar('Unexpected Error', 'Please try again');
     }
   }
+
+  // Log out and clear user session
+  Future<void> logOut() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userId'); // Clear userId
+    Get.offAllNamed('/loginScreen'); // Navigate to login screen
+  }
 }

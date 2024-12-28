@@ -113,18 +113,18 @@ class MainScreen extends StatelessWidget {
                       const SizedBox(
                         width: 10,
                       ),
-                      InkWell(
-                        onTap: () {
-                          mainScreenController.getScreens();
-                        },
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        child: const Icon(
-                          color: Colors.grey,
-                          Icons.replay,
-                          size: 20,
-                        ),
-                      ),
+                      // InkWell(
+                      //   onTap: () {
+                      //     mainScreenController.getScreens();
+                      //   },
+                      //   splashColor: Colors.transparent,
+                      //   highlightColor: Colors.transparent,
+                      //   child: const Icon(
+                      //     color: Colors.grey,
+                      //     Icons.replay,
+                      //     size: 20,
+                      //   ),
+                      // ),
                     ],
                   )
                 ],
