@@ -8,7 +8,7 @@ Row searchBar({
   required controller,
   required title,
   required buttonTitle,
-   Widget? button,
+  Widget? button,
 }) {
   return Row(
     children: [
@@ -64,10 +64,7 @@ Row searchBar({
         ),
       ),
       const Expanded(flex: 1, child: SizedBox()),
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: button
-      ),
+      Padding(padding: const EdgeInsets.all(8.0), child: button),
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: IconButton(

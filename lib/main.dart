@@ -7,21 +7,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Middleware/auth_middleware.dart';
 import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
+import 'Screens/Main screens/System Administrator/User Management/menus.dart';
 import 'Screens/Main screens/main_screen.dart';
+import 'security.dart';
 
 SharedPreferences? globalPrefs;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   kIsWeb
-      ? await Firebase.initializeApp(
-          options: const FirebaseOptions(
-              apiKey: "AIzaSyBkdkjdZyEn4_d436x4Jq_G_39jVynXX1k",
-              authDomain: "compass-automatic-gear.firebaseapp.com",
-              projectId: "compass-automatic-gear",
-              storageBucket: "compass-automatic-gear.firebasestorage.app",
-              messagingSenderId: "660504023083",
-              appId: "1:660504023083:web:becd167feb642c230b9a6e"))
+      ? await Firebase.initializeApp(options: options)
       : await Firebase.initializeApp();
   globalPrefs = await SharedPreferences.getInstance();
 
@@ -37,9 +32,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
-        GetPage(name: '/', page: () =>  const LoadingScreen()),
+        GetPage(name: '/', page: () => Menus()),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
-        GetPage(name: '/mainScreen', page: () =>  MainScreen(), middlewares: [AuthMiddleware()])
+        GetPage(
+            name: '/mainScreen',
+            page: () => MainScreen(),
+            middlewares: [AuthMiddleware()])
       ],
     );
   }
