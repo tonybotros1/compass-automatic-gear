@@ -38,6 +38,9 @@
 
 class MyTreeNode {
   MyTreeNode({
+    this.canDelete,
+    this.id,
+    this.isMenu,
     this.routeName,
     this.isPressed = false,
     required this.title,
@@ -55,5 +58,8 @@ class MyTreeNode {
   String? routeName;
   final List<MyTreeNode> children;
   MyTreeNode? parent;
-   bool isPressed;
+  bool isPressed;
+  bool? isMenu;
+  String? id;
+  bool? canDelete;
 }

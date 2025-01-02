@@ -35,19 +35,22 @@ class Menus extends StatelessWidget {
                         controller: controller,
                         title: 'Search for menus',
                         buttonTitle: 'New Menu',
-                        button: newMenuButton(context, constraints, controller),
+                        // button: newMenuButton(context, constraints, controller),
                       );
                     },
                   ),
                   Expanded(
                     child: GetX<MenusController>(
                       builder: (controller) {
-                        if (controller.isScreenLoading.value) {
+                        // print(controller.isScreenLoading.value);
+                        if (controller.isScreenLoading.value == true &&
+                            controller.allMenus.isEmpty) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
                         }
-                        if (controller.allMenus.isEmpty) {
+                        if (controller.isScreenLoading.value == false &&
+                            controller.allMenus.isEmpty) {
                           return const Center(
                             child: Text('No Element'),
                           );
@@ -77,6 +80,18 @@ class Menus extends StatelessWidget {
   }
 }
 
+Widget buildCell(String content) {
+  return Container(
+    color: Colors.white,
+    margin: const EdgeInsets.all(1),
+    child: Center(
+      child: Text(
+        content,
+      ),
+    ),
+  );
+}
+
 Widget tableOfMenus(
     {required constraints, required context, required controller}) {
   return DataTable(
@@ -92,21 +107,14 @@ Widget tableOfMenus(
           text: 'Menu',
           constraints: constraints,
         ),
-        // onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Children',
-        ),
-        // onSort: controller.onSort,
+        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
           text: 'Creation Date',
         ),
-        // onSort: controller.onSort,
+        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(
@@ -139,108 +147,6 @@ DataRow dataRowForTheTable(
       menuData['name'] ?? 'no name',
     )),
     DataCell(
-      Row(
-        children: [
-          const Text('Show'),
-          PopupMenuButton(
-            icon: const Icon(Icons.arrow_drop_down_rounded),
-            color: Colors.white,
-            position: PopupMenuPosition.under,
-            itemBuilder: (context) {
-              // Retrieve the data for sub_menus and screens
-              final subMenus =
-                  menuData['sub_menus'] as List<Map<String, dynamic>>;
-              final screens = menuData['screens'] as List<Map<String, dynamic>>;
-
-              return [
-                PopupMenuItem(
-                  enabled: false,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      subMenus.isNotEmpty
-                          ? Expanded(
-                              child: Column(
-                                children: [
-                                  const Text(
-                                    'Sub Menus',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: subMenus.map((subMenu) {
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 4),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              color: Colors.red),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              subMenu['name'] ?? 'No Name',
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const SizedBox(),
-                      screens.isNotEmpty
-                          ? Expanded(
-                              child: Column(
-                                children: [
-                                  const Text(
-                                    'Screens',
-                                    style: TextStyle(color: Colors.green),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: screens.map((screen) {
-                                      return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 4),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                color: Colors.green),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                screen['name'] ?? 'No Name',
-                                                style: const TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            ),
-                                          ));
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const SizedBox(),
-                    ],
-                  ),
-                ),
-              ];
-            },
-          )
-        ],
-      ),
-    ),
-    DataCell(
       Text(
         menuData['added_date'] != null
             ? controller.textToDate(menuData['added_date']) //
@@ -248,122 +154,73 @@ DataRow dataRowForTheTable(
       ),
     ),
     DataCell(ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-          ),
-          elevation: 5,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
         ),
-        onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                controller.screenName.text = menuData['name'];
-                controller.route.text = menuData['routeName'];
-
-                return AlertDialog(
-                  actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                  content: addNewMenuOrView(
-                    controller: controller,
-                    constraints: constraints,
-                    context: context,
-                    screenName: controller.screenName,
-                    route: controller.route,
-                  ),
-                  actions: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: ElevatedButton(
-                        onPressed: controller.addingNewScreenProcess.value
-                            ? null
-                            : () {
-                                controller.updateScreen(menuId);
-                                if (controller.addingNewScreenProcess.value ==
-                                    false) {
-                                  Get.back();
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        child: controller.addingNewScreenProcess.value == false
-                            ? const Text(
-                                'Save',
-                                style: TextStyle(color: Colors.white),
-                              )
-                            : const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                              ),
+        elevation: 5,
+        minimumSize: const Size(100, 40),
+      ),
+      onPressed: controller.buttonLoadingStates[menuId] == null ||
+              controller.buttonLoadingStates[menuId] == false
+          ? () async {
+              controller.setButtonLoading(menuId, true); // Start loading
+              await controller.getMenusScreens(menuId);
+              controller.setButtonLoading(menuId, false); // Stop loading
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    controller.selectedMenuID.value = '';
+                    return AlertDialog(
+                      actionsPadding:
+                          const EdgeInsets.symmetric(horizontal: 20),
+                      content: addNewMenuOrView(
+                        controller: controller,
+                        constraints: constraints,
+                        context: context,
                       ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: mainColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: controller.addingNewScreenProcess.value == false
-                          ? const Text(
-                              'Cancel',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ],
-                );
-              });
-        },
-        child: const Text('View'))),
-  ]);
-}
-
-ElevatedButton newMenuButton(
-    BuildContext context, BoxConstraints constraints, controller) {
-  return ElevatedButton(
-    onPressed: () {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewMenuOrView(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<MenusController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                      actions: [
+                        // Padding(
+                        //   padding: const EdgeInsets.symmetric(vertical: 16),
+                        //   child: ElevatedButton(
+                        //     onPressed: controller.addingNewMenuProcess.value
+                        //         ? null
+                        //         : () {
+                        //             controller.updateScreen(menuId);
+                        //             if (controller.addingNewMenuProcess.value ==
+                        //                 false) {
+                        //               Get.back();
+                        //             }
+                        //           },
+                        //     style: ElevatedButton.styleFrom(
+                        //       backgroundColor: Colors.green,
+                        //       shape: RoundedRectangleBorder(
+                        //         borderRadius: BorderRadius.circular(5),
+                        //       ),
+                        //     ),
+                        //     child: controller.addingNewMenuProcess.value == false
+                        //         ? const Text(
+                        //             'Save',
+                        //             style: TextStyle(color: Colors.white),
+                        //           )
+                        //         : const Padding(
+                        //             padding: EdgeInsets.all(8.0),
+                        //             child: CircularProgressIndicator(
+                        //               color: Colors.white,
+                        //             ),
+                        //           ),
+                        //   ),
+                        // ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton(
-                            onPressed: controller.addingNewMenuProcess.value
-                                ? null
-                                : () async {
-                                    await controller.addNewMenu();
-                                    if (controller.addingNewMenuProcess.value ==
-                                        false) {
-                                      Get.back();
-                                    }
-                                  },
+                            onPressed: () {
+                              Get.back();
+                            },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
+                              backgroundColor: mainColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5),
                               ),
@@ -371,7 +228,7 @@ ElevatedButton newMenuButton(
                             child:
                                 controller.addingNewMenuProcess.value == false
                                     ? const Text(
-                                        'Save',
+                                        'Cancel',
                                         style: TextStyle(color: Colors.white),
                                       )
                                     : const Padding(
@@ -381,41 +238,111 @@ ElevatedButton newMenuButton(
                                         ),
                                       ),
                           ),
-                        )),
-                ElevatedButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: controller.addingNewScreenProcess.value == false
-                      ? const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )
-                      : const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
                         ),
+                      ],
+                    );
+                  });
+            }
+          : null,
+      child: Obx(() {
+        bool isLoading = controller.buttonLoadingStates[menuId] ?? false;
+        return isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
                 ),
-              ],
-            );
-          });
-    },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green,
-      foregroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
-      ),
-      elevation: 5,
-    ),
-    child: const Text('New Screen'),
-  );
+              )
+            : const Text("View");
+      }),
+    )),
+  ]);
 }
+
+// ElevatedButton newMenuButton(
+//     BuildContext context, BoxConstraints constraints, controller) {
+//   return ElevatedButton(
+//     onPressed: () {
+//       showDialog(
+//           context: context,
+//           builder: (context) {
+//             return AlertDialog(
+//               actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+//               content: addNewMenuOrView(
+//                 controller: controller,
+//                 constraints: constraints,
+//                 context: context,
+//               ),
+//               // actions: [
+//               //   GetX<MenusController>(
+//               //       builder: (controller) => Padding(
+//               //             padding: const EdgeInsets.symmetric(vertical: 16),
+//               //             child: ElevatedButton(
+//               //               onPressed: controller.addingNewMenuProcess.value
+//               //                   ? null
+//               //                   : () async {
+//               //                       await controller.addNewMenu();
+//               //                       if (controller.addingNewMenuProcess.value ==
+//               //                           false) {
+//               //                         Get.back();
+//               //                       }
+//               //                     },
+//               //               style: ElevatedButton.styleFrom(
+//               //                 backgroundColor: Colors.green,
+//               //                 shape: RoundedRectangleBorder(
+//               //                   borderRadius: BorderRadius.circular(5),
+//               //                 ),
+//               //               ),
+//               //               child:
+//               //                   controller.addingNewMenuProcess.value == false
+//               //                       ? const Text(
+//               //                           'Save',
+//               //                           style: TextStyle(color: Colors.white),
+//               //                         )
+//               //                       : const Padding(
+//               //                           padding: EdgeInsets.all(8.0),
+//               //                           child: CircularProgressIndicator(
+//               //                             color: Colors.white,
+//               //                           ),
+//               //                         ),
+//               //             ),
+//               //           )),
+//               //   ElevatedButton(
+//               //     onPressed: () {
+//               //       Get.back();
+//               //     },
+//               //     style: ElevatedButton.styleFrom(
+//               //       backgroundColor: mainColor,
+//               //       shape: RoundedRectangleBorder(
+//               //         borderRadius: BorderRadius.circular(5),
+//               //       ),
+//               //     ),
+//               //     child: controller.addingNewMenuProcess.value == false
+//               //         ? const Text(
+//               //             'Cancel',
+//               //             style: TextStyle(color: Colors.white),
+//               //           )
+//               //         : const Padding(
+//               //             padding: EdgeInsets.all(8.0),
+//               //             child: CircularProgressIndicator(
+//               //               color: Colors.white,
+//               //             ),
+//               //           ),
+//               //   ),
+//               // ],
+//             );
+//           });
+//     },
+//     style: ElevatedButton.styleFrom(
+//       backgroundColor: Colors.green,
+//       foregroundColor: Colors.white,
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(5),
+//       ),
+//       elevation: 5,
+//     ),
+//     child: const Text('New Screen'),
+//   );
+// }
