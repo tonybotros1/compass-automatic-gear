@@ -168,6 +168,8 @@ ElevatedButton newScreenButton(
 Widget tableOfScreens(
     {required constraints, required context, required controller}) {
   return DataTable(
+    columnSpacing: 5,
+    showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
@@ -198,7 +200,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Action',
+          text: '',
         ),
       ),
     ],

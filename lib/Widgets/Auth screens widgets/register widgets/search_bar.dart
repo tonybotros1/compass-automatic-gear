@@ -64,18 +64,20 @@ Row searchBar({
         ),
       ),
       const Expanded(flex: 1, child: SizedBox()),
-      Padding(padding: const EdgeInsets.all(8.0), child: button),
       Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: IconButton(
-            onPressed: () {
-              controller.getAllUsers();
-            },
-            icon: const Icon(
-              Icons.refresh,
-              color: Colors.grey,
-            )),
-      )
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: button),
+      // Padding(
+      //   padding: const EdgeInsets.all(8.0),
+      //   child: IconButton(
+      //       onPressed: () {
+      //         controller.getAllUsers();
+      //       },
+      //       icon: const Icon(
+      //         Icons.refresh,
+      //         color: Colors.grey,
+      //       )),
+      // )
     ],
   );
 }

@@ -167,6 +167,8 @@ class Users extends StatelessWidget {
 
   Widget tableOfUsers({required constraints, required context}) {
     return DataTable(
+      columnSpacing: 5,
+    showBottomBorder: true,
       dataTextStyle: regTextStyle,
       headingTextStyle: fontStyleForTableHeader,
       sortColumnIndex: usersController.sortColumnIndex.value,
@@ -204,7 +206,7 @@ class Users extends StatelessWidget {
         DataColumn(
           label: AutoSizedText(
             constraints: constraints,
-            text: 'Action',
+            text: '',
           ),
         ),
       ],
