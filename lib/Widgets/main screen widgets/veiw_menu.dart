@@ -62,155 +62,149 @@ Widget viewMenu({
           ),
         ),
         menuSection(controller, constraints),
-        Obx(() {
-          return Expanded(
-            child: controller.selectedMenuID.value != ''
-                ? Stack(
-                    children: [
-                      ListView(
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: AutoSizedText(
-                                    maxLines: 2,
-                                    constraints: constraints,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 13,
-                                    ),
-                                    text:
-                                        '${controller.selectedMenuName.value}',
-                                  ),
-                                ),
-                              ),
-                              Form(
-                                key:
-                                    controller.formKeyForDropDownListForScreens,
-                                child: dropDownValues(
-                                  ids: controller.screenIDFromList,
-                                  labelText: 'Screens',
-                                  hintText: 'Select Screen',
-                                  menus: controller.selectFromScreens,
-                                  validate: true,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Wrap(
-                                  spacing:
-                                      10, // Horizontal spacing between items
-                                  runSpacing:
-                                      10, // Vertical spacing between rows
-                                  children: List.generate(
-                                      controller.screenIDFromList.length, (i) {
-                                    return Stack(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(15),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xffA6AEBF),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          child: Text(
-                                            '${controller.getScreenName(controller.screenIDFromList[i])}',
-                                            style:
-                                                const TextStyle(fontSize: 14),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 0,
-                                          right: 0,
-                                          child: InkWell(
-                                            onTap: () {
-                                              controller
-                                                  .removeScreenFromList(i);
-                                            },
-                                            child: const Icon(
-                                              Icons.remove_circle,
-                                              color: Colors.red,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  }),
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                      Positioned(
-                        bottom: 20,
-                        right: 20,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            elevation: 5,
-                            minimumSize: const Size(100, 40),
-                          ),
-                          onPressed: controller
-                                      .addingExistingScreenProcess.value ==
-                                  false
-                              ? () async {
-                                  if (controller.screenIDFromList.isEmpty &&
-                                      !controller.formKeyForDropDownListForScreens
-                                          .currentState!
-                                          .validate()) {
-                                    // Do nothing: this ensures validation is triggered when required
-                                  } else {
-                                    await controller.addExistingScreenToMenu();
-                                  }
-                                }
-                              : null,
-                          child: controller.addingExistingScreenProcess.value ==
-                                  false
-                              ? const Text('Add')
-                              : const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Center(
-                    child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(10)),
-                        child: const Text(
-                          'Select menu to start',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                  ),
-          );
-        })
+        screenSection(controller, constraints),
       ],
     ),
   );
+}
+
+Obx screenSection(controller, BoxConstraints constraints) {
+  return Obx(() {
+    return Expanded(
+      child: controller.selectedMenuID.value != ''
+          ? Stack(
+              children: [
+                ListView(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.grey,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: AutoSizedText(
+                              maxLines: 2,
+                              constraints: constraints,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                              text: '${controller.selectedMenuName.value}',
+                            ),
+                          ),
+                        ),
+                        Form(
+                          key: controller.formKeyForDropDownListForScreens,
+                          child: dropDownValues(
+                            ids: controller.screenIDFromList,
+                            labelText: 'Screens',
+                            hintText: 'Select Screen',
+                            menus: controller.selectFromScreens,
+                            validate: true,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Wrap(
+                            spacing: 10, // Horizontal spacing between items
+                            runSpacing: 10, // Vertical spacing between rows
+                            children: List.generate(
+                                controller.screenIDFromList.length, (i) {
+                              return Stack(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(15),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xffA6AEBF),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      '${controller.getScreenName(controller.screenIDFromList[i])}',
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: InkWell(
+                                      onTap: () {
+                                        controller.removeScreenFromList(i);
+                                      },
+                                      child: const Icon(
+                                        Icons.remove_circle,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+                Positioned(
+                  bottom: 20,
+                  right: 20,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      elevation: 5,
+                      minimumSize: const Size(100, 40),
+                    ),
+                    onPressed:
+                        controller.addingExistingScreenProcess.value == false
+                            ? () async {
+                                if (controller.screenIDFromList.isEmpty &&
+                                    !controller.formKeyForDropDownListForScreens
+                                        .currentState!
+                                        .validate()) {
+                                  // Do nothing: this ensures validation is triggered when required
+                                } else {
+                                  await controller.addExistingScreenToMenu();
+                                }
+                              }
+                            : null,
+                    child: controller.addingExistingScreenProcess.value == false
+                        ? const Text('Add')
+                        : const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            )
+          : Center(
+              child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(10)),
+                  child: const Text(
+                    'Select menu to start',
+                    style: TextStyle(color: Colors.white),
+                  )),
+            ),
+    );
+  });
 }
 
 Obx menuSection(controller, BoxConstraints constraints) {
@@ -436,64 +430,56 @@ AnimatedTreeView<MyTreeNode> leftTree({
                           width: 25,
                         ),
                 ),
-                entry.node.isMenu == true
-                    ? InkWell(
-                        onTap: entry.node.canRemove == false ||
-                                entry.node.canRemove == null
-                            ? null
-                            : () {
-                                showCupertinoDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return CupertinoAlertDialog(
-                                      title: const Text("Alert"),
-                                      content: const Text(
-                                          "Are you sure you want to remove this sub menu?"),
-                                      actions: [
-                                        CupertinoDialogAction(
-                                          child: const Text("Cancel"),
-                                          onPressed: () {
-                                            Get.back();
-                                          },
-                                        ),
-                                        CupertinoDialogAction(
-                                          isDestructiveAction: true,
-                                          isDefaultAction: true,
-                                          child: const Text("OK"),
-                                          onPressed: () async {
-                                            Get.back();
-                                            await controller
-                                                .removeNodeFromTheTree(
-                                                    entry.node.id,
-                                                    entry.node.parent!.id);
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                        //  () {
-                        //   // controller.selectedMenuID.value = entry.node.id;
-                        //   // controller.selectedMenuName.value =
-                        //   //     entry.node.title;
-                        //   // controller.selectedMenuCanDelete.value =
-                        //   //     entry.node.canDelete;
-                        //   // controller.menuName.clear();
-                        // },
-                        child: Icon(
-                          Icons.remove_circle_outline,
-                          size: 25,
-                          color: entry.node.canRemove == false ||
-                                  entry.node.canRemove == null
-                              ? Colors.grey
-                              : Colors.red,
-                        ),
-                      )
-                    : const SizedBox(
-                        height: 25,
-                        width: 25,
-                      )
+                // entry.node.isMenu == true
+                //     ?
+                InkWell(
+                  onTap: entry.node.canRemove == false ||
+                          entry.node.canRemove == null
+                      ? null
+                      : () {
+                          showCupertinoDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return CupertinoAlertDialog(
+                                title: const Text("Alert"),
+                                content: Text(entry.node.isMenu == true
+                                    ? "Are you sure you want to remove this sub menu?"
+                                    : "Are you sure you want to remove this screen?"),
+                                actions: [
+                                  CupertinoDialogAction(
+                                    child: const Text("Cancel"),
+                                    onPressed: () {
+                                      Get.back();
+                                    },
+                                  ),
+                                  CupertinoDialogAction(
+                                    isDestructiveAction: true,
+                                    isDefaultAction: true,
+                                    child: const Text("OK"),
+                                    onPressed: () async {
+                                      Get.back();
+                                      await controller.removeNodeFromTheTree(
+                                          entry.node.id, entry.node.parent!.id);
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                  child: Icon(
+                    Icons.remove_circle_outline,
+                    size: 25,
+                    color: entry.node.canRemove == false ||
+                            entry.node.canRemove == null
+                        ? Colors.grey
+                        : Colors.red,
+                  ),
+                )
+                // : const SizedBox(
+                //     height: 25,
+                //     width: 25,
+                //   )
               ],
             ),
           );

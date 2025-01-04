@@ -97,6 +97,7 @@ class MenusController extends GetxController {
       //
     }
   }
+  
 
 // this function is to remove a menu from the list
   removeMenuFromList(index) {
