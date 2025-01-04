@@ -12,6 +12,7 @@ class MenusController extends GetxController {
       TextEditingController(); // new menu name
   late TextEditingController description = TextEditingController();
   RxList menuIDFromList = RxList([]);
+  RxList screenIDFromList = RxList([]);
 
   RxMap allMenus = RxMap();
   RxList menusSubMenusChildren = RxList([]);
@@ -37,9 +38,14 @@ class MenusController extends GetxController {
   RxBool selectedMenuCanDelete = RxBool(false);
   RxBool addingNewMenuProcess = RxBool(false);
   RxBool addingExistingMenuProcess = RxBool(false);
+  RxBool addingExistingScreenProcess = RxBool(false);
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> formKeyForDropDownList = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKeyForDropDownListForMenus =
+      GlobalKey<FormState>();
+  final GlobalKey<FormState> formKeyForDropDownListForScreens =
+      GlobalKey<FormState>();
   RxMap<String, String> selectFromMenus = RxMap({});
+  RxMap<String, String> selectFromScreens = RxMap({});
   RxBool deletingProcess = RxBool(false);
 
   @override
@@ -88,7 +94,7 @@ class MenusController extends GetxController {
 
       removeNode(roots, nodeID);
     } catch (e) {
-      print(e);
+      //
     }
   }
 
@@ -97,11 +103,28 @@ class MenusController extends GetxController {
     menuIDFromList.removeAt(index);
   }
 
+  // this function is to remove a screen from the list
+  removeScreenFromList(index) {
+    screenIDFromList.removeAt(index);
+  }
+
   // this function to get menu name by id and add it to the screen
   String getMenuName(String menuID) {
     // Find the entry with the matching key
     final matchingEntry = selectFromMenus.entries.firstWhere(
       (entry) => entry.key == menuID,
+      orElse: () =>
+          const MapEntry('', 'Unknown'), // Handle cases where no match is found
+    );
+
+    return matchingEntry.value;
+  }
+
+   // this function to get screen name by id and add it to the screen
+  String getScreenName(String screenID) {
+    // Find the entry with the matching key
+    final matchingEntry = selectFromScreens.entries.firstWhere(
+      (entry) => entry.key == screenID,
       orElse: () =>
           const MapEntry('', 'Unknown'), // Handle cases where no match is found
     );
@@ -117,6 +140,7 @@ class MenusController extends GetxController {
     });
   }
 
+// this function is to add the sub menu to DB and to the tree
   addExistingSubMenuToMenu() async {
     try {
       addingExistingMenuProcess.value = true;
@@ -164,14 +188,70 @@ class MenusController extends GetxController {
     }
   }
 
+// this function is to add s screen to DB and to the tree
+   addExistingScreenToMenu() async {
+    try {
+      addingExistingScreenProcess.value = true;
+      var menu = await FirebaseFirestore.instance
+          .collection('menus ')
+          .where(FieldPath.documentId, isEqualTo: selectedMenuID.value)
+          .get();
+      if (menu.docs.isNotEmpty) {
+        var menuDoc = menu.docs.first;
+        var menuData = menuDoc.data();
+        var childrenList = List<String>.from(menuData['children'] ?? []);
+
+        List<String> finalChildrenList = [...childrenList, ...screenIDFromList];
+
+        // Update the selected menu's 'children' field
+        await menuDoc.reference.update({'children': finalChildrenList});
+
+        for (var child in screenIDFromList) {
+          var theSelectedMenu = await FirebaseFirestore.instance
+              .collection('screens')
+              .where(FieldPath.documentId, isEqualTo: child)
+              .get();
+
+          var selectedScreenData = theSelectedMenu.docs.first.data();
+
+          await addChildToNode(
+              roots,
+              selectedMenuName.value,
+              MyTreeNode(
+                parent: MyTreeNode(
+                    title: selectedMenuName.value, id: selectedMenuID.value),
+                title: getScreenName(child),
+                children: await buildMenus(selectedScreenData),
+                canRemove: true,
+                id: child,
+                isMenu: false,
+              ));
+        }
+
+        treeController.rebuild();
+      }
+      addingExistingScreenProcess.value = false;
+    } catch (e) {
+      addingExistingScreenProcess.value = false;
+    }
+  }
+
 // this function to get list of menus to select of them
-  listOfMenus() async {
+  listOfMenusAndScreen() async {
     try {
       var menus = await FirebaseFirestore.instance.collection('menus ').get();
+      var screens =
+          await FirebaseFirestore.instance.collection('screens').get();
 
       if (menus.docs.isNotEmpty) {
         for (var menu in menus.docs) {
-          selectFromMenus[menu.id] = menu.data()['name'];
+          selectFromMenus[menu.id] =
+              '${menu.data()['name']} (${menu.data()['description']})';
+        }
+      }
+      if (screens.docs.isNotEmpty) {
+        for (var screen in screens.docs) {
+          selectFromScreens[screen.id] = screen.data()['name'];
         }
       }
     } catch (e) {

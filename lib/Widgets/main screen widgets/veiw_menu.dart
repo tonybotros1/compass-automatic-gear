@@ -61,165 +61,300 @@ Widget viewMenu({
             ],
           ),
         ),
-        Obx(
-          () => Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                border: Border(
-                  right: BorderSide(color: Colors.grey),
-                ),
-              ),
-              child: controller.selectedMenuID.value != ''
-                  ? Stack(
-                      children: [
-                        ListView(
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: AutoSizedText(
-                                      maxLines: 2,
-                                      constraints: constraints,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                      ),
-                                      text:
-                                          '${controller.selectedMenuName.value}',
-                                    ),
+        menuSection(controller, constraints),
+        Obx(() {
+          return Expanded(
+            child: controller.selectedMenuID.value != ''
+                ? Stack(
+                    children: [
+                      ListView(
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey,
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                ),
-                                Form(
-                                  key: controller.formKeyForDropDownList,
-                                  child: dropDownValues(
-                                    menuIDFromList: controller.menuIDFromList,
-                                    labelText: 'Menus',
-                                    hintText: 'Select Menu',
-                                    menus: controller.selectFromMenus,
-                                    validate: true,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(20.0),
-                                  child: Wrap(
-                                    spacing:
-                                        10, // Horizontal spacing between items
-                                    runSpacing:
-                                        10, // Vertical spacing between rows
-                                    children: List.generate(
-                                        controller.menuIDFromList.length, (i) {
-                                      return Stack(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(15),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xffA6AEBF),
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: Text(
-                                              '${controller.getMenuName(controller.menuIDFromList[i])}',
-                                              style:
-                                                  const TextStyle(fontSize: 14),
-                                            ),
-                                          ),
-                                          Positioned(
-                                            top: 0,
-                                            right: 0,
-                                            child: InkWell(
-                                              onTap: () {
-                                                controller
-                                                    .removeMenuFromList(i);
-                                              },
-                                              child: const Icon(
-                                                Icons.remove_circle,
-                                                color: Colors.red,
-                                                size: 20,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    }),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Positioned(
-                          bottom: 20,
-                          right: 20,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              elevation: 5,
-                              minimumSize: const Size(100, 40),
-                            ),
-                            onPressed:
-                                controller.addingExistingMenuProcess.value ==
-                                        false
-                                    ? () async {
-                                        if (controller.menuIDFromList.isEmpty &&
-                                            !controller.formKeyForDropDownList
-                                                .currentState!
-                                                .validate()) {
-                                          // Do nothing: this ensures validation is triggered when required
-                                        } else {
-                                          await controller
-                                              .addExistingSubMenuToMenu();
-                                        }
-                                      }
-                                    : null,
-                            child: controller.addingExistingMenuProcess.value ==
-                                    false
-                                ? const Text('Add')
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
+                                  child: AutoSizedText(
+                                    maxLines: 2,
+                                    constraints: constraints,
+                                    style: const TextStyle(
                                       color: Colors.white,
-                                      strokeWidth: 2,
+                                      fontSize: 13,
                                     ),
+                                    text:
+                                        '${controller.selectedMenuName.value}',
                                   ),
+                                ),
+                              ),
+                              Form(
+                                key:
+                                    controller.formKeyForDropDownListForScreens,
+                                child: dropDownValues(
+                                  ids: controller.screenIDFromList,
+                                  labelText: 'Screens',
+                                  hintText: 'Select Screen',
+                                  menus: controller.selectFromScreens,
+                                  validate: true,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Wrap(
+                                  spacing:
+                                      10, // Horizontal spacing between items
+                                  runSpacing:
+                                      10, // Vertical spacing between rows
+                                  children: List.generate(
+                                      controller.screenIDFromList.length, (i) {
+                                    return Stack(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(15),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xffA6AEBF),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Text(
+                                            '${controller.getScreenName(controller.screenIDFromList[i])}',
+                                            style:
+                                                const TextStyle(fontSize: 14),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: InkWell(
+                                            onTap: () {
+                                              controller
+                                                  .removeScreenFromList(i);
+                                            },
+                                            child: const Icon(
+                                              Icons.remove_circle,
+                                              color: Colors.red,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                      Positioned(
+                        bottom: 20,
+                        right: 20,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            elevation: 5,
+                            minimumSize: const Size(100, 40),
                           ),
+                          onPressed: controller
+                                      .addingExistingScreenProcess.value ==
+                                  false
+                              ? () async {
+                                  if (controller.screenIDFromList.isEmpty &&
+                                      !controller.formKeyForDropDownListForScreens
+                                          .currentState!
+                                          .validate()) {
+                                    // Do nothing: this ensures validation is triggered when required
+                                  } else {
+                                    await controller.addExistingScreenToMenu();
+                                  }
+                                }
+                              : null,
+                          child: controller.addingExistingScreenProcess.value ==
+                                  false
+                              ? const Text('Add')
+                              : const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                ),
                         ),
-                      ],
-                    )
-                  : Center(
-                      child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(10)),
-                          child: const Text(
-                            'Select menu to start',
-                            style: TextStyle(color: Colors.white),
-                          )),
-                    ),
-            ),
-          ),
-        ),
-        const Expanded(
-          child: Column(
-            children: [],
-          ),
-        ),
+                      ),
+                    ],
+                  )
+                : Center(
+                    child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: const Text(
+                          'Select menu to start',
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  ),
+          );
+        })
       ],
+    ),
+  );
+}
+
+Obx menuSection(controller, BoxConstraints constraints) {
+  return Obx(
+    () => Expanded(
+      child: Container(
+        decoration: const BoxDecoration(
+          border: Border(
+            right: BorderSide(color: Colors.grey),
+          ),
+        ),
+        child: controller.selectedMenuID.value != ''
+            ? Stack(
+                children: [
+                  ListView(
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.grey,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: AutoSizedText(
+                                maxLines: 2,
+                                constraints: constraints,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                ),
+                                text: '${controller.selectedMenuName.value}',
+                              ),
+                            ),
+                          ),
+                          Form(
+                            key: controller.formKeyForDropDownListForMenus,
+                            child: dropDownValues(
+                              ids: controller.menuIDFromList,
+                              labelText: 'Menus',
+                              hintText: 'Select Menu',
+                              menus: controller.selectFromMenus,
+                              validate: true,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Wrap(
+                              spacing: 10, // Horizontal spacing between items
+                              runSpacing: 10, // Vertical spacing between rows
+                              children: List.generate(
+                                  controller.menuIDFromList.length, (i) {
+                                return Stack(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(15),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xffA6AEBF),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        '${controller.getMenuName(controller.menuIDFromList[i])}',
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 0,
+                                      right: 0,
+                                      child: InkWell(
+                                        onTap: () {
+                                          controller.removeMenuFromList(i);
+                                        },
+                                        child: const Icon(
+                                          Icons.remove_circle,
+                                          color: Colors.red,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        elevation: 5,
+                        minimumSize: const Size(100, 40),
+                      ),
+                      onPressed:
+                          controller.addingExistingMenuProcess.value == false
+                              ? () async {
+                                  if (controller.menuIDFromList.isEmpty &&
+                                      !controller.formKeyForDropDownListForMenus
+                                          .currentState!
+                                          .validate()) {
+                                    // Do nothing: this ensures validation is triggered when required
+                                  } else {
+                                    await controller.addExistingSubMenuToMenu();
+                                  }
+                                }
+                              : null,
+                      child: controller.addingExistingMenuProcess.value == false
+                          ? const Text('Add')
+                          : const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              )
+            : Center(
+                child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: const Text(
+                      'Select menu to start',
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ),
+      ),
     ),
   );
 }

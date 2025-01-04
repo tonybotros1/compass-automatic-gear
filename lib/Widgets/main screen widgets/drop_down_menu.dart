@@ -6,7 +6,7 @@ Padding dropDownValues({
   required String hintText,
   required Map menus,
   required bool validate,
-  required List menuIDFromList,
+  required List ids,
 }) {
   return Padding(
     padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -85,8 +85,8 @@ Padding dropDownValues({
         menus.entries.where((entry) {
           return entry.value == suggestion.toString();
         }).forEach((entry) {
-          if (!menuIDFromList.contains(entry.key)) {
-            menuIDFromList.add(entry.key);
+          if (!ids.contains(entry.key)) {
+            ids.add(entry.key);
           }
         });
 

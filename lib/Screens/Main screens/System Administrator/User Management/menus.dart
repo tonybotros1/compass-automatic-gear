@@ -310,7 +310,7 @@ ElevatedButton viewSection(controller, menuId, context, constraints) {
         ? () async {
             controller.menuIDFromList.clear();
             controller.setButtonLoading(menuId, true); // Start loading
-            await controller.listOfMenus();
+            await controller.listOfMenusAndScreen();
             await controller.getMenusScreens(menuId);
             controller.setButtonLoading(menuId, false); // Stop loading
             showDialog(
@@ -325,44 +325,16 @@ ElevatedButton viewSection(controller, menuId, context, constraints) {
                       context: context,
                     ),
                     actions: [
-                      // Padding(
-                      //   padding: const EdgeInsets.symmetric(vertical: 16),
-                      //   child: ElevatedButton(
-                      //     onPressed: controller.addingNewMenuProcess.value
-                      //         ? null
-                      //         : () {
-                      //             controller.updateScreen(menuId);
-                      //             if (controller.addingNewMenuProcess.value ==
-                      //                 false) {
-                      //               Get.back();
-                      //             }
-                      //           },
-                      //     style: ElevatedButton.styleFrom(
-                      //       backgroundColor: Colors.green,
-                      //       shape: RoundedRectangleBorder(
-                      //         borderRadius: BorderRadius.circular(5),
-                      //       ),
-                      //     ),
-                      //     child: controller.addingNewMenuProcess.value == false
-                      //         ? const Text(
-                      //             'Save',
-                      //             style: TextStyle(color: Colors.white),
-                      //           )
-                      //         : const Padding(
-                      //             padding: EdgeInsets.all(8.0),
-                      //             child: CircularProgressIndicator(
-                      //               color: Colors.white,
-                      //             ),
-                      //           ),
-                      //   ),
-                      // ),
+                      
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 23, vertical: 10),
                         child: ElevatedButton(
                             onPressed: () {
                               Get.back();
                             },
                             style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(100, 40),
                               backgroundColor: mainColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5),
