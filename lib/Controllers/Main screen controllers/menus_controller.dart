@@ -77,6 +77,21 @@ class MenusController extends GetxController {
   //   }
   // }
 
+  removeNodeFromTheTree(nodeID, parentID) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('menus ')
+          .doc(parentID)
+          .update({
+        'children': FieldValue.arrayRemove([nodeID])
+      });
+
+      removeNode(roots, nodeID);
+    } catch (e) {
+      print(e);
+    }
+  }
+
 // this function is to remove a menu from the list
   removeMenuFromList(index) {
     menuIDFromList.removeAt(index);
@@ -131,6 +146,8 @@ class MenusController extends GetxController {
               roots,
               selectedMenuName.value,
               MyTreeNode(
+                parent: MyTreeNode(
+                    title: selectedMenuName.value, id: selectedMenuID.value),
                 title: getMenuName(child),
                 children: await buildMenus(selectedMenuData),
                 canRemove: true,
@@ -243,6 +260,7 @@ class MenusController extends GetxController {
         removeNode(nodes[i].children, targetID);
       }
     }
+    treeController.rebuild();
   }
 
 // function to manage loading button

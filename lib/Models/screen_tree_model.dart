@@ -38,6 +38,7 @@
 
 class MyTreeNode {
   MyTreeNode({
+    this.parent,
     this.canRemove,
     this.id,
     this.isMenu,

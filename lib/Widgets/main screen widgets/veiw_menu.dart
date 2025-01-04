@@ -327,6 +327,10 @@ AnimatedTreeView<MyTreeNode> leftTree({
                                           child: const Text("OK"),
                                           onPressed: () async {
                                             Get.back();
+                                            await controller
+                                                .removeNodeFromTheTree(
+                                                    entry.node.id,
+                                                    entry.node.parent!.id);
                                           },
                                         ),
                                       ],
