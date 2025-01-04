@@ -10,8 +10,8 @@ class MenusController extends GetxController {
   // final RxList<DocumentSnapshot> allMenus = RxList<DocumentSnapshot>([]);
   late TextEditingController menuName =
       TextEditingController(); // new menu name
-  late TextEditingController menuNameFromList = TextEditingController();
-  RxString menuIDFromList = RxString('');
+  late TextEditingController description = TextEditingController();
+  RxList menuIDFromList = RxList([]);
 
   RxMap allMenus = RxMap();
   RxList menusSubMenusChildren = RxList([]);
@@ -26,7 +26,7 @@ class MenusController extends GetxController {
 
 // ========== test=================
   RxDouble containerWidth = RxDouble(300);
-  RxList rolesMenus = RxList([]);
+  // RxList rolesMenus = RxList([]);
   late TreeController<MyTreeNode> treeController;
   RxList<MyTreeNode> roots = <MyTreeNode>[].obs;
   RxBool isLoading = RxBool(true);
@@ -51,6 +51,57 @@ class MenusController extends GetxController {
     super.onInit();
   }
 
+  // Future<void> updateDescriptions() async {
+  //   try {
+  //     // Reference to the 'menus' collection
+  //     CollectionReference menus =
+  //         FirebaseFirestore.instance.collection('menus ');
+
+  //     // Fetch all documents in the collection
+  //     QuerySnapshot snapshot = await menus.get();
+
+  //     // Batch write to avoid multiple writes
+  //     WriteBatch batch = FirebaseFirestore.instance.batch();
+
+  //     // Iterate through documents and update the 'description' field
+  //     for (var doc in snapshot.docs) {
+  //       batch.update(
+  //           doc.reference, {'description': ''});
+  //     }
+
+  //     // Commit the batch
+  //     await batch.commit();
+  //     print("All documents updated with the 'description' field.");
+  //   } catch (e) {
+  //     print("Error updating descriptions: $e");
+  //   }
+  // }
+
+// this function is to remove a menu from the list
+  removeMenuFromList(index) {
+    menuIDFromList.removeAt(index);
+  }
+
+  // this function to get menu name by id and add it to the screen
+  String getMenuName(String menuID) {
+    // Find the entry with the matching key
+    final matchingEntry = selectFromMenus.entries.firstWhere(
+      (entry) => entry.key == menuID,
+      orElse: () =>
+          const MapEntry('', 'Unknown'), // Handle cases where no match is found
+    );
+
+    return matchingEntry.value;
+  }
+
+  // this function is to edit menu details like name and description
+  editMenu(menuID) async {
+    await FirebaseFirestore.instance.collection('menus ').doc(menuID).update({
+      'name': menuName.text,
+      'description': description.text,
+    });
+  }
+
   addExistingSubMenuToMenu() async {
     try {
       addingExistingMenuProcess.value = true;
@@ -63,29 +114,31 @@ class MenusController extends GetxController {
         var menuData = menuDoc.data();
         var childrenList = List<String>.from(menuData['children'] ?? []);
 
-        // Add the new menu ID to the children list
-        childrenList.add(menuIDFromList.value);
+        List<String> finalChildrenList = [...childrenList, ...menuIDFromList];
 
         // Update the selected menu's 'children' field
-        await menuDoc.reference.update({'children': childrenList});
+        await menuDoc.reference.update({'children': finalChildrenList});
 
-        var theSelectedMenu = await FirebaseFirestore.instance
-            .collection('menus ')
-            .where(FieldPath.documentId, isEqualTo: menuIDFromList.value)
-            .get();
+        for (var child in menuIDFromList) {
+          var theSelectedMenu = await FirebaseFirestore.instance
+              .collection('menus ')
+              .where(FieldPath.documentId, isEqualTo: child)
+              .get();
 
-        var selectedMenuData = theSelectedMenu.docs.first.data();
+          var selectedMenuData = theSelectedMenu.docs.first.data();
 
-        await addChildToNode(
-            roots,
-            selectedMenuName.value,
-            MyTreeNode(
-              title: menuNameFromList.text,
-              children: await buildMenus(selectedMenuData),
-              canDelete: true,
-              id: menuIDFromList.value,
-              isMenu: true,
-            ));
+          await addChildToNode(
+              roots,
+              selectedMenuName.value,
+              MyTreeNode(
+                title: getMenuName(child),
+                children: await buildMenus(selectedMenuData),
+                canRemove: true,
+                id: child,
+                isMenu: true,
+              ));
+        }
+
         treeController.rebuild();
       }
       addingExistingMenuProcess.value = false;
@@ -97,10 +150,7 @@ class MenusController extends GetxController {
 // this function to get list of menus to select of them
   listOfMenus() async {
     try {
-      var menus = await FirebaseFirestore.instance
-          .collection('menus ')
-          .where(FieldPath.documentId, whereNotIn: allMenus.keys)
-          .get();
+      var menus = await FirebaseFirestore.instance.collection('menus ').get();
 
       if (menus.docs.isNotEmpty) {
         for (var menu in menus.docs) {
@@ -113,45 +163,27 @@ class MenusController extends GetxController {
   }
 
 // this function is to delete a menu
-  deleteMenu() async {
+  Future<void> deleteMenuAndUpdateChildren(String menuId) async {
     try {
       deletingProcess.value = true;
-      var menuToDelete = FirebaseFirestore.instance
+      final firestore = FirebaseFirestore.instance;
+
+      await firestore.collection('menus ').doc(menuId).delete();
+
+      QuerySnapshot querySnapshot = await firestore
           .collection('menus ')
-          .doc(selectedMenuID.value);
+          .where('children', arrayContains: menuId)
+          .get();
 
-      var menuDetails = await menuToDelete.get();
+      WriteBatch batch = firestore.batch();
 
-      if (menuDetails.exists) {
-        // Get parent ID
-        var parentID = menuDetails.data()?['parent_id'];
-
-        if (parentID != null) {
-          // Fetch parent menu
-          var parentMenuSnapshot = await FirebaseFirestore.instance
-              .collection('menus ')
-              .where(FieldPath.documentId, isEqualTo: parentID)
-              .get();
-
-          if (parentMenuSnapshot.docs.isNotEmpty) {
-            // Get the list of children
-            var parentMenu = parentMenuSnapshot.docs.first;
-            List<dynamic> listOfChildren =
-                List<dynamic>.from(parentMenu.data()['children'] ?? []);
-
-            // Remove the selected menu ID
-            listOfChildren.removeWhere((id) => id == selectedMenuID.value);
-
-            // Update the parent menu document
-            await parentMenu.reference.update({'children': listOfChildren});
-            await menuToDelete.delete();
-            removeNode(roots, selectedMenuID.value);
-            selectedMenuID.value = '';
-            treeController.rebuild();
-            deletingProcess.value = false;
-          }
-        }
+      for (var doc in querySnapshot.docs) {
+        batch.update(doc.reference, {
+          'children': FieldValue.arrayRemove([menuId])
+        });
       }
+
+      await batch.commit();
       deletingProcess.value = false;
     } catch (e) {
       deletingProcess.value = false;
@@ -162,46 +194,13 @@ class MenusController extends GetxController {
   addNewMenu() async {
     try {
       addingNewMenuProcess.value = true;
-      // Adding a new menu
-      var newMenu = await FirebaseFirestore.instance.collection('menus ').add({
+
+      await FirebaseFirestore.instance.collection('menus ').add({
         'name': menuName.text,
+        'description': description.text,
         'added_date': DateTime.now().toString(),
         'children': [],
-        'parent_id': selectedMenuID.value,
       });
-
-      var newMenuID = newMenu.id;
-
-      await addChildToNode(
-          roots,
-          selectedMenuName.value,
-          MyTreeNode(
-            title: menuName.text,
-            children: [],
-            canDelete: true,
-            id: newMenuID,
-            isMenu: true,
-          ));
-      treeController.rebuild();
-
-      // Fetching the selected menu to update its 'children'
-      var menuSnapshot = await FirebaseFirestore.instance
-          .collection('menus ')
-          .where(FieldPath.documentId, isEqualTo: selectedMenuID.value)
-          .get();
-
-      if (menuSnapshot.docs.isNotEmpty) {
-        // Retrieve the current children list
-        var menuDoc = menuSnapshot.docs.first;
-        var menuData = menuDoc.data();
-        var childrenList = List<String>.from(menuData['children'] ?? []);
-
-        // Add the new menu ID to the children list
-        childrenList.add(newMenuID);
-
-        // Update the selected menu's 'children' field
-        await menuDoc.reference.update({'children': childrenList});
-      }
 
       addingNewMenuProcess.value = false;
     } catch (e) {
@@ -323,48 +322,22 @@ class MenusController extends GetxController {
 // Function to get main menus in the system
   getMenus() async {
     try {
-      rolesMenus.clear();
       allMenus.clear();
 
       FirebaseFirestore.instance
-          .collection('sys-roles')
+          .collection('menus ')
+          // .where(FieldPath.documentId, whereIn: rolesMenus)
+          .orderBy('name', descending: false)
           .snapshots()
-          .listen((roles) {
-        // Flatten the list of lists into a single list
-        rolesMenus.addAll(
-          roles.docs
-              .map((role) => role.data()['menuID'] ?? [])
-              .expand((menuID) => menuID is List ? menuID : [menuID])
-              .toList(),
-        );
-
-        // Ensure rolesMenus contains only unique, valid strings
-        rolesMenus.value = rolesMenus
-            .whereType<String>()
-            .where((id) => id.isNotEmpty)
-            .toSet()
-            .toList();
-
-        if (rolesMenus.isEmpty) {
-          isScreenLoading.value = false;
-          return;
+          .listen((menus) {
+        for (var menu in menus.docs) {
+          allMenus[menu.id] = {
+            'name': menu.data()['name'] ?? 'Unknown',
+            'added_date': menu.data()['added_date'],
+            'description': menu.data()['description'],
+          };
         }
-
-        FirebaseFirestore.instance
-            .collection('menus ')
-            .where(FieldPath.documentId, whereIn: rolesMenus)
-            .orderBy('name', descending: false)
-            .snapshots()
-            .listen((menus) {
-          for (var menu in menus.docs) {
-            allMenus[menu.id] = {
-              'name': menu.data()['name'] ?? 'Unknown',
-              'added_date': menu.data()['added_date'],
-            };
-          }
-          listOfMenus();
-          isScreenLoading.value = false;
-        });
+        isScreenLoading.value = false;
       });
     } catch (e) {
       isScreenLoading.value = false;
@@ -383,7 +356,7 @@ class MenusController extends GetxController {
       roots.value = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
         final children = await buildMenus(menuDoc.data());
         return MyTreeNode(
-          canDelete: false,
+          canRemove: false,
           id: menuDoc.id,
           title: menuDoc.data()['name'],
           children: children,
@@ -426,7 +399,7 @@ class MenusController extends GetxController {
     final menuNodes = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
       final children = await buildMenus(menuDoc.data());
       return MyTreeNode(
-        canDelete: true,
+        canRemove: true,
         id: menuDoc.id,
         title: menuDoc.data()['name'],
         children: children,
@@ -436,7 +409,7 @@ class MenusController extends GetxController {
 
     final screenNodes = screenSnapshot.docs.map((screenDoc) {
       return MyTreeNode(
-        canDelete: true,
+        canRemove: true,
         id: screenDoc.id,
         title: screenDoc.data()['name'],
         children: [],

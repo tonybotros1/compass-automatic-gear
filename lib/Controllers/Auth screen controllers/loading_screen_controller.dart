@@ -28,7 +28,6 @@ class LoadingScreenController extends GetxController {
       }
     } catch (e) {
       // Handle unexpected errors (e.g., navigation to login screen).
-      print("Error checking login status: $e");
       Get.offAllNamed('/loginScreen');
     }
   }

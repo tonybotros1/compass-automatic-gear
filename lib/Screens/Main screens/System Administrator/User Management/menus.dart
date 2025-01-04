@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/menus_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/add_new_menu_or_view.dart';
+import '../../../../Widgets/main screen widgets/add_or_edit_menu.dart';
+import '../../../../Widgets/main screen widgets/veiw_menu.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 
@@ -35,7 +37,7 @@ class Menus extends StatelessWidget {
                         controller: controller,
                         title: 'Search for menus',
                         buttonTitle: 'New Menu',
-                        // button: newMenuButton(context, constraints, controller),
+                        button: newMenuButton(context, constraints, controller),
                       );
                     },
                   ),
@@ -95,6 +97,7 @@ Widget buildCell(String content) {
 Widget tableOfMenus(
     {required constraints, required context, required controller}) {
   return DataTable(
+    columnSpacing: 5,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -111,6 +114,13 @@ Widget tableOfMenus(
       ),
       DataColumn(
         label: AutoSizedText(
+          maxLines: 2,
+          text: 'Description',
+          constraints: constraints,
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
           constraints: constraints,
           text: 'Creation Date',
         ),
@@ -119,7 +129,19 @@ Widget tableOfMenus(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Action',
+          text: '',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: '',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: '',
         ),
       ),
     ],
@@ -146,6 +168,9 @@ DataRow dataRowForTheTable(
     DataCell(Text(
       menuData['name'] ?? 'no name',
     )),
+    DataCell(Text(
+      menuData['description'] ?? 'no description',
+    )),
     DataCell(
       Text(
         menuData['added_date'] != null
@@ -153,9 +178,16 @@ DataRow dataRowForTheTable(
             : 'N/A',
       ),
     ),
-    DataCell(ElevatedButton(
+    DataCell(viewSection(controller, menuId, context, constraints)),
+    DataCell(editSection(controller, menuId, context, constraints, menuData)),
+    DataCell(deleteSection(controller, menuId, context, constraints)),
+  ]);
+}
+
+ElevatedButton deleteSection(controller, menuId, context, constraints) {
+  return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.red,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
@@ -163,59 +195,170 @@ DataRow dataRowForTheTable(
         elevation: 5,
         minimumSize: const Size(100, 40),
       ),
-      onPressed: controller.buttonLoadingStates[menuId] == null ||
-              controller.buttonLoadingStates[menuId] == false
-          ? () async {
-              controller.setButtonLoading(menuId, true); // Start loading
-              await controller.getMenusScreens(menuId);
-              controller.setButtonLoading(menuId, false); // Stop loading
-              showDialog(
+      onPressed: () {
+        showCupertinoDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return CupertinoAlertDialog(
+              title: const Text("Alert"),
+              content: const Text("The menu will be deleted permanently"),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text("Cancel"),
+                  onPressed: () {
+                    Get.back();
+                  },
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  isDefaultAction: true,
+                  child: const Text("OK"),
+                  onPressed: () async {
+                    await controller.deleteMenuAndUpdateChildren(menuId);
+                    controller.getMenus();
+                    Get.back();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: const Text("Delete"));
+}
+
+ElevatedButton editSection(controller, menuId, context, constraints, menuData) {
+  return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+        elevation: 5,
+        minimumSize: const Size(100, 40),
+      ),
+      onPressed: () {
+        showDialog(
+            context: context,
+            builder: (context) {
+              controller.menuName.text = menuData['name'];
+              controller.description.text = menuData['description'];
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: addOrEditMenu(
+                  controller: controller,
+                  constraints: constraints,
                   context: context,
-                  builder: (context) {
-                    controller.selectedMenuID.value = '';
-                    return AlertDialog(
-                      actionsPadding:
-                          const EdgeInsets.symmetric(horizontal: 20),
-                      content: addNewMenuOrView(
-                        controller: controller,
-                        constraints: constraints,
-                        context: context,
-                      ),
-                      actions: [
-                        // Padding(
-                        //   padding: const EdgeInsets.symmetric(vertical: 16),
-                        //   child: ElevatedButton(
-                        //     onPressed: controller.addingNewMenuProcess.value
-                        //         ? null
-                        //         : () {
-                        //             controller.updateScreen(menuId);
-                        //             if (controller.addingNewMenuProcess.value ==
-                        //                 false) {
-                        //               Get.back();
-                        //             }
-                        //           },
-                        //     style: ElevatedButton.styleFrom(
-                        //       backgroundColor: Colors.green,
-                        //       shape: RoundedRectangleBorder(
-                        //         borderRadius: BorderRadius.circular(5),
-                        //       ),
-                        //     ),
-                        //     child: controller.addingNewMenuProcess.value == false
-                        //         ? const Text(
-                        //             'Save',
-                        //             style: TextStyle(color: Colors.white),
-                        //           )
-                        //         : const Padding(
-                        //             padding: EdgeInsets.all(8.0),
-                        //             child: CircularProgressIndicator(
-                        //               color: Colors.white,
-                        //             ),
-                        //           ),
-                        //   ),
-                        // ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          await controller.editMenu(menuId);
+                          Get.back();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        child: const Text(
+                          'Save',
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: mainColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  ),
+                ],
+              );
+            });
+      },
+      child: const Text("Edit"));
+}
+
+ElevatedButton viewSection(controller, menuId, context, constraints) {
+  return ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.blue,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5),
+      ),
+      elevation: 5,
+      minimumSize: const Size(100, 40),
+    ),
+    onPressed: controller.buttonLoadingStates[menuId] == null ||
+            controller.buttonLoadingStates[menuId] == false
+        ? () async {
+            controller.menuIDFromList.clear();
+            controller.setButtonLoading(menuId, true); // Start loading
+            await controller.listOfMenus();
+            await controller.getMenusScreens(menuId);
+            controller.setButtonLoading(menuId, false); // Stop loading
+            showDialog(
+                context: context,
+                builder: (context) {
+                  controller.selectedMenuID.value = '';
+                  return AlertDialog(
+                    actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    content: viewMenu(
+                      controller: controller,
+                      constraints: constraints,
+                      context: context,
+                    ),
+                    actions: [
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(vertical: 16),
+                      //   child: ElevatedButton(
+                      //     onPressed: controller.addingNewMenuProcess.value
+                      //         ? null
+                      //         : () {
+                      //             controller.updateScreen(menuId);
+                      //             if (controller.addingNewMenuProcess.value ==
+                      //                 false) {
+                      //               Get.back();
+                      //             }
+                      //           },
+                      //     style: ElevatedButton.styleFrom(
+                      //       backgroundColor: Colors.green,
+                      //       shape: RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(5),
+                      //       ),
+                      //     ),
+                      //     child: controller.addingNewMenuProcess.value == false
+                      //         ? const Text(
+                      //             'Save',
+                      //             style: TextStyle(color: Colors.white),
+                      //           )
+                      //         : const Padding(
+                      //             padding: EdgeInsets.all(8.0),
+                      //             child: CircularProgressIndicator(
+                      //               color: Colors.white,
+                      //             ),
+                      //           ),
+                      //   ),
+                      // ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
                             onPressed: () {
                               Get.back();
                             },
@@ -225,124 +368,111 @@ DataRow dataRowForTheTable(
                                 borderRadius: BorderRadius.circular(5),
                               ),
                             ),
-                            child:
-                                controller.addingNewMenuProcess.value == false
-                                    ? const Text(
-                                        'Cancel',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                          ),
-                        ),
-                      ],
-                    );
-                  });
-            }
-          : null,
-      child: Obx(() {
-        bool isLoading = controller.buttonLoadingStates[menuId] ?? false;
-        return isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : const Text("View");
-      }),
-    )),
-  ]);
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.white),
+                            )),
+                      ),
+                    ],
+                  );
+                });
+          }
+        : null,
+    child: Obx(() {
+      bool isLoading = controller.buttonLoadingStates[menuId] ?? false;
+      return isLoading
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+          : const Text("View");
+    }),
+  );
 }
 
-// ElevatedButton newMenuButton(
-//     BuildContext context, BoxConstraints constraints, controller) {
-//   return ElevatedButton(
-//     onPressed: () {
-//       showDialog(
-//           context: context,
-//           builder: (context) {
-//             return AlertDialog(
-//               actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-//               content: addNewMenuOrView(
-//                 controller: controller,
-//                 constraints: constraints,
-//                 context: context,
-//               ),
-//               // actions: [
-//               //   GetX<MenusController>(
-//               //       builder: (controller) => Padding(
-//               //             padding: const EdgeInsets.symmetric(vertical: 16),
-//               //             child: ElevatedButton(
-//               //               onPressed: controller.addingNewMenuProcess.value
-//               //                   ? null
-//               //                   : () async {
-//               //                       await controller.addNewMenu();
-//               //                       if (controller.addingNewMenuProcess.value ==
-//               //                           false) {
-//               //                         Get.back();
-//               //                       }
-//               //                     },
-//               //               style: ElevatedButton.styleFrom(
-//               //                 backgroundColor: Colors.green,
-//               //                 shape: RoundedRectangleBorder(
-//               //                   borderRadius: BorderRadius.circular(5),
-//               //                 ),
-//               //               ),
-//               //               child:
-//               //                   controller.addingNewMenuProcess.value == false
-//               //                       ? const Text(
-//               //                           'Save',
-//               //                           style: TextStyle(color: Colors.white),
-//               //                         )
-//               //                       : const Padding(
-//               //                           padding: EdgeInsets.all(8.0),
-//               //                           child: CircularProgressIndicator(
-//               //                             color: Colors.white,
-//               //                           ),
-//               //                         ),
-//               //             ),
-//               //           )),
-//               //   ElevatedButton(
-//               //     onPressed: () {
-//               //       Get.back();
-//               //     },
-//               //     style: ElevatedButton.styleFrom(
-//               //       backgroundColor: mainColor,
-//               //       shape: RoundedRectangleBorder(
-//               //         borderRadius: BorderRadius.circular(5),
-//               //       ),
-//               //     ),
-//               //     child: controller.addingNewMenuProcess.value == false
-//               //         ? const Text(
-//               //             'Cancel',
-//               //             style: TextStyle(color: Colors.white),
-//               //           )
-//               //         : const Padding(
-//               //             padding: EdgeInsets.all(8.0),
-//               //             child: CircularProgressIndicator(
-//               //               color: Colors.white,
-//               //             ),
-//               //           ),
-//               //   ),
-//               // ],
-//             );
-//           });
-//     },
-//     style: ElevatedButton.styleFrom(
-//       backgroundColor: Colors.green,
-//       foregroundColor: Colors.white,
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(5),
-//       ),
-//       elevation: 5,
-//     ),
-//     child: const Text('New Screen'),
-//   );
-// }
+ElevatedButton newMenuButton(
+    BuildContext context, BoxConstraints constraints, controller) {
+  return ElevatedButton(
+    onPressed: () {
+      controller.menuName.clear();
+      controller.description.clear();
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+              content: addOrEditMenu(
+                controller: controller,
+                constraints: constraints,
+                context: context,
+              ),
+              actions: [
+                GetX<MenusController>(
+                    builder: (controller) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: ElevatedButton(
+                              onPressed: controller.addingNewMenuProcess.value
+                                  ? null
+                                  : () async {
+                                      await controller.addNewMenu();
+                                      if (controller
+                                              .addingNewMenuProcess.value ==
+                                          false) {
+                                        Get.back();
+                                      }
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(100, 40),
+                                backgroundColor: Colors.green,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                              child:
+                                  controller.addingNewMenuProcess.value == false
+                                      ? const Text(
+                                          'Save',
+                                          style: TextStyle(color: Colors.white),
+                                        )
+                                      : const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )),
+                        )),
+                ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: mainColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ],
+            );
+          });
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.green,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5),
+      ),
+      elevation: 5,
+    ),
+    child: const Text('New Menu'),
+  );
+}

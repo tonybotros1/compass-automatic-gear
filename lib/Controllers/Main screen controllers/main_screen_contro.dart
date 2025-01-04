@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/screen_tree_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../Screens/Main screens/System Administrator/User Management/menus.dart';
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
 import '../../consts.dart';
 
@@ -37,6 +38,8 @@ class MainScreenController extends GetxController {
             child: Users()); // Replace with your actual screen widget
       case '/functions':
         return const SizedBox(child: Functions());
+      case '/menus':
+        return const SizedBox(child: Menus());
       // Add more cases as needed
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
@@ -55,14 +58,15 @@ class MainScreenController extends GetxController {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String? action = prefs.getString('userId');
+      String? action = prefs.getString('userId');
       if (action == null || action == '') return;
 
       uid.value = action;
 
       // Fetch user roles
       final userSnapshot = await FirebaseFirestore.instance
-          .collection('sys-users').doc(uid.value) 
+          .collection('sys-users')
+          .doc(uid.value)
           .get();
 
       if (!userSnapshot.exists) return;

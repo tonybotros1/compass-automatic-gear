@@ -38,7 +38,7 @@
 
 class MyTreeNode {
   MyTreeNode({
-    this.canDelete,
+    this.canRemove,
     this.id,
     this.isMenu,
     this.routeName,
@@ -61,5 +61,5 @@ class MyTreeNode {
   bool isPressed;
   bool? isMenu;
   String? id;
-  bool? canDelete;
+  bool? canRemove;
 }
