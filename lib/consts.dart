@@ -64,6 +64,14 @@ var welcomButtonStyle = ElevatedButton.styleFrom(
   ),
   minimumSize: const Size(100, 40),
 );
+var logoutButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.red,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
 
 var addButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,

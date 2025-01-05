@@ -1,4 +1,5 @@
 import 'package:compass_automatic_gear/Responsive/responsive.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
@@ -6,6 +7,7 @@ import '../../Controllers/Main screen controllers/main_screen_contro.dart';
 import '../../Models/screen_tree_model.dart';
 import '../../Widgets/main screen widgets/expand_icon.dart';
 import '../../consts.dart';
+import '../../main.dart';
 
 class MainScreen extends StatelessWidget {
   MainScreen({super.key});
@@ -47,11 +49,51 @@ class MainScreen extends StatelessWidget {
                       ),
                       Padding(
                           padding: const EdgeInsets.only(right: 16),
-                          child: Obx(() => ElevatedButton(
-                              style: welcomButtonStyle,
-                              onPressed: () {},
-                              child: Text(
-                                  'Welcome ${mainScreenController.userName}'))))
+                          child: Obx(() => Row(
+                                children: [
+                                  ElevatedButton(
+                                      style: welcomButtonStyle,
+                                      onPressed: () {},
+                                      child: Text(
+                                          'Welcome ${mainScreenController.userName}')),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  ElevatedButton(
+                                      style: logoutButtonStyle,
+                                      onPressed: () async {
+                                        showCupertinoDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return CupertinoAlertDialog(
+                                              title: const Text("Alert"),
+                                              content: const Text(
+                                                  "Are you sure you want to logout?"),
+                                              actions: [
+                                                CupertinoDialogAction(
+                                                  child: const Text("Cancel"),
+                                                  onPressed: () {
+                                                    Get.back();
+                                                  },
+                                                ),
+                                                CupertinoDialogAction(
+                                                  isDestructiveAction: true,
+                                                  isDefaultAction: true,
+                                                  child: const Text("OK"),
+                                                  onPressed: () async {
+                                                    await globalPrefs
+                                                        ?.remove('userId');
+                                                    Get.offAllNamed('/');
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: const Text('Logout'))
+                                ],
+                              ))),
                     ],
                   ),
                 ),
