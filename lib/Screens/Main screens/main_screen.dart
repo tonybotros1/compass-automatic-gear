@@ -89,37 +89,30 @@ class MainScreen extends StatelessWidget {
                     'assets/logo2.png',
                     width: 90,
                   ),
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          mainScreenController.treeController.collapseAll();
-                        },
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        child: const Icon(
-                          color: Colors.grey,
-                          Icons.close_fullscreen_rounded,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      // InkWell(
-                      //   onTap: () {
-                      //     mainScreenController.getScreens();
-                      //   },
-                      //   splashColor: Colors.transparent,
-                      //   highlightColor: Colors.transparent,
-                      //   child: const Icon(
-                      //     color: Colors.grey,
-                      //     Icons.replay,
-                      //     size: 20,
-                      //   ),
-                      // ),
-                    ],
-                  )
+                  Obx(
+                    () => mainScreenController.isLoading.value == false
+                        ? InkWell(
+                            onTap: () {
+                              if (mainScreenController
+                                  .treeController.isTreeExpanded) {
+                                mainScreenController.treeController
+                                    .collapseAll();
+                              } else {
+                                mainScreenController.treeController.expandAll();
+                              }
+                            },
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            child: const Icon(
+                              color: Colors.grey,
+                              Icons.account_tree,
+                              size: 20,
+                            ),
+                          )
+                        : const SizedBox(
+                            width: 20,
+                          ),
+                  ),
                 ],
               ),
             ),

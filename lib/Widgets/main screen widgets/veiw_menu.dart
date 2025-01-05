@@ -168,6 +168,7 @@ Obx screenSection(controller, BoxConstraints constraints) {
                                   // Do nothing: this ensures validation is triggered when required
                                 } else {
                                   await controller.addExistingScreenToMenu();
+                                  controller.screenIDFromList.clear();
                                 }
                               }
                             : null,
@@ -305,6 +306,7 @@ Obx menuSection(controller, BoxConstraints constraints) {
                                     // Do nothing: this ensures validation is triggered when required
                                   } else {
                                     await controller.addExistingSubMenuToMenu();
+                                    controller.menuIDFromList.clear();
                                   }
                                 }
                               : null,

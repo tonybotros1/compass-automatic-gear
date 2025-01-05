@@ -198,9 +198,10 @@ Widget tableOfScreens(
         onSort: controller.onSort,
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
         label: AutoSizedText(
           constraints: constraints,
-          text: '',
+          text: 'Action',
         ),
       ),
     ],
@@ -239,53 +240,72 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
             : 'N/A',
       ),
     ),
-    DataCell(ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-          ),
-          elevation: 5,
-        ),
-        onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                controller.screenName.text = screenData['name'];
-                controller.route.text = screenData['routeName'];
+    DataCell(Align(
+      alignment: Alignment.center,
+      child: ElevatedButton(
+          style: viewButtonStyle,
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (context) {
+                  controller.screenName.text = screenData['name'];
+                  controller.route.text = screenData['routeName'];
 
-                return AlertDialog(
-                  actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                  content: addNewScreenOrView(
-                    controller: controller,
-                    constraints: constraints,
-                    context: context,
-                    screenName: controller.screenName,
-                    route: controller.route,
-                  ),
-                  actions: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: ElevatedButton(
-                        onPressed: controller.addingNewScreenProcess.value
-                            ? null
-                            : () {
-                                controller.updateScreen(screenId);
-                                if (controller.addingNewScreenProcess.value ==
-                                    false) {
-                                  Get.back();
-                                }
-                              },
+                  return AlertDialog(
+                    actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    content: addNewScreenOrView(
+                      controller: controller,
+                      constraints: constraints,
+                      context: context,
+                      screenName: controller.screenName,
+                      route: controller.route,
+                    ),
+                    actions: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: ElevatedButton(
+                          onPressed: controller.addingNewScreenProcess.value
+                              ? null
+                              : () {
+                                  controller.updateScreen(screenId);
+                                  if (controller.addingNewScreenProcess.value ==
+                                      false) {
+                                    Get.back();
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                          child:
+                              controller.addingNewScreenProcess.value == false
+                                  ? const Text(
+                                      'Save',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                        },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: mainColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5),
                           ),
                         ),
                         child: controller.addingNewScreenProcess.value == false
                             ? const Text(
-                                'Save',
+                                'Cancel',
                                 style: TextStyle(color: Colors.white),
                               )
                             : const Padding(
@@ -295,33 +315,11 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
                                 ),
                               ),
                       ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: mainColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: controller.addingNewScreenProcess.value == false
-                          ? const Text(
-                              'Cancel',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ],
-                );
-              });
-        },
-        child: const Text('View'))),
+                    ],
+                  );
+                });
+          },
+          child: const Text('View')),
+    )),
   ]);
 }

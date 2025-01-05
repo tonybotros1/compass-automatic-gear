@@ -117,7 +117,7 @@ Widget tableOfMenus(
       DataColumn(
         label: AutoSizedText(
           maxLines: 2,
-          text: 'Description',
+          text: 'Code',
           constraints: constraints,
         ),
       ),
@@ -129,10 +129,10 @@ Widget tableOfMenus(
         onSort: controller.onSort,
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.values[2],
+        headingRowAlignment: MainAxisAlignment.center,
         label: AutoSizedText(
           constraints: constraints,
-          text: '    Action',
+          text: '                Action',
         ),
       ),
     ],

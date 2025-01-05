@@ -23,8 +23,8 @@ Widget addOrEditMenu({
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: myTextFormField2(
-              labelText: 'Description',
-              hintText: 'Enter Description',
+              labelText: 'Code',
+              hintText: 'Enter Code',
               controller: controller.description,
               validate: false,
               obscureText: false,

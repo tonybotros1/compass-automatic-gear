@@ -92,12 +92,11 @@ class MenusController extends GetxController {
         'children': FieldValue.arrayRemove([nodeID])
       });
 
-      removeNode(roots, nodeID);
+      removeNode(roots, nodeID, parentID);
     } catch (e) {
       //
     }
   }
-  
 
 // this function is to remove a menu from the list
   removeMenuFromList(index) {
@@ -117,11 +116,13 @@ class MenusController extends GetxController {
       orElse: () =>
           const MapEntry('', 'Unknown'), // Handle cases where no match is found
     );
+    final menuName =
+        matchingEntry.value.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
 
-    return matchingEntry.value;
+    return menuName;
   }
 
-   // this function to get screen name by id and add it to the screen
+  // this function to get screen name by id and add it to the screen
   String getScreenName(String screenID) {
     // Find the entry with the matching key
     final matchingEntry = selectFromScreens.entries.firstWhere(
@@ -190,7 +191,7 @@ class MenusController extends GetxController {
   }
 
 // this function is to add s screen to DB and to the tree
-   addExistingScreenToMenu() async {
+  addExistingScreenToMenu() async {
     try {
       addingExistingScreenProcess.value = true;
       var menu = await FirebaseFirestore.instance
@@ -330,15 +331,16 @@ class MenusController extends GetxController {
   void removeNode(
     List<MyTreeNode> nodes, // The list of nodes to search
     String targetID, // The title of the node to remove
+    String parentID,
   ) {
     for (var i = 0; i < nodes.length; i++) {
-      if (nodes[i].id == targetID) {
+      if (nodes[i].id == targetID && nodes[i].parent!.id == parentID) {
         // Remove the node if the title matches
         nodes.removeAt(i);
         return; // Exit once the node is removed
       } else if (nodes[i].children.isNotEmpty) {
         // Recursively search in the children
-        removeNode(nodes[i].children, targetID);
+        removeNode(nodes[i].children, targetID, parentID);
       }
     }
     treeController.rebuild();
@@ -407,10 +409,15 @@ class MenusController extends GetxController {
       filteredMenus.assignAll(
         Map.fromEntries(
           allMenus.entries
-              .where((entry) => entry.value['name']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query.value))
+              .where((entry) =>
+                  entry.value['name']
+                      .toString()
+                      .toLowerCase()
+                      .contains(query.value) ||
+                  entry.value['description']
+                      .toString()
+                      .toLowerCase()
+                      .contains(query.value))
               .map((entry) => MapEntry(
                   entry.key as String, entry.value as Map<String, dynamic>)),
         ),
@@ -468,6 +475,7 @@ class MenusController extends GetxController {
         childrenProvider: (node) => node.children,
         parentProvider: (node) => node.parent,
       );
+      treeController.expandAll();
 
       isLoading.value = false;
     } catch (e) {
