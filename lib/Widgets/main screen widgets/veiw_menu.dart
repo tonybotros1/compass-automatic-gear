@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
 
+import '../../consts.dart';
 import 'drop_down_menu.dart';
 
 Widget viewMenu({
@@ -156,15 +157,7 @@ Obx screenSection(controller, BoxConstraints constraints) {
                   bottom: 20,
                   right: 20,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      elevation: 5,
-                      minimumSize: const Size(100, 40),
-                    ),
+                    style: addButtonStyle,
                     onPressed:
                         controller.addingExistingScreenProcess.value == false
                             ? () async {
@@ -301,15 +294,7 @@ Obx menuSection(controller, BoxConstraints constraints) {
                     bottom: 20,
                     right: 20,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        elevation: 5,
-                        minimumSize: const Size(100, 40),
-                      ),
+                      style: addButtonStyle,
                       onPressed:
                           controller.addingExistingMenuProcess.value == false
                               ? () async {

@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 var fontStyleForAppBar = TextStyle(
     fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
 var fontStyleForTableHeader = TextStyle(
-    color: Colors.grey[700], fontWeight: FontWeight.bold, fontSize: 16);
+    color: Colors.grey[700], fontWeight: FontWeight.bold, fontSize: 12);
 var iconStyleForTableHeaderDown =
     Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade700);
 var iconStyleForTableHeaderUp =
@@ -19,6 +19,60 @@ var userNameStyle = const TextStyle(
     decorationColor: Colors.blue);
 var footerTextStylr = TextStyle(
     color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 12);
+
+var newButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.green,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var viewButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.blue,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var editButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.deepPurple,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var deleteButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.red,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var welcomButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.blue,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var addButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.green,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
 
 var screenPadding = const EdgeInsets.only(
   left: 14,

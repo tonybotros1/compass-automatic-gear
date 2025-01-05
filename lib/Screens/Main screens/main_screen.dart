@@ -48,14 +48,7 @@ class MainScreen extends StatelessWidget {
                       Padding(
                           padding: const EdgeInsets.only(right: 16),
                           child: Obx(() => ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                elevation: 5,
-                              ),
+                              style: welcomButtonStyle,
                               onPressed: () {},
                               child: Text(
                                   'Welcome ${mainScreenController.userName}'))))
@@ -184,7 +177,7 @@ class MainScreen extends StatelessWidget {
                         style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 10),
+                            fontSize: 12),
                       ),
                     ),
                     entry.node.children.isNotEmpty

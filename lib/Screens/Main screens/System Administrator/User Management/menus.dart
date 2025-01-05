@@ -97,6 +97,8 @@ Widget buildCell(String content) {
 Widget tableOfMenus(
     {required constraints, required context, required controller}) {
   return DataTable(
+    dataRowMaxHeight: 40,
+    dataRowMinHeight: 30,
     columnSpacing: 5,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
@@ -127,21 +129,10 @@ Widget tableOfMenus(
         onSort: controller.onSort,
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.values[2],
         label: AutoSizedText(
           constraints: constraints,
-          text: '',
-        ),
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: '',
-        ),
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: '',
+          text: '    Action',
         ),
       ),
     ],
@@ -178,23 +169,24 @@ DataRow dataRowForTheTable(
             : 'N/A',
       ),
     ),
-    DataCell(viewSection(controller, menuId, context, constraints)),
-    DataCell(editSection(controller, menuId, context, constraints, menuData)),
-    DataCell(deleteSection(controller, menuId, context, constraints)),
+    DataCell(Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        viewSection(controller, menuId, context, constraints),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+          child:
+              editSection(controller, menuId, context, constraints, menuData),
+        ),
+        deleteSection(controller, menuId, context, constraints)
+      ],
+    )),
   ]);
 }
 
 ElevatedButton deleteSection(controller, menuId, context, constraints) {
   return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-        ),
-        elevation: 5,
-        minimumSize: const Size(100, 40),
-      ),
+      style: deleteButtonStyle,
       onPressed: () {
         showCupertinoDialog(
           context: context,
@@ -229,15 +221,7 @@ ElevatedButton deleteSection(controller, menuId, context, constraints) {
 
 ElevatedButton editSection(controller, menuId, context, constraints, menuData) {
   return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-        ),
-        elevation: 5,
-        minimumSize: const Size(100, 40),
-      ),
+      style: editButtonStyle,
       onPressed: () {
         showDialog(
             context: context,
@@ -296,15 +280,7 @@ ElevatedButton editSection(controller, menuId, context, constraints, menuData) {
 
 ElevatedButton viewSection(controller, menuId, context, constraints) {
   return ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.blue,
-      foregroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
-      ),
-      elevation: 5,
-      minimumSize: const Size(100, 40),
-    ),
+    style: viewButtonStyle,
     onPressed: controller.buttonLoadingStates[menuId] == null ||
             controller.buttonLoadingStates[menuId] == false
         ? () async {
@@ -325,7 +301,6 @@ ElevatedButton viewSection(controller, menuId, context, constraints) {
                       context: context,
                     ),
                     actions: [
-                      
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 23, vertical: 10),
@@ -437,14 +412,7 @@ ElevatedButton newMenuButton(
             );
           });
     },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green,
-      foregroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
-      ),
-      elevation: 5,
-    ),
+    style: newButtonStyle,
     child: const Text('New Menu'),
   );
 }
