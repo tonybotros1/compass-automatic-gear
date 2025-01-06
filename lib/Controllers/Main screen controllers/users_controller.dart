@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
-import 'package:crypto/crypto.dart'; // For password hashing
+import 'package:crypto/crypto.dart';
+
+import '../../consts.dart'; // For password hashing
 
 class UsersController extends GetxController {
   late TextEditingController email = TextEditingController();
@@ -160,17 +162,7 @@ class UsersController extends GetxController {
     }
   }
 
-  // this function is to show a snackbae with the state of the login process:
-  void showSnackBar(title, body) {
-    Get.snackbar(
-      title,
-      body,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 3),
-      backgroundColor: Colors.grey,
-      colorText: Colors.white,
-    );
-  }
+  
 
 // this function is to add new user
   // register() async {

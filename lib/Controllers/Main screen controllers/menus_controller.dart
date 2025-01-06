@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../Models/screen_tree_model.dart';
+import '../../consts.dart';
 
 class MenusController extends GetxController {
   // final RxList<DocumentSnapshot> allMenus = RxList<DocumentSnapshot>([]);
@@ -146,48 +147,97 @@ class MenusController extends GetxController {
   addExistingSubMenuToMenu() async {
     try {
       addingExistingMenuProcess.value = true;
+
+      // Fetch the selected menu
       var menu = await FirebaseFirestore.instance
           .collection('menus ')
-          .where(FieldPath.documentId, isEqualTo: selectedMenuID.value)
+          .doc(selectedMenuID.value)
           .get();
-      if (menu.docs.isNotEmpty) {
-        var menuDoc = menu.docs.first;
-        var menuData = menuDoc.data();
-        var childrenList = List<String>.from(menuData['children'] ?? []);
 
+      if (menu.exists) {
+        var menuData = menu.data();
+        var childrenList = List<String>.from(menuData?['children'] ?? []);
+
+        // Check for loop prevention
+        for (var childId in menuIDFromList) {
+          if (await isLoopDetected(childId, selectedMenuID.value)) {
+            // Log or show error message for the user
+            showSnackBar('Pleasr note', 'Cannot add! it creates a loop!');
+            addingExistingMenuProcess.value = false;
+            return; // Stop the process
+          }
+        }
+
+        // Update the children list
         List<String> finalChildrenList = [...childrenList, ...menuIDFromList];
 
         // Update the selected menu's 'children' field
-        await menuDoc.reference.update({'children': finalChildrenList});
+        await FirebaseFirestore.instance
+            .collection('menus ')
+            .doc(selectedMenuID.value)
+            .update({'children': finalChildrenList});
 
+        // Add the new nodes to the tree
         for (var child in menuIDFromList) {
           var theSelectedMenu = await FirebaseFirestore.instance
               .collection('menus ')
-              .where(FieldPath.documentId, isEqualTo: child)
+              .doc(child)
               .get();
 
-          var selectedMenuData = theSelectedMenu.docs.first.data();
+          if (theSelectedMenu.exists) {
+            Map<String, dynamic>? selectedMenuData = theSelectedMenu.data();
 
-          await addChildToNode(
+            await addChildToNode(
               roots,
               selectedMenuName.value,
               MyTreeNode(
                 parent: MyTreeNode(
                     title: selectedMenuName.value, id: selectedMenuID.value),
                 title: getMenuName(child),
-                children: await buildMenus(selectedMenuData),
+                children: await buildMenus(selectedMenuData!),
                 canRemove: true,
                 id: child,
                 isMenu: true,
-              ));
+              ),
+            );
+          }
         }
 
         treeController.rebuild();
       }
+
       addingExistingMenuProcess.value = false;
     } catch (e) {
       addingExistingMenuProcess.value = false;
+      print(e.toString());
     }
+  }
+
+  /// Helper Function to Check for Loop Detection
+  Future<bool> isLoopDetected(String childId, String targetMenuId) async {
+    // Base case: if the child is the target, a loop would be created
+    if (childId == targetMenuId) {
+      return true;
+    }
+
+    // Fetch the child menu data
+    var menu = await FirebaseFirestore.instance
+        .collection('menus ')
+        .doc(childId)
+        .get();
+
+    if (!menu.exists) return false;
+
+    var children = List<String>.from(menu.data()?['children'] ?? []);
+
+    // Recursively check if any child of this menu contains the target
+    for (var subChildId in children) {
+      if (await isLoopDetected(subChildId, targetMenuId)) {
+        return true; // Loop detected in the hierarchy
+      }
+    }
+
+    return false; // No loop detected
   }
 
 // this function is to add s screen to DB and to the tree

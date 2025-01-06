@@ -115,3 +115,16 @@ Widget verticalSpace({int space = 20}) {
     height: Get.height / space,
   );
 }
+
+// snack bar
+ void showSnackBar(title, body) {
+    Get.snackbar(
+      title,
+      body,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 3),
+      backgroundColor: Colors.grey,
+      colorText: Colors.white,
+    );
+  }
+

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../consts.dart';
+
 class FunctionsController extends GetxController {
   late TextEditingController screenName = TextEditingController();
   late TextEditingController route = TextEditingController();
@@ -122,17 +124,7 @@ class FunctionsController extends GetxController {
     }
   }
 
-  // this function is to show a snackbae with the state of the login process:
-  void showSnackBar(title, body) {
-    Get.snackbar(
-      title,
-      body,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 3),
-      backgroundColor: Colors.grey,
-      colorText: Colors.white,
-    );
-  }
+ 
 
 // this function is to add new screen to the system
   addNewScreen() {

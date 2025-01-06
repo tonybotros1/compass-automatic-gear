@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:crypto/crypto.dart'; // For password hashing
+import 'package:crypto/crypto.dart';
+
+import '../../consts.dart'; // For password hashing
 
 class LoginScreenController extends GetxController {
   late TextEditingController email = TextEditingController();
@@ -30,17 +32,7 @@ class LoginScreenController extends GetxController {
     }
   }
 
-// this function is to show a snackbae with the state of the login process:
-  void showSnackBar(title, body) {
-    Get.snackbar(
-      title,
-      body,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 3),
-      backgroundColor: Colors.grey,
-      colorText: Colors.white,
-    );
-  }
+
 
 
   saveUserIdInSharedPref() async {
