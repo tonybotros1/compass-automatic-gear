@@ -21,6 +21,7 @@ class ResponsibilitiesController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool loadingMenus = RxBool(false);
   RxBool deleteingResponsibility = RxBool(false);
+  RxBool viewLoading = RxBool(false);
 
   @override
   void onInit() {
@@ -30,6 +31,24 @@ class ResponsibilitiesController extends GetxController {
     });
 
     super.onInit();
+  }
+
+// this function is to update the role details
+  updateResponsibility(roleID) async {
+    addingNewResponsibilityProcess.value = true;
+    try {
+      await FirebaseFirestore.instance
+          .collection('sys-roles')
+          .doc(roleID)
+          .update({
+        'role_name': responsibilityName.text,
+        'menuID': menuIDFromList.value,
+      });
+      addingNewResponsibilityProcess.value = false;
+    } catch (e) {
+      addingNewResponsibilityProcess.value = false;
+      print(e);
+    }
   }
 
   // this function is to sort data in table
@@ -146,7 +165,6 @@ class ResponsibilitiesController extends GetxController {
   // this function to get list of menus to select of them
   listOfMenus() async {
     try {
-      loadingMenus.value = true;
       var menus = await FirebaseFirestore.instance.collection('menus ').get();
 
       if (menus.docs.isNotEmpty) {
@@ -155,7 +173,6 @@ class ResponsibilitiesController extends GetxController {
               '${menu.data()['name']} (${menu.data()['description']})';
         }
       }
-      loadingMenus.value = false;
     } catch (e) {
 //
     }
@@ -163,19 +180,28 @@ class ResponsibilitiesController extends GetxController {
 
   // this function is to get menu details
   Future<Map> getMenuDetails(menuID) async {
-    var menu = await FirebaseFirestore.instance
-        .collection('menus ')
-        .where(FieldPath.documentId, isEqualTo: menuID)
-        .get();
+    try {
+      var menu = await FirebaseFirestore.instance
+          .collection('menus ')
+          .where(FieldPath.documentId, isEqualTo: menuID)
+          .get();
 
-    var id = menu.docs.first.id;
-    var details = menu.docs.first.data();
+      var id = menu.docs.first.id;
+      var details = menu.docs.first.data();
 
-    return {
-      'id': id,
-      'name': details['name'],
-      'description': details['description']
-    };
+      return {
+        'id': id,
+        'name': details['name'],
+        'description': details['description']
+      };
+    } catch (e) {
+      print(e);
+      return {
+        'id': '',
+        'name': '',
+        'description': ''
+      };
+    }
   }
 
   // this function is to filter the search results for web

@@ -83,7 +83,9 @@ ElevatedButton newResponsibilityButton(context, constraints, controller) {
   return ElevatedButton(
       onPressed: controller.loadingMenus.value == false
           ? () async {
+              controller.loadingMenus.value = true;
               await controller.listOfMenus();
+              controller.loadingMenus.value = false;
               showDialog(
                   context: context,
                   builder: (context) {
@@ -264,123 +266,164 @@ DataRow dataRowForTheTable(
         children: [
           Padding(
             padding: const EdgeInsets.only(right: 5),
-            child: viewSection(),
+            child: viewSection(
+                constraints: constraints,
+                context: context,
+                controller: controller,
+                roleData: roleData,
+                roleID: roleId),
           ),
-          ElevatedButton(
-              style: deleteButtonStyle,
-              onPressed: () {
-                showCupertinoDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return CupertinoAlertDialog(
-                      title: const Text("Alert"),
-                      content:
-                          const Text("The menu will be deleted permanently"),
-                      actions: [
-                        CupertinoDialogAction(
-                          child: const Text("Cancel"),
-                          onPressed: () {
-                            Get.back();
-                          },
-                        ),
-                        CupertinoDialogAction(
-                          isDestructiveAction: true,
-                          isDefaultAction: true,
-                          child: const Text("OK"),
-                          onPressed: () async {
-                            await controller.deleteResponsibility(roleId);
-                            Get.back();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              child: const Text('Delete'))
+          deleteSection(context, controller, roleId)
         ],
       ),
     )),
   ]);
 }
 
-ElevatedButton viewSection() {
+ElevatedButton deleteSection(context, controller, roleId) {
   return ElevatedButton(
-      style: viewButtonStyle,
+      style: deleteButtonStyle,
       onPressed: () {
-        // showDialog(
-        //     context: context,
-        //     builder: (context) {
-        //       controller.screenName.text = screenData['name'];
-        //       controller.route.text = screenData['routeName'];
-
-        //       return AlertDialog(
-        //         actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-        //         content: addNewScreenOrView(
-        //           controller: controller,
-        //           constraints: constraints,
-        //           context: context,
-        //           screenName: controller.screenName,
-        //           route: controller.route,
-        //         ),
-        //         actions: [
-        //           Padding(
-        //             padding: const EdgeInsets.symmetric(vertical: 16),
-        //             child: ElevatedButton(
-        //               onPressed: controller.addingNewResponsibilityProcess.value
-        //                   ? null
-        //                   : () {
-        //                       controller.updateScreen(screenId);
-        //                       if (controller.addingNewResponsibilityProcess.value ==
-        //                           false) {
-        //                         Get.back();
-        //                       }
-        //                     },
-        //               style: ElevatedButton.styleFrom(
-        //                 backgroundColor: Colors.green,
-        //                 shape: RoundedRectangleBorder(
-        //                   borderRadius: BorderRadius.circular(5),
-        //                 ),
-        //               ),
-        //               child:
-        //                   controller.addingNewResponsibilityProcess.value == false
-        //                       ? const Text(
-        //                           'Save',
-        //                           style: TextStyle(color: Colors.white),
-        //                         )
-        //                       : const Padding(
-        //                           padding: EdgeInsets.all(8.0),
-        //                           child: CircularProgressIndicator(
-        //                             color: Colors.white,
-        //                           ),
-        //                         ),
-        //             ),
-        //           ),
-        //           ElevatedButton(
-        //             onPressed: () {
-        //               Get.back();
-        //             },
-        //             style: ElevatedButton.styleFrom(
-        //               backgroundColor: mainColor,
-        //               shape: RoundedRectangleBorder(
-        //                 borderRadius: BorderRadius.circular(5),
-        //               ),
-        //             ),
-        //             child: controller.addingNewResponsibilityProcess.value == false
-        //                 ? const Text(
-        //                     'Cancel',
-        //                     style: TextStyle(color: Colors.white),
-        //                   )
-        //                 : const Padding(
-        //                     padding: EdgeInsets.all(8.0),
-        //                     child: CircularProgressIndicator(
-        //                       color: Colors.white,
-        //                     ),
-        //                   ),
-        //           ),
-        //         ],
-        //       );
-        //     });
+        showCupertinoDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return CupertinoAlertDialog(
+              title: const Text("Alert"),
+              content: const Text("The menu will be deleted permanently"),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text("Cancel"),
+                  onPressed: () {
+                    Get.back();
+                  },
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  isDefaultAction: true,
+                  child: const Text("OK"),
+                  onPressed: () async {
+                    await controller.deleteResponsibility(roleId);
+                    Get.back();
+                  },
+                ),
+              ],
+            );
+          },
+        );
       },
-      child: const Text('View'));
+      child: const Text('Delete'));
+}
+
+Widget viewSection(
+    {required context,
+    required controller,
+    required roleData,
+    required constraints,
+    required roleID}) {
+  return GetX<ResponsibilitiesController>(builder: (controller) {
+    return ElevatedButton(
+        style: viewButtonStyle,
+        onPressed: controller.viewLoading.value == false
+            ? () async {
+                await controller.listOfMenus();
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      controller.responsibilityName.text =
+                          roleData['role_name'];
+
+                      controller.menuName.text = roleData['menu']['name'];
+                      controller.menuIDFromList.value = roleData['menu']['id'];
+
+                      // print(controller.menuName.text);
+                      return AlertDialog(
+                        actionsPadding:
+                            const EdgeInsets.symmetric(horizontal: 20),
+                        content: addNewResponsibilityOrView(
+                          controller: controller,
+                          constraints: constraints,
+                          context: context,
+                          responsibilityName: controller.responsibilityName,
+                          menuName: controller.menuName,
+                        ),
+                        actions: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: GetX<ResponsibilitiesController>(
+                                builder: (controller) {
+                              return ElevatedButton(
+                                onPressed: controller
+                                        .addingNewResponsibilityProcess.value
+                                    ? null
+                                    : () {
+                                        controller.updateResponsibility(roleID);
+                                        if (controller
+                                                .addingNewResponsibilityProcess
+                                                .value ==
+                                            false) {
+                                          Get.back();
+                                        }
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                ),
+                                child: controller.addingNewResponsibilityProcess
+                                            .value ==
+                                        false
+                                    ? const Text(
+                                        'Save',
+                                        style: TextStyle(color: Colors.white),
+                                      )
+                                    : const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                              );
+                            }),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Get.back();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: mainColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            child: controller
+                                        .addingNewResponsibilityProcess.value ==
+                                    false
+                                ? const Text(
+                                    'Cancel',
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                : const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      );
+                    });
+              }
+            : null,
+        child: controller.viewLoading.value == false
+            ? const Text('View')
+            : const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              ));
+  });
 }
