@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/screen_tree_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../Screens/Main screens/System Administrator/User Management/menus.dart';
+import '../../Screens/Main screens/System Administrator/User Management/responsibilities.dart';
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
 import '../../consts.dart';
 
@@ -15,7 +16,7 @@ class MainScreenController extends GetxController {
   RxBool isLoading = RxBool(true);
   RxString uid = RxString('');
   RxList userRoles = RxList([]);
-  RxList roleMenus = RxList([]);
+  RxString roleMenus = RxString('');
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
   Rx<Widget> selectedScreen = const SizedBox().obs;
@@ -34,12 +35,13 @@ class MainScreenController extends GetxController {
   Widget getScreenFromRoute(String? routeName) {
     switch (routeName) {
       case '/users':
-        return SizedBox(
-            child: Users()); // Replace with your actual screen widget
+        return SizedBox(child: Users());
       case '/functions':
         return const SizedBox(child: Functions());
       case '/menus':
         return const SizedBox(child: Menus());
+      case '/responsibilities':
+        return const SizedBox(child: Responsibilities());
       // Add more cases as needed
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
@@ -80,12 +82,12 @@ class MainScreenController extends GetxController {
           .where(FieldPath.documentId, whereIn: userRoles)
           .get();
 
-      roleMenus.assignAll(roleSnapshot.docs.first.data()['menuID']);
+      roleMenus.value = roleSnapshot.docs.first.data()['menuID'];
 
       // Build tree structure
       final menuSnapshot = await FirebaseFirestore.instance
           .collection('menus ')
-          .where(FieldPath.documentId, whereIn: roleMenus)
+          .where(FieldPath.documentId, isEqualTo: roleMenus.value)
           .get();
 
       final roots = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
@@ -105,6 +107,7 @@ class MainScreenController extends GetxController {
 
       isLoading.value = false;
     } catch (e) {
+      print(e);
       errorLoading.value = true;
       isLoading.value = false;
       // print(e);
