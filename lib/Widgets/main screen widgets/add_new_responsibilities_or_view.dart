@@ -12,7 +12,7 @@ Widget addNewResponsibilityOrView({
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
-    height: 150,
+    height: 170,
     child: ListView(
       children: [
         Padding(

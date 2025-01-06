@@ -19,12 +19,16 @@ class ResponsibilitiesController extends GetxController {
   RxBool isScreenLoding = RxBool(true);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
+  RxBool loadingMenus = RxBool(false);
+  RxBool deleteingResponsibility = RxBool(false);
+
   @override
   void onInit() {
     getResponsibilities();
     search.value.addListener(() {
       filterResponsibilities();
     });
+
     super.onInit();
   }
 
@@ -76,6 +80,31 @@ class ResponsibilitiesController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
+  deleteResponsibility(resID) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+
+      await firestore.collection('sys-roles').doc(resID).delete();
+      var users = await FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('roles', arrayContains: resID)
+          .get();
+
+      WriteBatch batch = firestore.batch();
+
+      for (var doc in users.docs) {
+        batch.update(doc.reference, {
+          'roles': FieldValue.arrayRemove([resID])
+        });
+      }
+      await batch.commit();
+      await getResponsibilities();
+      deleteingResponsibility.value = false;
+    } catch (e) {
+      deleteingResponsibility.value = false;
+    }
+  }
+
   addNewResponsibility() {
     try {
       if (menuIDFromList.isEmpty) {
@@ -95,7 +124,7 @@ class ResponsibilitiesController extends GetxController {
 // this functions is to get the Responsibilities in system and its details
   getResponsibilities() {
     try {
-      allResponsibilities.cast();
+      allResponsibilities.clear();
       FirebaseFirestore.instance
           .collection('sys-roles')
           .snapshots()
@@ -107,7 +136,6 @@ class ResponsibilitiesController extends GetxController {
             'added_date': role['added_date']
           };
         }
-        await listOfMenus();
         isScreenLoding.value = false;
       });
     } catch (e) {
@@ -118,6 +146,7 @@ class ResponsibilitiesController extends GetxController {
   // this function to get list of menus to select of them
   listOfMenus() async {
     try {
+      loadingMenus.value = true;
       var menus = await FirebaseFirestore.instance.collection('menus ').get();
 
       if (menus.docs.isNotEmpty) {
@@ -126,6 +155,7 @@ class ResponsibilitiesController extends GetxController {
               '${menu.data()['name']} (${menu.data()['description']})';
         }
       }
+      loadingMenus.value = false;
     } catch (e) {
 //
     }
