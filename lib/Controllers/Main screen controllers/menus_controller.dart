@@ -209,7 +209,6 @@ class MenusController extends GetxController {
       addingExistingMenuProcess.value = false;
     } catch (e) {
       addingExistingMenuProcess.value = false;
-      print(e.toString());
     }
   }
 

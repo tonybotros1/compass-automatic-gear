@@ -193,7 +193,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Added Date',
+          text: 'Creation Date',
         ),
         onSort: controller.onSort,
       ),

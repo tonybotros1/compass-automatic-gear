@@ -1,18 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
+import '../Auth screens widgets/register widgets/my_text_form_field.dart';
+
+Widget addNewResponsibilityOrView({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required controller,
+  TextEditingController? responsibilityName,
+  TextEditingController? menuName,
+}) {
+  return SizedBox(
+    width: constraints.maxWidth / 2.5,
+    height: 150,
+    child: ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: myTextFormField(
+            constraints: constraints,
+            obscureText: false,
+            controller: responsibilityName ?? controller.responsibilityName,
+            labelText: 'Responsibility Name',
+            hintText: 'Enter Responsibility name',
+            keyboardType: TextInputType.name,
+            validate: true,
+          ),
+        ),
+        dropDownValues(
+          textController: menuName,
+          labelText: 'Menus',
+          hintText: 'Select Menu',
+          menus: controller.selectFromMenus,
+          validate: true,
+          controller: controller,
+        ),
+      ],
+    ),
+  );
+}
+
 Padding dropDownValues({
   required String labelText,
   required String hintText,
   required Map menus,
   required bool validate,
-  required List ids,
   TextEditingController? textController,
-  controller,
+  required controller,
 }) {
   return Padding(
     padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
     child: TypeAheadField(
+      controller: textController,
       builder: (context, textEditingController, focusNode) => TextFormField(
         validator: validate
             ? (value) {
@@ -84,12 +123,11 @@ Padding dropDownValues({
         );
       },
       onSelected: (suggestion) {
+        textController!.text = suggestion.toString();
         menus.entries.where((entry) {
           return entry.value == suggestion.toString();
         }).forEach((entry) {
-          if (!ids.contains(entry.key)) {
-            ids.add(entry.key);
-          }
+          controller.menuIDFromList.value = entry.key;
         });
       },
       errorBuilder: (context, error) {

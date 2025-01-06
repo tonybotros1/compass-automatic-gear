@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../consts.dart';
 
-class FunctionsController extends GetxController {
+class FunctionsController extends GetxController { 
   late TextEditingController screenName = TextEditingController();
   late TextEditingController route = TextEditingController();
   final RxList<DocumentSnapshot> allScreens = RxList<DocumentSnapshot>([]);

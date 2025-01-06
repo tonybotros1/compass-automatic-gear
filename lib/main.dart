@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Middleware/auth_middleware.dart';
 import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
+import 'Screens/Main screens/System Administrator/User Management/responsibilities.dart';
 import 'Screens/Main screens/main_screen.dart';
 import 'security.dart';
 
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
-        GetPage(name: '/', page: () => const LoadingScreen()),
+        GetPage(name: '/', page: () => const Responsibilities()),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
         GetPage(
             name: '/mainScreen',
