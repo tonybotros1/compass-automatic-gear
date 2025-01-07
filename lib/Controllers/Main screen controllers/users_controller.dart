@@ -309,6 +309,11 @@ class UsersController extends GetxController {
     }
   }
 
+// this function is to delete user from the DB
+  deleteUser(userID) async{
+   await FirebaseFirestore.instance.collection('sys-users').doc(userID).delete();
+  }
+
   // this function is to get roles from DB
   getRoles() async {
     try {

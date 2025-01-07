@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/users_controller.dart';
@@ -232,8 +233,49 @@ class Users extends StatelessWidget {
       ),
       DataCell(Align(
         alignment: Alignment.center,
-        child:
-            viewSection(context, userData, constraints, uid, usersController),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 5),
+              child: viewSection(
+                  context, userData, constraints, uid, usersController),
+            ),
+            ElevatedButton(
+                style: deleteButtonStyle,
+                onPressed: () {
+                  showCupertinoDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CupertinoAlertDialog(
+                        title: const Text("Alert"),
+                        content:
+                            const Text("The user will be deleted permanently"),
+                        actions: [
+                          CupertinoDialogAction(
+                            child: const Text("Cancel"),
+                            onPressed: () {
+                              Get.back();
+                            },
+                          ),
+                          CupertinoDialogAction(
+                            isDestructiveAction: true,
+                            isDefaultAction: true,
+                            child: const Text("OK"),
+                            onPressed: () async {
+                              await usersController.deleteUser(uid);
+
+                              Get.back();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Text('Delete'))
+          ],
+        ),
       )),
     ]);
   }
