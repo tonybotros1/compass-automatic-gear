@@ -21,7 +21,8 @@ class ResponsibilitiesController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool loadingMenus = RxBool(false);
   RxBool deleteingResponsibility = RxBool(false);
-  RxBool viewLoading = RxBool(false);
+    var buttonLoadingStates = <String, bool>{}.obs;
+
 
   @override
   void onInit() {
@@ -31,6 +32,12 @@ class ResponsibilitiesController extends GetxController {
     });
 
     super.onInit();
+  }
+
+  // function to manage loading button
+  void setButtonLoading(String menuId, bool isLoading) {
+    buttonLoadingStates[menuId] = isLoading;
+    buttonLoadingStates.refresh(); // Notify listeners
   }
 
 // this function is to update the role details

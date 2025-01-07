@@ -104,7 +104,7 @@ var screenPadding = const EdgeInsets.only(
   left: 14,
   right: 14,
   bottom: 10,
-  top: 10,
+  top: 0,
 );
 
 var fontStyle3 = const TextStyle(fontSize: 16, color: Colors.white);
@@ -135,14 +135,13 @@ Widget verticalSpace({int space = 20}) {
 }
 
 // snack bar
- void showSnackBar(title, body) {
-    Get.snackbar(
-      title,
-      body,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 3),
-      backgroundColor: Colors.grey,
-      colorText: Colors.white,
-    );
-  }
-
+void showSnackBar(title, body) {
+  Get.snackbar(
+    title,
+    body,
+    snackPosition: SnackPosition.BOTTOM,
+    duration: const Duration(seconds: 3),
+    backgroundColor: Colors.grey,
+    colorText: Colors.white,
+  );
+}

@@ -34,7 +34,7 @@ class Responsibilities extends StatelessWidget {
                         constraints: constraints,
                         context: context,
                         controller: controller,
-                        title: 'Search for Responsibilities',
+                        title: 'Search for responsibilities',
                         buttonTitle: 'New Responsibilities',
                         button: newResponsibilityButton(
                             context, constraints, controller),
@@ -86,6 +86,8 @@ ElevatedButton newResponsibilityButton(context, constraints, controller) {
               controller.loadingMenus.value = true;
               await controller.listOfMenus();
               controller.loadingMenus.value = false;
+              controller.responsibilityName.clear();
+              controller.menuName.clear();
               showDialog(
                   context: context,
                   builder: (context) {
@@ -186,7 +188,7 @@ ElevatedButton newResponsibilityButton(context, constraints, controller) {
 Widget tableOfScreens(
     {required constraints, required context, required controller}) {
   return DataTable(
-     dataRowMaxHeight: 40,
+    dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
     showBottomBorder: true,
@@ -324,9 +326,14 @@ Widget viewSection(
     required roleID}) {
   return ElevatedButton(
       style: viewButtonStyle,
-      onPressed: controller.viewLoading.value == false
+      onPressed: controller.buttonLoadingStates[roleID] == null ||
+              controller.buttonLoadingStates[roleID] == false
           ? () async {
+              controller.setButtonLoading(roleID, true); // Start loading
+
               await controller.listOfMenus();
+              controller.setButtonLoading(roleID, false); // Start loading
+
               showDialog(
                   context: context,
                   builder: (context) {
@@ -364,12 +371,7 @@ Widget viewSection(
                                         Get.back();
                                       }
                                     },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
+                              style: saveButtonStyle,
                               child: controller.addingNewResponsibilityProcess
                                           .value ==
                                       false
@@ -390,12 +392,7 @@ Widget viewSection(
                           onPressed: () {
                             Get.back();
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: mainColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
+                          style: cancelButtonStyle,
                           child:
                               controller.addingNewResponsibilityProcess.value ==
                                       false
@@ -415,14 +412,29 @@ Widget viewSection(
                   });
             }
           : null,
-      child: controller.viewLoading.value == false
-          ? const Text('View')
-          : const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2,
-              ),
-            ));
+      child: GetX<ResponsibilitiesController>(builder: (controller) {
+        bool isLoading = controller.buttonLoadingStates[roleID] ?? false;
+        return isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : const Text('View');
+      }));
 }
+
+
+// controller.viewLoading.value == false
+//           ? const Text('View')
+//           : const SizedBox(
+//               height: 20,
+//               width: 20,
+//               child: CircularProgressIndicator(
+//                 color: Colors.white,
+//                 strokeWidth: 2,
+//               ),
+//             )
