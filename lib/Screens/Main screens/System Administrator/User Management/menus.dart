@@ -336,7 +336,11 @@ ElevatedButton viewSection(controller, menuId, context, constraints) {
                 strokeWidth: 2,
               ),
             )
-          : const Text("View");
+          : const Icon(
+              Icons.account_tree_outlined,
+              color: Colors.white,
+              fill: 0,
+            );
     }),
   );
 }

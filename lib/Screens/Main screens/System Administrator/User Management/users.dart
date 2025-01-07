@@ -149,6 +149,8 @@ class Users extends StatelessWidget {
 
   Widget tableOfUsers({required constraints, required context}) {
     return DataTable(
+      dataRowMaxHeight: 40,
+      dataRowMinHeight: 30,
       columnSpacing: 5,
       showBottomBorder: true,
       dataTextStyle: regTextStyle,

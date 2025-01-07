@@ -186,6 +186,8 @@ ElevatedButton newResponsibilityButton(context, constraints, controller) {
 Widget tableOfScreens(
     {required constraints, required context, required controller}) {
   return DataTable(
+     dataRowMaxHeight: 40,
+    dataRowMinHeight: 30,
     columnSpacing: 5,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
