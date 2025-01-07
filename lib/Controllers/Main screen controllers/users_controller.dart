@@ -162,8 +162,6 @@ class UsersController extends GetxController {
     }
   }
 
-  
-
 // this function is to add new user
   // register() async {
   //   try {
@@ -268,6 +266,7 @@ class UsersController extends GetxController {
   // this function is to update user details
   updateUserDetails(String userId) async {
     try {
+      sigupgInProcess.value = true;
       // Prepare the update data
       Map<String, dynamic> updateData = {
         'roles': selectedRoles.entries
@@ -298,11 +297,14 @@ class UsersController extends GetxController {
           .collection('sys-users') // Replace with your collection name
           .doc(userId) // The document ID you want to update
           .update(updateData);
+      sigupgInProcess.value = false;
 
       // Success message
       showSnackBar('Success', 'User details updated successfully');
     } catch (e) {
       // Handle errors
+      sigupgInProcess.value = false;
+
       showSnackBar('Error', 'Failed to update user details: $e');
     }
   }

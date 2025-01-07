@@ -99,6 +99,7 @@ class MainScreenController extends GetxController {
       final roots = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
         final children = await buildMenus(menuDoc.data());
         return MyTreeNode(
+          isMenu: true,
           title: menuDoc.data()['name'],
           children: children,
           routeName: menuDoc.data()['routeName'],
@@ -140,6 +141,7 @@ class MainScreenController extends GetxController {
     final menuNodes = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
       final children = await buildMenus(menuDoc.data());
       return MyTreeNode(
+        isMenu: true,
         title: menuDoc.data()['name'],
         children: children,
         routeName: menuDoc.data()['routeName'],
@@ -148,6 +150,7 @@ class MainScreenController extends GetxController {
 
     final screenNodes = screenSnapshot.docs.map((screenDoc) {
       return MyTreeNode(
+        isMenu: false,
         title: screenDoc.data()['name'],
         children: [],
         routeName: screenDoc.data()['routeName'],

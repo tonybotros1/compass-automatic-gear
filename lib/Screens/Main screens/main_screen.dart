@@ -202,7 +202,7 @@ class MainScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  color: entry.node.children.isNotEmpty
+                  color: entry.node.isMenu == true
                       ? const Color(0xff2E5077)
                       : const Color(0xff4DA1A9),
                   borderRadius: BorderRadius.circular(5),
@@ -256,7 +256,7 @@ class MainScreen extends StatelessWidget {
                 ),
               ),
 
-              child: entry.node.children.isNotEmpty
+              child: entry.node.isMenu == true
                   ? TreeIndentation(
                       entry: entry,
                       child: myTreeNodeTile,

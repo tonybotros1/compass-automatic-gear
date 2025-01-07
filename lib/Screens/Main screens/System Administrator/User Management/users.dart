@@ -103,26 +103,19 @@ class Users extends StatelessWidget {
                               ? null
                               : () {
                                   usersController.register();
-                                  if (usersController.sigupgInProcess.value ==
-                                      false) {
-                                    Get.back();
-                                  }
                                 },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
+                          style: saveButtonStyle,
                           child: usersController.sigupgInProcess.value == false
                               ? const Text(
                                   'Save',
                                   style: TextStyle(color: Colors.white),
                                 )
-                              : const Padding(
-                                  padding: EdgeInsets.all(8.0),
+                              : const SizedBox(
+                                  height: 20,
+                                  width: 20,
                                   child: CircularProgressIndicator(
                                     color: Colors.white,
+                                    strokeWidth: 2,
                                   ),
                                 ),
                         ),
@@ -131,12 +124,7 @@ class Users extends StatelessWidget {
                     onPressed: () {
                       Get.back();
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: mainColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
+                    style: cancelButtonStyle,
                     child: usersController.sigupgInProcess.value == false
                         ? const Text(
                             'Cancel',
@@ -153,14 +141,7 @@ class Users extends StatelessWidget {
               );
             });
       },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-        ),
-        elevation: 5,
-      ),
+      style: newButtonStyle,
       child: const Text('New User'),
     );
   }
@@ -251,109 +232,104 @@ class Users extends StatelessWidget {
       ),
       DataCell(Align(
         alignment: Alignment.center,
-        child: ElevatedButton(
-            style: viewButtonStyle,
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    usersController.email.text = userData['email'];
-                    usersController.name.text = userData['user_name'];
-                    usersController.userStatus.value = userData['status'];
-                    for (var roleId in userData['roles']) {
-                      usersController.selectedRoles.forEach((key, value) {
-                        if (value[0] == roleId) {
-                          usersController.selectedRoles.update(
-                            key,
-                            (value) => [value[0], true],
-                          );
-                        }
-                      });
+        child:
+            viewSection(context, userData, constraints, uid, usersController),
+      )),
+    ]);
+  }
+
+  ElevatedButton viewSection(context, Map<String, dynamic> userData,
+      constraints, uid, usersController) {
+    return ElevatedButton(
+        style: viewButtonStyle,
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                usersController.email.text = userData['email'];
+                usersController.name.text = userData['user_name'];
+                usersController.userStatus.value = userData['status'];
+                for (var roleId in userData['roles']) {
+                  usersController.selectedRoles.forEach((key, value) {
+                    if (value[0] == roleId) {
+                      usersController.selectedRoles.update(
+                        key,
+                        (value) => [value[0], true],
+                      );
                     }
+                  });
+                }
 
-                    // Reset roles not in userData['roles'] to false
-                    usersController.selectedRoles.forEach((key, value) {
-                      if (!userData['roles'].contains(value[0])) {
-                        usersController.selectedRoles.update(
-                          key,
-                          (value) => [value[0], false],
-                        );
-                      }
-                    });
+                // Reset roles not in userData['roles'] to false
+                usersController.selectedRoles.forEach((key, value) {
+                  if (!userData['roles'].contains(value[0])) {
+                    usersController.selectedRoles.update(
+                      key,
+                      (value) => [value[0], false],
+                    );
+                  }
+                });
 
-                    return AlertDialog(
-                      actionsPadding:
-                          const EdgeInsets.symmetric(horizontal: 20),
-                      content: addNewUserAndView(
-                          status: usersController.userStatus,
-                          controller: usersController,
-                          constraints: constraints,
-                          context: context,
-                          email: usersController.email,
-                          name: usersController.name,
-                          userExpiryDate: userData['expiry_date'],
-                          showActiveStatus: true),
-                      actions: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: usersController.sigupgInProcess.value
-                                ? null
-                                : () {
-                                    usersController.updateUserDetails(uid);
-                                    if (usersController.sigupgInProcess.value ==
-                                        false) {
-                                      Get.back();
-                                    }
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
-                            child:
-                                usersController.sigupgInProcess.value == false
-                                    ? const Text(
-                                        'Save',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: mainColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
+                return AlertDialog(
+                  actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                  content: addNewUserAndView(
+                      status: usersController.userStatus,
+                      controller: usersController,
+                      constraints: constraints,
+                      context: context,
+                      email: usersController.email,
+                      name: usersController.name,
+                      userExpiryDate: userData['expiry_date'],
+                      showActiveStatus: true),
+                  actions: [
+                    Obx(
+                      () => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: ElevatedButton(
+                          onPressed:
+                              usersController.sigupgInProcess.value == true
+                                  ? null
+                                  : () {
+                                      usersController.updateUserDetails(uid);
+                                    },
+                          style: saveButtonStyle,
                           child: usersController.sigupgInProcess.value == false
                               ? const Text(
-                                  'Cancel',
+                                  'Save',
                                   style: TextStyle(color: Colors.white),
                                 )
-                              : const Padding(
-                                  padding: EdgeInsets.all(8.0),
+                              : const SizedBox(
+                                  height: 20,
+                                  width: 20,
                                   child: CircularProgressIndicator(
                                     color: Colors.white,
+                                    strokeWidth: 2,
                                   ),
                                 ),
                         ),
-                      ],
-                    );
-                  });
-            },
-            child: const Text('View')),
-      )),
-    ]);
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      style: cancelButtonStyle,
+                      child: usersController.sigupgInProcess.value == false
+                          ? const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.white),
+                            )
+                          : const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ],
+                );
+              });
+        },
+        child: const Text('View'));
   }
 }
