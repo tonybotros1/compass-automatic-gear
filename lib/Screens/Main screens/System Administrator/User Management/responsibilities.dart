@@ -320,110 +320,107 @@ Widget viewSection(
     required roleData,
     required constraints,
     required roleID}) {
-  return GetX<ResponsibilitiesController>(builder: (controller) {
-    return ElevatedButton(
-        style: viewButtonStyle,
-        onPressed: controller.viewLoading.value == false
-            ? () async {
-                await controller.listOfMenus();
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      controller.responsibilityName.text =
-                          roleData['role_name'];
+  return ElevatedButton(
+      style: viewButtonStyle,
+      onPressed: controller.viewLoading.value == false
+          ? () async {
+              await controller.listOfMenus();
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    controller.responsibilityName.text = roleData['role_name'];
 
-                      controller.menuName.text = roleData['menu']['name'];
-                      controller.menuIDFromList.value = roleData['menu']['id'];
+                    controller.menuName.text = roleData['menu']['name'];
+                    controller.menuIDFromList.value = roleData['menu']['id'];
 
-                      // print(controller.menuName.text);
-                      return AlertDialog(
-                        actionsPadding:
-                            const EdgeInsets.symmetric(horizontal: 20),
-                        content: addNewResponsibilityOrView(
-                          controller: controller,
-                          constraints: constraints,
-                          context: context,
-                          responsibilityName: controller.responsibilityName,
-                          menuName: controller.menuName,
-                        ),
-                        actions: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: GetX<ResponsibilitiesController>(
-                                builder: (controller) {
-                              return ElevatedButton(
-                                onPressed: controller
-                                        .addingNewResponsibilityProcess.value
-                                    ? null
-                                    : () {
-                                        controller.updateResponsibility(roleID);
-                                        if (controller
-                                                .addingNewResponsibilityProcess
-                                                .value ==
-                                            false) {
-                                          Get.back();
-                                        }
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
+                    // print(controller.menuName.text);
+                    return AlertDialog(
+                      actionsPadding:
+                          const EdgeInsets.symmetric(horizontal: 20),
+                      content: addNewResponsibilityOrView(
+                        controller: controller,
+                        constraints: constraints,
+                        context: context,
+                        responsibilityName: controller.responsibilityName,
+                        menuName: controller.menuName,
+                      ),
+                      actions: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: GetX<ResponsibilitiesController>(
+                              builder: (controller) {
+                            return ElevatedButton(
+                              onPressed: controller
+                                      .addingNewResponsibilityProcess.value
+                                  ? null
+                                  : () {
+                                      controller.updateResponsibility(roleID);
+                                      if (controller
+                                              .addingNewResponsibilityProcess
+                                              .value ==
+                                          false) {
+                                        Get.back();
+                                      }
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
-                                child: controller.addingNewResponsibilityProcess
-                                            .value ==
-                                        false
-                                    ? const Text(
-                                        'Save',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                              );
-                            }),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Get.back();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: mainColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
                               ),
-                            ),
-                            child: controller
-                                        .addingNewResponsibilityProcess.value ==
-                                    false
-                                ? const Text(
-                                    'Cancel',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
+                              child: controller.addingNewResponsibilityProcess
+                                          .value ==
+                                      false
+                                  ? const Text(
+                                      'Save',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  ),
+                            );
+                          }),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Get.back();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: mainColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
                           ),
-                        ],
-                      );
-                    });
-              }
-            : null,
-        child: controller.viewLoading.value == false
-            ? const Text('View')
-            : const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              ));
-  });
+                          child:
+                              controller.addingNewResponsibilityProcess.value ==
+                                      false
+                                  ? const Text(
+                                      'Cancel',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                        ),
+                      ],
+                    );
+                  });
+            }
+          : null,
+      child: controller.viewLoading.value == false
+          ? const Text('View')
+          : const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            ));
 }

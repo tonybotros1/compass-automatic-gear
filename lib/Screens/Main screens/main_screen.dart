@@ -119,45 +119,49 @@ class MainScreen extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 16, bottom: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const SizedBox(
-                    width: 45,
-                  ),
-                  Image.asset(
-                    'assets/logo2.png',
-                    width: 90,
-                  ),
-                  Obx(
-                    () => mainScreenController.isLoading.value == false
-                        ? InkWell(
-                            onTap: () {
-                              if (mainScreenController
-                                  .treeController.isTreeExpanded) {
-                                mainScreenController.treeController
-                                    .collapseAll();
-                              } else {
-                                mainScreenController.treeController.expandAll();
-                              }
-                            },
-                            splashColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            child: const Icon(
-                              color: Colors.grey,
-                              Icons.account_tree,
-                              size: 20,
-                            ),
-                          )
-                        : const SizedBox(
-                            width: 20,
-                          ),
-                  ),
-                ],
-              ),
-            ),
+                padding: const EdgeInsets.only(top: 16, bottom: 10),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Centered logo
+                    Center(
+                      child: Image.asset(
+                        'assets/logo2.png',
+                        width: 90,
+                      ),
+                    ),
+                    // Icon in the bottom-right corner
+                    Positioned(
+                      bottom: 0,
+                      right: 10,
+                      child: Obx(
+                        () => mainScreenController.isLoading.value == false
+                            ? InkWell(
+                                onTap: () {
+                                  if (mainScreenController
+                                      .treeController.isTreeExpanded) {
+                                    mainScreenController.treeController
+                                        .collapseAll();
+                                  } else {
+                                    mainScreenController.treeController
+                                        .expandAll();
+                                  }
+                                },
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                child: const Icon(
+                                  color: Colors.grey,
+                                  Icons.account_tree,
+                                  size: 20,
+                                ),
+                              )
+                            : const SizedBox(
+                                width: 20,
+                              ),
+                      ),
+                    ),
+                  ],
+                )),
             Expanded(
               child: Obx(() => mainScreenController.isLoading.value == false &&
                       mainScreenController.errorLoading.value != true

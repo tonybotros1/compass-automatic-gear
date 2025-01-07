@@ -16,7 +16,8 @@ class MainScreenController extends GetxController {
   RxBool isLoading = RxBool(true);
   RxString uid = RxString('');
   RxList userRoles = RxList([]);
-  RxString roleMenus = RxString('');
+  // RxString roleMenus = RxString('');
+  RxList roleMenus = RxList([]);
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
   Rx<Widget> selectedScreen = const SizedBox().obs;
@@ -82,13 +83,18 @@ class MainScreenController extends GetxController {
           .where(FieldPath.documentId, whereIn: userRoles)
           .get();
 
-      roleMenus.value = roleSnapshot.docs.first.data()['menuID'];
+      // roleMenus.assignAll(await roleSnapshot.docs.first
+      //     .data()['menuID']); //=await roleSnapshot.docs.first.data()['menuID'];
+      for (var element in roleSnapshot.docs) {
+        roleMenus.add(element.data()['menuID']);
+      }
 
       // Build tree structure
       final menuSnapshot = await FirebaseFirestore.instance
           .collection('menus ')
-          .where(FieldPath.documentId, isEqualTo: roleMenus.value)
+          .where(FieldPath.documentId, whereIn: roleMenus)
           .get();
+
 
       final roots = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
         final children = await buildMenus(menuDoc.data());
@@ -107,7 +113,6 @@ class MainScreenController extends GetxController {
 
       isLoading.value = false;
     } catch (e) {
-      print(e);
       errorLoading.value = true;
       isLoading.value = false;
       // print(e);
