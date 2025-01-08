@@ -44,7 +44,7 @@ class Responsibilities extends StatelessWidget {
                   Expanded(
                     child: GetX<ResponsibilitiesController>(
                       builder: (controller) {
-                        if (controller.isScreenLoding.value) {
+                        if (controller.isScreenLoading.value) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
@@ -81,72 +81,42 @@ class Responsibilities extends StatelessWidget {
 
 ElevatedButton newResponsibilityButton(context, constraints, controller) {
   return ElevatedButton(
-      onPressed: controller.loadingMenus.value == false
-          ? () async {
-              controller.loadingMenus.value = true;
-              await controller.listOfMenus();
-              controller.loadingMenus.value = false;
-              controller.responsibilityName.clear();
-              controller.menuName.clear();
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      actionsPadding:
-                          const EdgeInsets.symmetric(horizontal: 20),
-                      content: addNewResponsibilityOrView(
-                          controller: controller,
-                          constraints: constraints,
-                          context: context,
-                          menuName: controller.menuName),
-                      actions: [
-                        GetX<ResponsibilitiesController>(
-                            builder: (controller) => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  child: ElevatedButton(
-                                    onPressed: controller
-                                            .addingNewResponsibilityProcess
-                                            .value
-                                        ? null
-                                        : () async {
-                                            await controller
-                                                .addNewResponsibility();
-                                            if (controller
-                                                    .addingNewResponsibilityProcess
-                                                    .value ==
-                                                false) {
-                                              Get.back();
-                                            }
-                                          },
-                                    style: saveButtonStyle,
-                                    child: controller
-                                                .addingNewResponsibilityProcess
-                                                .value ==
-                                            false
-                                        ? const Text(
-                                            'Save',
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          )
-                                        : const Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                  ),
-                                )),
-                        ElevatedButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          style: cancelButtonStyle,
-                          child:
-                              controller.addingNewResponsibilityProcess.value ==
+      onPressed: () async {
+        controller.responsibilityName.clear();
+        controller.menuName.clear();
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: addNewResponsibilityOrView(
+                    controller: controller,
+                    constraints: constraints,
+                    context: context,
+                    menuName: controller.menuName),
+                actions: [
+                  GetX<ResponsibilitiesController>(
+                      builder: (controller) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: ElevatedButton(
+                              onPressed: controller
+                                      .addingNewResponsibilityProcess.value
+                                  ? null
+                                  : () async {
+                                      await controller.addNewResponsibility();
+                                      if (controller
+                                              .addingNewResponsibilityProcess
+                                              .value ==
+                                          false) {
+                                        Get.back();
+                                      }
+                                    },
+                              style: saveButtonStyle,
+                              child: controller.addingNewResponsibilityProcess
+                                          .value ==
                                       false
                                   ? const Text(
-                                      'Cancel',
+                                      'Save',
                                       style: TextStyle(color: Colors.white),
                                     )
                                   : const Padding(
@@ -155,12 +125,30 @@ ElevatedButton newResponsibilityButton(context, constraints, controller) {
                                         color: Colors.white,
                                       ),
                                     ),
-                        ),
-                      ],
-                    );
-                  });
-            }
-          : null,
+                            ),
+                          )),
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: cancelButtonStyle,
+                    child:
+                        controller.addingNewResponsibilityProcess.value == false
+                            ? const Text(
+                                'Cancel',
+                                style: TextStyle(color: Colors.white),
+                              )
+                            : const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              ),
+                  ),
+                ],
+              );
+            });
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
@@ -169,20 +157,7 @@ ElevatedButton newResponsibilityButton(context, constraints, controller) {
         ),
         minimumSize: const Size(180, 40),
       ),
-      child: Obx(
-        () => controller.loadingMenus.value == false
-            ? const Text('New Responsibility')
-            : const SizedBox(
-                height: 20,
-                width: 20,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                ),
-              ),
-      ));
+      child: const Text('New Responsibility'));
 }
 
 Widget tableOfScreens(
@@ -326,115 +301,81 @@ Widget viewSection(
     required roleID}) {
   return ElevatedButton(
       style: viewButtonStyle,
-      onPressed: controller.buttonLoadingStates[roleID] == null ||
-              controller.buttonLoadingStates[roleID] == false
-          ? () async {
-              controller.setButtonLoading(roleID, true); // Start loading
+      onPressed: () async {
+        showDialog(
+            context: context,
+            builder: (context) {
+              controller.responsibilityName.text = roleData['role_name'];
 
-              await controller.listOfMenus();
-              controller.setButtonLoading(roleID, false); // Start loading
+              controller.menuName.text = roleData['menu']['name'];
+              // controller.menuIDFromList.value = roleData['menu']['id'];
 
-              showDialog(
+              // print(controller.menuName.text);
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: addNewResponsibilityOrView(
+                  controller: controller,
+                  constraints: constraints,
                   context: context,
-                  builder: (context) {
-                    controller.responsibilityName.text = roleData['role_name'];
-
-                    controller.menuName.text = roleData['menu']['name'];
-                    controller.menuIDFromList.value = roleData['menu']['id'];
-
-                    // print(controller.menuName.text);
-                    return AlertDialog(
-                      actionsPadding:
-                          const EdgeInsets.symmetric(horizontal: 20),
-                      content: addNewResponsibilityOrView(
-                        controller: controller,
-                        constraints: constraints,
-                        context: context,
-                        responsibilityName: controller.responsibilityName,
-                        menuName: controller.menuName,
-                      ),
-                      actions: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: GetX<ResponsibilitiesController>(
-                              builder: (controller) {
-                            return ElevatedButton(
-                              onPressed: controller
-                                      .addingNewResponsibilityProcess.value
-                                  ? null
-                                  : () {
-                                      controller.updateResponsibility(roleID);
-                                      if (controller
-                                              .addingNewResponsibilityProcess
-                                              .value ==
-                                          false) {
-                                        Get.back();
-                                      }
-                                    },
-                              style: saveButtonStyle,
-                              child: controller.addingNewResponsibilityProcess
-                                          .value ==
-                                      false
-                                  ? const Text(
-                                      'Save',
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  : const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            );
-                          }),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          style: cancelButtonStyle,
-                          child:
-                              controller.addingNewResponsibilityProcess.value ==
-                                      false
-                                  ? const Text(
-                                      'Cancel',
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  : const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                        ),
-                      ],
-                    );
-                  });
-            }
-          : null,
-      child: GetX<ResponsibilitiesController>(builder: (controller) {
-        bool isLoading = controller.buttonLoadingStates[roleID] ?? false;
-        return isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
+                  responsibilityName: controller.responsibilityName,
+                  menuName: controller.menuName,
                 ),
-              )
-            : const Text('View');
-      }));
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child:
+                        GetX<ResponsibilitiesController>(builder: (controller) {
+                      return ElevatedButton(
+                        onPressed:
+                            controller.addingNewResponsibilityProcess.value
+                                ? null
+                                : () {
+                                    controller.updateResponsibility(roleID);
+                                    if (controller
+                                            .addingNewResponsibilityProcess
+                                            .value ==
+                                        false) {
+                                      Get.back();
+                                    }
+                                  },
+                        style: saveButtonStyle,
+                        child:
+                            controller.addingNewResponsibilityProcess.value ==
+                                    false
+                                ? const Text(
+                                    'Save',
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                : const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                      );
+                    }),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: cancelButtonStyle,
+                    child:
+                        controller.addingNewResponsibilityProcess.value == false
+                            ? const Text(
+                                'Cancel',
+                                style: TextStyle(color: Colors.white),
+                              )
+                            : const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              ),
+                  ),
+                ],
+              );
+            });
+      },
+      child: const Text('View'));
 }
-
-
-// controller.viewLoading.value == false
-//           ? const Text('View')
-//           : const SizedBox(
-//               height: 20,
-//               width: 20,
-//               child: CircularProgressIndicator(
-//                 color: Colors.white,
-//                 strokeWidth: 2,
-//               ),
-//             )

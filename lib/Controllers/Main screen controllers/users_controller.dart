@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
-import '../../consts.dart'; // For password hashing
+import '../../consts.dart';
 
 class UsersController extends GetxController {
   late TextEditingController email = TextEditingController();
@@ -297,6 +297,7 @@ class UsersController extends GetxController {
           .collection('sys-users') // Replace with your collection name
           .doc(userId) // The document ID you want to update
           .update(updateData);
+
       sigupgInProcess.value = false;
 
       // Success message
@@ -310,8 +311,11 @@ class UsersController extends GetxController {
   }
 
 // this function is to delete user from the DB
-  deleteUser(userID) async{
-   await FirebaseFirestore.instance.collection('sys-users').doc(userID).delete();
+  deleteUser(userID) async {
+    await FirebaseFirestore.instance
+        .collection('sys-users')
+        .doc(userID)
+        .delete();
   }
 
   // this function is to get roles from DB

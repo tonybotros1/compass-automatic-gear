@@ -31,7 +31,7 @@ Widget addNewResponsibilityOrView({
           textController: menuName,
           labelText: 'Menus',
           hintText: 'Select Menu',
-          menus: controller.selectFromMenus,
+          menus: controller.menuMap,
           validate: true,
           controller: controller,
         ),
@@ -110,7 +110,7 @@ Padding dropDownValues({
           }
         },
       ),
-      suggestionsCallback: (pattern) async {
+      suggestionsCallback: (pattern) {
         return menus.values
             .toList()
             .where((item) =>
@@ -119,13 +119,15 @@ Padding dropDownValues({
       },
       itemBuilder: (context, suggestion) {
         return ListTile(
-          title: Text(suggestion.toString()),
+          title: Text('${suggestion['name']} (${suggestion['description']})'),
         );
       },
       onSelected: (suggestion) {
-        textController!.text = suggestion.toString();
+        textController!.text =
+            '${suggestion['name']} (${suggestion['description']})';
         menus.entries.where((entry) {
-          return entry.value == suggestion.toString();
+          return entry.value['name'] == suggestion['name'].toString() &&
+              entry.value['description'] == suggestion['description'];
         }).forEach((entry) {
           controller.menuIDFromList.value = entry.key;
         });

@@ -13,7 +13,7 @@ import '../../consts.dart';
 class MainScreenController extends GetxController {
   late TreeController<MyTreeNode> treeController;
   RxList<MyTreeNode> roots = <MyTreeNode>[].obs;
-  RxBool isLoading = RxBool(true);
+  RxBool isLoading = RxBool(false);
   RxString uid = RxString('');
   RxList userRoles = RxList([]);
   // RxString roleMenus = RxString('');
@@ -59,6 +59,8 @@ class MainScreenController extends GetxController {
 
   Future<void> getScreens() async {
     try {
+      isLoading.value = true;
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
       String? action = prefs.getString('userId');

@@ -11,18 +11,15 @@ class ResponsibilitiesController extends GetxController {
   RxBool addingNewResponsibilityProcess = RxBool(false);
   TextEditingController responsibilityName = TextEditingController();
   TextEditingController menuName = TextEditingController();
-  RxMap<String, String> selectFromMenus = RxMap({});
   RxString menuIDFromList = RxString('');
 
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
-  RxBool isScreenLoding = RxBool(true);
+  RxBool isScreenLoading = RxBool(true);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-  RxBool loadingMenus = RxBool(false);
   RxBool deleteingResponsibility = RxBool(false);
-    var buttonLoadingStates = <String, bool>{}.obs;
-
+  RxMap menuMap = RxMap({});
 
   @override
   void onInit() {
@@ -34,11 +31,6 @@ class ResponsibilitiesController extends GetxController {
     super.onInit();
   }
 
-  // function to manage loading button
-  void setButtonLoading(String menuId, bool isLoading) {
-    buttonLoadingStates[menuId] = isLoading;
-    buttonLoadingStates.refresh(); // Notify listeners
-  }
 
 // this function is to update the role details
   updateResponsibility(roleID) async {
@@ -54,7 +46,6 @@ class ResponsibilitiesController extends GetxController {
       addingNewResponsibilityProcess.value = false;
     } catch (e) {
       addingNewResponsibilityProcess.value = false;
-      print(e);
     }
   }
 
@@ -110,7 +101,6 @@ class ResponsibilitiesController extends GetxController {
     try {
       final firestore = FirebaseFirestore.instance;
 
-      await firestore.collection('sys-roles').doc(resID).delete();
       var users = await FirebaseFirestore.instance
           .collection('sys-users')
           .where('roles', arrayContains: resID)
@@ -124,7 +114,8 @@ class ResponsibilitiesController extends GetxController {
         });
       }
       await batch.commit();
-      await getResponsibilities();
+      await firestore.collection('sys-roles').doc(resID).delete();
+      // await getResponsibilities();
       deleteingResponsibility.value = false;
     } catch (e) {
       deleteingResponsibility.value = false;
@@ -148,66 +139,34 @@ class ResponsibilitiesController extends GetxController {
   }
 
 // this functions is to get the Responsibilities in system and its details
-  getResponsibilities() {
+  Future<void> getResponsibilities() async {
     try {
-      allResponsibilities.clear();
+      // Fetch menus once to avoid redundant calls
+      final menuSnapshot =
+          await FirebaseFirestore.instance.collection('menus ').get();
+
+      // Convert menus to a Map for easier access
+      menuMap.value = {for (var doc in menuSnapshot.docs) doc.id: doc.data()};
+
       FirebaseFirestore.instance
           .collection('sys-roles')
           .snapshots()
-          .listen((roles) async {
+          .listen((roles) {
+        allResponsibilities.clear();
+
         for (var role in roles.docs) {
           allResponsibilities[role.id] = {
             'role_name': role['role_name'],
-            'menu': await getMenuDetails(role['menuID']),
-            'added_date': role['added_date']
+            'menu': menuMap[role['menuID']] ?? {}, // Fetch menu data as Map
+            'added_date': role['added_date'],
           };
         }
-        isScreenLoding.value = false;
+
+        isScreenLoading.value = false;
       });
     } catch (e) {
-      isScreenLoding.value = false;
-    }
-  }
-
-  // this function to get list of menus to select of them
-  listOfMenus() async {
-    try {
-      var menus = await FirebaseFirestore.instance.collection('menus ').get();
-
-      if (menus.docs.isNotEmpty) {
-        for (var menu in menus.docs) {
-          selectFromMenus[menu.id] =
-              '${menu.data()['name']} (${menu.data()['description']})';
-        }
-      }
-    } catch (e) {
-//
-    }
-  }
-
-  // this function is to get menu details
-  Future<Map> getMenuDetails(menuID) async {
-    try {
-      var menu = await FirebaseFirestore.instance
-          .collection('menus ')
-          .where(FieldPath.documentId, isEqualTo: menuID)
-          .get();
-
-      var id = menu.docs.first.id;
-      var details = menu.docs.first.data();
-
-      return {
-        'id': id,
-        'name': details['name'],
-        'description': details['description']
-      };
-    } catch (e) {
-      print(e);
-      return {
-        'id': '',
-        'name': '',
-        'description': ''
-      };
+      // Log the error for debugging
+      isScreenLoading.value = false;
     }
   }
 
