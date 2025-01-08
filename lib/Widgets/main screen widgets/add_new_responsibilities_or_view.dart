@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:get/get.dart';
 
 import '../Auth screens widgets/register widgets/my_text_form_field.dart';
 
@@ -99,7 +100,7 @@ Padding dropDownValues({
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
+                        Get.back();
                       },
                       child: const Text('OK'),
                     ),

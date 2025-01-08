@@ -31,7 +31,6 @@ class ResponsibilitiesController extends GetxController {
     super.onInit();
   }
 
-
 // this function is to update the role details
   updateResponsibility(roleID) async {
     addingNewResponsibilityProcess.value = true;
@@ -44,6 +43,7 @@ class ResponsibilitiesController extends GetxController {
         'menuID': menuIDFromList.value,
       });
       addingNewResponsibilityProcess.value = false;
+      Get.back();
     } catch (e) {
       addingNewResponsibilityProcess.value = false;
     }
@@ -132,6 +132,7 @@ class ResponsibilitiesController extends GetxController {
           'menuID': menuIDFromList.value,
           'added_date': DateTime.now().toString(),
         });
+        Get.back();
       }
     } catch (e) {
       //

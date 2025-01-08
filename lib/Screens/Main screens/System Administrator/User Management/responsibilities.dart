@@ -104,12 +104,6 @@ ElevatedButton newResponsibilityButton(context, constraints, controller) {
                                   ? null
                                   : () async {
                                       await controller.addNewResponsibility();
-                                      if (controller
-                                              .addingNewResponsibilityProcess
-                                              .value ==
-                                          false) {
-                                        Get.back();
-                                      }
                                     },
                               style: saveButtonStyle,
                               child: controller.addingNewResponsibilityProcess
@@ -331,12 +325,6 @@ Widget viewSection(
                                 ? null
                                 : () {
                                     controller.updateResponsibility(roleID);
-                                    if (controller
-                                            .addingNewResponsibilityProcess
-                                            .value ==
-                                        false) {
-                                      Get.back();
-                                    }
                                   },
                         style: saveButtonStyle,
                         child:
@@ -346,10 +334,12 @@ Widget viewSection(
                                     'Save',
                                     style: TextStyle(color: Colors.white),
                                   )
-                                : const Padding(
-                                    padding: EdgeInsets.all(8.0),
+                                : const SizedBox(
+                                    height: 20,
+                                    width: 20,
                                     child: CircularProgressIndicator(
                                       color: Colors.white,
+                                      strokeWidth: 2,
                                     ),
                                   ),
                       );
