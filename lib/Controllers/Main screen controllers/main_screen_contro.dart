@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
@@ -15,9 +17,9 @@ class MainScreenController extends GetxController {
   RxList<MyTreeNode> roots = <MyTreeNode>[].obs;
   RxBool isLoading = RxBool(false);
   RxString uid = RxString('');
-  RxList userRoles = RxList([]);
+  RxList<String> userRoles = RxList([]);
   // RxString roleMenus = RxString('');
-  RxList roleMenus = RxList([]);
+  RxList<String> roleMenus = RxList([]);
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
   Rx<Widget> selectedScreen = const SizedBox().obs;
@@ -167,14 +169,20 @@ class MainScreenController extends GetxController {
     try {
       isLoading.value = true;
 
+      // Fetch user ID from SharedPreferences
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-      String? action = prefs.getString('userId');
-      if (action == null || action == '') return;
+      final action = prefs.getString('userId');
+      if (action == null || action.isEmpty) return;
 
       uid.value = action;
 
-      // Fetch user roles
+      // Check for cached data
+      final cachedMenus = prefs.getString('cachedMenus');
+      final cachedScreens = prefs.getString('cachedScreens');
+      final cachedRoles = prefs.getStringList('cachedRoles');
+      final cachedRoleMenus = prefs.getStringList('cachedRoleMenus');
+
+      // Fetch user data from Firestore
       final userSnapshot = await FirebaseFirestore.instance
           .collection('sys-users')
           .doc(uid.value)
@@ -182,38 +190,75 @@ class MainScreenController extends GetxController {
 
       if (!userSnapshot.exists) return;
 
-      userRoles.assignAll(userSnapshot.data()!['roles']);
-      userName.value = userSnapshot.data()!['user_name'];
+      final fetchedRoles =
+          List<String>.from(userSnapshot.data()?['roles'] ?? []);
+      userName.value = userSnapshot.data()?['user_name'] ?? '';
 
-      // Fetch role menus
-      final roleSnapshot = await FirebaseFirestore.instance
-          .collection('sys-roles')
-          .where(FieldPath.documentId, whereIn: userRoles)
-          .get();
+      bool rolesChanged = false;
 
-      for (var element in roleSnapshot.docs) {
-        roleMenus.add(element.data()['menuID']);
+      // Check if roles have changed
+      if (cachedRoles == null ||
+          !const ListEquality().equals(cachedRoles, fetchedRoles)) {
+        rolesChanged = true;
       }
 
-      final menus = await FirebaseFirestore.instance.collection('menus ').get();
-      final screens =
-          await FirebaseFirestore.instance.collection('screens').get();
+      if (!rolesChanged &&
+          cachedMenus != null &&
+          cachedScreens != null &&
+          cachedRoleMenus != null) {
+        // Use cached data
+        allMenus.value = Map<String, dynamic>.from(jsonDecode(cachedMenus));
+        allScreens.value = Map<String, dynamic>.from(jsonDecode(cachedScreens));
+        userRoles.assignAll(cachedRoles!);
+        roleMenus.assignAll(cachedRoleMenus);
 
-      allMenus.value = {for (var menu in menus.docs) menu.id: menu.data()};
-      allScreens.value = {
-        for (var screen in screens.docs) screen.id: screen.data()
-      };
+      } else {
+        // Fetch role menus if roles have changed or no cache exists
+        userRoles.assignAll(fetchedRoles);
 
-      var menuSnapshot = allMenus.entries
+        final roleSnapshot = await FirebaseFirestore.instance
+            .collection('sys-roles')
+            .where(FieldPath.documentId, whereIn: userRoles)
+            .get();
+
+        roleMenus.clear();
+        for (var doc in roleSnapshot.docs) {
+          final menuID = doc.data()['menuID'];
+          if (menuID is String) {
+            roleMenus.add(menuID);
+          } else if (menuID is List) {
+            roleMenus.addAll(List<String>.from(menuID));
+          }
+        }
+
+        // Fetch menus and screens
+        final collections = await Future.wait([
+          FirebaseFirestore.instance.collection('menus ').get(),
+          FirebaseFirestore.instance.collection('screens').get(),
+        ]);
+
+        allMenus.value = {
+          for (var menu in collections[0].docs) menu.id: menu.data()
+        };
+        allScreens.value = {
+          for (var screen in collections[1].docs) screen.id: screen.data()
+        };
+
+        // Cache the updated data
+        await prefs.setString('cachedMenus', jsonEncode(allMenus));
+        await prefs.setString('cachedScreens', jsonEncode(allScreens));
+        await prefs.setStringList('cachedRoles', userRoles);
+        await prefs.setStringList('cachedRoleMenus', roleMenus);
+
+        print('Data fetched and cached.');
+      }
+
+      // Filter menus based on role menus
+      final menuSnapshot = allMenus.entries
           .where((entry) => roleMenus.contains(entry.key))
           .toList();
 
-      // // Build tree structure
-      // final menuSnapshot = await FirebaseFirestore.instance
-      //     .collection('menus ')
-      //     .where(FieldPath.documentId, whereIn: roleMenus)
-      //     .get();
-
+      // Build tree structure
       final roots = await Future.wait(menuSnapshot.map((menuDoc) async {
         final children = await buildMenus(menuDoc.value);
         return MyTreeNode(
@@ -224,6 +269,7 @@ class MainScreenController extends GetxController {
         );
       }));
 
+      // Initialize tree controller
       treeController = TreeController<MyTreeNode>(
         roots: roots,
         childrenProvider: (node) => node.children,
@@ -234,7 +280,7 @@ class MainScreenController extends GetxController {
     } catch (e) {
       errorLoading.value = true;
       isLoading.value = false;
-      // print(e);
+      print('Error loading screens: $e');
     }
   }
 

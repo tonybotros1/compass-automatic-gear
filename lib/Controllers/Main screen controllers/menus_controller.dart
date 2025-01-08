@@ -48,6 +48,8 @@ class MenusController extends GetxController {
   RxMap<String, String> selectFromMenus = RxMap({});
   RxMap<String, String> selectFromScreens = RxMap({});
   RxBool deletingProcess = RxBool(false);
+  RxMap allMenusDocs = RxMap({});
+  RxMap allScreensDocs = RxMap({});
 
   @override
   void onInit() {
