@@ -250,7 +250,6 @@ class MainScreenController extends GetxController {
         await prefs.setStringList('cachedRoles', userRoles);
         await prefs.setStringList('cachedRoleMenus', roleMenus);
 
-        print('Data fetched and cached.');
       }
 
       // Filter menus based on role menus
@@ -280,7 +279,6 @@ class MainScreenController extends GetxController {
     } catch (e) {
       errorLoading.value = true;
       isLoading.value = false;
-      print('Error loading screens: $e');
     }
   }
 
