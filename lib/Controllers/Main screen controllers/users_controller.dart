@@ -256,6 +256,7 @@ class UsersController extends GetxController {
       });
 
       sigupgInProcess.value = false;
+      Get.back();
       showSnackBar('Done', 'New user added successfully');
     } catch (e) {
       sigupgInProcess.value = false;
@@ -299,6 +300,7 @@ class UsersController extends GetxController {
           .update(updateData);
 
       sigupgInProcess.value = false;
+      Get.back();
 
       // Success message
       showSnackBar('Success', 'User details updated successfully');

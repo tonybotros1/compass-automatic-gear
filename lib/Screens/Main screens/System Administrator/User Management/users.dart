@@ -275,7 +275,7 @@ class Users extends StatelessWidget {
                     },
                   );
                 },
-                child: Text('Delete'))
+                child: const Text('Delete'))
           ],
         ),
       )),
