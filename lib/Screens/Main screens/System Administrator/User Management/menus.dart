@@ -132,7 +132,7 @@ Widget tableOfMenus(
         headingRowAlignment: MainAxisAlignment.center,
         label: AutoSizedText(
           constraints: constraints,
-          text: '                Action',
+          text: 'Action',
         ),
       ),
     ],
@@ -170,7 +170,7 @@ DataRow dataRowForTheTable(
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         viewSection(controller, menuId, context, constraints),
         Padding(
