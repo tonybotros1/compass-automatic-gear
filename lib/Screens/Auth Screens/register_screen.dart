@@ -54,22 +54,7 @@ class RegisterScreen extends StatelessWidget {
                       const SizedBox(
                         width: 10,
                       ),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
-                          decoration: BoxDecoration(
-                            color: const Color(0xffEFF3EA),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: GetBuilder<RegisterScreenController>(
-                              builder: (controller) {
-                            return controller.buildRightContent(
-                                controller.selectedMenu.value,
-                                constraints,
-                                controller);
-                          }),
-                        ),
-                      )
+                      rightSide(constraints)
                     ],
                   ),
                 )
@@ -77,6 +62,24 @@ class RegisterScreen extends StatelessWidget {
             ),
           );
         }));
+  }
+
+  Expanded rightSide(BoxConstraints constraints) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
+        decoration: BoxDecoration(
+          color: const Color(0xffEFF3EA),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: GetBuilder<RegisterScreenController>(builder: (controller) {
+          return controller.buildRightContent(
+            controller.selectedMenu.value,
+            constraints,
+          );
+        }),
+      ),
+    );
   }
 }
 

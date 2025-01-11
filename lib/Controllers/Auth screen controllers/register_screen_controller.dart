@@ -90,7 +90,7 @@ class RegisterScreenController extends GetxController {
     update();
   }
 
-  Widget buildRightContent(int index, constraints, controller) {
+  Widget buildRightContent(int index, controller) {
     switch (index) {
       case 0:
         return companyDetails(controller: controller);
