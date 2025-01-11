@@ -165,122 +165,90 @@ class MainScreenController extends GetxController {
   //   return [...menuNodes, ...screenNodes];
   // }
 
-  Future<void> getScreens() async {
-    try {
-      isLoading.value = true;
+ Future<void> getScreens() async {
+  try {
+    isLoading.value = true;
 
-      // Fetch user ID from SharedPreferences
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final action = prefs.getString('userId');
-      if (action == null || action.isEmpty) return;
+    // Fetch user ID from SharedPreferences
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final action = prefs.getString('userId');
+    if (action == null || action.isEmpty) return;
 
-      uid.value = action;
+    uid.value = action;
 
-      // Check for cached data
-      final cachedMenus = prefs.getString('cachedMenus');
-      final cachedScreens = prefs.getString('cachedScreens');
-      final cachedRoles = prefs.getStringList('cachedRoles');
-      final cachedRoleMenus = prefs.getStringList('cachedRoleMenus');
+    // Fetch user data from Firestore
+    final userSnapshot = await FirebaseFirestore.instance
+        .collection('sys-users')
+        .doc(uid.value)
+        .get();
 
-      // Fetch user data from Firestore
-      final userSnapshot = await FirebaseFirestore.instance
-          .collection('sys-users')
-          .doc(uid.value)
-          .get();
+    if (!userSnapshot.exists) return;
 
-      if (!userSnapshot.exists) return;
+    final fetchedRoles =
+        List<String>.from(userSnapshot.data()?['roles'] ?? []);
+    userName.value = userSnapshot.data()?['user_name'] ?? '';
 
-      final fetchedRoles =
-          List<String>.from(userSnapshot.data()?['roles'] ?? []);
-      userName.value = userSnapshot.data()?['user_name'] ?? '';
+    // Assign roles directly without checking for cached data
+    userRoles.assignAll(fetchedRoles);
 
-      bool rolesChanged = false;
+    // Fetch role menus
+    final roleSnapshot = await FirebaseFirestore.instance
+        .collection('sys-roles')
+        .where(FieldPath.documentId, whereIn: userRoles)
+        .get();
 
-      // Check if roles have changed
-      if (cachedRoles == null ||
-          !const ListEquality().equals(cachedRoles, fetchedRoles)) {
-        rolesChanged = true;
+    roleMenus.clear();
+    for (var doc in roleSnapshot.docs) {
+      final menuID = doc.data()['menuID'];
+      if (menuID is String) {
+        roleMenus.add(menuID);
+      } else if (menuID is List) {
+        roleMenus.addAll(List<String>.from(menuID));
       }
-
-      if (!rolesChanged &&
-          cachedMenus != null &&
-          cachedScreens != null &&
-          cachedRoleMenus != null) {
-        // Use cached data
-        allMenus.value = Map<String, dynamic>.from(jsonDecode(cachedMenus));
-        allScreens.value = Map<String, dynamic>.from(jsonDecode(cachedScreens));
-        userRoles.assignAll(cachedRoles!);
-        roleMenus.assignAll(cachedRoleMenus);
-
-      } else {
-        // Fetch role menus if roles have changed or no cache exists
-        userRoles.assignAll(fetchedRoles);
-
-        final roleSnapshot = await FirebaseFirestore.instance
-            .collection('sys-roles')
-            .where(FieldPath.documentId, whereIn: userRoles)
-            .get();
-
-        roleMenus.clear();
-        for (var doc in roleSnapshot.docs) {
-          final menuID = doc.data()['menuID'];
-          if (menuID is String) {
-            roleMenus.add(menuID);
-          } else if (menuID is List) {
-            roleMenus.addAll(List<String>.from(menuID));
-          }
-        }
-
-        // Fetch menus and screens
-        final collections = await Future.wait([
-          FirebaseFirestore.instance.collection('menus ').get(),
-          FirebaseFirestore.instance.collection('screens').get(),
-        ]);
-
-        allMenus.value = {
-          for (var menu in collections[0].docs) menu.id: menu.data()
-        };
-        allScreens.value = {
-          for (var screen in collections[1].docs) screen.id: screen.data()
-        };
-
-        // Cache the updated data
-        await prefs.setString('cachedMenus', jsonEncode(allMenus));
-        await prefs.setString('cachedScreens', jsonEncode(allScreens));
-        await prefs.setStringList('cachedRoles', userRoles);
-        await prefs.setStringList('cachedRoleMenus', roleMenus);
-
-      }
-
-      // Filter menus based on role menus
-      final menuSnapshot = allMenus.entries
-          .where((entry) => roleMenus.contains(entry.key))
-          .toList();
-
-      // Build tree structure
-      final roots = await Future.wait(menuSnapshot.map((menuDoc) async {
-        final children = await buildMenus(menuDoc.value);
-        return MyTreeNode(
-          isMenu: true,
-          title: menuDoc.value['name'],
-          children: children,
-          routeName: menuDoc.value['routeName'],
-        );
-      }));
-
-      // Initialize tree controller
-      treeController = TreeController<MyTreeNode>(
-        roots: roots,
-        childrenProvider: (node) => node.children,
-        parentProvider: (node) => node.parent,
-      );
-
-      isLoading.value = false;
-    } catch (e) {
-      errorLoading.value = true;
-      isLoading.value = false;
     }
+
+    // Fetch menus and screens
+    final collections = await Future.wait([
+      FirebaseFirestore.instance.collection('menus ').get(),
+      FirebaseFirestore.instance.collection('screens').get(),
+    ]);
+
+    allMenus.value = {
+      for (var menu in collections[0].docs) menu.id: menu.data()
+    };
+    allScreens.value = {
+      for (var screen in collections[1].docs) screen.id: screen.data()
+    };
+
+    // Filter menus based on role menus
+    final menuSnapshot = allMenus.entries
+        .where((entry) => roleMenus.contains(entry.key))
+        .toList();
+
+    // Build tree structure
+    final roots = await Future.wait(menuSnapshot.map((menuDoc) async {
+      final children = await buildMenus(menuDoc.value);
+      return MyTreeNode(
+        isMenu: true,
+        title: menuDoc.value['name'],
+        children: children,
+        routeName: menuDoc.value['routeName'],
+      );
+    }));
+
+    // Initialize tree controller
+    treeController = TreeController<MyTreeNode>(
+      roots: roots,
+      childrenProvider: (node) => node.children,
+      parentProvider: (node) => node.parent,
+    );
+
+    isLoading.value = false;
+  } catch (e) {
+    errorLoading.value = true;
+    isLoading.value = false;
   }
+}
 
   Future<List<MyTreeNode>> buildMenus(Map<String, dynamic> menuDetail) async {
     List<String> childrenIds = List<String>.from(menuDetail['children'] ?? []);
