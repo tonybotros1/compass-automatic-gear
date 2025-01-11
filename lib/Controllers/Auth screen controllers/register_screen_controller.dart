@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,6 +19,9 @@ class RegisterScreenController extends GetxController {
   TextEditingController country = TextEditingController();
   TextEditingController city = TextEditingController();
   Uint8List? imageBytes;
+  RxMap allRoles = RxMap({});
+  RxList roleIDFromList = RxList([]);
+
 
   final menu = <RegisterMenuModel>[
     RegisterMenuModel(title: 'Company Details', isPressed: true),
@@ -25,6 +29,44 @@ class RegisterScreenController extends GetxController {
     RegisterMenuModel(title: 'Responsibilities', isPressed: false),
   ];
 
+  @override
+  void onInit() {
+    getResponsibilities();
+
+    super.onInit();
+  }
+
+  // this function is to remove a menu from the list
+  removeMenuFromList(index) {
+    roleIDFromList.removeAt(index);
+  }
+
+   String getRoleName(String menuID) {
+    // Find the entry with the matching key
+    final matchingEntry = allRoles.entries.firstWhere(
+      (entry) => entry.key == menuID,
+      orElse: () =>
+          const MapEntry('', 'Unknown'), // Handle cases where no match is found
+    );
+    final menuName =
+        matchingEntry.value.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
+
+    return menuName;
+  }
+
+
+// this function is to get Responsibilities
+  getResponsibilities() async {
+    var roles = await FirebaseFirestore.instance
+        .collection('sys-roles')
+        .where('is_shown_for_users', isEqualTo: true)
+        .get();
+    for (var role in roles.docs) {
+      allRoles[role.id] =  role.data()['role_name'];
+    }
+  }
+
+// this function is to select an image for logo
   pickImage() async {
     final ImagePicker picker = ImagePicker();
     XFile? image = await picker.pickImage(source: ImageSource.gallery);

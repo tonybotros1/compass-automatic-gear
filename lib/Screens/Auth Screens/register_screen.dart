@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../Controllers/Auth screen controllers/register_screen_controller.dart';
+import '../../Widgets/main screen widgets/drop_down_menu.dart';
 import '../../Widgets/my_text_field.dart';
 import '../../consts.dart';
 
@@ -88,7 +89,64 @@ Widget responsibilities({
     curve: Curves.easeInOut,
     child: Stack(
       children: [
-       
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            dropDownValues(
+                labelText: 'Responsibilities',
+                hintText: 'select responsibility ',
+                menus: controller.allRoles,
+                validate: true,
+                ids: controller.roleIDFromList),
+            ListView(
+              shrinkWrap: true,
+              children: [
+                GetX<RegisterScreenController>(builder: (controller) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Wrap(
+                      spacing: 10, // Horizontal spacing between items
+                      runSpacing: 10, // Vertical spacing between rows
+                      children:
+                          List.generate(controller.roleIDFromList.length, (i) {
+                        return Stack(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: const Color(0xffA6AEBF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                controller
+                                    .getRoleName(controller.roleIDFromList[i]),
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: InkWell(
+                                onTap: () {
+                                  controller.removeMenuFromList(i);
+                                },
+                                child: const Icon(
+                                  Icons.remove_circle,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ],
+        ),
         Positioned(
             bottom: 0,
             left: 0,

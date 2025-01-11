@@ -168,6 +168,7 @@ class ResponsibilitiesController extends GetxController {
           'role_name': responsibilityName.text,
           'menuID': menuIDFromList.value,
           'added_date': DateTime.now().toString(),
+          'is_shown_for_users':true
         });
         Get.back();
       }
