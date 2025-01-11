@@ -77,27 +77,41 @@ class LoginScreen extends StatelessWidget {
                     SizedBox(
                       height: constraints.maxHeight / 10,
                     ),
-                    Obx(() => ElevatedButton(
-                          onPressed: loginScreenController.sigingInProcess.value
-                              ? null
-                              : () {
-                                  loginScreenController.singIn();
+                    Obx(() => Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed:
+                                  loginScreenController.sigingInProcess.value
+                                      ? null
+                                      : () {
+                                          loginScreenController.singIn();
+                                        },
+                              style: loginButtonStyle,
+                              child:
+                                  loginScreenController.sigingInProcess.value ==
+                                          false
+                                      ? const Text(
+                                          'Login',
+                                          style: TextStyle(color: Colors.white),
+                                        )
+                                      : const Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                            ),
+                            const SizedBox(
+                              width: 20,
+                            ),
+                            ElevatedButton(
+                                style: newCompannyButtonStyle,
+                                onPressed: () {
+                                  Get.toNamed('/registerScreen');
                                 },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: mainColor,
-                          ),
-                          child: loginScreenController.sigingInProcess.value ==
-                                  false
-                              ? const Text(
-                                  'Login',
-                                  style: TextStyle(color: Colors.white),
-                                )
-                              : const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                child: const Text('Are you a new company?'))
+                          ],
                         )),
                   ],
                 ),

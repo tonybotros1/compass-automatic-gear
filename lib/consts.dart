@@ -100,6 +100,44 @@ var addButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var nextButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.blue[300],
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var selectButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.deepPurple[200],
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var loginButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: mainColor,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var newCompannyButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.deepPurple[200],
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+
+
 var screenPadding = const EdgeInsets.only(
   left: 14,
   right: 14,
