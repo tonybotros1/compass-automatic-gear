@@ -21,6 +21,8 @@ class ResponsibilitiesController extends GetxController {
   RxBool deleteingResponsibility = RxBool(false);
   RxMap menuMap = RxMap({});
 
+  RxList selectedRow = RxList([]);
+
   @override
   void onInit() {
     getResponsibilities();
@@ -29,6 +31,41 @@ class ResponsibilitiesController extends GetxController {
     });
 
     super.onInit();
+  }
+
+  // Future<void> updateDescriptions() async {
+  //   try {
+  //     // Reference to the 'menus' collection
+  //     CollectionReference menus =
+  //         FirebaseFirestore.instance.collection('sys-roles');
+
+  //     // Fetch all documents in the collection
+  //     QuerySnapshot snapshot = await menus.get();
+
+  //     // Batch write to avoid multiple writes
+  //     WriteBatch batch = FirebaseFirestore.instance.batch();
+
+  //     // Iterate through documents and update the 'description' field
+  //     for (var doc in snapshot.docs) {
+  //       batch.update(doc.reference, {'is_shown_for_users': false});
+  //     }
+
+  //     // Commit the batch
+  //     await batch.commit();
+  //     print("All documents updated with the 'description' field.");
+  //   } catch (e) {
+  //     print("Error updating descriptions: $e");
+  //   }
+  // }
+
+// this function is to choose the roles to be shown for the other users or not
+  updateRoleStatus(roleID, status) async {
+    await FirebaseFirestore.instance
+        .collection('sys-roles')
+        .doc(roleID)
+        .update({
+      'is_shown_for_users': status,
+    });
   }
 
 // this function is to update the role details
@@ -151,6 +188,7 @@ class ResponsibilitiesController extends GetxController {
 
       FirebaseFirestore.instance
           .collection('sys-roles')
+          .orderBy('is_shown_for_users', descending: true)
           .snapshots()
           .listen((roles) {
         allResponsibilities.clear();
@@ -160,6 +198,7 @@ class ResponsibilitiesController extends GetxController {
             'role_name': role['role_name'],
             'menu': menuMap[role['menuID']] ?? {}, // Fetch menu data as Map
             'added_date': role['added_date'],
+            'is_shown_for_users': role['is_shown_for_users'],
           };
         }
 

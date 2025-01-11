@@ -201,56 +201,61 @@ Widget tableOfScreens(
             final roleData = role.value;
             final roleId = role.key;
             return dataRowForTheTable(
-                roleData, context, constraints, roleId, controller);
+                roleData, context, constraints, roleId, controller, role);
           }).toList()
         : controller.filteredResponsibilities.entries.map<DataRow>((role) {
             final roleData = role.value;
             final roleId = role.key;
             return dataRowForTheTable(
-                roleData, context, constraints, roleId, controller);
+                roleData, context, constraints, roleId, controller, role);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(
-    Map<String, dynamic> roleData, context, constraints, roleId, controller) {
-  return DataRow(cells: [
-    DataCell(Text(
-      roleData['role_name'] ?? 'no name',
-    )),
-    DataCell(
-      Text(
-        roleData['menu'] != null || roleData['menu'].isNotEmpty()
-            ? '${roleData['menu']['name']} (${roleData['menu']['description']})'
-            : 'no menu',
-      ),
-    ),
-    DataCell(
-      Text(
-        roleData['added_date'] != null
-            ? controller.textToDate(roleData['added_date']) //
-            : 'N/A',
-      ),
-    ),
-    DataCell(Align(
-      // alignment: Alignment.center,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 5),
-            child: viewSection(
-                constraints: constraints,
-                context: context,
-                controller: controller,
-                roleData: roleData,
-                roleID: roleId),
+DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
+    roleId, controller, role) {
+  return DataRow(
+      selected: roleData['is_shown_for_users'] ?? false,
+      onSelectChanged: (isSelected) {
+        controller.updateRoleStatus(roleId,isSelected);
+      },
+      cells: [
+        DataCell(Text(
+          roleData['role_name'] ?? 'no name',
+        )),
+        DataCell(
+          Text(
+            roleData['menu'] != null || roleData['menu'].isNotEmpty()
+                ? '${roleData['menu']['name']} (${roleData['menu']['description']})'
+                : 'no menu',
           ),
-          deleteSection(context, controller, roleId)
-        ],
-      ),
-    )),
-  ]);
+        ),
+        DataCell(
+          Text(
+            roleData['added_date'] != null
+                ? controller.textToDate(roleData['added_date']) //
+                : 'N/A',
+          ),
+        ),
+        DataCell(Align(
+          // alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 5),
+                child: viewSection(
+                    constraints: constraints,
+                    context: context,
+                    controller: controller,
+                    roleData: roleData,
+                    roleID: roleId),
+              ),
+              deleteSection(context, controller, roleId)
+            ],
+          ),
+        )),
+      ]);
 }
 
 ElevatedButton deleteSection(context, controller, roleId) {
