@@ -90,14 +90,17 @@ Widget responsibilities({
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Form(
-              key: controller.formKeyForThirdMenu,
-              child: dropDownValues(
-                  labelText: 'Responsibilities',
-                  hintText: 'select responsibility ',
-                  menus: controller.allRoles,
-                  validate: true,
-                  ids: controller.roleIDFromList),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Form(
+                key: controller.formKeyForThirdMenu,
+                child: dropDownValues(
+                    labelText: 'Responsibilities',
+                    hintText: 'select responsibility ',
+                    menus: controller.allRoles,
+                    validate: true,
+                    ids: controller.roleIDFromList),
+              ),
             ),
             ListView(
               shrinkWrap: true,
