@@ -14,7 +14,7 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         bottomNavigationBar: Container(
-          color: Colors.grey[200], // Background color of the footer
+          color: const Color(0xffEFF3EA), // Background color of the footer
           padding: const EdgeInsets.all(16.0),
           child: Text(
             '© ${DateTime.now().year} Compass Automatic Gear. All rights reserved.',
@@ -54,7 +54,20 @@ class RegisterScreen extends StatelessWidget {
                       const SizedBox(
                         width: 10,
                       ),
-                      rightSide(constraints)
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
+                          decoration: BoxDecoration(
+                            color: const Color(0xffEFF3EA),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: GetBuilder<RegisterScreenController>(
+                              builder: (controller) {
+                            return controller.buildRightContent(
+                                controller.selectedMenu.value, controller);
+                          }),
+                        ),
+                      )
                     ],
                   ),
                 )
@@ -63,31 +76,13 @@ class RegisterScreen extends StatelessWidget {
           );
         }));
   }
-
-  Expanded rightSide(BoxConstraints constraints) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
-        decoration: BoxDecoration(
-          color: const Color(0xffEFF3EA),
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: GetBuilder<RegisterScreenController>(builder: (controller) {
-          return controller.buildRightContent(
-            controller.selectedMenu.value,
-            constraints,
-          );
-        }),
-      ),
-    );
-  }
 }
 
 Widget responsibilities({
   required controller,
 }) {
   return AnimatedContainer(
-    height: 300,
+    height: 320,
     duration: const Duration(milliseconds: 300),
     curve: Curves.easeInOut,
     child: Stack(
@@ -95,12 +90,15 @@ Widget responsibilities({
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            dropDownValues(
-                labelText: 'Responsibilities',
-                hintText: 'select responsibility ',
-                menus: controller.allRoles,
-                validate: true,
-                ids: controller.roleIDFromList),
+            Form(
+              key: controller.formKeyForThirdMenu,
+              child: dropDownValues(
+                  labelText: 'Responsibilities',
+                  hintText: 'select responsibility ',
+                  menus: controller.allRoles,
+                  validate: true,
+                  ids: controller.roleIDFromList),
+            ),
             ListView(
               shrinkWrap: true,
               children: [
@@ -156,13 +154,45 @@ Widget responsibilities({
             child: Row(
               children: [
                 ElevatedButton(
-                    style: saveButtonStyle,
-                    onPressed: () {},
-                    child: const Text('Save')),
+                  style: saveButtonStyle,
+                  onPressed: () {
+                    if (controller.roleIDFromList.isEmpty &&
+                        !controller.formKeyForThirdMenu.currentState!
+                            .validate()) {}
+                    if (controller.userName.text.isNotEmpty &&
+                        controller.companyName.text.isNotEmpty &&
+                        controller.typeOfBusiness.text.isNotEmpty &&
+                        controller.password.text.isNotEmpty &&
+                        controller.phoneNumber.text.isNotEmpty &&
+                        controller.email.text.isNotEmpty &&
+                        controller.address.text.isNotEmpty &&
+                        controller.country.text.isNotEmpty &&
+                        controller.city.text.isNotEmpty &&
+                        controller.imageBytes.isNotEmpty) {
+                      controller.update();
+
+                      controller.addNewCompany();
+                    } else {
+                      showSnackBar('Note', 'Please fill all fields');
+                    }
+                  },
+                  child: controller.addingProcess.value == false
+                      ? const Text('Save')
+                      : const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                ),
                 const SizedBox(width: 10),
                 ElevatedButton(
                     style: cancelButtonStyle,
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.offAllNamed('/');
+                    },
                     child: const Text('Cancel')),
               ],
             ))
@@ -175,87 +205,123 @@ Widget contactDetails({
   required controller,
 }) {
   return AnimatedContainer(
-    height: 300,
+    height: 320,
     duration: const Duration(milliseconds: 300),
     curve: Curves.easeInOut,
     child: Stack(
       children: [
-        Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              child: myTextFormField2(
-                labelText: 'Name',
-                hintText: 'Enter your name here',
-                controller: controller.userName,
-                validate: true,
-                obscureText: false,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              child: myTextFormField2(
-                labelText: 'Phone Number',
-                hintText: 'Enter your phone number here',
-                controller: controller.phoneNumber,
-                validate: true,
-                obscureText: false,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              child: myTextFormField2(
-                labelText: 'Email',
-                hintText: 'Enter a valid email here',
-                controller: controller.email,
-                validate: true,
-                obscureText: false,
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    child: myTextFormField2(
-                      labelText: 'Address',
-                      hintText: 'Enter your company address',
-                      controller: controller.address,
-                      validate: true,
-                      obscureText: false,
+        Form(
+          key: controller.formKeyForSecondMenu,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 2.5),
+                      child: myTextFormField2(
+                        labelText: 'Name',
+                        hintText: 'Enter your name here',
+                        controller: controller.userName,
+                        validate: true,
+                        obscureText: false,
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    child: myTextFormField2(
-                      labelText: 'City',
-                      hintText: 'Enter your city',
-                      controller: controller.city,
-                      validate: true,
-                      obscureText: false,
+                  Expanded(
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 2.5),
+                        child: myTextFormField2(
+                            labelText: 'Password',
+                            hintText: 'Enter your password here',
+                            controller: controller.password,
+                            validate: true,
+                            obscureText: controller.obscureText.value,
+                            icon: IconButton(
+                                onPressed: () {
+                                  controller.changeObscureTextValue();
+                                },
+                                icon: Icon(controller.obscureText.value
+                                    ? Icons.remove_red_eye_outlined
+                                    : Icons.visibility_off)))),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 2.5),
+                      child: myTextFormField2(
+                        labelText: 'Phone Number',
+                        hintText: 'Enter your phone number here',
+                        controller: controller.phoneNumber,
+                        validate: true,
+                        obscureText: false,
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    child: myTextFormField2(
-                      labelText: 'Country',
-                      hintText: 'Enter your country',
-                      controller: controller.country,
-                      validate: true,
-                      obscureText: false,
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 2.5),
+                      child: myTextFormField2(
+                        labelText: 'Email',
+                        hintText: 'Enter a valid email here',
+                        controller: controller.email,
+                        validate: true,
+                        obscureText: false,
+                      ),
                     ),
                   ),
+                ],
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 2.5),
+                child: myTextFormField2(
+                  labelText: 'Address',
+                  hintText: 'Enter your company address',
+                  controller: controller.address,
+                  validate: true,
+                  obscureText: false,
                 ),
-              ],
-            ),
-          ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 2.5),
+                      child: myTextFormField2(
+                        labelText: 'Country',
+                        hintText: 'Enter your country',
+                        controller: controller.country,
+                        validate: true,
+                        obscureText: false,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 2.5),
+                      child: myTextFormField2(
+                        labelText: 'City',
+                        hintText: 'Enter your city',
+                        controller: controller.city,
+                        validate: true,
+                        obscureText: false,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         Positioned(
             bottom: 0,
@@ -265,7 +331,11 @@ Widget contactDetails({
                 ElevatedButton(
                     style: nextButtonStyle,
                     onPressed: () {
-                      controller.goToNextMenu();
+                      if (!controller.formKeyForSecondMenu.currentState!
+                          .validate()) {
+                      } else {
+                        controller.goToNextMenu();
+                      }
                     },
                     child: const Text('Next')),
                 const SizedBox(width: 10),
@@ -286,67 +356,76 @@ Widget companyDetails({
   required controller,
 }) {
   return AnimatedContainer(
-    height: 300,
+    height: 320,
     duration: const Duration(milliseconds: 300),
     curve: Curves.easeInOut,
     child: Stack(
       children: [
-        Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              child: myTextFormField2(
-                labelText: 'Company Name',
-                hintText: 'Enter your company name here',
-                controller: controller.companyName,
-                validate: true,
-                obscureText: false,
+        Form(
+          key: controller.formKeyForFirstMenu,
+          child: Column(
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                child: myTextFormField2(
+                  labelText: 'Company Name',
+                  hintText: 'Enter your company name here',
+                  controller: controller.companyName,
+                  validate: true,
+                  obscureText: false,
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              child: myTextFormField2(
-                labelText: 'Type Of Business',
-                hintText: 'Enter type of business',
-                controller: controller.typeOfBusiness,
-                validate: true,
-                obscureText: false,
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                child: myTextFormField2(
+                  labelText: 'Type Of Business',
+                  hintText: 'Enter type of business',
+                  controller: controller.typeOfBusiness,
+                  validate: true,
+                  obscureText: false,
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ElevatedButton(
-                      style: selectButtonStyle,
-                      onPressed: () {
-                        controller.pickImage();
-                      },
-                      child: const Text('Select Logo')),
-                  Container(
-                    width: 150,
-                    height: 150,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(
-                            style: BorderStyle.solid, color: Colors.grey)),
-                    child: controller.imageBytes == null
-                        ? const Center(
-                            child: FittedBox(
-                                child: Text(
-                              'No image selected',
-                              style: TextStyle(color: Colors.grey),
-                            )),
-                          )
-                        : Image.memory(controller.imageBytes,
-                            fit: BoxFit.cover),
-                  )
-                ],
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ElevatedButton(
+                        style: selectButtonStyle,
+                        onPressed: () {
+                          controller.pickImage();
+                        },
+                        child: const Text('Select Logo')),
+                    Container(
+                      width: 150,
+                      height: 150,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                              style: BorderStyle.solid,
+                              color: controller.warningForImage.value == false
+                                  ? Colors.grey
+                                  : Colors.red)),
+                      child: controller.imageBytes == null
+                          ? const Center(
+                              child: FittedBox(
+                                  child: Text(
+                                'No image selected',
+                                style: TextStyle(color: Colors.grey),
+                              )),
+                            )
+                          : Image.memory(controller.imageBytes,
+                              fit: BoxFit.cover),
+                    )
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         Positioned(
             bottom: 0,
@@ -356,7 +435,25 @@ Widget companyDetails({
                 ElevatedButton(
                     style: nextButtonStyle,
                     onPressed: () {
-                      controller.goToNextMenu();
+                      if (!controller.formKeyForFirstMenu.currentState!
+                              .validate() ||
+                          controller.imageBytes == null ||
+                          controller.imageBytes.isEmpty) {
+                        // Handle the validation or warning
+                        if (!controller.formKeyForFirstMenu.currentState!
+                            .validate()) {
+                          // Optionally add specific handling for form validation failure
+                        }
+                        if (controller.imageBytes == null ||
+                            controller.imageBytes.isEmpty) {
+                          controller.warningForImage.value = true;
+                          controller.update();
+                        }
+                      } else {
+                        controller.warningForImage.value = false;
+                        controller.update();
+                        controller.goToNextMenu();
+                      }
                     },
                     child: const Text('Next')),
                 const SizedBox(width: 10),
@@ -379,7 +476,7 @@ Widget leftSideMenu() {
       builder: (controller) {
         return Container(
           width: 320,
-          height: 360,
+          height: 380,
           padding: const EdgeInsets.fromLTRB(35, 30, 0, 30),
           decoration: BoxDecoration(
             color: const Color(0xffEFF3EA),

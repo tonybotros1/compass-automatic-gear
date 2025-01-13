@@ -1,18 +1,24 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Models/register_menu_model.dart';
 import '../../Screens/Auth Screens/register_screen.dart';
+import '../../consts.dart';
 
 class RegisterScreenController extends GetxController {
   RxInt selectedMenu = RxInt(0);
   TextEditingController companyName = TextEditingController();
   TextEditingController typeOfBusiness = TextEditingController();
   TextEditingController userName = TextEditingController();
+  TextEditingController password = TextEditingController();
   TextEditingController phoneNumber = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController address = TextEditingController();
@@ -21,7 +27,13 @@ class RegisterScreenController extends GetxController {
   Uint8List? imageBytes;
   RxMap allRoles = RxMap({});
   RxList roleIDFromList = RxList([]);
-
+  RxBool addingProcess = RxBool(false);
+  RxString logoUrl = RxString('');
+  RxBool obscureText = RxBool(true);
+  RxBool warningForImage = RxBool(false);
+  final GlobalKey<FormState> formKeyForFirstMenu = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKeyForSecondMenu = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKeyForThirdMenu = GlobalKey<FormState>();
 
   final menu = <RegisterMenuModel>[
     RegisterMenuModel(title: 'Company Details', isPressed: true),
@@ -32,7 +44,6 @@ class RegisterScreenController extends GetxController {
   @override
   void onInit() {
     getResponsibilities();
-
     super.onInit();
   }
 
@@ -41,7 +52,7 @@ class RegisterScreenController extends GetxController {
     roleIDFromList.removeAt(index);
   }
 
-   String getRoleName(String menuID) {
+  String getRoleName(String menuID) {
     // Find the entry with the matching key
     final matchingEntry = allRoles.entries.firstWhere(
       (entry) => entry.key == menuID,
@@ -54,7 +65,6 @@ class RegisterScreenController extends GetxController {
     return menuName;
   }
 
-
 // this function is to get Responsibilities
   getResponsibilities() async {
     var roles = await FirebaseFirestore.instance
@@ -62,7 +72,7 @@ class RegisterScreenController extends GetxController {
         .where('is_shown_for_users', isEqualTo: true)
         .get();
     for (var role in roles.docs) {
-      allRoles[role.id] =  role.data()['role_name'];
+      allRoles[role.id] = role.data()['role_name'];
     }
   }
 
@@ -88,6 +98,105 @@ class RegisterScreenController extends GetxController {
     selectedMenu.value += 1;
     selectFromLeftMenu(selectedMenu.value);
     update();
+  }
+
+  String formatPhrase(String phrase) {
+    return phrase.replaceAll(' ', '_');
+  }
+
+  // this function is to change the obscureText value:
+  void changeObscureTextValue() {
+    if (obscureText.value == true) {
+      obscureText.value = false;
+    } else {
+      obscureText.value = true;
+    }
+    update();
+  }
+
+  addNewCompany() async {
+    try {
+      addingProcess.value = true;
+
+      var userDataSnapshot = await FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('email', isEqualTo: email.text) // Check for existing email
+          .get();
+
+      if (userDataSnapshot.docs.isNotEmpty) {
+        addingProcess.value = false;
+        showSnackBar(
+            'Email already in use', 'This email is already registered');
+        return;
+      }
+
+      if (imageBytes != null && imageBytes!.isNotEmpty) {
+        final Reference storageRef = FirebaseStorage.instance
+            .ref()
+            .child('images/${formatPhrase(companyName.text)}.png');
+        final UploadTask uploadTask = storageRef.putData(
+          imageBytes!,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        await uploadTask.then((p0) async {
+          logoUrl.value = await storageRef.getDownloadURL();
+        });
+      }
+
+      var bytes = utf8.encode(password.text); // Convert password to bytes
+      var digest = sha256.convert(bytes); // Hash the password
+      String hashedPassword = digest.toString();
+
+      var newCompany =
+          await FirebaseFirestore.instance.collection('companies').add({
+        'company_logo': logoUrl.value,
+        'company_name': companyName.text,
+        'type_of_business': typeOfBusiness.text,
+        'contact_details': {
+          'address': address.text,
+          'city': city.text,
+          'country': country.text,
+          'email': email.text,
+          'name': userName.text,
+          'password': hashedPassword,
+          'phone': phoneNumber.text,
+        },
+      });
+
+      DateTime now = DateTime.now(); // Current date and time
+      DateTime expiryDate =
+          DateTime(now.year, now.month + 1, now.day); // Add one month
+
+      var newUser =
+          await FirebaseFirestore.instance.collection('sys-users').add({
+        "user_name": userName.text,
+        "email": email.text,
+        "password": hashedPassword, // Store hashed password
+        "roles": roleIDFromList,
+        "expiry_date": expiryDate.toString(),
+        "added_date": DateTime.now().toString(),
+        "status": true,
+        "company_id": newCompany.id,
+      });
+
+      await saveUserIdAndCompanyIdInSharedPref(newUser.id, newCompany.id);
+      showSnackBar('Registeration Success', 'Welcome');
+
+      Get.offAllNamed('/mainScreen');
+
+      addingProcess.value = false;
+    } catch (e) {
+      print(e);
+      addingProcess.value = false;
+    }
+  }
+
+// this function is to save user id in shared pref
+  saveUserIdAndCompanyIdInSharedPref(userId, companyId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userId', userId);
+    await prefs.setString('companyId', companyId);
   }
 
   Widget buildRightContent(int index, controller) {

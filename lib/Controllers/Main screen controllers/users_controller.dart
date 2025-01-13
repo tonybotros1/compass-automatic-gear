@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../consts.dart';
 
@@ -240,6 +241,9 @@ class UsersController extends GetxController {
             'Email already in use', 'This email is already registered');
         return;
       }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final companyId = prefs.getString('companyId');
+      if (companyId == null || companyId.isEmpty) return;
 
       // Save the user details in Firestore with an auto-generated document ID
       await FirebaseFirestore.instance.collection('sys-users').add({
@@ -252,7 +256,8 @@ class UsersController extends GetxController {
             .toList(),
         "expiry_date": '${selectedDate.value}',
         "added_date": DateTime.now().toString(),
-        "status": true
+        "status": true,
+        "company_id": companyId,
       });
 
       sigupgInProcess.value = false;
@@ -325,8 +330,10 @@ class UsersController extends GetxController {
     try {
       isLoading.value = true;
       // Fetch roles from the 'sys-roles' collection
-      var rolesSnapshot =
-          await FirebaseFirestore.instance.collection('sys-roles').get();
+      var rolesSnapshot = await FirebaseFirestore.instance
+          .collection('sys-roles')
+          .where('is_shown_for_users', isEqualTo: true)
+          .get();
 
       // Map documents to a list of roles
       var roles = rolesSnapshot.docs.map((doc) {
@@ -351,10 +358,14 @@ class UsersController extends GetxController {
   }
 
   // this function is to get all users in the system
-  getAllUsers() {
+  getAllUsers() async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final companyId = prefs.getString('companyId');
+      if (companyId == null || companyId.isEmpty) return;
       FirebaseFirestore.instance
           .collection('sys-users')
+          .where('company_id', isEqualTo: companyId)
           .snapshots()
           .listen((event) {
         allUsers.assignAll(event.docs);

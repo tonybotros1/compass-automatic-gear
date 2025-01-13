@@ -14,7 +14,6 @@ class LoginScreenController extends GetxController {
   final FocusNode focusNode = FocusNode(); // To keep track of focus
 
   late String currentUserToken = '';
-  late String userId;
   RxBool obscureText = RxBool(true);
   RxBool sigingInProcess = RxBool(false);
 
@@ -32,12 +31,10 @@ class LoginScreenController extends GetxController {
     }
   }
 
-
-
-
-  saveUserIdInSharedPref() async {
+  saveUserIdAndCompanyIdInSharedPref(userId, companyId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
+    await prefs.setString('companyId', companyId);
   }
 
 // this functon is to check if the date of the user has been expired or not
@@ -137,9 +134,9 @@ class LoginScreenController extends GetxController {
       // Compare the entered hashed password with the stored password hash
       if (hashedPassword == storedHashedPassword) {
         // Password is correct, proceed with login
-        userId = userDataSnapshot.docs.first.id;
         // await saveToken(userId);
-        await saveUserIdInSharedPref();
+        await saveUserIdAndCompanyIdInSharedPref(userDataSnapshot.docs.first.id,
+            userDataSnapshot.docs.first.data()['company_id']);
 
         sigingInProcess.value = false;
         showSnackBar('Login Success', 'Welcome');

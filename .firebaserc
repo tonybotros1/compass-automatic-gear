@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "compass-automatic-gear"
-  }
+    "default": "compass-automatic-gear",
+    "compass": "compass-automatic-gear"
+  },
+  "targets": {},
+  "etags": {}
 }

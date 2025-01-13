@@ -124,10 +124,18 @@ class MainScreen extends StatelessWidget {
                   alignment: Alignment.center,
                   children: [
                     // Centered logo
-                    Center(
-                      child: Image.asset(
-                        'assets/logo2.png',
-                        width: 90,
+                    Obx(
+                      () => Center(
+                        child: mainScreenController
+                                .companyImageURL.value.isNotEmpty
+                            ? Image.network(
+                                mainScreenController.companyImageURL.value,
+                                width: 90,
+                              )
+                            : const SizedBox(
+                                height: 90,
+                                width: 90,
+                              ),
                       ),
                     ),
                     // Icon in the bottom-right corner
@@ -173,12 +181,14 @@ class MainScreen extends StatelessWidget {
                           child: Text('Network error please try again'))),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Compass Automatic Gear',
-                style: footerTextStylr,
-              ),
-            )
+                padding: const EdgeInsets.all(8.0),
+                child: Obx(
+                  () => Text(
+                    textAlign: TextAlign.center,
+                    mainScreenController.companyName.value,
+                    style: footerTextStylr,
+                  ),
+                ))
           ],
         ));
   }
