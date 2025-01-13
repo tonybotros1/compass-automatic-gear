@@ -100,18 +100,21 @@ Obx screenSection(controller, BoxConstraints constraints) {
                             ),
                           ),
                         ),
-                        Form(
-                          key: controller.formKeyForDropDownListForScreens,
-                          child: dropDownValues(
-                            ids: controller.screenIDFromList,
-                            labelText: 'Screens',
-                            hintText: 'Select Screen',
-                            menus: controller.selectFromScreens,
-                            validate: true,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Form(
+                            key: controller.formKeyForDropDownListForScreens,
+                            child: dropDownValues(
+                              ids: controller.screenIDFromList,
+                              labelText: 'Screens',
+                              hintText: 'Select Screen',
+                              menus: controller.selectFromScreens,
+                              validate: true,
+                            ),
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(20.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Wrap(
                             spacing: 10, // Horizontal spacing between items
                             runSpacing: 10, // Vertical spacing between rows
@@ -238,18 +241,21 @@ Obx menuSection(controller, BoxConstraints constraints) {
                               ),
                             ),
                           ),
-                          Form(
-                            key: controller.formKeyForDropDownListForMenus,
-                            child: dropDownValues(
-                              ids: controller.menuIDFromList,
-                              labelText: 'Menus',
-                              hintText: 'Select Menu',
-                              menus: controller.selectFromMenus,
-                              validate: true,
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Form(
+                              key: controller.formKeyForDropDownListForMenus,
+                              child: dropDownValues(
+                                ids: controller.menuIDFromList,
+                                labelText: 'Menus',
+                                hintText: 'Select Menu',
+                                menus: controller.selectFromMenus,
+                                validate: true,
+                              ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(20.0),
+                            padding: const EdgeInsets.all(8.0),
                             child: Wrap(
                               spacing: 10, // Horizontal spacing between items
                               runSpacing: 10, // Vertical spacing between rows

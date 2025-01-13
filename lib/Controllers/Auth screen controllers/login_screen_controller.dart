@@ -12,6 +12,7 @@ class LoginScreenController extends GetxController {
   late TextEditingController email = TextEditingController();
   late TextEditingController pass = TextEditingController();
   final FocusNode focusNode = FocusNode(); // To keep track of focus
+  final GlobalKey<FormState> formKeyForlogin = GlobalKey<FormState>();
 
   late String currentUserToken = '';
   RxBool obscureText = RxBool(true);
@@ -113,8 +114,29 @@ class LoginScreenController extends GetxController {
         showSnackBar('Login failed', 'This email is not registered');
         return;
       }
-
+      // check for company status
       var userData = userDataSnapshot.docs.first.data();
+      var companyId = userData['company_id'];
+      var company = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .get();
+
+      if (!company.exists) {
+        sigingInProcess.value = false;
+
+        showSnackBar('Login failed', 'No company found');
+        return;
+      }
+      bool companyStatus = company.data()!['status'];
+
+      if (companyStatus == false) {
+        sigingInProcess.value = false;
+
+        showSnackBar('Login failed', 'Your session has been expired');
+        return;
+      }
+
       var storedHashedPassword = userData['password']; // Stored hashed password
       var isExpire = userData['expiry_date'];
       var userActiveStatus = userData['status'];

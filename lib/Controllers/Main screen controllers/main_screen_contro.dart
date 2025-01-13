@@ -1,3 +1,4 @@
+import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
 import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
@@ -64,6 +65,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Menus());
       case '/responsibilities':
         return const SizedBox(child: Responsibilities());
+      case '/defineCompany':
+        return const SizedBox(child: Companies());
       // Add more cases as needed
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));

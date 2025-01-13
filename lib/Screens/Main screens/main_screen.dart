@@ -83,6 +83,8 @@ class MainScreen extends StatelessWidget {
                                                   onPressed: () async {
                                                     await globalPrefs
                                                         ?.remove('userId');
+                                                         await globalPrefs
+                                                        ?.remove('companyId');
                                                     Get.offAllNamed('/');
                                                   },
                                                 ),

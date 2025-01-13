@@ -153,6 +153,8 @@ class RegisterScreenController extends GetxController {
         'company_logo': logoUrl.value,
         'company_name': companyName.text,
         'type_of_business': typeOfBusiness.text,
+        'added_date': DateTime.now().toString(),
+        'status': true,
         'contact_details': {
           'address': address.text,
           'city': city.text,
