@@ -29,7 +29,7 @@ class MainScreenController extends GetxController {
   RxMap allScreens = RxMap({});
   RxString companyImageURL = RxString('');
   RxString companyName = RxString('');
-
+  RxDouble menuWidth = RxDouble(250);
   @override
   void onInit() {
     // init();

@@ -1,4 +1,5 @@
 import 'package:compass_automatic_gear/Responsive/responsive.dart';
+import 'package:compass_automatic_gear/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -83,7 +84,7 @@ class MainScreen extends StatelessWidget {
                                                   onPressed: () async {
                                                     await globalPrefs
                                                         ?.remove('userId');
-                                                         await globalPrefs
+                                                    await globalPrefs
                                                         ?.remove('companyId');
                                                     Get.offAllNamed('/');
                                                   },
@@ -110,87 +111,112 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  Container sideMenuWidget() {
-    return Container(
-        decoration: BoxDecoration(
-          color: mainColorForWeb,
-          // border: Border(
-          //     right: BorderSide(color: mainColorForWeb, width: 2)),
-        ),
-        width: 200,
-        child: Column(
+  Widget sideMenuWidget() {
+    return Obx(() => Stack(
           children: [
-            Padding(
-                padding: const EdgeInsets.only(top: 16, bottom: 10),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Centered logo
-                    Obx(
-                      () => Center(
-                        child: mainScreenController
-                                .companyImageURL.value.isNotEmpty
-                            ? Image.network(
-                                mainScreenController.companyImageURL.value,
-                                width: 90,
-                              )
-                            : const SizedBox(
-                                height: 90,
-                                width: 90,
-                              ),
-                      ),
+            // Main Side Menu
+            Container(
+              width: mainScreenController.menuWidth.value,
+              decoration: BoxDecoration(
+                color: mainColorForWeb,
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16, bottom: 10),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Obx(
+                          () => Center(
+                            child: mainScreenController
+                                    .companyImageURL.value.isNotEmpty
+                                ? Image.network(
+                                    mainScreenController.companyImageURL.value,
+                                    width: 90,
+                                  )
+                                : const SizedBox(
+                                    height: 90,
+                                    width: 90,
+                                  ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 10,
+                          child: Obx(
+                            () => mainScreenController.isLoading.value == false
+                                ? InkWell(
+                                    onTap: () {
+                                      if (mainScreenController
+                                          .treeController.isTreeExpanded) {
+                                        mainScreenController.treeController
+                                            .collapseAll();
+                                      } else {
+                                        mainScreenController.treeController
+                                            .expandAll();
+                                      }
+                                    },
+                                    splashColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    child: const Icon(
+                                      color: Colors.grey,
+                                      Icons.account_tree,
+                                      size: 20,
+                                    ),
+                                  )
+                                : const SizedBox(
+                                    width: 20,
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
-                    // Icon in the bottom-right corner
-                    Positioned(
-                      bottom: 0,
-                      right: 10,
-                      child: Obx(
-                        () => mainScreenController.isLoading.value == false
-                            ? InkWell(
-                                onTap: () {
-                                  if (mainScreenController
-                                      .treeController.isTreeExpanded) {
-                                    mainScreenController.treeController
-                                        .collapseAll();
-                                  } else {
-                                    mainScreenController.treeController
-                                        .expandAll();
-                                  }
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: const Icon(
-                                  color: Colors.grey,
-                                  Icons.account_tree,
-                                  size: 20,
-                                ),
-                              )
-                            : const SizedBox(
-                                width: 20,
-                              ),
-                      ),
-                    ),
-                  ],
-                )),
-            Expanded(
-              child: Obx(() => mainScreenController.isLoading.value == false &&
-                      mainScreenController.errorLoading.value != true
-                  ? leftTree()
-                  : mainScreenController.isLoading.value == true &&
-                          mainScreenController.errorLoading.value != true
-                      ? const Center(child: CircularProgressIndicator())
-                      : const Center(
-                          child: Text('Network error please try again'))),
-            ),
-            Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Obx(
-                  () => Text(
-                    textAlign: TextAlign.center,
-                    mainScreenController.companyName.value,
-                    style: footerTextStylr,
                   ),
-                ))
+                  Expanded(
+                    child: Obx(() => mainScreenController.isLoading.value ==
+                                false &&
+                            mainScreenController.errorLoading.value != true
+                        ? leftTree()
+                        : mainScreenController.isLoading.value == true &&
+                                mainScreenController.errorLoading.value != true
+                            ? const Center(child: CircularProgressIndicator())
+                            : const Center(
+                                child: Text('Network error please try again'))),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Obx(
+                      () => Text(
+                        textAlign: TextAlign.center,
+                        mainScreenController.companyName.value,
+                        style: footerTextStylr,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 0,
+              bottom: 0,
+              right: 0,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.resizeLeftRight,
+                child: GestureDetector(
+                  onHorizontalDragUpdate: (details) {
+                    mainScreenController.menuWidth.value += details.delta.dx;
+                    mainScreenController.menuWidth.value = mainScreenController
+                        .menuWidth.value
+                        .clamp(200.0, 400.0);
+                  },
+                  child: Container(
+                    width: 5,
+                    color: Colors.transparent,
+                  ),
+                ),
+              ),
+            ),
           ],
         ));
   }
@@ -223,12 +249,13 @@ class MainScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       flex: 4,
-                      child: Text(
-                        entry.node.title,
+                      child: AutoSizedText(
+                        text: entry.node.title,
                         style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 12),
+                        constraints: const BoxConstraints(),
                       ),
                     ),
                     entry.node.children.isNotEmpty
