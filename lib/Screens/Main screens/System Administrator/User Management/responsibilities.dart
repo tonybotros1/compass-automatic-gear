@@ -217,7 +217,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
   return DataRow(
       selected: roleData['is_shown_for_users'] ?? false,
       onSelectChanged: (isSelected) {
-        controller.updateRoleStatus(roleId,isSelected);
+        controller.updateRoleStatus(roleId, isSelected);
       },
       cells: [
         DataCell(Text(
@@ -304,9 +304,9 @@ Widget viewSection(
         showDialog(
             context: context,
             builder: (context) {
-              controller.responsibilityName.text = roleData['role_name'];
+              controller.responsibilityName.text = roleData['role_name'] ?? '';
 
-              controller.menuName.text = roleData['menu']['name'];
+              controller.menuName.text = roleData['menu']['name'] ?? '';
               // controller.menuIDFromList.value = roleData['menu']['id'];
 
               // print(controller.menuName.text);

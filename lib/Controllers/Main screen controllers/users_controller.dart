@@ -33,9 +33,9 @@ class UsersController extends GetxController {
   RxBool isAscending = RxBool(true);
 
   @override
-  void onInit() async {
-    await getRoles();
-    await getAllUsers();
+  void onInit()  {
+     getRoles();
+     getAllUsers();
     // getUserStatus('OXugS6xlxhdk5mq48uPwpZilA672');
     search.value.addListener(() {
       filterCards();
@@ -330,29 +330,36 @@ class UsersController extends GetxController {
     try {
       isLoading.value = true;
       // Fetch roles from the 'sys-roles' collection
-      var rolesSnapshot = await FirebaseFirestore.instance
+      FirebaseFirestore.instance
           .collection('sys-roles')
           .where('is_shown_for_users', isEqualTo: true)
-          .get();
+          .snapshots()
+          .listen((roles) {
+        for (var role in roles.docs) {
+          selectedRoles.addAll({
+            role.data()['role_name']: [role.id, false]
+          });
+        }
+      });
 
-      // Map documents to a list of roles
-      var roles = rolesSnapshot.docs.map((doc) {
-        return {
-          ...doc.data(),
-          'id': doc.id,
-        };
-      }).toList();
-      // sysRoles.assignAll(roles);
-      for (var role in roles) {
-        selectedRoles.addAll({
-          role['role_name']: [role['id'], false]
-        });
-      }
+      // // Map documents to a list of roles
+      // var roles = rolesSnapshot.docs.map((doc) {
+      //   return {
+      //     ...doc.data(),
+      //     'id': doc.id,
+      //   };
+      // }).toList();
+      // // sysRoles.assignAll(roles);
+      // for (var role in roles) {
+      //   selectedRoles.addAll({
+      //     role['role_name']: [role['id'], false]
+      //   });
+      // }
 
       isLoading.value = false;
     } catch (e) {
       isLoading.value = false;
-
+      print('$e fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
       return [];
     }
   }
