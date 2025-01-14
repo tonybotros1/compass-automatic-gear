@@ -17,7 +17,7 @@ class RegisterScreen extends StatelessWidget {
           color: const Color(0xffEFF3EA), // Background color of the footer
           padding: const EdgeInsets.all(16.0),
           child: Text(
-            '© ${DateTime.now().year} Compass Automatic Gear. All rights reserved.',
+            '© ${DateTime.now().year} DataHub AI. All rights reserved.',
             textAlign: TextAlign.center,
             style: const TextStyle(
                 fontSize: 14,

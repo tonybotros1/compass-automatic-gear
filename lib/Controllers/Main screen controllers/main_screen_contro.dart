@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
 import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +13,7 @@ import '../../Screens/Main screens/System Administrator/User Management/menus.da
 import '../../Screens/Main screens/System Administrator/User Management/responsibilities.dart';
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
 import '../../consts.dart';
+import 'package:csv/csv.dart';
 
 class MainScreenController extends GetxController {
   late TreeController<MyTreeNode> treeController;
@@ -35,7 +39,39 @@ class MainScreenController extends GetxController {
     // init();
     getCompanyDetails();
     getScreens();
+    // readCSV();
     super.onInit();
+  }
+
+  void readCSV() async {
+    try {
+      // Load the CSV file from assets
+      final csvData = await rootBundle.loadString('data.csv');
+
+      // Parse the CSV data
+      List<List<dynamic>> rows = const CsvToListConverter().convert(csvData);
+
+      // Print the data and add it to Firestore
+      for (int i = 1; i < 20; i++) {
+        if (rows[i][4] != null && rows[i][6] != null) {
+          print(i);
+          await FirebaseFirestore.instance
+              .collection('all_lists')
+              .doc('qYmKFOoU3GPuP0ddtsDN')
+              .collection('values')
+              .add({
+                'name': rows[i][4],
+                'code': rows[i][6],
+              })
+              .then((value) => print('Added row $i'))
+              .catchError((error) => print('Error adding row $i: $error'));
+        } else {
+          print('Skipping row $i due to null values');
+        }
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   // this function is to get company details

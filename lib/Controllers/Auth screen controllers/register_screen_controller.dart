@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:html' as html;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../Models/register_menu_model.dart';
 import '../../Screens/Auth Screens/register_screen.dart';
@@ -78,12 +80,35 @@ class RegisterScreenController extends GetxController {
 
 // this function is to select an image for logo
   pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      imageBytes = await image.readAsBytes();
+    // final ImagePicker picker = ImagePicker();
+    // XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    // if (image != null) {
+    //   imageBytes = await image.readAsBytes();
+    // }
+    try {
+      // Create a file upload input element
+      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      uploadInput.accept = 'image/*';
+      uploadInput.click();
+
+      uploadInput.onChange.listen((event) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files.first;
+          final reader = html.FileReader();
+
+          reader.readAsArrayBuffer(file);
+          reader.onLoadEnd.listen((event) async {
+            if (reader.result != null) {
+              imageBytes = reader.result as Uint8List;
+              update();
+            }
+          });
+        }
+      });
+    } catch (e) {
+      //
     }
-    update();
   }
 
   selectFromLeftMenu(i) {

@@ -49,7 +49,7 @@ class LoginScreen extends StatelessWidget {
                         //     : Get.width * 0.8, // Responsive width
                         // height: 300,
                         child: Image.asset(
-                          'assets/COMPASS_LOGO.jpg',
+                          'assets/DATAHUB_LIGHT.png',
                         ),
                       ),
                       myTextFormField1(
