@@ -14,11 +14,16 @@ Widget dropDownValuesForList({
   return TypeAheadField(
     controller: textController,
     builder: (context, textEditingController, focusNode) => TextFormField(
-      enabled: values.isEmpty ? false : true,
+      enabled: values.isNotEmpty,
       validator: validate
           ? (value) {
-              if (value!.isEmpty) {
-                return 'Please Select $labelText';
+              if (value == null || value.isEmpty) {
+                return 'Please select $labelText';
+              }
+              bool isValid = values.any((val) =>
+                  val['name'].toString().toLowerCase() == value.toLowerCase());
+              if (!isValid) {
+                return 'Please select a valid $labelText';
               }
               return null;
             }
@@ -88,7 +93,7 @@ Widget dropDownValuesForList({
         textController!.text = '${suggestion['name']}';
         controller.onSelect(isCoutry, suggestion['code']);
       } catch (e) {
-        print(e);
+        //
       }
     },
     errorBuilder: (context, error) {

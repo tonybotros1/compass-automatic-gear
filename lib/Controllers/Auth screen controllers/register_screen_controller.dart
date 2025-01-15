@@ -47,19 +47,13 @@ class RegisterScreenController extends GetxController {
 
   @override
   void onInit() {
-    getResponsibilities();
     getCountriesAndCities();
+    getResponsibilities();
     super.onInit();
   }
 
   onSelect(bool isCountry, String code) {
     if (isCountry == true) {
-      // values.where((entry) {
-      //   return entry.value['name'] == suggestion['name'].toString() &&
-      //       entry.value['description'] == suggestion['description'];
-      // }).forEach((entry) {
-      //   controller.menuIDFromList.value = entry.key;
-      // });
       query.value = code.toLowerCase();
       if (query.isEmpty) {
         filterdCitiesByCountry.clear();
@@ -80,28 +74,33 @@ class RegisterScreenController extends GetxController {
   }
 
   getCountriesAndCities() async {
-    var countries = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('list_name', isEqualTo: 'countries')
-        .get();
-    var cities = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('list_name', isEqualTo: 'cities')
-        .get();
+    try {
+      var countries = await FirebaseFirestore.instance
+          .collection('all_lists')
+          .where('list_name', isEqualTo: 'countries')
+          .get();
+      var cities = await FirebaseFirestore.instance
+          .collection('all_lists')
+          .where('list_name', isEqualTo: 'cities')
+          .get();
 
-    var countriesDoc = countries.docs.first;
-    var countryValues = await countriesDoc.reference.collection('values').get();
-    var citiesDoc = cities.docs.first;
-    var cityValues = await citiesDoc.reference.collection('values').get();
-    allCountries.value = [
-      for (var country in countryValues.docs)
-        {'name': country.data()['name'], 'code': country.data()['code']}
-    ];
-    allCities.value = [
-      for (var city in cityValues.docs)
-        {'name': city.data()['name'], 'code': city.data()['code']}
-    ];
-    update();
+      var countriesDoc = countries.docs.first;
+      var countryValues =
+          await countriesDoc.reference.collection('values').get();
+      var citiesDoc = cities.docs.first;
+      var cityValues = await citiesDoc.reference.collection('values').get();
+      allCountries.value = [
+        for (var country in countryValues.docs)
+          {'name': country.data()['name'], 'code': country.data()['code']}
+      ];
+      allCities.value = [
+        for (var city in cityValues.docs)
+          {'name': city.data()['name'], 'code': city.data()['code']}
+      ];
+      update();
+    } catch (e) {
+      // print(e);
+    }
   }
 
   // this function is to remove a menu from the list
