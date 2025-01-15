@@ -231,7 +231,7 @@ DataRow dataRowForTheTable(
               //       );
               //     });
             },
-            child: const Text('View')),
+            child: const Text('Values')),
         Padding(
           padding: const EdgeInsets.only(left: 5, right: 5),
           child: editButton(controller, listData, listId, context, constraints),

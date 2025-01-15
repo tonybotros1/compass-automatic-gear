@@ -21,11 +21,45 @@ class ListOfValuesController extends GetxController {
   @override
   void onInit() {
     getLists();
+    // editCities();
     search.value.addListener(() {
       filterLists();
     });
     super.onInit();
   }
+
+  
+
+  // editCities() async {
+  //   try {
+  //     // Fetch all documents that match the conditions
+  //     QuerySnapshot snapshot = await FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .where('list_name', isEqualTo: "cities")
+  //         .get();
+
+  //     for (var doc in snapshot.docs) {
+  //       // Access the 'values' sub-collection of the current document
+  //       QuerySnapshot valuesSnapshot = await doc.reference
+  //           .collection('values')
+  //           .where('country_id', isEqualTo: 'I78CXdMEcMOrk8ViVU0o')
+  //           .get();
+
+  //       // Iterate through the documents in the 'values' sub-collection
+  //       for (var valueDoc in valuesSnapshot.docs) {
+  //         // Update the required fields
+  //         await valueDoc.reference.update({
+  //           'code': 'UAE', // Replace 'field1' with the actual field name
+  //           // Add additional fields as needed
+  //         });
+  //       }
+  //     }
+
+  //     print('All fields updated successfully!');
+  //   } catch (e) {
+  //     print('Error updating fields: $e');
+  //   }
+  // }
 
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
