@@ -133,11 +133,11 @@ class MainScreen extends StatelessWidget {
                                     .companyImageURL.value.isNotEmpty
                                 ? Image.network(
                                     mainScreenController.companyImageURL.value,
-                                    width: 90,
+                                    width: 100,
                                   )
                                 : const SizedBox(
-                                    height: 90,
-                                    width: 90,
+                                    height: 100,
+                                    width: 100,
                                   ),
                           ),
                         ),
