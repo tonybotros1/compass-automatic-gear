@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../consts.dart';
 
-class FunctionsController extends GetxController { 
+class FunctionsController extends GetxController {
   late TextEditingController screenName = TextEditingController();
   late TextEditingController route = TextEditingController();
   final RxList<DocumentSnapshot> allScreens = RxList<DocumentSnapshot>([]);
@@ -102,10 +102,11 @@ class FunctionsController extends GetxController {
         'name': screenName.text,
         'routeName': route.text,
       });
-      addingNewScreenProcess.value = true;
+      addingNewScreenProcess.value = false;
+      Get.back();
       showSnackBar('Done', 'Screen Updated successfully');
     } catch (e) {
-      addingNewScreenProcess.value = true;
+      addingNewScreenProcess.value = false;
       showSnackBar('failed', 'Please try again');
     }
   }
@@ -124,8 +125,6 @@ class FunctionsController extends GetxController {
     }
   }
 
- 
-
 // this function is to add new screen to the system
   addNewScreen() {
     try {
@@ -139,6 +138,7 @@ class FunctionsController extends GetxController {
         "added_date": DateTime.now().toString(),
       });
       addingNewScreenProcess.value = false;
+      Get.back();
       showSnackBar('Done', 'New Screen added successfully');
     } on FirebaseAuthException catch (e) {
       addingNewScreenProcess.value = false;

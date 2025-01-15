@@ -82,6 +82,8 @@ ElevatedButton newScreenButton(
     BuildContext context, BoxConstraints constraints, controller) {
   return ElevatedButton(
     onPressed: () {
+      controller.screenName.clear();
+      controller.route.clear();
       showDialog(
           context: context,
           builder: (context) {
@@ -101,11 +103,6 @@ ElevatedButton newScreenButton(
                                 ? null
                                 : () async {
                                     await controller.addNewScreen();
-                                    if (controller
-                                            .addingNewScreenProcess.value ==
-                                        false) {
-                                      Get.back();
-                                    }
                                   },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
@@ -168,7 +165,7 @@ ElevatedButton newScreenButton(
 Widget tableOfScreens(
     {required constraints, required context, required controller}) {
   return DataTable(
-     dataRowMaxHeight: 40,
+    dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
     showBottomBorder: true,
@@ -250,8 +247,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
             showDialog(
                 context: context,
                 builder: (context) {
-                  controller.screenName.text = screenData['name'];
-                  controller.route.text = screenData['routeName'];
+                  controller.screenName.text = screenData['name'] ?? '';
+                  controller.route.text = screenData['routeName'] ?? '';
 
                   return AlertDialog(
                     actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -270,10 +267,6 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
                               ? null
                               : () {
                                   controller.updateScreen(screenId);
-                                  if (controller.addingNewScreenProcess.value ==
-                                      false) {
-                                    Get.back();
-                                  }
                                 },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
