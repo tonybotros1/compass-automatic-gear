@@ -1,4 +1,5 @@
 import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
+import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/Setup/list_of_values.dart';
 import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,21 +45,23 @@ class MainScreenController extends GetxController {
   void readCSV() async {
     try {
       // Load the CSV file from assets
-      final csvData = await rootBundle.loadString('data.csv');
+      final csvData = await rootBundle.loadString('ae.csv');
 
       // Parse the CSV data
       List<List<dynamic>> rows = const CsvToListConverter().convert(csvData);
 
       // Print the data and add it to Firestore
-      for (int i = 1; i < 20; i++) {
+      for (int i = 1; i < rows.length; i++) {
         if (rows[i][4] != null && rows[i][6] != null) {
+          //I78CXdMEcMOrk8ViVU0o
           await FirebaseFirestore.instance
               .collection('all_lists')
-              .doc('qYmKFOoU3GPuP0ddtsDN')
+              .doc('JrUQRsWVZSn3xIsSvWc5')
               .collection('values')
               .add({
-                'name': rows[i][4],
-                'code': rows[i][6],
+                'name': rows[i][0],
+                'code': rows[i][5],
+                'country_id': 'I78CXdMEcMOrk8ViVU0o'
               })
               .then((value) => print('Added row $i'))
               .catchError((error) => print('Error adding row $i: $error'));
@@ -100,6 +103,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Responsibilities());
       case '/defineCompany':
         return const SizedBox(child: Companies());
+      case '/listOfValues':
+        return const SizedBox(child: ListOfValues());
       // Add more cases as needed
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));

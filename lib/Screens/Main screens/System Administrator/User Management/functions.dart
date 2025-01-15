@@ -150,14 +150,7 @@ ElevatedButton newScreenButton(
             );
           });
     },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green,
-      foregroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
-      ),
-      elevation: 5,
-    ),
+    style: newButtonStyle,
     child: const Text('New Screen'),
   );
 }
