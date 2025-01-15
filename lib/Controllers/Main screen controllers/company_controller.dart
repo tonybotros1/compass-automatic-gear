@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class CompanyController extends GetxController {
@@ -41,15 +40,7 @@ class CompanyController extends GetxController {
     super.onInit();
   }
 
-  // this function is to select an image for logo
-  pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      imageBytes = await image.readAsBytes();
-    }
-    update();
-  }
+  
 
   // this function is to remove a menu from the list
   removeMenuFromList(index) {
@@ -139,7 +130,6 @@ class CompanyController extends GetxController {
         isScreenLoding.value = false;
       });
     } catch (e) {
-      print(e);
       isScreenLoding.value = false;
     }
   }

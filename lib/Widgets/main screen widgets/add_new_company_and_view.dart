@@ -160,7 +160,7 @@ Widget addNewCompanyOrView({
                       ElevatedButton(
                         style: selectButtonStyle,
                         onPressed: () {
-                          controller.pickImage();
+                          // controller.pickImage();
                         },
                         child: const Text('Select Logo'),
                       ),

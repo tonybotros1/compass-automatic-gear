@@ -7,9 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:file_picker/file_picker.dart';
 
 import '../../Models/register_menu_model.dart';
 import '../../Screens/Auth Screens/register_screen.dart';
@@ -214,7 +212,6 @@ class RegisterScreenController extends GetxController {
 
       addingProcess.value = false;
     } catch (e) {
-      print(e);
       addingProcess.value = false;
     }
   }
@@ -226,7 +223,7 @@ class RegisterScreenController extends GetxController {
     await prefs.setString('companyId', companyId);
   }
 
-  Widget buildRightContent(int index, controller) {
+  Widget buildRightContent(int index, controller,constraints) {
     switch (index) {
       case 0:
         return companyDetails(controller: controller);

@@ -33,9 +33,9 @@ class UsersController extends GetxController {
   RxBool isAscending = RxBool(true);
 
   @override
-  void onInit()  {
-     getRoles();
-     getAllUsers();
+  void onInit() {
+    getRoles();
+    getAllUsers();
     // getUserStatus('OXugS6xlxhdk5mq48uPwpZilA672');
     search.value.addListener(() {
       filterCards();
@@ -342,24 +342,9 @@ class UsersController extends GetxController {
         }
       });
 
-      // // Map documents to a list of roles
-      // var roles = rolesSnapshot.docs.map((doc) {
-      //   return {
-      //     ...doc.data(),
-      //     'id': doc.id,
-      //   };
-      // }).toList();
-      // // sysRoles.assignAll(roles);
-      // for (var role in roles) {
-      //   selectedRoles.addAll({
-      //     role['role_name']: [role['id'], false]
-      //   });
-      // }
-
       isLoading.value = false;
     } catch (e) {
       isLoading.value = false;
-      print('$e fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
       return [];
     }
   }

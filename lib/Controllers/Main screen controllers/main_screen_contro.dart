@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
 import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +52,6 @@ class MainScreenController extends GetxController {
       // Print the data and add it to Firestore
       for (int i = 1; i < 20; i++) {
         if (rows[i][4] != null && rows[i][6] != null) {
-          print(i);
           await FirebaseFirestore.instance
               .collection('all_lists')
               .doc('qYmKFOoU3GPuP0ddtsDN')
@@ -70,7 +67,7 @@ class MainScreenController extends GetxController {
         }
       }
     } catch (e) {
-      print('Error: $e');
+      //
     }
   }
 

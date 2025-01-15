@@ -1,3 +1,4 @@
+import 'package:compass_automatic_gear/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -48,7 +49,7 @@ class RegisterScreen extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       leftSideMenu(),
                       const SizedBox(
@@ -64,7 +65,9 @@ class RegisterScreen extends StatelessWidget {
                           child: GetBuilder<RegisterScreenController>(
                               builder: (controller) {
                             return controller.buildRightContent(
-                                controller.selectedMenu.value, controller);
+                                controller.selectedMenu.value,
+                                controller,
+                                constraints);
                           }),
                         ),
                       )
@@ -82,7 +85,7 @@ Widget responsibilities({
   required controller,
 }) {
   return AnimatedContainer(
-    height: 320,
+    height: 230,
     duration: const Duration(milliseconds: 300),
     curve: Curves.easeInOut,
     child: Stack(
@@ -234,6 +237,36 @@ Widget contactDetails({
                   ),
                   Expanded(
                     child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 2.5),
+                      child: myTextFormField2(
+                        labelText: 'Phone Number',
+                        hintText: 'Enter your phone number here',
+                        controller: controller.phoneNumber,
+                        validate: true,
+                        obscureText: false,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 2.5),
+                      child: myTextFormField2(
+                        labelText: 'Email',
+                        hintText: 'Enter a valid email here',
+                        controller: controller.email,
+                        validate: true,
+                        obscureText: false,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 2.5),
                         child: myTextFormField2(
@@ -249,36 +282,6 @@ Widget contactDetails({
                                 icon: Icon(controller.obscureText.value
                                     ? Icons.remove_red_eye_outlined
                                     : Icons.visibility_off)))),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 2.5),
-                      child: myTextFormField2(
-                        labelText: 'Phone Number',
-                        hintText: 'Enter your phone number here',
-                        controller: controller.phoneNumber,
-                        validate: true,
-                        obscureText: false,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 2.5),
-                      child: myTextFormField2(
-                        labelText: 'Email',
-                        hintText: 'Enter a valid email here',
-                        controller: controller.email,
-                        validate: true,
-                        obscureText: false,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -355,76 +358,91 @@ Widget contactDetails({
   );
 }
 
-Widget companyDetails({
-  required controller,
-}) {
+Widget companyDetails({required controller}) {
   return AnimatedContainer(
-    height: 320,
+    height: 230,
     duration: const Duration(milliseconds: 300),
     curve: Curves.easeInOut,
     child: Stack(
       children: [
         Form(
           key: controller.formKeyForFirstMenu,
-          child: Column(
+          child: Row(
             children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                child: myTextFormField2(
-                  labelText: 'Company Name',
-                  hintText: 'Enter your company name here',
-                  controller: controller.companyName,
-                  validate: true,
-                  obscureText: false,
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                child: myTextFormField2(
-                  labelText: 'Type Of Business',
-                  hintText: 'Enter type of business',
-                  controller: controller.typeOfBusiness,
-                  validate: true,
-                  obscureText: false,
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    ElevatedButton(
-                        style: selectButtonStyle,
-                        onPressed: () {
-                          controller.pickImage();
-                        },
-                        child: const Text('Select Logo')),
-                    Container(
-                      width: 150,
-                      height: 150,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                              style: BorderStyle.solid,
-                              color: controller.warningForImage.value == false
-                                  ? Colors.grey
-                                  : Colors.red)),
-                      child: controller.imageBytes == null
-                          ? const Center(
-                              child: FittedBox(
-                                  child: Text(
-                                'No image selected',
-                                style: TextStyle(color: Colors.grey),
-                              )),
-                            )
-                          : Image.memory(controller.imageBytes,
-                              fit: BoxFit.cover),
-                    )
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
+                      child: myTextFormField2(
+                        labelText: 'Company Name',
+                        hintText: 'Enter your company name here',
+                        controller: controller.companyName,
+                        validate: true,
+                        obscureText: false,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
+                      child: myTextFormField2(
+                        labelText: 'Type Of Business',
+                        hintText: 'Enter type of business',
+                        controller: controller.typeOfBusiness,
+                        validate: true,
+                        obscureText: false,
+                      ),
+                    ),
                   ],
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  child: Column(
+                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                                style: BorderStyle.solid,
+                                color: controller.warningForImage.value == false
+                                    ? Colors.grey
+                                    : Colors.red)),
+                        child: controller.imageBytes == null
+                            ? const Center(
+                                child: FittedBox(
+                                    child: Icon(
+                                  Icons.image,
+                                  color: Colors.grey,
+                                  size: 30,
+                                )),
+                              )
+                            : Image.memory(controller.imageBytes,
+                                fit: BoxFit.fitWidth),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: ElevatedButton(
+                            style: selectButtonStyle,
+                            onPressed: () {
+                              controller.pickImage();
+                            },
+                            child: const AutoSizedText(
+                              text: 'Select Logo',
+                              constraints: BoxConstraints(),
+                            )),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
