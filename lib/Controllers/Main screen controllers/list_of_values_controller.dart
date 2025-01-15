@@ -13,10 +13,14 @@ class ListOfValuesController extends GetxController {
   RxBool isScreenLoding = RxBool(true);
   final GlobalKey<FormState> formKeyForAddingNewList = GlobalKey<FormState>();
   final RxList<DocumentSnapshot> allLists = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allValues = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredLists = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredValues = RxList<DocumentSnapshot>([]);
   RxBool addingNewListProcess = RxBool(false);
   RxBool editingListProcess = RxBool(false);
   RxBool deletingListProcess = RxBool(false);
+  RxBool loadingValues = RxBool(false);
+  RxBool addingNewListValue = RxBool(false);
 
   @override
   void onInit() {
@@ -27,8 +31,6 @@ class ListOfValuesController extends GetxController {
     });
     super.onInit();
   }
-
-  
 
   // editCities() async {
   //   try {
@@ -135,6 +137,23 @@ class ListOfValuesController extends GetxController {
       });
     } catch (e) {
       isScreenLoding.value = false;
+    }
+  }
+
+  getListValues(listId) async {
+    try {
+      loadingValues.value = true;
+      var listValues = await FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(listId)
+          .collection('values')
+          .orderBy('name', descending: false)
+          .get();
+
+      allValues.assignAll(listValues.docs);
+      loadingValues.value = false;
+    } catch (e) {
+      loadingValues.value = false;
     }
   }
 
