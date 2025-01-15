@@ -26,6 +26,9 @@ class RegisterScreenController extends GetxController {
   TextEditingController city = TextEditingController();
   Uint8List? imageBytes;
   RxMap allRoles = RxMap({});
+  RxList allCountries = RxList([]);
+  RxList allCities = RxList([]);
+  RxList filterdCitiesByCountry = RxList([]);
   RxList roleIDFromList = RxList([]);
   RxBool addingProcess = RxBool(false);
   RxString logoUrl = RxString('');
@@ -34,6 +37,7 @@ class RegisterScreenController extends GetxController {
   final GlobalKey<FormState> formKeyForFirstMenu = GlobalKey<FormState>();
   final GlobalKey<FormState> formKeyForSecondMenu = GlobalKey<FormState>();
   final GlobalKey<FormState> formKeyForThirdMenu = GlobalKey<FormState>();
+  RxString query = RxString('');
 
   final menu = <RegisterMenuModel>[
     RegisterMenuModel(title: 'Company Details', isPressed: true),
@@ -44,7 +48,60 @@ class RegisterScreenController extends GetxController {
   @override
   void onInit() {
     getResponsibilities();
+    getCountriesAndCities();
     super.onInit();
+  }
+
+  onSelect(bool isCountry, String code) {
+    if (isCountry == true) {
+      // values.where((entry) {
+      //   return entry.value['name'] == suggestion['name'].toString() &&
+      //       entry.value['description'] == suggestion['description'];
+      // }).forEach((entry) {
+      //   controller.menuIDFromList.value = entry.key;
+      // });
+      query.value = code.toLowerCase();
+      if (query.isEmpty) {
+        filterdCitiesByCountry.clear();
+        update();
+      } else {
+        //  filterdCitiesByCountry.clear();
+        city.clear();
+        filterdCitiesByCountry.assignAll(
+          allCities.where((city) {
+            return city['code'].toString().toLowerCase().contains(query);
+          }).toList(),
+        );
+        update();
+      }
+    }
+
+    update();
+  }
+
+  getCountriesAndCities() async {
+    var countries = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('list_name', isEqualTo: 'countries')
+        .get();
+    var cities = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('list_name', isEqualTo: 'cities')
+        .get();
+
+    var countriesDoc = countries.docs.first;
+    var countryValues = await countriesDoc.reference.collection('values').get();
+    var citiesDoc = cities.docs.first;
+    var cityValues = await citiesDoc.reference.collection('values').get();
+    allCountries.value = [
+      for (var country in countryValues.docs)
+        {'name': country.data()['name'], 'code': country.data()['code']}
+    ];
+    allCities.value = [
+      for (var city in cityValues.docs)
+        {'name': city.data()['name'], 'code': city.data()['code']}
+    ];
+    update();
   }
 
   // this function is to remove a menu from the list
@@ -223,7 +280,7 @@ class RegisterScreenController extends GetxController {
     await prefs.setString('companyId', companyId);
   }
 
-  Widget buildRightContent(int index, controller,constraints) {
+  Widget buildRightContent(int index, controller, constraints) {
     switch (index) {
       case 0:
         return companyDetails(controller: controller);

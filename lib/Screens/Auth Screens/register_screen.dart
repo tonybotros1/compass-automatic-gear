@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../Controllers/Auth screen controllers/register_screen_controller.dart';
+import '../../Widgets/Auth screens widgets/register widgets/drop_down_menu_for_lists.dart';
 import '../../Widgets/main screen widgets/drop_down_menu.dart';
 import '../../Widgets/my_text_field.dart';
 import '../../consts.dart';
@@ -296,36 +297,44 @@ Widget contactDetails({
                   obscureText: false,
                 ),
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 2.5),
-                      child: myTextFormField2(
-                        labelText: 'Country',
-                        hintText: 'Enter your country',
-                        controller: controller.country,
-                        validate: true,
-                        obscureText: false,
+              GetBuilder<RegisterScreenController>(builder: (controller) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 2.5),
+                        child: dropDownValuesForList(
+                          isCoutry: true,
+                          labelText: 'Country',
+                          hintText: 'Enter your country',
+                          controller: controller,
+                          textController: controller.country,
+                          validate: true,
+                          values: controller.allCountries,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 2.5),
-                      child: myTextFormField2(
-                        labelText: 'City',
-                        hintText: 'Enter your city',
-                        controller: controller.city,
-                        validate: true,
-                        obscureText: false,
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 2.5),
+                        child: dropDownValuesForList(
+                          isCoutry: false,
+                          labelText: 'City',
+                          hintText: 'Enter your city',
+                          controller: controller,
+                          textController: controller.city,
+                          validate: true,
+                          values: controller.filterdCitiesByCountry.isEmpty
+                              ? []
+                              : controller.filterdCitiesByCountry,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              })
             ],
           ),
         ),
