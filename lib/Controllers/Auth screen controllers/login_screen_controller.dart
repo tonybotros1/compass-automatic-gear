@@ -32,10 +32,11 @@ class LoginScreenController extends GetxController {
     }
   }
 
-  saveUserIdAndCompanyIdInSharedPref(userId, companyId) async {
+  saveUserIdAndCompanyIdInSharedPref(userId, companyId, userEmail) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
     await prefs.setString('companyId', companyId);
+    await prefs.setString('userEmail', userEmail);
   }
 
 // this functon is to check if the date of the user has been expired or not
@@ -157,8 +158,10 @@ class LoginScreenController extends GetxController {
       if (hashedPassword == storedHashedPassword) {
         // Password is correct, proceed with login
         // await saveToken(userId);
-        await saveUserIdAndCompanyIdInSharedPref(userDataSnapshot.docs.first.id,
-            userDataSnapshot.docs.first.data()['company_id']);
+        await saveUserIdAndCompanyIdInSharedPref(
+            userDataSnapshot.docs.first.id,
+            userDataSnapshot.docs.first.data()['company_id'],
+            userDataSnapshot.docs.first.data()['email']);
 
         sigingInProcess.value = false;
         showSnackBar('Login Success', 'Welcome');

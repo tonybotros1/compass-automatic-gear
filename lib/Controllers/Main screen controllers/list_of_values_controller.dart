@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListOfValuesController extends GetxController {
   late TextEditingController listName = TextEditingController();
@@ -29,9 +30,11 @@ class ListOfValuesController extends GetxController {
   RxBool addingNewListValue = RxBool(false);
   RxBool edititngListValue = RxBool(false);
   RxString listIDToWorkWithNewValue = RxString('');
+  RxString userEmail = RxString('');
 
   @override
   void onInit() {
+    getUserEmail();
     getLists();
     // editCities();
     searchForLists.value.addListener(() {
@@ -43,36 +46,10 @@ class ListOfValuesController extends GetxController {
     super.onInit();
   }
 
-  // editCities() async {
-  //   try {
-  //     // Fetch all documents that match the conditions
-  //     QuerySnapshot snapshot = await FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .where('list_name', isEqualTo: "cities")
-  //         .get();
-
-  //     for (var doc in snapshot.docs) {
-  //       // Access the 'values' sub-collection of the current document
-  //       QuerySnapshot valuesSnapshot = await doc.reference
-  //           .collection('values')
-  //           .where('country_id', isEqualTo: 'I78CXdMEcMOrk8ViVU0o')
-  //           .get();
-
-  //       // Iterate through the documents in the 'values' sub-collection
-  //       for (var valueDoc in valuesSnapshot.docs) {
-  //         // Update the required fields
-  //         await valueDoc.reference.update({
-  //           'code': 'UAE', // Replace 'field1' with the actual field name
-  //           // Add additional fields as needed
-  //         });
-  //       }
-  //     }
-
-  //     print('All fields updated successfully!');
-  //   } catch (e) {
-  //     print('Error updating fields: $e');
-  //   }
-  // }
+  getUserEmail() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    userEmail.value = prefs.getString('userEmail')!;
+  }
 
   // this function is to sort data in table
   void onSortForLists(int columnIndex, bool ascending) {

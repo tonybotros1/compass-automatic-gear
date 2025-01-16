@@ -36,7 +36,10 @@ class ListOfValues extends StatelessWidget {
                         context: context,
                         controller: controller,
                         title: 'Search for Lists',
-                        button: newListButton(context, constraints, controller),
+                        button: controller.userEmail.value ==
+                                'datahubai@gmail.com'
+                            ? newListButton(context, constraints, controller)
+                            : null,
                       );
                     },
                   ),
@@ -201,11 +204,16 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
                   });
             },
             child: const Text('Values')),
-        Padding(
-          padding: const EdgeInsets.only(left: 5, right: 5),
-          child: editButton(controller, listData, listId, context, constraints),
-        ),
-        deleteSection(controller, listId, context, constraints),
+        controller.userEmail.value == 'datahubai@gmail.com'
+            ? Padding(
+                padding: const EdgeInsets.only(left: 5, right: 5),
+                child: editButton(
+                    controller, listData, listId, context, constraints),
+              )
+            : const SizedBox(),
+        controller.userEmail.value == 'datahubai@gmail.com'
+            ? deleteSection(controller, listId, context, constraints)
+            : const SizedBox(),
       ],
     )),
   ]);

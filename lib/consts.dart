@@ -203,7 +203,7 @@ void showSnackBar(title, body) {
 
 Future<dynamic> alertDialog(
     {required context,
-    required controller,
+     controller,
     required String content,
     required void Function() onPressed}) {
   return showCupertinoDialog(

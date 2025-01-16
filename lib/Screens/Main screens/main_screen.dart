@@ -63,36 +63,19 @@ class MainScreen extends StatelessWidget {
                                   ElevatedButton(
                                       style: logoutButtonStyle,
                                       onPressed: () async {
-                                        showCupertinoDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return CupertinoAlertDialog(
-                                              title: const Text("Alert"),
-                                              content: const Text(
-                                                  "Are you sure you want to logout?"),
-                                              actions: [
-                                                CupertinoDialogAction(
-                                                  child: const Text("Cancel"),
-                                                  onPressed: () {
-                                                    Get.back();
-                                                  },
-                                                ),
-                                                CupertinoDialogAction(
-                                                  isDestructiveAction: true,
-                                                  isDefaultAction: true,
-                                                  child: const Text("OK"),
-                                                  onPressed: () async {
-                                                    await globalPrefs
-                                                        ?.remove('userId');
-                                                    await globalPrefs
-                                                        ?.remove('companyId');
-                                                    Get.offAllNamed('/');
-                                                  },
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
+                                        alertDialog(
+                                            context: context,
+                                            content:
+                                                "Are you sure you want to logout?",
+                                            onPressed: () async {
+                                              await globalPrefs
+                                                  ?.remove('userId');
+                                              await globalPrefs
+                                                  ?.remove('companyId');
+                                              await globalPrefs
+                                                  ?.remove('userEmail');
+                                              Get.offAllNamed('/');
+                                            });
                                       },
                                       child: const Icon(Icons.logout))
                                 ],
