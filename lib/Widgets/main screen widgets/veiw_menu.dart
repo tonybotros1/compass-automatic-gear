@@ -1,6 +1,6 @@
-import 'package:compass_automatic_gear/Models/screen_tree_model.dart';
-import 'package:compass_automatic_gear/Widgets/main%20screen%20widgets/auto_size_box.dart';
-import 'package:compass_automatic_gear/Widgets/main%20screen%20widgets/expand_icon.dart';
+import 'package:datahubai/Models/screen_tree_model.dart';
+import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
+import 'package:datahubai/Widgets/main%20screen%20widgets/expand_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';

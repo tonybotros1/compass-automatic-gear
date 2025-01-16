@@ -1,6 +1,6 @@
-import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
-import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/Setup/list_of_values.dart';
-import 'package:compass_automatic_gear/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/list_of_values.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';

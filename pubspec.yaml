@@ -1,5 +1,5 @@
-name: compass_automatic_gear
-description: "A new Flutter project."
+name: datahubai
+description: "DataHub AI"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -60,6 +60,21 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  flutter_launcher_icons: "^0.14.2"
+  flutter_lints: ^5.0.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/DATAHUB.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/DATAHUB.png"
+    background_color: "#FFFFFF"
+    theme_color: "#FFFFFF"
+  
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

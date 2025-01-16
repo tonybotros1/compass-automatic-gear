@@ -1,4 +1,4 @@
-import 'package:compass_automatic_gear/Widgets/main%20screen%20widgets/auto_size_box.dart';
+import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';

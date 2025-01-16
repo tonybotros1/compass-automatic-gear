@@ -1,6 +1,5 @@
-import 'package:compass_automatic_gear/Responsive/responsive.dart';
-import 'package:compass_automatic_gear/Widgets/main%20screen%20widgets/auto_size_box.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:datahubai/Responsive/responsive.dart';
+import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';

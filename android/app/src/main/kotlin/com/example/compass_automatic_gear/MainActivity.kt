@@ -1,4 +1,4 @@
-package com.example.compass_automatic_gear
+package com.datahubai
 
 import io.flutter.embedding.android.FlutterActivity
 

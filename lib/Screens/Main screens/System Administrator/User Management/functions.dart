@@ -1,4 +1,4 @@
-import 'package:compass_automatic_gear/Controllers/Main%20screen%20controllers/functions_controller.dart';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/functions_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

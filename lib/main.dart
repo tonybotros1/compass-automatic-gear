@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      title: 'DataHub AI',
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
