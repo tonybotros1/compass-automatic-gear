@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -196,5 +197,39 @@ void showSnackBar(title, body) {
     duration: const Duration(seconds: 3),
     backgroundColor: Colors.grey,
     colorText: Colors.white,
+  );
+}
+
+
+Future<dynamic> alertDialog(
+    {required context,
+    required controller,
+    required String content,
+    required void Function() onPressed}) {
+  return showCupertinoDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CupertinoAlertDialog(
+        title: const Text("Alert"),
+        content: Text(content),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text("Cancel"),
+            onPressed: () {
+              Get.back();
+            },
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            isDefaultAction: true,
+            onPressed: onPressed,
+            child: const Text(
+              'Ok',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      );
+    },
   );
 }

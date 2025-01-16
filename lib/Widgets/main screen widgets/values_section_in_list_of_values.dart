@@ -160,79 +160,133 @@ DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ElevatedButton(
-            style: valueData['available'] == false
-                ? unHideButtonStyle
-                : hideButtonStyle,
-            onPressed: () {
-              bool status;
-              if (valueData['available'] == false) {
-                status = true;
-              } else {
-                status = false;
-              }
-              controller.editHideOrUnhide(
-                  controller.listIDToWorkWithNewValue.value, valueId, status);
-            },
-            child: valueData['available'] == true
-                ? const Text('Active')
-                : const Text('Inactive')),
+        activeInActiveSection(valueData, controller, valueId),
         Padding(
           padding: const EdgeInsets.only(left: 5, right: 5),
-          child: ElevatedButton(
-              style: editButtonStyle,
-              onPressed: () {},
-              child: const Text('Edit')),
+          child:
+              editSection(controller, valueData, context, constraints, valueId),
         ),
-        ElevatedButton(
-            style: deleteButtonStyle,
-            onPressed: () {
-              showCupertinoDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return CupertinoAlertDialog(
-                    title: const Text("Alert"),
-                    content:
-                        const Text("The value will be deleted permanently"),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: const Text("Cancel"),
-                        onPressed: () {
-                          Get.back();
-                        },
-                      ),
-                      CupertinoDialogAction(
-                        isDestructiveAction: true,
-                        isDefaultAction: true,
-                        child: controller.deletingListProcess.value == false
-                            ? const Text(
-                                'Ok',
-                                style: TextStyle(color: Colors.red),
-                              )
-                            : const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                        onPressed: () async {
-                          controller.deleteValue(
-                              controller.listIDToWorkWithNewValue.value,
-                              valueId);
-                          Get.back();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            child: const Text('Delete')),
+        deleteSection(context, controller, valueId),
       ],
     )),
   ]);
+}
+
+ElevatedButton deleteSection(
+    context, ListOfValuesController controller, valueId) {
+  return ElevatedButton(
+      style: deleteButtonStyle,
+      onPressed: () {
+        alertDialog(
+            context: context,
+            controller: controller,
+            content: 'The value will be deleted permanently',
+            onPressed: () {
+              controller.deleteValue(
+                  controller.listIDToWorkWithNewValue.value, valueId);
+            });
+      },
+      child: const Text('Delete'));
+}
+
+
+
+ElevatedButton editSection(ListOfValuesController controller,
+    Map<String, dynamic> valueData, context, constraints, valueId) {
+  return ElevatedButton(
+      style: editButtonStyle,
+      onPressed: () {
+        controller.valueName.text = valueData['name'];
+        controller.restrictedBy.text = valueData['restricted_by'];
+        controller.valueCode.text = valueData['code'];
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: addNewValueOrEdit(
+                  controller: controller,
+                  constraints: constraints,
+                  context: context,
+                  isEnabled: false,
+                ),
+                actions: [
+                  GetX<ListOfValuesController>(
+                      builder: (controller) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: ElevatedButton(
+                              onPressed: controller.addingNewListValue.value
+                                  ? null
+                                  : () async {
+                                      if (!controller
+                                          .formKeyForAddingNewList.currentState!
+                                          .validate()) {
+                                      } else {
+                                        controller.editValue(
+                                            controller.listIDToWorkWithNewValue,
+                                            valueId);
+                                      }
+                                    },
+                              style: saveButtonStyle,
+                              child:
+                                  controller.addingNewListValue.value == false
+                                      ? const Text(
+                                          'Save',
+                                          style: TextStyle(color: Colors.white),
+                                        )
+                                      : const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                            ),
+                          )),
+                  ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      style: cancelButtonStyle,
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ],
+              );
+            });
+      },
+      child: controller.edititngListValue.value == false
+          ? const Text('Edit')
+          : const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            ));
+}
+
+ElevatedButton activeInActiveSection(Map<String, dynamic> valueData,
+    ListOfValuesController controller, valueId) {
+  return ElevatedButton(
+      style:
+          valueData['available'] == false ? unHideButtonStyle : hideButtonStyle,
+      onPressed: () {
+        bool status;
+        if (valueData['available'] == false) {
+          status = true;
+        } else {
+          status = false;
+        }
+        controller.editHideOrUnhide(
+            controller.listIDToWorkWithNewValue.value, valueId, status);
+      },
+      child: valueData['available'] == true
+          ? const Text('Active')
+          : const Text('Inactive'));
 }
 
 ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
@@ -241,6 +295,7 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
     onPressed: () {
       controller.valueName.clear();
       controller.valueCode.clear();
+      controller.restrictedBy.clear();
       showDialog(
           context: context,
           builder: (context) {
@@ -250,6 +305,7 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
                 controller: controller,
                 constraints: constraints,
                 context: context,
+                isEnabled: true,
               ),
               actions: [
                 GetX<ListOfValuesController>(

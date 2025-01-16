@@ -8,9 +8,10 @@ Widget myTextFormField2({
   required obscureText,
   IconButton? icon,
   keyboardType,
-  bool? isCapital,
+  bool? isEnabled
 }) {
   return TextFormField(
+    enabled: isEnabled,
     obscureText: obscureText,
     keyboardType: keyboardType,
     controller: controller,

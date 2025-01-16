@@ -33,8 +33,6 @@ class ListOfValues extends StatelessWidget {
                     builder: (controller) {
                       return searchBar(
                         search: controller.searchForLists,
-
-                     
                         constraints: constraints,
                         context: context,
                         controller: controller,
@@ -218,44 +216,13 @@ ElevatedButton deleteSection(controller, listId, context, constraints) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
-        showCupertinoDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return CupertinoAlertDialog(
-              title: const Text("Alert"),
-              content: const Text("The list will be deleted permanently"),
-              actions: [
-                CupertinoDialogAction(
-                  child: const Text("Cancel"),
-                  onPressed: () {
-                    Get.back();
-                  },
-                ),
-                CupertinoDialogAction(
-                  isDestructiveAction: true,
-                  isDefaultAction: true,
-                  child: controller.deletingListProcess.value == false
-                      ? const Text(
-                          'Ok',
-                          style: TextStyle(color: Colors.red),
-                        )
-                      : const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                  onPressed: () async {
-                    await controller.deleteList(listId);
-                    Get.back();
-                  },
-                ),
-              ],
-            );
-          },
-        );
+        alertDialog(
+            context: context,
+            controller: controller,
+            content: "The list will be deleted permanently",
+            onPressed: () {
+              controller.deleteList(listId);
+            });
       },
       child: const Text("Delete"));
 }
@@ -313,27 +280,14 @@ ElevatedButton editButton(controller, listData, listId, context, constraints) {
                           ),
                         )),
                 ElevatedButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: controller.addingNewListProcess.value == false
-                      ? const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )
-                      : const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: cancelButtonStyle,
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.white),
+                    )),
               ],
             );
           });

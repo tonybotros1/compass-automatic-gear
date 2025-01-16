@@ -47,7 +47,6 @@ class MenusController extends GetxController {
       GlobalKey<FormState>();
   RxMap<String, String> selectFromMenus = RxMap({});
   RxMap<String, String> selectFromScreens = RxMap({});
-  RxBool deletingProcess = RxBool(false);
   RxMap allMenusDocs = RxMap({});
   RxMap allScreensDocs = RxMap({});
 
@@ -315,10 +314,7 @@ class MenusController extends GetxController {
 // this function is to delete a menu
   Future<void> deleteMenuAndUpdateChildren(String menuId) async {
     try {
-      deletingProcess.value = true;
       final firestore = FirebaseFirestore.instance;
-
-      await firestore.collection('menus ').doc(menuId).delete();
 
       QuerySnapshot querySnapshot = await firestore
           .collection('menus ')
@@ -334,9 +330,11 @@ class MenusController extends GetxController {
       }
 
       await batch.commit();
-      deletingProcess.value = false;
+      await firestore.collection('menus ').doc(menuId).delete();
+      getMenus();
+      Get.back();
     } catch (e) {
-      deletingProcess.value = false;
+      //
     }
   }
 

@@ -9,10 +9,11 @@ Widget addNewValueOrEdit({
   TextEditingController? valueName,
   TextEditingController? valueCode,
   TextEditingController? restrictedBy,
+  bool? isEnabled,
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
-    height: 160,
+    height: 200,
     child: Form(
       key: controller.formKeyForAddingNewList,
       child: Column(
@@ -26,15 +27,13 @@ Widget addNewValueOrEdit({
             validate: true,
           ),
           myTextFormField2(
-            isCapital: true,
-            obscureText: false,
-            controller: valueCode ?? controller.valueCode,
-            labelText: 'Code',
-            hintText: 'Enter code',
-            validate: true,
-          ),
+              obscureText: false,
+              controller: valueCode ?? controller.valueCode,
+              labelText: 'Code',
+              hintText: 'Enter code',
+              validate: true,
+              isEnabled: isEnabled),
           myTextFormField2(
-            isCapital: true,
             obscureText: false,
             controller: restrictedBy ?? controller.restrictedBy,
             labelText: 'Restricted By',

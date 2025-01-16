@@ -31,7 +31,7 @@ class Responsibilities extends StatelessWidget {
                     init: ResponsibilitiesController(),
                     builder: (controller) {
                       return searchBar(
-                        search:controller.search,
+                        search: controller.search,
                         constraints: constraints,
                         context: context,
                         controller: controller,
@@ -79,7 +79,7 @@ class Responsibilities extends StatelessWidget {
   }
 }
 
-ElevatedButton newResponsibilityButton(context, constraints, controller) {
+ElevatedButton newResponsibilityButton(context, constraints,ResponsibilitiesController controller) {
   return ElevatedButton(
       onPressed: () async {
         controller.responsibilityName.clear();
@@ -155,7 +155,7 @@ ElevatedButton newResponsibilityButton(context, constraints, controller) {
 }
 
 Widget tableOfScreens(
-    {required constraints, required context, required controller}) {
+    {required constraints, required context, required ResponsibilitiesController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -213,7 +213,7 @@ Widget tableOfScreens(
 }
 
 DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
-    roleId, controller, role) {
+    roleId,ResponsibilitiesController controller, role) {
   return DataRow(
       selected: roleData['is_shown_for_users'] ?? false,
       onSelectChanged: (isSelected) {
@@ -258,36 +258,18 @@ DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
       ]);
 }
 
-ElevatedButton deleteSection(context, controller, roleId) {
+ElevatedButton deleteSection(
+    context, ResponsibilitiesController controller, roleId) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
-        showCupertinoDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return CupertinoAlertDialog(
-              title: const Text("Alert"),
-              content: const Text("The menu will be deleted permanently"),
-              actions: [
-                CupertinoDialogAction(
-                  child: const Text("Cancel"),
-                  onPressed: () {
-                    Get.back();
-                  },
-                ),
-                CupertinoDialogAction(
-                  isDestructiveAction: true,
-                  isDefaultAction: true,
-                  child: const Text("OK"),
-                  onPressed: () async {
-                    await controller.deleteResponsibility(roleId);
-                    Get.back();
-                  },
-                ),
-              ],
-            );
-          },
-        );
+        alertDialog(
+            context: context,
+            controller: controller,
+            content: 'The responsibility will be deleted permanently',
+            onPressed: () {
+              controller.deleteResponsibility(roleId);
+            });
       },
       child: const Text('Delete'));
 }

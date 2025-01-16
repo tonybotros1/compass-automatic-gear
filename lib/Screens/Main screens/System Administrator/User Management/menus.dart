@@ -33,7 +33,6 @@ class Menus extends StatelessWidget {
                     builder: (controller) {
                       return searchBar(
                         search: controller.search,
-                     
                         constraints: constraints,
                         context: context,
                         controller: controller,
@@ -185,37 +184,18 @@ DataRow dataRowForTheTable(
   ]);
 }
 
-ElevatedButton deleteSection(controller, menuId, context, constraints) {
+ElevatedButton deleteSection(
+    MenusController controller, menuId, context, constraints) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
-        showCupertinoDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return CupertinoAlertDialog(
-              title: const Text("Alert"),
-              content: const Text("The menu will be deleted permanently"),
-              actions: [
-                CupertinoDialogAction(
-                  child: const Text("Cancel"),
-                  onPressed: () {
-                    Get.back();
-                  },
-                ),
-                CupertinoDialogAction(
-                  isDestructiveAction: true,
-                  isDefaultAction: true,
-                  child: const Text("OK"),
-                  onPressed: () async {
-                    await controller.deleteMenuAndUpdateChildren(menuId);
-                    controller.getMenus();
-                    Get.back();
-                  },
-                ),
-              ],
-            );
-          },
-        );
+        alertDialog(
+            context: context,
+            controller: controller,
+            content: 'The menu will be deleted permanently',
+            onPressed: () {
+              controller.deleteMenuAndUpdateChildren(menuId);
+            });
       },
       child: const Text("Delete"));
 }

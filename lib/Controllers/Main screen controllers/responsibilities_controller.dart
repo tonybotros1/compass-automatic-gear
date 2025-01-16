@@ -18,7 +18,6 @@ class ResponsibilitiesController extends GetxController {
   RxBool isScreenLoading = RxBool(true);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-  RxBool deleteingResponsibility = RxBool(false);
   RxMap menuMap = RxMap({});
 
   RxList selectedRow = RxList([]);
@@ -152,10 +151,10 @@ class ResponsibilitiesController extends GetxController {
       }
       await batch.commit();
       await firestore.collection('sys-roles').doc(resID).delete();
+      Get.back();
       // await getResponsibilities();
-      deleteingResponsibility.value = false;
     } catch (e) {
-      deleteingResponsibility.value = false;
+      //
     }
   }
 
@@ -168,7 +167,7 @@ class ResponsibilitiesController extends GetxController {
           'role_name': responsibilityName.text,
           'menuID': menuIDFromList.value,
           'added_date': DateTime.now().toString(),
-          'is_shown_for_users':true
+          'is_shown_for_users': true
         });
         Get.back();
       }

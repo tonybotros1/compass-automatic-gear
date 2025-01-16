@@ -233,53 +233,33 @@ class Users extends StatelessWidget {
               : 'N/A',
         ),
       ),
-      DataCell(Align(
-        alignment: Alignment.center,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 5),
-              child: viewSection(
-                  context, userData, constraints, uid, usersController),
-            ),
-            ElevatedButton(
-                style: deleteButtonStyle,
-                onPressed: () {
-                  showCupertinoDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return CupertinoAlertDialog(
-                        title: const Text("Alert"),
-                        content:
-                            const Text("The user will be deleted permanently"),
-                        actions: [
-                          CupertinoDialogAction(
-                            child: const Text("Cancel"),
-                            onPressed: () {
-                              Get.back();
-                            },
-                          ),
-                          CupertinoDialogAction(
-                            isDestructiveAction: true,
-                            isDefaultAction: true,
-                            child: const Text("OK"),
-                            onPressed: () async {
-                              await usersController.deleteUser(uid);
-
-                              Get.back();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: const Text('Delete'))
-          ],
-        ),
+      DataCell(Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 5),
+            child: viewSection(
+                context, userData, constraints, uid, usersController),
+          ),
+          deleteSection(context, uid)
+        ],
       )),
     ]);
+  }
+
+  ElevatedButton deleteSection(context, uid) {
+    return ElevatedButton(
+            style: deleteButtonStyle,
+            onPressed: () {
+              alertDialog(
+                  context: context,
+                  controller: usersController,
+                  content: 'The user will be deleted permanently',
+                  onPressed: () {
+                    usersController.deleteUser(uid);
+                  });
+            },
+            child: const Text('Delete'));
   }
 
   ElevatedButton viewSection(context, Map<String, dynamic> userData,
