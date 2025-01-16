@@ -312,7 +312,7 @@ class ListOfValuesController extends GetxController {
         'available': status,
       });
     } catch (e) {
-      print(e);
+//
     }
   }
 
