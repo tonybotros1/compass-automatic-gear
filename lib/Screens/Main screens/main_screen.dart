@@ -94,7 +94,7 @@ class MainScreen extends StatelessWidget {
                                           },
                                         );
                                       },
-                                      child: const Text('Logout'))
+                                      child: const Icon(Icons.logout))
                                 ],
                               ))),
                     ],
@@ -240,9 +240,7 @@ class MainScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  color: entry.node.isMenu == true
-                      ? const Color(0xff2E5077)
-                      : const Color(0xff4DA1A9),
+                  color: entry.node.isMenu == true ? mainColor : secColor,
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Row(

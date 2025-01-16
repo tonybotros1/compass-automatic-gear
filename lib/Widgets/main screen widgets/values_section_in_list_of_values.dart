@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../consts.dart';
 import '../Auth screens widgets/register widgets/search_bar.dart';
+import 'add_or_edit_new_list.dart';
 import 'auto_size_box.dart';
 
 Widget valuesSection({
@@ -27,8 +28,7 @@ Widget valuesSection({
               context: context,
               controller: controller,
               title: 'Search for values',
-              buttonTitle: 'New Value',
-              // button: newListButton(context, constraints, controller),
+              button: newListButton(context, constraints, controller),
             );
           },
         ),
@@ -69,106 +69,60 @@ Widget tableOfScreens(
     required context,
     required ListOfValuesController controller}) {
   return DataTable(
-      dataRowMaxHeight: 40,
-      dataRowMinHeight: 30,
-      columnSpacing: 5,
-      showBottomBorder: true,
-      dataTextStyle: regTextStyle,
-      headingTextStyle: fontStyleForTableHeader,
-      sortColumnIndex: controller.sortColumnIndex.value,
-      sortAscending: controller.isAscending.value,
-      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-      columns: [
-        DataColumn(
-          label: AutoSizedText(
-            text: 'Code',
-            constraints: constraints,
-          ),
-          onSort: controller.onSort,
+    dataRowMaxHeight: 40,
+    dataRowMinHeight: 30,
+    columnSpacing: 5,
+    showBottomBorder: true,
+    dataTextStyle: regTextStyle,
+    headingTextStyle: fontStyleForTableHeader,
+    sortColumnIndex: controller.sortColumnIndex.value,
+    sortAscending: controller.isAscending.value,
+    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    columns: [
+      DataColumn(
+        label: AutoSizedText(
+          text: 'Code',
+          constraints: constraints,
         ),
-        DataColumn(
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Name',
-          ),
-          onSort: controller.onSort,
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Name',
         ),
-        DataColumn(
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Creation Date',
-          ),
-          onSort: controller.onSort,
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Creation Date',
         ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.center,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Action',
-          ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Action',
         ),
-      ],
-      rows: [
-        DataRow(cells: [
-          DataCell(
-            TextField(
-              decoration: InputDecoration(hintText: "Enter value 1"),
-              onChanged: (newValue1) {
-                controller.listName.text =
-                    newValue1; // Update the controller or variable
-              },
-            ),
-          ),
-          DataCell(
-            TextField(
-              decoration: InputDecoration(hintText: "Enter value 2"),
-              onChanged: (newValue2) {
-                controller.code.text =
-                    newValue2; // Update the controller or variable
-              },
-            ),
-          ),
-          DataCell(
-            TextField(
-              decoration: InputDecoration(hintText: "Enter value 2"),
-              onChanged: (newValue2) {
-                controller.code.text =
-                    newValue2; // Update the controller or variable
-              },
-            ),
-          ),
-          DataCell(
-            IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () {
-                if (controller.listName.text.isNotEmpty &&
-                    controller.code.text.isNotEmpty) {
-                  // Add new values to the list
-                  final newEntry = {
-                    'value1': controller.listName.text,
-                    'value2': controller.code.text,
-                  };
-                  // controller.addNewValue(newEntry);
-                }
-              },
-            ),
-          ),
-        ]),
-        ...controller.filteredValues.isEmpty &&
-                controller.search.value.text.isEmpty
-            ? controller.allValues.map<DataRow>((value) {
-                final valueData = value.data() as Map<String, dynamic>;
-                final valueId = value.id;
-                return dataRowForTheTable(
-                    valueData, context, constraints, valueId, controller);
-              }).toList()
-            : controller.filteredValues.map<DataRow>((value) {
-                final valueData = value.data() as Map<String, dynamic>;
-                final valueId = value.id;
-                return dataRowForTheTable(
-                    valueData, context, constraints, valueId, controller);
-              }).toList(),
-      ]);
+      ),
+    ],
+    rows: controller.filteredValues.isEmpty &&
+            controller.search.value.text.isEmpty
+        ? controller.allValues.map<DataRow>((value) {
+            final valueData = value.data() as Map<String, dynamic>;
+            final valueId = value.id;
+            return dataRowForTheTable(
+                valueData, context, constraints, valueId, controller);
+          }).toList()
+        : controller.filteredValues.map<DataRow>((value) {
+            final valueData = value.data() as Map<String, dynamic>;
+            final valueId = value.id;
+            return dataRowForTheTable(
+                valueData, context, constraints, valueId, controller);
+          }).toList(),
+  );
 }
 
 DataRow dataRowForTheTable(
@@ -206,4 +160,88 @@ DataRow dataRowForTheTable(
       ],
     )),
   ]);
+}
+
+ElevatedButton newListButton(
+    BuildContext context, BoxConstraints constraints, controller) {
+  return ElevatedButton(
+    onPressed: () {
+      controller.listName.clear();
+      controller.code.clear();
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+              content: addNewListOrEdit(
+                controller: controller,
+                constraints: constraints,
+                context: context,
+              ),
+              actions: [
+                GetX<ListOfValuesController>(
+                    builder: (controller) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: ElevatedButton(
+                            onPressed: controller.addingNewListProcess.value
+                                ? null
+                                : () async {
+                                    if (!controller
+                                        .formKeyForAddingNewList.currentState!
+                                        .validate()) {
+                                    } else {
+                                      await controller.addNewList();
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            child:
+                                controller.addingNewListProcess.value == false
+                                    ? const Text(
+                                        'Save',
+                                        style: TextStyle(color: Colors.white),
+                                      )
+                                    : const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                          ),
+                        )),
+                ElevatedButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mainColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  child: controller.addingNewListProcess.value == false
+                      ? const Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.white),
+                        )
+                      : const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ],
+            );
+          });
+    },
+    style: newButtonStyle,
+    child: const Text('New List'),
+  );
 }

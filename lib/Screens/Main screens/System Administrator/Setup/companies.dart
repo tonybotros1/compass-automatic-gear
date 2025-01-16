@@ -34,7 +34,6 @@ class Companies extends StatelessWidget {
                         context: context,
                         controller: controller,
                         title: 'Search for companies',
-                        buttonTitle: 'New Company',
                         button:
                             newCompanyButton(context, constraints, controller),
                       );
@@ -232,12 +231,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
             //             onPressed: () {
             //               Get.back();
             //             },
-            //             style: ElevatedButton.styleFrom(
-            //               backgroundColor: mainColor,
-            //               shape: RoundedRectangleBorder(
-            //                 borderRadius: BorderRadius.circular(5),
-            //               ),
-            //             ),
+            //             style: cancelButtonStyle,
             //             child: controller.addingNewScreenProcess.value == false
             //                 ? const Text(
             //                     'Cancel',
@@ -283,12 +277,7 @@ ElevatedButton newCompanyButton(
                                 : () async {
                                     // await controller.addNewScreen();
                                   },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
+                            style: saveButtonStyle,
                             child: controller.addingNewCompanyProcess.value ==
                                     false
                                 ? const Text(
@@ -307,12 +296,7 @@ ElevatedButton newCompanyButton(
                   onPressed: () {
                     Get.back();
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
+                  style: cancelButtonStyle,
                   child: controller.addingNewCompanyProcess.value == false
                       ? const Text(
                           'Cancel',

@@ -35,7 +35,6 @@ class Responsibilities extends StatelessWidget {
                         context: context,
                         controller: controller,
                         title: 'Search for responsibilities',
-                        buttonTitle: 'New Responsibilities',
                         button: newResponsibilityButton(
                             context, constraints, controller),
                       );

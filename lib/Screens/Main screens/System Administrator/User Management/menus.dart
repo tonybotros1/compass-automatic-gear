@@ -36,7 +36,6 @@ class Menus extends StatelessWidget {
                         context: context,
                         controller: controller,
                         title: 'Search for menus',
-                        buttonTitle: 'New Menu',
                         button: newMenuButton(context, constraints, controller),
                       );
                     },
@@ -260,12 +259,7 @@ ElevatedButton editSection(controller, menuId, context, constraints, menuData) {
                         onPressed: () {
                           Get.back();
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: mainColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
+                        style: cancelButtonStyle,
                         child: const Text(
                           'Cancel',
                           style: TextStyle(color: Colors.white),
@@ -308,13 +302,7 @@ ElevatedButton viewSection(controller, menuId, context, constraints) {
                             onPressed: () {
                               Get.back();
                             },
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(100, 40),
-                              backgroundColor: mainColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
+                            style: cancelButtonStyle,
                             child: const Text(
                               'Cancel',
                               style: TextStyle(color: Colors.white),
@@ -376,13 +364,7 @@ ElevatedButton newMenuButton(
                                         Get.back();
                                       }
                                     },
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size(100, 40),
-                                backgroundColor: Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
+                              style: saveButtonStyle,
                               child:
                                   controller.addingNewMenuProcess.value == false
                                       ? const Text(
@@ -402,12 +384,7 @@ ElevatedButton newMenuButton(
                     onPressed: () {
                       Get.back();
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: mainColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
+                    style: cancelButtonStyle,
                     child: const Text(
                       'Cancel',
                       style: TextStyle(color: Colors.white),

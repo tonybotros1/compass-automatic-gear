@@ -75,7 +75,7 @@ var deleteButtonStyle = ElevatedButton.styleFrom(
 );
 
 var welcomButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.blue,
+  backgroundColor: mainColor,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
@@ -88,7 +88,7 @@ var logoutButtonStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(60, 40),
 );
 
 var addButtonStyle = ElevatedButton.styleFrom(
@@ -119,7 +119,7 @@ var selectButtonStyle = ElevatedButton.styleFrom(
 );
 
 var loginButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.blue[900],
+  backgroundColor: mainColor,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
@@ -128,7 +128,7 @@ var loginButtonStyle = ElevatedButton.styleFrom(
 );
 
 var newCompannyButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: const Color(0xff4C585B),
+  backgroundColor: secColor,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
@@ -146,9 +146,9 @@ var screenPadding = const EdgeInsets.only(
 var fontStyle3 = const TextStyle(fontSize: 16, color: Colors.white);
 // var mainColor = const Color.fromARGB(255, 228, 200, 233);
 
-var mainColor = const Color(0xffEA2027);
+var mainColor = const Color(0xff005f95);
 // var mainColor = const Color(0xff27374D);
-var secColor = const Color(0xffeb4d4b);
+var secColor = const Color(0xff7E99A3);
 // var secColor = const Color(0xff526D82);
 var containerColor = const Color(0xffF5F5F5);
 

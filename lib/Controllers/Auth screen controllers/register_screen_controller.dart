@@ -49,25 +49,23 @@ class RegisterScreenController extends GetxController {
   void onInit() {
     getCountriesAndCities();
     getResponsibilities();
+
     super.onInit();
   }
 
   onSelect(bool isCountry, String code) {
-    if (isCountry == true) {
+    if (isCountry) {
       query.value = code.toLowerCase();
-      if (query.isEmpty) {
-        filterdCitiesByCountry.clear();
-        update();
-      } else {
-        //  filterdCitiesByCountry.clear();
-        city.clear();
-        filterdCitiesByCountry.assignAll(
-          allCities.where((city) {
-            return city['code'].toString().toLowerCase().contains(query);
-          }).toList(),
-        );
-        update();
-      }
+      filterdCitiesByCountry.clear();
+      city.clear();
+      filterdCitiesByCountry.assignAll(
+        allCities.where((city) {
+          return city['restricted_by']
+              .toString()
+              .toLowerCase()
+              .contains(query.value);
+        }).toList(),
+      );
     }
 
     update();
@@ -91,11 +89,21 @@ class RegisterScreenController extends GetxController {
       var cityValues = await citiesDoc.reference.collection('values').get();
       allCountries.value = [
         for (var country in countryValues.docs)
-          {'name': country.data()['name'], 'code': country.data()['code']}
+          {
+            'name': country.data()['name'],
+            'code': country.data()['code'],
+            'restricted_by': country.data()['restricted_by'],
+            'available': country.data()['available']
+          }
       ];
       allCities.value = [
         for (var city in cityValues.docs)
-          {'name': city.data()['name'], 'code': city.data()['code']}
+          {
+            'name': city.data()['name'],
+            'code': city.data()['code'],
+            'restricted_by': city.data()['restricted_by'],
+            'available': city.data()['available']
+          }
       ];
       update();
     } catch (e) {

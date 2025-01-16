@@ -34,7 +34,6 @@ class Functions extends StatelessWidget {
                         context: context,
                         controller: controller,
                         title: 'Search for screens',
-                        buttonTitle: 'New Screen',
                         button:
                             newScreenButton(context, constraints, controller),
                       );
@@ -104,12 +103,7 @@ ElevatedButton newScreenButton(
                                 : () async {
                                     await controller.addNewScreen();
                                   },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
+                            style:saveButtonStyle,
                             child:
                                 controller.addingNewScreenProcess.value == false
                                     ? const Text(
@@ -128,12 +122,7 @@ ElevatedButton newScreenButton(
                   onPressed: () {
                     Get.back();
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
+                  style: cancelButtonStyle,
                   child: controller.addingNewScreenProcess.value == false
                       ? const Text(
                           'Cancel',
@@ -285,12 +274,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
                         onPressed: () {
                           Get.back();
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: mainColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
+                        style: cancelButtonStyle,
                         child: controller.addingNewScreenProcess.value == false
                             ? const Text(
                                 'Cancel',

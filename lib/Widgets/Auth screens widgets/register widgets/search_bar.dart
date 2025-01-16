@@ -7,7 +7,6 @@ Row searchBar({
   required context,
   required controller,
   required title,
-  required buttonTitle,
   Widget? button,
 }) {
   return Row(

@@ -36,7 +36,6 @@ class ListOfValues extends StatelessWidget {
                         context: context,
                         controller: controller,
                         title: 'Search for Lists',
-                        buttonTitle: 'New List',
                         button: newListButton(context, constraints, controller),
                       );
                     },
@@ -205,12 +204,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
                           onPressed: () {
                             Get.back();
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: mainColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
+                          style: cancelButtonStyle,
                           child: controller.addingNewListValue.value == false
                               ? const Text(
                                   'Cancel',
@@ -424,12 +418,7 @@ ElevatedButton newListButton(
                   onPressed: () {
                     Get.back();
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
+                  style: cancelButtonStyle,
                   child: controller.addingNewListProcess.value == false
                       ? const Text(
                           'Cancel',
