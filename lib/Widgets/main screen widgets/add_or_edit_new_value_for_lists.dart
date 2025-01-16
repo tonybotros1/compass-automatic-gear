@@ -26,6 +26,7 @@ Widget addNewValueOrEdit({
             validate: true,
           ),
           myTextFormField2(
+            isCapital: true,
             obscureText: false,
             controller: valueCode ?? controller.valueCode,
             labelText: 'Code',
@@ -33,6 +34,7 @@ Widget addNewValueOrEdit({
             validate: true,
           ),
           myTextFormField2(
+            isCapital: true,
             obscureText: false,
             controller: restrictedBy ?? controller.restrictedBy,
             labelText: 'Restricted By',

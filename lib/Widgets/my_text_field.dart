@@ -8,6 +8,7 @@ Widget myTextFormField2({
   required obscureText,
   IconButton? icon,
   keyboardType,
+  bool? isCapital,
 }) {
   return TextFormField(
     obscureText: obscureText,

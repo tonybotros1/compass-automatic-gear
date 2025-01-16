@@ -37,7 +37,7 @@ class ListOfValuesController extends GetxController {
     searchForLists.value.addListener(() {
       filterLists();
     });
-     searchForValues.value.addListener(() {
+    searchForValues.value.addListener(() {
       filterValues();
     });
     super.onInit();
@@ -75,11 +75,11 @@ class ListOfValuesController extends GetxController {
   // }
 
   // this function is to sort data in table
-  void onSort(int columnIndex, bool ascending) {
+  void onSortForLists(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
       allLists.sort((screen1, screen2) {
-        final String? value1 = screen1.get('name');
-        final String? value2 = screen2.get('name');
+        final String? value1 = screen1.get('code');
+        final String? value2 = screen2.get('code');
 
         // Handle nulls: put nulls at the end
         if (value1 == null && value2 == null) return 0;
@@ -90,8 +90,8 @@ class ListOfValuesController extends GetxController {
       });
     } else if (columnIndex == 1) {
       allLists.sort((screen1, screen2) {
-        final String? value1 = screen1.get('routeName');
-        final String? value2 = screen2.get('routeName');
+        final String? value1 = screen1.get('list_name');
+        final String? value2 = screen2.get('list_name');
 
         // Handle nulls: put nulls at the end
         if (value1 == null && value2 == null) return 0;
@@ -102,6 +102,60 @@ class ListOfValuesController extends GetxController {
       });
     } else if (columnIndex == 2) {
       allLists.sort((screen1, screen2) {
+        final String? value1 = screen1.get('added_date');
+        final String? value2 = screen2.get('added_date');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    }
+    sortColumnIndex.value = columnIndex;
+    isAscending.value = ascending;
+  }
+
+  void onSortForValues(int columnIndex, bool ascending) {
+    if (columnIndex == 0) {
+      allValues.sort((screen1, screen2) {
+        final String? value1 = screen1.get('code');
+        final String? value2 = screen2.get('code');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 1) {
+      allValues.sort((screen1, screen2) {
+        final String? value1 = screen1.get('name');
+        final String? value2 = screen2.get('name');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 2) {
+      allValues.sort((screen1, screen2) {
+        final String? value1 = screen1.get('restricted_by');
+        final String? value2 = screen2.get('restricted_by');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 3) {
+      allValues.sort((screen1, screen2) {
         final String? value1 = screen1.get('added_date');
         final String? value2 = screen2.get('added_date');
 
@@ -130,14 +184,17 @@ class ListOfValuesController extends GetxController {
     } else {
       filteredLists.assignAll(
         allLists.where((list) {
-          return list['list_name'].toString().toLowerCase().contains(queryForLists) ||
+          return list['list_name']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForLists) ||
               list['code'].toString().toLowerCase().contains(queryForLists);
         }).toList(),
       );
     }
   }
 
-   // this function is to filter the search results for web
+  // this function is to filter the search results for web
   void filterValues() {
     queryForValues.value = searchForValues.value.text.toLowerCase();
     if (queryForValues.value.isEmpty) {
@@ -145,7 +202,10 @@ class ListOfValuesController extends GetxController {
     } else {
       filteredValues.assignAll(
         allValues.where((value) {
-          return value['name'].toString().toLowerCase().contains(queryForValues) ||
+          return value['name']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForValues) ||
               value['code'].toString().toLowerCase().contains(queryForValues);
         }).toList(),
       );
@@ -318,6 +378,4 @@ class ListOfValuesController extends GetxController {
       return formattedDate;
     }
   }
-
- 
 }

@@ -100,21 +100,21 @@ Widget tableOfScreens(
           text: 'Code',
           constraints: constraints,
         ),
-        onSort: controller.onSort,
+        onSort: controller.onSortForLists,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
           text: 'Name',
         ),
-        onSort: controller.onSort,
+        onSort: controller.onSortForLists,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
           text: 'Creation Date',
         ),
-        onSort: controller.onSort,
+        onSort: controller.onSortForLists,
       ),
       DataColumn(
         headingRowAlignment: MainAxisAlignment.center,

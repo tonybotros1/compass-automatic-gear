@@ -26,7 +26,6 @@ Widget valuesSection({
           builder: (controller) {
             return searchBar(
               search: controller.searchForValues,
-          
               constraints: constraints,
               context: context,
               controller: controller,
@@ -87,28 +86,28 @@ Widget tableOfScreens(
           text: 'Code',
           constraints: constraints,
         ),
-        onSort: controller.onSort,
+        onSort: controller.onSortForValues,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
           text: 'Name',
         ),
-        onSort: controller.onSort,
+        onSort: controller.onSortForValues,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
           text: 'Restricted By',
         ),
-        onSort: controller.onSort,
+        onSort: controller.onSortForValues,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
           text: 'Creation Date',
         ),
-        onSort: controller.onSort,
+        onSort: controller.onSortForValues,
       ),
       DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
@@ -176,8 +175,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
                   controller.listIDToWorkWithNewValue.value, valueId, status);
             },
             child: valueData['available'] == true
-                ? const Text('Hide')
-                : const Text('Unhide')),
+                ? const Text('Active')
+                : const Text('Inactive')),
         Padding(
           padding: const EdgeInsets.only(left: 5, right: 5),
           child: ElevatedButton(
