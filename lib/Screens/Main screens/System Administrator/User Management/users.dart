@@ -29,6 +29,7 @@ class Users extends StatelessWidget {
               child: Column(
                 children: [
                   searchBar(
+                    search: usersController.search,
                     constraints: constraints,
                     context: context,
                     controller: usersController,

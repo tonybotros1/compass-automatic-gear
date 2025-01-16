@@ -76,10 +76,12 @@ class RegisterScreenController extends GetxController {
       var countries = await FirebaseFirestore.instance
           .collection('all_lists')
           .where('list_name', isEqualTo: 'countries')
+          .where('available', isEqualTo: true)
           .get();
       var cities = await FirebaseFirestore.instance
           .collection('all_lists')
           .where('list_name', isEqualTo: 'cities')
+          .where('available', isEqualTo: true)
           .get();
 
       var countriesDoc = countries.docs.first;

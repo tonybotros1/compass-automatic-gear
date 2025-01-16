@@ -31,6 +31,7 @@ class Responsibilities extends StatelessWidget {
                     init: ResponsibilitiesController(),
                     builder: (controller) {
                       return searchBar(
+                        search:controller.search,
                         constraints: constraints,
                         context: context,
                         controller: controller,

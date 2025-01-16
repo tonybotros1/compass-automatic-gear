@@ -1,10 +1,11 @@
 import 'package:compass_automatic_gear/Controllers/Main%20screen%20controllers/list_of_values_controller.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../consts.dart';
 import '../Auth screens widgets/register widgets/search_bar.dart';
-import 'add_or_edit_new_list.dart';
+import 'add_or_edit_new_value_for_lists.dart';
 import 'auto_size_box.dart';
 
 Widget valuesSection({
@@ -24,11 +25,13 @@ Widget valuesSection({
           init: ListOfValuesController(),
           builder: (controller) {
             return searchBar(
+              search: controller.searchForValues,
+          
               constraints: constraints,
               context: context,
               controller: controller,
               title: 'Search for values',
-              button: newListButton(context, constraints, controller),
+              button: newValueButton(context, constraints, controller),
             );
           },
         ),
@@ -96,6 +99,13 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
+          text: 'Restricted By',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
           text: 'Creation Date',
         ),
         onSort: controller.onSort,
@@ -109,7 +119,7 @@ Widget tableOfScreens(
       ),
     ],
     rows: controller.filteredValues.isEmpty &&
-            controller.search.value.text.isEmpty
+            controller.searchForValues.value.text.isEmpty
         ? controller.allValues.map<DataRow>((value) {
             final valueData = value.data() as Map<String, dynamic>;
             final valueId = value.id;
@@ -125,21 +135,26 @@ Widget tableOfScreens(
   );
 }
 
-DataRow dataRowForTheTable(
-    Map<String, dynamic> listData, context, constraints, listId, controller) {
+DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
+    valueId, ListOfValuesController controller) {
   return DataRow(cells: [
     DataCell(Text(
-      listData['code'] ?? 'no code',
+      valueData['code'] ?? 'no code',
     )),
     DataCell(
       Text(
-        listData['name'] ?? 'no value',
+        valueData['name'] ?? 'no value',
       ),
     ),
     DataCell(
       Text(
-        listData['added_date'] != null
-            ? controller.textToDate(listData['added_date']) //
+        valueData['restricted_by'] ?? '',
+      ),
+    ),
+    DataCell(
+      Text(
+        valueData['added_date'] != null
+            ? controller.textToDate(valueData['added_date']) //
             : 'N/A',
       ),
     ),
@@ -147,33 +162,92 @@ DataRow dataRowForTheTable(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
-            style: editButtonStyle,
-            onPressed: () {},
-            child: const Text('Edit')),
+            style: valueData['available'] == false
+                ? unHideButtonStyle
+                : hideButtonStyle,
+            onPressed: () {
+              bool status;
+              if (valueData['available'] == false) {
+                status = true;
+              } else {
+                status = false;
+              }
+              controller.editHideOrUnhide(
+                  controller.listIDToWorkWithNewValue.value, valueId, status);
+            },
+            child: valueData['available'] == true
+                ? const Text('Hide')
+                : const Text('Unhide')),
         Padding(
-          padding: const EdgeInsets.only(left: 5),
+          padding: const EdgeInsets.only(left: 5, right: 5),
           child: ElevatedButton(
-              style: deleteButtonStyle,
+              style: editButtonStyle,
               onPressed: () {},
-              child: const Text('Delete')),
+              child: const Text('Edit')),
         ),
+        ElevatedButton(
+            style: deleteButtonStyle,
+            onPressed: () {
+              showCupertinoDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return CupertinoAlertDialog(
+                    title: const Text("Alert"),
+                    content:
+                        const Text("The value will be deleted permanently"),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: const Text("Cancel"),
+                        onPressed: () {
+                          Get.back();
+                        },
+                      ),
+                      CupertinoDialogAction(
+                        isDestructiveAction: true,
+                        isDefaultAction: true,
+                        child: controller.deletingListProcess.value == false
+                            ? const Text(
+                                'Ok',
+                                style: TextStyle(color: Colors.red),
+                              )
+                            : const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                        onPressed: () async {
+                          controller.deleteValue(
+                              controller.listIDToWorkWithNewValue.value,
+                              valueId);
+                          Get.back();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: const Text('Delete')),
       ],
     )),
   ]);
 }
 
-ElevatedButton newListButton(
-    BuildContext context, BoxConstraints constraints, controller) {
+ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
+    ListOfValuesController controller) {
   return ElevatedButton(
     onPressed: () {
-      controller.listName.clear();
-      controller.code.clear();
+      controller.valueName.clear();
+      controller.valueCode.clear();
       showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
               actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewListOrEdit(
+              content: addNewValueOrEdit(
                 controller: controller,
                 constraints: constraints,
                 context: context,
@@ -183,65 +257,47 @@ ElevatedButton newListButton(
                     builder: (controller) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ElevatedButton(
-                            onPressed: controller.addingNewListProcess.value
+                            onPressed: controller.addingNewListValue.value
                                 ? null
                                 : () async {
                                     if (!controller
                                         .formKeyForAddingNewList.currentState!
                                         .validate()) {
                                     } else {
-                                      await controller.addNewList();
+                                      await controller.addNewValue(controller
+                                          .listIDToWorkWithNewValue.value);
                                     }
                                   },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
-                            child:
-                                controller.addingNewListProcess.value == false
-                                    ? const Text(
-                                        'Save',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
+                            style: saveButtonStyle,
+                            child: controller.addingNewListValue.value == false
+                                ? const Text(
+                                    'Save',
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                : const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
                           ),
                         )),
                 ElevatedButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: controller.addingNewListProcess.value == false
-                      ? const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )
-                      : const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: cancelButtonStyle,
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.white),
+                    )),
               ],
             );
           });
     },
     style: newButtonStyle,
-    child: const Text('New List'),
+    child: const Text('New Value'),
   );
 }

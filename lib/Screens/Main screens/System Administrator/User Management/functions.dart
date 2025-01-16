@@ -30,6 +30,9 @@ class Functions extends StatelessWidget {
                     init: FunctionsController(),
                     builder: (controller) {
                       return searchBar(
+                        search: controller.search,
+
+                      
                         constraints: constraints,
                         context: context,
                         controller: controller,

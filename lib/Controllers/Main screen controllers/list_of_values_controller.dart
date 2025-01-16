@@ -6,8 +6,14 @@ import 'package:intl/intl.dart';
 class ListOfValuesController extends GetxController {
   late TextEditingController listName = TextEditingController();
   late TextEditingController code = TextEditingController();
-  RxString query = RxString('');
-  Rx<TextEditingController> search = TextEditingController().obs;
+  late TextEditingController valueCode = TextEditingController();
+  late TextEditingController valueName = TextEditingController();
+  late TextEditingController restrictedBy = TextEditingController();
+
+  RxString queryForLists = RxString('');
+  Rx<TextEditingController> searchForLists = TextEditingController().obs;
+  RxString queryForValues = RxString('');
+  Rx<TextEditingController> searchForValues = TextEditingController().obs;
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool isScreenLoding = RxBool(true);
@@ -21,13 +27,18 @@ class ListOfValuesController extends GetxController {
   RxBool deletingListProcess = RxBool(false);
   RxBool loadingValues = RxBool(false);
   RxBool addingNewListValue = RxBool(false);
+  RxBool edititngListValue = RxBool(false);
+  RxString listIDToWorkWithNewValue = RxString('');
 
   @override
   void onInit() {
     getLists();
     // editCities();
-    search.value.addListener(() {
+    searchForLists.value.addListener(() {
       filterLists();
+    });
+     searchForValues.value.addListener(() {
+      filterValues();
     });
     super.onInit();
   }
@@ -113,14 +124,29 @@ class ListOfValuesController extends GetxController {
 
   // this function is to filter the search results for web
   void filterLists() {
-    query.value = search.value.text.toLowerCase();
-    if (query.value.isEmpty) {
+    queryForLists.value = searchForLists.value.text.toLowerCase();
+    if (queryForLists.value.isEmpty) {
       filteredLists.clear();
     } else {
       filteredLists.assignAll(
         allLists.where((list) {
-          return list['list_name'].toString().toLowerCase().contains(query) ||
-              list['code'].toString().toLowerCase().contains(query);
+          return list['list_name'].toString().toLowerCase().contains(queryForLists) ||
+              list['code'].toString().toLowerCase().contains(queryForLists);
+        }).toList(),
+      );
+    }
+  }
+
+   // this function is to filter the search results for web
+  void filterValues() {
+    queryForValues.value = searchForValues.value.text.toLowerCase();
+    if (queryForValues.value.isEmpty) {
+      filteredValues.clear();
+    } else {
+      filteredValues.assignAll(
+        allValues.where((value) {
+          return value['name'].toString().toLowerCase().contains(queryForValues) ||
+              value['code'].toString().toLowerCase().contains(queryForValues);
         }).toList(),
       );
     }
@@ -140,20 +166,93 @@ class ListOfValuesController extends GetxController {
     }
   }
 
-  getListValues(listId) async {
+  getListValues(listId) {
     try {
       loadingValues.value = true;
-      var listValues = await FirebaseFirestore.instance
+      FirebaseFirestore.instance
           .collection('all_lists')
           .doc(listId)
           .collection('values')
           .orderBy('name', descending: false)
-          .get();
-
-      allValues.assignAll(listValues.docs);
-      loadingValues.value = false;
+          .snapshots()
+          .listen((value) {
+        allValues.assignAll(value.docs);
+        loadingValues.value = false;
+      });
     } catch (e) {
       loadingValues.value = false;
+    }
+  }
+
+// this function is to add new value to the selected list
+  addNewValue(listId) async {
+    try {
+      addingNewListValue.value = true;
+      await FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(listId)
+          .collection('values')
+          .add({
+        'name': valueName.text,
+        'code': valueCode.text,
+        'available': true,
+        'restricted_by': restrictedBy.text,
+        'added_date': DateTime.now().toString(),
+      });
+
+      addingNewListValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewListValue.value = false;
+    }
+  }
+
+// this function is to delete a value from list
+  deleteValue(listId, valueId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(listId)
+          .collection('values')
+          .doc(valueId)
+          .delete();
+      Get.back();
+    } catch (e) {
+//
+    }
+  }
+
+  editValue(listId, valueId) async {
+    try {
+      edititngListValue.value = true;
+      await FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(listId)
+          .collection('values')
+          .doc(valueId)
+          .update({
+        'name': valueName.text,
+        'restricted_by': restrictedBy.text,
+      });
+
+      edititngListValue.value = false;
+    } catch (e) {
+      edititngListValue.value = false;
+    }
+  }
+
+  editHideOrUnhide(listId, valueId, bool status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(listId)
+          .collection('values')
+          .doc(valueId)
+          .update({
+        'available': status,
+      });
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -219,4 +318,6 @@ class ListOfValuesController extends GetxController {
       return formattedDate;
     }
   }
+
+ 
 }

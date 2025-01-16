@@ -30,6 +30,8 @@ class Companies extends StatelessWidget {
                     init: CompanyController(),
                     builder: (controller) {
                       return searchBar(
+                        search:   controller.search,
+                       
                         constraints: constraints,
                         context: context,
                         controller: controller,

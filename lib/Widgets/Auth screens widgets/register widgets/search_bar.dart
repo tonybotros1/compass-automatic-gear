@@ -8,6 +8,7 @@ Row searchBar({
   required controller,
   required title,
   Widget? button,
+  required search,
 }) {
   return Row(
     children: [
@@ -37,7 +38,7 @@ Row searchBar({
                 child: SizedBox(
                   width: constraints.maxWidth / 2,
                   child: TextFormField(
-                    controller: controller.search.value,
+                    controller: search.value,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintStyle: const TextStyle(color: iconColor),
@@ -50,7 +51,7 @@ Row searchBar({
               FittedBox(
                 child: IconButton(
                   onPressed: () {
-                    controller.search.value.clear();
+                    search.value.clear();
                   },
                   icon: const Icon(
                     Icons.close,

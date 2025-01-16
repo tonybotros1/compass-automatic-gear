@@ -32,6 +32,9 @@ class ListOfValues extends StatelessWidget {
                     init: ListOfValuesController(),
                     builder: (controller) {
                       return searchBar(
+                        search: controller.searchForLists,
+
+                     
                         constraints: constraints,
                         context: context,
                         controller: controller,
@@ -78,7 +81,9 @@ class ListOfValues extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints, required context, required controller}) {
+    {required constraints,
+    required context,
+    required ListOfValuesController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -119,20 +124,20 @@ Widget tableOfScreens(
         ),
       ),
     ],
-    rows:
-        controller.filteredLists.isEmpty && controller.search.value.text.isEmpty
-            ? controller.allLists.map<DataRow>((list) {
-                final listData = list.data() as Map<String, dynamic>;
-                final listId = list.id;
-                return dataRowForTheTable(
-                    listData, context, constraints, listId, controller);
-              }).toList()
-            : controller.filteredLists.map<DataRow>((list) {
-                final listData = list.data() as Map<String, dynamic>;
-                final listId = list.id;
-                return dataRowForTheTable(
-                    listData, context, constraints, listId, controller);
-              }).toList(),
+    rows: controller.filteredLists.isEmpty &&
+            controller.searchForLists.value.text.isEmpty
+        ? controller.allLists.map<DataRow>((list) {
+            final listData = list.data() as Map<String, dynamic>;
+            final listId = list.id;
+            return dataRowForTheTable(
+                listData, context, constraints, listId, controller);
+          }).toList()
+        : controller.filteredLists.map<DataRow>((list) {
+            final listData = list.data() as Map<String, dynamic>;
+            final listId = list.id;
+            return dataRowForTheTable(
+                listData, context, constraints, listId, controller);
+          }).toList(),
   );
 }
 
@@ -160,6 +165,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
         ElevatedButton(
             style: viewButtonStyle,
             onPressed: () {
+              controller.listIDToWorkWithNewValue.value = listId;
               controller.getListValues(listId);
               showDialog(
                   context: context,
@@ -174,22 +180,15 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
                       ),
                       actions: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton(
-                            onPressed: controller.addingNewListValue.value
-                                ? null
-                                : () {
-                                    // controller.updateScreen(screenId);
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
+                            onPressed: () {
+                              Get.back();
+                            },
+                            style: cancelButtonStyle,
                             child: controller.addingNewListValue.value == false
                                 ? const Text(
-                                    'Save',
+                                    'Cancel',
                                     style: TextStyle(color: Colors.white),
                                   )
                                 : const Padding(
@@ -199,23 +198,6 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
                                     ),
                                   ),
                           ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          style: cancelButtonStyle,
-                          child: controller.addingNewListValue.value == false
-                              ? const Text(
-                                  'Cancel',
-                                  style: TextStyle(color: Colors.white),
-                                )
-                              : const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                  ),
-                                ),
                         ),
                       ],
                     );
@@ -241,7 +223,7 @@ ElevatedButton deleteSection(controller, listId, context, constraints) {
           builder: (BuildContext context) {
             return CupertinoAlertDialog(
               title: const Text("Alert"),
-              content: const Text("The menu will be deleted permanently"),
+              content: const Text("The list will be deleted permanently"),
               actions: [
                 CupertinoDialogAction(
                   child: const Text("Cancel"),

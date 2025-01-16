@@ -32,6 +32,8 @@ class Menus extends StatelessWidget {
                     init: MenusController(),
                     builder: (controller) {
                       return searchBar(
+                        search: controller.search,
+                     
                         constraints: constraints,
                         context: context,
                         controller: controller,
