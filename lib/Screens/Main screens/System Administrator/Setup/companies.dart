@@ -256,7 +256,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
 }
 
 ElevatedButton newCompanyButton(
-    BuildContext context, BoxConstraints constraints, controller) {
+    BuildContext context, BoxConstraints constraints,CompanyController controller) {
   return ElevatedButton(
     onPressed: () {
       showDialog(

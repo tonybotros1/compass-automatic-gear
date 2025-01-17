@@ -8,7 +8,7 @@ import 'drop_down_menu.dart';
 Widget addNewCompanyOrView({
   required BoxConstraints constraints,
   required BuildContext context,
-  required controller,
+  required CompanyController controller,
   TextEditingController? companyName,
   TextEditingController? typeOfBusiness,
   TextEditingController? userName,
@@ -153,20 +153,13 @@ Widget addNewCompanyOrView({
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: GetBuilder<CompanyController>(builder: (controller) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  return Column(
+                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      ElevatedButton(
-                        style: selectButtonStyle,
-                        onPressed: () {
-                          // controller.pickImage();
-                        },
-                        child: const Text('Select Logo'),
-                      ),
                       Container(
-                        width: 150,
-                        height: 150,
+                        width: 120,
+                        height: 100,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           border: Border.all(
@@ -189,7 +182,14 @@ Widget addNewCompanyOrView({
                                 controller.imageBytes!,
                                 fit: BoxFit.cover,
                               ),
-                      )
+                      ),
+                      ElevatedButton(
+                        style: selectButtonStyle,
+                        onPressed: () {
+                          // controller.pickImage();
+                        },
+                        child: const Text('Select Logo'),
+                      ),
                     ],
                   );
                 }),
@@ -203,12 +203,12 @@ Widget addNewCompanyOrView({
                     child: dropDownValues(
                       labelText: 'Responsibilities',
                       hintText: 'Select responsibility',
-                      menus: controller.allRoles ?? [],
+                      menus: controller.allRoles,
                       validate: true,
-                      ids: controller.roleIDFromList ?? [],
+                      ids: controller.roleIDFromList,
                     ),
                   ),
-                  if (controller.roleIDFromList?.isNotEmpty ?? false)
+                  if (controller.roleIDFromList.isNotEmpty)
                     ListView(
                       shrinkWrap: true,
                       children: [
