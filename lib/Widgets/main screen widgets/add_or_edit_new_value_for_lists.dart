@@ -38,7 +38,7 @@ Widget addNewValueOrEdit({
             controller: restrictedBy ?? controller.restrictedBy,
             labelText: 'Restricted By',
             hintText: 'Optional',
-            validate: true,
+            validate: false,
           ),
         ],
       ),
