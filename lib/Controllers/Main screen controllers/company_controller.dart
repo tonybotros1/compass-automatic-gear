@@ -46,21 +46,17 @@ class CompanyController extends GetxController {
 
   getCountriesAndCities() async {
     try {
-      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-          .instance
+      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore.instance
           .collection('all_lists')
           .where('code', isEqualTo: 'COUNTRIES')
           .get();
-      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-          .instance
+      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore.instance
           .collection('all_lists')
           .where('code', isEqualTo: 'CITIES')
           .get();
 
-      QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc =
-          countries.docs.first;
-      QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc
-          .reference
+      QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc = countries.docs.first;
+      QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc.reference
           .collection('values')
           .where('available', isEqualTo: true)
           .get();

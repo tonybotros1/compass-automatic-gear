@@ -293,6 +293,19 @@ class ListOfValuesController extends GetxController {
     }
   }
 
+  editPublicOrPrivate(listId, bool status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(listId)
+          .update({
+        'is_public': status,
+      });
+    } catch (e) {
+//
+    }
+  }
+
 // this function is to add new list
   addNewList() async {
     try {
@@ -301,6 +314,7 @@ class ListOfValuesController extends GetxController {
         'list_name': listName.text,
         'code': code.text,
         'added_date': DateTime.now().toString(),
+        'is_public':true,
       });
       addingNewListProcess.value = false;
       Get.back();

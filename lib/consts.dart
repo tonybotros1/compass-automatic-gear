@@ -83,6 +83,25 @@ var unHideButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var publicButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: const Color(0xff16C47F),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var privateButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: const Color(0xff123524),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+
 var deleteButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.red,
   foregroundColor: Colors.white,

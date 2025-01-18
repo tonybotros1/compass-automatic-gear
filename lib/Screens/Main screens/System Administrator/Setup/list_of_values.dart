@@ -162,48 +162,13 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ElevatedButton(
-            style: viewButtonStyle,
-            onPressed: () {
-              controller.listIDToWorkWithNewValue.value = listId;
-              controller.getListValues(listId);
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      actionsPadding:
-                          const EdgeInsets.symmetric(horizontal: 20),
-                      content: valuesSection(
-                        controller: controller,
-                        constraints: constraints,
-                        context: context,
-                      ),
-                      actions: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Get.back();
-                            },
-                            style: cancelButtonStyle,
-                            child: controller.addingNewListValue.value == false
-                                ? const Text(
-                                    'Cancel',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    );
-                  });
-            },
-            child: const Text('Values')),
+        valSectionInTheTable(controller, listId, context, constraints),
+        controller.userEmail.value == 'datahubai@gmail.com'
+            ? Padding(
+                padding: const EdgeInsets.only(left: 5),
+                child: publicPrivateSection(listData, controller, listId),
+              )
+            : const SizedBox(),
         controller.userEmail.value == 'datahubai@gmail.com'
             ? Padding(
                 padding: const EdgeInsets.only(left: 5, right: 5),
@@ -217,6 +182,71 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
       ],
     )),
   ]);
+}
+
+ElevatedButton publicPrivateSection(
+    listData, ListOfValuesController controller, listId) {
+  return ElevatedButton(
+      style: listData['is_public'] == false
+          ? privateButtonStyle
+          : publicButtonStyle,
+      onPressed: () {
+        bool status;
+        if (listData['is_public'] == false) {
+          status = true;
+        } else {
+          status = false;
+        }
+        controller.editPublicOrPrivate(listId, status);
+      },
+      child: listData['is_public'] == true
+          ? const Text('Public')
+          : const Text('Private'));
+}
+
+ElevatedButton valSectionInTheTable(
+    ListOfValuesController controller, listId, context, constraints) {
+  return ElevatedButton(
+      style: viewButtonStyle,
+      onPressed: () {
+        controller.listIDToWorkWithNewValue.value = listId;
+        controller.getListValues(listId);
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: valuesSection(
+                  controller: controller,
+                  constraints: constraints,
+                  context: context,
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      style: cancelButtonStyle,
+                      child: controller.addingNewListValue.value == false
+                          ? const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.white),
+                            )
+                          : const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              );
+            });
+      },
+      child: const Text('Values'));
 }
 
 ElevatedButton deleteSection(controller, listId, context, constraints) {
