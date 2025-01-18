@@ -59,6 +59,12 @@ class MainScreen extends StatelessWidget {
                                   const SizedBox(
                                     width: 10,
                                   ),
+                                  // IconButton(
+                                  //     onPressed: () {},
+                                  //     icon: Icon(
+                                  //       Icons.logout,
+                                  //       color: Colors.red,
+                                  //     )),
                                   ElevatedButton(
                                       style: logoutButtonStyle,
                                       onPressed: () async {
@@ -76,7 +82,10 @@ class MainScreen extends StatelessWidget {
                                               Get.offAllNamed('/');
                                             });
                                       },
-                                      child: const Icon(Icons.logout))
+                                      child: const Icon(
+                                        Icons.logout,
+                                        color: Colors.white,
+                                      ))
                                 ],
                               ))),
                     ],

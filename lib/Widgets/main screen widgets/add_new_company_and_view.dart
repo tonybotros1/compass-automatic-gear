@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Main screen controllers/company_controller.dart';
-import '../../consts.dart';
+import '../Auth screens widgets/register widgets/drop_down_menu_for_lists.dart';
 import '../my_text_field.dart';
 import 'drop_down_menu.dart';
 
@@ -17,7 +17,7 @@ Widget addNewCompanyOrView({
   TextEditingController? country,
 }) {
   return SizedBox(
-    width: constraints.maxWidth / 2,
+    width: constraints.maxWidth / 1.5,
     // height: 100,
     child: ListView(
       children: [
@@ -117,103 +117,64 @@ Widget addNewCompanyOrView({
             validate: true,
           ),
         ),
-        Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: myTextFormField2(
-                  obscureText: false,
-                  controller: country ?? controller.country,
-                  labelText: 'Country',
-                  hintText: 'Enter country',
-                  keyboardType: TextInputType.name,
-                  validate: true,
+        GetBuilder<CompanyController>(builder: (controller) {
+          return Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: dropDownValuesForList(
+                    isCoutry: true,
+                    labelText: 'Country',
+                    hintText: 'Enter your country',
+                    controller: controller,
+                    textController: controller.country,
+                    validate: true,
+                    values: controller.allCountries,
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: myTextFormField2(
-                  obscureText: false,
-                  controller: city ?? controller.city,
-                  labelText: 'City',
-                  hintText: 'Enter city',
-                  validate: true,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: dropDownValuesForList(
+                    isCoutry: false,
+                    labelText: 'City',
+                    hintText: 'Enter your city',
+                    controller: controller,
+                    textController: controller.city,
+                    validate: true,
+                    values: controller.filterdCitiesByCountry.isEmpty
+                        ? []
+                        : controller.filterdCitiesByCountry,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GetBuilder<CompanyController>(builder: (controller) {
-                  return Column(
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            style: BorderStyle.solid,
-                            color: controller.warningForImage.value == false
-                                ? Colors.grey
-                                : Colors.red,
-                          ),
-                        ),
-                        child: controller.imageBytes == null
-                            ? const Center(
-                                child: FittedBox(
-                                  child: Text(
-                                    'No image selected',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                ),
-                              )
-                            : Image.memory(
-                                controller.imageBytes!,
-                                fit: BoxFit.cover,
-                              ),
+              child: GetX<CompanyController>(builder: (context) {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: dropDownValues(
+                        labelText: 'Responsibilities',
+                        hintText: 'Select responsibility',
+                        menus: controller.allRoles,
+                        validate: true,
+                        ids: controller.roleIDFromList,
                       ),
-                      ElevatedButton(
-                        style: selectButtonStyle,
-                        onPressed: () {
-                          // controller.pickImage();
-                        },
-                        child: const Text('Select Logo'),
-                      ),
-                    ],
-                  );
-                }),
-              ),
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: dropDownValues(
-                      labelText: 'Responsibilities',
-                      hintText: 'Select responsibility',
-                      menus: controller.allRoles,
-                      validate: true,
-                      ids: controller.roleIDFromList,
                     ),
-                  ),
-                  if (controller.roleIDFromList.isNotEmpty)
-                    ListView(
-                      shrinkWrap: true,
-                      children: [
-                        GetX<CompanyController>(builder: (controller) {
-                          return Padding(
+                    if (controller.roleIDFromList.isNotEmpty)
+                      ListView(
+                        shrinkWrap: true,
+                        children: [
+                          Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Wrap(
                               spacing: 10, // Horizontal spacing between items
@@ -257,11 +218,48 @@ Widget addNewCompanyOrView({
                                 },
                               ),
                             ),
-                          );
-                        }),
-                      ],
+                          )
+                        ],
+                      ),
+                  ],
+                );
+              }),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GetBuilder<CompanyController>(builder: (controller) {
+                  return InkWell(
+                    onTap: () {
+                      controller.pickImage();
+                    },
+                    child: Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(
+                          style: BorderStyle.solid,
+                          color: controller.warningForImage.value == false
+                              ? Colors.grey
+                              : Colors.red,
+                        ),
+                      ),
+                      child: controller.imageBytes == null
+                          ? const Center(
+                              child: FittedBox(
+                                child: Text(
+                                  'No image selected',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                            )
+                          : Image.memory(
+                              controller.imageBytes!,
+                              fit: BoxFit.fitHeight,
+                            ),
                     ),
-                ],
+                  );
+                }),
               ),
             ),
           ],

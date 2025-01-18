@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-
+import 'dart:html' as html;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,10 +29,14 @@ class CompanyController extends GetxController {
   Uint8List? imageBytes;
   RxList roleIDFromList = RxList([]);
   RxMap allRoles = RxMap({});
+  RxList allCountries = RxList([]);
+  RxList allCities = RxList([]);
+  RxList filterdCitiesByCountry = RxList([]);
 
   @override
   void onInit() {
     getResponsibilities();
+    getCountriesAndCities();
     getCompanies();
     search.value.addListener(() {
       filterCompanies();
@@ -40,7 +44,95 @@ class CompanyController extends GetxController {
     super.onInit();
   }
 
-  
+  getCountriesAndCities() async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+          .instance
+          .collection('all_lists')
+          .where('code', isEqualTo: 'COUNTRIES')
+          .get();
+      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+          .instance
+          .collection('all_lists')
+          .where('code', isEqualTo: 'CITIES')
+          .get();
+
+      QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc =
+          countries.docs.first;
+      QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc
+          .reference
+          .collection('values')
+          .where('available', isEqualTo: true)
+          .get();
+      QueryDocumentSnapshot<Map<String, dynamic>> citiesDoc = cities.docs.first;
+      QuerySnapshot<Map<String, dynamic>> cityValues = await citiesDoc.reference
+          .collection('values')
+          .where('available', isEqualTo: true)
+          .get();
+      allCountries.value = [
+        for (var country in countryValues.docs)
+          {
+            'name': country.data()['name'],
+            'code': country.data()['code'],
+            'restricted_by': country.data()['restricted_by'],
+            'available': country.data()['available']
+          }
+      ];
+      allCities.value = [
+        for (var city in cityValues.docs)
+          {
+            'name': city.data()['name'],
+            'code': city.data()['code'],
+            'restricted_by': city.data()['restricted_by'],
+            'available': city.data()['available']
+          }
+      ];
+      update();
+    } catch (e) {
+      // print(e);
+    }
+  }
+
+  onSelect(bool isCountry, String code) {
+    if (isCountry) {
+      filterdCitiesByCountry.clear();
+      var query = code.toLowerCase();
+      city.clear();
+      filterdCitiesByCountry.assignAll(
+        allCities.where((city) {
+          return city['restricted_by'].toString().toLowerCase().contains(query);
+        }).toList(),
+      );
+      update();
+    }
+  }
+
+  // this function is to select an image for logo
+  pickImage() async {
+    try {
+      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      uploadInput.accept = 'image/*';
+      uploadInput.click();
+
+      uploadInput.onChange.listen((event) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files.first;
+          final reader = html.FileReader();
+
+          reader.readAsArrayBuffer(file);
+          reader.onLoadEnd.listen((event) async {
+            if (reader.result != null) {
+              imageBytes = reader.result as Uint8List;
+              update();
+            }
+          });
+        }
+      });
+    } catch (e) {
+      //
+    }
+  }
 
   // this function is to remove a menu from the list
   removeMenuFromList(index) {
@@ -59,16 +151,21 @@ class CompanyController extends GetxController {
   }
 
   String getRoleName(String menuID) {
-    // Find the entry with the matching key
-    final matchingEntry = allRoles.entries.firstWhere(
-      (entry) => entry.key == menuID,
-      orElse: () =>
-          const MapEntry('', 'Unknown'), // Handle cases where no match is found
-    );
-    final menuName =
-        matchingEntry.value.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
+    try {
+      // Find the entry with the matching key
+      final matchingEntry = allRoles.entries.firstWhere(
+        (entry) => entry.key == menuID,
+        orElse: () => const MapEntry(
+            '', 'Unknown'), // Handle cases where no match is found
+      );
+      final menuName =
+          matchingEntry.value.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
 
-    return menuName;
+      return menuName;
+    } catch (e) {
+      print(e);
+      return '';
+    }
   }
 
   // this function is to sort data in table

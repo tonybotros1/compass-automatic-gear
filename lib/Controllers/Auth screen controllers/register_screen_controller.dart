@@ -73,22 +73,29 @@ class RegisterScreenController extends GetxController {
 
   getCountriesAndCities() async {
     try {
-      var countries = await FirebaseFirestore.instance
+      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+          .instance
           .collection('all_lists')
-          .where('list_name', isEqualTo: 'countries')
-          .where('available', isEqualTo: true)
+          .where('code', isEqualTo: 'COUNTRIES')
           .get();
-      var cities = await FirebaseFirestore.instance
+      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+          .instance
           .collection('all_lists')
-          .where('list_name', isEqualTo: 'cities')
-          .where('available', isEqualTo: true)
+          .where('code', isEqualTo: 'CITIES')
           .get();
 
-      var countriesDoc = countries.docs.first;
-      var countryValues =
-          await countriesDoc.reference.collection('values').get();
-      var citiesDoc = cities.docs.first;
-      var cityValues = await citiesDoc.reference.collection('values').get();
+      QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc =
+          countries.docs.first;
+      QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc
+          .reference
+          .collection('values')
+          .where('available', isEqualTo: true)
+          .get();
+      QueryDocumentSnapshot<Map<String, dynamic>> citiesDoc = cities.docs.first;
+      QuerySnapshot<Map<String, dynamic>> cityValues = await citiesDoc.reference
+          .collection('values')
+          .where('available', isEqualTo: true)
+          .get();
       allCountries.value = [
         for (var country in countryValues.docs)
           {

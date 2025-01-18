@@ -80,7 +80,7 @@ class Companies extends StatelessWidget {
 }
 
 Widget tableOfCompanies(
-    {required constraints, required context, required controller}) {
+    {required constraints, required context, required CompanyController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
