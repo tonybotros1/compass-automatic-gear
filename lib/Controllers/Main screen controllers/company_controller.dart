@@ -159,7 +159,7 @@ class CompanyController extends GetxController {
 
       return menuName;
     } catch (e) {
-      print(e);
+      // print(e);
       return '';
     }
   }

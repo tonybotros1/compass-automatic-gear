@@ -481,7 +481,7 @@ AnimatedTreeView<MyTreeNode> leftTree({
           // drag target. Add some decoration to give feedback to the user.
           if (details != null) {
             myTreeNodeTile = ColoredBox(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               child: myTreeNodeTile,
             );
           }
