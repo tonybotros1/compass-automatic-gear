@@ -8,6 +8,7 @@ class ListOfValuesController extends GetxController {
   late TextEditingController listName = TextEditingController();
   late TextEditingController code = TextEditingController();
   late TextEditingController masteredByForList = TextEditingController();
+  late TextEditingController masteredByForValue = TextEditingController();
   late TextEditingController valueCode = TextEditingController();
   late TextEditingController valueName = TextEditingController();
   late TextEditingController restrictedBy = TextEditingController();
@@ -32,6 +33,7 @@ class ListOfValuesController extends GetxController {
   RxString listIDToWorkWithNewValue = RxString('');
   RxString userEmail = RxString('');
   RxMap listMap = RxMap({});
+  RxMap valueMap = RxMap({});
   RxString masteredById = RxString('');
 
   @override
@@ -195,6 +197,7 @@ class ListOfValuesController extends GetxController {
     try {
       FirebaseFirestore.instance
           .collection('all_lists')
+          .orderBy('list_name', descending: false)
           .snapshots()
           .listen((lists) {
         listMap.clear();
@@ -220,7 +223,7 @@ class ListOfValuesController extends GetxController {
         .value;
   }
 
-  getListValues(listId) {
+  getListValues(listId, masterBtId) {
     try {
       loadingValues.value = true;
       FirebaseFirestore.instance
@@ -229,10 +232,21 @@ class ListOfValuesController extends GetxController {
           .collection('values')
           .orderBy('name', descending: false)
           .snapshots()
-          .listen((value) {
-        allValues.assignAll(value.docs);
+          .listen((values) {
+        allValues.assignAll(values.docs);
         loadingValues.value = false;
       });
+        FirebaseFirestore.instance
+            .collection('all_lists')
+            .doc(masterBtId)
+            .collection('values')
+            .snapshots()
+            .listen((values) {
+          valueMap.clear();
+          for (var value in values.docs) {
+            valueMap[value.id] = value.data()['name'];
+          }
+        });
     } catch (e) {
       loadingValues.value = false;
     }
@@ -366,7 +380,7 @@ class ListOfValuesController extends GetxController {
           .update({
         'list_name': listName.text,
         'code': code.text,
-        'mastered_by':masteredById.value,
+        'mastered_by': masteredById.value,
       });
       editingListProcess.value = false;
       Get.back();

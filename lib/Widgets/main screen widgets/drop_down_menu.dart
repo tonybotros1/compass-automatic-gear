@@ -23,6 +23,7 @@ Widget dropDownValues({
             }
           : null,
       controller: textEditingController,
+      enabled: menus.isNotEmpty,
       focusNode: focusNode,
       decoration: InputDecoration(
         focusedBorder: const OutlineInputBorder(

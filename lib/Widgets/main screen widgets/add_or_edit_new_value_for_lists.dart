@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../Controllers/Main screen controllers/list_of_values_controller.dart';
 import '../my_text_field.dart';
+import 'drop_down_menu.dart';
 
 Widget addNewValueOrEdit({
   required BoxConstraints constraints,
@@ -16,8 +17,7 @@ Widget addNewValueOrEdit({
     height: 200,
     child: Form(
       key: controller.formKeyForAddingNewList,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: ListView(
         children: [
           myTextFormField2(
             obscureText: false,
@@ -26,20 +26,29 @@ Widget addNewValueOrEdit({
             hintText: 'Enter Value name',
             validate: true,
           ),
-          myTextFormField2(
-              obscureText: false,
-              controller: valueCode ?? controller.valueCode,
-              labelText: 'Code',
-              hintText: 'Enter code',
-              validate: true,
-              isEnabled: isEnabled),
-          myTextFormField2(
-            obscureText: false,
-            controller: restrictedBy ?? controller.restrictedBy,
-            labelText: 'Restricted By',
-            hintText: 'Optional',
-            validate: false,
+          SizedBox(
+            height: 20,
           ),
+          dropDownValues(
+              onSelected: (suggestion) {
+                controller.masteredByForValue.text = suggestion.toString();
+                controller.valueMap.entries.where((entry) {
+                  return entry.value == suggestion.toString();
+                }).forEach((entry) {
+                  controller.masteredById.value = entry.key;
+                });
+              },
+              itemBuilder: (context, suggestion) {
+                return ListTile(
+                  title: Text(suggestion.toString()),
+                );
+              },
+              labelText: 'Masterd By',
+              hintText: 'Select the parent Value for this Value (Optional)',
+              menus: controller.valueMap,
+              validate: false,
+              controller: controller,
+              textController: restrictedBy ?? controller.masteredByForValue)
         ],
       ),
     ),

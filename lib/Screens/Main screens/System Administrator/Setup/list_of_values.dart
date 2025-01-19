@@ -172,7 +172,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        valSectionInTheTable(controller, listId, context, constraints),
+        valSectionInTheTable(
+            controller, listId, context, constraints, listData),
         controller.userEmail.value == 'datahubai@gmail.com'
             ? Padding(
                 padding: const EdgeInsets.only(left: 5),
@@ -215,12 +216,12 @@ ElevatedButton publicPrivateSection(
 }
 
 ElevatedButton valSectionInTheTable(
-    ListOfValuesController controller, listId, context, constraints) {
+    ListOfValuesController controller, listId, context, constraints, listData) {
   return ElevatedButton(
       style: viewButtonStyle,
       onPressed: () {
         controller.listIDToWorkWithNewValue.value = listId;
-        controller.getListValues(listId);
+        controller.getListValues(listId, listData['mastered_by']);
         showDialog(
             context: context,
             builder: (context) {

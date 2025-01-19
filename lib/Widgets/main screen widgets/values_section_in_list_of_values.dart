@@ -142,7 +142,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
     DataCell(
       Text(
         valueData['added_date'] != null
-            ? controller.textToDate(valueData['added_date']) //
+            ? controller.textToDate(valueData['added_date']) 
             : 'N/A',
       ),
     ),
