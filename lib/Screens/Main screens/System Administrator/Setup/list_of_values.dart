@@ -159,10 +159,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
         listData['list_name'] ?? 'no list name',
       ),
     ),
-     DataCell(
-      Text(
-        listData['master'] ?? '',
-      ),
+    DataCell(
+      Text(controller.getListNameById(listData['mastered_by']) ?? ''),
     ),
     DataCell(
       Text(
@@ -276,11 +274,15 @@ ElevatedButton deleteSection(controller, listId, context, constraints) {
       child: const Text("Delete"));
 }
 
-ElevatedButton editButton(controller, listData, listId, context, constraints) {
+ElevatedButton editButton(
+    ListOfValuesController controller, listData, listId, context, constraints) {
   return ElevatedButton(
     onPressed: () {
-      controller.listName.text = listData['list_name'];
-      controller.code.text = listData['code'];
+      controller.listName.text = listData['list_name'] ?? '';
+      controller.code.text = listData['code'] ?? '';
+      controller.masteredById.value = '';
+      controller.masteredByForList.text =
+          controller.getListNameById(listData['masterd_by'])!;
       showDialog(
           context: context,
           builder: (context) {
@@ -346,12 +348,15 @@ ElevatedButton editButton(controller, listData, listId, context, constraints) {
   );
 }
 
-ElevatedButton newListButton(
-    BuildContext context, BoxConstraints constraints, controller) {
+ElevatedButton newListButton(BuildContext context, BoxConstraints constraints,
+    ListOfValuesController controller) {
   return ElevatedButton(
     onPressed: () {
       controller.listName.clear();
       controller.code.clear();
+      controller.masteredByForList.clear();
+      controller.masteredById.value = '';
+
       showDialog(
           context: context,
           builder: (context) {

@@ -82,13 +82,6 @@ Widget tableOfScreens(
     columns: [
       DataColumn(
         label: AutoSizedText(
-          text: 'Code',
-          constraints: constraints,
-        ),
-        onSort: controller.onSortForValues,
-      ),
-      DataColumn(
-        label: AutoSizedText(
           constraints: constraints,
           text: 'Name',
         ),
@@ -97,7 +90,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Restricted By',
+          text: 'Mastered By',
         ),
         onSort: controller.onSortForValues,
       ),
@@ -136,9 +129,6 @@ Widget tableOfScreens(
 DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
     valueId, ListOfValuesController controller) {
   return DataRow(cells: [
-    DataCell(Text(
-      valueData['code'] ?? 'no code',
-    )),
     DataCell(
       Text(
         valueData['name'] ?? 'no value',
@@ -187,8 +177,6 @@ ElevatedButton deleteSection(
       },
       child: const Text('Delete'));
 }
-
-
 
 ElevatedButton editSection(ListOfValuesController controller,
     Map<String, dynamic> valueData, context, constraints, valueId) {

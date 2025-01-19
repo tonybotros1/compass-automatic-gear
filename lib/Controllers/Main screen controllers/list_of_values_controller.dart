@@ -7,10 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ListOfValuesController extends GetxController {
   late TextEditingController listName = TextEditingController();
   late TextEditingController code = TextEditingController();
+  late TextEditingController masteredByForList = TextEditingController();
   late TextEditingController valueCode = TextEditingController();
   late TextEditingController valueName = TextEditingController();
   late TextEditingController restrictedBy = TextEditingController();
-
   RxString queryForLists = RxString('');
   Rx<TextEditingController> searchForLists = TextEditingController().obs;
   RxString queryForValues = RxString('');
@@ -32,6 +32,7 @@ class ListOfValuesController extends GetxController {
   RxString listIDToWorkWithNewValue = RxString('');
   RxString userEmail = RxString('');
   RxMap listMap = RxMap({});
+  RxString masteredById = RxString('');
 
   @override
   void onInit() {
@@ -196,12 +197,27 @@ class ListOfValuesController extends GetxController {
           .collection('all_lists')
           .snapshots()
           .listen((lists) {
+        listMap.clear();
+        for (var list in lists.docs) {
+          listMap[list.id] = list.data()['list_name'];
+        }
         allLists.assignAll(lists.docs);
         isScreenLoding.value = false;
       });
     } catch (e) {
       isScreenLoding.value = false;
     }
+  }
+
+  String? getListNameById(listId) {
+    if (listId == null) return '';
+    return listMap.entries
+        .firstWhere(
+          (entry) => entry.key == listId,
+          orElse: () =>
+              const MapEntry('', ''), // Handle the case where no entry is found
+        )
+        .value;
   }
 
   getListValues(listId) {
@@ -315,7 +331,8 @@ class ListOfValuesController extends GetxController {
         'list_name': listName.text,
         'code': code.text,
         'added_date': DateTime.now().toString(),
-        'is_public':true,
+        'is_public': true,
+        'mastered_by': masteredById.value,
       });
       addingNewListProcess.value = false;
       Get.back();
@@ -349,6 +366,7 @@ class ListOfValuesController extends GetxController {
           .update({
         'list_name': listName.text,
         'code': code.text,
+        'mastered_by':masteredById.value,
       });
       editingListProcess.value = false;
       Get.back();
