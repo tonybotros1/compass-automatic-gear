@@ -220,6 +220,7 @@ ElevatedButton valSectionInTheTable(
   return ElevatedButton(
       style: viewButtonStyle,
       onPressed: () {
+        controller.valueMap.clear();
         controller.listIDToWorkWithNewValue.value = listId;
         controller.getListValues(listId, listData['mastered_by']);
         showDialog(
@@ -281,9 +282,9 @@ ElevatedButton editButton(
     onPressed: () {
       controller.listName.text = listData['list_name'] ?? '';
       controller.code.text = listData['code'] ?? '';
-      controller.masteredById.value = '';
+      controller.masteredByIdForList.value = '';
       controller.masteredByForList.text =
-          controller.getListNameById(listData['masterd_by'])!;
+          controller.getListNameById(listData['mastered_by'])!;
       showDialog(
           context: context,
           builder: (context) {
@@ -356,7 +357,7 @@ ElevatedButton newListButton(BuildContext context, BoxConstraints constraints,
       controller.listName.clear();
       controller.code.clear();
       controller.masteredByForList.clear();
-      controller.masteredById.value = '';
+      controller.masteredByIdForList.value = '';
 
       showDialog(
           context: context,

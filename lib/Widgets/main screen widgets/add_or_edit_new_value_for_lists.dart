@@ -31,11 +31,11 @@ Widget addNewValueOrEdit({
           ),
           dropDownValues(
               onSelected: (suggestion) {
-                controller.masteredByForValue.text = suggestion.toString();
+                controller.restrictedBy.text = suggestion.toString();
                 controller.valueMap.entries.where((entry) {
                   return entry.value == suggestion.toString();
                 }).forEach((entry) {
-                  controller.masteredById.value = entry.key;
+                  controller.masteredByIdForValues.value = entry.key;
                 });
               },
               itemBuilder: (context, suggestion) {
@@ -48,7 +48,7 @@ Widget addNewValueOrEdit({
               menus: controller.valueMap,
               validate: false,
               controller: controller,
-              textController: restrictedBy ?? controller.masteredByForValue)
+              textController: restrictedBy ?? controller.restrictedBy)
         ],
       ),
     ),

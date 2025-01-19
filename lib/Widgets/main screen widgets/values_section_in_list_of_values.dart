@@ -127,7 +127,7 @@ Widget tableOfScreens(
 }
 
 DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
-    valueId, ListOfValuesController controller) {
+    String valueId, ListOfValuesController controller) {
   return DataRow(cells: [
     DataCell(
       Text(
@@ -136,13 +136,13 @@ DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
     ),
     DataCell(
       Text(
-        valueData['restricted_by'] ?? '',
+        controller.getValueNameById(valueData['restricted_by']) ?? '',
       ),
     ),
     DataCell(
       Text(
         valueData['added_date'] != null
-            ? controller.textToDate(valueData['added_date']) 
+            ? controller.textToDate(valueData['added_date'])
             : 'N/A',
       ),
     ),
@@ -179,13 +179,14 @@ ElevatedButton deleteSection(
 }
 
 ElevatedButton editSection(ListOfValuesController controller,
-    Map<String, dynamic> valueData, context, constraints, valueId) {
+    Map<String, dynamic> valueData, context, constraints, String valueId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
         controller.valueName.text = valueData['name'];
-        controller.restrictedBy.text = valueData['restricted_by'];
-        controller.valueCode.text = valueData['code'];
+        controller.restrictedBy.text =
+            controller.getValueNameById(valueData['restricted_by'])!;
+        controller.masteredByIdForValues.value = '';
         showDialog(
             context: context,
             builder: (context) {
@@ -210,7 +211,8 @@ ElevatedButton editSection(ListOfValuesController controller,
                                           .validate()) {
                                       } else {
                                         controller.editValue(
-                                            controller.listIDToWorkWithNewValue,
+                                            controller
+                                                .listIDToWorkWithNewValue.value,
                                             valueId);
                                       }
                                     },
@@ -244,20 +246,11 @@ ElevatedButton editSection(ListOfValuesController controller,
               );
             });
       },
-      child: controller.edititngListValue.value == false
-          ? const Text('Edit')
-          : const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2,
-              ),
-            ));
+      child: Text('Edit'));
 }
 
 ElevatedButton activeInActiveSection(Map<String, dynamic> valueData,
-    ListOfValuesController controller, valueId) {
+    ListOfValuesController controller,String valueId) {
   return ElevatedButton(
       style:
           valueData['available'] == false ? unHideButtonStyle : hideButtonStyle,
@@ -281,7 +274,6 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
   return ElevatedButton(
     onPressed: () {
       controller.valueName.clear();
-      controller.valueCode.clear();
       controller.restrictedBy.clear();
       showDialog(
           context: context,

@@ -8,8 +8,6 @@ class ListOfValuesController extends GetxController {
   late TextEditingController listName = TextEditingController();
   late TextEditingController code = TextEditingController();
   late TextEditingController masteredByForList = TextEditingController();
-  late TextEditingController masteredByForValue = TextEditingController();
-  late TextEditingController valueCode = TextEditingController();
   late TextEditingController valueName = TextEditingController();
   late TextEditingController restrictedBy = TextEditingController();
   RxString queryForLists = RxString('');
@@ -29,12 +27,12 @@ class ListOfValuesController extends GetxController {
   RxBool deletingListProcess = RxBool(false);
   RxBool loadingValues = RxBool(false);
   RxBool addingNewListValue = RxBool(false);
-  RxBool edititngListValue = RxBool(false);
   RxString listIDToWorkWithNewValue = RxString('');
   RxString userEmail = RxString('');
   RxMap listMap = RxMap({});
   RxMap valueMap = RxMap({});
-  RxString masteredById = RxString('');
+  RxString masteredByIdForList = RxString('');
+  RxString masteredByIdForValues = RxString('');
 
   @override
   void onInit() {
@@ -223,6 +221,17 @@ class ListOfValuesController extends GetxController {
         .value;
   }
 
+  String? getValueNameById(listId) {
+    if (listId == null) return '';
+    return valueMap.entries
+        .firstWhere(
+          (entry) => entry.key == listId,
+          orElse: () =>
+              const MapEntry('', ''), // Handle the case where no entry is found
+        )
+        .value;
+  }
+
   getListValues(listId, masterBtId) {
     try {
       loadingValues.value = true;
@@ -236,17 +245,17 @@ class ListOfValuesController extends GetxController {
         allValues.assignAll(values.docs);
         loadingValues.value = false;
       });
-        FirebaseFirestore.instance
-            .collection('all_lists')
-            .doc(masterBtId)
-            .collection('values')
-            .snapshots()
-            .listen((values) {
-          valueMap.clear();
-          for (var value in values.docs) {
-            valueMap[value.id] = value.data()['name'];
-          }
-        });
+      FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(masterBtId)
+          .collection('values')
+          .snapshots()
+          .listen((values) {
+        valueMap.clear();
+        for (var value in values.docs) {
+          valueMap[value.id] = value.data()['name'];
+        }
+      });
     } catch (e) {
       loadingValues.value = false;
     }
@@ -262,9 +271,8 @@ class ListOfValuesController extends GetxController {
           .collection('values')
           .add({
         'name': valueName.text,
-        'code': valueCode.text,
         'available': true,
-        'restricted_by': restrictedBy.text,
+        'restricted_by': masteredByIdForValues.value,
         'added_date': DateTime.now().toString(),
       });
 
@@ -292,7 +300,6 @@ class ListOfValuesController extends GetxController {
 
   editValue(listId, valueId) async {
     try {
-      edititngListValue.value = true;
       await FirebaseFirestore.instance
           .collection('all_lists')
           .doc(listId)
@@ -300,12 +307,12 @@ class ListOfValuesController extends GetxController {
           .doc(valueId)
           .update({
         'name': valueName.text,
-        'restricted_by': restrictedBy.text,
+        'restricted_by': masteredByIdForValues.value,
       });
 
-      edititngListValue.value = false;
+      Get.back();
     } catch (e) {
-      edititngListValue.value = false;
+      print(e);
     }
   }
 
@@ -346,7 +353,7 @@ class ListOfValuesController extends GetxController {
         'code': code.text,
         'added_date': DateTime.now().toString(),
         'is_public': true,
-        'mastered_by': masteredById.value,
+        'mastered_by': masteredByIdForList.value,
       });
       addingNewListProcess.value = false;
       Get.back();
@@ -380,7 +387,7 @@ class ListOfValuesController extends GetxController {
           .update({
         'list_name': listName.text,
         'code': code.text,
-        'mastered_by': masteredById.value,
+        'mastered_by': masteredByIdForList.value,
       });
       editingListProcess.value = false;
       Get.back();

@@ -46,7 +46,7 @@ Widget addNewListOrEdit({
                 controller.listMap.entries.where((entry) {
                   return entry.value == suggestion.toString();
                 }).forEach((entry) {
-                  controller.masteredById.value = entry.key;
+                  controller.masteredByIdForList.value = entry.key;
                 });
               },
               itemBuilder: (context, suggestion) {
