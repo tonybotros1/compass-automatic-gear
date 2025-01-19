@@ -31,6 +31,7 @@ class ListOfValuesController extends GetxController {
   RxBool edititngListValue = RxBool(false);
   RxString listIDToWorkWithNewValue = RxString('');
   RxString userEmail = RxString('');
+  RxMap listMap = RxMap({});
 
   @override
   void onInit() {

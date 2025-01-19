@@ -6,11 +6,13 @@ Widget dropDownValues({
   required String hintText,
   required Map menus,
   required bool validate,
-  required List ids,
+  required Widget Function(BuildContext, dynamic) itemBuilder,
+  required void Function(dynamic)? onSelected,
   TextEditingController? textController,
   controller,
 }) {
   return TypeAheadField(
+    controller: textController,
     builder: (context, textEditingController, focusNode) => TextFormField(
       validator: validate
           ? (value) {
@@ -76,20 +78,8 @@ Widget dropDownValues({
               item.toString().toLowerCase().contains(pattern.toLowerCase()))
           .toList();
     },
-    itemBuilder: (context, suggestion) {
-      return ListTile(
-        title: Text(suggestion.toString()),
-      );
-    },
-    onSelected: (suggestion) {
-      menus.entries.where((entry) {
-        return entry.value == suggestion.toString();
-      }).forEach((entry) {
-        if (!ids.contains(entry.key)) {
-          ids.add(entry.key);
-        }
-      });
-    },
+    itemBuilder: itemBuilder,
+    onSelected: onSelected,
     errorBuilder: (context, error) {
       return Padding(
         padding: const EdgeInsets.all(8.0),

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
 
+import '../../Controllers/Main screen controllers/menus_controller.dart';
 import '../../consts.dart';
 import 'drop_down_menu.dart';
 
@@ -69,7 +70,7 @@ Widget viewMenu({
   );
 }
 
-Obx screenSection(controller, BoxConstraints constraints) {
+Obx screenSection(MenusController controller, BoxConstraints constraints) {
   return Obx(() {
     return Expanded(
       child: controller.selectedMenuID.value != ''
@@ -96,7 +97,7 @@ Obx screenSection(controller, BoxConstraints constraints) {
                                 color: Colors.white,
                                 fontSize: 13,
                               ),
-                              text: '${controller.selectedMenuName.value}',
+                              text: controller.selectedMenuName.value,
                             ),
                           ),
                         ),
@@ -105,7 +106,22 @@ Obx screenSection(controller, BoxConstraints constraints) {
                           child: Form(
                             key: controller.formKeyForDropDownListForScreens,
                             child: dropDownValues(
-                              ids: controller.screenIDFromList,
+                              onSelected: (suggestion) {
+                                controller.selectFromScreens.entries
+                                    .where((entry) {
+                                  return entry.value == suggestion.toString();
+                                }).forEach((entry) {
+                                  if (!controller.screenIDFromList
+                                      .contains(entry.key)) {
+                                    controller.screenIDFromList.add(entry.key);
+                                  }
+                                });
+                              },
+                              itemBuilder: (context, suggestion) {
+                                return ListTile(
+                                  title: Text(suggestion.toString()),
+                                );
+                              },
                               labelText: 'Screens',
                               hintText: 'Select Screen',
                               menus: controller.selectFromScreens,
@@ -129,7 +145,8 @@ Obx screenSection(controller, BoxConstraints constraints) {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Text(
-                                      '${controller.getScreenName(controller.screenIDFromList[i])}',
+                                      controller.getScreenName(
+                                          controller.screenIDFromList[i]),
                                       style: const TextStyle(fontSize: 14),
                                     ),
                                   ),
@@ -204,7 +221,7 @@ Obx screenSection(controller, BoxConstraints constraints) {
   });
 }
 
-Obx menuSection(controller, BoxConstraints constraints) {
+Obx menuSection(MenusController controller, BoxConstraints constraints) {
   return Obx(
     () => Expanded(
       child: Container(
@@ -237,7 +254,7 @@ Obx menuSection(controller, BoxConstraints constraints) {
                                   color: Colors.white,
                                   fontSize: 13,
                                 ),
-                                text: '${controller.selectedMenuName.value}',
+                                text: controller.selectedMenuName.value,
                               ),
                             ),
                           ),
@@ -246,7 +263,22 @@ Obx menuSection(controller, BoxConstraints constraints) {
                             child: Form(
                               key: controller.formKeyForDropDownListForMenus,
                               child: dropDownValues(
-                                ids: controller.menuIDFromList,
+                                onSelected: (suggestion) {
+                                  controller.selectFromMenus.entries
+                                      .where((entry) {
+                                    return entry.value == suggestion.toString();
+                                  }).forEach((entry) {
+                                    if (!controller.menuIDFromList
+                                        .contains(entry.key)) {
+                                      controller.menuIDFromList.add(entry.key);
+                                    }
+                                  });
+                                },
+                                itemBuilder: (context, suggestion) {
+                                  return ListTile(
+                                    title: Text(suggestion.toString()),
+                                  );
+                                },
                                 labelText: 'Menus',
                                 hintText: 'Select Menu',
                                 menus: controller.selectFromMenus,
@@ -270,7 +302,8 @@ Obx menuSection(controller, BoxConstraints constraints) {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Text(
-                                        '${controller.getMenuName(controller.menuIDFromList[i])}',
+                                        controller.getMenuName(
+                                            controller.menuIDFromList[i]),
                                         style: const TextStyle(fontSize: 14),
                                       ),
                                     ),
@@ -481,7 +514,8 @@ AnimatedTreeView<MyTreeNode> leftTree({
           // drag target. Add some decoration to give feedback to the user.
           if (details != null) {
             myTreeNodeTile = ColoredBox(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              color:
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               child: myTreeNodeTile,
             );
           }

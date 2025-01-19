@@ -112,6 +112,13 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
+          text: 'Mastered By',
+        ),
+        onSort: controller.onSortForLists,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
           text: 'Creation Date',
         ),
         onSort: controller.onSortForLists,
@@ -150,6 +157,11 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
     DataCell(
       Text(
         listData['list_name'] ?? 'no list name',
+      ),
+    ),
+     DataCell(
+      Text(
+        listData['master'] ?? '',
       ),
     ),
     DataCell(

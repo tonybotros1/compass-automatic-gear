@@ -163,11 +163,25 @@ Widget addNewCompanyOrView({
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: dropDownValues(
+                        onSelected: (suggestion) {
+                          controller.allRoles.entries.where((entry) {
+                            return entry.value == suggestion.toString();
+                          }).forEach((entry) {
+                            if (!controller.roleIDFromList
+                                .contains(entry.key)) {
+                              controller.roleIDFromList.add(entry.key);
+                            }
+                          });
+                        },
+                        itemBuilder: (context, suggestion) {
+                          return ListTile(
+                            title: Text(suggestion.toString()),
+                          );
+                        },
                         labelText: 'Responsibilities',
                         hintText: 'Select responsibility',
                         menus: controller.allRoles,
                         validate: true,
-                        ids: controller.roleIDFromList,
                       ),
                     ),
                     if (controller.roleIDFromList.isNotEmpty)

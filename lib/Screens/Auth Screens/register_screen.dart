@@ -83,7 +83,7 @@ class RegisterScreen extends StatelessWidget {
 }
 
 Widget responsibilities({
-  required controller,
+  required RegisterScreenController controller,
 }) {
   return AnimatedContainer(
     height: 230,
@@ -99,11 +99,25 @@ Widget responsibilities({
               child: Form(
                 key: controller.formKeyForThirdMenu,
                 child: dropDownValues(
+                    onSelected: (suggestion) {
+                      controller.allRoles.entries.where((entry) {
+                        return entry.value == suggestion.toString();
+                      }).forEach((entry) {
+                        if (!controller.roleIDFromList.contains(entry.key)) {
+                          controller.roleIDFromList.add(entry.key);
+                        }
+                      });
+                    },
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text(suggestion.toString()),
+                      );
+                    },
                     labelText: 'Responsibilities',
                     hintText: 'select responsibility ',
                     menus: controller.allRoles,
                     validate: true,
-                    ids: controller.roleIDFromList),
+               ),
               ),
             ),
             ListView(
@@ -175,7 +189,7 @@ Widget responsibilities({
                         controller.address.text.isNotEmpty &&
                         controller.country.text.isNotEmpty &&
                         controller.city.text.isNotEmpty &&
-                        controller.imageBytes.isNotEmpty) {
+                        controller.imageBytes!.isNotEmpty) {
                       controller.update();
 
                       controller.addNewCompany();
