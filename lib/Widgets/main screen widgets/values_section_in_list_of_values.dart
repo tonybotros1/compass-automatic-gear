@@ -149,7 +149,9 @@ DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        activeInActiveSection(valueData, controller, valueId),
+        controller.userEmail.value == 'datahubai@gmail.com'
+            ? activeInActiveSection(valueData, controller, valueId)
+            : SizedBox(),
         Padding(
           padding: const EdgeInsets.only(left: 5, right: 5),
           child:
@@ -250,7 +252,7 @@ ElevatedButton editSection(ListOfValuesController controller,
 }
 
 ElevatedButton activeInActiveSection(Map<String, dynamic> valueData,
-    ListOfValuesController controller,String valueId) {
+    ListOfValuesController controller, String valueId) {
   return ElevatedButton(
       style:
           valueData['available'] == false ? unHideButtonStyle : hideButtonStyle,

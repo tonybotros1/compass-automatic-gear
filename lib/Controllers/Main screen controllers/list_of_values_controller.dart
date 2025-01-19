@@ -193,18 +193,27 @@ class ListOfValuesController extends GetxController {
 
   getLists() {
     try {
-      FirebaseFirestore.instance
-          .collection('all_lists')
-          .orderBy('list_name', descending: false)
-          .snapshots()
-          .listen((lists) {
-        listMap.clear();
-        for (var list in lists.docs) {
-          listMap[list.id] = list.data()['list_name'];
-        }
-        allLists.assignAll(lists.docs);
-        isScreenLoding.value = false;
-      });
+      var lists = FirebaseFirestore.instance.collection('all_lists');
+
+      if (userEmail.value == 'datahubai@gmail.com') {
+        lists.snapshots().listen((lists) {
+          listMap.clear();
+          for (var list in lists.docs) {
+            listMap[list.id] = list.data()['list_name'];
+          }
+          allLists.assignAll(lists.docs);
+          isScreenLoding.value = false;
+        });
+      } else {
+        lists.where('is_public', isEqualTo: true).snapshots().listen((lists) {
+          listMap.clear();
+          for (var list in lists.docs) {
+            listMap[list.id] = list.data()['list_name'];
+          }
+          allLists.assignAll(lists.docs);
+          isScreenLoding.value = false;
+        });
+      }
     } catch (e) {
       isScreenLoding.value = false;
     }
@@ -235,27 +244,41 @@ class ListOfValuesController extends GetxController {
   getListValues(listId, masterBtId) {
     try {
       loadingValues.value = true;
-      FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(listId)
-          .collection('values')
-          .orderBy('name', descending: false)
-          .snapshots()
-          .listen((values) {
-        allValues.assignAll(values.docs);
-        loadingValues.value = false;
-      });
-      FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(masterBtId)
-          .collection('values')
-          .snapshots()
-          .listen((values) {
-        valueMap.clear();
-        for (var value in values.docs) {
-          valueMap[value.id] = value.data()['name'];
-        }
-      });
+
+      if (userEmail.value == 'datahubai@gmail.com') {
+        FirebaseFirestore.instance
+            .collection('all_lists')
+            .doc(listId)
+            .collection('values')
+            .orderBy('name', descending: false)
+            .snapshots()
+            .listen((values) {
+          allValues.assignAll(values.docs);
+        });
+        FirebaseFirestore.instance
+            .collection('all_lists')
+            .doc(masterBtId)
+            .collection('values')
+            .snapshots()
+            .listen((values) {
+          valueMap.clear();
+          for (var value in values.docs) {
+            valueMap[value.id] = value.data()['name'];
+            loadingValues.value = false;
+          }
+        });
+      } else {
+        FirebaseFirestore.instance
+            .collection('all_lists')
+            .doc(listId)
+            .collection('values')
+            .where('available', isEqualTo: true)
+            .snapshots()
+            .listen((values) {
+          allValues.assignAll(values.docs);
+          loadingValues.value = false;
+        });
+      }
     } catch (e) {
       loadingValues.value = false;
     }
