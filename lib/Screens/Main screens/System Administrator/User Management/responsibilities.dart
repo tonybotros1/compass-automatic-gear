@@ -78,7 +78,8 @@ class Responsibilities extends StatelessWidget {
   }
 }
 
-ElevatedButton newResponsibilityButton(context, constraints,ResponsibilitiesController controller) {
+ElevatedButton newResponsibilityButton(
+    context, constraints, ResponsibilitiesController controller) {
   return ElevatedButton(
       onPressed: () async {
         controller.responsibilityName.clear();
@@ -154,7 +155,9 @@ ElevatedButton newResponsibilityButton(context, constraints,ResponsibilitiesCont
 }
 
 Widget tableOfScreens(
-    {required constraints, required context, required ResponsibilitiesController controller}) {
+    {required constraints,
+    required context,
+    required ResponsibilitiesController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -212,7 +215,7 @@ Widget tableOfScreens(
 }
 
 DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
-    roleId,ResponsibilitiesController controller, role) {
+    roleId, ResponsibilitiesController controller, role) {
   return DataRow(
       selected: roleData['is_shown_for_users'] ?? false,
       onSelectChanged: (isSelected) {
@@ -275,7 +278,7 @@ ElevatedButton deleteSection(
 
 Widget viewSection(
     {required context,
-    required controller,
+    required ResponsibilitiesController controller,
     required roleData,
     required constraints,
     required roleID}) {
@@ -288,7 +291,7 @@ Widget viewSection(
               controller.responsibilityName.text = roleData['role_name'] ?? '';
 
               controller.menuName.text = roleData['menu']['name'] ?? '';
-              // controller.menuIDFromList.value = roleData['menu']['id'];
+              controller.menuIDFromList.value = roleData['menu_id'];
 
               // print(controller.menuName.text);
               return AlertDialog(

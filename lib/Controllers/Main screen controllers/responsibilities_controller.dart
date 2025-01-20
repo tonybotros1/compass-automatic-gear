@@ -197,6 +197,7 @@ class ResponsibilitiesController extends GetxController {
           allResponsibilities[role.id] = {
             'role_name': role['role_name'],
             'menu': menuMap[role['menuID']] ?? {}, // Fetch menu data as Map
+            'menu_id':role['menuID'],
             'added_date': role['added_date'],
             'is_shown_for_users': role['is_shown_for_users'],
           };
