@@ -314,6 +314,7 @@ class MenusController extends GetxController {
 // this function is to delete a menu
   Future<void> deleteMenuAndUpdateChildren(String menuId) async {
     try {
+      Get.back();
       final firestore = FirebaseFirestore.instance;
 
       QuerySnapshot querySnapshot = await firestore
@@ -332,7 +333,6 @@ class MenusController extends GetxController {
       await batch.commit();
       await firestore.collection('menus ').doc(menuId).delete();
       getMenus();
-      Get.back();
     } catch (e) {
       //
     }
