@@ -33,18 +33,19 @@ class ListOfValuesController extends GetxController {
   RxMap valueMap = RxMap({});
   RxString masteredByIdForList = RxString('');
   RxString masteredByIdForValues = RxString('');
-
+  
   @override
   void onInit() {
-    getUserEmail();
-    getLists();
-    // editCities();
-    searchForLists.value.addListener(() {
-      filterLists();
+    getUserEmail().then((_) {
+      getLists();
+      searchForLists.value.addListener(() {
+        filterLists();
+      });
+      searchForValues.value.addListener(() {
+        filterValues();
+      });
     });
-    searchForValues.value.addListener(() {
-      filterValues();
-    });
+
     super.onInit();
   }
 
