@@ -1,9 +1,14 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:html' as html;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
+import '../../consts.dart';
 
 class CompanyController extends GetxController {
   RxBool isScreenLoding = RxBool(true);
@@ -19,7 +24,6 @@ class CompanyController extends GetxController {
   final RxList<DocumentSnapshot> allCompanies = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredCompanies =
       RxList<DocumentSnapshot>([]);
-
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxInt sortColumnIndex = RxInt(0);
@@ -32,6 +36,11 @@ class CompanyController extends GetxController {
   RxList allCountries = RxList([]);
   RxList allCities = RxList([]);
   RxList filterdCitiesByCountry = RxList([]);
+  RxString selectedCountryId = RxString('');
+  RxString selectedCityId = RxString('');
+  RxString logoUrl = RxString('');
+  final GlobalKey<FormState> formKeyForCompany = GlobalKey<FormState>();
+
 
   @override
   void onInit() {
@@ -44,19 +53,99 @@ class CompanyController extends GetxController {
     super.onInit();
   }
 
+  addNewCompany() async {
+    try {
+      addingNewCompanyProcess.value = true;
+
+      var userDataSnapshot = await FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('email', isEqualTo: email.text) // Check for existing email
+          .get();
+
+      if (userDataSnapshot.docs.isNotEmpty) {
+        addingNewCompanyProcess.value = false;
+        showSnackBar(
+            'Email already in use', 'This email is already registered');
+        return;
+      }
+
+      if (imageBytes != null && imageBytes!.isNotEmpty) {
+        final Reference storageRef = FirebaseStorage.instance
+            .ref()
+            .child('images/${formatPhrase(companyName.text)}.png');
+        final UploadTask uploadTask = storageRef.putData(
+          imageBytes!,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        await uploadTask.then((p0) async {
+          logoUrl.value = await storageRef.getDownloadURL();
+        });
+      }
+
+      var bytes = utf8.encode(password.text);
+      var digest = sha256.convert(bytes);
+      String hashedPassword = digest.toString();
+
+      var newCompany =
+          await FirebaseFirestore.instance.collection('companies').add({
+        'company_logo': logoUrl.value,
+        'company_name': companyName.text,
+        'type_of_business': typeOfBusiness.text,
+        'added_date': DateTime.now().toString(),
+        'status': true,
+        'contact_details': {
+          'address': address.text,
+          'city': selectedCityId.value,
+          'country': selectedCountryId.value,
+          'email': email.text,
+          'name': userName.text,
+          'password': hashedPassword,
+          'phone': phoneNumber.text,
+        },
+      });
+
+      DateTime now = DateTime.now();
+      DateTime expiryDate = DateTime(now.year, now.month + 1, now.day);
+
+      await FirebaseFirestore.instance.collection('sys-users').add({
+        "user_name": userName.text,
+        "email": email.text,
+        "password": hashedPassword,
+        "roles": roleIDFromList,
+        "expiry_date": expiryDate.toString(),
+        "added_date": DateTime.now().toString(),
+        "status": true,
+        "company_id": newCompany.id,
+      });
+
+      addingNewCompanyProcess.value = false;
+    } catch (e) {
+      addingNewCompanyProcess.value = false;
+    }
+  }
+
+  String formatPhrase(String phrase) {
+    return phrase.replaceAll(' ', '_');
+  }
+
   getCountriesAndCities() async {
     try {
-      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore.instance
+      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+          .instance
           .collection('all_lists')
           .where('code', isEqualTo: 'COUNTRIES')
           .get();
-      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore.instance
+      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+          .instance
           .collection('all_lists')
           .where('code', isEqualTo: 'CITIES')
           .get();
 
-      QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc = countries.docs.first;
-      QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc.reference
+      QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc =
+          countries.docs.first;
+      QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc
+          .reference
           .collection('values')
           .where('available', isEqualTo: true)
           .get();
@@ -68,6 +157,7 @@ class CompanyController extends GetxController {
       allCountries.value = [
         for (var country in countryValues.docs)
           {
+            'id': country.id,
             'name': country.data()['name'],
             'code': country.data()['code'],
             'restricted_by': country.data()['restricted_by'],
@@ -77,6 +167,7 @@ class CompanyController extends GetxController {
       allCities.value = [
         for (var city in cityValues.docs)
           {
+            'id': city.id,
             'name': city.data()['name'],
             'code': city.data()['code'],
             'restricted_by': city.data()['restricted_by'],
@@ -89,17 +180,22 @@ class CompanyController extends GetxController {
     }
   }
 
-  onSelect(bool isCountry, String code) {
+  onSelect(bool isCountry, String selectedId) {
     if (isCountry) {
       filterdCitiesByCountry.clear();
-      var query = code.toLowerCase();
       city.clear();
       filterdCitiesByCountry.assignAll(
         allCities.where((city) {
-          return city['restricted_by'].toString().toLowerCase().contains(query);
+          return city['restricted_by']
+              .toString()
+              .toLowerCase()
+              .contains(selectedId.toLowerCase());
         }).toList(),
       );
+      selectedCountryId.value = selectedId;
       update();
+    } else {
+      selectedCityId.value = selectedId;
     }
   }
 
@@ -136,14 +232,16 @@ class CompanyController extends GetxController {
   }
 
   // this function is to get Responsibilities
-  getResponsibilities() async {
-    var roles = await FirebaseFirestore.instance
+  getResponsibilities() {
+    FirebaseFirestore.instance
         .collection('sys-roles')
         .where('is_shown_for_users', isEqualTo: true)
-        .get();
-    for (var role in roles.docs) {
-      allRoles[role.id] = role.data()['role_name'];
-    }
+        .snapshots()
+        .listen((roles) {
+      for (var role in roles.docs) {
+        allRoles[role.id] = role.data()['role_name'];
+      }
+    });
   }
 
   String getRoleName(String menuID) {

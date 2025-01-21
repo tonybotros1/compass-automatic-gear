@@ -31,8 +31,6 @@ class Functions extends StatelessWidget {
                     builder: (controller) {
                       return searchBar(
                         search: controller.search,
-
-                      
                         constraints: constraints,
                         context: context,
                         controller: controller,
@@ -106,7 +104,7 @@ ElevatedButton newScreenButton(
                                 : () async {
                                     await controller.addNewScreen();
                                   },
-                            style:saveButtonStyle,
+                            style: saveButtonStyle,
                             child:
                                 controller.addingNewScreenProcess.value == false
                                     ? const Text(
@@ -227,7 +225,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
     DataCell(Align(
       alignment: Alignment.center,
       child: ElevatedButton(
-          style: viewButtonStyle,
+          style: editButtonStyle,
           onPressed: () {
             showDialog(
                 context: context,
@@ -294,7 +292,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
                   );
                 });
           },
-          child: const Text('View')),
+          child: const Text('Edit')),
     )),
   ]);
 }

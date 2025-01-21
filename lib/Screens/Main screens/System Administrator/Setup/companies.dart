@@ -30,8 +30,7 @@ class Companies extends StatelessWidget {
                     init: CompanyController(),
                     builder: (controller) {
                       return searchBar(
-                        search:   controller.search,
-                       
+                        search: controller.search,
                         constraints: constraints,
                         context: context,
                         controller: controller,
@@ -80,7 +79,9 @@ class Companies extends StatelessWidget {
 }
 
 Widget tableOfCompanies(
-    {required constraints, required context, required CompanyController controller}) {
+    {required constraints,
+    required context,
+    required CompanyController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -179,7 +180,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
     DataCell(Align(
       alignment: Alignment.center,
       child: ElevatedButton(
-          style: viewButtonStyle,
+          style: editButtonStyle,
           onPressed: () {
             // showDialog(
             //     context: context,
@@ -250,13 +251,13 @@ DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
             //       );
             //     });
           },
-          child: const Text('View')),
+          child: const Text('Edit')),
     )),
   ]);
 }
 
-ElevatedButton newCompanyButton(
-    BuildContext context, BoxConstraints constraints,CompanyController controller) {
+ElevatedButton newCompanyButton(BuildContext context,
+    BoxConstraints constraints, CompanyController controller) {
   return ElevatedButton(
     onPressed: () {
       showDialog(
@@ -277,7 +278,13 @@ ElevatedButton newCompanyButton(
                             onPressed: controller.addingNewCompanyProcess.value
                                 ? null
                                 : () async {
-                                    // await controller.addNewScreen();
+                                    if (!controller
+                                            .formKeyForCompany.currentState!
+                                            .validate() &&
+                                        controller.roleIDFromList.isEmpty) {
+                                    } else {
+                                      await controller.addNewCompany();
+                                    }
                                   },
                             style: saveButtonStyle,
                             child: controller.addingNewCompanyProcess.value ==

@@ -237,7 +237,7 @@ class Users extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(right: 5),
-            child: viewSection(
+            child: editSection(
                 context, userData, constraints, uid, usersController),
           ),
           deleteSection(context, uid)
@@ -248,23 +248,23 @@ class Users extends StatelessWidget {
 
   ElevatedButton deleteSection(context, uid) {
     return ElevatedButton(
-            style: deleteButtonStyle,
-            onPressed: () {
-              alertDialog(
-                  context: context,
-                  controller: usersController,
-                  content: 'The user will be deleted permanently',
-                  onPressed: () {
-                    usersController.deleteUser(uid);
-                  });
-            },
-            child: const Text('Delete'));
+        style: deleteButtonStyle,
+        onPressed: () {
+          alertDialog(
+              context: context,
+              controller: usersController,
+              content: 'The user will be deleted permanently',
+              onPressed: () {
+                usersController.deleteUser(uid);
+              });
+        },
+        child: const Text('Delete'));
   }
 
-  ElevatedButton viewSection(context, Map<String, dynamic> userData,
+  ElevatedButton editSection(context, Map<String, dynamic> userData,
       constraints, uid, usersController) {
     return ElevatedButton(
-        style: viewButtonStyle,
+        style: editButtonStyle,
         onPressed: () {
           showDialog(
               context: context,
@@ -353,6 +353,6 @@ class Users extends StatelessWidget {
                 );
               });
         },
-        child: const Text('View'));
+        child: const Text('Edit'));
   }
 }

@@ -217,10 +217,10 @@ Widget tableOfScreens(
 DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
     roleId, ResponsibilitiesController controller, role) {
   return DataRow(
-      selected: roleData['is_shown_for_users'] ?? false,
-      onSelectChanged: (isSelected) {
-        controller.updateRoleStatus(roleId, isSelected);
-      },
+      // selected: roleData['is_shown_for_users'] ?? false,
+      // onSelectChanged: (isSelected) {
+      //   controller.updateRoleStatus(roleId, isSelected);
+      // },
       cells: [
         DataCell(Text(
           roleData['role_name'] ?? 'no name',
@@ -244,9 +244,10 @@ DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              publicPrivateSection(roleData, controller, roleId),
               Padding(
-                padding: const EdgeInsets.only(right: 5),
-                child: viewSection(
+                padding: const EdgeInsets.only(right: 5, left: 5),
+                child: editSection(
                     constraints: constraints,
                     context: context,
                     controller: controller,
@@ -258,6 +259,26 @@ DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
           ),
         )),
       ]);
+}
+
+ElevatedButton publicPrivateSection(
+    roleData, ResponsibilitiesController controller, roleId) {
+  return ElevatedButton(
+      style: roleData['is_shown_for_users'] == false
+          ? privateButtonStyle
+          : publicButtonStyle,
+      onPressed: () {
+        bool status;
+        if (roleData['is_shown_for_users'] == false) {
+          status = true;
+        } else {
+          status = false;
+        }
+        controller.updateRoleStatus(roleId, status);
+      },
+      child: roleData['is_shown_for_users'] == true
+          ? const Text('Public')
+          : const Text('Private'));
 }
 
 ElevatedButton deleteSection(
@@ -276,14 +297,14 @@ ElevatedButton deleteSection(
       child: const Text('Delete'));
 }
 
-Widget viewSection(
+Widget editSection(
     {required context,
     required ResponsibilitiesController controller,
     required roleData,
     required constraints,
     required roleID}) {
   return ElevatedButton(
-      style: viewButtonStyle,
+      style: editButtonStyle,
       onPressed: () async {
         showDialog(
             context: context,
@@ -356,5 +377,5 @@ Widget viewSection(
               );
             });
       },
-      child: const Text('View'));
+      child: const Text('Edit'));
 }
