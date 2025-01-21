@@ -33,19 +33,18 @@ class ListOfValuesController extends GetxController {
   RxMap valueMap = RxMap({});
   RxString masteredByIdForList = RxString('');
   RxString masteredByIdForValues = RxString('');
-  
+
   @override
   void onInit() {
     getUserEmail().then((_) {
       getLists();
-      searchForLists.value.addListener(() {
-        filterLists();
-      });
-      searchForValues.value.addListener(() {
-        filterValues();
-      });
     });
-
+    searchForLists.value.addListener(() {
+      filterLists();
+    });
+    searchForValues.value.addListener(() {
+      filterValues();
+    });
     super.onInit();
   }
 
@@ -186,7 +185,10 @@ class ListOfValuesController extends GetxController {
                   .toString()
                   .toLowerCase()
                   .contains(queryForValues) ||
-              value['code'].toString().toLowerCase().contains(queryForValues);
+              getValueNameById(value['restricted_by'])
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForValues);
         }).toList(),
       );
     }

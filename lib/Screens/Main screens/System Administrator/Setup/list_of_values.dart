@@ -112,7 +112,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Mastered By',
+          text: 'Parent (LOV)',
         ),
         onSort: controller.onSortForLists,
       ),
