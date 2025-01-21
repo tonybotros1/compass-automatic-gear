@@ -224,7 +224,6 @@ class CompanyController extends GetxController {
       addingNewCompanyProcess.value = false;
       Get.back();
     } catch (e) {
-      print(e);
       addingNewCompanyProcess.value = false;
     }
   }
@@ -473,9 +472,7 @@ class CompanyController extends GetxController {
         isScreenLoding.value = false;
       });
     } catch (e) {
-      // Handle any errors
       isScreenLoding.value = false;
-      print('Error fetching companies: $e');
     }
   }
 

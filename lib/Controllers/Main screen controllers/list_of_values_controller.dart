@@ -338,7 +338,7 @@ class ListOfValuesController extends GetxController {
 
       Get.back();
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
 
