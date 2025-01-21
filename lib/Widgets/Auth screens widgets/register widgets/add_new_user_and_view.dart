@@ -11,6 +11,7 @@ Widget addNewUserAndView(
     required controller,
     TextEditingController? email,
     TextEditingController? name,
+    bool? canEdit,
     userExpiryDate,
     status,
     showActiveStatus}) {
@@ -37,6 +38,7 @@ Widget addNewUserAndView(
           hintText: 'Enter your email',
           keyboardType: TextInputType.emailAddress,
           validate: true,
+          canEdit: canEdit,
         ),
         Obx(() => myTextFormField(
               constraints: constraints,
@@ -78,8 +80,7 @@ Widget addNewUserAndView(
                                     value: controller.selectedRoles.values
                                         .elementAt(i)[1],
                                     onChanged: (selected) {
-                                      var key = controller
-                                          .selectedRoles.keys
+                                      var key = controller.selectedRoles.keys
                                           .elementAt(i); // Get the key
                                       controller.selectedRoles[key] = [
                                         controller.selectedRoles[key]![0],

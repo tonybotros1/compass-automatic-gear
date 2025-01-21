@@ -10,8 +10,10 @@ Widget myTextFormField({
   IconButton? icon,
   required constraints,
   keyboardType,
+  bool? canEdit,
 }) {
   return TextFormField(
+    enabled: canEdit,
     obscureText: obscureText,
     keyboardType: keyboardType,
     controller: controller,

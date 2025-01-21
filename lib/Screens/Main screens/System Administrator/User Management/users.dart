@@ -262,7 +262,7 @@ class Users extends StatelessWidget {
   }
 
   ElevatedButton editSection(context, Map<String, dynamic> userData,
-      constraints, uid, usersController) {
+      constraints, uid, UsersController usersController) {
     return ElevatedButton(
         style: editButtonStyle,
         onPressed: () {
@@ -296,6 +296,7 @@ class Users extends StatelessWidget {
                 return AlertDialog(
                   actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                   content: addNewUserAndView(
+                      canEdit: false,
                       status: usersController.userStatus,
                       controller: usersController,
                       constraints: constraints,
