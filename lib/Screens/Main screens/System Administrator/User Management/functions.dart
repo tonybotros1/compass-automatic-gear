@@ -111,12 +111,14 @@ ElevatedButton newScreenButton(
                                         'Save',
                                         style: TextStyle(color: Colors.white),
                                       )
-                                    : const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                        ),
+                                    : SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
                                       ),
+                                    ),
                           ),
                         )),
                 ElevatedButton(
@@ -124,17 +126,10 @@ ElevatedButton newScreenButton(
                     Get.back();
                   },
                   style: cancelButtonStyle,
-                  child: controller.addingNewScreenProcess.value == false
-                      ? const Text(
+                  child:  const Text(
                           'Cancel',
                           style: TextStyle(color: Colors.white),
                         )
-                      : const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                        ),
                 ),
               ],
             );
@@ -263,12 +258,14 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
                                       'Save',
                                       style: TextStyle(color: Colors.white),
                                     )
-                                  : const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                      ),
+                                  : SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
                                     ),
+                                  ),
                         ),
                       ),
                       ElevatedButton(
@@ -276,17 +273,10 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
                           Get.back();
                         },
                         style: cancelButtonStyle,
-                        child: controller.addingNewScreenProcess.value == false
-                            ? const Text(
+                        child:const Text(
                                 'Cancel',
                                 style: TextStyle(color: Colors.white),
                               )
-                            : const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                              ),
                       ),
                     ],
                   );

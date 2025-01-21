@@ -188,7 +188,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
               )
             : const SizedBox(),
         controller.userEmail.value == 'datahubai@gmail.com'
-            ? deleteSection(controller, listId, context, constraints)
+            ? deleteSection(controller, listId, context)
             : const SizedBox(),
       ],
     )),
@@ -261,7 +261,7 @@ ElevatedButton valSectionInTheTable(
       child: const Text('Values'));
 }
 
-ElevatedButton deleteSection(controller, listId, context, constraints) {
+ElevatedButton deleteSection(controller, listId, context) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
