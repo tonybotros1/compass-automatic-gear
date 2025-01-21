@@ -38,6 +38,8 @@ class RegisterScreenController extends GetxController {
   final GlobalKey<FormState> formKeyForSecondMenu = GlobalKey<FormState>();
   final GlobalKey<FormState> formKeyForThirdMenu = GlobalKey<FormState>();
   RxString query = RxString('');
+  RxString selectedCountryId = RxString('');
+  RxString selectedCityId = RxString('');
 
   final menu = <RegisterMenuModel>[
     RegisterMenuModel(title: 'Company Details', isPressed: true),
@@ -53,9 +55,8 @@ class RegisterScreenController extends GetxController {
     super.onInit();
   }
 
-  onSelect(bool isCountry, String code) {
+  onSelect(bool isCountry, String selectedId) {
     if (isCountry) {
-      query.value = code.toLowerCase();
       filterdCitiesByCountry.clear();
       city.clear();
       filterdCitiesByCountry.assignAll(
@@ -63,13 +64,16 @@ class RegisterScreenController extends GetxController {
           return city['restricted_by']
               .toString()
               .toLowerCase()
-              .contains(query.value);
+              .contains(selectedId.toLowerCase());
         }).toList(),
       );
+      selectedCountryId.value = selectedId;
+      update();
+    } else {
+      selectedCityId.value = selectedId;
     }
-
-    update();
   }
+
 
   getCountriesAndCities() async {
     try {
@@ -99,6 +103,7 @@ class RegisterScreenController extends GetxController {
       allCountries.value = [
         for (var country in countryValues.docs)
           {
+            'id': country.id,
             'name': country.data()['name'],
             'code': country.data()['code'],
             'restricted_by': country.data()['restricted_by'],
@@ -108,6 +113,7 @@ class RegisterScreenController extends GetxController {
       allCities.value = [
         for (var city in cityValues.docs)
           {
+            'id': city.id,
             'name': city.data()['name'],
             'code': city.data()['code'],
             'restricted_by': city.data()['restricted_by'],
@@ -229,7 +235,7 @@ class RegisterScreenController extends GetxController {
       if (imageBytes != null && imageBytes!.isNotEmpty) {
         final Reference storageRef = FirebaseStorage.instance
             .ref()
-            .child('images/${formatPhrase(companyName.text)}.png');
+            .child('images/${formatPhrase(companyName.text)}_${DateTime.now()}.png');
         final UploadTask uploadTask = storageRef.putData(
           imageBytes!,
           SettableMetadata(contentType: 'image/png'),
@@ -255,9 +261,6 @@ class RegisterScreenController extends GetxController {
           'address': address.text,
           'city': city.text,
           'country': country.text,
-          'email': email.text,
-          'name': userName.text,
-          'password': hashedPassword,
           'phone': phoneNumber.text,
         },
       });
@@ -276,6 +279,19 @@ class RegisterScreenController extends GetxController {
         "added_date": DateTime.now().toString(),
         "status": true,
         "company_id": newCompany.id,
+      });
+
+      await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(newCompany.id)
+          .update({
+        'contact_details': {
+          'address': address.text,
+          'city': selectedCityId.value,
+          'country': selectedCountryId.value,
+          'phone': phoneNumber.text,
+          'user_id': newUser.id,
+        },
       });
 
       await saveUserIdAndCompanyIdInSharedPref(newUser.id, newCompany.id);

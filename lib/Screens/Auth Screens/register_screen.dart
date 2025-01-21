@@ -1,4 +1,3 @@
-import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -99,25 +98,25 @@ Widget responsibilities({
               child: Form(
                 key: controller.formKeyForThirdMenu,
                 child: dropDownValues(
-                    onSelected: (suggestion) {
-                      controller.allRoles.entries.where((entry) {
-                        return entry.value == suggestion.toString();
-                      }).forEach((entry) {
-                        if (!controller.roleIDFromList.contains(entry.key)) {
-                          controller.roleIDFromList.add(entry.key);
-                        }
-                      });
-                    },
-                    itemBuilder: (context, suggestion) {
-                      return ListTile(
-                        title: Text(suggestion.toString()),
-                      );
-                    },
-                    labelText: 'Responsibilities',
-                    hintText: 'select responsibility ',
-                    menus: controller.allRoles,
-                    validate: true,
-               ),
+                  onSelected: (suggestion) {
+                    controller.allRoles.entries.where((entry) {
+                      return entry.value == suggestion.toString();
+                    }).forEach((entry) {
+                      if (!controller.roleIDFromList.contains(entry.key)) {
+                        controller.roleIDFromList.add(entry.key);
+                      }
+                    });
+                  },
+                  itemBuilder: (context, suggestion) {
+                    return ListTile(
+                      title: Text(suggestion.toString()),
+                    );
+                  },
+                  labelText: 'Responsibilities',
+                  hintText: 'select responsibility ',
+                  menus: controller.allRoles,
+                  validate: true,
+                ),
               ),
             ),
             ListView(
@@ -391,6 +390,7 @@ Widget companyDetails({required controller}) {
         Form(
           key: controller.formKeyForFirstMenu,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 flex: 3,
@@ -426,45 +426,31 @@ Widget companyDetails({required controller}) {
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                  child: Column(
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    // crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                                style: BorderStyle.solid,
-                                color: controller.warningForImage.value == false
-                                    ? Colors.grey
-                                    : Colors.red)),
-                        child: controller.imageBytes == null
-                            ? const Center(
-                                child: FittedBox(
-                                    child: Icon(
-                                  Icons.image,
-                                  color: Colors.grey,
-                                  size: 30,
-                                )),
-                              )
-                            : Image.memory(controller.imageBytes,
-                                fit: BoxFit.fitWidth),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: ElevatedButton(
-                            style: selectButtonStyle,
-                            onPressed: () {
-                              controller.pickImage();
-                            },
-                            child: const AutoSizedText(
-                              text: 'Select Logo',
-                              constraints: BoxConstraints(),
-                            )),
-                      ),
-                    ],
+                  child: InkWell(
+                    onTap: () {
+                      controller.pickImage();
+                    },
+                    child: Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                              style: BorderStyle.solid,
+                              color: controller.warningForImage.value == false
+                                  ? Colors.grey
+                                  : Colors.red)),
+                      child: controller.imageBytes == null
+                          ? const Center(
+                              child: FittedBox(
+                                  child: Icon(
+                                Icons.image,
+                                color: Colors.grey,
+                                size: 30,
+                              )),
+                            )
+                          : Image.memory(controller.imageBytes,
+                              fit: BoxFit.fitHeight),
+                    ),
                   ),
                 ),
               ),
