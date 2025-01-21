@@ -22,6 +22,7 @@ class CompanyController extends GetxController {
   TextEditingController country = TextEditingController();
   TextEditingController city = TextEditingController();
   final RxList<DocumentSnapshot> allCompanies = RxList<DocumentSnapshot>([]);
+  RxMap userDetails = RxMap({});
   final RxList<DocumentSnapshot> filteredCompanies =
       RxList<DocumentSnapshot>([]);
   RxString query = RxString('');
@@ -30,7 +31,7 @@ class CompanyController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool warningForImage = RxBool(false);
   RxBool addingNewCompanyProcess = RxBool(false);
-  Uint8List? imageBytes;
+  Uint8List? imageBytes = Uint8List(8);
   RxList roleIDFromList = RxList([]);
   RxMap allRoles = RxMap({});
   RxList allCountries = RxList([]);
@@ -39,18 +40,51 @@ class CompanyController extends GetxController {
   RxString selectedCountryId = RxString('');
   RxString selectedCityId = RxString('');
   RxString logoUrl = RxString('');
-  final GlobalKey<FormState> formKeyForCompany = GlobalKey<FormState>();
-
 
   @override
   void onInit() {
-    getResponsibilities();
-    getCountriesAndCities();
-    getCompanies();
+    getCountriesAndCities().then((_) {
+      getResponsibilities();
+      getCompanies();
+    });
     search.value.addListener(() {
       filterCompanies();
     });
     super.onInit();
+  }
+
+  deletCompany(companyId) async {
+    try {
+      Get.back();
+      await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .delete();
+
+      var users = await FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('company_id', isEqualTo: companyId)
+          .get();
+
+      for (var user in users.docs) {
+        await user.reference.delete();
+      }
+    } catch (e) {
+      //
+    }
+  }
+
+  editActiveOrInActiveStatus(companyId, bool status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .update({
+        'status': status,
+      });
+    } catch (e) {
+//
+    }
   }
 
   addNewCompany() async {
@@ -70,9 +104,8 @@ class CompanyController extends GetxController {
       }
 
       if (imageBytes != null && imageBytes!.isNotEmpty) {
-        final Reference storageRef = FirebaseStorage.instance
-            .ref()
-            .child('images/${formatPhrase(companyName.text)}.png');
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+            'images/${formatPhrase(companyName.text)}_${DateTime.now()}.png');
         final UploadTask uploadTask = storageRef.putData(
           imageBytes!,
           SettableMetadata(contentType: 'image/png'),
@@ -98,9 +131,6 @@ class CompanyController extends GetxController {
           'address': address.text,
           'city': selectedCityId.value,
           'country': selectedCountryId.value,
-          'email': email.text,
-          'name': userName.text,
-          'password': hashedPassword,
           'phone': phoneNumber.text,
         },
       });
@@ -108,7 +138,8 @@ class CompanyController extends GetxController {
       DateTime now = DateTime.now();
       DateTime expiryDate = DateTime(now.year, now.month + 1, now.day);
 
-      await FirebaseFirestore.instance.collection('sys-users').add({
+      var newUser =
+          await FirebaseFirestore.instance.collection('sys-users').add({
         "user_name": userName.text,
         "email": email.text,
         "password": hashedPassword,
@@ -119,12 +150,86 @@ class CompanyController extends GetxController {
         "company_id": newCompany.id,
       });
 
+      await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(newCompany.id)
+          .update({
+        'contact_details': {
+          'address': address.text,
+          'city': selectedCityId.value,
+          'country': selectedCountryId.value,
+          'phone': phoneNumber.text,
+          'user_id': newUser.id,
+        },
+      });
+
       addingNewCompanyProcess.value = false;
     } catch (e) {
       addingNewCompanyProcess.value = false;
     }
   }
 
+  updateCompany(companyID, userId) async {
+    try {
+      addingNewCompanyProcess.value = true;
+
+      var newCompanyData = {
+        'company_name': companyName.text,
+        'type_of_business': typeOfBusiness.text,
+        'contact_details': {
+          'address': address.text,
+          'city': selectedCityId.value,
+          'country': selectedCountryId.value,
+          'phone': phoneNumber.text,
+          'user_id':userId,
+        }
+      };
+
+      if (imageBytes != null && imageBytes!.isNotEmpty) {
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+            'images/${formatPhrase(companyName.text)}_${DateTime.now()}.png');
+        final UploadTask uploadTask = storageRef.putData(
+          imageBytes!,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        await uploadTask.then((p0) async {
+          logoUrl.value = await storageRef.getDownloadURL();
+        });
+        newCompanyData['company_logo'] = logoUrl.value;
+      }
+
+      var newUserData = {
+        'user_name': userName.text,
+        'roles': roleIDFromList,
+      };
+      if (password.text.isNotEmpty) {
+        // Hash the password using SHA-256
+        var bytes = utf8.encode(password.text); // Convert password to bytes
+        var digest = sha256.convert(bytes); // Hash the password
+        String hashedPassword = digest.toString();
+        newUserData['password'] = hashedPassword;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyID)
+          .update(newCompanyData);
+
+      await FirebaseFirestore.instance
+          .collection('sys-users')
+          .doc(userId)
+          .update(newUserData);
+
+      addingNewCompanyProcess.value = false;
+      Get.back();
+    } catch (e) {
+      print(e);
+      addingNewCompanyProcess.value = false;
+    }
+  }
+
+// this function is to remove spaces from company name
   String formatPhrase(String phrase) {
     return phrase.replaceAll(' ', '_');
   }
@@ -177,6 +282,30 @@ class CompanyController extends GetxController {
       update();
     } catch (e) {
       // print(e);
+    }
+  }
+
+  String? getCountryName(String countryId) {
+    try {
+      final country = allCountries.firstWhere(
+        (country) => country['id'] == countryId,
+        orElse: () => 'No Country', // Returns null if no match is found
+      );
+      return country['name'];
+    } catch (e) {
+      return 'No Country';
+    }
+  }
+
+  String? getCityName(cityId) {
+    try {
+      final city = allCities.firstWhere(
+        (city) => city['id'] == cityId,
+        orElse: () => 'No City',
+      );
+      return city['name'];
+    } catch (e) {
+      return 'No City';
     }
   }
 
@@ -313,15 +442,40 @@ class CompanyController extends GetxController {
 // this function is to get all companies registered in system
   getCompanies() {
     try {
+      // Listen to the companies collection changes
       FirebaseFirestore.instance
           .collection('companies')
           .snapshots()
-          .listen((company) {
-        allCompanies.assignAll(company.docs);
+          .listen((companySnapshot) {
+        // Update allCompanies with the latest data
+        allCompanies.assignAll(companySnapshot.docs);
+
+        // Fetch user details for each company contact
+        for (var com in companySnapshot.docs) {
+          var userId = com.data()['contact_details']['user_id'];
+          if (userId != null) {
+            // Listen to the specific user document changes
+            FirebaseFirestore.instance
+                .collection('sys-users')
+                .doc(userId)
+                .snapshots()
+                .listen((userSnapshot) {
+              if (userSnapshot.exists) {
+                userDetails[userSnapshot.id] = {
+                  'user_name': userSnapshot.data()!['user_name'],
+                  'email': userSnapshot.data()!['email'],
+                  'roles': userSnapshot.data()!['roles'],
+                };
+              }
+            });
+          }
+        }
         isScreenLoding.value = false;
       });
     } catch (e) {
+      // Handle any errors
       isScreenLoding.value = false;
+      print('Error fetching companies: $e');
     }
   }
 

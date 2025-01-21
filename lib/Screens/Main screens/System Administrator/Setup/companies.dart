@@ -152,7 +152,7 @@ Widget tableOfCompanies(
 }
 
 DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
-    constraints, companyId, controller) {
+    constraints, companyId, CompanyController controller) {
   return DataRow(cells: [
     DataCell(Text(
       companyData['company_name'] ?? 'no name',
@@ -165,7 +165,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
               )
             : const Text('no logo')),
     DataCell(Text(
-      '${companyData['contact_details']['country']} | ${companyData['contact_details']['city']}',
+      '${controller.getCountryName(companyData['contact_details']['country'])} | ${controller.getCityName(companyData['contact_details']['city'])}',
     )),
     DataCell(Text(
       companyData['contact_details']['phone'] ?? 'no phone number',
@@ -177,89 +177,173 @@ DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
             : 'N/A',
       ),
     ),
-    DataCell(Align(
-      alignment: Alignment.center,
-      child: ElevatedButton(
-          style: editButtonStyle,
-          onPressed: () {
-            // showDialog(
-            //     context: context,
-            //     builder: (context) {
-            //       controller.screenName.text = screenData['name'];
-            //       controller.route.text = screenData['routeName'];
-
-            //       return AlertDialog(
-            //         actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-            //         content: addNewScreenOrView(
-            //           controller: controller,
-            //           constraints: constraints,
-            //           context: context,
-            //           screenName: controller.screenName,
-            //           route: controller.route,
-            //         ),
-            //         actions: [
-            //           Padding(
-            //             padding: const EdgeInsets.symmetric(vertical: 16),
-            //             child: ElevatedButton(
-            //               onPressed: controller.addingNewScreenProcess.value
-            //                   ? null
-            //                   : () {
-            //                       controller.updateScreen(screenId);
-            //                       if (controller.addingNewScreenProcess.value ==
-            //                           false) {
-            //                         Get.back();
-            //                       }
-            //                     },
-            //               style: ElevatedButton.styleFrom(
-            //                 backgroundColor: Colors.green,
-            //                 shape: RoundedRectangleBorder(
-            //                   borderRadius: BorderRadius.circular(5),
-            //                 ),
-            //               ),
-            //               child:
-            //                   controller.addingNewScreenProcess.value == false
-            //                       ? const Text(
-            //                           'Save',
-            //                           style: TextStyle(color: Colors.white),
-            //                         )
-            //                       : const Padding(
-            //                           padding: EdgeInsets.all(8.0),
-            //                           child: CircularProgressIndicator(
-            //                             color: Colors.white,
-            //                           ),
-            //                         ),
-            //             ),
-            //           ),
-            //           ElevatedButton(
-            //             onPressed: () {
-            //               Get.back();
-            //             },
-            //             style: cancelButtonStyle,
-            //             child: controller.addingNewScreenProcess.value == false
-            //                 ? const Text(
-            //                     'Cancel',
-            //                     style: TextStyle(color: Colors.white),
-            //                   )
-            //                 : const Padding(
-            //                     padding: EdgeInsets.all(8.0),
-            //                     child: CircularProgressIndicator(
-            //                       color: Colors.white,
-            //                     ),
-            //                   ),
-            //           ),
-            //         ],
-            //       );
-            //     });
-          },
-          child: const Text('Edit')),
+    DataCell(Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        activeInActiveSection(companyData, controller, companyId),
+        Padding(
+          padding: const EdgeInsets.only(left: 5, right: 5),
+          child: editEction(
+              context, controller, companyData, constraints, companyId),
+        ),
+        deleteSection(controller, companyId, context),
+      ],
     )),
   ]);
+}
+
+ElevatedButton deleteSection(CompanyController controller, companyId, context) {
+  return ElevatedButton(
+      style: deleteButtonStyle,
+      onPressed: () {
+        alertDialog(
+            context: context,
+            controller: controller,
+            content: "The Company and its users will be deleted permanently",
+            onPressed: () {
+              controller.deletCompany(companyId);
+            });
+      },
+      child: const Text("Delete"));
+}
+
+ElevatedButton activeInActiveSection(Map<String, dynamic> companyData,
+    CompanyController controller, String companyId) {
+  return ElevatedButton(
+      style:
+          companyData['status'] == false ? unHideButtonStyle : hideButtonStyle,
+      onPressed: () {
+        bool status;
+        if (companyData['status'] == false) {
+          status = true;
+        } else {
+          status = false;
+        }
+        controller.editActiveOrInActiveStatus(companyId, status);
+      },
+      child: companyData['status'] == true
+          ? const Text('Active')
+          : const Text('Inactive'));
+}
+
+ElevatedButton editEction(context, CompanyController controller,
+    Map<String, dynamic> companyData, constraints, companyID) {
+  return ElevatedButton(
+      style: editButtonStyle,
+      onPressed: () {
+        controller.companyName.text = companyData['company_name'] ?? '';
+        controller.typeOfBusiness.text = companyData['type_of_business'] ?? '';
+        controller.userName.text =
+            controller.userDetails[companyData['contact_details']['user_id']]
+                    ['user_name'] ??
+                '';
+        controller.phoneNumber.text =
+            companyData['contact_details']['phone'] ?? '';
+        controller.email.text =
+            controller.userDetails[companyData['contact_details']['user_id']]
+                    ['email'] ??
+                '';
+        controller.address.text =
+            companyData['contact_details']['address'] ?? '';
+        controller.country.text = controller
+            .getCountryName(companyData['contact_details']['country'])!;
+        controller.city.text =
+            controller.getCityName(companyData['contact_details']['city'])!;
+        controller.imageBytes = null;
+        controller.roleIDFromList.assignAll(controller
+            .userDetails[companyData['contact_details']['user_id']]['roles']);
+        controller.logoUrl.value = companyData['company_logo'] ?? '';
+        controller.selectedCountryId.value =
+            companyData['contact_details']['country'] ?? '';
+        controller.selectedCityId.value =
+            companyData['contact_details']['city'] ?? '';
+
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: addNewCompanyOrView(
+                  canEdit: false,
+                  controller: controller,
+                  constraints: constraints,
+                  context: context,
+                  companyName: controller.companyName,
+                  typeOfBusiness: controller.typeOfBusiness,
+                  companyLogo: companyData['company_logo'],
+                  city: controller.city,
+                  country: controller.country,
+                  address: controller.address,
+                  email: controller.email,
+                  phoneNumber: controller.phoneNumber,
+                  userName: controller.userName,
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: GetX<CompanyController>(builder: (controller) {
+                      return ElevatedButton(
+                          onPressed: controller.addingNewCompanyProcess.value
+                              ? null
+                              : () {
+                                  controller.updateCompany(
+                                      companyID,
+                                      companyData['contact_details']
+                                          ['user_id']);
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                          child:
+                              controller.addingNewCompanyProcess.value == false
+                                  ? const Text(
+                                      'Save',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    ));
+                    }),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      style: cancelButtonStyle,
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ],
+              );
+            });
+      },
+      child: const Text('Edit'));
 }
 
 ElevatedButton newCompanyButton(BuildContext context,
     BoxConstraints constraints, CompanyController controller) {
   return ElevatedButton(
     onPressed: () {
+      controller.companyName.clear();
+      controller.typeOfBusiness.clear();
+      controller.userName.clear();
+      controller.password.clear();
+      controller.phoneNumber.clear();
+      controller.email.clear();
+      controller.address.clear();
+      controller.country.clear();
+      controller.city.clear();
+      controller.roleIDFromList.clear();
+      controller.imageBytes = null;
       showDialog(
           context: context,
           builder: (context) {
@@ -278,12 +362,24 @@ ElevatedButton newCompanyButton(BuildContext context,
                             onPressed: controller.addingNewCompanyProcess.value
                                 ? null
                                 : () async {
-                                    if (!controller
-                                            .formKeyForCompany.currentState!
-                                            .validate() &&
-                                        controller.roleIDFromList.isEmpty) {
+                                    if (controller.userName.text.isNotEmpty &&
+                                        controller
+                                            .companyName.text.isNotEmpty &&
+                                        controller
+                                            .typeOfBusiness.text.isNotEmpty &&
+                                        controller.password.text.isNotEmpty &&
+                                        controller
+                                            .phoneNumber.text.isNotEmpty &&
+                                        controller.email.text.isNotEmpty &&
+                                        controller.address.text.isNotEmpty &&
+                                        controller.country.text.isNotEmpty &&
+                                        controller.city.text.isNotEmpty &&
+                                        controller.imageBytes!.isNotEmpty &&
+                                        controller.roleIDFromList.isNotEmpty) {
+                                      controller.addNewCompany();
                                     } else {
-                                      await controller.addNewCompany();
+                                      showSnackBar(
+                                          'Note', 'Please fill all fields');
                                     }
                                   },
                             style: saveButtonStyle,
@@ -293,43 +389,30 @@ ElevatedButton newCompanyButton(BuildContext context,
                                     'Save',
                                     style: TextStyle(color: Colors.white),
                                   )
-                                : const Padding(
-                                    padding: EdgeInsets.all(8.0),
+                                : const SizedBox(
+                                    height: 20,
+                                    width: 20,
                                     child: CircularProgressIndicator(
                                       color: Colors.white,
+                                      strokeWidth: 2,
                                     ),
                                   ),
                           ),
                         )),
                 ElevatedButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  style: cancelButtonStyle,
-                  child: controller.addingNewCompanyProcess.value == false
-                      ? const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )
-                      : const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: cancelButtonStyle,
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.white),
+                    )),
               ],
             );
           });
     },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green,
-      foregroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
-      ),
-      elevation: 5,
-    ),
+    style: newButtonStyle,
     child: const Text('New Company'),
   );
 }

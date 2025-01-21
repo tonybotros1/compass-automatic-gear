@@ -411,17 +411,10 @@ ElevatedButton newListButton(BuildContext context, BoxConstraints constraints,
                     Get.back();
                   },
                   style: cancelButtonStyle,
-                  child: controller.addingNewListProcess.value == false
-                      ? const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )
-                      : const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                        ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             );
