@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 import '../../Models/screen_tree_model.dart';
 import '../../consts.dart';
@@ -576,21 +575,21 @@ class MenusController extends GetxController {
     return [...menuNodes, ...screenNodes];
   }
 
-  // function to convert text to date and make the format dd-mm-yyyy
-  String textToDate(dynamic inputDate) {
-    try {
-      if (inputDate is String) {
-        // Match the actual date format of the input
-        DateTime parsedDate =
-            DateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(inputDate);
-        return DateFormat("dd-MM-yyyy").format(parsedDate);
-      } else if (inputDate is DateTime) {
-        return DateFormat("dd-MM-yyyy").format(inputDate);
-      } else {
-        throw FormatException("Invalid input type for textToDate: $inputDate");
-      }
-    } catch (e) {
-      return "Invalid Date"; // Return a default or placeholder string
-    }
-  }
+  // // function to convert text to date and make the format dd-mm-yyyy
+  // String textToDate(dynamic inputDate) {
+  //   try {
+  //     if (inputDate is String) {
+  //       // Match the actual date format of the input
+  //       DateTime parsedDate =
+  //           DateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(inputDate);
+  //       return DateFormat("dd-MM-yyyy").format(parsedDate);
+  //     } else if (inputDate is DateTime) {
+  //       return DateFormat("dd-MM-yyyy").format(inputDate);
+  //     } else {
+  //       throw FormatException("Invalid input type for textToDate: $inputDate");
+  //     }
+  //   } catch (e) {
+  //     return "Invalid Date"; // Return a default or placeholder string
+  //   }
+  // }
 }

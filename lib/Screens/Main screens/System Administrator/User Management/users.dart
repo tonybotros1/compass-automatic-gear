@@ -221,22 +221,23 @@ class Users extends StatelessWidget {
       DataCell(
         Text(
           userData['added_date'] != null
-              ? usersController.textToDate(userData['added_date']) //
+              ? textToDate(userData['added_date']) //
               : 'N/A',
         ),
       ),
       DataCell(
         Text(
           userData['expiry_date'] != null
-              ? usersController.textToDate(userData['expiry_date'])
+              ? textToDate(userData['expiry_date'])
               : 'N/A',
         ),
       ),
       DataCell(Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          activeInActiveSection(userData, uid),
           Padding(
-            padding: const EdgeInsets.only(right: 5),
+            padding: const EdgeInsets.only(right: 5, left: 5),
             child: editSection(
                 context, userData, constraints, uid, usersController),
           ),
@@ -244,6 +245,26 @@ class Users extends StatelessWidget {
         ],
       )),
     ]);
+  }
+
+  ElevatedButton activeInActiveSection(
+      Map<String, dynamic> userData, String userId) {
+    return ElevatedButton(
+        style: userData['status'] == false
+            ? inActiveButtonStyle
+            : activeButtonStyle,
+        onPressed: () {
+          bool status;
+          if (userData['status'] == false) {
+            status = true;
+          } else {
+            status = false;
+          }
+          usersController.changeUserStatus(userId, status);
+        },
+        child: userData['status'] == true
+            ? const Text('Active')
+            : const Text('Inactive'));
   }
 
   ElevatedButton deleteSection(context, uid) {
@@ -271,7 +292,6 @@ class Users extends StatelessWidget {
               builder: (context) {
                 usersController.email.text = userData['email'];
                 usersController.name.text = userData['user_name'];
-                usersController.userStatus.value = userData['status'];
                 for (var roleId in userData['roles']) {
                   usersController.selectedRoles.forEach((key, value) {
                     if (value[0] == roleId) {
@@ -297,7 +317,6 @@ class Users extends StatelessWidget {
                   actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                   content: addNewUserAndView(
                       canEdit: false,
-                      status: usersController.userStatus,
                       controller: usersController,
                       constraints: constraints,
                       context: context,

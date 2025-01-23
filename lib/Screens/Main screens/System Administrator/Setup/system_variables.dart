@@ -134,7 +134,7 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
           });
     },
     style: newButtonStyle,
-    child: const Text('New Screen'),
+    child: const Text('New Variable'),
   );
 }
 
@@ -213,7 +213,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> variableData, context,
     DataCell(
       Text(
         variableData['added_date'] != null && variableData['added_date'] != ''
-            ? controller.textToDate(variableData['added_date']) //
+            ? textToDate(variableData['added_date']) //
             : 'N/A',
       ),
     ),

@@ -235,7 +235,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
         DataCell(
           Text(
             roleData['added_date'] != null
-                ? controller.textToDate(roleData['added_date']) //
+                ? textToDate(roleData['added_date']) //
                 : 'N/A',
           ),
         ),

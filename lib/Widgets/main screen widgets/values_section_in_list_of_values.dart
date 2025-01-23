@@ -142,7 +142,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
     DataCell(
       Text(
         valueData['added_date'] != null
-            ? controller.textToDate(valueData['added_date'])
+            ? textToDate(valueData['added_date'])
             : 'N/A',
       ),
     ),
@@ -254,8 +254,9 @@ ElevatedButton editSection(ListOfValuesController controller,
 ElevatedButton activeInActiveSection(Map<String, dynamic> valueData,
     ListOfValuesController controller, String valueId) {
   return ElevatedButton(
-      style:
-          valueData['available'] == false ? unHideButtonStyle : hideButtonStyle,
+      style: valueData['available'] == false
+          ? inActiveButtonStyle
+          : activeButtonStyle,
       onPressed: () {
         bool status;
         if (valueData['available'] == false) {

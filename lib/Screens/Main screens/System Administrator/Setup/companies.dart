@@ -173,7 +173,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
     DataCell(
       Text(
         companyData['added_date'] != null
-            ? controller.textToDate(companyData['added_date']) //
+            ? textToDate(companyData['added_date']) //
             : 'N/A',
       ),
     ),
@@ -211,7 +211,7 @@ ElevatedButton activeInActiveSection(Map<String, dynamic> companyData,
     CompanyController controller, String companyId) {
   return ElevatedButton(
       style:
-          companyData['status'] == false ? unHideButtonStyle : hideButtonStyle,
+          companyData['status'] == false ? inActiveButtonStyle : activeButtonStyle,
       onPressed: () {
         bool status;
         if (companyData['status'] == false) {

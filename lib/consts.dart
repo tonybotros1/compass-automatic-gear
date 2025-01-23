@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 var fontStyleForAppBar = TextStyle(
     fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
@@ -65,8 +66,8 @@ var editButtonStyle = ElevatedButton.styleFrom(
   ),
   minimumSize: const Size(100, 40),
 );
-var hideButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: const Color(0xff4C585B),
+var activeButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: const Color(0xff9ACBD0),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
@@ -74,8 +75,8 @@ var hideButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
-var unHideButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: const Color(0xffA5BFCC),
+var inActiveButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: const Color(0xff09122C),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
@@ -100,7 +101,6 @@ var privateButtonStyle = ElevatedButton.styleFrom(
   ),
   minimumSize: const Size(100, 40),
 );
-
 
 var deleteButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.red,
@@ -219,10 +219,9 @@ void showSnackBar(title, body) {
   );
 }
 
-
 Future<dynamic> alertDialog(
     {required context,
-     controller,
+    controller,
     required String content,
     required void Function() onPressed}) {
   return showCupertinoDialog(
@@ -251,4 +250,18 @@ Future<dynamic> alertDialog(
       );
     },
   );
+}
+
+// function to convert text to date and make the format dd-mm-yyyy
+textToDate(inputDate) {
+  if (inputDate is String) {
+    DateTime parsedDate = DateFormat("yyyy-MM-dd").parse(inputDate);
+    String formattedDate = DateFormat("dd-MM-yyyy").format(parsedDate);
+
+    return formattedDate;
+  } else if (inputDate is DateTime) {
+    String formattedDate = DateFormat("dd-MM-yyyy").format(inputDate);
+
+    return formattedDate;
+  }
 }

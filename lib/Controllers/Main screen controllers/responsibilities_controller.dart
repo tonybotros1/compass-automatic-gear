@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 import '../../consts.dart';
 
@@ -188,7 +187,7 @@ class ResponsibilitiesController extends GetxController {
 
       FirebaseFirestore.instance
           .collection('sys-roles')
-          .orderBy('is_shown_for_users', descending: true)
+          .orderBy('role_name', descending: false)
           .snapshots()
           .listen((roles) {
         allResponsibilities.clear();
@@ -197,7 +196,7 @@ class ResponsibilitiesController extends GetxController {
           allResponsibilities[role.id] = {
             'role_name': role['role_name'],
             'menu': menuMap[role['menuID']] ?? {}, // Fetch menu data as Map
-            'menu_id':role['menuID'],
+            'menu_id': role['menuID'],
             'added_date': role['added_date'],
             'is_shown_for_users': role['is_shown_for_users'],
           };
@@ -236,21 +235,21 @@ class ResponsibilitiesController extends GetxController {
     }
   }
 
-  // function to convert text to date and make the format dd-mm-yyyy
-  String textToDate(dynamic inputDate) {
-    try {
-      if (inputDate is String) {
-        // Match the actual date format of the input
-        DateTime parsedDate =
-            DateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(inputDate);
-        return DateFormat("dd-MM-yyyy").format(parsedDate);
-      } else if (inputDate is DateTime) {
-        return DateFormat("dd-MM-yyyy").format(inputDate);
-      } else {
-        throw FormatException("Invalid input type for textToDate: $inputDate");
-      }
-    } catch (e) {
-      return "Invalid Date"; // Return a default or placeholder string
-    }
-  }
+  // // function to convert text to date and make the format dd-mm-yyyy
+  // String textToDate(dynamic inputDate) {
+  //   try {
+  //     if (inputDate is String) {
+  //       // Match the actual date format of the input
+  //       DateTime parsedDate =
+  //           DateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(inputDate);
+  //       return DateFormat("dd-MM-yyyy").format(parsedDate);
+  //     } else if (inputDate is DateTime) {
+  //       return DateFormat("dd-MM-yyyy").format(inputDate);
+  //     } else {
+  //       throw FormatException("Invalid input type for textToDate: $inputDate");
+  //     }
+  //   } catch (e) {
+  //     return "Invalid Date"; // Return a default or placeholder string
+  //   }
+  // }
 }

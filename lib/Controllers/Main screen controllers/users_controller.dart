@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../consts.dart';
 
 class UsersController extends GetxController {
@@ -28,7 +27,7 @@ class UsersController extends GetxController {
   final RxList<DocumentSnapshot> filteredUsers = RxList<DocumentSnapshot>([]);
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
-  RxBool userStatus = RxBool(true);
+  // RxBool userStatus = RxBool(true);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
 
@@ -36,7 +35,6 @@ class UsersController extends GetxController {
   void onInit() {
     getRoles();
     getAllUsers();
-    // getUserStatus('OXugS6xlxhdk5mq48uPwpZilA672');
     search.value.addListener(() {
       filterCards();
     });
@@ -117,6 +115,18 @@ class UsersController extends GetxController {
     }
   }
 
+// this functions is to change the user status from active / inactive
+  changeUserStatus(userId, status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('sys-users')
+          .doc(userId)
+          .update({'status': status});
+    } catch (e) {
+      //
+    }
+  }
+
   // Function to format the date
   String formatDate(DateTime date) {
     final formatter = DateFormat('yyyy-MM-dd');
@@ -138,20 +148,6 @@ class UsersController extends GetxController {
 
     if (picked != null && picked != selectedDate.value) {
       selectDate(picked);
-    }
-  }
-
-  // function to convert text to date and make the format dd-mm-yyyy
-  textToDate(inputDate) {
-    if (inputDate is String) {
-      DateTime parsedDate = DateFormat("yyyy-MM-dd").parse(inputDate);
-      String formattedDate = DateFormat("dd-MM-yyyy").format(parsedDate);
-
-      return formattedDate;
-    } else if (inputDate is DateTime) {
-      String formattedDate = DateFormat("dd-MM-yyyy").format(inputDate);
-
-      return formattedDate;
     }
   }
 
@@ -282,7 +278,6 @@ class UsersController extends GetxController {
             .map((entry) => entry.value[0]) // Extract the role name
             .toList(),
         'expiry_date': '${selectedDate.value}',
-        'status': userStatus.value,
         'user_name': name.text,
         'email': email.text,
       };

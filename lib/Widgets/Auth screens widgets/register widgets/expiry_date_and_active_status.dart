@@ -10,7 +10,6 @@ Widget expiryDateAndActiveStatus({
   required date,
   required controller,
   showActiveStatus,
-  activeStatusValue,
 }) {
   if (date != '') {
     controller.selectedDate.value = DateTime.parse(date);
@@ -18,13 +17,7 @@ Widget expiryDateAndActiveStatus({
     controller.selectedDate.value = DateTime.now();
   }
   return ListTile(
-    trailing: showActiveStatus == true
-        ? Obx(() => CupertinoSwitch(
-            value: activeStatusValue.value,
-            onChanged: (status) {
-              controller.userStatus.value = status;
-            }))
-        : const SizedBox(),
+   
     contentPadding: const EdgeInsets.all(0),
     title: Text(
       "Expiry Date ",
@@ -33,7 +26,7 @@ Widget expiryDateAndActiveStatus({
     subtitle: Row(
       children: [
         Obx(
-          () => Text(controller.textToDate(
+          () => Text(textToDate(
               controller.formatDate(controller.selectedDate.value))),
         ),
         const SizedBox(

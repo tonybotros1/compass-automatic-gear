@@ -165,7 +165,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
     DataCell(
       Text(
         listData['added_date'] != null
-            ? controller.textToDate(listData['added_date']) //
+            ? textToDate(listData['added_date']) //
             : 'N/A',
       ),
     ),

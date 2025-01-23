@@ -13,7 +13,6 @@ Widget addNewUserAndView(
     TextEditingController? name,
     bool? canEdit,
     userExpiryDate,
-    status,
     showActiveStatus}) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
@@ -56,7 +55,6 @@ Widget addNewUserAndView(
               validate: true,
             )),
         expiryDateAndActiveStatus(
-            activeStatusValue: status,
             showActiveStatus: showActiveStatus,
             controller: controller,
             context: context,

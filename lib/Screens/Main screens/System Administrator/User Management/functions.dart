@@ -213,7 +213,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
     DataCell(
       Text(
         screenData['added_date'] != null
-            ? controller.textToDate(screenData['added_date']) //
+            ? textToDate(screenData['added_date']) //
             : 'N/A',
       ),
     ),

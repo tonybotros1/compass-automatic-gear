@@ -164,7 +164,7 @@ DataRow dataRowForTheTable(
     DataCell(
       Text(
         menuData['added_date'] != null
-            ? controller.textToDate(menuData['added_date']) //
+            ? textToDate(menuData['added_date']) //
             : 'N/A',
       ),
     ),

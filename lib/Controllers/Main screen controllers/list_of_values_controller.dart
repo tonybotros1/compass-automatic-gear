@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListOfValuesController extends GetxController {
@@ -422,17 +421,5 @@ class ListOfValuesController extends GetxController {
     }
   }
 
-  // function to convert text to date and make the format dd-mm-yyyy
-  textToDate(inputDate) {
-    if (inputDate is String) {
-      DateTime parsedDate = DateFormat("yyyy-MM-dd").parse(inputDate);
-      String formattedDate = DateFormat("dd-MM-yyyy").format(parsedDate);
-
-      return formattedDate;
-    } else if (inputDate is DateTime) {
-      String formattedDate = DateFormat("dd-MM-yyyy").format(inputDate);
-
-      return formattedDate;
-    }
-  }
+  
 }
