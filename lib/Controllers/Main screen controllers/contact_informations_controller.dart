@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Models/phone_type_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,9 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ContactInformationsController extends GetxController {
   TextEditingController contactName = TextEditingController();
   TextEditingController contactAdress = TextEditingController();
-  Rx<TextEditingController> phoneTypeSection = TextEditingController().obs;
-  Rx<TextEditingController> phoneNumberSection = TextEditingController().obs;
-  Rx<TextEditingController> phoneNameSection = TextEditingController().obs;
+  // Rx<TextEditingController> phoneTypeSection = TextEditingController().obs;
+  RxList<PhoneTypeModel> controllers = RxList<PhoneTypeModel>([]);
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -27,8 +27,16 @@ class ContactInformationsController extends GetxController {
     }
   ]);
 
+  final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+
   @override
   void onInit() {
+    controllers.value = List.generate(
+      contactPhone.length + 1,
+      (index) => PhoneTypeModel(
+          controller: TextEditingController()), // Return a TestModel
+    );
+
     getContacts();
     getPhoneTypes();
     search.value.addListener(() {
@@ -37,16 +45,27 @@ class ContactInformationsController extends GetxController {
     super.onInit();
   }
 
+// this function is to generate a new phone field
   addPhoneLine() {
+    final index = contactPhone.length;
+
     contactPhone.add({
       'type': '',
       'number': '',
       'name': '',
     });
+    listKey.currentState
+        ?.insertItem(index, duration: const Duration(milliseconds: 300));
+
+    controllers.add(PhoneTypeModel(controller: TextEditingController()));
   }
 
-  removePhoneLine(i) {
-    contactPhone.removeAt(i);
+// this function is to remove a phone field
+  void removePhoneField(int index) {
+    // if (index >= 0 && index < contactPhone.length) {
+    // }
+    contactPhone.removeAt(index);
+    controllers.removeAt(index);
   }
 
   // this function is to sort data in table
@@ -157,7 +176,8 @@ class ContactInformationsController extends GetxController {
             .snapshots()
             .listen((types) {
           phoneTypes.value = types.docs;
-          phoneTypeSection.value.text = types.docs.first.data()['name'];
+          // phoneTypeSection.value.text = types.docs.first.data()['name'];
+          controllers[0].controller!.text = types.docs.first.data()['name'];
           contactPhone[0]['type'] = types.docs.first.data()['name'];
         });
       }

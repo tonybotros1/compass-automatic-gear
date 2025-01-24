@@ -44,103 +44,27 @@ Widget addNewContactOrEdit({
         GetX<ContactInformationsController>(builder: (controller) {
           return Column(
             children: [
-              ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: controller.contactPhone.length,
-                  itemBuilder: (context, i) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 30,
-                              child: Icon(
-                                Icons.phone,
-                                color: Colors.grey,
-                                size: 25,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: AnimatedContainer(
-                                duration: const Duration(microseconds: 300),
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 10),
-                                  child: smartField(
-                                      onChangedForName: (value) {
-                                        controller.contactPhone[i]['name'] =
-                                            value;
-                                      },
-                                      onChangedForNumber: (value) {
-                                        controller.contactPhone[i]['number'] =
-                                            value;
-                                      },
-                                      textControllerForDropMenu:
-                                          controller.phoneTypeSection.value,
-                                      labelTextForDropMenu: 'Type',
-                                      hintTextForDeopMenu: 'Select Phone Type',
-                                      menuValues:
-                                          controller.phoneTypes.isEmpty == true
-                                              ? []
-                                              : controller.phoneTypes,
-                                      itemBuilder: (context, suggestion) {
-                                        return ListTile(
-                                          title: Text('${suggestion['name']}'),
-                                        );
-                                      },
-                                      onSelected: (value) {
-                                        controller.phoneTypeSection.value.text =
-                                            value['name'];
-                                        controller.contactPhone[i]['type'] =
-                                            value['name'];
-                                      },
-                                      labelTextForPhoneSection: 'Phone Number',
-                                      hintTextForPhoneSection:
-                                          'Enter Phone Number',
-                                      controllerForPhoneSection:
-                                          controller.phoneNumberSection.value,
-                                      validateForPhoneSection: true,
-                                      labelTextForNameSection: 'Name',
-                                      hintTextForNameSection: 'Enter Name',
-                                      controllerForNameSection:
-                                          controller.phoneNameSection.value,
-                                      validateForNameSection: true),
-                                ),
-                              ),
-                            ),
-                            controller.contactPhone.length > 1
-                                ? IconButton(
-                                    onPressed: () {
-                                      controller.removePhoneLine(i);
-                                    },
-                                    icon: Icon(
-                                      Icons.remove_circle_outline,
-                                      color: Colors.red,
-                                    ))
-                                : SizedBox()
-                          ],
-                        ),
-                      ],
-                    );
-                  }),
-              controller.phoneNumberSection.value.text.isNotEmpty
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.add),
-                          color: Colors.grey,
-                          onPressed: () {
-                            controller.addPhoneLine();
-                          },
-                        ),
-                      ],
-                    )
-                  : SizedBox()
+              AnimatedList(
+                key: controller.listKey,
+                shrinkWrap: true,
+                initialItemCount: controller.contactPhone.length,
+                itemBuilder: (context, i, animation) {
+                  return buildSmartField(
+                      controller, controller.contactPhone[i], animation, i);
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    color: Colors.grey,
+                    onPressed: () {
+                      controller.addPhoneLine();
+                    },
+                  ),
+                ],
+              )
             ],
           );
         }),
@@ -148,6 +72,102 @@ Widget addNewContactOrEdit({
     ),
   );
 }
+
+Widget buildSmartField(ContactInformationsController controller,
+    Map<String, dynamic> item, Animation<double> animation, int index,
+    {bool isRemoving = false}) {
+ 
+  return SizeTransition(
+    sizeFactor: animation,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Row(
+          children: [
+            SizedBox(
+              width: 30,
+              child: Icon(
+                Icons.phone,
+                color: Colors.grey,
+                size: 25,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: smartField(
+                  onChangedForName: (value) {
+                    controller.contactPhone[index]['name'] = value;
+                  },
+                  onChangedForNumber: (value) {
+                    controller.contactPhone[index]['number'] = value;
+                  },
+                  textControllerForDropMenu:
+                      controller.controllers[index].controller,
+                  labelTextForDropMenu: 'Type',
+                  hintTextForDeopMenu: 'Select Phone Type',
+                  menuValues: controller.phoneTypes.isEmpty
+                      ? []
+                      : controller.phoneTypes,
+                  itemBuilder: (context, suggestion) {
+                    return ListTile(
+                      title: Text('${suggestion['name']}'),
+                    );
+                  },
+                  onSelected: (value) {
+                    controller.contactPhone[index]['type'] = value['name'];
+                    controller.controllers[index].controller!.text =
+                        value['name'];
+                  },
+                  labelTextForPhoneSection: 'Phone Number',
+                  hintTextForPhoneSection: 'Enter Phone Number',
+                  validateForPhoneSection: true,
+                  labelTextForNameSection: 'Name',
+                  hintTextForNameSection: 'Enter Name',
+                  validateForNameSection: true,
+                ),
+              ),
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeIn,
+              switchOutCurve: Curves.easeOut,
+              child: controller.contactPhone.length > 1
+                  ? IconButton(
+                      key: ValueKey('remove_$index'),
+                      onPressed: () {
+                        removePhoneFieldWithAnimation(index, controller);
+                      },
+                      icon: Icon(
+                        Icons.remove_circle_outline,
+                        color: Colors.red,
+                      ),
+                    )
+                  : const SizedBox(),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+// =====================================================
+void removePhoneFieldWithAnimation(
+    int index, ContactInformationsController controller) {
+  final removedItem = controller.contactPhone[index];
+  controller.removePhoneField(index);
+  controller.listKey.currentState?.removeItem(
+    index,
+    (context, animation) {
+      return buildSmartField(controller, removedItem, animation, index,
+          isRemoving: true);
+    },
+    duration: const Duration(milliseconds: 300),
+  );
+}
+// =====================================================
 
 Widget smartField({
   required String labelTextForDropMenu,
@@ -158,11 +178,9 @@ Widget smartField({
   TextEditingController? textControllerForDropMenu,
   required String labelTextForPhoneSection,
   required String hintTextForPhoneSection,
-  required controllerForPhoneSection,
   required validateForPhoneSection,
   required String labelTextForNameSection,
   required String hintTextForNameSection,
-  required controllerForNameSection,
   required validateForNameSection,
   required void Function(String)? onChangedForNumber,
   required void Function(String)? onChangedForName,
@@ -274,30 +292,29 @@ Widget smartField({
       ),
       Expanded(
         flex: 2,
-        child: typeSection(
-            controllerForPhoneSection,
-            labelTextForPhoneSection,
-            hintTextForPhoneSection,
-            validateForPhoneSection,
-            onChangedForNumber),
+        child: typeSection(labelTextForPhoneSection, hintTextForPhoneSection,
+            validateForPhoneSection, onChangedForNumber),
       ),
       SizedBox(
         width: 5,
       ),
-      Expanded(
-        flex: 2,
-        child: typeSection(controllerForNameSection, labelTextForNameSection,
-            hintTextForNameSection, validateForNameSection, onChangedForName),
+      AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeIn,
+        child: Expanded(
+          flex: 2,
+          child: typeSection(labelTextForNameSection, hintTextForNameSection,
+              validateForNameSection, onChangedForName),
+        ),
       ),
     ],
   );
 }
 
-TextFormField typeSection(controller, String labelText, String hintText,
-    validate, void Function(String)? onChanged) {
+TextFormField typeSection(String labelText, String hintText, validate,
+    void Function(String)? onChanged) {
   return TextFormField(
     onChanged: onChanged,
-    controller: controller,
     decoration: InputDecoration(
       hintStyle: const TextStyle(color: Colors.grey),
       labelText: labelText,
