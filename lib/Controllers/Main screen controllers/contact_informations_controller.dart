@@ -6,6 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ContactInformationsController extends GetxController {
   TextEditingController contactName = TextEditingController();
   TextEditingController contactAdress = TextEditingController();
+  Rx<TextEditingController> phoneTypeSection = TextEditingController().obs;
+  Rx<TextEditingController> phoneNumberSection = TextEditingController().obs;
+  Rx<TextEditingController> phoneNameSection = TextEditingController().obs;
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -15,19 +18,35 @@ class ContactInformationsController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-  RxList contactPhone = RxList([{
-    'type':'',
-    'number':'',
-    'name':'',
-  }]);
+  RxList phoneTypes = RxList([]);
+  RxList contactPhone = RxList([
+    {
+      'type': '',
+      'number': '',
+      'name': '',
+    }
+  ]);
 
   @override
   void onInit() {
     getContacts();
+    getPhoneTypes();
     search.value.addListener(() {
       filterContacts();
     });
     super.onInit();
+  }
+
+  addPhoneLine() {
+    contactPhone.add({
+      'type': '',
+      'number': '',
+      'name': '',
+    });
+  }
+
+  removePhoneLine(i) {
+    contactPhone.removeAt(i);
   }
 
   // this function is to sort data in table
@@ -117,6 +136,33 @@ class ContactInformationsController extends GetxController {
           return screen['name'].toString().toLowerCase().contains(query);
         }).toList(),
       );
+    }
+  }
+
+  Future<void> getPhoneTypes() async {
+    try {
+      // Query for the document with code 'PHONE_TYPES'
+      var type = await FirebaseFirestore.instance
+          .collection('all_lists')
+          .where('code', isEqualTo: 'PHONE_TYPES')
+          .get();
+
+      if (type.docs.isNotEmpty) {
+        // Access the 'values' subcollection using the document ID
+        FirebaseFirestore.instance
+            .collection('all_lists')
+            .doc(type.docs.first.id) // Use the document ID
+            .collection('values')
+            .where('available', isEqualTo: true)
+            .snapshots()
+            .listen((types) {
+          phoneTypes.value = types.docs;
+          phoneTypeSection.value.text = types.docs.first.data()['name'];
+          contactPhone[0]['type'] = types.docs.first.data()['name'];
+        });
+      }
+    } catch (e) {
+//
     }
   }
 }

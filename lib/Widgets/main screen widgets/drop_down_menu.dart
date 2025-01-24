@@ -26,16 +26,20 @@ Widget dropDownValues({
       enabled: menus.isNotEmpty,
       focusNode: focusNode,
       decoration: InputDecoration(
-        focusedBorder: const OutlineInputBorder(
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey, width: 2.0),
         ),
-        enabledBorder: const OutlineInputBorder(
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey, width: 1.0),
         ),
-        errorBorder: const OutlineInputBorder(
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.red, width: 1.0),
         ),
-        focusedErrorBorder: const OutlineInputBorder(
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.red, width: 2.0),
         ),
         iconColor: Colors.grey.shade700,
