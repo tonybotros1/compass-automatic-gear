@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ContactInformationsController extends GetxController {
+  TextEditingController contactName = TextEditingController();
+  TextEditingController contactAdress = TextEditingController();
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -12,6 +15,20 @@ class ContactInformationsController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
+  RxList contactPhone = RxList([{
+    'type':'',
+    'number':'',
+    'name':'',
+  }]);
+
+  @override
+  void onInit() {
+    getContacts();
+    search.value.addListener(() {
+      filterContacts();
+    });
+    super.onInit();
+  }
 
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
@@ -61,7 +78,45 @@ class ContactInformationsController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
+// this functions is to get all contacts in the current company
+  getContacts() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final companyId = prefs.getString('companyId');
+      FirebaseFirestore.instance
+          .collection('all_contacts')
+          .where('company_id', isEqualTo: companyId)
+          .snapshots()
+          .listen((contacts) {
+        allContacts.assignAll(contacts.docs);
+        isScreenLoding.value = false;
+      });
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
+  }
 
-  
-  
+  addNewContact() async {
+    try {
+      addingNewValue.value = true;
+      await FirebaseFirestore.instance.collection('all_contacts').add({});
+      addingNewValue.value = false;
+    } catch (e) {
+      addingNewValue.value = false;
+    }
+  }
+
+  // this function is to filter the search results for web
+  void filterContacts() {
+    query.value = search.value.text.toLowerCase();
+    if (query.value.isEmpty) {
+      filteredContacts.clear();
+    } else {
+      filteredContacts.assignAll(
+        allContacts.where((screen) {
+          return screen['name'].toString().toLowerCase().contains(query);
+        }).toList(),
+      );
+    }
+  }
 }

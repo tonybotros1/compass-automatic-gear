@@ -289,7 +289,7 @@ Widget contactDetails({
                             controller: controller.password,
                             validate: true,
                             obscureText: controller.obscureText.value,
-                            icon: IconButton(
+                            suffixIcon: IconButton(
                                 onPressed: () {
                                   controller.changeObscureTextValue();
                                 },

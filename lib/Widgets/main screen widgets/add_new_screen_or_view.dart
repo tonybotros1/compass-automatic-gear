@@ -32,41 +32,7 @@ Widget addNewScreenOrView({
           keyboardType: TextInputType.emailAddress,
           validate: true,
         ),
-        // Expanded(
-        //   child: Container(
-        //       decoration: BoxDecoration(
-        //           border: Border.all(color: Colors.grey),
-        //           borderRadius: BorderRadius.circular(15)),
-        //       child: Obx(
-        //         () => controller.isLoading.value == false
-        //             ? ListView.builder(
-        //                 itemCount: controller.selectedRoles.length,
-        //                 shrinkWrap: true,
-        //                 itemBuilder: (context, i) {
-        //                   return ListTile(
-        //                       leading: Obx(
-        //                         () => Checkbox(
-        //                             activeColor: Colors.blue,
-        //                             value: controller.selectedRoles.values
-        //                                 .elementAt(i)[1],
-        //                             onChanged: (selected) {
-        //                               var key = controller
-        //                                   .selectedRoles.keys
-        //                                   .elementAt(i); // Get the key
-        //                               controller.selectedRoles[key] = [
-        //                                 controller.selectedRoles[key]![0],
-        //                                 selected!,
-        //                               ];
-        //                             }),
-        //                       ),
-        //                       title: Text(
-        //                           '${controller.selectedRoles.keys.elementAt(i)}'));
-        //                 })
-        //             : CircularProgressIndicator(
-        //                 color: mainColor,
-        //               ),
-        //       )),
-        // ),
+       
       ],
     ),
   );
