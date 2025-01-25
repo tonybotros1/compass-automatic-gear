@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../Models/register_menu_model.dart';
+import '../../Models/menu_model.dart';
 import '../../Screens/Auth Screens/register_screen.dart';
 import '../../consts.dart';
 
@@ -41,10 +41,10 @@ class RegisterScreenController extends GetxController {
   RxString selectedCountryId = RxString('');
   RxString selectedCityId = RxString('');
 
-  final menu = <RegisterMenuModel>[
-    RegisterMenuModel(title: 'Company Details', isPressed: true),
-    RegisterMenuModel(title: 'Contact Details', isPressed: false),
-    RegisterMenuModel(title: 'Responsibilities', isPressed: false),
+  final menu = <MenuModel>[
+    MenuModel(title: 'Company Details', isPressed: true),
+    MenuModel(title: 'Contact Details', isPressed: false),
+    MenuModel(title: 'Responsibilities', isPressed: false),
   ];
 
   @override

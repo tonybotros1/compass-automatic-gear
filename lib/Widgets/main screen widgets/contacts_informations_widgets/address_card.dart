@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../Controllers/Main screen controllers/contact_informations_controller.dart';
-import 'smart_field.dart';
+import 'address_field.dart';
 
-Column socialCardSection(ContactInformationsController controller) {
+Column addressCardSection(ContactInformationsController controller) {
   return Column(
     children: [
       AnimatedList(
-        key: controller.listKeyForSocialLine,
+        key: controller.listKeyForAddressLine,
         shrinkWrap: true,
-        initialItemCount: controller.contactSocial.length,
+        initialItemCount: controller.contactAddress.length,
         itemBuilder: (context, i, animation) {
           return buildSmartField(
-              controller, controller.contactSocial[i], animation, i);
+              controller, controller.contactAddress[i], animation, i);
         },
       ),
       Row(
@@ -22,7 +22,7 @@ Column socialCardSection(ContactInformationsController controller) {
             icon: Icon(Icons.add),
             color: Colors.grey,
             onPressed: () {
-              controller.addSocialLine();
+              controller.addAdressLine();
             },
           ),
         ],
@@ -44,7 +44,7 @@ Widget buildSmartField(ContactInformationsController controller,
             SizedBox(
               width: 30,
               child: Icon(
-                Icons.public,
+                Icons.home,
                 color: Colors.grey,
                 size: 25,
               ),
@@ -53,47 +53,63 @@ Widget buildSmartField(ContactInformationsController controller,
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: smartField(
-                    onChangedForThirdSection: (value) {
-                      controller.contactSocial[index]['name'] = value;
+                child: addressField(
+                    labelTextForLine: 'Line',
+                    hintTextForLine: 'Enter Your Line',
+                    validateForLine: false,
+                    onChangedForLine: (value) {
+                      controller.contactAddress[index]['line'] = value;
                     },
-                    textControllerForDropMenu:
-                        controller.socialTypesControllers[index].controller,
-                    labelTextForDropMenu: 'Type',
-                    hintTextForDeopMenu: 'Select Social Type',
-                    menuValues: controller.typeOfSocialsMap.isEmpty
-                        ? {}
-                        : controller.typeOfSocialsMap,
+                    textControllerForCity:
+                        controller.citiesControllers[index].controller,
+                    textControllerForCountry:
+                        controller.countriesControllers[index].controller,
+                    labelTextForCountry: 'Country',
+                    labelTextForCity: 'City',
+                    hintTextForCountry: 'Select Country',
+                    hintTextForCity: 'Select City',
+                    validateForcity: false,
+                    validateForCountry: false,
+                    countryValues: controller.allCountries,
+                    cityValues:
+                        controller.allCities, // need to update to on select
+                    controller: controller,
                     itemBuilder: (context, suggestion) {
                       return ListTile(
                         title: Text('${suggestion['name']}'),
                       );
                     },
-                    onSelected: (suggestion) {
-                      controller.socialTypesControllers[index].controller!
-                          .text = suggestion['name'];
-                      controller.typeOfSocialsMap.entries.where((entry) {
+                    onSelectedForCity: (suggestion) {
+                      controller.citiesControllers[index].controller!.text =
+                          suggestion['name'];
+                      controller.allCities.entries.where((entry) {
                         return entry.value['name'] ==
                             suggestion['name'].toString();
                       }).forEach((entry) {
-                        controller.contactSocial[index]['type'] = entry.key;
+                        controller.contactAddress[index]['city'] = entry.key;
                       });
                     },
-                    labelTextForThirdSection: 'Link',
-                    hintTextForThirdSection: 'Enter Link',
-                    validateForThirdSection: false,
-                    validateForTypeSection: false),
+                    onSelectedForCountry: (suggestion) {
+                      controller.countriesControllers[index].controller!.text =
+                          suggestion['name'];
+                      controller.allCountries.entries.where((entry) {
+                        return entry.value['name'] ==
+                            suggestion['name'].toString();
+                      }).forEach((entry) {
+                        controller.contactAddress[index]['country'] = entry.key;
+                      });
+                    }),
               ),
             ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               switchInCurve: Curves.easeIn,
               switchOutCurve: Curves.easeOut,
-              child: controller.contactSocial.length > 1
+              child: controller.contactAddress.length > 1
                   ? IconButton(
                       key: ValueKey('remove_$index'),
                       onPressed: () {
-                        removeSocialFieldWithAnimation(index, controller);
+                        removeAdressFieldWithAnimation(index, controller);
                       },
                       icon: Icon(
                         Icons.remove_circle_outline,
@@ -110,11 +126,11 @@ Widget buildSmartField(ContactInformationsController controller,
 }
 
 // =====================================================
-void removeSocialFieldWithAnimation(
+void removeAdressFieldWithAnimation(
     int index, ContactInformationsController controller) {
-  final removedItem = controller.contactSocial[index];
-  controller.removeSocialField(index);
-  controller.listKeyForSocialLine.currentState?.removeItem(
+  final removedItem = controller.contactAddress[index];
+  controller.removeAddressField(index);
+  controller.listKeyForAddressLine.currentState?.removeItem(
     index,
     (context, animation) {
       return buildSmartField(controller, removedItem, animation, index,

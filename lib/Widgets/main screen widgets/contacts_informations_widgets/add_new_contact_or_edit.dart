@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/contact_informations_controller.dart';
 import '../../my_text_field.dart';
-import 'package:buttons_tabbar/buttons_tabbar.dart';
-
 import '../drop_down_menu.dart';
-import 'contacts_card.dart';
 import 'image_section.dart';
-import 'social_card.dart';
 
 Widget addNewContactOrEdit({
   required BoxConstraints constraints,
@@ -19,6 +15,7 @@ Widget addNewContactOrEdit({
   bool? canEdit,
 }) {
   return SizedBox(
+    height: constraints.maxHeight,
     width: constraints.maxWidth,
     child: SingleChildScrollView(
       child: Column(
@@ -103,52 +100,63 @@ Widget addNewContactOrEdit({
               ),
             ],
           ),
-          DefaultTabController(
-            length: 3,
-            child: Column(
-              children: <Widget>[
-                ButtonsTabBar(
-                  buttonMargin: EdgeInsets.symmetric(horizontal: 60),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 60),
-                  backgroundColor: Colors.blue[400],
-                  unselectedBackgroundColor: Colors.grey[300],
-                  unselectedLabelStyle: TextStyle(
-                    color: Colors.black87,
-                  ),
-                  labelStyle: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                  tabs: [
-                    Tab(icon: Icon(Icons.home), text: 'Address Card'),
-                    Tab(icon: Icon(Icons.contacts), text: 'Contact Card'),
-                    Tab(icon: Icon(Icons.alternate_email), text: 'Social Card'),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  height: 600,
-                  child: TabBarView(
-                    children: <Widget>[
-                      Center(
-                        child: Icon(Icons.directions_car),
+          GetBuilder<ContactInformationsController>(builder: (controller) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: SizedBox(
+                height: 60,
+                child: ListView.separated(
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 100),
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  itemCount: controller.taps.length,
+                  itemBuilder: (context, i) {
+                    return Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                          color: controller.taps[i].isPressed == true
+                              ? Colors.blue
+                              : Colors.grey,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Center(
+                        child: InkWell(
+                          onTap: () {
+                            controller.selectFromTaps(i);
+                          },
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            style: TextStyle(
+                              color: controller.taps[i].isPressed == false
+                                  ? Colors.grey.shade700
+                                  : Colors.white,
+                              fontSize: controller.taps[i].isPressed == true
+                                  ? 18
+                                  : 16, // Font size change
+                              fontWeight: controller.taps[i].isPressed == true
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                            child: Text(controller.taps[i].title),
+                          ),
+                        ),
                       ),
-                      GetX<ContactInformationsController>(
-                          builder: (controller) {
-                        return contactsCardSection(controller);
-                      }),
-                      GetX<ContactInformationsController>(
-                          builder: (controller) {
-                        return socialCardSection(controller);
-                      }),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          }),
+          GetBuilder<ContactInformationsController>(
+              builder: (controller) {
+            return controller.buildTapsContent(
+                controller.selectedTap.value, controller);
+          }),
         ],
       ),
     ),
   );
 }
+
+

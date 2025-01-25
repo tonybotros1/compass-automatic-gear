@@ -7,6 +7,11 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:html' as html;
 
+import '../../Models/menu_model.dart';
+import '../../Widgets/main screen widgets/contacts_informations_widgets/address_card.dart';
+import '../../Widgets/main screen widgets/contacts_informations_widgets/contacts_card.dart';
+import '../../Widgets/main screen widgets/contacts_informations_widgets/social_card.dart';
+
 class ContactInformationsController extends GetxController {
   TextEditingController contactName = TextEditingController();
   TextEditingController groupName = TextEditingController();
@@ -15,6 +20,8 @@ class ContactInformationsController extends GetxController {
   // Rx<TextEditingController> phoneTypeSection = TextEditingController().obs;
   RxList<TypeModel> phoneTypesControllers = RxList<TypeModel>([]);
   RxList<TypeModel> socialTypesControllers = RxList<TypeModel>([]);
+  RxList<TypeModel> countriesControllers = RxList<TypeModel>([]);
+  RxList<TypeModel> citiesControllers = RxList<TypeModel>([]);
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -24,6 +31,13 @@ class ContactInformationsController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
+  RxInt selectedTap = RxInt(0);
+
+  final taps = <MenuModel>[
+    MenuModel(title: 'Address Card', isPressed: true),
+    MenuModel(title: 'Contact Card', isPressed: false),
+    MenuModel(title: 'Social Card', isPressed: false),
+  ];
   RxList contactPhone = RxList([
     {
       'type': '',
@@ -39,20 +53,34 @@ class ContactInformationsController extends GetxController {
       'link': '',
     }
   ]);
+
+  RxList contactAddress = RxList([
+    {
+      'line': '',
+      'country': '',
+      'city': '',
+    }
+  ]);
   RxMap typeOfBusinessMap = RxMap({});
   RxMap typeOfSocialsMap = RxMap({});
   RxMap phoneTypesMap = RxMap({});
   Uint8List? imageBytes;
+  RxMap allCities = RxMap({});
+  RxMap allCountries = RxMap({});
 
   final GlobalKey<AnimatedListState> listKeyForPhoneLine =
       GlobalKey<AnimatedListState>();
   final GlobalKey<AnimatedListState> listKeyForSocialLine =
       GlobalKey<AnimatedListState>();
+  final GlobalKey<AnimatedListState> listKeyForAddressLine =
+      GlobalKey<AnimatedListState>();
 
   @override
   void onInit() {
+    generateControllerForAdressCountriesAndCities();
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
+    getCountriesAndCities();
     getTypeOfBusiness();
     getTypeOfSocial();
     getContacts();
@@ -61,6 +89,72 @@ class ContactInformationsController extends GetxController {
       filterContacts();
     });
     super.onInit();
+  }
+
+  selectFromTaps(i) {
+    selectedTap.value = i;
+    for (int index = 0; index < taps.length; index++) {
+      taps[index].isPressed = (index == i);
+    }
+    update();
+  }
+
+  Widget buildTapsContent(int index, controller) {
+    switch (index) {
+      case 0:
+        return addressCardSection(controller);
+      case 1:
+        return contactsCardSection(controller);
+      case 2:
+        return socialCardSection(controller);
+
+      default:
+        return const Text('4');
+    }
+  }
+
+  getCountriesAndCities() async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+          .instance
+          .collection('all_lists')
+          .where('code', isEqualTo: 'COUNTRIES')
+          .get();
+      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+          .instance
+          .collection('all_lists')
+          .where('code', isEqualTo: 'CITIES')
+          .get();
+
+      var countriesId = countries.docs.first.id;
+      var citiesId = cities.docs.first.id;
+
+      FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(countriesId)
+          .collection('values')
+          .where('available', isEqualTo: true)
+          .snapshots()
+          .listen((countries) {
+        allCountries.value = {
+          for (var doc in countries.docs) doc.id: doc.data()
+        };
+      });
+
+      FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(citiesId)
+          .collection('values')
+          .where('available', isEqualTo: true)
+          .snapshots()
+          .listen((cities) {
+        allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+      });
+
+      update();
+    } catch (e) {
+      // print(e);
+    }
   }
 
   generateControllerForPhoneTypes() {
@@ -74,6 +168,19 @@ class ContactInformationsController extends GetxController {
   generateControllerForSocialTypes() {
     socialTypesControllers.value = List.generate(
       contactSocial.length + 1,
+      (index) =>
+          TypeModel(controller: TextEditingController()), // Return a TestModel
+    );
+  }
+
+  generateControllerForAdressCountriesAndCities() {
+    countriesControllers.value = List.generate(
+      contactAddress.length + 1,
+      (index) =>
+          TypeModel(controller: TextEditingController()), // Return a TestModel
+    );
+    citiesControllers.value = List.generate(
+      contactAddress.length + 1,
       (index) =>
           TypeModel(controller: TextEditingController()), // Return a TestModel
     );
@@ -143,7 +250,7 @@ class ContactInformationsController extends GetxController {
     phoneTypesControllers.add(TypeModel(controller: TextEditingController()));
   }
 
-  // this function is to generate a new phone field
+  // this function is to generate a new social field
   addSocialLine() {
     final index = contactSocial.length;
 
@@ -153,8 +260,22 @@ class ContactInformationsController extends GetxController {
     });
     listKeyForSocialLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
-
     socialTypesControllers.add(TypeModel(controller: TextEditingController()));
+  }
+
+  // this function is to generate a new address field
+  addAdressLine() {
+    final index = contactAddress.length;
+
+    contactAddress.add({
+      'line': '',
+      'country': '',
+      'city': '',
+    });
+    listKeyForAddressLine.currentState
+        ?.insertItem(index, duration: const Duration(milliseconds: 300));
+    countriesControllers.add(TypeModel(controller: TextEditingController()));
+    citiesControllers.add(TypeModel(controller: TextEditingController()));
   }
 
 // this function is to remove a phone field
@@ -165,13 +286,23 @@ class ContactInformationsController extends GetxController {
     phoneTypesControllers.removeAt(index);
   }
 
-// this function is to remove a phone field
+// this function is to remove a social field
   void removeSocialField(int index) {
     // if (index >= 0 && index < contactPhone.length) {
     // }
     contactSocial.removeAt(index);
     socialTypesControllers.removeAt(index);
   }
+  // this function is to remove a address field
+  void removeAddressField(int index) {
+    // if (index >= 0 && index < contactPhone.length) {
+    // }
+    contactAddress.removeAt(index);
+    countriesControllers.removeAt(index);
+    citiesControllers.removeAt(index);
+  }
+
+
 
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
