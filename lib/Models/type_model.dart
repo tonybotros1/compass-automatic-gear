@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 
-class PhoneTypeModel {
+class TypeModel {
    TextEditingController? controller = TextEditingController();
 
-   PhoneTypeModel({ required this.controller,});
+   TypeModel({ required this.controller,});
 }

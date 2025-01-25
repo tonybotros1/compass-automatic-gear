@@ -10,6 +10,7 @@ Widget dropDownValues({
   required void Function(dynamic)? onSelected,
   TextEditingController? textController,
   controller,
+  icon,
 }) {
   return TypeAheadField(
     controller: textController,
@@ -26,6 +27,7 @@ Widget dropDownValues({
       enabled: menus.isNotEmpty,
       focusNode: focusNode,
       decoration: InputDecoration(
+        icon: icon,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey, width: 2.0),

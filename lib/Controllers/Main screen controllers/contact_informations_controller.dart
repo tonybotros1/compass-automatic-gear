@@ -1,14 +1,20 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:datahubai/Models/phone_type_model.dart';
+import 'package:datahubai/Models/type_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:html' as html;
 
 class ContactInformationsController extends GetxController {
   TextEditingController contactName = TextEditingController();
-  TextEditingController contactAdress = TextEditingController();
+  TextEditingController groupName = TextEditingController();
+  Rx<TextEditingController> typrOfBusiness = TextEditingController().obs;
+  RxString typrOfBusinessId = RxString('');
   // Rx<TextEditingController> phoneTypeSection = TextEditingController().obs;
-  RxList<PhoneTypeModel> controllers = RxList<PhoneTypeModel>([]);
+  RxList<TypeModel> phoneTypesControllers = RxList<TypeModel>([]);
+  RxList<TypeModel> socialTypesControllers = RxList<TypeModel>([]);
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -18,31 +24,108 @@ class ContactInformationsController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-  RxList phoneTypes = RxList([]);
   RxList contactPhone = RxList([
     {
       'type': '',
       'number': '',
       'name': '',
+      'email': '',
     }
   ]);
 
-  final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+  RxList contactSocial = RxList([
+    {
+      'type': '',
+      'link': '',
+    }
+  ]);
+  RxMap typeOfBusinessMap = RxMap({});
+  RxMap typeOfSocialsMap = RxMap({});
+  RxMap phoneTypesMap = RxMap({});
+  Uint8List? imageBytes;
+
+  final GlobalKey<AnimatedListState> listKeyForPhoneLine =
+      GlobalKey<AnimatedListState>();
+  final GlobalKey<AnimatedListState> listKeyForSocialLine =
+      GlobalKey<AnimatedListState>();
 
   @override
   void onInit() {
-    controllers.value = List.generate(
-      contactPhone.length + 1,
-      (index) => PhoneTypeModel(
-          controller: TextEditingController()), // Return a TestModel
-    );
-
+    generateControllerForPhoneTypes();
+    generateControllerForSocialTypes();
+    getTypeOfBusiness();
+    getTypeOfSocial();
     getContacts();
     getPhoneTypes();
     search.value.addListener(() {
       filterContacts();
     });
     super.onInit();
+  }
+
+  generateControllerForPhoneTypes() {
+    phoneTypesControllers.value = List.generate(
+      contactPhone.length + 1,
+      (index) =>
+          TypeModel(controller: TextEditingController()), // Return a TestModel
+    );
+  }
+
+  generateControllerForSocialTypes() {
+    socialTypesControllers.value = List.generate(
+      contactSocial.length + 1,
+      (index) =>
+          TypeModel(controller: TextEditingController()), // Return a TestModel
+    );
+  }
+
+  // this function is to select an image for logo
+  pickImage() async {
+    try {
+      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      uploadInput.accept = 'image/*';
+      uploadInput.click();
+
+      uploadInput.onChange.listen((event) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files.first;
+          final reader = html.FileReader();
+
+          reader.readAsArrayBuffer(file);
+          reader.onLoadEnd.listen((event) async {
+            if (reader.result != null) {
+              imageBytes = reader.result as Uint8List;
+              update();
+            }
+          });
+        }
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+// this function is to get the business types
+  getTypeOfBusiness() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'TYPE_OF_BUSINESS')
+        .get();
+
+    var typrId = typeDoc.docs.first.id;
+
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typrId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .snapshots()
+        .listen((business) {
+      typeOfBusinessMap.value = {
+        for (var doc in business.docs) doc.id: doc.data()
+      };
+    });
   }
 
 // this function is to generate a new phone field
@@ -54,10 +137,24 @@ class ContactInformationsController extends GetxController {
       'number': '',
       'name': '',
     });
-    listKey.currentState
+    listKeyForPhoneLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
 
-    controllers.add(PhoneTypeModel(controller: TextEditingController()));
+    phoneTypesControllers.add(TypeModel(controller: TextEditingController()));
+  }
+
+  // this function is to generate a new phone field
+  addSocialLine() {
+    final index = contactSocial.length;
+
+    contactSocial.add({
+      'type': '',
+      'link': '',
+    });
+    listKeyForSocialLine.currentState
+        ?.insertItem(index, duration: const Duration(milliseconds: 300));
+
+    socialTypesControllers.add(TypeModel(controller: TextEditingController()));
   }
 
 // this function is to remove a phone field
@@ -65,7 +162,15 @@ class ContactInformationsController extends GetxController {
     // if (index >= 0 && index < contactPhone.length) {
     // }
     contactPhone.removeAt(index);
-    controllers.removeAt(index);
+    phoneTypesControllers.removeAt(index);
+  }
+
+// this function is to remove a phone field
+  void removeSocialField(int index) {
+    // if (index >= 0 && index < contactPhone.length) {
+    // }
+    contactSocial.removeAt(index);
+    socialTypesControllers.removeAt(index);
   }
 
   // this function is to sort data in table
@@ -163,7 +268,7 @@ class ContactInformationsController extends GetxController {
       // Query for the document with code 'PHONE_TYPES'
       var type = await FirebaseFirestore.instance
           .collection('all_lists')
-          .where('code', isEqualTo: 'PHONE_TYPES')
+          .where('code', isEqualTo: 'CONTACT_TYPES')
           .get();
 
       if (type.docs.isNotEmpty) {
@@ -175,14 +280,46 @@ class ContactInformationsController extends GetxController {
             .where('available', isEqualTo: true)
             .snapshots()
             .listen((types) {
-          phoneTypes.value = types.docs;
+          phoneTypesMap.value = {
+            for (var doc in types.docs) doc.id: doc.data()
+          };
           // phoneTypeSection.value.text = types.docs.first.data()['name'];
-          controllers[0].controller!.text = types.docs.first.data()['name'];
+          phoneTypesControllers[0].controller!.text =
+              types.docs.first.data()['name'];
           contactPhone[0]['type'] = types.docs.first.data()['name'];
         });
       }
     } catch (e) {
 //
+    }
+  }
+
+// this function is to get the business types
+  getTypeOfSocial() async {
+    try {
+      var typeDoc = await FirebaseFirestore.instance
+          .collection('all_lists')
+          .where('code', isEqualTo: 'SOCIAL_MEDIA')
+          .get();
+
+      var typrId = typeDoc.docs.first.id;
+
+      FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(typrId)
+          .collection('values')
+          .where('available', isEqualTo: true)
+          .snapshots()
+          .listen((socials) {
+        typeOfSocialsMap.value = {
+          for (var doc in socials.docs) doc.id: doc.data()
+        };
+        socialTypesControllers[0].controller!.text =
+            socials.docs.first.data()['name'];
+        contactSocial[0]['type'] = socials.docs.first.data()['name'];
+      });
+    } catch (e) {
+      print(e);
     }
   }
 }

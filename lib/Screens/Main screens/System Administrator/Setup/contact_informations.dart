@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/contact_informations_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/add_new_contact_or_edit.dart';
+import '../../../../Widgets/main screen widgets/contacts_informations_widgets/add_new_contact_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 

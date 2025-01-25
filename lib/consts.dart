@@ -265,3 +265,4 @@ textToDate(inputDate) {
     return formattedDate;
   }
 }
+
