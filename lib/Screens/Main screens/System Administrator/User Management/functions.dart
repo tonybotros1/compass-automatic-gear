@@ -112,25 +112,24 @@ ElevatedButton newScreenButton(
                                         style: TextStyle(color: Colors.white),
                                       )
                                     : SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
                                       ),
-                                    ),
                           ),
                         )),
                 ElevatedButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  style: cancelButtonStyle,
-                  child:  const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )
-                ),
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: cancelButtonStyle,
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.white),
+                    )),
               ],
             );
           });
@@ -217,72 +216,98 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
             : 'N/A',
       ),
     ),
-    DataCell(Align(
-      alignment: Alignment.center,
-      child: ElevatedButton(
-          style: editButtonStyle,
-          onPressed: () {
-            showDialog(
-                context: context,
-                builder: (context) {
-                  controller.screenName.text = screenData['name'] ?? '';
-                  controller.route.text = screenData['routeName'] ?? '';
-
-                  return AlertDialog(
-                    actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    content: addNewScreenOrView(
-                      controller: controller,
-                      constraints: constraints,
-                      context: context,
-                      screenName: controller.screenName,
-                      route: controller.route,
-                    ),
-                    actions: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: ElevatedButton(
-                          onPressed: controller.addingNewScreenProcess.value
-                              ? null
-                              : () {
-                                  controller.updateScreen(screenId);
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                          child:
-                              controller.addingNewScreenProcess.value == false
-                                  ? const Text(
-                                      'Save',
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        style: cancelButtonStyle,
-                        child:const Text(
-                                'Cancel',
-                                style: TextStyle(color: Colors.white),
-                              )
-                      ),
-                    ],
-                  );
-                });
-          },
-          child: const Text('Edit')),
+    DataCell(Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 5),
+          child: editSection(
+              context, controller, screenData, constraints, screenId),
+        ),
+        deleteSection(context, controller, screenId),
+      ],
     )),
   ]);
+}
+
+ElevatedButton deleteSection(
+    context, FunctionsController controller, screenId) {
+  return ElevatedButton(
+      style: deleteButtonStyle,
+      onPressed: () {
+        alertDialog(
+            context: context,
+            controller: controller,
+            content: 'The user will be deleted permanently',
+            onPressed: () {
+              controller.deleteScreen(screenId);
+            });
+      },
+      child: const Text('Delete'));
+}
+
+ElevatedButton editSection(context, controller, Map<String, dynamic> screenData,
+    constraints, screenId) {
+  return ElevatedButton(
+      style: editButtonStyle,
+      onPressed: () {
+        showDialog(
+            context: context,
+            builder: (context) {
+              controller.screenName.text = screenData['name'] ?? '';
+              controller.route.text = screenData['routeName'] ?? '';
+
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: addNewScreenOrView(
+                  controller: controller,
+                  constraints: constraints,
+                  context: context,
+                  screenName: controller.screenName,
+                  route: controller.route,
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: ElevatedButton(
+                      onPressed: controller.addingNewScreenProcess.value
+                          ? null
+                          : () {
+                              controller.updateScreen(screenId);
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      child: controller.addingNewScreenProcess.value == false
+                          ? const Text(
+                              'Save',
+                              style: TextStyle(color: Colors.white),
+                            )
+                          : SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                    ),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      style: cancelButtonStyle,
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ],
+              );
+            });
+      },
+      child: const Text('Edit'));
 }

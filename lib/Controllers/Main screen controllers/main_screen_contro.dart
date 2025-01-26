@@ -74,7 +74,7 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: ListOfValues());
       case '/systemVariables':
         return const SizedBox(child: SystemVariables());
-      case '/contactInformation':
+      case '/entityInformation':
         return const SizedBox(child: ContactInformations());
       // Add more cases as needed
       default:

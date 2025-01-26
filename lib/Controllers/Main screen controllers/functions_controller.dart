@@ -124,6 +124,14 @@ class FunctionsController extends GetxController {
     }
   }
 
+  deleteScreen(screenId) async {
+    Get.back();
+    await FirebaseFirestore.instance
+        .collection('screens')
+        .doc(screenId)
+        .delete();
+  }
+
 // this function is to add new screen to the system
   addNewScreen() {
     try {
