@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../Controllers/Main screen controllers/contact_informations_controller.dart';
+import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/contacts_informations_widgets/add_new_contact_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 
-class ContactInformations extends StatelessWidget {
-  const ContactInformations({super.key});
+class EntityInformations extends StatelessWidget {
+  const EntityInformations({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +26,8 @@ class ContactInformations extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  GetX<ContactInformationsController>(
-                    init: ContactInformationsController(),
+                  GetX<EntityInformationsController>(
+                    init: EntityInformationsController(),
                     builder: (controller) {
                       return searchBar(
                         search: controller.search,
@@ -41,7 +41,7 @@ class ContactInformations extends StatelessWidget {
                     },
                   ),
                   Expanded(
-                    child: GetX<ContactInformationsController>(
+                    child: GetX<EntityInformationsController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
                           return const Center(
@@ -81,7 +81,7 @@ class ContactInformations extends StatelessWidget {
 Widget tableOfScreens(
     {required constraints,
     required context,
-    required ContactInformationsController controller}) {
+    required EntityInformationsController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -140,7 +140,7 @@ Widget tableOfScreens(
 }
 
 DataRow dataRowForTheTable(Map<String, dynamic> variableData, context,
-    constraints, variableId, ContactInformationsController controller) {
+    constraints, variableId, EntityInformationsController controller) {
   return DataRow(cells: [
     DataCell(Text(
       variableData['code'] ?? 'no code',
@@ -172,7 +172,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> variableData, context,
 }
 
 ElevatedButton newContactButton(BuildContext context,
-    BoxConstraints constraints, ContactInformationsController controller) {
+    BoxConstraints constraints, EntityInformationsController controller) {
   return ElevatedButton(
     onPressed: () {
       // controller.code.clear();
@@ -188,7 +188,7 @@ ElevatedButton newContactButton(BuildContext context,
                 context: context,
               ),
               actions: [
-                GetX<ContactInformationsController>(
+                GetX<EntityInformationsController>(
                     builder: (controller) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ElevatedButton(

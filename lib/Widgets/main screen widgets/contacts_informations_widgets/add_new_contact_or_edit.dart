@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../Controllers/Main screen controllers/contact_informations_controller.dart';
+import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../my_text_field.dart';
 import '../drop_down_menu.dart';
 import 'image_section.dart';
@@ -8,7 +8,7 @@ import 'image_section.dart';
 Widget addNewContactOrEdit({
   required BoxConstraints constraints,
   required BuildContext context,
-  required ContactInformationsController controller,
+  required EntityInformationsController controller,
   TextEditingController? name,
   TextEditingController? groupName,
   TextEditingController? typrOfBusiness,
@@ -53,7 +53,7 @@ Widget addNewContactOrEdit({
                     SizedBox(
                       height: 10,
                     ),
-                    GetX<ContactInformationsController>(builder: (controller) {
+                    GetX<EntityInformationsController>(builder: (controller) {
                       return dropDownValues(
                         icon: Icon(
                           Icons.receipt_long,
@@ -93,14 +93,14 @@ Widget addNewContactOrEdit({
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: GetBuilder<ContactInformationsController>(
+                child: GetBuilder<EntityInformationsController>(
                     builder: (controller) {
                   return imageSection(controller);
                 }),
               ),
             ],
           ),
-          GetBuilder<ContactInformationsController>(builder: (controller) {
+          GetBuilder<EntityInformationsController>(builder: (controller) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: SizedBox(
@@ -148,7 +148,7 @@ Widget addNewContactOrEdit({
               ),
             );
           }),
-          GetBuilder<ContactInformationsController>(
+          GetBuilder<EntityInformationsController>(
               builder: (controller) {
             return controller.buildTapsContent(
                 controller.selectedTap.value, controller);

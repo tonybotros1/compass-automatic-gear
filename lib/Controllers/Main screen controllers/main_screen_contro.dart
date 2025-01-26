@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/screen_tree_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../Screens/Main screens/System Administrator/Setup/contact_informations.dart';
+import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../Screens/Main screens/System Administrator/Setup/system_variables.dart';
 import '../../Screens/Main screens/System Administrator/User Management/menus.dart';
 import '../../Screens/Main screens/System Administrator/User Management/responsibilities.dart';
@@ -75,7 +75,7 @@ class MainScreenController extends GetxController {
       case '/systemVariables':
         return const SizedBox(child: SystemVariables());
       case '/entityInformation':
-        return const SizedBox(child: ContactInformations());
+        return const SizedBox(child: EntityInformations());
       // Add more cases as needed
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));

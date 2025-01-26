@@ -12,7 +12,7 @@ import '../../Widgets/main screen widgets/contacts_informations_widgets/address_
 import '../../Widgets/main screen widgets/contacts_informations_widgets/contacts_card.dart';
 import '../../Widgets/main screen widgets/contacts_informations_widgets/social_card.dart';
 
-class ContactInformationsController extends GetxController {
+class EntityInformationsController extends GetxController {
   TextEditingController contactName = TextEditingController();
   TextEditingController groupName = TextEditingController();
   Rx<TextEditingController> typrOfBusiness = TextEditingController().obs;

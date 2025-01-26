@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../Controllers/Main screen controllers/contact_informations_controller.dart';
+import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 
-InkWell imageSection(ContactInformationsController controller) {
+InkWell imageSection(EntityInformationsController controller) {
   return InkWell(
                   onTap: () {
                     controller.pickImage();

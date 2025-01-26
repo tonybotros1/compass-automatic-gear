@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../Controllers/Main screen controllers/contact_informations_controller.dart';
+import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import 'smart_field.dart';
 
-Column contactsCardSection(ContactInformationsController controller) {
+Column contactsCardSection(EntityInformationsController controller) {
   return Column(
     children: [
       AnimatedList(
@@ -31,7 +31,7 @@ Column contactsCardSection(ContactInformationsController controller) {
   );
 }
 
-Widget buildSmartField(ContactInformationsController controller,
+Widget buildSmartField(EntityInformationsController controller,
     Map<String, dynamic> item, Animation<double> animation, int index,
     {bool isRemoving = false}) {
   return SizeTransition(
@@ -125,7 +125,7 @@ Widget buildSmartField(ContactInformationsController controller,
 
 // =====================================================
 void removePhoneFieldWithAnimation(
-    int index, ContactInformationsController controller) {
+    int index, EntityInformationsController controller) {
   final removedItem = controller.contactPhone[index];
   controller.removePhoneField(index);
   controller.listKeyForPhoneLine.currentState?.removeItem(
