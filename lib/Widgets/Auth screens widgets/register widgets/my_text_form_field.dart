@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 Widget myTextFormField({
   required String labelText,
@@ -11,8 +11,11 @@ Widget myTextFormField({
   required constraints,
   keyboardType,
   bool? canEdit,
+  bool? isnumber,
 }) {
   return TextFormField(
+    inputFormatters:
+        isnumber == true ? [FilteringTextInputFormatter.digitsOnly] : null,
     enabled: canEdit,
     obscureText: obscureText,
     keyboardType: keyboardType,
