@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/contacts_informations_widgets/add_new_contact_or_edit.dart';
+import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_contact_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 
@@ -182,7 +182,7 @@ ElevatedButton newContactButton(BuildContext context,
           builder: (context) {
             return AlertDialog(
               actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewContactOrEdit(
+              content: addNewEntityOrEdit(
                 controller: controller,
                 constraints: constraints,
                 context: context,

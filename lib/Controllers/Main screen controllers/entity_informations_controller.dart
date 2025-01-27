@@ -8,15 +8,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:html' as html;
 
 import '../../Models/menu_model.dart';
-import '../../Widgets/main screen widgets/contacts_informations_widgets/address_card.dart';
-import '../../Widgets/main screen widgets/contacts_informations_widgets/contacts_card.dart';
-import '../../Widgets/main screen widgets/contacts_informations_widgets/social_card.dart';
+
+import '../../Widgets/main screen widgets/entity_informations_widgets/address_card.dart';
+import '../../Widgets/main screen widgets/entity_informations_widgets/company_details.dart';
+import '../../Widgets/main screen widgets/entity_informations_widgets/main_details.dart';
 
 class EntityInformationsController extends GetxController {
   TextEditingController contactName = TextEditingController();
   TextEditingController groupName = TextEditingController();
+  TextEditingController trn = TextEditingController();
   Rx<TextEditingController> typrOfBusiness = TextEditingController().obs;
+  Rx<TextEditingController> entityType = TextEditingController().obs;
   RxString typrOfBusinessId = RxString('');
+  RxString entityTypeId = RxString('');
   // Rx<TextEditingController> phoneTypeSection = TextEditingController().obs;
   RxList<TypeModel> phoneTypesControllers = RxList<TypeModel>([]);
   RxList<TypeModel> socialTypesControllers = RxList<TypeModel>([]);
@@ -31,10 +35,16 @@ class EntityInformationsController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-  RxInt selectedTap = RxInt(0);
+  RxInt selectedMenu = RxInt(0);
+  RxBool isVendorSelected = RxBool(false);
+  RxBool isCustomerSelected = RxBool(false);
+  RxBool isCompanySelected = RxBool(false);
+  RxBool isIndividualSelected = RxBool(false);
 
-  final taps = <MenuModel>[
-    MenuModel(title: 'Address Card', isPressed: true),
+  final menus = <MenuModel>[
+    MenuModel(title: 'Main Details', isPressed: true),
+    MenuModel(title: 'Company Details', isPressed: false),
+    MenuModel(title: 'Address Card', isPressed: false),
     MenuModel(title: 'Contact Card', isPressed: false),
     MenuModel(title: 'Social Card', isPressed: false),
   ];
@@ -62,6 +72,7 @@ class EntityInformationsController extends GetxController {
     }
   ]);
   RxMap typeOfBusinessMap = RxMap({});
+  RxMap entityTypeMap = RxMap({});
   RxMap typeOfSocialsMap = RxMap({});
   RxMap phoneTypesMap = RxMap({});
   Uint8List? imageBytes;
@@ -81,6 +92,7 @@ class EntityInformationsController extends GetxController {
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
     getCountriesAndCities();
+    getEntityType();
     getTypeOfBusiness();
     getTypeOfSocial();
     getContacts();
@@ -91,27 +103,80 @@ class EntityInformationsController extends GetxController {
     super.onInit();
   }
 
-  selectFromTaps(i) {
-    selectedTap.value = i;
-    for (int index = 0; index < taps.length; index++) {
-      taps[index].isPressed = (index == i);
+  // selectFromTaps(i) {
+  //   selectedTap.value = i;
+  //   for (int index = 0; index < taps.length; index++) {
+  //     taps[index].isPressed = (index == i);
+  //   }
+  //   update();
+  // }
+
+  selectFromLeftMenu(i) {
+    selectedMenu.value = i;
+    for (int index = 0; index < menus.length; index++) {
+      menus[index].isPressed = (index == i);
     }
     update();
   }
 
-  Widget buildTapsContent(int index, controller) {
+  Widget buildRightContent(int index, controller, constraints) {
     switch (index) {
       case 0:
-        return addressCardSection(controller);
+        return mainDetails(controller: controller);
       case 1:
-        return contactsCardSection(controller);
+        return companyDetails(controller: controller, constraints: constraints);
       case 2:
-        return socialCardSection(controller);
+        return addressCardSection(controller);
 
       default:
         return const Text('4');
     }
   }
+
+  goToNextMenu() {
+    selectedMenu.value += 1;
+    selectFromLeftMenu(selectedMenu.value);
+    update();
+  }
+
+  selectVendor() {
+    isVendorSelected.isTrue
+        ? isVendorSelected.value = false
+        : isVendorSelected.value = true;
+    update();
+  }
+
+  selectCustomer() {
+    isCustomerSelected.isTrue
+        ? isCustomerSelected.value = false
+        : isCustomerSelected.value = true;
+    update();
+  }
+
+  selectCompantOrIndividual(String selected) {
+    if (selected == 'company') {
+      isCompanySelected.value = true;
+      isIndividualSelected.value = false;
+    } else {
+      isCompanySelected.value = false;
+      isIndividualSelected.value = true;
+    }
+    update();
+  }
+
+  // Widget buildTapsContent(int index, controller) {
+  //   switch (index) {
+  //     case 0:
+  //       return addressCardSection(controller);
+  //     case 1:
+  //       return contactsCardSection(controller);
+  //     case 2:
+  //       return socialCardSection(controller);
+
+  //     default:
+  //       return const Text('4');
+  //   }
+  // }
 
   getCountriesAndCities() async {
     try {
@@ -235,6 +300,26 @@ class EntityInformationsController extends GetxController {
     });
   }
 
+// this function is to get the business types
+  getEntityType() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'ENTITY_TYPES')
+        .get();
+
+    var typrId = typeDoc.docs.first.id;
+
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typrId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .snapshots()
+        .listen((entity) {
+      entityTypeMap.value = {for (var doc in entity.docs) doc.id: doc.data()};
+    });
+  }
+
 // this function is to generate a new phone field
   addPhoneLine() {
     final index = contactPhone.length;
@@ -293,6 +378,7 @@ class EntityInformationsController extends GetxController {
     contactSocial.removeAt(index);
     socialTypesControllers.removeAt(index);
   }
+
   // this function is to remove a address field
   void removeAddressField(int index) {
     // if (index >= 0 && index < contactPhone.length) {
@@ -301,8 +387,6 @@ class EntityInformationsController extends GetxController {
     countriesControllers.removeAt(index);
     citiesControllers.removeAt(index);
   }
-
-
 
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {

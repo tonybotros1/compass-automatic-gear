@@ -1,33 +1,55 @@
 import 'package:flutter/material.dart';
 
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
+import '../../../consts.dart';
 import 'address_field.dart';
 
-Column addressCardSection(EntityInformationsController controller) {
-  return Column(
-    children: [
-      AnimatedList(
-        key: controller.listKeyForAddressLine,
-        shrinkWrap: true,
-        initialItemCount: controller.contactAddress.length,
-        itemBuilder: (context, i, animation) {
-          return buildSmartField(
-              controller, controller.contactAddress[i], animation, i);
-        },
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          IconButton(
-            icon: Icon(Icons.add),
-            color: Colors.grey,
-            onPressed: () {
-              controller.addAdressLine();
-            },
+Widget addressCardSection(EntityInformationsController controller) {
+  return AnimatedContainer(
+    height: 400,
+    duration: Duration(milliseconds: 300),
+    curve: Curves.easeInOut,
+    child: Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          child: ListView(
+            children: [
+              AnimatedList(
+                key: controller.listKeyForAddressLine,
+                shrinkWrap: true,
+                initialItemCount: controller.contactAddress.length,
+                itemBuilder: (context, i, animation) {
+                  return buildSmartField(
+                      controller, controller.contactAddress[i], animation, i);
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    color: Colors.grey,
+                    onPressed: () {
+                      controller.addAdressLine();
+                    },
+                  ),
+                ],
+              )
+            ],
           ),
-        ],
-      )
-    ],
+        ),
+        Positioned(
+            bottom: 20,
+            left: 20,
+            child: ElevatedButton(
+                style: nextButtonStyle,
+                onPressed: () {
+                  controller.goToNextMenu();
+                },
+                child: const Text('Next')))
+      ],
+    ),
   );
 }
 
