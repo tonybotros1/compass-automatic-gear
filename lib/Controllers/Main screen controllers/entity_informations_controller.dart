@@ -13,6 +13,7 @@ import '../../Widgets/main screen widgets/entity_informations_widgets/address_ca
 import '../../Widgets/main screen widgets/entity_informations_widgets/company_details.dart';
 import '../../Widgets/main screen widgets/entity_informations_widgets/contacts_card.dart';
 import '../../Widgets/main screen widgets/entity_informations_widgets/main_details.dart';
+import '../../Widgets/main screen widgets/entity_informations_widgets/social_card.dart';
 
 class EntityInformationsController extends GetxController {
   TextEditingController contactName = TextEditingController();
@@ -130,7 +131,8 @@ class EntityInformationsController extends GetxController {
         return addressCardSection(controller);
       case 3:
         return contactsCardSection(controller);
-
+      case 4:
+        return socialCardSection(controller);
       default:
         return const Text('4');
     }
