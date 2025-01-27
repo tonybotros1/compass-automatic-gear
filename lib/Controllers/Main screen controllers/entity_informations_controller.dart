@@ -11,6 +11,7 @@ import '../../Models/menu_model.dart';
 
 import '../../Widgets/main screen widgets/entity_informations_widgets/address_card.dart';
 import '../../Widgets/main screen widgets/entity_informations_widgets/company_details.dart';
+import '../../Widgets/main screen widgets/entity_informations_widgets/contacts_card.dart';
 import '../../Widgets/main screen widgets/entity_informations_widgets/main_details.dart';
 
 class EntityInformationsController extends GetxController {
@@ -127,6 +128,8 @@ class EntityInformationsController extends GetxController {
         return companyDetails(controller: controller, constraints: constraints);
       case 2:
         return addressCardSection(controller);
+      case 3:
+        return contactsCardSection(controller);
 
       default:
         return const Text('4');
