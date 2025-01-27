@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 Widget myTextFormField2(
     {required String labelText,
@@ -8,9 +9,12 @@ Widget myTextFormField2(
     required obscureText,
     IconButton? suffixIcon,
     Icon? icon,
+    bool? isnumber,
     keyboardType,
     bool? isEnabled}) {
   return TextFormField(
+    inputFormatters:
+        isnumber == true ? [FilteringTextInputFormatter.digitsOnly] : null,
     enabled: isEnabled,
     obscureText: obscureText,
     keyboardType: keyboardType,

@@ -272,7 +272,6 @@ Widget mainDetails({required EntityInformationsController controller}) {
                     controller.goToNextMenu();
                   }
                   if (controller.isIndividualSelected.isTrue) {
-                    controller.selectedMenu.value += 1;
                     controller.goToNextMenu();
                   }
                 },

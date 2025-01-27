@@ -34,7 +34,7 @@ class EntityInformations extends StatelessWidget {
                         constraints: constraints,
                         context: context,
                         controller: controller,
-                        title: 'Search for Contacts',
+                        title: 'Search for Entities',
                         button:
                             newContactButton(context, constraints, controller),
                       );
@@ -76,7 +76,6 @@ class EntityInformations extends StatelessWidget {
     );
   }
 }
-
 
 Widget tableOfScreens(
     {required constraints,
@@ -227,6 +226,6 @@ ElevatedButton newContactButton(BuildContext context,
           });
     },
     style: newButtonStyle,
-    child: const Text('New Variable'),
+    child: const Text('New Entity'),
   );
 }

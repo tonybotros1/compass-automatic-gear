@@ -12,16 +12,20 @@ import '../../Models/menu_model.dart';
 import '../../Widgets/main screen widgets/entity_informations_widgets/address_card.dart';
 import '../../Widgets/main screen widgets/entity_informations_widgets/company_details.dart';
 import '../../Widgets/main screen widgets/entity_informations_widgets/contacts_card.dart';
+import '../../Widgets/main screen widgets/entity_informations_widgets/customer_section.dart';
 import '../../Widgets/main screen widgets/entity_informations_widgets/main_details.dart';
 import '../../Widgets/main screen widgets/entity_informations_widgets/social_card.dart';
 
 class EntityInformationsController extends GetxController {
   TextEditingController contactName = TextEditingController();
   TextEditingController groupName = TextEditingController();
+  TextEditingController creditLimit = TextEditingController();
   TextEditingController trn = TextEditingController();
   Rx<TextEditingController> typrOfBusiness = TextEditingController().obs;
+  Rx<TextEditingController> salesMAn = TextEditingController().obs;
   Rx<TextEditingController> entityType = TextEditingController().obs;
   RxString typrOfBusinessId = RxString('');
+  RxString salesManId = RxString('');
   RxString entityTypeId = RxString('');
   // Rx<TextEditingController> phoneTypeSection = TextEditingController().obs;
   RxList<TypeModel> phoneTypesControllers = RxList<TypeModel>([]);
@@ -45,11 +49,12 @@ class EntityInformationsController extends GetxController {
   final ScrollController scrollController = ScrollController();
 
   final menus = <MenuModel>[
-    MenuModel(title: 'Main Details', isPressed: true),
-    MenuModel(title: 'Company Details', isPressed: false),
-    MenuModel(title: 'Address Card', isPressed: false),
-    MenuModel(title: 'Contact Card', isPressed: false),
-    MenuModel(title: 'Social Card', isPressed: false),
+    MenuModel(title: 'Main Details', isPressed: true, shown: true),
+    MenuModel(title: 'Company Details', isPressed: false, shown: false),
+    MenuModel(title: 'Address Card', isPressed: false, shown: true),
+    MenuModel(title: 'Contact Card', isPressed: false, shown: true),
+    MenuModel(title: 'Social Card', isPressed: false, shown: true),
+    MenuModel(title: 'Customer Details', isPressed: false, shown: false),
   ];
   RxList contactPhone = RxList([
     {
@@ -75,6 +80,7 @@ class EntityInformationsController extends GetxController {
     }
   ]);
   RxMap typeOfBusinessMap = RxMap({});
+  RxMap salesManMap = RxMap({});
   RxMap entityTypeMap = RxMap({});
   RxMap typeOfSocialsMap = RxMap({});
   RxMap phoneTypesMap = RxMap({});
@@ -100,43 +106,56 @@ class EntityInformationsController extends GetxController {
     getTypeOfSocial();
     getContacts();
     getPhoneTypes();
+    getSalesMan();
     search.value.addListener(() {
       filterContacts();
     });
     super.onInit();
   }
 
-  // selectFromTaps(i) {
-  //   selectedTap.value = i;
-  //   for (int index = 0; index < taps.length; index++) {
-  //     taps[index].isPressed = (index == i);
-  //   }
-  //   update();
-  // }
 
   selectFromLeftMenu(i) {
     selectedMenu.value = i;
-    for (int index = 0; index < menus.length; index++) {
-      menus[index].isPressed = (index == i);
+    for (int index = 0; index < visibleMenus.length; index++) {
+      visibleMenus[index].isPressed = (index == i);
     }
     update();
   }
 
+  // Filtered menu list
+  List<MenuModel> get visibleMenus {
+    return menus.where((menu) {
+      if (menu.title == 'Company Details' && !isCompanySelected.value) {
+        return false;
+      }
+      if (menu.title == 'Customer Details' && !isCustomerSelected.value) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
+ 
+
   Widget buildRightContent(int index, controller, constraints) {
-    switch (index) {
-      case 0:
-        return mainDetails(controller: controller);
-      case 1:
-        return companyDetails(controller: controller, constraints: constraints);
-      case 2:
-        return addressCardSection(controller);
-      case 3:
-        return contactsCardSection(controller);
-      case 4:
-        return socialCardSection(controller);
-      default:
-        return const Text('4');
-    }
+    // Map menu titles to their respective widgets
+    final Map<String, Widget Function()> menuWidgets = {
+      'Main Details': () => mainDetails(controller: controller),
+      'Company Details': () =>
+          companyDetails(controller: controller, constraints: constraints),
+      'Address Card': () => addressCardSection(controller),
+      'Contact Card': () => contactsCardSection(controller),
+      'Social Card': () => socialCardSection(controller),
+      'Customer Details': () =>
+          customerDetails(controller: controller, constraints: constraints),
+    };
+
+    // Get the title of the menu item at the current index
+    final currentMenuTitle = visibleMenus[index].title;
+
+    // Dynamically return the corresponding widget or a fallback
+    return menuWidgets[currentMenuTitle]?.call() ??
+        const Text('No content available');
   }
 
   goToNextMenu() {
@@ -145,12 +164,13 @@ class EntityInformationsController extends GetxController {
     // Scroll to the selected menu item
     scrollController.animateTo(
       selectedMenu.value *
-          10, // Calculate position (adjust height as necessary)
+          30, // Calculate position (adjust height as necessary)
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
     update();
   }
+  
 
   selectVendor() {
     isVendorSelected.isTrue
@@ -177,19 +197,6 @@ class EntityInformationsController extends GetxController {
     update();
   }
 
-  // Widget buildTapsContent(int index, controller) {
-  //   switch (index) {
-  //     case 0:
-  //       return addressCardSection(controller);
-  //     case 1:
-  //       return contactsCardSection(controller);
-  //     case 2:
-  //       return socialCardSection(controller);
-
-  //     default:
-  //       return const Text('4');
-  //   }
-  // }
 
   getCountriesAndCities() async {
     try {
@@ -313,7 +320,7 @@ class EntityInformationsController extends GetxController {
     });
   }
 
-// this function is to get the business types
+// this function is to get the entity types
   getEntityType() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
@@ -330,6 +337,16 @@ class EntityInformationsController extends GetxController {
         .snapshots()
         .listen((entity) {
       entityTypeMap.value = {for (var doc in entity.docs) doc.id: doc.data()};
+    });
+  }
+
+// this function is to get all sales man in the system
+  getSalesMan() {
+    FirebaseFirestore.instance
+        .collection('sales_man')
+        .snapshots()
+        .listen((saleMan) {
+      salesManMap.value = {for (var doc in saleMan.docs) doc.id: doc.data()};
     });
   }
 
