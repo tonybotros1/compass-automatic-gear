@@ -40,9 +40,9 @@ Widget addNewEntityOrEdit({
   );
 }
 
-
-
 GetBuilder<EntityInformationsController> buildLeftSideMenu() {
+  // Declare and initialize ScrollController
+
   return GetBuilder<EntityInformationsController>(builder: (controller) {
     return Container(
       width: 320,
@@ -54,53 +54,49 @@ GetBuilder<EntityInformationsController> buildLeftSideMenu() {
       ),
       child: Center(
         child: ListView.builder(
+          controller: controller.scrollController,
           shrinkWrap: true,
           itemCount: controller.menus.length,
           itemBuilder: (context, i) {
-            return InkWell(
-              onTap: () {
-                controller.selectFromLeftMenu(i);
-              },
-              child: Row(
-                children: [
-                  Text(
-                    '${i + 1}',
-                    style: TextStyle(
-                      color: controller.menus[i].isPressed == false
-                          ? Colors.grey.shade700
-                          : Color(0xff2973B2),
-                    ),
+            return Row(
+              children: [
+                Text(
+                  '${i + 1}',
+                  style: TextStyle(
+                    color: controller.menus[i].isPressed == false
+                        ? Colors.grey.shade700
+                        : Color(0xff2973B2),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, right: 15),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      width: 2,
-                      height: controller.menus[i].isPressed == true ? 100 : 70,
-                      color: controller.menus[i].isPressed == false
-                          ? Colors.white54
-                          : Color(0xff2973B2),
-                    ),
-                  ),
-                  AnimatedDefaultTextStyle(
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15, right: 15),
+                  child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
-                    style: TextStyle(
-                      color: controller.menus[i].isPressed == false
-                          ? Colors.grey.shade700
-                          : Color(0xff2973B2),
-                      fontSize: controller.menus[i].isPressed == true
-                          ? 18
-                          : 16, // Font size change
-                      fontWeight: controller.menus[i].isPressed == true
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
-                    child: FittedBox(child: Text(controller.menus[i].title)),
+                    width: 2,
+                    height: controller.menus[i].isPressed == true ? 100 : 70,
+                    color: controller.menus[i].isPressed == false
+                        ? Colors.white54
+                        : Color(0xff2973B2),
                   ),
-                ],
-              ),
+                ),
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  style: TextStyle(
+                    color: controller.menus[i].isPressed == false
+                        ? Colors.grey.shade700
+                        : Color(0xff2973B2),
+                    fontSize: controller.menus[i].isPressed == true
+                        ? 18
+                        : 16, // Font size change
+                    fontWeight: controller.menus[i].isPressed == true
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                  child: FittedBox(child: Text(controller.menus[i].title)),
+                ),
+              ],
             );
           },
         ),
@@ -108,6 +104,7 @@ GetBuilder<EntityInformationsController> buildLeftSideMenu() {
     );
   });
 }
+
 
 
 // Column(

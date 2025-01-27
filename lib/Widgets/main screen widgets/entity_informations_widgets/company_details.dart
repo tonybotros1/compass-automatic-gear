@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -123,7 +122,9 @@ Widget companyDetails(
             left: 20,
             child: ElevatedButton(
                 style: nextButtonStyle,
-                onPressed: () {},
+                onPressed: () {
+                  controller.goToNextMenu();
+                },
                 child: const Text('Next')))
       ],
     ),

@@ -42,6 +42,7 @@ class EntityInformationsController extends GetxController {
   RxBool isCustomerSelected = RxBool(false);
   RxBool isCompanySelected = RxBool(false);
   RxBool isIndividualSelected = RxBool(false);
+  final ScrollController scrollController = ScrollController();
 
   final menus = <MenuModel>[
     MenuModel(title: 'Main Details', isPressed: true),
@@ -141,6 +142,13 @@ class EntityInformationsController extends GetxController {
   goToNextMenu() {
     selectedMenu.value += 1;
     selectFromLeftMenu(selectedMenu.value);
+    // Scroll to the selected menu item
+    scrollController.animateTo(
+      selectedMenu.value *
+          10, // Calculate position (adjust height as necessary)
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
     update();
   }
 
