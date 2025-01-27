@@ -109,8 +109,8 @@ Widget buildSmartField(EntityInformationsController controller,
                         controller.contactPhone[index]['type'] = entry.key;
                       });
                     },
-                    labelTextForFirstSection: 'Phone Number',
-                    hintTextForFirstSection: 'Enter Phone Number',
+                    labelTextForFirstSection: 'Phone',
+                    hintTextForFirstSection: 'Enter Phone',
                     validateForFirstSection: false,
                     labelTextForThirdSection: 'Name',
                     hintTextForThirdSection: 'Enter Name',

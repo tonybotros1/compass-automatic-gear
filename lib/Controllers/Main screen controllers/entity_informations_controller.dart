@@ -113,7 +113,6 @@ class EntityInformationsController extends GetxController {
     super.onInit();
   }
 
-
   selectFromLeftMenu(i) {
     selectedMenu.value = i;
     for (int index = 0; index < visibleMenus.length; index++) {
@@ -134,8 +133,6 @@ class EntityInformationsController extends GetxController {
       return true;
     }).toList();
   }
-
- 
 
   Widget buildRightContent(int index, controller, constraints) {
     // Map menu titles to their respective widgets
@@ -159,18 +156,19 @@ class EntityInformationsController extends GetxController {
   }
 
   goToNextMenu() {
-    selectedMenu.value += 1;
-    selectFromLeftMenu(selectedMenu.value);
-    // Scroll to the selected menu item
-    scrollController.animateTo(
-      selectedMenu.value *
-          30, // Calculate position (adjust height as necessary)
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-    update();
+    if (selectedMenu.value + 1 < visibleMenus.length) {
+      selectedMenu.value += 1;
+      selectFromLeftMenu(selectedMenu.value);
+      // Scroll to the selected menu item
+      scrollController.animateTo(
+        selectedMenu.value *
+            30, // Calculate position (adjust height as necessary)
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+      update();
+    }
   }
-  
 
   selectVendor() {
     isVendorSelected.isTrue
@@ -196,7 +194,6 @@ class EntityInformationsController extends GetxController {
     }
     update();
   }
-
 
   getCountriesAndCities() async {
     try {

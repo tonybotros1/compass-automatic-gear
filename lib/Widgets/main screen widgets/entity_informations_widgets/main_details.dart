@@ -43,147 +43,35 @@ Widget mainDetails({required EntityInformationsController controller}) {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        InkWell(
-                          onTap: () {
-                            controller.selectCustomer();
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                            height: 100,
-                            width: 180,
-                            decoration: BoxDecoration(
-                                color: controller.isCustomerSelected.isFalse
-                                    ? Colors.white54
-                                    : Colors.blue[200],
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(
-                                    color: controller.isCustomerSelected.isTrue
-                                        ? Colors.blue
-                                        : Colors.grey,
-                                    width: 2)),
-                            child: Stack(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Image.asset(
-                                      'assets/customer.png',
-                                      width: 70,
-                                    ),
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Customer',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black),
-                                        ),
-                                        Text('.................')
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Positioned(
-                                    top: 10,
-                                    right: 10,
-                                    child: Container(
-                                      width: 15,
-                                      height: 15,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border:
-                                              Border.all(color: Colors.blue)),
-                                      child: Center(
-                                        child:
-                                            controller.isCustomerSelected.isTrue
-                                                ? Container(
-                                                    width: 10,
-                                                    height: 10,
-                                                    decoration: BoxDecoration(
-                                                        shape: BoxShape.circle,
-                                                        color: Colors.blue),
-                                                  )
-                                                : SizedBox(),
-                                      ),
-                                    ))
-                              ],
-                            ),
-                          ),
+                        Text(
+                          'What are you?      ',
+                          style: TextStyle(fontSize: 25, color: Colors.black54),
                         ),
-                        InkWell(
-                          onTap: () {
-                            controller.selectVendor();
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                            height: 100,
-                            width: 180,
-                            decoration: BoxDecoration(
-                                color: controller.isVendorSelected.isFalse
-                                    ? Colors.white54
-                                    : Colors.blue[200],
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(
-                                    color: controller.isVendorSelected.isTrue
-                                        ? Colors.blue
-                                        : Colors.grey,
-                                    width: 2)),
-                            child: Stack(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Image.asset(
-                                      'assets/vendor.png',
-                                      width: 70,
-                                    ),
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Vendor',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black),
-                                        ),
-                                        Text('.................')
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Positioned(
-                                    top: 10,
-                                    right: 10,
-                                    child: Container(
-                                      width: 15,
-                                      height: 15,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border:
-                                              Border.all(color: Colors.blue)),
-                                      child: Center(
-                                        child:
-                                            controller.isVendorSelected.isTrue
-                                                ? Container(
-                                                    width: 10,
-                                                    height: 10,
-                                                    decoration: BoxDecoration(
-                                                        shape: BoxShape.circle,
-                                                        color: Colors.blue),
-                                                  )
-                                                : SizedBox(),
-                                      ),
-                                    ))
-                              ],
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            myBox(
+                                title: 'Customer',
+                                controller: controller,
+                                onTap: () {
+                                  controller.selectCustomer();
+                                },
+                                type: controller.isCustomerSelected.value,
+                                primaryColor: Colors.blue,
+                                secondaryyColor: Colors.blue.shade200),
+                            SizedBox(
+                              width: 50,
                             ),
-                          ),
+                            myBox(
+                                title: 'Vendor',
+                                controller: controller,
+                                onTap: () {
+                                  controller.selectVendor();
+                                },
+                                type: controller.isVendorSelected.value,
+                                primaryColor: Colors.blue,
+                                secondaryyColor: Colors.blue.shade200),
+                          ],
                         ),
                       ],
                     ),
@@ -198,54 +86,44 @@ Widget mainDetails({required EntityInformationsController controller}) {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Container(
-                          height: 50,
-                          width: 120,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                  color: Colors.red.shade200, width: 2)),
-                          child: Row(
-                            children: [
-                              CupertinoCheckbox(
-                                  value: controller.isCompanySelected.value,
-                                  onChanged: (value) {
-                                    controller
-                                        .selectCompantOrIndividual('company');
-                                  }),
-                              Text(
-                                'Company',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54),
-                              ),
-                            ],
-                          ),
+                        Text(
+                          'Select your status',
+                          style: TextStyle(fontSize: 25, color: Colors.black54),
                         ),
-                        Container(
-                          height: 50,
-                          width: 120,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                  color: Colors.purple.shade200, width: 2)),
-                          child: Row(
-                            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              CupertinoCheckbox(
-                                  value: controller.isIndividualSelected.value,
-                                  onChanged: (value) {
-                                    controller.selectCompantOrIndividual(
-                                        'individual');
-                                  }),
-                              Text(
-                                'Individual',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            myBox(
+                                title: 'Company',
+                                primaryColor: Colors.red,
+                                secondaryyColor: Colors.red.shade200,
+                                controller: controller,
+                                onTap: () {
+                                  controller
+                                      .selectCompantOrIndividual('company');
+                                },
+                                type: controller.isCompanySelected.value),
+                            SizedBox(
+                              width: 50,
+                              child: Center(
+                                child: Text(
+                                  'Or',
+                                  style: TextStyle(color: Colors.black54),
+                                ),
                               ),
-                            ],
-                          ),
+                            ),
+                            myBox(
+                              title: 'Individual',
+                              controller: controller,
+                              onTap: () {
+                                controller
+                                    .selectCompantOrIndividual('individual');
+                              },
+                              type: controller.isIndividualSelected.value,
+                              primaryColor: Colors.red,
+                              secondaryyColor: Colors.red.shade200,
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -268,15 +146,66 @@ Widget mainDetails({required EntityInformationsController controller}) {
             child: ElevatedButton(
                 style: nextButtonStyle,
                 onPressed: () {
-                  if (controller.isCompanySelected.isTrue) {
-                    controller.goToNextMenu();
-                  }
-                  if (controller.isIndividualSelected.isTrue) {
-                    controller.goToNextMenu();
-                  }
+                  controller.goToNextMenu();
                 },
                 child: const Text('Next')))
       ],
+    ),
+  );
+}
+
+InkWell myBox({
+  required String title,
+  required EntityInformationsController controller,
+  required void Function()? onTap,
+  required bool type,
+  required Color primaryColor,
+  required Color secondaryyColor,
+}) {
+  return InkWell(
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      height: 60,
+      width: 100,
+      decoration: BoxDecoration(
+          color: type == false ? Colors.white54 : secondaryyColor,
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(
+              color: type == true ? primaryColor : Colors.grey, width: 2)),
+      child: Stack(
+        children: [
+          Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: type == false ? Colors.black54 : Colors.black),
+            ),
+          ),
+          Positioned(
+              top: 5,
+              right: 5,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.blue)),
+                child: Center(
+                  child: type == true
+                      ? Container(
+                          width: 5,
+                          height: 5,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.blue),
+                        )
+                      : SizedBox(),
+                ),
+              ))
+        ],
+      ),
     ),
   );
 }

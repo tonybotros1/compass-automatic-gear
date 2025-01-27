@@ -43,12 +43,13 @@ Widget smartField({
       ),
       showFirstField == true
           ? Expanded(
-              flex: 2,
+              flex: 1,
               child: typeSection(
-                 labelText: labelTextForFirstSection ?? '',
-                hintText:  hintTextForFirstSection ?? '',
-                 validate: validateForFirstSection ?? false,
-                 onChanged: onChangedForFirstSection),
+                  maxLines: 1,
+                  labelText: labelTextForFirstSection ?? '',
+                  hintText: hintTextForFirstSection ?? '',
+                  validate: validateForFirstSection ?? false,
+                  onChanged: onChangedForFirstSection),
             )
           : SizedBox(),
       SizedBox(
@@ -58,10 +59,11 @@ Widget smartField({
           ? Expanded(
               flex: 2,
               child: typeSection(
-                 labelText: labelTextForSecondSection ?? '',
-               hintText:   hintTextForSecondSection ?? '',
-                 validate: validateForSecondSection,
-                 onChanged: onChangedForSecondSection),
+                  maxLines: 1,
+                  labelText: labelTextForSecondSection ?? '',
+                  hintText: hintTextForSecondSection ?? '',
+                  validate: validateForSecondSection,
+                  onChanged: onChangedForSecondSection),
             )
           : SizedBox(),
       SizedBox(
@@ -72,8 +74,12 @@ Widget smartField({
         curve: Curves.easeIn,
         child: Expanded(
           flex: 2,
-          child: typeSection(labelText:labelTextForThirdSection,hintText: hintTextForThirdSection,
-            validate:  validateForThirdSection,onChanged: onChangedForThirdSection),
+          child: typeSection(
+              maxLines: 1,
+              labelText: labelTextForThirdSection,
+              hintText: hintTextForThirdSection,
+              validate: validateForThirdSection,
+              onChanged: onChangedForThirdSection),
         ),
       ),
     ],
