@@ -21,17 +21,18 @@ Widget addNewEntityOrEdit({
 }) {
   return SizedBox(
     height: constraints.maxHeight,
-    width: constraints.maxWidth / 1.5,
+    width: constraints.maxWidth / 1.1,
     child: SingleChildScrollView(
       child: Column(
         children: [
+          SizedBox(height: 5,),
           myTextFormField2(
             icon: Icon(
               Icons.person,
               color: Colors.grey,
             ),
             obscureText: false,
-            controller: controller.contactName,
+            controller: controller.entityName,
             labelText: 'Name',
             hintText: 'Enter Entity Name',
             validate: true,
@@ -40,10 +41,13 @@ Widget addNewEntityOrEdit({
             height: 10,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Row(
                 children: [
+                  SizedBox(
+                    width: 25,
+                  ),
                   GetX<EntityInformationsController>(builder: (controller) {
                     return CupertinoCheckbox(
                         value: controller.isCustomerSelected.value,
@@ -149,18 +153,29 @@ Widget addNewEntityOrEdit({
             height: 10,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              SizedBox(
+                width: 25,
+              ),
               Row(
                 children: [
-                  GetX<EntityInformationsController>(builder: (controller) {
-                    return CupertinoCheckbox(
-                        value: controller.isCompanySelected.value,
+                  Padding(
+                    padding: const EdgeInsets.all(13.0),
+                    child: GetX<EntityInformationsController>(
+                        builder: (controller) {
+                      return CupertinoRadio<bool>(
+                        value: true,
+                        groupValue: controller.isCompanySelected.value,
                         onChanged: (value) {
-                          controller.selectCompantOrIndividual(
-                              'company', value!);
-                        });
-                  }),
+                          if (value != null) {
+                            controller.selectCompantOrIndividual(
+                                'company', value);
+                          }
+                        },
+                      );
+                    }),
+                  ),
                   Text(
                     'Company',
                     style: regTextStyle,
@@ -169,14 +184,22 @@ Widget addNewEntityOrEdit({
               ),
               Row(
                 children: [
-                  GetX<EntityInformationsController>(builder: (controller) {
-                    return CupertinoCheckbox(
-                        value: controller.isIndividualSelected.value,
+                  Padding(
+                    padding: const EdgeInsets.all(13.0),
+                    child: GetX<EntityInformationsController>(
+                        builder: (controller) {
+                      return CupertinoRadio<bool>(
+                        value: true,
+                        groupValue: controller.isIndividualSelected.value,
                         onChanged: (value) {
-                          controller.selectCompantOrIndividual(
-                              'individual', value!);
-                        });
-                  }),
+                          if (value != null) {
+                            controller.selectCompantOrIndividual(
+                                'individual', value);
+                          }
+                        },
+                      );
+                    }),
+                  ),
                   Text(
                     'Individual',
                     style: regTextStyle,
@@ -211,13 +234,13 @@ Widget addNewEntityOrEdit({
                 Icons.receipt_long,
                 color: Colors.grey,
               ),
-              textController: controller.typrOfBusiness.value,
+              textController: controller.industry.value,
               onSelected: (suggestion) {
-                controller.typrOfBusiness.value.text = '${suggestion['name']}';
-                controller.typeOfBusinessMap.entries.where((entry) {
+                controller.industry.value.text = '${suggestion['name']}';
+                controller.industryMap.entries.where((entry) {
                   return entry.value['name'] == suggestion['name'].toString();
                 }).forEach((entry) {
-                  controller.typrOfBusinessId.value = entry.key;
+                  controller.industryId.value = entry.key;
                 });
               },
               itemBuilder: (context, suggestion) {
@@ -228,8 +251,8 @@ Widget addNewEntityOrEdit({
               labelText: 'Industries',
               hintText: 'Select Industries',
               menus: controller.isCompanySelected.isTrue
-                  ? controller.typeOfBusinessMap.isNotEmpty
-                      ? controller.typeOfBusinessMap
+                  ? controller.industryMap.isNotEmpty
+                      ? controller.industryMap
                       : {}
                   : {},
               validate: false,

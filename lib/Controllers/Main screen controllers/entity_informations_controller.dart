@@ -2,20 +2,21 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/Models/type_model.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:html' as html;
 
 class EntityInformationsController extends GetxController {
-  TextEditingController contactName = TextEditingController();
+  TextEditingController entityName = TextEditingController();
   TextEditingController groupName = TextEditingController();
   TextEditingController creditLimit = TextEditingController();
   TextEditingController trn = TextEditingController();
-  Rx<TextEditingController> typrOfBusiness = TextEditingController().obs;
+  Rx<TextEditingController> industry = TextEditingController().obs;
   Rx<TextEditingController> salesMAn = TextEditingController().obs;
   Rx<TextEditingController> entityType = TextEditingController().obs;
-  RxString typrOfBusinessId = RxString('');
+  RxString industryId = RxString('');
   RxString salesManId = RxString('');
   RxString entityTypeId = RxString('');
   RxList<TypeModel> phoneTypesControllers = RxList<TypeModel>([]);
@@ -25,10 +26,10 @@ class EntityInformationsController extends GetxController {
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
-  final RxList<DocumentSnapshot> allContacts = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredContacts =
+  final RxList<DocumentSnapshot> allEntities = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredEntities =
       RxList<DocumentSnapshot>([]);
-  RxBool addingNewValue = RxBool(false);
+  RxBool addingNewEntity = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
 
@@ -36,8 +37,9 @@ class EntityInformationsController extends GetxController {
   RxBool isCustomerSelected = RxBool(false);
   RxBool isCompanySelected = RxBool(false);
   RxBool isIndividualSelected = RxBool(false);
+  RxString logoUrl = RxString('');
 
-  RxMap typeOfBusinessMap = RxMap({});
+  RxMap industryMap = RxMap({});
   RxMap salesManMap = RxMap({});
   RxMap entityTypeMap = RxMap({});
   RxMap typeOfSocialsMap = RxMap({});
@@ -45,7 +47,9 @@ class EntityInformationsController extends GetxController {
   Uint8List? imageBytes;
   RxMap allCities = RxMap({});
   RxMap allCountries = RxMap({});
-
+  RxMap filterdCitiesByCountry = RxMap({});
+  RxList entityCode = RxList([]);
+  RxList entityStatus = RxList([]);
   final GlobalKey<AnimatedListState> listKeyForPhoneLine =
       GlobalKey<AnimatedListState>();
   final GlobalKey<AnimatedListState> listKeyForSocialLine =
@@ -80,6 +84,7 @@ class EntityInformationsController extends GetxController {
 
   @override
   void onInit() {
+    getEntities();
     generateControllerForAdressCountriesAndCities();
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
@@ -87,32 +92,151 @@ class EntityInformationsController extends GetxController {
     getEntityType();
     getTypeOfBusiness();
     getTypeOfSocial();
-    getContacts();
     getPhoneTypes();
     getSalesMan();
     search.value.addListener(() {
-      filterContacts();
+      filterEntities();
     });
     super.onInit();
   }
 
+  clearAllVariables() {
+    entityName.clear();
+    entityCode.clear();
+    isCustomerSelected.value = false;
+    isVendorSelected.value = false;
+    creditLimit.clear();
+    salesMAn.value.clear();
+    salesManId.value = '';
+    logoUrl.value = '';
+    imageBytes = null;
+    entityStatus.clear();
+    isCompanySelected.value = false;
+    isIndividualSelected.value = false;
+    groupName.clear();
+    industry.value.clear();
+    industryId.value = '';
+    trn.clear();
+    entityType.value.clear();
+    entityTypeId.value = '';
+    contactAddress.clear();
+    contactAddress.add({
+      'line': '',
+      'country': '',
+      'city': '',
+    });
+
+    contactPhone.clear();
+    contactPhone.add({
+      'type': '',
+      'number': '',
+      'name': '',
+      'email': '',
+      'tob_title': '',
+    });
+    contactSocial.clear();
+    contactSocial.add({
+      'type': '',
+      'link': '',
+    });
+    socialTypesControllers.clear();
+    phoneTypesControllers.clear();
+    countriesControllers.clear();
+    citiesControllers.clear();
+    generateControllerForAdressCountriesAndCities();
+    generateControllerForPhoneTypes();
+    generateControllerForSocialTypes();
+  }
+
+  String formatPhrase(String phrase) {
+    return phrase.replaceAll(' ', '_');
+  }
+
+  addNewEntity() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final companyId = prefs.getString('companyId');
+      addingNewEntity.value = true;
+      if (imageBytes != null && imageBytes!.isNotEmpty) {
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+            'entities_pictures/${formatPhrase(entityName.text)}_${DateTime.now()}.png');
+        final UploadTask uploadTask = storageRef.putData(
+          imageBytes!,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        await uploadTask.then((p0) async {
+          logoUrl.value = await storageRef.getDownloadURL();
+        });
+      }
+
+      FirebaseFirestore.instance.collection('entity_informations').add({
+        'entity_name': entityName.text,
+        'entity_picture': logoUrl.value,
+        'entity_code': entityCode,
+        'credit_limit': int.parse(creditLimit.text),
+        'sales_man': salesManId.value,
+        'entity_status': entityStatus,
+        'group_name': groupName.text,
+        'industry': industryId.value,
+        'trn': trn.text,
+        'entity_type': entityTypeId.value,
+        'entity_address': contactAddress,
+        'entity_phone': contactPhone,
+        'entity_social': contactSocial,
+        'added_date': DateTime.now().toString(),
+        'company_id': companyId,
+      });
+      addingNewEntity.value = false;
+    } catch (e) {
+      addingNewEntity.value = false;
+    }
+  }
+
   selectVendor(bool value) {
     isVendorSelected.value = value;
+    if (value == true) {
+      entityCode.add('Vendor');
+    } else {
+      entityCode.remove('Vendor');
+    }
   }
 
   selectCustomer(bool value) {
     isCustomerSelected.value = value;
+    if (value == true) {
+      entityCode.add('Customer');
+    } else {
+      entityCode.remove('Customer');
+    }
   }
 
   selectCompantOrIndividual(String selected, bool value) {
     if (selected == 'company') {
       isCompanySelected.value = value;
       isIndividualSelected.value = false;
+      entityStatus.clear();
+      entityStatus.add('Company');
     } else {
       isCompanySelected.value = false;
       isIndividualSelected.value = value;
+      entityStatus.clear();
+      entityStatus.add('Individual');
     }
-    update();
+  }
+
+  void onSelect(String selectedId) {
+    filterdCitiesByCountry.clear();
+    filterdCitiesByCountry.addAll(
+      Map.fromEntries(
+        allCities.entries.where((entry) {
+          return entry.value['restricted_by']
+              .toString()
+              .toLowerCase()
+              .contains(selectedId.toLowerCase());
+        }),
+      ),
+    );
   }
 
   getCountriesAndCities() async {
@@ -152,8 +276,6 @@ class EntityInformationsController extends GetxController {
           .listen((cities) {
         allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
       });
-
-      update();
     } catch (e) {
       // print(e);
     }
@@ -231,9 +353,7 @@ class EntityInformationsController extends GetxController {
         .where('available', isEqualTo: true)
         .snapshots()
         .listen((business) {
-      typeOfBusinessMap.value = {
-        for (var doc in business.docs) doc.id: doc.data()
-      };
+      industryMap.value = {for (var doc in business.docs) doc.id: doc.data()};
     });
   }
 
@@ -340,21 +460,9 @@ class EntityInformationsController extends GetxController {
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
-      allContacts.sort((screen1, screen2) {
-        final String? value1 = screen1.get('code');
-        final String? value2 = screen2.get('code');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 1) {
-      allContacts.sort((screen1, screen2) {
-        final String? value1 = screen1.get('value');
-        final String? value2 = screen2.get('value');
+      allEntities.sort((screen1, screen2) {
+        final String? value1 = screen1.get('entity_name');
+        final String? value2 = screen2.get('entity_name');
 
         // Handle nulls: put nulls at the end
         if (value1 == null && value2 == null) return 0;
@@ -364,7 +472,19 @@ class EntityInformationsController extends GetxController {
         return compareString(ascending, value1, value2);
       });
     } else if (columnIndex == 2) {
-      allContacts.sort((screen1, screen2) {
+      allEntities.sort((screen1, screen2) {
+        final String? value1 = screen1.get('entity_status')[0];
+        final String? value2 = screen2.get('entity_status')[0];
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 3) {
+      allEntities.sort((screen1, screen2) {
         final String? value1 = screen1.get('added_date');
         final String? value2 = screen2.get('added_date');
 
@@ -386,16 +506,16 @@ class EntityInformationsController extends GetxController {
   }
 
 // this functions is to get all contacts in the current company
-  getContacts() async {
+  getEntities() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final companyId = prefs.getString('companyId');
       FirebaseFirestore.instance
-          .collection('all_contacts')
+          .collection('entity_informations')
           .where('company_id', isEqualTo: companyId)
           .snapshots()
           .listen((contacts) {
-        allContacts.assignAll(contacts.docs);
+        allEntities.assignAll(contacts.docs);
         isScreenLoding.value = false;
       });
     } catch (e) {
@@ -403,25 +523,30 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  addNewContact() async {
-    try {
-      addingNewValue.value = true;
-      await FirebaseFirestore.instance.collection('all_contacts').add({});
-      addingNewValue.value = false;
-    } catch (e) {
-      addingNewValue.value = false;
-    }
-  }
-
-  // this function is to filter the search results for web
-  void filterContacts() {
+  void filterEntities() {
     query.value = search.value.text.toLowerCase();
     if (query.value.isEmpty) {
-      filteredContacts.clear();
+      filteredEntities.clear();
     } else {
-      filteredContacts.assignAll(
-        allContacts.where((screen) {
-          return screen['name'].toString().toLowerCase().contains(query);
+      filteredEntities.assignAll(
+        allEntities.where((entity) {
+          return entity['entity_name']
+                  .toString()
+                  .toLowerCase()
+                  .contains(query) ||
+              entity['entity_status'][0]
+                  .toString()
+                  .toLowerCase()
+                  .contains(query) ||
+              entity['entity_code'][0]
+                  .toString()
+                  .toLowerCase()
+                  .contains(query) ||
+              (entity['entity_code'].length > 1 &&
+                  entity['entity_code'][1]
+                      .toString()
+                      .toLowerCase()
+                      .contains(query));
         }).toList(),
       );
     }
@@ -447,10 +572,7 @@ class EntityInformationsController extends GetxController {
           phoneTypesMap.value = {
             for (var doc in types.docs) doc.id: doc.data()
           };
-          // phoneTypeSection.value.text = types.docs.first.data()['name'];
-          phoneTypesControllers[0].controller!.text =
-              types.docs.first.data()['name'];
-          contactPhone[0]['type'] = types.docs.first.data()['name'];
+         
         });
       }
     } catch (e) {
@@ -478,12 +600,10 @@ class EntityInformationsController extends GetxController {
         typeOfSocialsMap.value = {
           for (var doc in socials.docs) doc.id: doc.data()
         };
-        socialTypesControllers[0].controller!.text =
-            socials.docs.first.data()['name'];
-        contactSocial[0]['type'] = socials.docs.first.data()['name'];
+      
       });
     } catch (e) {
-      print(e);
+      //
     }
   }
 }

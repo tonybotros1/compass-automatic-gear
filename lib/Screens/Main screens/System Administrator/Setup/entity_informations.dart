@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_contact_or_edit.dart';
+import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 
@@ -48,7 +48,7 @@ class EntityInformations extends StatelessWidget {
                             child: CircularProgressIndicator(),
                           );
                         }
-                        if (controller.allContacts.isEmpty) {
+                        if (controller.allEntities.isEmpty) {
                           return const Center(
                             child: Text('No Element'),
                           );
@@ -94,7 +94,7 @@ Widget tableOfScreens(
     columns: [
       DataColumn(
         label: AutoSizedText(
-          text: 'Code',
+          text: 'Name',
           constraints: constraints,
         ),
         onSort: controller.onSort,
@@ -102,7 +102,13 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Value',
+          text: 'Code',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Status',
         ),
         onSort: controller.onSort,
       ),
@@ -121,38 +127,53 @@ Widget tableOfScreens(
         ),
       ),
     ],
-    rows: controller.filteredContacts.isEmpty &&
+    rows: controller.filteredEntities.isEmpty &&
             controller.search.value.text.isEmpty
-        ? controller.allContacts.map<DataRow>((variable) {
-            final variableData = variable.data() as Map<String, dynamic>;
-            final variableId = variable.id;
+        ? controller.allEntities.map<DataRow>((entity) {
+            final entityData = entity.data() as Map<String, dynamic>;
+            final entityId = entity.id;
             return dataRowForTheTable(
-                variableData, context, constraints, variableId, controller);
+                entityData, context, constraints, entityId, controller);
           }).toList()
-        : controller.filteredContacts.map<DataRow>((variable) {
-            final variableData = variable.data() as Map<String, dynamic>;
-            final variableId = variable.id;
+        : controller.filteredEntities.map<DataRow>((entity) {
+            final entityData = entity.data() as Map<String, dynamic>;
+            final entityId = entity.id;
             return dataRowForTheTable(
-                variableData, context, constraints, variableId, controller);
+                entityData, context, constraints, entityId, controller);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> variableData, context,
-    constraints, variableId, EntityInformationsController controller) {
+DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
+    constraints, entityId, EntityInformationsController controller) {
   return DataRow(cells: [
     DataCell(Text(
-      variableData['code'] ?? 'no code',
+      entityData['entity_name'] ?? 'no name',
     )),
     DataCell(
-      Text(
-        variableData['value'] ?? 'no value',
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            entityData['entity_code'][0] ?? '',
+          ),
+          entityData['entity_code'].length == 2
+              ? Text(
+                  entityData['entity_code'][1] ?? '',
+                )
+              : SizedBox(),
+        ],
       ),
     ),
     DataCell(
       Text(
-        variableData['added_date'] != null && variableData['added_date'] != ''
-            ? textToDate(variableData['added_date']) //
+        entityData['entity_status'][0] ?? '',
+      ),
+    ),
+    DataCell(
+      Text(
+        entityData['added_date'] != null && entityData['added_date'] != ''
+            ? textToDate(entityData['added_date']) //
             : 'N/A',
       ),
     ),
@@ -174,8 +195,7 @@ ElevatedButton newContactButton(BuildContext context,
     BoxConstraints constraints, EntityInformationsController controller) {
   return ElevatedButton(
     onPressed: () {
-      // controller.code.clear();
-      // controller.value.clear();
+      controller.clearAllVariables();
       showDialog(
           context: context,
           builder: (context) {
@@ -191,13 +211,13 @@ ElevatedButton newContactButton(BuildContext context,
                     builder: (controller) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ElevatedButton(
-                            onPressed: controller.addingNewValue.value
+                            onPressed: controller.addingNewEntity.value
                                 ? null
                                 : () async {
-                                    // await controller.addNewContact();
+                                    await controller.addNewEntity();
                                   },
                             style: saveButtonStyle,
-                            child: controller.addingNewValue.value == false
+                            child: controller.addingNewEntity.value == false
                                 ? const Text(
                                     'Save',
                                     style: TextStyle(color: Colors.white),

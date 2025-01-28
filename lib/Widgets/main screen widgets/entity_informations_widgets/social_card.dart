@@ -91,7 +91,7 @@ Widget buildSmartField(EntityInformationsController controller,
                           )),
                       DynamicConfig(
                         isDropdown: false,
-                        flex: 1,
+                        flex: 2,
                         fieldConfig: FieldConfig(
                           labelText: 'Link',
                           hintText: 'Enter Link',

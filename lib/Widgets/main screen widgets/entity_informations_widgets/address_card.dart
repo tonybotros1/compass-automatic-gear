@@ -58,7 +58,6 @@ Widget buildSmartField(EntityInformationsController controller,
                   child:
                       GetX<EntityInformationsController>(builder: (controller) {
                     final isCountriesLoading = controller.allCountries.isEmpty;
-                    final isCitiesLoading = controller.allCities.isEmpty;
 
                     return dynamicFields(dynamicConfigs: [
                       DynamicConfig(
@@ -97,6 +96,10 @@ Widget buildSmartField(EntityInformationsController controller,
                                   suggestion['name'].toString();
                             }).forEach(
                               (entry) {
+                                controller.citiesControllers[index].controller!
+                                    .clear();
+                                controller.onSelect(entry.key);
+
                                 controller.contactAddress[index]['country'] =
                                     entry.key;
                               },
@@ -110,10 +113,11 @@ Widget buildSmartField(EntityInformationsController controller,
                         dropdownConfig: DropdownConfig(
                           textController:
                               controller.citiesControllers[index].controller,
-                          labelText: isCitiesLoading ? 'Loading...' : 'City',
+                          labelText: 'City',
                           hintText: 'Select Your City',
-                          menuValues:
-                              isCitiesLoading ? {} : controller.allCities,
+                          menuValues: controller.filterdCitiesByCountry.isEmpty
+                              ? {}
+                              : controller.filterdCitiesByCountry,
                           itemBuilder: (context, suggestion) {
                             return ListTile(
                               title: Text('${suggestion['name']}'),
