@@ -54,7 +54,7 @@ Widget mainDetails({required EntityInformationsController controller}) {
                                 title: 'Customer',
                                 controller: controller,
                                 onTap: () {
-                                  controller.selectCustomer();
+                                  // controller.selectCustomer();
                                 },
                                 type: controller.isCustomerSelected.value,
                                 primaryColor: Colors.blue,
@@ -66,7 +66,7 @@ Widget mainDetails({required EntityInformationsController controller}) {
                                 title: 'Vendor',
                                 controller: controller,
                                 onTap: () {
-                                  controller.selectVendor();
+                                  // controller.selectVendor();
                                 },
                                 type: controller.isVendorSelected.value,
                                 primaryColor: Colors.blue,
@@ -99,8 +99,8 @@ Widget mainDetails({required EntityInformationsController controller}) {
                                 secondaryyColor: Colors.red.shade200,
                                 controller: controller,
                                 onTap: () {
-                                  controller
-                                      .selectCompantOrIndividual('company');
+                                  // controller
+                                      // .selectCompantOrIndividual('company');
                                 },
                                 type: controller.isCompanySelected.value),
                             SizedBox(
@@ -116,8 +116,8 @@ Widget mainDetails({required EntityInformationsController controller}) {
                               title: 'Individual',
                               controller: controller,
                               onTap: () {
-                                controller
-                                    .selectCompantOrIndividual('individual');
+                                // controller
+                                //     .selectCompantOrIndividual('individual');
                               },
                               type: controller.isIndividualSelected.value,
                               primaryColor: Colors.red,

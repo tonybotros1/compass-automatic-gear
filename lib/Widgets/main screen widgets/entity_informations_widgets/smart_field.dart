@@ -45,7 +45,6 @@ Widget smartField({
           ? Expanded(
               flex: 1,
               child: typeSection(
-                  maxLines: 1,
                   labelText: labelTextForFirstSection ?? '',
                   hintText: hintTextForFirstSection ?? '',
                   validate: validateForFirstSection ?? false,
@@ -59,7 +58,6 @@ Widget smartField({
           ? Expanded(
               flex: 2,
               child: typeSection(
-                  maxLines: 1,
                   labelText: labelTextForSecondSection ?? '',
                   hintText: hintTextForSecondSection ?? '',
                   validate: validateForSecondSection,
@@ -75,7 +73,6 @@ Widget smartField({
         child: Expanded(
           flex: 2,
           child: typeSection(
-              maxLines: 1,
               labelText: labelTextForThirdSection,
               hintText: hintTextForThirdSection,
               validate: validateForThirdSection,
@@ -85,15 +82,97 @@ Widget smartField({
     ],
   );
 }
+Widget dynamicFields({
+  required List<DynamicConfig> dynamicConfigs,
+}) {
+  return Row(
+    children: [
+      ...List.generate(dynamicConfigs.length, (index) {
+        final config = dynamicConfigs[index];
+        return Expanded(
+          flex: config.flex,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0),
+            child: config.isDropdown
+                ? dropDownValues(
+                    textController: config.dropdownConfig?.textController,
+                    labelText: config.dropdownConfig?.labelText ?? '',
+                    hintText: config.dropdownConfig?.hintText ?? '',
+                    menus: config.dropdownConfig?.menuValues ?? {},
+                    validate: config.dropdownConfig?.validate ?? false,
+                    itemBuilder: config.dropdownConfig?.itemBuilder ?? (_, __) => const SizedBox(),
+                    onSelected: config.dropdownConfig?.onSelected,
+                  )
+                : typeSection(
+                    labelText: config.fieldConfig?.labelText ?? '',
+                    hintText: config.fieldConfig?.hintText ?? '',
+                    validate: config.fieldConfig?.validate ?? false,
+                    onChanged: config.fieldConfig?.onChanged,
+                  ),
+          ),
+        );
+      }),
+    ],
+  );
+}
 
+class DynamicConfig {
+  final bool isDropdown;
+  final int flex;
+  final DropdownConfig? dropdownConfig;
+  final FieldConfig? fieldConfig;
+
+  DynamicConfig({
+    required this.isDropdown,
+    this.flex = 1,
+    this.dropdownConfig,
+    this.fieldConfig,
+  });
+}
+
+class DropdownConfig {
+  final String labelText;
+  final String hintText;
+  final Map menuValues;
+  final bool validate;
+  final int flex;
+  final Widget Function(BuildContext, dynamic) itemBuilder;
+  final void Function(dynamic)? onSelected;
+  final TextEditingController? textController;
+
+  DropdownConfig({
+    required this.labelText,
+    required this.hintText,
+    required this.menuValues,
+    this.validate = false,
+    this.flex = 1,
+    required this.itemBuilder,
+    this.onSelected,
+    this.textController,
+  });
+}
+
+class FieldConfig {
+  final String? labelText;
+  final String? hintText;
+  final bool validate;
+  final int flex;
+  final void Function(String)? onChanged;
+
+  FieldConfig({
+    this.labelText,
+    this.hintText,
+    this.validate = false,
+    this.flex = 1,
+    this.onChanged,
+  });
+}
 TextFormField typeSection(
     {String? labelText,
     String? hintText,
     bool? validate,
-    int? maxLines,
     void Function(String)? onChanged}) {
   return TextFormField(
-    maxLines: maxLines,
     onChanged: onChanged,
     decoration: InputDecoration(
       hintStyle: const TextStyle(color: Colors.grey),

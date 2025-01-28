@@ -28,7 +28,6 @@ Widget addressField({
       Expanded(
         flex: 2,
         child: typeSection(
-            maxLines: 3,
             labelText: labelTextForLine,
             hintText: hintTextForLine,
             validate: validateForLine,
@@ -37,33 +36,31 @@ Widget addressField({
       SizedBox(
         width: 5,
       ),
+      Expanded(
+        child: dropDownValues(
+            textController: textControllerForCountry,
+            labelText: labelTextForCountry,
+            hintText: hintTextForCountry,
+            menus: countryValues,
+            validate: validateForCountry,
+            itemBuilder: itemBuilder,
+            onSelected: onSelectedForCountry),
+      ),
+      SizedBox(
+        width: 5,
+      ),
       AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
         child: Expanded(
-          child: Column(
-            children: [
-              dropDownValues(
-textController: textControllerForCountry,                
-                  labelText: labelTextForCountry,
-                  hintText: hintTextForCountry,
-                  menus: countryValues,
-                  validate: validateForCountry,
-                  itemBuilder: itemBuilder,
-                  onSelected: onSelectedForCountry),
-              SizedBox(
-                height: 5,
-              ),
-              dropDownValues(
-                textController: textControllerForCity,
-                  labelText: labelTextForCity,
-                  hintText: hintTextForCity,
-                  menus: cityValues,
-                  validate: validateForcity,
-                  itemBuilder: itemBuilder,
-                  onSelected: onSelectedForCity),
-            ],
-          ),
+          child: dropDownValues(
+              textController: textControllerForCity,
+              labelText: labelTextForCity,
+              hintText: hintTextForCity,
+              menus: cityValues,
+              validate: validateForcity,
+              itemBuilder: itemBuilder,
+              onSelected: onSelectedForCity),
         ),
       ),
     ],

@@ -170,27 +170,21 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  selectVendor() {
-    isVendorSelected.isTrue
-        ? isVendorSelected.value = false
-        : isVendorSelected.value = true;
-    update();
+  selectVendor(bool value) {
+    isVendorSelected.value = value;
   }
 
-  selectCustomer() {
-    isCustomerSelected.isTrue
-        ? isCustomerSelected.value = false
-        : isCustomerSelected.value = true;
-    update();
+  selectCustomer(bool value) {
+    isCustomerSelected.value = value;
   }
 
-  selectCompantOrIndividual(String selected) {
+  selectCompantOrIndividual(String selected, bool value) {
     if (selected == 'company') {
-      isCompanySelected.value = true;
+      isCompanySelected.value = value;
       isIndividualSelected.value = false;
     } else {
       isCompanySelected.value = false;
-      isIndividualSelected.value = true;
+      isIndividualSelected.value = value;
     }
     update();
   }
