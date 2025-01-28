@@ -307,6 +307,6 @@ ElevatedButton newSalesManButton(BuildContext context,
           });
     },
     style: newButtonStyle,
-    child: const Text('New Variable'),
+    child: const Text('New Sale Man'),
   );
 }
