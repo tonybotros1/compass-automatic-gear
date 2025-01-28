@@ -8,7 +8,7 @@ InkWell imageSection(EntityInformationsController controller) {
       controller.pickImage();
     },
     child: Container(
-      height: 150,
+      height: 120,
       width: 200,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
@@ -25,7 +25,7 @@ InkWell imageSection(EntityInformationsController controller) {
             )
           : Image.memory(
               controller.imageBytes!,
-              fit: BoxFit.fitWidth,
+              fit: BoxFit.contain,
             ),
     ),
   );

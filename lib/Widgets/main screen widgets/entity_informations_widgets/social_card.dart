@@ -1,55 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
-import '../../../consts.dart';
-import 'smart_field.dart';
+import '../../../Models/dynamic_field_models.dart';
+import 'dynamic_field.dart';
 
 Widget socialCardSection(EntityInformationsController controller) {
-  return AnimatedContainer(
-    height: 400,
-    duration: Duration(milliseconds: 300),
-    curve: Curves.easeInOut,
-    child: Stack(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-          child: ListView(
-            children: [
-              AnimatedList(
-                key: controller.listKeyForSocialLine,
-                shrinkWrap: true,
-                initialItemCount: controller.contactSocial.length,
-                itemBuilder: (context, i, animation) {
-                  return buildSmartField(
-                      controller, controller.contactSocial[i], animation, i);
-                },
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.add),
-                    color: Colors.grey,
-                    onPressed: () {
-                      controller.addSocialLine();
-                    },
-                  ),
-                ],
-              )
-            ],
+  return Column(
+    children: [
+      AnimatedList(
+        key: controller.listKeyForSocialLine,
+        shrinkWrap: true,
+        initialItemCount: controller.contactSocial.length,
+        itemBuilder: (context, i, animation) {
+          return buildSmartField(
+              controller, controller.contactSocial[i], animation, i);
+        },
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          IconButton(
+            icon: Icon(Icons.add),
+            color: Colors.grey,
+            onPressed: () {
+              controller.addSocialLine();
+            },
           ),
-        ),
-        Positioned(
-            bottom: 20,
-            left: 20,
-            child: ElevatedButton(
-                style: nextButtonStyle,
-                onPressed: () {
-                  controller.goToNextMenu();
-                },
-                child: const Text('Next')))
-      ],
-    ),
+        ],
+      )
+    ],
   );
 }
 
@@ -74,38 +54,55 @@ Widget buildSmartField(EntityInformationsController controller,
             const SizedBox(width: 10),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: smartField(
-                    onChangedForThirdSection: (value) {
-                      controller.contactSocial[index]['name'] = value;
-                    },
-                    textControllerForDropMenu:
-                        controller.socialTypesControllers[index].controller,
-                    labelTextForDropMenu: 'Type',
-                    hintTextForDeopMenu: 'Select Social Type',
-                    menuValues: controller.typeOfSocialsMap.isEmpty
-                        ? {}
-                        : controller.typeOfSocialsMap,
-                    itemBuilder: (context, suggestion) {
-                      return ListTile(
-                        title: Text('${suggestion['name']}'),
-                      );
-                    },
-                    onSelected: (suggestion) {
-                      controller.socialTypesControllers[index].controller!
-                          .text = suggestion['name'];
-                      controller.typeOfSocialsMap.entries.where((entry) {
-                        return entry.value['name'] ==
-                            suggestion['name'].toString();
-                      }).forEach((entry) {
-                        controller.contactSocial[index]['type'] = entry.key;
-                      });
-                    },
-                    labelTextForThirdSection: 'Link',
-                    hintTextForThirdSection: 'Enter Link',
-                    validateForThirdSection: false,
-                    validateForTypeSection: false),
-              ),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child:
+                      GetX<EntityInformationsController>(builder: (controller) {
+                    final isSocialTypeLoading =
+                        controller.typeOfSocialsMap.isEmpty;
+                    return dynamicFields(dynamicConfigs: [
+                      DynamicConfig(
+                          isDropdown: true,
+                          flex: 1,
+                          dropdownConfig: DropdownConfig(
+                            textController: controller
+                                .socialTypesControllers[index].controller,
+                            labelText: isSocialTypeLoading ? 'Loading' : 'Type',
+                            hintText: 'Select Social Type',
+                            menuValues: isSocialTypeLoading
+                                ? {}
+                                : controller.typeOfSocialsMap,
+                            itemBuilder: (context, suggestion) {
+                              return ListTile(
+                                title: Text('${suggestion['name']}'),
+                              );
+                            },
+                            onSelected: (suggestion) {
+                              controller.socialTypesControllers[index]
+                                  .controller!.text = suggestion['name'];
+                              controller.typeOfSocialsMap.entries
+                                  .where((entry) {
+                                return entry.value['name'] ==
+                                    suggestion['name'].toString();
+                              }).forEach((entry) {
+                                controller.contactSocial[index]['type'] =
+                                    entry.key;
+                              });
+                            },
+                          )),
+                      DynamicConfig(
+                        isDropdown: false,
+                        flex: 1,
+                        fieldConfig: FieldConfig(
+                          labelText: 'Link',
+                          hintText: 'Enter Link',
+                          validate: false,
+                          onChanged: (value) {
+                            controller.contactSocial[index]['link'] = value;
+                          },
+                        ),
+                      ),
+                    ]);
+                  })),
             ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),

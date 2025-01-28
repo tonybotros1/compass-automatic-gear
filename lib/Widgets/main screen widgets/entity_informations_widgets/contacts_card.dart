@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
-import 'smart_field.dart';
+import '../../../Models/dynamic_field_models.dart';
+import 'dynamic_field.dart';
 
 Widget contactsCardSection(EntityInformationsController controller) {
   return Column(
@@ -53,83 +55,89 @@ Widget buildSmartField(EntityInformationsController controller,
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: dynamicFields(dynamicConfigs: [
-                  DynamicConfig(
-                      isDropdown: true,
-                      flex: 1,
-                      dropdownConfig: DropdownConfig(
-                          textController: controller
-                              .phoneTypesControllers[index].controller,
-                          labelText: 'Type',
-                          hintText: 'Select Phone Type',
-                          menuValues: controller.phoneTypesMap.isEmpty
-                              ? {}
-                              : controller.phoneTypesMap,
-                          itemBuilder: (context, suggestion) {
-                            return ListTile(
-                              title: Text('${suggestion['name']}'),
-                            );
+                child: GetX<EntityInformationsController>(
+                  builder: (controller) {
+                    final isphoneTypesLoading = controller.phoneTypesMap.isEmpty;
+
+                    return dynamicFields(dynamicConfigs: [
+                      DynamicConfig(
+                          isDropdown: true,
+                          flex: 1,
+                          dropdownConfig: DropdownConfig(
+                              textController: controller
+                                  .phoneTypesControllers[index].controller,
+                              labelText: isphoneTypesLoading? 'Loading...' :'Type',
+                              hintText: 'Select Phone Type',
+                              menuValues: isphoneTypesLoading
+                                  ? {}
+                                  : controller.phoneTypesMap,
+                              itemBuilder: (context, suggestion) {
+                                return ListTile(
+                                  title: Text('${suggestion['name']}'),
+                                );
+                              },
+                              onSelected: (suggestion) {
+                                controller.phoneTypesControllers[index].controller!
+                                    .text = suggestion['name'];
+                                controller.phoneTypesMap.entries.where((entry) {
+                                  return entry.value['name'] ==
+                                      suggestion['name'].toString();
+                                }).forEach((entry) {
+                                  controller.contactPhone[index]['type'] =
+                                      entry.key;
+                                });
+                              })),
+                      DynamicConfig(
+                        isDropdown: false,
+                        flex: 1,
+                        fieldConfig: FieldConfig(
+                          labelText: 'Phone',
+                          hintText: 'Enter Phone',
+                          validate: false,
+                          onChanged: (value) {
+                            controller.contactPhone[index]['number'] = value;
                           },
-                          onSelected: (suggestion) {
-                            controller.phoneTypesControllers[index].controller!
-                                .text = suggestion['name'];
-                            controller.phoneTypesMap.entries.where((entry) {
-                              return entry.value['name'] ==
-                                  suggestion['name'].toString();
-                            }).forEach((entry) {
-                              controller.contactPhone[index]['type'] =
-                                  entry.key;
-                            });
-                          })),
-                  DynamicConfig(
-                    isDropdown: false,
-                    flex: 1,
-                    fieldConfig: FieldConfig(
-                      labelText: 'Phone',
-                      hintText: 'Enter Phone',
-                      validate: false,
-                      onChanged: (value) {
-                        controller.contactPhone[index]['number'] = value;
-                      },
-                    ),
-                  ),
-                  DynamicConfig(
-                    isDropdown: false,
-                    flex: 1,
-                    fieldConfig: FieldConfig(
-                      labelText: 'Email',
-                      hintText: 'Enter Email',
-                      validate: false,
-                      onChanged: (value) {
-                        controller.contactPhone[index]['email'] = value;
-                      },
-                    ),
-                  ),
-                  DynamicConfig(
-                    isDropdown: false,
-                    flex: 1,
-                    fieldConfig: FieldConfig(
-                      labelText: 'Name',
-                      hintText: 'Enter Name',
-                      validate: false,
-                      onChanged: (value) {
-                        controller.contactPhone[index]['name'] = value;
-                      },
-                    ),
-                  ),
-                  DynamicConfig(
-                    isDropdown: false,
-                    flex: 1,
-                    fieldConfig: FieldConfig(
-                      labelText: 'Job Title',
-                      hintText: 'Enter Job Title',
-                      validate: false,
-                      onChanged: (value) {
-                        controller.contactPhone[index]['tob_title'] = value;
-                      },
-                    ),
-                  )
-                ]),
+                        ),
+                      ),
+                      DynamicConfig(
+                        isDropdown: false,
+                        flex: 2,
+                        fieldConfig: FieldConfig(
+                          labelText: 'Email',
+                          hintText: 'Enter Email',
+                          validate: false,
+                          onChanged: (value) {
+                            controller.contactPhone[index]['email'] = value;
+                          },
+                        ),
+                      ),
+                      DynamicConfig(
+                        isDropdown: false,
+                        flex: 1,
+                        fieldConfig: FieldConfig(
+                          labelText: 'Name',
+                          hintText: 'Enter Name',
+                          validate: false,
+                          onChanged: (value) {
+                            controller.contactPhone[index]['name'] = value;
+                          },
+                        ),
+                      ),
+                      DynamicConfig(
+                        isDropdown: false,
+                        flex: 1,
+                        fieldConfig: FieldConfig(
+                          labelText: 'Job Title',
+                          hintText: 'Enter Job Title',
+                          validate: false,
+                          onChanged: (value) {
+                            controller.contactPhone[index]['tob_title'] = value;
+                          },
+                        ),
+                      )
+                    ]);
+                  }
+                ),
               ),
             ),
             AnimatedSwitcher(

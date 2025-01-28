@@ -7,15 +7,6 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:html' as html;
 
-import '../../Models/menu_model.dart';
-
-import '../../Widgets/main screen widgets/entity_informations_widgets/address_card.dart';
-import '../../Widgets/main screen widgets/entity_informations_widgets/company_details.dart';
-import '../../Widgets/main screen widgets/entity_informations_widgets/contacts_card.dart';
-import '../../Widgets/main screen widgets/entity_informations_widgets/customer_section.dart';
-import '../../Widgets/main screen widgets/entity_informations_widgets/main_details.dart';
-import '../../Widgets/main screen widgets/entity_informations_widgets/social_card.dart';
-
 class EntityInformationsController extends GetxController {
   TextEditingController contactName = TextEditingController();
   TextEditingController groupName = TextEditingController();
@@ -27,7 +18,6 @@ class EntityInformationsController extends GetxController {
   RxString typrOfBusinessId = RxString('');
   RxString salesManId = RxString('');
   RxString entityTypeId = RxString('');
-  // Rx<TextEditingController> phoneTypeSection = TextEditingController().obs;
   RxList<TypeModel> phoneTypesControllers = RxList<TypeModel>([]);
   RxList<TypeModel> socialTypesControllers = RxList<TypeModel>([]);
   RxList<TypeModel> countriesControllers = RxList<TypeModel>([]);
@@ -41,28 +31,35 @@ class EntityInformationsController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-  RxInt selectedMenu = RxInt(0);
+
   RxBool isVendorSelected = RxBool(false);
   RxBool isCustomerSelected = RxBool(false);
   RxBool isCompanySelected = RxBool(false);
   RxBool isIndividualSelected = RxBool(false);
-  final ScrollController scrollController = ScrollController();
 
-  final menus = <MenuModel>[
-    MenuModel(title: 'Main Details', isPressed: true, shown: true),
-    MenuModel(title: 'Company Details', isPressed: false, shown: false),
-    MenuModel(title: 'Address Card', isPressed: false, shown: true),
-    MenuModel(title: 'Contact Card', isPressed: false, shown: true),
-    MenuModel(title: 'Social Card', isPressed: false, shown: true),
-    MenuModel(title: 'Customer Details', isPressed: false, shown: false),
-  ];
+  RxMap typeOfBusinessMap = RxMap({});
+  RxMap salesManMap = RxMap({});
+  RxMap entityTypeMap = RxMap({});
+  RxMap typeOfSocialsMap = RxMap({});
+  RxMap phoneTypesMap = RxMap({});
+  Uint8List? imageBytes;
+  RxMap allCities = RxMap({});
+  RxMap allCountries = RxMap({});
+
+  final GlobalKey<AnimatedListState> listKeyForPhoneLine =
+      GlobalKey<AnimatedListState>();
+  final GlobalKey<AnimatedListState> listKeyForSocialLine =
+      GlobalKey<AnimatedListState>();
+  final GlobalKey<AnimatedListState> listKeyForAddressLine =
+      GlobalKey<AnimatedListState>();
+
   RxList contactPhone = RxList([
     {
       'type': '',
       'number': '',
       'name': '',
       'email': '',
-      'tob_title':'',
+      'tob_title': '',
     }
   ]);
 
@@ -80,21 +77,6 @@ class EntityInformationsController extends GetxController {
       'city': '',
     }
   ]);
-  RxMap typeOfBusinessMap = RxMap({});
-  RxMap salesManMap = RxMap({});
-  RxMap entityTypeMap = RxMap({});
-  RxMap typeOfSocialsMap = RxMap({});
-  RxMap phoneTypesMap = RxMap({});
-  Uint8List? imageBytes;
-  RxMap allCities = RxMap({});
-  RxMap allCountries = RxMap({});
-
-  final GlobalKey<AnimatedListState> listKeyForPhoneLine =
-      GlobalKey<AnimatedListState>();
-  final GlobalKey<AnimatedListState> listKeyForSocialLine =
-      GlobalKey<AnimatedListState>();
-  final GlobalKey<AnimatedListState> listKeyForAddressLine =
-      GlobalKey<AnimatedListState>();
 
   @override
   void onInit() {
@@ -112,63 +94,6 @@ class EntityInformationsController extends GetxController {
       filterContacts();
     });
     super.onInit();
-  }
-
-  selectFromLeftMenu(i) {
-    selectedMenu.value = i;
-    for (int index = 0; index < visibleMenus.length; index++) {
-      visibleMenus[index].isPressed = (index == i);
-    }
-    update();
-  }
-
-  // Filtered menu list
-  List<MenuModel> get visibleMenus {
-    return menus.where((menu) {
-      if (menu.title == 'Company Details' && !isCompanySelected.value) {
-        return false;
-      }
-      if (menu.title == 'Customer Details' && !isCustomerSelected.value) {
-        return false;
-      }
-      return true;
-    }).toList();
-  }
-
-  Widget buildRightContent(int index, controller, constraints) {
-    // Map menu titles to their respective widgets
-    final Map<String, Widget Function()> menuWidgets = {
-      'Main Details': () => mainDetails(controller: controller),
-      'Company Details': () =>
-          companyDetails(controller: controller, constraints: constraints),
-      'Address Card': () => addressCardSection(controller),
-      'Contact Card': () => contactsCardSection(controller),
-      'Social Card': () => socialCardSection(controller),
-      'Customer Details': () =>
-          customerDetails(controller: controller, constraints: constraints),
-    };
-
-    // Get the title of the menu item at the current index
-    final currentMenuTitle = visibleMenus[index].title;
-
-    // Dynamically return the corresponding widget or a fallback
-    return menuWidgets[currentMenuTitle]?.call() ??
-        const Text('No content available');
-  }
-
-  goToNextMenu() {
-    if (selectedMenu.value + 1 < visibleMenus.length) {
-      selectedMenu.value += 1;
-      selectFromLeftMenu(selectedMenu.value);
-      // Scroll to the selected menu item
-      scrollController.animateTo(
-        selectedMenu.value *
-            30, // Calculate position (adjust height as necessary)
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-      update();
-    }
   }
 
   selectVendor(bool value) {
@@ -349,9 +274,9 @@ class EntityInformationsController extends GetxController {
     contactPhone.add({
       'type': '',
       'number': '',
-      'email':'',
+      'email': '',
       'name': '',
-      'tob_title':'',
+      'tob_title': '',
     });
     listKeyForPhoneLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));

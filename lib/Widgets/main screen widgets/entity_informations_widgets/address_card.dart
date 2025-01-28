@@ -1,7 +1,9 @@
+import 'package:datahubai/Widgets/main%20screen%20widgets/entity_informations_widgets/dynamic_field.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
-import 'address_field.dart';
+import '../../../Models/dynamic_field_models.dart';
 
 Widget addressCardSection(EntityInformationsController controller) {
   return Column(
@@ -52,54 +54,86 @@ Widget buildSmartField(EntityInformationsController controller,
             const SizedBox(width: 10),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: addressField(
-                    labelTextForLine: 'Line',
-                    hintTextForLine: 'Enter Your Line',
-                    validateForLine: false,
-                    onChangedForLine: (value) {
-                      controller.contactAddress[index]['line'] = value;
-                    },
-                    textControllerForCity:
-                        controller.citiesControllers[index].controller,
-                    textControllerForCountry:
-                        controller.countriesControllers[index].controller,
-                    labelTextForCountry: 'Country',
-                    labelTextForCity: 'City',
-                    hintTextForCountry: 'Select Country',
-                    hintTextForCity: 'Select City',
-                    validateForcity: false,
-                    validateForCountry: false,
-                    countryValues: controller.allCountries,
-                    cityValues:
-                        controller.allCities, // need to update to on select
-                    controller: controller,
-                    itemBuilder: (context, suggestion) {
-                      return ListTile(
-                        title: Text('${suggestion['name']}'),
-                      );
-                    },
-                    onSelectedForCity: (suggestion) {
-                      controller.citiesControllers[index].controller!.text =
-                          suggestion['name'];
-                      controller.allCities.entries.where((entry) {
-                        return entry.value['name'] ==
-                            suggestion['name'].toString();
-                      }).forEach((entry) {
-                        controller.contactAddress[index]['city'] = entry.key;
-                      });
-                    },
-                    onSelectedForCountry: (suggestion) {
-                      controller.countriesControllers[index].controller!.text =
-                          suggestion['name'];
-                      controller.allCountries.entries.where((entry) {
-                        return entry.value['name'] ==
-                            suggestion['name'].toString();
-                      }).forEach((entry) {
-                        controller.contactAddress[index]['country'] = entry.key;
-                      });
-                    }),
-              ),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child:
+                      GetX<EntityInformationsController>(builder: (controller) {
+                    final isCountriesLoading = controller.allCountries.isEmpty;
+                    final isCitiesLoading = controller.allCities.isEmpty;
+
+                    return dynamicFields(dynamicConfigs: [
+                      DynamicConfig(
+                        isDropdown: false,
+                        flex: 2,
+                        fieldConfig: FieldConfig(
+                          labelText: 'Line',
+                          hintText: 'Enter Line',
+                          validate: false,
+                          onChanged: (value) {
+                            controller.contactAddress[index]['line'] = value;
+                          },
+                        ),
+                      ),
+                      DynamicConfig(
+                        isDropdown: true,
+                        flex: 1,
+                        dropdownConfig: DropdownConfig(
+                          textController:
+                              controller.countriesControllers[index].controller,
+                          labelText:
+                              isCountriesLoading ? 'Loading...' : 'Country',
+                          hintText: 'Select Your Country',
+                          menuValues:
+                              isCountriesLoading ? {} : controller.allCountries,
+                          itemBuilder: (context, suggestion) {
+                            return ListTile(
+                              title: Text('${suggestion['name']}'),
+                            );
+                          },
+                          onSelected: (suggestion) {
+                            controller.countriesControllers[index].controller!
+                                .text = suggestion['name'];
+                            controller.allCountries.entries.where((entry) {
+                              return entry.value['name'] ==
+                                  suggestion['name'].toString();
+                            }).forEach(
+                              (entry) {
+                                controller.contactAddress[index]['country'] =
+                                    entry.key;
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      DynamicConfig(
+                        isDropdown: true,
+                        flex: 1,
+                        dropdownConfig: DropdownConfig(
+                          textController:
+                              controller.citiesControllers[index].controller,
+                          labelText: isCitiesLoading ? 'Loading...' : 'City',
+                          hintText: 'Select Your City',
+                          menuValues:
+                              isCitiesLoading ? {} : controller.allCities,
+                          itemBuilder: (context, suggestion) {
+                            return ListTile(
+                              title: Text('${suggestion['name']}'),
+                            );
+                          },
+                          onSelected: (suggestion) {
+                            controller.citiesControllers[index].controller!
+                                .text = suggestion['name'];
+                            controller.allCities.entries.where((entry) {
+                              return entry.value['name'] ==
+                                  suggestion['name'].toString();
+                            }).forEach((entry) {
+                              controller.contactAddress[index]['city'] =
+                                  entry.key;
+                            });
+                          },
+                        ),
+                      ),
+                    ]);
+                  })),
             ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
