@@ -62,6 +62,7 @@ class EntityInformationsController extends GetxController {
       'number': '',
       'name': '',
       'email': '',
+      'tob_title':'',
     }
   ]);
 
@@ -348,7 +349,9 @@ class EntityInformationsController extends GetxController {
     contactPhone.add({
       'type': '',
       'number': '',
+      'email':'',
       'name': '',
+      'tob_title':'',
     });
     listKeyForPhoneLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));

@@ -58,6 +58,8 @@ Widget buildSmartField(EntityInformationsController controller,
                       isDropdown: true,
                       flex: 1,
                       dropdownConfig: DropdownConfig(
+                          textController: controller
+                              .phoneTypesControllers[index].controller,
                           labelText: 'Type',
                           hintText: 'Select Phone Type',
                           menuValues: controller.phoneTypesMap.isEmpty
@@ -83,58 +85,51 @@ Widget buildSmartField(EntityInformationsController controller,
                     isDropdown: false,
                     flex: 1,
                     fieldConfig: FieldConfig(
-                      labelText: 'Field 1',
-                      hintText: 'Enter first value',
+                      labelText: 'Phone',
+                      hintText: 'Enter Phone',
+                      validate: false,
                       onChanged: (value) {
-                        print('Field 1: $value');
+                        controller.contactPhone[index]['number'] = value;
+                      },
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: false,
+                    flex: 1,
+                    fieldConfig: FieldConfig(
+                      labelText: 'Email',
+                      hintText: 'Enter Email',
+                      validate: false,
+                      onChanged: (value) {
+                        controller.contactPhone[index]['email'] = value;
+                      },
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: false,
+                    flex: 1,
+                    fieldConfig: FieldConfig(
+                      labelText: 'Name',
+                      hintText: 'Enter Name',
+                      validate: false,
+                      onChanged: (value) {
+                        controller.contactPhone[index]['name'] = value;
+                      },
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: false,
+                    flex: 1,
+                    fieldConfig: FieldConfig(
+                      labelText: 'Job Title',
+                      hintText: 'Enter Job Title',
+                      validate: false,
+                      onChanged: (value) {
+                        controller.contactPhone[index]['tob_title'] = value;
                       },
                     ),
                   )
                 ]),
-                //  smartField(
-                //     showFirstField: true,
-                //     showSecondField: true,
-                //     onChangedForSecondSection: (value) {
-                //       controller.contactPhone[index]['email'] = value;
-                //     },
-                //     onChangedForThirdSection: (value) {
-                //       controller.contactPhone[index]['name'] = value;
-                //     },
-                //     onChangedForFirstSection: (value) {
-                //       controller.contactPhone[index]['number'] = value;
-                //     },
-                //     textControllerForDropMenu:
-                //         controller.phoneTypesControllers[index].controller,
-                //     labelTextForDropMenu: 'Type',
-                //     hintTextForDeopMenu: 'Select Phone Type',
-                //     menuValues: controller.phoneTypesMap.isEmpty
-                //         ? {}
-                //         : controller.phoneTypesMap,
-                //     itemBuilder: (context, suggestion) {
-                //       return ListTile(
-                //         title: Text('${suggestion['name']}'),
-                //       );
-                //     },
-                //     onSelected: (suggestion) {
-                //       controller.phoneTypesControllers[index].controller!.text =
-                //           suggestion['name'];
-                //       controller.phoneTypesMap.entries.where((entry) {
-                //         return entry.value['name'] ==
-                //             suggestion['name'].toString();
-                //       }).forEach((entry) {
-                //         controller.contactPhone[index]['type'] = entry.key;
-                //       });
-                //     },
-                //     labelTextForFirstSection: 'Phone',
-                //     hintTextForFirstSection: 'Enter Phone',
-                //     validateForFirstSection: false,
-                //     labelTextForThirdSection: 'Name',
-                //     hintTextForThirdSection: 'Enter Name',
-                //     validateForThirdSection: false,
-                //     labelTextForSecondSection: 'Email',
-                //     hintTextForSecondSection: 'Enter Email',
-                //     validateForSecondSection: false,
-                //     validateForTypeSection: false),
               ),
             ),
             AnimatedSwitcher(

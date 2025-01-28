@@ -82,6 +82,7 @@ Widget smartField({
     ],
   );
 }
+
 Widget dynamicFields({
   required List<DynamicConfig> dynamicConfigs,
 }) {
@@ -92,7 +93,7 @@ Widget dynamicFields({
         return Expanded(
           flex: config.flex,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
+            padding: const EdgeInsets.symmetric(horizontal: 1),
             child: config.isDropdown
                 ? dropDownValues(
                     textController: config.dropdownConfig?.textController,
@@ -100,7 +101,8 @@ Widget dynamicFields({
                     hintText: config.dropdownConfig?.hintText ?? '',
                     menus: config.dropdownConfig?.menuValues ?? {},
                     validate: config.dropdownConfig?.validate ?? false,
-                    itemBuilder: config.dropdownConfig?.itemBuilder ?? (_, __) => const SizedBox(),
+                    itemBuilder: config.dropdownConfig?.itemBuilder ??
+                        (_, __) => const SizedBox(),
                     onSelected: config.dropdownConfig?.onSelected,
                   )
                 : typeSection(
@@ -167,6 +169,7 @@ class FieldConfig {
     this.onChanged,
   });
 }
+
 TextFormField typeSection(
     {String? labelText,
     String? hintText,
