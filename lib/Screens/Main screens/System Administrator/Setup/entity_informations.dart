@@ -212,6 +212,7 @@ ElevatedButton editSection(context, EntityInformationsController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
+        controller.imageBytes = null;
         controller.entityName.text = entityData['entity_name'];
         controller.entityCode.clear();
         controller.isCustomerSelected.value = false;

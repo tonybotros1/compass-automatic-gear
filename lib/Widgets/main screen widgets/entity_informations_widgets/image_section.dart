@@ -26,11 +26,11 @@ InkWell imageSection(EntityInformationsController controller) {
           : controller.imageBytes != null
               ? Image.memory(
                   controller.imageBytes!,
-                  fit: BoxFit.fitHeight,
+                  fit: BoxFit.contain,
                 )
               : Image.network(
                   controller.logoUrl.value,
-                  fit: BoxFit.fitHeight,
+                  fit: BoxFit.contain,
                 ),
     ),
   );
