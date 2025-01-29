@@ -10,11 +10,15 @@ Widget dropDownValues({
   required void Function(dynamic)? onSelected,
   TextEditingController? textController,
   controller,
+  suggestionsController,
+  void Function()? onTapForTypeAheadField,
   icon,
 }) {
   return TypeAheadField(
+    suggestionsController: suggestionsController,
     controller: textController,
     builder: (context, textEditingController, focusNode) => TextFormField(
+      onTap: ()=> onTapForTypeAheadField,
       validator: validate
           ? (value) {
               if (value!.isEmpty) {
@@ -78,7 +82,7 @@ Widget dropDownValues({
         }
       },
     ),
-    suggestionsCallback: (pattern) async {
+    suggestionsCallback: (pattern) async {      
       return menus.values
           .toList()
           .where((item) =>
@@ -96,9 +100,6 @@ Widget dropDownValues({
         ),
       );
     },
-    loadingBuilder: (context) => const Center(
-      child: CircularProgressIndicator(),
-    ),
     emptyBuilder: (context) => const Padding(
       padding: EdgeInsets.all(8.0),
       child: Text('No items found'),

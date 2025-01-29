@@ -154,9 +154,9 @@ class EntityInformationsController extends GetxController {
 
   addNewEntity() async {
     try {
+      addingNewEntity.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final companyId = prefs.getString('companyId');
-      addingNewEntity.value = true;
       if (imageBytes != null && imageBytes!.isNotEmpty) {
         final Reference storageRef = FirebaseStorage.instance.ref().child(
             'entities_pictures/${formatPhrase(entityName.text)}_${DateTime.now()}.png');
@@ -188,6 +188,7 @@ class EntityInformationsController extends GetxController {
         'company_id': companyId,
       });
       addingNewEntity.value = false;
+      Get.back();
     } catch (e) {
       addingNewEntity.value = false;
     }
@@ -226,17 +227,17 @@ class EntityInformationsController extends GetxController {
   }
 
   void onSelect(String selectedId) {
-    filterdCitiesByCountry.clear();
-    filterdCitiesByCountry.addAll(
-      Map.fromEntries(
-        allCities.entries.where((entry) {
-          return entry.value['restricted_by']
-              .toString()
-              .toLowerCase()
-              .contains(selectedId.toLowerCase());
-        }),
-      ),
+    // filterdCitiesByCountry.clear();
+    print(filterdCitiesByCountry);
+    filterdCitiesByCountry.value = Map.fromEntries(
+      allCities.entries.where((entry) {
+        return entry.value['restricted_by']
+            .toString()
+            .toLowerCase()
+            .contains(selectedId.toLowerCase());
+      }),
     );
+    print(filterdCitiesByCountry);
   }
 
   getCountriesAndCities() async {
@@ -572,7 +573,6 @@ class EntityInformationsController extends GetxController {
           phoneTypesMap.value = {
             for (var doc in types.docs) doc.id: doc.data()
           };
-         
         });
       }
     } catch (e) {
@@ -600,7 +600,6 @@ class EntityInformationsController extends GetxController {
         typeOfSocialsMap.value = {
           for (var doc in socials.docs) doc.id: doc.data()
         };
-      
       });
     } catch (e) {
       //

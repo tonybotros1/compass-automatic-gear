@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class DynamicConfig {
   final bool isDropdown;
@@ -24,17 +24,20 @@ class DropdownConfig {
   final Widget Function(BuildContext, dynamic) itemBuilder;
   final void Function(dynamic)? onSelected;
   final TextEditingController? textController;
+  final SuggestionsController<dynamic>? suggestionsController;
+  final void Function()? onTap;
 
-  DropdownConfig({
-    required this.labelText,
-    required this.hintText,
-    required this.menuValues,
-    this.validate = false,
-    this.flex = 1,
-    required this.itemBuilder,
-    this.onSelected,
-    this.textController,
-  });
+  DropdownConfig(
+      {required this.labelText,
+      required this.hintText,
+      required this.menuValues,
+      this.validate = false,
+      this.flex = 1,
+      required this.itemBuilder,
+      this.onSelected,
+      this.textController,
+      this.suggestionsController,
+      this.onTap});
 }
 
 class FieldConfig {

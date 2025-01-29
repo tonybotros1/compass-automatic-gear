@@ -1,5 +1,6 @@
 import 'package:datahubai/Widgets/main%20screen%20widgets/entity_informations_widgets/dynamic_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
@@ -102,6 +103,7 @@ Widget buildSmartField(EntityInformationsController controller,
 
                                 controller.contactAddress[index]['country'] =
                                     entry.key;
+                                SuggestionsController().refresh();
                               },
                             );
                           },
@@ -111,6 +113,8 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: true,
                         flex: 1,
                         dropdownConfig: DropdownConfig(
+                          suggestionsController: SuggestionsController(),
+                          onTap: SuggestionsController().refresh,
                           textController:
                               controller.citiesControllers[index].controller,
                           labelText: 'City',

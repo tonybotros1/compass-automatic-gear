@@ -17,6 +17,7 @@ Widget dynamicFields({
             padding: const EdgeInsets.symmetric(horizontal: 1),
             child: config.isDropdown
                 ? dropDownValues(
+                  suggestionsController: config.dropdownConfig?.suggestionsController,
                     textController: config.dropdownConfig?.textController,
                     labelText: config.dropdownConfig?.labelText ?? '',
                     hintText: config.dropdownConfig?.hintText ?? '',
