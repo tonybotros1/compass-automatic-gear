@@ -65,6 +65,7 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: false,
                         flex: 2,
                         fieldConfig: FieldConfig(
+                          textController: controller.linesControllers[index].controller,
                           labelText: 'Line',
                           hintText: 'Enter Line',
                           validate: false,

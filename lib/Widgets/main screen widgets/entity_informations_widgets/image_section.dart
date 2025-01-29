@@ -14,7 +14,7 @@ InkWell imageSection(EntityInformationsController controller) {
         borderRadius: BorderRadius.circular(5),
         border: Border.all(style: BorderStyle.solid, color: Colors.grey),
       ),
-      child: controller.imageBytes == null
+      child: controller.imageBytes == null && controller.logoUrl.value.isEmpty
           ? const Center(
               child: FittedBox(
                 child: Text(
@@ -23,10 +23,15 @@ InkWell imageSection(EntityInformationsController controller) {
                 ),
               ),
             )
-          : Image.memory(
-              controller.imageBytes!,
-              fit: BoxFit.contain,
-            ),
+          : controller.imageBytes != null
+              ? Image.memory(
+                  controller.imageBytes!,
+                  fit: BoxFit.fitHeight,
+                )
+              : Image.network(
+                  controller.logoUrl.value,
+                  fit: BoxFit.fitHeight,
+                ),
     ),
   );
 }

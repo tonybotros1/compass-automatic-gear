@@ -167,7 +167,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
     ),
     DataCell(
       Text(
-        entityData['entity_status'][0] ?? '',
+        entityData['entity_status'] ?? '',
       ),
     ),
     DataCell(
@@ -180,15 +180,111 @@ DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Padding(
-        //   padding: const EdgeInsets.only(right: 5),
-        //   child: editSection(
-        //       context, controller, variableData, constraints, variableId),
-        // ),
-        // deleteSection(controller, variableId, context),
+        Padding(
+          padding: const EdgeInsets.only(right: 5),
+          child: editSection(
+              context, controller, entityData, constraints, entityId),
+        ),
+        deleteSection(controller, entityId, context),
       ],
     )),
   ]);
+}
+
+ElevatedButton deleteSection(
+    EntityInformationsController controller, entityId, context) {
+  return ElevatedButton(
+      style: deleteButtonStyle,
+      onPressed: () {
+        alertDialog(
+            context: context,
+            controller: controller,
+            content: "The list will be deleted permanently",
+            onPressed: () {
+              controller.deleteEntity(entityId);
+            });
+      },
+      child: const Text("Delete"));
+}
+
+ElevatedButton editSection(context, EntityInformationsController controller,
+    Map<String, dynamic> entityData, constraints, entityId) {
+  return ElevatedButton(
+      style: editButtonStyle,
+      onPressed: () {
+        controller.entityName.text = entityData['entity_name'];
+        controller.entityCode.clear();
+        controller.isCustomerSelected.value = false;
+        controller.isVendorSelected.value = false;
+
+        controller.updateEntityCode(entityData['entity_code']);
+        controller.creditLimit.text =
+            (entityData['credit_limit'] ?? '').toString();
+        controller.salesMAn.value.text =
+            controller.getSaleManName(entityData['sales_man'])!;
+        controller.updateEntityStatus(entityData['entity_status']);
+        controller.groupName.text = entityData['group_name'];
+        controller.industry.value.text =
+            controller.getIndustryName(entityData['industry'])!;
+        controller.trn.text = entityData['trn'];
+        controller.entityType.value.text =
+            controller.getEntityTypeName(entityData['entity_type'])!;
+        controller.logoUrl.value = entityData['entity_picture'];
+        controller.updateEntityAddress(entityData['entity_address']);
+        controller.updateEntityPhone(entityData['entity_phone']);
+        controller.updateEntitySocial(entityData['entity_social']);
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: addNewEntityOrEdit(
+                  controller: controller,
+                  constraints: constraints,
+                  context: context,
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: ElevatedButton(
+                      onPressed: controller.addingNewEntity.value
+                          ? null
+                          : () {
+                              // controller.editSaleMan(salemanId);
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      child: controller.addingNewEntity.value == false
+                          ? const Text(
+                              'Save',
+                              style: TextStyle(color: Colors.white),
+                            )
+                          : const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      style: cancelButtonStyle,
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ],
+              );
+            });
+      },
+      child: const Text('Edit'));
 }
 
 ElevatedButton newContactButton(BuildContext context,

@@ -17,7 +17,6 @@ Widget addNewEntityOrEdit({
   TextEditingController? name,
   TextEditingController? groupName,
   TextEditingController? typrOfBusiness,
-  bool? canEdit,
 }) {
   return SizedBox(
     height: constraints.maxHeight,
@@ -169,7 +168,7 @@ Widget addNewEntityOrEdit({
                         groupValue: controller.isCompanySelected.value,
                         onChanged: (value) {
                           if (value != null) {
-                            controller.selectCompantOrIndividual(
+                            controller.selectCompanyOrIndividual(
                                 'company', value);
                           }
                         },
@@ -193,7 +192,7 @@ Widget addNewEntityOrEdit({
                         groupValue: controller.isIndividualSelected.value,
                         onChanged: (value) {
                           if (value != null) {
-                            controller.selectCompantOrIndividual(
+                            controller.selectCompanyOrIndividual(
                                 'individual', value);
                           }
                         },

@@ -23,6 +23,12 @@ class EntityInformationsController extends GetxController {
   RxList<TypeModel> socialTypesControllers = RxList<TypeModel>([]);
   RxList<TypeModel> countriesControllers = RxList<TypeModel>([]);
   RxList<TypeModel> citiesControllers = RxList<TypeModel>([]);
+  RxList<TypeModel> linesControllers = RxList<TypeModel>([]);
+  RxList<TypeModel> phoneNumbersControllers = RxList<TypeModel>([]);
+  RxList<TypeModel> linksControllers = RxList<TypeModel>([]);
+  RxList<TypeModel> emailsControllers = RxList<TypeModel>([]);
+  RxList<TypeModel> namesControllers = RxList<TypeModel>([]);
+  RxList<TypeModel> jobTitlesControllers = RxList<TypeModel>([]);
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -49,7 +55,7 @@ class EntityInformationsController extends GetxController {
   RxMap allCountries = RxMap({});
   RxMap filterdCitiesByCountry = RxMap({});
   RxList entityCode = RxList([]);
-  RxList entityStatus = RxList([]);
+  RxString entityStatus = RxString('');
   final GlobalKey<AnimatedListState> listKeyForPhoneLine =
       GlobalKey<AnimatedListState>();
   final GlobalKey<AnimatedListState> listKeyForSocialLine =
@@ -84,11 +90,12 @@ class EntityInformationsController extends GetxController {
 
   @override
   void onInit() {
-    getEntities();
+    getCountriesAndCities().then((_) {
+      getEntities();
+    });
     generateControllerForAdressCountriesAndCities();
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
-    getCountriesAndCities();
     getEntityType();
     getTypeOfBusiness();
     getTypeOfSocial();
@@ -110,7 +117,7 @@ class EntityInformationsController extends GetxController {
     salesManId.value = '';
     logoUrl.value = '';
     imageBytes = null;
-    entityStatus.clear();
+    entityStatus.value = '';
     isCompanySelected.value = false;
     isIndividualSelected.value = false;
     groupName.clear();
@@ -140,13 +147,24 @@ class EntityInformationsController extends GetxController {
       'link': '',
     });
     socialTypesControllers.clear();
+    linksControllers.clear();
     phoneTypesControllers.clear();
+    phoneNumbersControllers.clear();
+    emailsControllers.clear();
+    namesControllers.clear();
+    jobTitlesControllers.clear();
     countriesControllers.clear();
     citiesControllers.clear();
+    linesControllers.clear();
     generateControllerForAdressCountriesAndCities();
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
   }
+
+  // assendValuesToEdit(Map<String, dynamic> entityData){
+  //   entityData.
+
+  // }
 
   String formatPhrase(String phrase) {
     return phrase.replaceAll(' ', '_');
@@ -176,7 +194,7 @@ class EntityInformationsController extends GetxController {
         'entity_code': entityCode,
         'credit_limit': int.parse(creditLimit.text),
         'sales_man': salesManId.value,
-        'entity_status': entityStatus,
+        'entity_status': entityStatus.value,
         'group_name': groupName.text,
         'industry': industryId.value,
         'trn': trn.text,
@@ -191,6 +209,95 @@ class EntityInformationsController extends GetxController {
       Get.back();
     } catch (e) {
       addingNewEntity.value = false;
+    }
+  }
+
+  deleteEntity(entityId) async {
+    try {
+      Get.back();
+      await FirebaseFirestore.instance
+          .collection('entity_informations')
+          .doc(entityId)
+          .delete();
+    } catch (e) {
+      //
+    }
+  }
+
+  String? getSaleManName(String saleManId) {
+    try {
+      final salesMan = salesManMap.entries.firstWhere(
+        (saleMan) => saleMan.key == saleManId,
+      );
+      return salesMan.value['name'];
+    } catch (e) {
+      return 'No sale man';
+    }
+  }
+
+  String? getIndustryName(String industryId) {
+    try {
+      final industry = industryMap.entries.firstWhere(
+        (industryy) => industryy.key == industryId,
+      );
+      return industry.value['name'];
+    } catch (e) {
+      return 'No industry';
+    }
+  }
+
+  String? getEntityTypeName(String entityTypeId) {
+    try {
+      final entityType = entityTypeMap.entries.firstWhere(
+        (entityTypee) => entityTypee.key == entityTypeId,
+      );
+      return entityType.value['name'];
+    } catch (e) {
+      return 'No industry';
+    }
+  }
+
+  String? getCountryName(String countryId) {
+    try {
+      final country = allCountries.entries.firstWhere(
+        (country) => country.key == countryId,
+      );
+      return country.value['name'];
+    } catch (e) {
+      return 'No Country';
+    }
+  }
+
+  String? getCityName(String cityId) {
+    try {
+      final city = allCities.entries.firstWhere(
+        (city) => city.key == cityId,
+      );
+      return city.value['name'];
+    } catch (e) {
+      return 'No city';
+    }
+  }
+
+  String? getPhoneTypeName(String typeId) {
+    try {
+      final type = phoneTypesMap.entries.firstWhere(
+        (type) => type.key == typeId,
+      );
+      return type.value['name'];
+    } catch (e) {
+      return 'No type';
+    }
+  }
+
+  String? getSocialTypeName(String socialId) {
+    try {
+      final social = typeOfSocialsMap.entries.firstWhere(
+        (social) => social.key == socialId,
+      );
+      return social.value['name'];
+    } catch (e) {
+      return 'No social';
     }
   }
 
@@ -212,32 +319,80 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  selectCompantOrIndividual(String selected, bool value) {
-    if (selected == 'company') {
-      isCompanySelected.value = value;
-      isIndividualSelected.value = false;
-      entityStatus.clear();
-      entityStatus.add('Company');
-    } else {
-      isCompanySelected.value = false;
-      isIndividualSelected.value = value;
-      entityStatus.clear();
-      entityStatus.add('Individual');
+// this function is to set the entity code fro edit
+  void updateEntityCode(List entityCodes) {
+    isCustomerSelected.value = entityCodes.contains('Customer');
+    isVendorSelected.value = entityCodes.contains('Vendor');
+
+    entityCode.clear();
+    entityCode.addAll(entityCodes.toSet());
+  }
+
+// this function is to set the entity status fro edit
+  void updateEntityStatus(String entityStatusText) {
+    isCompanySelected.value = entityStatusText == 'Company';
+    isIndividualSelected.value = entityStatusText == 'Individual';
+    entityStatus.value = isCompanySelected.isTrue ? 'Company' : 'Individual';
+  }
+
+// this function is to set the entity address fro edit
+  void updateEntityAddress(List entityAddressFromData) {
+    contactAddress.value = entityAddressFromData;
+    generateControllerForAdressCountriesAndCities();
+    for (var i = 0; i < contactAddress.length; i++) {
+      countriesControllers[i].controller?.text =
+          getCountryName(contactAddress[i]['country'])!;
+      citiesControllers[i].controller?.text =
+          getCityName(contactAddress[i]['city'])!;
+      linesControllers[i].controller?.text = contactAddress[i]['line'];
     }
   }
 
+  // this function is to set the entity phone fro edit
+  void updateEntityPhone(List entityPhoneFromData) {
+    contactPhone.value = entityPhoneFromData;
+    generateControllerForPhoneTypes();
+    for (var i = 0; i < contactPhone.length; i++) {
+      phoneTypesControllers[i].controller?.text =
+          getPhoneTypeName(contactPhone[i]['type'])!;
+      phoneNumbersControllers[i].controller?.text = contactPhone[i]['number'];
+      emailsControllers[i].controller?.text = contactPhone[i]['email'];
+      namesControllers[i].controller?.text = contactPhone[i]['name'];
+      jobTitlesControllers[i].controller?.text = contactPhone[i]['tob_title'];
+    }
+  }
+
+  // this function is to set the entity social fro edit
+  void updateEntitySocial(List entitySocialFromData) {
+    contactSocial.value = entitySocialFromData;
+    generateControllerForSocialTypes();
+    for (var i = 0; i < contactSocial.length; i++) {
+      socialTypesControllers[i].controller?.text =
+          getSocialTypeName(contactSocial[i]['type'])!;
+      linksControllers[i].controller?.text = contactSocial[i]['link'];
+    }
+  }
+
+  void selectCompanyOrIndividual(String selected, bool value) {
+    bool isCompany = selected == 'company';
+
+    isCompanySelected.value = isCompany ? value : false;
+    isIndividualSelected.value = isCompany ? false : value;
+    entityStatus.value = isCompany ? 'Company' : 'Individual';
+  }
+
   void onSelect(String selectedId) {
-    // filterdCitiesByCountry.clear();
-    print(filterdCitiesByCountry);
-    filterdCitiesByCountry.value = Map.fromEntries(
-      allCities.entries.where((entry) {
-        return entry.value['restricted_by']
-            .toString()
-            .toLowerCase()
-            .contains(selectedId.toLowerCase());
-      }),
+    filterdCitiesByCountry.clear();
+    filterdCitiesByCountry.addAll(
+      Map.fromEntries(
+        allCities.entries.where((entry) {
+          return entry.value['restricted_by']
+              .toString()
+              .toLowerCase()
+              .contains(selectedId.toLowerCase());
+        }),
+      ),
     );
-    print(filterdCitiesByCountry);
   }
 
   getCountriesAndCities() async {
@@ -288,10 +443,23 @@ class EntityInformationsController extends GetxController {
       (index) =>
           TypeModel(controller: TextEditingController()), // Return a TestModel
     );
+    phoneNumbersControllers.value = List.generate(contactPhone.length + 1,
+        (index) => TypeModel(controller: TextEditingController()));
+    emailsControllers.value = List.generate(contactPhone.length + 1,
+        (index) => TypeModel(controller: TextEditingController()));
+    namesControllers.value = List.generate(contactPhone.length + 1,
+        (index) => TypeModel(controller: TextEditingController()));
+    jobTitlesControllers.value = List.generate(contactPhone.length + 1,
+        (index) => TypeModel(controller: TextEditingController()));
   }
 
   generateControllerForSocialTypes() {
     socialTypesControllers.value = List.generate(
+      contactSocial.length + 1,
+      (index) =>
+          TypeModel(controller: TextEditingController()), // Return a TestModel
+    );
+    linksControllers.value = List.generate(
       contactSocial.length + 1,
       (index) =>
           TypeModel(controller: TextEditingController()), // Return a TestModel
@@ -309,6 +477,8 @@ class EntityInformationsController extends GetxController {
       (index) =>
           TypeModel(controller: TextEditingController()), // Return a TestModel
     );
+    linesControllers.value = List.generate(contactAddress.length + 1,
+        (index) => TypeModel(controller: TextEditingController()));
   }
 
   // this function is to select an image for logo
@@ -403,6 +573,10 @@ class EntityInformationsController extends GetxController {
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
 
     phoneTypesControllers.add(TypeModel(controller: TextEditingController()));
+    phoneNumbersControllers.add(TypeModel(controller: TextEditingController()));
+    emailsControllers.add(TypeModel(controller: TextEditingController()));
+    namesControllers.add(TypeModel(controller: TextEditingController()));
+    jobTitlesControllers.add(TypeModel(controller: TextEditingController()));
   }
 
   // this function is to generate a new social field
@@ -416,6 +590,7 @@ class EntityInformationsController extends GetxController {
     listKeyForSocialLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
     socialTypesControllers.add(TypeModel(controller: TextEditingController()));
+    linksControllers.add(TypeModel(controller: TextEditingController()));
   }
 
   // this function is to generate a new address field
@@ -431,6 +606,7 @@ class EntityInformationsController extends GetxController {
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
     countriesControllers.add(TypeModel(controller: TextEditingController()));
     citiesControllers.add(TypeModel(controller: TextEditingController()));
+    linesControllers.add(TypeModel(controller: TextEditingController()));
   }
 
 // this function is to remove a phone field
@@ -439,6 +615,10 @@ class EntityInformationsController extends GetxController {
     // }
     contactPhone.removeAt(index);
     phoneTypesControllers.removeAt(index);
+    phoneNumbersControllers.removeAt(index);
+    emailsControllers.removeAt(index);
+    namesControllers.removeAt(index);
+    jobTitlesControllers.removeAt(index);
   }
 
 // this function is to remove a social field
@@ -447,6 +627,7 @@ class EntityInformationsController extends GetxController {
     // }
     contactSocial.removeAt(index);
     socialTypesControllers.removeAt(index);
+    linksControllers.removeAt(index);
   }
 
   // this function is to remove a address field
@@ -456,6 +637,7 @@ class EntityInformationsController extends GetxController {
     contactAddress.removeAt(index);
     countriesControllers.removeAt(index);
     citiesControllers.removeAt(index);
+    linesControllers.removeAt(index);
   }
 
   // this function is to sort data in table

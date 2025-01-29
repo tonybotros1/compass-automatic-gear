@@ -46,6 +46,7 @@ class FieldConfig {
   final bool validate;
   final int flex;
   final void Function(String)? onChanged;
+  final TextEditingController? textController;
 
   FieldConfig({
     this.labelText,
@@ -53,5 +54,6 @@ class FieldConfig {
     this.validate = false,
     this.flex = 1,
     this.onChanged,
+    this.textController,
   });
 }

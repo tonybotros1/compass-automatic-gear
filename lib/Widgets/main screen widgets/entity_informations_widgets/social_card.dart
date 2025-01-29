@@ -93,6 +93,7 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: false,
                         flex: 2,
                         fieldConfig: FieldConfig(
+                          textController: controller.linksControllers[index].controller,
                           labelText: 'Link',
                           hintText: 'Enter Link',
                           validate: false,

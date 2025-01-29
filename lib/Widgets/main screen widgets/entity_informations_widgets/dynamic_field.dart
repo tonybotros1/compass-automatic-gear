@@ -28,6 +28,7 @@ Widget dynamicFields({
                     onSelected: config.dropdownConfig?.onSelected,
                   )
                 : typeSection(
+                  textController: config.fieldConfig?.textController,
                     labelText: config.fieldConfig?.labelText ?? '',
                     hintText: config.fieldConfig?.hintText ?? '',
                     validate: config.fieldConfig?.validate ?? false,
@@ -44,8 +45,10 @@ TextFormField typeSection(
     {String? labelText,
     String? hintText,
     bool? validate,
+    TextEditingController? textController,
     void Function(String)? onChanged}) {
   return TextFormField(
+    controller: textController,
     onChanged: onChanged,
     decoration: InputDecoration(
       hintStyle: const TextStyle(color: Colors.grey),
