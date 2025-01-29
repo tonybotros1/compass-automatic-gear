@@ -161,11 +161,6 @@ class EntityInformationsController extends GetxController {
     generateControllerForSocialTypes();
   }
 
-  // assendValuesToEdit(Map<String, dynamic> entityData){
-  //   entityData.
-
-  // }
-
   String formatPhrase(String phrase) {
     return phrase.replaceAll(' ', '_');
   }
@@ -212,6 +207,50 @@ class EntityInformationsController extends GetxController {
     }
   }
 
+  editEntity(entityId) async {
+    try {
+      addingNewEntity.value = true;
+
+      var newEntityData = {
+        'entity_name': entityName.text,
+        'entity_code': entityCode,
+        'credit_limit': int.parse(creditLimit.text),
+        'sales_man': salesManId.value,
+        'entity_status': entityStatus.value,
+        'group_name': groupName.text,
+        'industry': industryId.value,
+        'trn': trn.text,
+        'entity_type': entityTypeId.value,
+        'entity_address': contactAddress,
+        'entity_phone': contactPhone,
+        'entity_social': contactSocial,
+      };
+
+      if (imageBytes != null && imageBytes!.isNotEmpty) {
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+            'images/${formatPhrase(entityName.text)}_${DateTime.now()}.png');
+        final UploadTask uploadTask = storageRef.putData(
+          imageBytes!,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        await uploadTask.then((p0) async {
+          logoUrl.value = await storageRef.getDownloadURL();
+        });
+        newEntityData['entity_picture'] = logoUrl.value;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('entity_informations')
+          .doc(entityId)
+          .update(newEntityData);
+      addingNewEntity.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEntity.value = false;
+    }
+  }
+
   deleteEntity(entityId) async {
     try {
       Get.back();
@@ -231,7 +270,7 @@ class EntityInformationsController extends GetxController {
       );
       return salesMan.value['name'];
     } catch (e) {
-      return 'No sale man';
+      return '';
     }
   }
 
@@ -242,7 +281,7 @@ class EntityInformationsController extends GetxController {
       );
       return industry.value['name'];
     } catch (e) {
-      return 'No industry';
+      return '';
     }
   }
 
@@ -253,7 +292,7 @@ class EntityInformationsController extends GetxController {
       );
       return entityType.value['name'];
     } catch (e) {
-      return 'No industry';
+      return '';
     }
   }
 
@@ -264,7 +303,7 @@ class EntityInformationsController extends GetxController {
       );
       return country.value['name'];
     } catch (e) {
-      return 'No Country';
+      return '';
     }
   }
 
@@ -275,7 +314,7 @@ class EntityInformationsController extends GetxController {
       );
       return city.value['name'];
     } catch (e) {
-      return 'No city';
+      return '';
     }
   }
 
@@ -286,7 +325,7 @@ class EntityInformationsController extends GetxController {
       );
       return type.value['name'];
     } catch (e) {
-      return 'No type';
+      return '';
     }
   }
 
@@ -297,7 +336,7 @@ class EntityInformationsController extends GetxController {
       );
       return social.value['name'];
     } catch (e) {
-      return 'No social';
+      return '';
     }
   }
 

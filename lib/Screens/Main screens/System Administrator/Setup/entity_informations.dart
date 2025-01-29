@@ -250,7 +250,7 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                       onPressed: controller.addingNewEntity.value
                           ? null
                           : () {
-                              // controller.editSaleMan(salemanId);
+                              controller.editEntity(entityId);
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
