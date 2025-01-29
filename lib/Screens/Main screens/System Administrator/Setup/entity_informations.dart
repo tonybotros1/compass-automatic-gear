@@ -153,6 +153,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
     DataCell(
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             entityData['entity_code'][0] ?? '',
