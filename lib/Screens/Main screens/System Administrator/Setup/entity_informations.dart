@@ -222,13 +222,16 @@ ElevatedButton editSection(context, EntityInformationsController controller,
             (entityData['credit_limit'] ?? '').toString();
         controller.salesMAn.value.text =
             controller.getSaleManName(entityData['sales_man'])!;
+        controller.salesManId.value = entityData['sales_man'];
         controller.updateEntityStatus(entityData['entity_status']);
         controller.groupName.text = entityData['group_name'];
         controller.industry.value.text =
             controller.getIndustryName(entityData['industry'])!;
+        controller.industryId.value = entityData['industry'];
         controller.trn.text = entityData['trn'];
         controller.entityType.value.text =
             controller.getEntityTypeName(entityData['entity_type'])!;
+        controller.entityTypeId.value = entityData['entity_type'];
         controller.logoUrl.value = entityData['entity_picture'];
         controller.updateEntityAddress(entityData['entity_address']);
         controller.updateEntityPhone(entityData['entity_phone']);
