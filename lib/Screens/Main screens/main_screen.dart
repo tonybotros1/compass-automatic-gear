@@ -6,6 +6,7 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import '../../Controllers/Main screen controllers/main_screen_contro.dart';
 import '../../Models/screen_tree_model.dart';
 import '../../Widgets/main screen widgets/expand_icon.dart';
+import '../../Widgets/overlay_button.dart';
 import '../../consts.dart';
 import '../../main.dart';
 
@@ -49,45 +50,173 @@ class MainScreen extends StatelessWidget {
                       ),
                       Padding(
                           padding: const EdgeInsets.only(right: 16),
-                          child: Obx(() => Row(
-                                children: [
-                                  ElevatedButton(
-                                      style: welcomButtonStyle,
-                                      onPressed: () {},
+                          child: Obx(() =>mainScreenController.isLoading.isFalse? SmartInfoOverlay(
+                            backgroundColor: Colors.blue.shade200,
+                            triggerBuilder: (showOverlay) => InkWell(
+                              onTap: showOverlay,
+                              child: CircleAvatar(
+                                backgroundColor: mainColor,
+                                radius: 25,
+                                child: Center(
+                                  child: Flexible(
                                       child: Text(
-                                          'Welcome ${mainScreenController.userName}')),
-                                  const SizedBox(
-                                    width: 10,
+                                    mainScreenController.getFirstCharacter(
+                                        mainScreenController.userName.value),
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.white),
+                                  )),
+                                ),
+                              ),
+                            ),
+                            overlayContent: (dismiss) => Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                    mainScreenController
+                                        .userEmail.value,
+                                    style:
+                                        TextStyle(color: Colors.white)),
+                                SizedBox(
+                                  height: 25,
+                                ),
+                                CircleAvatar(
+                                  backgroundColor: mainColor,
+                                  radius: 35,
+                                  child: Text(
+                                    mainScreenController
+                                        .getFirstCharacter(
+                                            mainScreenController
+                                                .userName.value),
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        color: Colors.white),
                                   ),
-                                  // IconButton(
-                                  //     onPressed: () {},
-                                  //     icon: Icon(
-                                  //       Icons.logout,
-                                  //       color: Colors.red,
-                                  //     )),
-                                  ElevatedButton(
-                                      style: logoutButtonStyle,
-                                      onPressed: () async {
-                                        alertDialog(
-                                            context: context,
-                                            content:
-                                                "Are you sure you want to logout?",
-                                            onPressed: () async {
-                                              await globalPrefs
-                                                  ?.remove('userId');
-                                              await globalPrefs
-                                                  ?.remove('companyId');
-                                              await globalPrefs
-                                                  ?.remove('userEmail');
-                                              Get.offAllNamed('/');
-                                            });
-                                      },
-                                      child: const Icon(
-                                        Icons.logout,
+                                ),
+                                FittedBox(
+                                  child: Text(
+                                    'Hi, ${mainScreenController.userName.value}!',
+                                    style: TextStyle(
                                         color: Colors.white,
-                                      ))
-                                ],
-                              ))),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 30),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(16),
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      color: Colors.blue.shade400,
+                                      borderRadius:
+                                          BorderRadius.circular(15)),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Center(
+                                        child: Text(
+                                          mainScreenController
+                                              .companyName.value,
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight:
+                                                  FontWeight.bold),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.symmetric(
+                                                vertical: 16),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              'Joining Date:',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                              '${textToDate(mainScreenController.userJoiningDate.value)}',
+                                              style: TextStyle(
+                                                color: Colors
+                                                    .grey.shade800,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.symmetric(
+                                                vertical: 16),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              'Expiry Date:',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                              '${textToDate(mainScreenController.userExpiryDate.value)}',
+                                              style: TextStyle(
+                                                color: Colors
+                                                    .grey.shade800,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          ElevatedButton(
+                                              style: logoutButtonStyle,
+                                              onPressed: () async {
+                                                dismiss();
+                                                alertDialog(
+                                                    context: context,
+                                                    content:
+                                                        "Are you sure you want to logout?",
+                                                    onPressed:
+                                                        () async {
+                                                      await globalPrefs
+                                                          ?.remove(
+                                                              'userId');
+                                                      await globalPrefs
+                                                          ?.remove(
+                                                              'companyId');
+                                                      await globalPrefs
+                                                          ?.remove(
+                                                              'userEmail');
+                                                      Get.offAllNamed(
+                                                          '/');
+                                                    });
+                                              },
+                                              child: Text('Logout')),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            maxWidth: 400,
+                            horizontalEdgeMargin: 12,
+                            verticalOffset: 8,
+                          ):SizedBox())),
                     ],
                   ),
                 ),

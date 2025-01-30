@@ -120,7 +120,7 @@ var welcomButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 var logoutButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.red,
+  backgroundColor: Color(0xff3A6D8C),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
@@ -255,6 +255,9 @@ Future<dynamic> alertDialog(
 // function to convert text to date and make the format dd-mm-yyyy
 textToDate(inputDate) {
   if (inputDate is String) {
+    if (inputDate == '') {
+      return '';
+    }
     DateTime parsedDate = DateFormat("yyyy-MM-dd").parse(inputDate);
     String formattedDate = DateFormat("dd-MM-yyyy").format(parsedDate);
 
@@ -265,4 +268,3 @@ textToDate(inputDate) {
     return formattedDate;
   }
 }
-

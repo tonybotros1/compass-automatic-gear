@@ -28,6 +28,9 @@ class MainScreenController extends GetxController {
   Rx<Widget> selectedScreen = const SizedBox().obs;
   Rx<Text> selectedScreenName = const Text('').obs;
   RxString userName = RxString('');
+  RxString userEmail = RxString('');
+  RxString userJoiningDate = RxString('');
+  RxString userExpiryDate = RxString('');
   RxBool errorLoading = RxBool(false);
   RxMap allMenus = RxMap({});
   RxMap allScreens = RxMap({});
@@ -58,6 +61,11 @@ class MainScreenController extends GetxController {
       companyImageURL.value = companyDetails.data()!['company_logo'];
       companyName.value = companyDetails.data()!['company_name'];
     }
+  }
+
+// this function is to get the fisrt letter of the name of current user
+  String getFirstCharacter(String word) {
+    return word.characters.isNotEmpty ? word.characters.first : '';
   }
 
 // this function is to get the screen and show it on the right side of the main screen
@@ -117,7 +125,9 @@ class MainScreenController extends GetxController {
       final fetchedRoles =
           List<String>.from(userSnapshot.data()?['roles'] ?? []);
       userName.value = userSnapshot.data()?['user_name'] ?? '';
-
+      userEmail.value = userSnapshot.data()?['email'] ?? '';
+      userJoiningDate.value = userSnapshot.data()?['added_date'] ?? '';
+      userExpiryDate.value = userSnapshot.data()?['expiry_date'] ?? '';
       // Assign roles directly without checking for cached data
       userRoles.assignAll(fetchedRoles);
 
