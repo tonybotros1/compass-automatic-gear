@@ -232,7 +232,8 @@ ElevatedButton editEction(context, CompanyController controller,
       style: editButtonStyle,
       onPressed: () {
         controller.companyName.text = companyData['company_name'] ?? '';
-        controller.typeOfBusiness.text = companyData['type_of_business'] ?? '';
+        controller.industry.text = companyData['type_of_business'] ?? '';
+            controller.industryId.value = companyData['type_of_business'] ?? '';
         controller.userName.text =
             controller.userDetails[companyData['contact_details']['user_id']]
                     ['user_name'] ??
@@ -269,7 +270,7 @@ ElevatedButton editEction(context, CompanyController controller,
                   constraints: constraints,
                   context: context,
                   companyName: controller.companyName,
-                  typeOfBusiness: controller.typeOfBusiness,
+                  typeOfBusiness: controller.industry,
                   companyLogo: companyData['company_logo'],
                   city: controller.city,
                   country: controller.country,
@@ -334,7 +335,8 @@ ElevatedButton newCompanyButton(BuildContext context,
   return ElevatedButton(
     onPressed: () {
       controller.companyName.clear();
-      controller.typeOfBusiness.clear();
+      controller.industry.clear();
+      controller.industryId.value = '';
       controller.userName.clear();
       controller.password.clear();
       controller.phoneNumber.clear();
@@ -366,7 +368,7 @@ ElevatedButton newCompanyButton(BuildContext context,
                                         controller
                                             .companyName.text.isNotEmpty &&
                                         controller
-                                            .typeOfBusiness.text.isNotEmpty &&
+                                            .industry.text.isNotEmpty &&
                                         controller.password.text.isNotEmpty &&
                                         controller
                                             .phoneNumber.text.isNotEmpty &&

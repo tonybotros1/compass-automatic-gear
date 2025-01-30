@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../Controllers/Auth screen controllers/register_screen_controller.dart';
-import '../../Widgets/Auth screens widgets/register widgets/drop_down_menu_for_lists.dart';
 import '../../Widgets/main screen widgets/drop_down_menu.dart';
 import '../../Widgets/my_text_field.dart';
 import '../../consts.dart';

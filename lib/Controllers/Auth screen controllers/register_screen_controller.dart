@@ -73,57 +73,6 @@ class RegisterScreenController extends GetxController {
     update();
   }
 
-  // getCountriesAndCities() async {
-  //   try {
-  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'COUNTRIES')
-  //         .get();
-  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'CITIES')
-  //         .get();
-
-  //     QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc =
-  //         countries.docs.first;
-  //     QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc
-  //         .reference
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .get();
-  //     QueryDocumentSnapshot<Map<String, dynamic>> citiesDoc = cities.docs.first;
-  //     QuerySnapshot<Map<String, dynamic>> cityValues = await citiesDoc.reference
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .get();
-  //     allCountries.value = [
-  //       for (var country in countryValues.docs)
-  //         {
-  //           'id': country.id,
-  //           'name': country.data()['name'],
-  //           'code': country.data()['code'],
-  //           'restricted_by': country.data()['restricted_by'],
-  //           'available': country.data()['available']
-  //         }
-  //     ];
-  //     allCities.value = [
-  //       for (var city in cityValues.docs)
-  //         {
-  //           'id': city.id,
-  //           'name': city.data()['name'],
-  //           'code': city.data()['code'],
-  //           'restricted_by': city.data()['restricted_by'],
-  //           'available': city.data()['available']
-  //         }
-  //     ];
-  //     update();
-  //   } catch (e) {
-  //     // print(e);
-  //   }
-  // }
-
   getCountriesAndCities() async {
     try {
       QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
@@ -198,13 +147,7 @@ class RegisterScreenController extends GetxController {
 
 // this function is to select an image for logo
   pickImage() async {
-    // final ImagePicker picker = ImagePicker();
-    // XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    // if (image != null) {
-    //   imageBytes = await image.readAsBytes();
-    // }
     try {
-      // Create a file upload input element
       html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
       uploadInput.accept = 'image/*';
       uploadInput.click();

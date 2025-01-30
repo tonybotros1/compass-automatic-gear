@@ -65,7 +65,8 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: false,
                         flex: 2,
                         fieldConfig: FieldConfig(
-                          textController: controller.linesControllers[index].controller,
+                          textController:
+                              controller.linesControllers[index].controller,
                           labelText: 'Line',
                           hintText: 'Enter Line',
                           validate: false,
@@ -98,13 +99,12 @@ Widget buildSmartField(EntityInformationsController controller,
                                   suggestion['name'].toString();
                             }).forEach(
                               (entry) {
-                                // controller.citiesControllers[index].controller!
-                                //     .clear();
+                                controller.citiesControllers[index].controller!
+                                    .clear();
                                 controller.onSelect(entry.key);
 
                                 controller.contactAddress[index]['country'] =
                                     entry.key;
-                                // SuggestionsController().refresh();
                               },
                             );
                           },

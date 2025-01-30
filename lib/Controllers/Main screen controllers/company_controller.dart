@@ -11,7 +11,8 @@ import '../../consts.dart';
 class CompanyController extends GetxController {
   RxBool isScreenLoding = RxBool(true);
   TextEditingController companyName = TextEditingController();
-  TextEditingController typeOfBusiness = TextEditingController();
+  TextEditingController industry = TextEditingController();
+  RxString industryId = RxString('');
   TextEditingController userName = TextEditingController();
   TextEditingController password = TextEditingController();
   TextEditingController phoneNumber = TextEditingController();
@@ -32,16 +33,18 @@ class CompanyController extends GetxController {
   Uint8List? imageBytes = Uint8List(8);
   RxList roleIDFromList = RxList([]);
   RxMap allRoles = RxMap({});
-  RxList allCountries = RxList([]);
-  RxList allCities = RxList([]);
-  RxList filterdCitiesByCountry = RxList([]);
+  RxMap allCountries = RxMap({});
+  RxMap allCities = RxMap({});
+  RxMap filterdCitiesByCountry = RxMap({});
   RxString selectedCountryId = RxString('');
   RxString selectedCityId = RxString('');
   RxString logoUrl = RxString('');
+  RxMap industryMap = RxMap({});
 
   @override
   void onInit() {
     getCountriesAndCities().then((_) {
+      getIndustries();
       getResponsibilities();
       getCompanies();
     });
@@ -49,6 +52,26 @@ class CompanyController extends GetxController {
       filterCompanies();
     });
     super.onInit();
+  }
+
+// this function is to get industries
+  getIndustries() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'INDUSTRIES')
+        .get();
+
+    var typrId = typeDoc.docs.first.id;
+
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typrId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .snapshots()
+        .listen((business) {
+      industryMap.value = {for (var doc in business.docs) doc.id: doc.data()};
+    });
   }
 
   deletCompany(companyId) async {
@@ -122,7 +145,7 @@ class CompanyController extends GetxController {
           await FirebaseFirestore.instance.collection('companies').add({
         'company_logo': logoUrl.value,
         'company_name': companyName.text,
-        'type_of_business': typeOfBusiness.text,
+        'industry': industryId.value,
         'added_date': DateTime.now().toString(),
         'status': true,
         'contact_details': {
@@ -173,13 +196,13 @@ class CompanyController extends GetxController {
 
       var newCompanyData = {
         'company_name': companyName.text,
-        'type_of_business': typeOfBusiness.text,
+        'industry': industryId.value,
         'contact_details': {
           'address': address.text,
           'city': selectedCityId.value,
           'country': selectedCountryId.value,
           'phone': phoneNumber.text,
-          'user_id':userId,
+          'user_id': userId,
         }
       };
 
@@ -244,38 +267,30 @@ class CompanyController extends GetxController {
           .where('code', isEqualTo: 'CITIES')
           .get();
 
-      QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc =
-          countries.docs.first;
-      QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc
-          .reference
+      var countriesId = countries.docs.first.id;
+      var citiesId = cities.docs.first.id;
+
+      FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(countriesId)
           .collection('values')
           .where('available', isEqualTo: true)
-          .get();
-      QueryDocumentSnapshot<Map<String, dynamic>> citiesDoc = cities.docs.first;
-      QuerySnapshot<Map<String, dynamic>> cityValues = await citiesDoc.reference
+          .snapshots()
+          .listen((countries) {
+        allCountries.value = {
+          for (var doc in countries.docs) doc.id: doc.data()
+        };
+      });
+
+      FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(citiesId)
           .collection('values')
           .where('available', isEqualTo: true)
-          .get();
-      allCountries.value = [
-        for (var country in countryValues.docs)
-          {
-            'id': country.id,
-            'name': country.data()['name'],
-            'code': country.data()['code'],
-            'restricted_by': country.data()['restricted_by'],
-            'available': country.data()['available']
-          }
-      ];
-      allCities.value = [
-        for (var city in cityValues.docs)
-          {
-            'id': city.id,
-            'name': city.data()['name'],
-            'code': city.data()['code'],
-            'restricted_by': city.data()['restricted_by'],
-            'available': city.data()['available']
-          }
-      ];
+          .snapshots()
+          .listen((cities) {
+        allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+      });
       update();
     } catch (e) {
       // print(e);
@@ -284,45 +299,38 @@ class CompanyController extends GetxController {
 
   String? getCountryName(String countryId) {
     try {
-      final country = allCountries.firstWhere(
-        (country) => country['id'] == countryId,
-        orElse: () => 'No Country', // Returns null if no match is found
+      final country = allCountries.entries.firstWhere(
+        (country) => country.key == countryId,
       );
-      return country['name'];
+      return country.value['name'];
     } catch (e) {
-      return 'No Country';
+      return '';
     }
   }
 
-  String? getCityName(cityId) {
+  String? getCityName(String cityId) {
     try {
-      final city = allCities.firstWhere(
-        (city) => city['id'] == cityId,
-        orElse: () => 'No City',
+      final city = allCities.entries.firstWhere(
+        (city) => city.key == cityId,
       );
-      return city['name'];
+      return city.value['name'];
     } catch (e) {
-      return 'No City';
+      return '';
     }
   }
 
-  onSelect(bool isCountry, String selectedId) {
-    if (isCountry) {
-      filterdCitiesByCountry.clear();
-      city.clear();
-      filterdCitiesByCountry.assignAll(
-        allCities.where((city) {
-          return city['restricted_by']
+  void onSelect(String selectedId) {
+    filterdCitiesByCountry.clear();
+    filterdCitiesByCountry.addAll(
+      Map.fromEntries(
+        allCities.entries.where((entry) {
+          return entry.value['restricted_by']
               .toString()
               .toLowerCase()
               .contains(selectedId.toLowerCase());
-        }).toList(),
-      );
-      selectedCountryId.value = selectedId;
-      update();
-    } else {
-      selectedCityId.value = selectedId;
-    }
+        }),
+      ),
+    );
   }
 
   // this function is to select an image for logo

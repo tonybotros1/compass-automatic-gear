@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Main screen controllers/company_controller.dart';
-import '../Auth screens widgets/register widgets/drop_down_menu_for_lists.dart';
 import '../my_text_field.dart';
 import 'drop_down_menu.dart';
 
@@ -44,13 +44,31 @@ Widget addNewCompanyOrView({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: myTextFormField2(
-                  obscureText: false,
-                  controller: typeOfBusiness ?? controller.typeOfBusiness,
-                  labelText: 'Type Of Business',
-                  hintText: 'Enter type of business',
-                  validate: true,
-                ),
+                child: GetX<CompanyController>(builder: (controller) {
+                  final isIndustryLoading = controller.industryMap.isEmpty;
+                  return dropDownValues(
+                    textController: controller.industry,
+                    controller: controller.industry,
+                    labelText: 'Industry',
+                    hintText: 'Enter industry',
+                    validate: true,
+                    menus: isIndustryLoading ? {} : controller.industryMap,
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text('${suggestion['name']}'),
+                      );
+                    },
+                    onSelected: (suggestion) {
+                      controller.industry.text = '${suggestion['name']}';
+                      controller.industryMap.entries.where((entry) {
+                        return entry.value['name'] ==
+                            suggestion['name'].toString();
+                      }).forEach((entry) {
+                        controller.industryId.value = entry.key;
+                      });
+                    },
+                  );
+                }),
               ),
             ),
           ],
@@ -123,36 +141,70 @@ Widget addNewCompanyOrView({
             validate: true,
           ),
         ),
-        GetBuilder<CompanyController>(builder: (controller) {
+        GetX<CompanyController>(builder: (controller) {
+          final isCountriesLoading = controller.allCountries.isEmpty;
+
           return Row(
             children: [
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: dropDownValuesForList(
-                    isCoutry: true,
+                  child: dropDownValues(
                     labelText: 'Country',
                     hintText: 'Enter your country',
                     controller: controller,
-                    textController: controller.country,
+                    textController: country ?? controller.country,
                     validate: true,
-                    values: controller.allCountries,
+                    menus: isCountriesLoading ? {} : controller.allCountries,
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text('${suggestion['name']}'),
+                      );
+                    },
+                    onSelected: (suggestion) {
+                      controller.country.text = suggestion['name'];
+                      controller.allCountries.entries.where((entry) {
+                        return entry.value['name'] ==
+                            suggestion['name'].toString();
+                      }).forEach(
+                        (entry) {
+                          controller.onSelect(entry.key);
+                          controller.city.clear();
+                          controller.selectedCountryId.value = entry.key;
+                        },
+                      );
+                    },
                   ),
                 ),
               ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: dropDownValuesForList(
-                    isCoutry: false,
+                  child: dropDownValues(
+                    suggestionsController: SuggestionsController(),
+                    onTapForTypeAheadField: SuggestionsController().refresh,
                     labelText: 'City',
                     hintText: 'Enter your city',
                     controller: controller,
-                    textController: controller.city,
+                    textController: city ?? controller.city,
                     validate: true,
-                    values: controller.filterdCitiesByCountry.isEmpty
-                        ? []
+                    menus: controller.filterdCitiesByCountry.isEmpty
+                        ? {}
                         : controller.filterdCitiesByCountry,
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        title: Text('${suggestion['name']}'),
+                      );
+                    },
+                    onSelected: (suggestion) {
+                      controller.city.text = suggestion['name'];
+                      controller.allCities.entries.where((entry) {
+                        return entry.value['name'] ==
+                            suggestion['name'].toString();
+                      }).forEach((entry) {
+                        controller.selectedCityId.value = entry.key;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -186,7 +238,9 @@ Widget addNewCompanyOrView({
                         },
                         labelText: 'Responsibilities',
                         hintText: 'Select responsibility',
-                        menus: controller.allRoles,
+                        menus: controller.allRoles.isEmpty
+                            ? {}
+                            : controller.allRoles,
                         validate: true,
                       ),
                     ),
