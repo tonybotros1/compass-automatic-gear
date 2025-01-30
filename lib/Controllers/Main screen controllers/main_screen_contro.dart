@@ -34,6 +34,8 @@ class MainScreenController extends GetxController {
   RxString companyImageURL = RxString('');
   RxString companyName = RxString('');
   RxDouble menuWidth = RxDouble(250);
+  MyTreeNode? previouslySelectedNode;
+
   @override
   void onInit() {
     // init();

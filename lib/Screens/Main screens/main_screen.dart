@@ -294,13 +294,20 @@ class MainScreen extends StatelessWidget {
                     )
                   : Container(
                       width: null,
-                      // color: entry.node.isPressed == true
-                      //     ? Colors.grey.withOpacity(0.5)
-                      //     : null,
+                      color: entry.node.isPressed == true
+                          ? Colors.grey.withValues(alpha: (0.5))
+                          : null,
                       child: InkWell(
                         onTap: () {
-                          entry.node.isPressed = true;
+                          if (mainScreenController.previouslySelectedNode !=
+                              null) {
+                            mainScreenController
+                                .previouslySelectedNode!.isPressed = false;
+                          }
 
+                          entry.node.isPressed = true;
+                          mainScreenController.previouslySelectedNode =
+                              entry.node;
                           mainScreenController.treeController.rebuild();
                           mainScreenController.selectedScreen.value =
                               mainScreenController
