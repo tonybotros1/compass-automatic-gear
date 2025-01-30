@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -181,7 +182,7 @@ Widget responsibilities({
                             .validate()) {}
                     if (controller.userName.text.isNotEmpty &&
                         controller.companyName.text.isNotEmpty &&
-                        controller.typeOfBusiness.text.isNotEmpty &&
+                        controller.industry.text.isNotEmpty &&
                         controller.password.text.isNotEmpty &&
                         controller.phoneNumber.text.isNotEmpty &&
                         controller.email.text.isNotEmpty &&
@@ -222,7 +223,7 @@ Widget responsibilities({
 }
 
 Widget contactDetails({
-  required controller,
+  required RegisterScreenController controller,
 }) {
   return AnimatedContainer(
     height: 320,
@@ -317,14 +318,30 @@ Widget contactDetails({
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 2.5),
-                        child: dropDownValuesForList(
-                          isCoutry: true,
-                          labelText: 'Country',
-                          hintText: 'Enter your country',
-                          controller: controller,
+                        child: dropDownValues(
                           textController: controller.country,
+                          labelText: 'Country',
+                          hintText: 'Select Country',
+                          menus: controller.allCountries,
                           validate: true,
-                          values: controller.allCountries,
+                          itemBuilder: (context, suggestion) {
+                            return ListTile(
+                              title: Text('${suggestion['name']}'),
+                            );
+                          },
+                          onSelected: (suggestion) {
+                            controller.country.text = suggestion['name'];
+                            controller.allCountries.entries.where((entry) {
+                              return entry.value['name'] ==
+                                  suggestion['name'].toString();
+                            }).forEach(
+                              (entry) {
+                                controller.onSelect(entry.key);
+
+                                controller.selectedCountryId.value = entry.key;
+                              },
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -332,17 +349,31 @@ Widget contactDetails({
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 2.5),
-                        child: dropDownValuesForList(
-                          isCoutry: false,
-                          labelText: 'City',
-                          hintText: 'Enter your city',
-                          controller: controller,
-                          textController: controller.city,
-                          validate: true,
-                          values: controller.filterdCitiesByCountry.isEmpty
-                              ? []
-                              : controller.filterdCitiesByCountry,
-                        ),
+                        child: dropDownValues(
+                            suggestionsController: SuggestionsController(),
+                            onTapForTypeAheadField:
+                                SuggestionsController().refresh,
+                            textController: controller.city,
+                            labelText: 'City',
+                            hintText: 'Select City',
+                            menus: controller.filterdCitiesByCountry.isEmpty
+                                ? {}
+                                : controller.filterdCitiesByCountry,
+                            validate: true,
+                            itemBuilder: (context, suggestion) {
+                              return ListTile(
+                                title: Text('${suggestion['name']}'),
+                              );
+                            },
+                            onSelected: (suggestion) {
+                              controller.city.text = suggestion['name'];
+                              controller.allCities.entries.where((entry) {
+                                return entry.value['name'] ==
+                                    suggestion['name'].toString();
+                              }).forEach((entry) {
+                                controller.selectedCityId.value = entry.key;
+                              });
+                            }),
                       ),
                     ),
                   ],
@@ -380,7 +411,7 @@ Widget contactDetails({
   );
 }
 
-Widget companyDetails({required controller}) {
+Widget companyDetails({required RegisterScreenController controller}) {
   return AnimatedContainer(
     height: 230,
     duration: const Duration(milliseconds: 300),
@@ -411,12 +442,29 @@ Widget companyDetails({required controller}) {
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),
-                      child: myTextFormField2(
-                        labelText: 'Type Of Business',
-                        hintText: 'Enter type of business',
-                        controller: controller.typeOfBusiness,
+                      child: dropDownValues(
+                        textController: controller.industry,
+                        labelText: 'Industry',
+                        hintText: 'Enter industry',
+                        controller: controller.industry,
                         validate: true,
-                        obscureText: false,
+                        menus: controller.industryMap.isNotEmpty
+                            ? controller.industryMap
+                            : {},
+                        itemBuilder: (context, suggestion) {
+                          return ListTile(
+                            title: Text('${suggestion['name']}'),
+                          );
+                        },
+                        onSelected: (suggestion) {
+                          controller.industry.text = '${suggestion['name']}';
+                          controller.industryMap.entries.where((entry) {
+                            return entry.value['name'] ==
+                                suggestion['name'].toString();
+                          }).forEach((entry) {
+                            controller.industryID.value = entry.key;
+                          });
+                        },
                       ),
                     ),
                   ],
@@ -448,7 +496,7 @@ Widget companyDetails({required controller}) {
                                 size: 30,
                               )),
                             )
-                          : Image.memory(controller.imageBytes,
+                          : Image.memory(controller.imageBytes!,
                               fit: BoxFit.fitHeight),
                     ),
                   ),
@@ -468,14 +516,14 @@ Widget companyDetails({required controller}) {
                       if (!controller.formKeyForFirstMenu.currentState!
                               .validate() ||
                           controller.imageBytes == null ||
-                          controller.imageBytes.isEmpty) {
+                          controller.imageBytes!.isEmpty) {
                         // Handle the validation or warning
                         if (!controller.formKeyForFirstMenu.currentState!
                             .validate()) {
                           // Optionally add specific handling for form validation failure
                         }
                         if (controller.imageBytes == null ||
-                            controller.imageBytes.isEmpty) {
+                            controller.imageBytes!.isEmpty) {
                           controller.warningForImage.value = true;
                           controller.update();
                         }

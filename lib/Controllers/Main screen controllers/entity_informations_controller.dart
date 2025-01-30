@@ -97,7 +97,7 @@ class EntityInformationsController extends GetxController {
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
     getEntityType();
-    getTypeOfBusiness();
+    getIndustries();
     getTypeOfSocial();
     getPhoneTypes();
     getSalesMan();
@@ -561,10 +561,10 @@ class EntityInformationsController extends GetxController {
   }
 
 // this function is to get the business types
-  getTypeOfBusiness() async {
+  getIndustries() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
-        .where('code', isEqualTo: 'TYPE_OF_BUSINESS')
+        .where('code', isEqualTo: 'INDUSTRIES')
         .get();
 
     var typrId = typeDoc.docs.first.id;

@@ -98,13 +98,13 @@ Widget buildSmartField(EntityInformationsController controller,
                                   suggestion['name'].toString();
                             }).forEach(
                               (entry) {
-                                controller.citiesControllers[index].controller!
-                                    .clear();
+                                // controller.citiesControllers[index].controller!
+                                //     .clear();
                                 controller.onSelect(entry.key);
 
                                 controller.contactAddress[index]['country'] =
                                     entry.key;
-                                SuggestionsController().refresh();
+                                // SuggestionsController().refresh();
                               },
                             );
                           },

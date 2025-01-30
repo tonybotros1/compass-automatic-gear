@@ -16,7 +16,8 @@ import '../../consts.dart';
 class RegisterScreenController extends GetxController {
   RxInt selectedMenu = RxInt(0);
   TextEditingController companyName = TextEditingController();
-  TextEditingController typeOfBusiness = TextEditingController();
+  TextEditingController industry = TextEditingController();
+  RxString industryID = RxString('');
   TextEditingController userName = TextEditingController();
   TextEditingController password = TextEditingController();
   TextEditingController phoneNumber = TextEditingController();
@@ -26,9 +27,9 @@ class RegisterScreenController extends GetxController {
   TextEditingController city = TextEditingController();
   Uint8List? imageBytes;
   RxMap allRoles = RxMap({});
-  RxList allCountries = RxList([]);
-  RxList allCities = RxList([]);
-  RxList filterdCitiesByCountry = RxList([]);
+  RxMap allCountries = RxMap({});
+  RxMap allCities = RxMap({});
+  RxMap filterdCitiesByCountry = RxMap({});
   RxList roleIDFromList = RxList([]);
   RxBool addingProcess = RxBool(false);
   RxString logoUrl = RxString('');
@@ -40,6 +41,7 @@ class RegisterScreenController extends GetxController {
   RxString query = RxString('');
   RxString selectedCountryId = RxString('');
   RxString selectedCityId = RxString('');
+  RxMap industryMap = RxMap({});
 
   final menu = <MenuModel>[
     MenuModel(title: 'Company Details', isPressed: true),
@@ -50,30 +52,77 @@ class RegisterScreenController extends GetxController {
   @override
   void onInit() {
     getCountriesAndCities();
+    getIndustries();
     getResponsibilities();
 
     super.onInit();
   }
 
-  onSelect(bool isCountry, String selectedId) {
-    if (isCountry) {
-      filterdCitiesByCountry.clear();
-      city.clear();
-      filterdCitiesByCountry.assignAll(
-        allCities.where((city) {
-          return city['restricted_by']
+  void onSelect(String selectedId) {
+    filterdCitiesByCountry.clear();
+    filterdCitiesByCountry.addAll(
+      Map.fromEntries(
+        allCities.entries.where((entry) {
+          return entry.value['restricted_by']
               .toString()
               .toLowerCase()
               .contains(selectedId.toLowerCase());
-        }).toList(),
-      );
-      selectedCountryId.value = selectedId;
-      update();
-    } else {
-      selectedCityId.value = selectedId;
-    }
+        }),
+      ),
+    );
+    update();
   }
 
+  // getCountriesAndCities() async {
+  //   try {
+  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'COUNTRIES')
+  //         .get();
+  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'CITIES')
+  //         .get();
+
+  //     QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc =
+  //         countries.docs.first;
+  //     QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc
+  //         .reference
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .get();
+  //     QueryDocumentSnapshot<Map<String, dynamic>> citiesDoc = cities.docs.first;
+  //     QuerySnapshot<Map<String, dynamic>> cityValues = await citiesDoc.reference
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .get();
+  //     allCountries.value = [
+  //       for (var country in countryValues.docs)
+  //         {
+  //           'id': country.id,
+  //           'name': country.data()['name'],
+  //           'code': country.data()['code'],
+  //           'restricted_by': country.data()['restricted_by'],
+  //           'available': country.data()['available']
+  //         }
+  //     ];
+  //     allCities.value = [
+  //       for (var city in cityValues.docs)
+  //         {
+  //           'id': city.id,
+  //           'name': city.data()['name'],
+  //           'code': city.data()['code'],
+  //           'restricted_by': city.data()['restricted_by'],
+  //           'available': city.data()['available']
+  //         }
+  //     ];
+  //     update();
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
 
   getCountriesAndCities() async {
     try {
@@ -88,38 +137,30 @@ class RegisterScreenController extends GetxController {
           .where('code', isEqualTo: 'CITIES')
           .get();
 
-      QueryDocumentSnapshot<Map<String, dynamic>> countriesDoc =
-          countries.docs.first;
-      QuerySnapshot<Map<String, dynamic>> countryValues = await countriesDoc
-          .reference
+      var countriesId = countries.docs.first.id;
+      var citiesId = cities.docs.first.id;
+
+      FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(countriesId)
           .collection('values')
           .where('available', isEqualTo: true)
-          .get();
-      QueryDocumentSnapshot<Map<String, dynamic>> citiesDoc = cities.docs.first;
-      QuerySnapshot<Map<String, dynamic>> cityValues = await citiesDoc.reference
+          .snapshots()
+          .listen((countries) {
+        allCountries.value = {
+          for (var doc in countries.docs) doc.id: doc.data()
+        };
+      });
+
+      FirebaseFirestore.instance
+          .collection('all_lists')
+          .doc(citiesId)
           .collection('values')
           .where('available', isEqualTo: true)
-          .get();
-      allCountries.value = [
-        for (var country in countryValues.docs)
-          {
-            'id': country.id,
-            'name': country.data()['name'],
-            'code': country.data()['code'],
-            'restricted_by': country.data()['restricted_by'],
-            'available': country.data()['available']
-          }
-      ];
-      allCities.value = [
-        for (var city in cityValues.docs)
-          {
-            'id': city.id,
-            'name': city.data()['name'],
-            'code': city.data()['code'],
-            'restricted_by': city.data()['restricted_by'],
-            'available': city.data()['available']
-          }
-      ];
+          .snapshots()
+          .listen((cities) {
+        allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+      });
       update();
     } catch (e) {
       // print(e);
@@ -233,9 +274,8 @@ class RegisterScreenController extends GetxController {
       }
 
       if (imageBytes != null && imageBytes!.isNotEmpty) {
-        final Reference storageRef = FirebaseStorage.instance
-            .ref()
-            .child('images/${formatPhrase(companyName.text)}_${DateTime.now()}.png');
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+            'images/${formatPhrase(companyName.text)}_${DateTime.now()}.png');
         final UploadTask uploadTask = storageRef.putData(
           imageBytes!,
           SettableMetadata(contentType: 'image/png'),
@@ -254,7 +294,7 @@ class RegisterScreenController extends GetxController {
           await FirebaseFirestore.instance.collection('companies').add({
         'company_logo': logoUrl.value,
         'company_name': companyName.text,
-        'type_of_business': typeOfBusiness.text,
+        'industry': industryID.value,
         'added_date': DateTime.now().toString(),
         'status': true,
         'contact_details': {
@@ -324,5 +364,25 @@ class RegisterScreenController extends GetxController {
       default:
         return const Text('4');
     }
+  }
+
+// this function is to get the industries
+  getIndustries() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'INDUSTRIES')
+        .get();
+
+    var typrId = typeDoc.docs.first.id;
+
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typrId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .snapshots()
+        .listen((business) {
+      industryMap.value = {for (var doc in business.docs) doc.id: doc.data()};
+    });
   }
 }
