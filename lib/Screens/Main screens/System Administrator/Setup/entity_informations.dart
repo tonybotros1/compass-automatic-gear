@@ -101,14 +101,8 @@ Widget tableOfScreens(
       ),
       DataColumn(
         label: AutoSizedText(
+          text: 'Phone',
           constraints: constraints,
-          text: 'Code',
-        ),
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Status',
         ),
         onSort: controller.onSort,
       ),
@@ -150,27 +144,13 @@ DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
     DataCell(Text(
       entityData['entity_name'] ?? 'no name',
     )),
-    DataCell(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            entityData['entity_code'][0] ?? '',
-          ),
-          entityData['entity_code'].length == 2
-              ? Text(
-                  entityData['entity_code'][1] ?? '',
-                )
-              : SizedBox(),
-        ],
-      ),
-    ),
-    DataCell(
-      Text(
-        entityData['entity_status'] ?? '',
-      ),
-    ),
+    DataCell(Text(
+      (entityData['entity_phone'] as List)
+              .map((phoneData) => phoneData['number'])
+              .take(2) // Show only the first 3 numbers
+              .join('/') +
+          ((entityData['entity_phone'].length > 2) ? '...' : ''),
+    )),
     DataCell(
       Text(
         entityData['added_date'] != null && entityData['added_date'] != ''
@@ -181,8 +161,9 @@ DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        activeInActiveSection(controller, entityData, entityId),
         Padding(
-          padding: const EdgeInsets.only(right: 5),
+          padding: const EdgeInsets.only(right: 5, left: 5),
           child: editSection(
               context, controller, entityData, constraints, entityId),
         ),
@@ -190,6 +171,23 @@ DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
       ],
     )),
   ]);
+}
+
+ElevatedButton activeInActiveSection(EntityInformationsController controller,
+    Map<String, dynamic> entityData, String entityId) {
+  return ElevatedButton(
+      style: entityData['status'] == false
+          ? inActiveButtonStyle
+          : activeButtonStyle,
+      onPressed: () {
+        bool status;
+        entityData['status'] == false ? status = true : status = false;
+
+        controller.changeEntityStatus(entityId, status);
+      },
+      child: entityData['status'] == true
+          ? const Text('Active')
+          : const Text('Inactive'));
 }
 
 ElevatedButton deleteSection(

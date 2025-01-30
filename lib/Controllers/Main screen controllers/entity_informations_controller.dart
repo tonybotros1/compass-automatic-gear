@@ -199,6 +199,7 @@ class EntityInformationsController extends GetxController {
         'entity_social': contactSocial,
         'added_date': DateTime.now().toString(),
         'company_id': companyId,
+        'status': true,
       });
       addingNewEntity.value = false;
       Get.back();
@@ -248,6 +249,18 @@ class EntityInformationsController extends GetxController {
       Get.back();
     } catch (e) {
       addingNewEntity.value = false;
+    }
+  }
+
+// this functions is to change the user status from active / inactive
+  changeEntityStatus(String entityId, bool status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('entity_informations')
+          .doc(entityId)
+          .update({'status': status});
+    } catch (e) {
+      //
     }
   }
 
@@ -752,23 +765,14 @@ class EntityInformationsController extends GetxController {
     } else {
       filteredEntities.assignAll(
         allEntities.where((entity) {
-          return entity['entity_name']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
-              entity['entity_status'][0]
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
-              entity['entity_code'][0]
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
-              (entity['entity_code'].length > 1 &&
-                  entity['entity_code'][1]
-                      .toString()
-                      .toLowerCase()
-                      .contains(query));
+          bool nameMatches =
+              entity['entity_name'].toString().toLowerCase().contains(query);
+
+          // Check if any phone number in entity_phone contains the query
+          bool phoneMatches = (entity['entity_phone'] as List).any(
+              (phoneData) => phoneData['number'].toString().contains(query));
+
+          return nameMatches || phoneMatches;
         }).toList(),
       );
     }
