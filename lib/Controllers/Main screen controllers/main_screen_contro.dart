@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/screen_tree_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../Screens/Main screens/System Administrator/Setup/branches.dart';
 import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../Screens/Main screens/System Administrator/Setup/system_variables.dart';
@@ -95,6 +96,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Counters());
       case '/currencies':
         return const SizedBox(child: Currency());
+      case '/branches':
+        return const SizedBox(child: Branches());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../Controllers/Main screen controllers/currency_controller.dart';
+import '../../../../Controllers/Main screen controllers/branches_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/currencies_widgets/add_new_currency_or_edit.dart';
+import '../../../../Widgets/main screen widgets/branches_widgets/add_new_branch_or_edit.dart';
 import '../../../../consts.dart';
 
-class Currency extends StatelessWidget {
-  const Currency({super.key});
+class Branches extends StatelessWidget {
+  const Branches({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,29 +26,29 @@ class Currency extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  GetX<CurrencyController>(
-                    init: CurrencyController(),
+                  GetX<BranchesController>(
+                    init: BranchesController(),
                     builder: (controller) {
                       return searchBar(
                         search: controller.search,
                         constraints: constraints,
                         context: context,
                         controller: controller,
-                        title: 'Search for currencies',
+                        title: 'Search for branches',
                         button:
-                            newCurrencyButton(context, constraints, controller),
+                            newBranchesButton(context, constraints, controller),
                       );
                     },
                   ),
                   Expanded(
-                    child: GetX<CurrencyController>(
+                    child: GetX<BranchesController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
                         }
-                        if (controller.allCurrencies.isEmpty) {
+                        if (controller.allBranches.isEmpty) {
                           return const Center(
                             child: Text('No Element'),
                           );
@@ -81,7 +81,7 @@ class Currency extends StatelessWidget {
 Widget tableOfScreens(
     {required constraints,
     required context,
-    required CurrencyController controller}) {
+    required BranchesController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -110,13 +110,6 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Rate',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
           text: 'Creation Date',
         ),
         onSort: controller.onSort,
@@ -129,112 +122,113 @@ Widget tableOfScreens(
         ),
       ),
     ],
-    rows: controller.filteredCurrencies.isEmpty &&
+    rows: controller.filteredBranches.isEmpty &&
             controller.search.value.text.isEmpty
-        ? controller.allCurrencies.map<DataRow>((currency) {
-            final currencyData = currency.data() as Map<String, dynamic>;
-            final currencyId = currency.id;
+        ? controller.allBranches.map<DataRow>((branch) {
+            final branchData = branch.data() as Map<String, dynamic>;
+            final branchId = branch.id;
             return dataRowForTheTable(
-                currencyData, context, constraints, currencyId, controller);
+                branchData, context, constraints, branchId, controller);
           }).toList()
-        : controller.filteredCurrencies.map<DataRow>((currency) {
-            final currencyData = currency.data() as Map<String, dynamic>;
-            final currencyId = currency.id;
+        : controller.filteredBranches.map<DataRow>((branch) {
+            final branchData = branch.data() as Map<String, dynamic>;
+            final branchId = branch.id;
             return dataRowForTheTable(
-                currencyData, context, constraints, currencyId, controller);
+                branchData, context, constraints, branchId, controller);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> currencyData, context,
-    constraints, currencyId, CurrencyController controller) {
+DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
+    constraints, branchId, BranchesController controller) {
   return DataRow(cells: [
     DataCell(Text(
-      currencyData['code'] ?? 'no code',
+      branchData['code'] ?? 'no code',
     )),
     DataCell(
       Text(
-        currencyData['name'] ?? 'no name',
+        branchData['name'] ?? 'no name',
       ),
     ),
     DataCell(
       Text(
-        '${currencyData['rate']}',
-      ),
-    ),
-    DataCell(
-      Text(
-        currencyData['added_date'] != null && currencyData['added_date'] != ''
-            ? textToDate(currencyData['added_date']) //
+        branchData['added_date'] != null && branchData['added_date'] != ''
+            ? textToDate(branchData['added_date']) //
             : 'N/A',
       ),
     ),
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        activeInActiveSection(controller, currencyData, currencyId),
+        activeInActiveSection(controller, branchData, branchId),
         Padding(
           padding: const EdgeInsets.only(right: 5, left: 5),
           child: editSection(
-              context, controller, currencyData, constraints, currencyId),
+              context, controller, branchData, constraints, branchId),
         ),
-        deleteSection(controller, currencyId, context),
+        deleteSection(controller, branchId, context),
       ],
     )),
   ]);
 }
 
-ElevatedButton activeInActiveSection(CurrencyController controller,
-    Map<String, dynamic> currencyData, String currencyId) {
+ElevatedButton activeInActiveSection(BranchesController controller,
+    Map<String, dynamic> branchData, String branchId) {
   return ElevatedButton(
-      style: currencyData['status'] == false
+      style: branchData['status'] == false
           ? inActiveButtonStyle
           : activeButtonStyle,
       onPressed: () {
         bool status;
-        if (currencyData['status'] == false) {
+        if (branchData['status'] == false) {
           status = true;
         } else {
           status = false;
         }
-        controller.changeCurrencyStatus(currencyId, status);
+        controller.changeBranchStatus(branchId, status);
       },
-      child: currencyData['status'] == true
+      child: branchData['status'] == true
           ? const Text('Active')
           : const Text('Inactive'));
 }
 
-ElevatedButton deleteSection(
-    CurrencyController controller, currencyId, context) {
+ElevatedButton deleteSection(BranchesController controller, branchId, context) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
         alertDialog(
             context: context,
             controller: controller,
-            content: "The currency will be deleted permanently",
+            content: "The branch will be deleted permanently",
             onPressed: () {
-              controller.deleteCurrency(currencyId);
+              controller.deleteBranch(branchId);
             });
       },
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, CurrencyController controller,
-    Map<String, dynamic> currencyData, constraints, currencyId) {
+ElevatedButton editSection(context, BranchesController controller,
+    Map<String, dynamic> branchData, constraints, branchId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
         showDialog(
             context: context,
             builder: (context) {
-              controller.code.text = currencyData['code'] ?? '';
-              controller.name.text = currencyData['name'] ?? '';
-              controller.rate.text = (currencyData['rate'] ?? '').toString();
+              controller.onSelect(branchData['country_id']);
+              controller.code.text = branchData['code'] ?? '';
+              controller.name.text = branchData['name'] ?? '';
+              controller.line.text = branchData['line'] ?? '';
+              controller.country.text =
+                  controller.getCountryName(branchData['country_id'])!;
+              controller.city.text =
+                  controller.getCityName(branchData['city_id'])!;
+              controller.countryId.value = branchData['country_id'];
+              controller.cityId.value = branchData['city_id'];
 
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewCurrencyOrEdit(
+                content: addNewBranchOrEdit(
                   controller: controller,
                   constraints: constraints,
                   context: context,
@@ -246,7 +240,7 @@ ElevatedButton editSection(context, CurrencyController controller,
                       onPressed: controller.addingNewValue.value
                           ? null
                           : () {
-                              controller.editCurrency(currencyId);
+                              controller.editBranch(branchId);
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -283,32 +277,36 @@ ElevatedButton editSection(context, CurrencyController controller,
       child: const Text('Edit'));
 }
 
-ElevatedButton newCurrencyButton(BuildContext context,
-    BoxConstraints constraints, CurrencyController controller) {
+ElevatedButton newBranchesButton(BuildContext context,
+    BoxConstraints constraints, BranchesController controller) {
   return ElevatedButton(
     onPressed: () {
       controller.code.clear();
       controller.name.clear();
-      controller.rate.clear();
+      controller.line.clear();
+      controller.country.clear();
+      controller.countryId.value = '';
+      controller.city.clear();
+      controller.cityId.value = '';
       showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
               actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewCurrencyOrEdit(
+              content: addNewBranchOrEdit(
                 controller: controller,
                 constraints: constraints,
                 context: context,
               ),
               actions: [
-                GetX<CurrencyController>(
+                GetX<BranchesController>(
                     builder: (controller) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ElevatedButton(
                             onPressed: controller.addingNewValue.value
                                 ? null
                                 : () async {
-                                    await controller.addNewCurrency();
+                                    await controller.addNewBranch();
                                   },
                             style: saveButtonStyle,
                             child: controller.addingNewValue.value == false
@@ -340,6 +338,6 @@ ElevatedButton newCurrencyButton(BuildContext context,
           });
     },
     style: newButtonStyle,
-    child: const Text('New Currency'),
+    child: const Text('New Branch'),
   );
 }
