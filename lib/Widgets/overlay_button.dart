@@ -30,7 +30,8 @@ class SmartInfoOverlayState extends State<SmartInfoOverlay> {
   OverlayEntry? _overlayEntry;
 
   void showOverlay() {
-    final renderBox = _triggerKey.currentContext?.findRenderObject() as RenderBox?;
+    final renderBox =
+        _triggerKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
 
     final buttonPosition = renderBox.localToGlobal(Offset.zero);
@@ -55,7 +56,7 @@ class SmartInfoOverlayState extends State<SmartInfoOverlay> {
             top: position.top,
             child: Material(
               elevation: widget.elevation,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(15),
               child: Container(
                 width: position.width,
                 constraints: BoxConstraints(
@@ -64,7 +65,7 @@ class SmartInfoOverlayState extends State<SmartInfoOverlay> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: widget.backgroundColor,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(15),
                 ),
                 child: SingleChildScrollView(
                   child: widget.overlayContent(dismissOverlay),
@@ -98,13 +99,15 @@ class SmartInfoOverlayState extends State<SmartInfoOverlay> {
     );
 
     // Calculate vertical position
-    final verticalSpaceBelow = screenSize.height - buttonPosition.dy - buttonSize.height;
+    final verticalSpaceBelow =
+        screenSize.height - buttonPosition.dy - buttonSize.height;
     final verticalSpaceAbove = buttonPosition.dy;
 
     double topPosition;
     if (verticalSpaceBelow > 100 || verticalSpaceBelow > verticalSpaceAbove) {
       // Show below if enough space or more space below than above
-      topPosition = buttonPosition.dy + buttonSize.height + widget.verticalOffset;
+      topPosition =
+          buttonPosition.dy + buttonSize.height + widget.verticalOffset;
     } else {
       // Show above if not enough space below
       topPosition = buttonPosition.dy - widget.verticalOffset - 100;

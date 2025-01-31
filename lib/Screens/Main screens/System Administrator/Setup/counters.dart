@@ -354,6 +354,6 @@ ElevatedButton newCounterButton(BuildContext context,
           });
     },
     style: newButtonStyle,
-    child: const Text('New Sale Man'),
+    child: const Text('New Counter'),
   );
 }
