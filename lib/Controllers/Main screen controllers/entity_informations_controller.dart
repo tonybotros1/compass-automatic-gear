@@ -38,13 +38,11 @@ class EntityInformationsController extends GetxController {
   RxBool addingNewEntity = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-
   RxBool isVendorSelected = RxBool(false);
   RxBool isCustomerSelected = RxBool(false);
   RxBool isCompanySelected = RxBool(false);
   RxBool isIndividualSelected = RxBool(false);
   RxString logoUrl = RxString('');
-
   RxMap industryMap = RxMap({});
   RxMap salesManMap = RxMap({});
   RxMap entityTypeMap = RxMap({});

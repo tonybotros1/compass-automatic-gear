@@ -175,6 +175,7 @@ class BranchesController extends GetxController {
     try {
       FirebaseFirestore.instance
           .collection('branches')
+          .where('company_id', isEqualTo: companyId.value)
           .snapshots()
           .listen((branches) {
         allBranches.assignAll(branches.docs);

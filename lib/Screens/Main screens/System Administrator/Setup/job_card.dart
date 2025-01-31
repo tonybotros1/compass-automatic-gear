@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
+import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../consts.dart';
 
-class EntityInformations extends StatelessWidget {
-  const EntityInformations({super.key});
+class JobCard extends StatelessWidget {
+  const JobCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,35 +26,36 @@ class EntityInformations extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  GetX<EntityInformationsController>(
-                    init: EntityInformationsController(),
+                  GetX<JobCardController>(
+                    init: JobCardController(),
                     builder: (controller) {
                       return searchBar(
                         search: controller.search,
                         constraints: constraints,
                         context: context,
                         controller: controller,
-                        title: 'Search for Entities',
+                        title: 'Search for job cards',
                         button:
-                            newContactButton(context, constraints, controller),
+                            newJobCardButton(context, constraints, controller),
                       );
                     },
                   ),
                   Expanded(
-                    child: GetX<EntityInformationsController>(
+                    child: GetX<JobCardController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
                         }
-                        if (controller.allEntities.isEmpty) {
+                        if (controller.allJobCards.isEmpty) {
                           return const Center(
                             child: Text('No Element'),
                           );
                         }
                         return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
+                          scrollDirection: Axis
+                              .vertical, // Horizontal scrolling for the table
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
@@ -77,10 +78,11 @@ class EntityInformations extends StatelessWidget {
   }
 }
 
+
 Widget tableOfScreens(
     {required constraints,
     required context,
-    required EntityInformationsController controller}) {
+    required JobCardController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -94,15 +96,15 @@ Widget tableOfScreens(
     columns: [
       DataColumn(
         label: AutoSizedText(
-          text: 'Name',
+          text: 'Code',
           constraints: constraints,
         ),
         onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(
-          text: 'Phone',
           constraints: constraints,
+          text: 'Name',
         ),
         onSort: controller.onSort,
       ),
@@ -121,126 +123,113 @@ Widget tableOfScreens(
         ),
       ),
     ],
-    rows: controller.filteredEntities.isEmpty &&
+    rows: controller.filteredJobCards.isEmpty &&
             controller.search.value.text.isEmpty
-        ? controller.allEntities.map<DataRow>((entity) {
-            final entityData = entity.data() as Map<String, dynamic>;
-            final entityId = entity.id;
+        ? controller.allJobCards.map<DataRow>((branch) {
+            final branchData = branch.data() as Map<String, dynamic>;
+            final branchId = branch.id;
             return dataRowForTheTable(
-                entityData, context, constraints, entityId, controller);
+                branchData, context, constraints, branchId, controller);
           }).toList()
-        : controller.filteredEntities.map<DataRow>((entity) {
-            final entityData = entity.data() as Map<String, dynamic>;
-            final entityId = entity.id;
+        : controller.filteredJobCards.map<DataRow>((branch) {
+            final branchData = branch.data() as Map<String, dynamic>;
+            final branchId = branch.id;
             return dataRowForTheTable(
-                entityData, context, constraints, entityId, controller);
+                branchData, context, constraints, branchId, controller);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
-    constraints, entityId, EntityInformationsController controller) {
+DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
+    constraints, branchId, JobCardController controller) {
   return DataRow(cells: [
     DataCell(Text(
-      entityData['entity_name'] ?? 'no name',
-    )),
-    DataCell(Text(
-      (entityData['entity_phone'] as List)
-              .map((phoneData) => phoneData['number'])
-              .take(2) // Show only the first 3 numbers
-              .join('/') +
-          ((entityData['entity_phone'].length > 2) ? '...' : ''),
+      branchData['code'] ?? 'no code',
     )),
     DataCell(
       Text(
-        entityData['added_date'] != null && entityData['added_date'] != ''
-            ? textToDate(entityData['added_date']) //
+        branchData['name'] ?? 'no name',
+      ),
+    ),
+    DataCell(
+      Text(
+        branchData['added_date'] != null && branchData['added_date'] != ''
+            ? textToDate(branchData['added_date']) //
             : 'N/A',
       ),
     ),
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        activeInActiveSection(controller, entityData, entityId),
+        activeInActiveSection(controller, branchData, branchId),
         Padding(
           padding: const EdgeInsets.only(right: 5, left: 5),
           child: editSection(
-              context, controller, entityData, constraints, entityId),
+              context, controller, branchData, constraints, branchId),
         ),
-        deleteSection(controller, entityId, context),
+        deleteSection(controller, branchId, context),
       ],
     )),
   ]);
 }
 
-ElevatedButton activeInActiveSection(EntityInformationsController controller,
-    Map<String, dynamic> entityData, String entityId) {
+ElevatedButton activeInActiveSection(JobCardController controller,
+    Map<String, dynamic> branchData, String branchId) {
   return ElevatedButton(
-      style: entityData['status'] == false
+      style: branchData['status'] == false
           ? inActiveButtonStyle
           : activeButtonStyle,
       onPressed: () {
         bool status;
-        entityData['status'] == false ? status = true : status = false;
-
-        controller.changeEntityStatus(entityId, status);
+        if (branchData['status'] == false) {
+          status = true;
+        } else {
+          status = false;
+        }
+        // controller.changeBranchStatus(branchId, status);
       },
-      child: entityData['status'] == true
+      child: branchData['status'] == true
           ? const Text('Active')
           : const Text('Inactive'));
 }
 
-ElevatedButton deleteSection(
-    EntityInformationsController controller, entityId, context) {
+ElevatedButton deleteSection(JobCardController controller, branchId, context) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
         alertDialog(
             context: context,
             controller: controller,
-            content: "The entity will be deleted permanently",
+            content: "The branch will be deleted permanently",
             onPressed: () {
-              controller.deleteEntity(entityId);
+              // controller.deleteBranch(branchId);
             });
       },
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, EntityInformationsController controller,
-    Map<String, dynamic> entityData, constraints, entityId) {
+ElevatedButton editSection(context, JobCardController controller,
+    Map<String, dynamic> branchData, constraints, branchId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        controller.imageBytes = null;
-        controller.entityName.text = entityData['entity_name'];
-        controller.entityCode.clear();
-        controller.isCustomerSelected.value = false;
-        controller.isVendorSelected.value = false;
-        controller.updateEntityCode(entityData['entity_code']);
-        controller.creditLimit.text =
-            (entityData['credit_limit'] ?? '').toString();
-        controller.salesMAn.value.text =
-            controller.getSaleManName(entityData['sales_man'])!;
-        controller.salesManId.value = entityData['sales_man'];
-        controller.updateEntityStatus(entityData['entity_status']);
-        controller.groupName.text = entityData['group_name'];
-        controller.industry.value.text =
-            controller.getIndustryName(entityData['industry'])!;
-        controller.industryId.value = entityData['industry'];
-        controller.trn.text = entityData['trn'];
-        controller.entityType.value.text =
-            controller.getEntityTypeName(entityData['entity_type'])!;
-        controller.entityTypeId.value = entityData['entity_type'];
-        controller.logoUrl.value = entityData['entity_picture'];
-        controller.updateEntityAddress(entityData['entity_address']);
-        controller.updateEntityPhone(entityData['entity_phone']);
-        controller.updateEntitySocial(entityData['entity_social']);
         showDialog(
             context: context,
             builder: (context) {
+              // controller.onSelect(branchData['country_id']);
+              // controller.code.text = branchData['code'] ?? '';
+              // controller.name.text = branchData['name'] ?? '';
+              // controller.line.text = branchData['line'] ?? '';
+              // controller.country.text =
+              //     controller.getCountryName(branchData['country_id'])!;
+              // controller.city.text =
+              //     controller.getCityName(branchData['city_id'])!;
+              // controller.countryId.value = branchData['country_id'];
+              // controller.cityId.value = branchData['city_id'];
+
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewEntityOrEdit(
+                content: addNewJobCardOrEdit(
                   controller: controller,
                   constraints: constraints,
                   context: context,
@@ -249,10 +238,10 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: ElevatedButton(
-                      onPressed: controller.addingNewEntity.value
+                      onPressed: controller.addingNewValue.value
                           ? null
                           : () {
-                              controller.editEntity(entityId);
+                              // controller.editBranch(branchId);
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -260,7 +249,7 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                      child: controller.addingNewEntity.value == false
+                      child: controller.addingNewValue.value == false
                           ? const Text(
                               'Save',
                               style: TextStyle(color: Colors.white),
@@ -289,33 +278,40 @@ ElevatedButton editSection(context, EntityInformationsController controller,
       child: const Text('Edit'));
 }
 
-ElevatedButton newContactButton(BuildContext context,
-    BoxConstraints constraints, EntityInformationsController controller) {
+
+ElevatedButton newJobCardButton(BuildContext context,
+    BoxConstraints constraints, JobCardController controller) {
   return ElevatedButton(
     onPressed: () {
-      controller.clearAllVariables();
+      // controller.code.clear();
+      // controller.name.clear();
+      // controller.line.clear();
+      // controller.country.clear();
+      // controller.countryId.value = '';
+      // controller.city.clear();
+      // controller.cityId.value = '';
       showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
               actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewEntityOrEdit(
+              content: addNewJobCardOrEdit(
                 controller: controller,
                 constraints: constraints,
                 context: context,
               ),
               actions: [
-                GetX<EntityInformationsController>(
+                GetX<JobCardController>(
                     builder: (controller) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ElevatedButton(
-                            onPressed: controller.addingNewEntity.value
+                            onPressed: controller.addingNewValue.value
                                 ? null
                                 : () async {
-                                    await controller.addNewEntity();
+                                    // await controller.addNewBranch();
                                   },
                             style: saveButtonStyle,
-                            child: controller.addingNewEntity.value == false
+                            child: controller.addingNewValue.value == false
                                 ? const Text(
                                     'Save',
                                     style: TextStyle(color: Colors.white),
@@ -344,6 +340,6 @@ ElevatedButton newContactButton(BuildContext context,
           });
     },
     style: newButtonStyle,
-    child: const Text('New Entity'),
+    child: const Text('New Job Card'),
   );
 }
