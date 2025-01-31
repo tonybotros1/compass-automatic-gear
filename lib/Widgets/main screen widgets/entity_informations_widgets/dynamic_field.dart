@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../Models/dynamic_field_models.dart';
 import '../drop_down_menu.dart';
@@ -28,6 +29,8 @@ Widget dynamicFields({
                     onSelected: config.dropdownConfig?.onSelected,
                   )
                 : typeSection(
+                  isnumber:config.fieldConfig?.isnumber  ,
+                  isEnabled:config.fieldConfig?.isEnabled ,
                   textController: config.fieldConfig?.textController,
                     labelText: config.fieldConfig?.labelText ?? '',
                     hintText: config.fieldConfig?.hintText ?? '',
@@ -46,8 +49,13 @@ TextFormField typeSection(
     String? hintText,
     bool? validate,
     TextEditingController? textController,
+    bool? isEnabled,
+    bool? isnumber,
     void Function(String)? onChanged}) {
   return TextFormField(
+    inputFormatters:
+        isnumber == true ? [FilteringTextInputFormatter.digitsOnly] : null,
+    enabled: isEnabled,
     controller: textController,
     onChanged: onChanged,
     decoration: InputDecoration(

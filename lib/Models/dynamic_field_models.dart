@@ -26,6 +26,7 @@ class DropdownConfig {
   final TextEditingController? textController;
   final SuggestionsController<dynamic>? suggestionsController;
   final void Function()? onTap;
+  final bool? isEnabled;
 
   DropdownConfig(
       {required this.labelText,
@@ -37,6 +38,7 @@ class DropdownConfig {
       this.onSelected,
       this.textController,
       this.suggestionsController,
+      this.isEnabled,
       this.onTap});
 }
 
@@ -47,6 +49,8 @@ class FieldConfig {
   final int flex;
   final void Function(String)? onChanged;
   final TextEditingController? textController;
+  final bool? isEnabled;
+  final bool? isnumber;
 
   FieldConfig({
     this.labelText,
@@ -55,5 +59,7 @@ class FieldConfig {
     this.flex = 1,
     this.onChanged,
     this.textController,
+    this.isEnabled,
+    this.isnumber,
   });
 }

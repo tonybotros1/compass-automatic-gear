@@ -11,9 +11,16 @@ class JobCardController extends GetxController {
   TextEditingController carModel = TextEditingController();
   TextEditingController country = TextEditingController();
   TextEditingController city = TextEditingController();
+  TextEditingController year = TextEditingController();
+  TextEditingController vin = TextEditingController();
+  TextEditingController color = TextEditingController();
+  Rx<TextEditingController> mileageIn = TextEditingController(text: '0').obs;
+  Rx<TextEditingController> mileageOut = TextEditingController(text: '0').obs;
+  Rx<TextEditingController> inOutDiff = TextEditingController(text: '0').obs;
   RxString carBrandId = RxString('');
   RxString carModelId = RxString('');
   RxString countryId = RxString('');
+  RxString colorId = RxString('');
   RxString cityId = RxString('');
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
@@ -29,6 +36,7 @@ class JobCardController extends GetxController {
   RxMap allCountries = RxMap({});
   RxMap filterdCitiesByCountry = RxMap({});
   RxMap allCities = RxMap({});
+  RxMap allColors = RxMap({});
 
   RxMap allBrands = RxMap({});
   RxMap filterdModelsByBrands = RxMap({});
@@ -39,6 +47,7 @@ class JobCardController extends GetxController {
     super.onInit();
     await getCompanyId();
     await getCurrentJobCardCounterNumber();
+    getColors();
     getCarsModelsAndBrands();
     getCountriesAndCities();
     getAllJobCards();
@@ -47,6 +56,32 @@ class JobCardController extends GetxController {
   getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
+  }
+
+  inOutDiffCalculating() {
+    inOutDiff.value.text =
+        (int.parse(mileageIn.value.text) - int.parse(mileageOut.value.text))
+            .toString();
+  }
+
+// this function is to get industries
+  getColors() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'COLORS')
+        .get();
+
+    var typrId = typeDoc.docs.first.id;
+
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typrId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .snapshots()
+        .listen((colors) {
+      allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
+    });
   }
 
   getCurrentJobCardCounterNumber() async {
@@ -240,6 +275,19 @@ class JobCardController extends GetxController {
         }),
       ),
     );
-    print(filterdModelsByBrands);
+  }
+
+  void onSelectForCountryAndCity(String selectedId) {
+    filterdCitiesByCountry.clear();
+    filterdCitiesByCountry.addAll(
+      Map.fromEntries(
+        allCities.entries.where((entry) {
+          return entry.value['restricted_by']
+              .toString()
+              .toLowerCase()
+              .contains(selectedId.toLowerCase());
+        }),
+      ),
+    );
   }
 }
