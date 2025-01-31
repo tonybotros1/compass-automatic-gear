@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
+import '../../../../Controllers/Main screen controllers/counters_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/counters_widgets/add_new_counter_or_edit.dart';
 import '../../../../consts.dart';
 
-class EntityInformations extends StatelessWidget {
-  const EntityInformations({super.key});
+class Counters extends StatelessWidget {
+  const Counters({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,35 +26,36 @@ class EntityInformations extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  GetX<EntityInformationsController>(
-                    init: EntityInformationsController(),
+                  GetX<CountersController>(
+                    init: CountersController(),
                     builder: (controller) {
                       return searchBar(
                         search: controller.search,
                         constraints: constraints,
                         context: context,
                         controller: controller,
-                        title: 'Search for Entities',
+                        title: 'Search for counters',
                         button:
-                            newContactButton(context, constraints, controller),
+                            newCounterButton(context, constraints, controller),
                       );
                     },
                   ),
                   Expanded(
-                    child: GetX<EntityInformationsController>(
+                    child: GetX<CountersController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
                         }
-                        if (controller.allEntities.isEmpty) {
+                        if (controller.allCounters.isEmpty) {
                           return const Center(
                             child: Text('No Element'),
                           );
                         }
                         return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
+                          scrollDirection: Axis
+                              .vertical, // Horizontal scrolling for the table
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
@@ -80,7 +81,7 @@ class EntityInformations extends StatelessWidget {
 Widget tableOfScreens(
     {required constraints,
     required context,
-    required EntityInformationsController controller}) {
+    required CountersController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -94,15 +95,29 @@ Widget tableOfScreens(
     columns: [
       DataColumn(
         label: AutoSizedText(
-          text: 'Name',
+          text: 'Code',
           constraints: constraints,
         ),
         onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(
-          text: 'Phone',
           constraints: constraints,
+          text: 'Description',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Prefix',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Value',
         ),
         onSort: controller.onSort,
       ),
@@ -121,127 +136,118 @@ Widget tableOfScreens(
         ),
       ),
     ],
-    rows: controller.filteredEntities.isEmpty &&
+    rows: controller.filteredCounters.isEmpty &&
             controller.search.value.text.isEmpty
-        ? controller.allEntities.map<DataRow>((entity) {
-            final entityData = entity.data() as Map<String, dynamic>;
-            final entityId = entity.id;
+        ? controller.allCounters.map<DataRow>((counter) {
+            final counterData = counter.data() as Map<String, dynamic>;
+            final counterId = counter.id;
             return dataRowForTheTable(
-                entityData, context, constraints, entityId, controller);
+                counterData, context, constraints, counterId, controller);
           }).toList()
-        : controller.filteredEntities.map<DataRow>((entity) {
-            final entityData = entity.data() as Map<String, dynamic>;
-            final entityId = entity.id;
+        : controller.filteredCounters.map<DataRow>((counter) {
+            final counterData = counter.data() as Map<String, dynamic>;
+            final counterId = counter.id;
             return dataRowForTheTable(
-                entityData, context, constraints, entityId, controller);
+                counterData, context, constraints, counterId, controller);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
-    constraints, entityId, EntityInformationsController controller) {
+DataRow dataRowForTheTable(Map<String, dynamic> counterData, context,
+    constraints, counterId, CountersController controller) {
   return DataRow(cells: [
     DataCell(Text(
-      entityData['entity_name'] ?? 'no name',
-    )),
-    DataCell(Text(
-      (entityData['entity_phone'] as List)
-              .map((phoneData) => phoneData['number'])
-              .take(2) // Show only the first 3 numbers
-              .join('/') +
-          ((entityData['entity_phone'].length > 2) ? '...' : ''),
+      counterData['code'] ?? 'no code',
     )),
     DataCell(
       Text(
-        entityData['added_date'] != null && entityData['added_date'] != ''
-            ? textToDate(entityData['added_date']) //
+        counterData['description'] ?? 'no description',
+      ),
+    ),
+    DataCell(
+      Text(
+        counterData['prefix'] ?? 'no prefix',
+      ),
+    ),
+    DataCell(
+      Text(
+        '${counterData['value']}',
+      ),
+    ),
+    DataCell(
+      Text(
+        counterData['added_date'] != null && counterData['added_date'] != ''
+            ? textToDate(counterData['added_date']) //
             : 'N/A',
       ),
     ),
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        activeInActiveSection(controller, entityData, entityId),
+        activeInActiveSection(controller, counterData, counterId),
         Padding(
           padding: const EdgeInsets.only(right: 5, left: 5),
           child: editSection(
-              context, controller, entityData, constraints, entityId),
+              context, controller, counterData, constraints, counterId),
         ),
-        deleteSection(controller, entityId, context),
+        deleteSection(controller, counterId, context),
       ],
     )),
   ]);
 }
 
-ElevatedButton activeInActiveSection(EntityInformationsController controller,
-    Map<String, dynamic> entityData, String entityId) {
+ElevatedButton activeInActiveSection(CountersController controller,
+    Map<String, dynamic> counterData, String counterId) {
   return ElevatedButton(
-      style: entityData['status'] == false
+      style: counterData['status'] == false
           ? inActiveButtonStyle
           : activeButtonStyle,
       onPressed: () {
         bool status;
-        entityData['status'] == false ? status = true : status = false;
-
-        controller.changeEntityStatus(entityId, status);
+        if (counterData['status'] == false) {
+          status = true;
+        } else {
+          status = false;
+        }
+        controller.changeCounterStatus(counterId, status);
       },
-      child: entityData['status'] == true
+      child: counterData['status'] == true
           ? const Text('Active')
           : const Text('Inactive'));
 }
 
 ElevatedButton deleteSection(
-    EntityInformationsController controller, entityId, context) {
+    CountersController controller, variableId, context) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
         alertDialog(
             context: context,
             controller: controller,
-            content: "The entity will be deleted permanently",
+            content: "The counter will be deleted permanently",
             onPressed: () {
-              controller.deleteEntity(entityId);
+              controller.deleteCounter(variableId);
             });
       },
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, EntityInformationsController controller,
-    Map<String, dynamic> entityData, constraints, entityId) {
+ElevatedButton editSection(context, CountersController controller,
+    Map<String, dynamic> counterData, constraints, counterId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        controller.imageBytes = null;
-        controller.entityName.text = entityData['entity_name'];
-        controller.entityCode.clear();
-        controller.isCustomerSelected.value = false;
-        controller.isVendorSelected.value = false;
-
-        controller.updateEntityCode(entityData['entity_code']);
-        controller.creditLimit.text =
-            (entityData['credit_limit'] ?? '').toString();
-        controller.salesMAn.value.text =
-            controller.getSaleManName(entityData['sales_man'])!;
-        controller.salesManId.value = entityData['sales_man'];
-        controller.updateEntityStatus(entityData['entity_status']);
-        controller.groupName.text = entityData['group_name'];
-        controller.industry.value.text =
-            controller.getIndustryName(entityData['industry'])!;
-        controller.industryId.value = entityData['industry'];
-        controller.trn.text = entityData['trn'];
-        controller.entityType.value.text =
-            controller.getEntityTypeName(entityData['entity_type'])!;
-        controller.entityTypeId.value = entityData['entity_type'];
-        controller.logoUrl.value = entityData['entity_picture'];
-        controller.updateEntityAddress(entityData['entity_address']);
-        controller.updateEntityPhone(entityData['entity_phone']);
-        controller.updateEntitySocial(entityData['entity_social']);
         showDialog(
             context: context,
             builder: (context) {
+              controller.code.text = counterData['code'] ?? '';
+              controller.description.text = counterData['description'] ?? '';
+              controller.prefix.text = counterData['prefix'] ?? '';
+              controller.value.text = (counterData['value'] ?? '').toString();
+
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewEntityOrEdit(
+                content: addNewConterOrEdit(
                   controller: controller,
                   constraints: constraints,
                   context: context,
@@ -250,10 +256,10 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: ElevatedButton(
-                      onPressed: controller.addingNewEntity.value
+                      onPressed: controller.addingNewValue.value
                           ? null
                           : () {
-                              controller.editEntity(entityId);
+                              controller.editCounter(counterId);
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -261,7 +267,7 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                      child: controller.addingNewEntity.value == false
+                      child: controller.addingNewValue.value == false
                           ? const Text(
                               'Save',
                               style: TextStyle(color: Colors.white),
@@ -290,33 +296,36 @@ ElevatedButton editSection(context, EntityInformationsController controller,
       child: const Text('Edit'));
 }
 
-ElevatedButton newContactButton(BuildContext context,
-    BoxConstraints constraints, EntityInformationsController controller) {
+ElevatedButton newCounterButton(BuildContext context,
+    BoxConstraints constraints, CountersController controller) {
   return ElevatedButton(
     onPressed: () {
-      controller.clearAllVariables();
+      controller.code.clear();
+      controller.description.clear();
+      controller.prefix.clear();
+      controller.value.clear();
       showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
               actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewEntityOrEdit(
+              content: addNewConterOrEdit(
                 controller: controller,
                 constraints: constraints,
                 context: context,
               ),
               actions: [
-                GetX<EntityInformationsController>(
+                GetX<CountersController>(
                     builder: (controller) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ElevatedButton(
-                            onPressed: controller.addingNewEntity.value
+                            onPressed: controller.addingNewValue.value
                                 ? null
                                 : () async {
-                                    await controller.addNewEntity();
+                                    await controller.addNewCounter();
                                   },
                             style: saveButtonStyle,
-                            child: controller.addingNewEntity.value == false
+                            child: controller.addingNewValue.value == false
                                 ? const Text(
                                     'Save',
                                     style: TextStyle(color: Colors.white),
@@ -345,6 +354,6 @@ ElevatedButton newContactButton(BuildContext context,
           });
     },
     style: newButtonStyle,
-    child: const Text('New Entity'),
+    child: const Text('New Sale Man'),
   );
 }
