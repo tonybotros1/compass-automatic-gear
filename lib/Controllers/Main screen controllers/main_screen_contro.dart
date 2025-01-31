@@ -1,4 +1,5 @@
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/currency.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/list_of_values.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/sales_man.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
@@ -92,7 +93,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: SalesMan());
       case '/counters':
         return const SizedBox(child: Counters());
-      // Add more cases as needed
+      case '/currencies':
+        return const SizedBox(child: Currency());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

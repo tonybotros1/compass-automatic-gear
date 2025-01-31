@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../decimal_text_field.dart';
+
 Widget myTextFormField({
   required String labelText,
   required String hintText,
@@ -12,10 +14,15 @@ Widget myTextFormField({
   keyboardType,
   bool? canEdit,
   bool? isnumber,
+  bool? isDouble
 }) {
   return TextFormField(
-    inputFormatters:
-        isnumber == true ? [FilteringTextInputFormatter.digitsOnly] : null,
+   inputFormatters: isnumber == true
+    ? [FilteringTextInputFormatter.digitsOnly]
+    : isDouble == true
+        ? [DecimalTextInputFormatter()]
+        : [],
+
     enabled: canEdit,
     obscureText: obscureText,
     keyboardType: keyboardType,
