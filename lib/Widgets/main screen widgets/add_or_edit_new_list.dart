@@ -18,7 +18,7 @@ Widget addNewListOrEdit({
       key: controller.formKeyForAddingNewList,
       child: ListView(
         children: [
-          myTextFormField2(
+          myTextFormFieldWithBorder(
             // constraints: constraints,
             obscureText: false,
             controller: listName ?? controller.listName,
@@ -29,7 +29,7 @@ Widget addNewListOrEdit({
           SizedBox(
             height: 10,
           ),
-          myTextFormField2(
+          myTextFormFieldWithBorder(
             // constraints: constraints,
             obscureText: false,
             controller: code ?? controller.code,

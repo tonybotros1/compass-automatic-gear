@@ -14,7 +14,7 @@ Widget addOrEditMenu({
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: myTextFormField2(
+          child: myTextFormFieldWithBorder(
             labelText: 'Menu Name',
             hintText: 'Enter Menu Name',
             controller: controller.menuName,
@@ -24,7 +24,7 @@ Widget addOrEditMenu({
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: myTextFormField2(
+          child: myTextFormFieldWithBorder(
             labelText: 'Code',
             hintText: 'Enter Code',
             controller: controller.description,

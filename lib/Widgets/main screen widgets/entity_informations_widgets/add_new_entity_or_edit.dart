@@ -25,7 +25,7 @@ Widget addNewEntityOrEdit({
       child: Column(
         children: [
           SizedBox(height: 5,),
-          myTextFormField2(
+          myTextFormFieldWithBorder(
             icon: Icon(
               Icons.person,
               color: Colors.grey,
@@ -87,7 +87,7 @@ Widget addNewEntityOrEdit({
                 child: Column(
                   children: [
                     GetX<EntityInformationsController>(builder: (controller) {
-                      return myTextFormField2(
+                      return myTextFormFieldWithBorder(
                         isEnabled: controller.isCustomerSelected.isTrue,
                         isnumber: true,
                         icon: Icon(
@@ -211,7 +211,7 @@ Widget addNewEntityOrEdit({
             height: 10,
           ),
           GetX<EntityInformationsController>(builder: (controller) {
-            return myTextFormField2(
+            return myTextFormFieldWithBorder(
               isEnabled: controller.isCompanySelected.isTrue,
               icon: Icon(
                 Icons.apartment,
@@ -262,7 +262,7 @@ Widget addNewEntityOrEdit({
             height: 15,
           ),
           GetX<EntityInformationsController>(builder: (controller) {
-            return myTextFormField2(
+            return myTextFormFieldWithBorder(
               isEnabled: controller.isCompanySelected.isTrue,
               icon: Icon(
                 Icons.currency_exchange,

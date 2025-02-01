@@ -27,7 +27,7 @@ Widget dynamicFields({
                         (_, __) => const SizedBox(),
                     onSelected: config.dropdownConfig?.onSelected,
                   )
-                : myTextFormField2(
+                : myTextFormFieldWithBorder(
                     isDouble: config.fieldConfig?.isDouble,
                     isnumber: config.fieldConfig?.isnumber,
                     isEnabled: config.fieldConfig?.isEnabled,

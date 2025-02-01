@@ -240,7 +240,7 @@ Widget contactDetails({
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 2.5),
-                      child: myTextFormField2(
+                      child: myTextFormFieldWithBorder(
                         labelText: 'Name',
                         hintText: 'Enter your name here',
                         controller: controller.userName,
@@ -253,7 +253,7 @@ Widget contactDetails({
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 2.5),
-                      child: myTextFormField2(
+                      child: myTextFormFieldWithBorder(
                         labelText: 'Phone Number',
                         hintText: 'Enter your phone number here',
                         controller: controller.phoneNumber,
@@ -270,7 +270,7 @@ Widget contactDetails({
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 2.5),
-                      child: myTextFormField2(
+                      child: myTextFormFieldWithBorder(
                         labelText: 'Email',
                         hintText: 'Enter a valid email here',
                         controller: controller.email,
@@ -283,7 +283,7 @@ Widget contactDetails({
                     child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 2.5),
-                        child: myTextFormField2(
+                        child: myTextFormFieldWithBorder(
                             labelText: 'Password',
                             hintText: 'Enter your password here',
                             controller: controller.password,
@@ -302,7 +302,7 @@ Widget contactDetails({
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 2.5),
-                child: myTextFormField2(
+                child: myTextFormFieldWithBorder(
                   labelText: 'Address',
                   hintText: 'Enter your company address',
                   controller: controller.address,
@@ -430,7 +430,7 @@ Widget companyDetails({required RegisterScreenController controller}) {
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),
-                      child: myTextFormField2(
+                      child: myTextFormFieldWithBorder(
                         labelText: 'Company Name',
                         hintText: 'Enter your company name here',
                         controller: controller.companyName,

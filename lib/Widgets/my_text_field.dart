@@ -2,7 +2,7 @@ import 'package:datahubai/Widgets/decimal_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-Widget myTextFormField2(
+Widget myTextFormFieldWithBorder(
     {String? labelText,
     String? hintText,
     TextEditingController? controller,

@@ -19,7 +19,7 @@ Widget addNewValueOrEdit({
       key: controller.formKeyForAddingNewList,
       child: ListView(
         children: [
-          myTextFormField2(
+          myTextFormFieldWithBorder(
             obscureText: false,
             controller: valueName ?? controller.valueName,
             labelText: 'Value Name',

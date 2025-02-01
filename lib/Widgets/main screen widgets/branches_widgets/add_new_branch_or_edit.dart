@@ -20,7 +20,7 @@ Widget addNewBranchOrEdit({
         SizedBox(
           height: 5,
         ),
-        myTextFormField2(
+        myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.code,
           labelText: 'Code',
@@ -30,7 +30,7 @@ Widget addNewBranchOrEdit({
         SizedBox(
           height: 15,
         ),
-        myTextFormField2(
+        myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.name,
           labelText: 'Description',
@@ -40,7 +40,7 @@ Widget addNewBranchOrEdit({
         SizedBox(
           height: 15,
         ),
-        myTextFormField2(
+        myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.line,
           labelText: 'Line',

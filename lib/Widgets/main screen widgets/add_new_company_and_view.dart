@@ -31,7 +31,7 @@ Widget addNewCompanyOrView({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: myTextFormField2(
+                child: myTextFormFieldWithBorder(
                   obscureText: false,
                   controller: companyName ?? controller.companyName,
                   labelText: 'Company Name',
@@ -78,7 +78,7 @@ Widget addNewCompanyOrView({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: myTextFormField2(
+                child: myTextFormFieldWithBorder(
                   obscureText: false,
                   controller: userName ?? controller.userName,
                   labelText: 'Name',
@@ -91,7 +91,7 @@ Widget addNewCompanyOrView({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: myTextFormField2(
+                child: myTextFormFieldWithBorder(
                   obscureText: false,
                   controller: phoneNumber ?? controller.phoneNumber,
                   labelText: 'Phone Number',
@@ -107,7 +107,7 @@ Widget addNewCompanyOrView({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: myTextFormField2(
+                child: myTextFormFieldWithBorder(
                   obscureText: false,
                   controller: email ?? controller.email,
                   labelText: 'Email',
@@ -120,7 +120,7 @@ Widget addNewCompanyOrView({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: myTextFormField2(
+                child: myTextFormFieldWithBorder(
                   obscureText: false,
                   controller: controller.password,
                   labelText: 'Password',
@@ -133,7 +133,7 @@ Widget addNewCompanyOrView({
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: myTextFormField2(
+          child: myTextFormFieldWithBorder(
             obscureText: false,
             controller: address ?? controller.address,
             labelText: 'Address',
