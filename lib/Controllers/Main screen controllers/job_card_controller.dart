@@ -14,6 +14,14 @@ class JobCardController extends GetxController {
   TextEditingController year = TextEditingController();
   TextEditingController vin = TextEditingController();
   TextEditingController color = TextEditingController();
+  TextEditingController customerName = TextEditingController();
+  TextEditingController customerPhoneNumber = TextEditingController();
+  TextEditingController customerCreditNumber = TextEditingController(text: '0');
+  TextEditingController customerOutstanding = TextEditingController(text: '0');
+  TextEditingController customerSaleMan = TextEditingController();
+  TextEditingController customerBranch = TextEditingController();
+  TextEditingController customerCurrency = TextEditingController();
+  TextEditingController customerCurrencyRate = TextEditingController(text: '0');
   Rx<TextEditingController> mileageIn = TextEditingController(text: '0').obs;
   Rx<TextEditingController> mileageOut = TextEditingController(text: '0').obs;
   Rx<TextEditingController> inOutDiff = TextEditingController(text: '0').obs;
@@ -22,6 +30,10 @@ class JobCardController extends GetxController {
   RxString countryId = RxString('');
   RxString colorId = RxString('');
   RxString cityId = RxString('');
+  RxString customerId = RxString('');
+  RxString customerSaleManId = RxString('');
+  RxString customerBranchId = RxString('');
+  RxString customerCurrencyId = RxString('');
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -37,20 +49,57 @@ class JobCardController extends GetxController {
   RxMap filterdCitiesByCountry = RxMap({});
   RxMap allCities = RxMap({});
   RxMap allColors = RxMap({});
+  RxMap allBranches = RxMap({});
+  RxMap allCurrencies = RxMap({});
 
   RxMap allBrands = RxMap({});
   RxMap filterdModelsByBrands = RxMap({});
   RxMap allModels = RxMap({});
+  RxMap allCustomers = RxMap({});
+  RxMap salesManMap = RxMap({});
 
   @override
   void onInit() async {
     super.onInit();
     await getCompanyId();
     await getCurrentJobCardCounterNumber();
+    getSalesMan();
+    getBranches();
+    getBranches();
+    getCurrencies();
+    getAllCustomers();
     getColors();
     getCarsModelsAndBrands();
     getCountriesAndCities();
     getAllJobCards();
+  }
+
+  getCurrencies() {
+    FirebaseFirestore.instance
+        .collection('currencies')
+        .snapshots()
+        .listen((branches) {
+      allCurrencies.value = {for (var doc in branches.docs) doc.id: doc.data()};
+    });
+  }
+
+  getBranches() {
+    FirebaseFirestore.instance
+        .collection('branches')
+        .snapshots()
+        .listen((branches) {
+      allBranches.value = {for (var doc in branches.docs) doc.id: doc.data()};
+    });
+  }
+
+// this function is to get all sales man in the system
+  getSalesMan() {
+    FirebaseFirestore.instance
+        .collection('sales_man')
+        .snapshots()
+        .listen((saleMan) {
+      salesManMap.value = {for (var doc in saleMan.docs) doc.id: doc.data()};
+    });
   }
 
   getCompanyId() async {
@@ -60,7 +109,7 @@ class JobCardController extends GetxController {
 
   inOutDiffCalculating() {
     inOutDiff.value.text =
-        (int.parse(mileageIn.value.text) - int.parse(mileageOut.value.text))
+        (int.parse(mileageOut.value.text) - int.parse(mileageIn.value.text))
             .toString();
   }
 
@@ -82,6 +131,22 @@ class JobCardController extends GetxController {
         .listen((colors) {
       allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
     });
+  }
+
+  getAllCustomers() {
+    try {
+      FirebaseFirestore.instance
+          .collection('entity_informations')
+          .where('entity_code', arrayContains: 'Customer')
+          .snapshots()
+          .listen((customers) {
+        allCustomers.value = {
+          for (var doc in customers.docs) doc.id: doc.data()
+        };
+      });
+    } catch (e) {
+      //
+    }
   }
 
   getCurrentJobCardCounterNumber() async {
@@ -264,6 +329,17 @@ class JobCardController extends GetxController {
     }
   }
 
+  String? getSaleManName(String saleManId) {
+    try {
+      final salesMan = salesManMap.entries.firstWhere(
+        (saleMan) => saleMan.key == saleManId,
+      );
+      return salesMan.value['name'];
+    } catch (e) {
+      return '';
+    }
+  }
+
   void onSelectForBrandsAndModels(String selectedId) {
     filterdModelsByBrands.assignAll(
       Map.fromEntries(
@@ -289,5 +365,24 @@ class JobCardController extends GetxController {
         }),
       ),
     );
+  }
+
+  void onSelectForCustomers(String selectedId) {
+    var currentUserDetails = allCustomers.entries.firstWhere((entry) {
+      return entry.key
+          .toString()
+          .toLowerCase()
+          .contains(selectedId.toLowerCase());
+    });
+
+    customerPhoneNumber.text =
+        (currentUserDetails.value['entity_phone'] as List)
+            .map((phoneData) => phoneData['number'])
+            .join('/');
+    customerCreditNumber.text =
+        (currentUserDetails.value['credit_limit'] ?? '0').toString();
+    customerSaleManId.value = currentUserDetails.value['sales_man'];
+    customerSaleMan.text =
+        getSaleManName(currentUserDetails.value['sales_man'])!;
   }
 }

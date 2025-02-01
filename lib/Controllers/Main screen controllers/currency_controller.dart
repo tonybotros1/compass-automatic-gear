@@ -123,6 +123,7 @@ class CurrencyController extends GetxController {
         'status': true,
       });
       addingNewValue.value = false;
+      Get.back();
     } catch (e) {
       addingNewValue.value = false;
     }
@@ -140,7 +141,7 @@ class CurrencyController extends GetxController {
         'rate': double.parse(rate.text),
       });
     } catch (e) {
-        //
+      //
     }
   }
 
@@ -179,7 +180,10 @@ class CurrencyController extends GetxController {
           return saleman['code'].toString().toLowerCase().contains(query) ||
               saleman['name'].toString().toLowerCase().contains(query) ||
               saleman['rate'].toString().toLowerCase().contains(query) ||
-              textToDate(saleman['added_date']).toString().toLowerCase().contains(query);
+              textToDate(saleman['added_date'])
+                  .toString()
+                  .toLowerCase()
+                  .contains(query);
         }).toList(),
       );
     }

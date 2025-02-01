@@ -18,7 +18,7 @@ Widget dropDownValues({
     suggestionsController: suggestionsController,
     controller: textController,
     builder: (context, textEditingController, focusNode) => TextFormField(
-      onTap: ()=> onTapForTypeAheadField,
+      onTap: () => onTapForTypeAheadField,
       validator: validate
           ? (value) {
               if (value!.isEmpty) {
@@ -33,19 +33,19 @@ Widget dropDownValues({
       decoration: InputDecoration(
         icon: icon,
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(5),
           borderSide: BorderSide(color: Colors.grey, width: 2.0),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(5),
           borderSide: BorderSide(color: Colors.grey, width: 1.0),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(5),
           borderSide: BorderSide(color: Colors.red, width: 1.0),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(5),
           borderSide: BorderSide(color: Colors.red, width: 2.0),
         ),
         iconColor: Colors.grey.shade700,
@@ -82,7 +82,7 @@ Widget dropDownValues({
         }
       },
     ),
-    suggestionsCallback: (pattern) async {      
+    suggestionsCallback: (pattern) async {
       return menus.values
           .toList()
           .where((item) =>

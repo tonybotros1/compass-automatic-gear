@@ -51,6 +51,7 @@ class FieldConfig {
   final TextEditingController? textController;
   final bool? isEnabled;
   final bool? isnumber;
+  final bool? isDouble;
 
   FieldConfig({
     this.labelText,
@@ -61,5 +62,6 @@ class FieldConfig {
     this.textController,
     this.isEnabled,
     this.isnumber,
+    this.isDouble,
   });
 }

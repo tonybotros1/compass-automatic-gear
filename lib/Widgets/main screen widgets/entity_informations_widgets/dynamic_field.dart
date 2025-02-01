@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../Models/dynamic_field_models.dart';
+import '../../decimal_text_field.dart';
 import '../drop_down_menu.dart';
 
 
@@ -15,7 +16,7 @@ Widget dynamicFields({
         return Expanded(
           flex: config.flex,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 1),
+            padding: const EdgeInsets.symmetric(horizontal: 5),
             child: config.isDropdown
                 ? dropDownValues(
                   suggestionsController: config.dropdownConfig?.suggestionsController,
@@ -29,6 +30,7 @@ Widget dynamicFields({
                     onSelected: config.dropdownConfig?.onSelected,
                   )
                 : typeSection(
+                  isDouble: config.fieldConfig?.isDouble,
                   isnumber:config.fieldConfig?.isnumber  ,
                   isEnabled:config.fieldConfig?.isEnabled ,
                   textController: config.fieldConfig?.textController,
@@ -51,10 +53,14 @@ TextFormField typeSection(
     TextEditingController? textController,
     bool? isEnabled,
     bool? isnumber,
+    bool? isDouble,
     void Function(String)? onChanged}) {
   return TextFormField(
-    inputFormatters:
-        isnumber == true ? [FilteringTextInputFormatter.digitsOnly] : null,
+    inputFormatters: isnumber == true
+    ? [FilteringTextInputFormatter.digitsOnly]
+    : isDouble == true
+        ? [DecimalTextInputFormatter()]
+        : [],
     enabled: isEnabled,
     controller: textController,
     onChanged: onChanged,
@@ -64,19 +70,19 @@ TextFormField typeSection(
       hintText: hintText,
       labelStyle: TextStyle(color: Colors.grey.shade700),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.grey, width: 2.0),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.grey, width: 1.0),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.red, width: 1.0),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.red, width: 2.0),
       ),
     ),

@@ -161,9 +161,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        activeInActiveSection(controller, branchData, branchId),
         Padding(
-          padding: const EdgeInsets.only(right: 5, left: 5),
+          padding: const EdgeInsets.only(right: 5),
           child: editSection(
               context, controller, branchData, constraints, branchId),
         ),
@@ -173,25 +172,6 @@ DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
   ]);
 }
 
-ElevatedButton activeInActiveSection(JobCardController controller,
-    Map<String, dynamic> branchData, String branchId) {
-  return ElevatedButton(
-      style: branchData['status'] == false
-          ? inActiveButtonStyle
-          : activeButtonStyle,
-      onPressed: () {
-        bool status;
-        if (branchData['status'] == false) {
-          status = true;
-        } else {
-          status = false;
-        }
-        // controller.changeBranchStatus(branchId, status);
-      },
-      child: branchData['status'] == true
-          ? const Text('Active')
-          : const Text('Inactive'));
-}
 
 ElevatedButton deleteSection(JobCardController controller, branchId, context) {
   return ElevatedButton(

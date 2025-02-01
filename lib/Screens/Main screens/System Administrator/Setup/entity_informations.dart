@@ -147,7 +147,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
     DataCell(Text(
       (entityData['entity_phone'] as List)
               .map((phoneData) => phoneData['number'])
-              .take(2) // Show only the first 3 numbers
+              .take(2) 
               .join('/') +
           ((entityData['entity_phone'].length > 2) ? '...' : ''),
     )),
