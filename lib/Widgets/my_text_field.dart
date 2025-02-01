@@ -1,20 +1,27 @@
+import 'package:datahubai/Widgets/decimal_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 Widget myTextFormField2(
-    {required String labelText,
-    required String hintText,
-    required controller,
-    required validate,
-    required obscureText,
+    {String? labelText,
+    String? hintText,
+    TextEditingController? controller,
+    bool? validate,
+    bool obscureText = false,
     IconButton? suffixIcon,
     Icon? icon,
     bool? isnumber,
+    bool? isDouble,
     keyboardType,
+    void Function(String)? onChanged,
     bool? isEnabled}) {
   return TextFormField(
-    inputFormatters:
-        isnumber == true ? [FilteringTextInputFormatter.digitsOnly] : null,
+    onChanged: onChanged,
+    inputFormatters: isnumber == true
+        ? [FilteringTextInputFormatter.digitsOnly]
+        : isDouble == true
+            ? [DecimalTextInputFormatter()]
+            : [],
     enabled: isEnabled,
     obscureText: obscureText,
     keyboardType: keyboardType,
@@ -27,19 +34,19 @@ Widget myTextFormField2(
       hintText: hintText,
       labelStyle: TextStyle(color: Colors.grey.shade700),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.grey, width: 2.0),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.grey, width: 1.0),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.red, width: 1.0),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.red, width: 2.0),
       ),
     ),
