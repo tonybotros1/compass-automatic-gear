@@ -1,4 +1,4 @@
-import 'package:datahubai/Widgets/main%20screen%20widgets/entity_informations_widgets/dynamic_field.dart';
+import 'package:datahubai/Widgets/main%20screen%20widgets/dynamic_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';

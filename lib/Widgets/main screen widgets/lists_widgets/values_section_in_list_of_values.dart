@@ -2,10 +2,10 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../consts.dart';
-import '../Auth screens widgets/register widgets/search_bar.dart';
+import '../../../consts.dart';
+import '../../Auth screens widgets/register widgets/search_bar.dart';
 import 'add_or_edit_new_value_for_lists.dart';
-import 'auto_size_box.dart';
+import '../auto_size_box.dart';
 
 Widget valuesSection({
   required BoxConstraints constraints,

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/responsibilities_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/add_new_responsibilities_or_view.dart';
+import '../../../../Widgets/main screen widgets/responsibilities_widgets/add_new_responsibilities_or_view.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 
@@ -93,7 +93,7 @@ ElevatedButton newResponsibilityButton(
                     controller: controller,
                     constraints: constraints,
                     context: context,
-                    menuName: controller.menuName),
+                    ),
                 actions: [
                   GetX<ResponsibilitiesController>(
                       builder: (controller) => Padding(
@@ -321,8 +321,7 @@ Widget editSection(
                   controller: controller,
                   constraints: constraints,
                   context: context,
-                  responsibilityName: controller.responsibilityName,
-                  menuName: controller.menuName,
+                  
                 ),
                 actions: [
                   Padding(

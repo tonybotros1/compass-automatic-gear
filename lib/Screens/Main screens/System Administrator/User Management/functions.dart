@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/add_new_screen_or_view.dart';
+import '../../../../Widgets/main screen widgets/functions_widgets/add_new_screen_or_view.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 
@@ -263,8 +263,6 @@ ElevatedButton editSection(context, controller, Map<String, dynamic> screenData,
                   controller: controller,
                   constraints: constraints,
                   context: context,
-                  screenName: controller.screenName,
-                  route: controller.route,
                 ),
                 actions: [
                   Padding(

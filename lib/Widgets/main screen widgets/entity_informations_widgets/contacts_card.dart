@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../Models/dynamic_field_models.dart';
-import 'dynamic_field.dart';
+import '../dynamic_field.dart';
 
 Widget contactsCardSection(EntityInformationsController controller) {
   return Column(

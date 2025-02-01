@@ -4,7 +4,7 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
 import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../Models/dynamic_field_models.dart';
 import '../../../consts.dart';
-import '../entity_informations_widgets/dynamic_field.dart';
+import '../dynamic_field.dart';
 
 Container customerDetailsSection() {
   return Container(

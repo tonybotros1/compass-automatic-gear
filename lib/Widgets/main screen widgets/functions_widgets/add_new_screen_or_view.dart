@@ -1,38 +1,39 @@
+import 'package:datahubai/Controllers/Main%20screen%20controllers/functions_controller.dart';
 import 'package:flutter/material.dart';
-import '../Auth screens widgets/register widgets/my_text_form_field.dart';
+import '../../my_text_field.dart';
 
 Widget addNewScreenOrView({
   required BoxConstraints constraints,
   required BuildContext context,
-  required controller,
-  TextEditingController? screenName,
-  TextEditingController? route,
+  required FunctionsController controller,
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
-    height: 100,
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
+    height: 150,
+    child: ListView(
       children: [
-        myTextFormField(
-          constraints: constraints,
+        SizedBox(
+          height: 10,
+        ),
+        myTextFormFieldWithBorder(
           obscureText: false,
-          controller: screenName ?? controller.screenName,
+          controller:  controller.screenName,
           labelText: 'Screen Name',
           hintText: 'Enter Screen name',
           keyboardType: TextInputType.name,
           validate: true,
         ),
-        myTextFormField(
-          constraints: constraints,
+        SizedBox(
+          height: 20,
+        ),
+        myTextFormFieldWithBorder(
           obscureText: false,
-          controller: route ?? controller.route,
+          controller:  controller.route,
           labelText: 'Route',
           hintText: 'Enter route name',
           keyboardType: TextInputType.emailAddress,
           validate: true,
         ),
-       
       ],
     ),
   );

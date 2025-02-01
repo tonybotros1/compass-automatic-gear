@@ -1,6 +1,6 @@
+import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
-import '../../Controllers/Main screen controllers/sales_man_controller.dart';
-import '../Auth screens widgets/register widgets/my_text_form_field.dart';
+import '../../../Controllers/Main screen controllers/sales_man_controller.dart';
 
 Widget addNewSaleManOrEdit({
   required BoxConstraints constraints,
@@ -12,29 +12,32 @@ Widget addNewSaleManOrEdit({
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
-    height: 100,
+    height: 150,
     child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        myTextFormField(
-          constraints: constraints,
+        SizedBox(
+          height: 10,
+        ),
+        myTextFormFieldWithBorder(
           obscureText: false,
           controller: name ?? controller.name,
           labelText: 'Name',
           hintText: 'Enter Sale Man Name',
           validate: true,
-          canEdit: canEdit,
+          isEnabled: canEdit,
         ),
-        myTextFormField(
+        SizedBox(
+          height: 10,
+        ),
+        myTextFormFieldWithBorder(
           isnumber: true,
-          constraints: constraints,
           obscureText: false,
           controller: target ?? controller.target,
           labelText: 'Target',
           hintText: 'Enter Target',
           validate: true,
         ),
-       
       ],
     ),
   );

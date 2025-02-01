@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/sales_man_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/add_new_saleman_or_edit.dart';
+import '../../../../Widgets/main screen widgets/sales_man_widgets/add_new_saleman_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 

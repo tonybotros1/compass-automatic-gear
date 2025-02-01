@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/list_of_values_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/add_or_edit_new_list.dart';
+import '../../../../Widgets/main screen widgets/lists_widgets/add_or_edit_new_list.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/values_section_in_list_of_values.dart';
+import '../../../../Widgets/main screen widgets/lists_widgets/values_section_in_list_of_values.dart';
 import '../../../../consts.dart';
 
 class ListOfValues extends StatelessWidget {

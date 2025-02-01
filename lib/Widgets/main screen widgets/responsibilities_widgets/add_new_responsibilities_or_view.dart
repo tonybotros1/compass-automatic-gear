@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../Controllers/Main screen controllers/responsibilities_controller.dart';
-import '../Auth screens widgets/register widgets/my_text_form_field.dart';
-import 'drop_down_menu.dart';
+import '../../../Controllers/Main screen controllers/responsibilities_controller.dart';
+import '../../my_text_field.dart';
+import '../drop_down_menu.dart';
 
 Widget addNewResponsibilityOrView({
   required BoxConstraints constraints,
   required BuildContext context,
   required ResponsibilitiesController controller,
-  TextEditingController? responsibilityName,
-  TextEditingController? menuName,
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
@@ -17,10 +15,9 @@ Widget addNewResponsibilityOrView({
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: ListView(
         children: [
-          myTextFormField(
-            constraints: constraints,
+          myTextFormFieldWithBorder(
             obscureText: false,
-            controller: responsibilityName ?? controller.responsibilityName,
+            controller:  controller.responsibilityName,
             labelText: 'Responsibility Name',
             hintText: 'Enter Responsibility name',
             keyboardType: TextInputType.name,
@@ -30,9 +27,9 @@ Widget addNewResponsibilityOrView({
             height: 10,
           ),
           dropDownValues(
-            textController: menuName ?? controller.menuName,
+            textController: controller.menuName,
             onSelected: (suggestion) {
-              menuName!.text =
+              controller.menuName.text =
                   '${suggestion['name']} (${suggestion['description']})';
               controller.menuMap.entries.where((entry) {
                 return entry.value['name'] == suggestion['name'].toString() &&

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../Models/dynamic_field_models.dart';
-import '../../my_text_field.dart';
-import '../drop_down_menu.dart';
+import '../../Models/dynamic_field_models.dart';
+import '../my_text_field.dart';
+import 'drop_down_menu.dart';
 
 Widget dynamicFields({
   required List<DynamicConfig> dynamicConfigs,

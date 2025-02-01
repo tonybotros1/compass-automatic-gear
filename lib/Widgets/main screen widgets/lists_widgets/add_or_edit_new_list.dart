@@ -1,7 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values_controller.dart';
 import 'package:flutter/material.dart';
-import '../my_text_field.dart';
-import 'drop_down_menu.dart';
+import '../../my_text_field.dart';
+import '../drop_down_menu.dart';
 
 Widget addNewListOrEdit({
   required BoxConstraints constraints,

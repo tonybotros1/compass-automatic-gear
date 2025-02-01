@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
-import '../../Controllers/Main screen controllers/company_controller.dart';
-import '../my_text_field.dart';
-import 'drop_down_menu.dart';
+import '../../../Controllers/Main screen controllers/company_controller.dart';
+import '../../my_text_field.dart';
+import '../drop_down_menu.dart';
 
 Widget addNewCompanyOrView({
   required BoxConstraints constraints,

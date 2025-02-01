@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/menus_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/add_or_edit_menu.dart';
-import '../../../../Widgets/main screen widgets/veiw_menu.dart';
+import '../../../../Widgets/main screen widgets/menus_widgets/add_or_edit_menu.dart';
+import '../../../../Widgets/main screen widgets/menus_widgets/veiw_menu.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 
