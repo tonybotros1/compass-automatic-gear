@@ -28,7 +28,7 @@ Widget addNewBranchOrEdit({
           validate: true,
         ),
         SizedBox(
-          height: 15,
+          height: 10,
         ),
         myTextFormFieldWithBorder(
           obscureText: false,
@@ -38,7 +38,7 @@ Widget addNewBranchOrEdit({
           validate: true,
         ),
         SizedBox(
-          height: 15,
+          height: 10,
         ),
         myTextFormFieldWithBorder(
           obscureText: false,
@@ -48,7 +48,7 @@ Widget addNewBranchOrEdit({
           validate: true,
         ),
         SizedBox(
-          height: 15,
+          height: 10,
         ),
         GetX<BranchesController>(builder: (controller) {
           var isCountryLoading = controller.allCountries.isEmpty;
@@ -79,7 +79,7 @@ Widget addNewBranchOrEdit({
           );
         }),
         SizedBox(
-          height: 15,
+          height: 10,
         ),
         GetX<BranchesController>(builder: (controller) {
           var isCityLoading = controller.filterdCitiesByCountry.isEmpty;

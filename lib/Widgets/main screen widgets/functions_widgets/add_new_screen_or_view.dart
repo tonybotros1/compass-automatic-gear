@@ -24,7 +24,7 @@ Widget addNewScreenOrView({
           validate: true,
         ),
         SizedBox(
-          height: 20,
+          height: 10,
         ),
         myTextFormFieldWithBorder(
           obscureText: false,
