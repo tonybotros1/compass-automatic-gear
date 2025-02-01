@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
 import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../Models/dynamic_field_models.dart';
+import '../../../consts.dart';
 import '../entity_informations_widgets/dynamic_field.dart';
 
 Container customerDetailsSection() {
@@ -108,87 +110,140 @@ Container customerDetailsSection() {
         SizedBox(
           height: 20,
         ),
-        GetX<JobCardController>(builder: (controller) {
-          final isBranchesLoading = controller.allBranches.isEmpty;
-          final isCurrenciesLoading = controller.allCurrencies.isEmpty;
+        Row(
+          children: [
+            Expanded(
+              child: GetX<JobCardController>(builder: (controller) {
+                final isBranchesLoading = controller.allBranches.isEmpty;
+                final isCurrenciesLoading = controller.allCurrencies.isEmpty;
 
-          return dynamicFields(dynamicConfigs: [
-            DynamicConfig(
-              isDropdown: true,
-              flex: 2,
-              dropdownConfig: DropdownConfig(
-                textController: controller.customerBranch,
-                labelText: isBranchesLoading ? 'Loading...' : 'Branch',
-                hintText: 'Select Branch',
-                menuValues: isBranchesLoading ? {} : controller.allBranches,
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text('${suggestion['name']}'),
-                  );
-                },
-                onSelected: (suggestion) {
-                  controller.customerBranch.text = suggestion['name'];
-                  controller.allBranches.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach(
-                    (entry) {
-                      controller.customerBranchId.value = entry.key;
-                    },
-                  );
-                },
-              ),
+                return dynamicFields(dynamicConfigs: [
+                  DynamicConfig(
+                    isDropdown: true,
+                    flex: 2,
+                    dropdownConfig: DropdownConfig(
+                      textController: controller.customerBranch,
+                      labelText: isBranchesLoading ? 'Loading...' : 'Branch',
+                      hintText: 'Select Branch',
+                      menuValues:
+                          isBranchesLoading ? {} : controller.allBranches,
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          title: Text('${suggestion['name']}'),
+                        );
+                      },
+                      onSelected: (suggestion) {
+                        controller.customerBranch.text = suggestion['name'];
+                        controller.allBranches.entries.where((entry) {
+                          return entry.value['name'] ==
+                              suggestion['name'].toString();
+                        }).forEach(
+                          (entry) {
+                            controller.customerBranchId.value = entry.key;
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: true,
+                    flex: 1,
+                    dropdownConfig: DropdownConfig(
+                      textController: controller.customerCurrency,
+                      labelText: isBranchesLoading ? 'Loading...' : 'Currency',
+                      hintText: 'Select Currency',
+                      menuValues:
+                          isCurrenciesLoading ? {} : controller.allCurrencies,
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          title: Text('${suggestion['code']}'),
+                        );
+                      },
+                      onSelected: (suggestion) {
+                        controller.customerCurrency.text = suggestion['code'];
+                        controller.allCurrencies.entries.where((entry) {
+                          return entry.value['code'] ==
+                              suggestion['code'].toString();
+                        }).forEach(
+                          (entry) {
+                            controller.customerCurrencyId.value = entry.key;
+                            controller.customerCurrencyRate.text =
+                                (entry.value['rate'] ?? '0').toString();
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: false,
+                    flex: 1,
+                    fieldConfig: FieldConfig(
+                      isDouble: true,
+                      textController: controller.customerCurrencyRate,
+                      labelText: 'Rate',
+                      hintText: 'Enter Rate',
+                      validate: false,
+                    ),
+                  ),
+                ]);
+              }),
             ),
-            DynamicConfig(
-              isDropdown: true,
-              flex: 1,
-              dropdownConfig: DropdownConfig(
-                textController: controller.customerCurrency,
-                labelText: isBranchesLoading ? 'Loading...' : 'Currency',
-                hintText: 'Select Currency',
-                menuValues: isCurrenciesLoading ? {} : controller.allCurrencies,
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text('${suggestion['code']}'),
-                  );
-                },
-                onSelected: (suggestion) {
-                  controller.customerCurrency.text = suggestion['code'];
-                  controller.allCurrencies.entries.where((entry) {
-                    return entry.value['code'] == suggestion['code'].toString();
-                  }).forEach(
-                    (entry) {
-                      controller.customerCurrencyId.value = entry.key;
-                      controller.customerCurrencyRate.text =
-                          (entry.value['rate'] ?? '0').toString();
-                    },
-                  );
-                },
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(13.0),
+                        child: GetX<JobCardController>(builder: (controller) {
+                          return CupertinoRadio<bool>(
+                            value: true,
+                            groupValue: controller.isCashSelected.value,
+                            onChanged: (value) {
+                              if (value != null) {
+                                controller.selectCashOrCredit('cash', value);
+                              }
+                            },
+                          );
+                        }),
+                      ),
+                      Text(
+                        'Cash',
+                        style: regTextStyle,
+                      )
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(13.0),
+                        child: GetX<JobCardController>(builder: (controller) {
+                          return CupertinoRadio<bool>(
+                            value: true,
+                            groupValue: controller.isCreditSelected.value,
+                            onChanged: (value) {
+                              if (value != null) {
+                                controller.selectCashOrCredit('credit', value);
+                              }
+                            },
+                          );
+                        }),
+                      ),
+                      Text(
+                        'Credit',
+                        style: regTextStyle,
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                ],
               ),
-            ),
-            DynamicConfig(
-              isDropdown: false,
-              flex: 1,
-              fieldConfig: FieldConfig(
-                isDouble: true,
-                textController: controller.customerCurrencyRate,
-                labelText: 'Rate',
-                hintText: 'Enter Rate',
-                validate: false,
-              ),
-            ),
-            DynamicConfig(
-              isDropdown: false,
-              flex: 4,
-              fieldConfig: FieldConfig(
-                isDouble: true,
-                // textController: controller.customerCurrencyRate,
-                labelText: '',
-                hintText: '',
-                validate: false,
-              ),
-            ),
-          ]);
-        }),
+            )
+          ],
+        ),
       ],
     ),
   );

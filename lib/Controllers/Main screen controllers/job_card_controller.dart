@@ -57,7 +57,9 @@ class JobCardController extends GetxController {
   RxMap allModels = RxMap({});
   RxMap allCustomers = RxMap({});
   RxMap salesManMap = RxMap({});
-
+  RxBool isCashSelected = RxBool(false);
+  RxBool isCreditSelected = RxBool(false);
+  RxString payType = RxString('');
   @override
   void onInit() async {
     super.onInit();
@@ -72,6 +74,16 @@ class JobCardController extends GetxController {
     getCarsModelsAndBrands();
     getCountriesAndCities();
     getAllJobCards();
+  }
+
+
+  
+  void selectCashOrCredit(String selected, bool value) {
+    bool isCash = selected == 'cash';
+
+    isCashSelected.value = isCash ? value : false;
+    isCreditSelected.value = isCash ? false : value;
+    payType.value = isCash ? 'Cash' : 'Credit';
   }
 
   getCurrencies() {
