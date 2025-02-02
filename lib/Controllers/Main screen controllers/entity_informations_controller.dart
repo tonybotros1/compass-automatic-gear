@@ -39,8 +39,8 @@ class EntityInformationsController extends GetxController {
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool isVendorSelected = RxBool(false);
-  RxBool isCustomerSelected = RxBool(false);
-  RxBool isCompanySelected = RxBool(false);
+  RxBool isCustomerSelected = RxBool(true);
+  RxBool isCompanySelected = RxBool(true);
   RxBool isIndividualSelected = RxBool(false);
   RxString logoUrl = RxString('');
   RxMap industryMap = RxMap({});
@@ -108,7 +108,7 @@ class EntityInformationsController extends GetxController {
   clearAllVariables() {
     entityName.clear();
     entityCode.clear();
-    isCustomerSelected.value = false;
+    // isCustomerSelected.value = false;
     isVendorSelected.value = false;
     creditLimit.clear();
     salesMAn.value.clear();
@@ -116,7 +116,7 @@ class EntityInformationsController extends GetxController {
     logoUrl.value = '';
     imageBytes = null;
     entityStatus.value = '';
-    isCompanySelected.value = false;
+    // isCompanySelected.value = false;
     isIndividualSelected.value = false;
     groupName.clear();
     industry.value.clear();

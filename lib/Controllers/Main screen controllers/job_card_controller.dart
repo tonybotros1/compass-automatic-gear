@@ -57,7 +57,7 @@ class JobCardController extends GetxController {
   RxMap allModels = RxMap({});
   RxMap allCustomers = RxMap({});
   RxMap salesManMap = RxMap({});
-  RxBool isCashSelected = RxBool(false);
+  RxBool isCashSelected = RxBool(true);
   RxBool isCreditSelected = RxBool(false);
   RxString payType = RxString('');
   @override
@@ -76,8 +76,6 @@ class JobCardController extends GetxController {
     getAllJobCards();
   }
 
-
-  
   void selectCashOrCredit(String selected, bool value) {
     bool isCash = selected == 'cash';
 

@@ -113,6 +113,7 @@ Container customerDetailsSection() {
         Row(
           children: [
             Expanded(
+              flex: 2,
               child: GetX<JobCardController>(builder: (controller) {
                 final isBranchesLoading = controller.allBranches.isEmpty;
                 final isCurrenciesLoading = controller.allCurrencies.isEmpty;
@@ -188,25 +189,30 @@ Container customerDetailsSection() {
                 ]);
               }),
             ),
-            Expanded(
+            Container(
+              padding: EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(5),
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(13.0),
-                        child: GetX<JobCardController>(builder: (controller) {
-                          return CupertinoRadio<bool>(
-                            value: true,
-                            groupValue: controller.isCashSelected.value,
-                            onChanged: (value) {
-                              if (value != null) {
-                                controller.selectCashOrCredit('cash', value);
-                              }
-                            },
-                          );
-                        }),
+                      GetX<JobCardController>(builder: (controller) {
+                        return CupertinoRadio<bool>(
+                          value: true,
+                          groupValue: controller.isCashSelected.value,
+                          onChanged: (value) {
+                            if (value != null) {
+                              controller.selectCashOrCredit('cash', value);
+                            }
+                          },
+                        );
+                      }),
+                      SizedBox(
+                        width: 2,
                       ),
                       Text(
                         'Cash',
@@ -214,21 +220,24 @@ Container customerDetailsSection() {
                       )
                     ],
                   ),
+                  SizedBox(
+                    width: 15,
+                  ),
                   Row(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(13.0),
-                        child: GetX<JobCardController>(builder: (controller) {
-                          return CupertinoRadio<bool>(
-                            value: true,
-                            groupValue: controller.isCreditSelected.value,
-                            onChanged: (value) {
-                              if (value != null) {
-                                controller.selectCashOrCredit('credit', value);
-                              }
-                            },
-                          );
-                        }),
+                      GetX<JobCardController>(builder: (controller) {
+                        return CupertinoRadio<bool>(
+                          value: true,
+                          groupValue: controller.isCreditSelected.value,
+                          onChanged: (value) {
+                            if (value != null) {
+                              controller.selectCashOrCredit('credit', value);
+                            }
+                          },
+                        );
+                      }),
+                      SizedBox(
+                        width: 2,
                       ),
                       Text(
                         'Credit',
@@ -236,12 +245,10 @@ Container customerDetailsSection() {
                       )
                     ],
                   ),
-                  SizedBox(
-                    width: 10,
-                  ),
                 ],
               ),
-            )
+            ),
+            Expanded(child: SizedBox()),
           ],
         ),
       ],
