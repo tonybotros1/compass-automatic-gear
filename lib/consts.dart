@@ -268,3 +268,20 @@ textToDate(inputDate) {
     return formattedDate;
   }
 }
+
+
+Container labelContainer({
+ required String lable,
+}) {
+  return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      alignment: Alignment.centerLeft,
+      height: 50,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5), color: Colors.grey[400]),
+      child: Text(
+       lable,
+        style: TextStyle(color: Colors.grey[700]),
+      ),
+    );
+}

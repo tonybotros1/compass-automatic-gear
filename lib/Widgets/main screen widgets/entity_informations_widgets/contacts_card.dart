@@ -3,32 +3,55 @@ import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../Models/dynamic_field_models.dart';
+import '../../../consts.dart';
 import '../dynamic_field.dart';
 
 Widget contactsCardSection(EntityInformationsController controller) {
   return Column(
     children: [
-      AnimatedList(
-        key: controller.listKeyForPhoneLine,
-        shrinkWrap: true,
-        initialItemCount: controller.contactPhone.length,
-        itemBuilder: (context, i, animation) {
-          return buildSmartField(
-              controller, controller.contactPhone[i], animation, i);
-        },
+      labelContainer(lable: 'Contacts Details'),
+      SizedBox(
+        height: 3,
       ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          IconButton(
-            icon: Icon(Icons.add),
-            color: Colors.grey,
-            onPressed: () {
-              controller.addPhoneLine();
-            },
-          ),
-        ],
-      )
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(5)),
+        child: Column(
+          children: [
+            AnimatedList(
+              key: controller.listKeyForPhoneLine,
+              shrinkWrap: true,
+              initialItemCount: controller.contactPhone.length,
+              itemBuilder: (context, i, animation) {
+                return buildSmartField(
+                    controller, controller.contactPhone[i], animation, i);
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                 TextButton.icon(
+                  onPressed: () {
+                     controller.addPhoneLine();
+                  },
+                  label: Text(
+                    'More...',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                  icon: Icon(
+                    size: 25,
+                    Icons.add_circle_outline,
+                    color: Colors.blue,
+                  ),
+                ),
+               
+              ],
+            )
+          ],
+        ),
+      ),
     ],
   );
 }
@@ -43,15 +66,6 @@ Widget buildSmartField(EntityInformationsController controller,
       children: [
         Row(
           children: [
-            SizedBox(
-              width: 30,
-              child: Icon(
-                Icons.phone,
-                color: Colors.grey,
-                size: 25,
-              ),
-            ),
-            const SizedBox(width: 10),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
