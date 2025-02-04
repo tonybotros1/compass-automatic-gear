@@ -99,6 +99,9 @@ class JobCardController extends GetxController {
   RxString payType = RxString('');
   DateFormat format = DateFormat("dd-MM-yyyy");
 
+  RxList internalNotes = RxList([]);
+  RxBool loadingInternalNotes = RxBool(false);
+
   @override
   void onInit() async {
     super.onInit();
@@ -114,6 +117,14 @@ class JobCardController extends GetxController {
     getCarsModelsAndBrands();
     getCountriesAndCities();
     getAllJobCards();
+  }
+
+  addInternalNote(currentUserId, note) {
+    internalNotes.add({
+      'note':note,
+      'currentUserID':currentUserId,
+      'time':DateTime.now(),
+    });
   }
 
   changingDaysDependingOnQuotationEndDate() {

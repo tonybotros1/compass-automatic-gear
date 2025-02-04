@@ -5,6 +5,7 @@ import '../../../../Controllers/Main screen controllers/job_card_controller.dart
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
+import '../../../../Widgets/main screen widgets/job_cards_widgets/internal_notes_widget.dart';
 import '../../../../consts.dart';
 
 class JobCard extends StatelessWidget {
@@ -77,7 +78,6 @@ class JobCard extends StatelessWidget {
     );
   }
 }
-
 
 Widget tableOfScreens(
     {required constraints,
@@ -172,7 +172,6 @@ DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
   ]);
 }
 
-
 ElevatedButton deleteSection(JobCardController controller, branchId, context) {
   return ElevatedButton(
       style: deleteButtonStyle,
@@ -258,7 +257,6 @@ ElevatedButton editSection(context, JobCardController controller,
       child: const Text('Edit'));
 }
 
-
 ElevatedButton newJobCardButton(BuildContext context,
     BoxConstraints constraints, JobCardController controller) {
   return ElevatedButton(
@@ -281,40 +279,59 @@ ElevatedButton newJobCardButton(BuildContext context,
                 context: context,
               ),
               actions: [
-                GetX<JobCardController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewValue.value
-                                ? null
-                                : () async {
-                                    // await controller.addNewBranch();
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      style: internalNotesButtonStyle,
+                      onPressed: () {
+                        internalNotesDialog(context, controller, constraints);
+                      },
+                      child: Text('Internal Notes'),
+                    ),
+                    Row(
+                      children: [
+                        GetX<JobCardController>(
+                          builder: (controller) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: ElevatedButton(
+                              onPressed: controller.addingNewValue.value
+                                  ? null
+                                  : () async {
+                                      // await controller.addNewBranch();
+                                    },
+                              style: saveButtonStyle,
+                              child: controller.addingNewValue.value == false
+                                  ? const Text(
+                                      'Save',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
                                     ),
-                                  ),
+                            ),
                           ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            Get.back();
+                          },
+                          style: cancelButtonStyle,
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             );
           });
@@ -323,3 +340,4 @@ ElevatedButton newJobCardButton(BuildContext context,
     child: const Text('New Card'),
   );
 }
+

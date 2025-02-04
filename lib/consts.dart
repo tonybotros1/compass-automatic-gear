@@ -49,6 +49,15 @@ var cancelButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var internalNotesButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Color(0xffFA812F),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var viewButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blue,
   foregroundColor: Colors.white,
