@@ -223,6 +223,17 @@ Container jobCardSection(
                 validate: false,
               ),
             ),
+            DynamicConfig(
+              isDropdown: false,
+              flex: 1,
+              fieldConfig: FieldConfig(
+                isnumber: true,
+                textController: controller.minTestKms.value,
+                labelText: 'Min Test KMs',
+                hintText: 'Enter Min Test KMs',
+                validate: false,
+              ),
+            ),
           ]);
         }),
         GetBuilder<JobCardController>(builder: (controller) {
@@ -239,7 +250,7 @@ Container jobCardSection(
                 ))
           ]);
         }),
-         GetBuilder<JobCardController>(builder: (controller) {
+        GetBuilder<JobCardController>(builder: (controller) {
           return dynamicFields(dynamicConfigs: [
             DynamicConfig(
                 isDropdown: false,

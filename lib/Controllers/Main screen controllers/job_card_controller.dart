@@ -23,6 +23,7 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> reference1 = TextEditingController().obs;
   Rx<TextEditingController> reference2 = TextEditingController().obs;
   Rx<TextEditingController> reference3 = TextEditingController().obs;
+  Rx<TextEditingController> minTestKms = TextEditingController().obs;
   Rx<TextEditingController> invoiceCounter =
       TextEditingController(text: 'Auto').obs;
   Rx<TextEditingController> lpoCounter = TextEditingController().obs;
