@@ -16,7 +16,6 @@ Container customerDetailsSection() {
       children: [
         GetX<JobCardController>(builder: (controller) {
           var isCustomersLoading = controller.allCustomers.isEmpty;
-          final isSalesManLoading = controller.salesManMap.isEmpty;
 
           return dynamicFields(dynamicConfigs: [
             DynamicConfig(
@@ -55,9 +54,29 @@ Container customerDetailsSection() {
               isDropdown: false,
               flex: 2,
               fieldConfig: FieldConfig(
-                textController: controller.customerPhoneNumber,
+                textController: controller.customerEntityName,
+                labelText: 'Entity Name',
+                hintText: 'Enter Entity Name',
+                validate: false,
+              ),
+            ),
+            DynamicConfig(
+              isDropdown: false,
+              flex: 2,
+              fieldConfig: FieldConfig(
+                textController: controller.customerEntityPhoneNumber,
                 labelText: 'Phone Number',
                 hintText: 'Enter Phone Number',
+                validate: false,
+              ),
+            ),
+            DynamicConfig(
+              isDropdown: false,
+              flex: 2,
+              fieldConfig: FieldConfig(
+                textController: controller.customerEntityEmail,
+                labelText: 'Entity Email',
+                hintText: 'Enter Entity Email',
                 validate: false,
               ),
             ),
@@ -83,34 +102,6 @@ Container customerDetailsSection() {
                 validate: false,
               ),
             ),
-            DynamicConfig(
-              isDropdown: true,
-              flex: 2,
-              dropdownConfig: DropdownConfig(
-                listValues: controller.salesManMap.values
-                    .map((value) => value['name'].toString())
-                    .toList(),
-                textController: controller.customerSaleMan,
-                labelText: isSalesManLoading ? 'Loading...' : 'Sales Man',
-                hintText: 'Select Sales Man',
-                menuValues: isSalesManLoading ? {} : controller.salesManMap,
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text('${suggestion['name']}'),
-                  );
-                },
-                onSelected: (suggestion) {
-                  controller.customerSaleMan.text = suggestion['name'];
-                  controller.salesManMap.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach(
-                    (entry) {
-                      controller.customerSaleManId.value = entry.key;
-                    },
-                  );
-                },
-              ),
-            ),
           ]);
         }),
         SizedBox(
@@ -119,12 +110,43 @@ Container customerDetailsSection() {
         Row(
           children: [
             Expanded(
-              flex: 2,
+              flex: 3,
               child: GetX<JobCardController>(builder: (controller) {
                 final isBranchesLoading = controller.allBranches.isEmpty;
                 final isCurrenciesLoading = controller.allCurrencies.isEmpty;
+                final isSalesManLoading = controller.salesManMap.isEmpty;
 
                 return dynamicFields(dynamicConfigs: [
+                  DynamicConfig(
+                    isDropdown: true,
+                    flex: 2,
+                    dropdownConfig: DropdownConfig(
+                      listValues: controller.salesManMap.values
+                          .map((value) => value['name'].toString())
+                          .toList(),
+                      textController: controller.customerSaleMan,
+                      labelText: isSalesManLoading ? 'Loading...' : 'Sales Man',
+                      hintText: 'Select Sales Man',
+                      menuValues:
+                          isSalesManLoading ? {} : controller.salesManMap,
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          title: Text('${suggestion['name']}'),
+                        );
+                      },
+                      onSelected: (suggestion) {
+                        controller.customerSaleMan.text = suggestion['name'];
+                        controller.salesManMap.entries.where((entry) {
+                          return entry.value['name'] ==
+                              suggestion['name'].toString();
+                        }).forEach(
+                          (entry) {
+                            controller.customerSaleManId.value = entry.key;
+                          },
+                        );
+                      },
+                    ),
+                  ),
                   DynamicConfig(
                     isDropdown: true,
                     flex: 2,

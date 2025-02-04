@@ -28,7 +28,9 @@ class JobCardController extends GetxController {
   TextEditingController vin = TextEditingController();
   TextEditingController color = TextEditingController();
   TextEditingController customerName = TextEditingController();
-  TextEditingController customerPhoneNumber = TextEditingController();
+  TextEditingController customerEntityName = TextEditingController();
+  TextEditingController customerEntityEmail = TextEditingController();
+  TextEditingController customerEntityPhoneNumber = TextEditingController();
   TextEditingController customerCreditNumber = TextEditingController(text: '0');
   TextEditingController customerOutstanding = TextEditingController(text: '0');
   TextEditingController customerSaleMan = TextEditingController();
@@ -468,10 +470,15 @@ class JobCardController extends GetxController {
           .contains(selectedId.toLowerCase());
     });
 
-    customerPhoneNumber.text =
-        (currentUserDetails.value['entity_phone'] as List)
-            .map((phoneData) => phoneData['number'])
-            .join('/');
+    var phoneDetails = currentUserDetails.value['entity_phone'].firstWhere(
+      (value) => value['isPrimary'] == true,
+      orElse: () => {'phone': ''},
+    );
+
+    customerEntityPhoneNumber.text = phoneDetails['number'] ?? '';
+    customerEntityName.text = phoneDetails['name'] ?? '';
+    customerEntityEmail.text = phoneDetails['email'];
+
     customerCreditNumber.text =
         (currentUserDetails.value['credit_limit'] ?? '0').toString();
     customerSaleManId.value = currentUserDetails.value['sales_man'];
