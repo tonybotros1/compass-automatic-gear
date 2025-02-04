@@ -53,8 +53,11 @@ Widget addNewBranchOrEdit({
         GetX<BranchesController>(builder: (controller) {
           var isCountryLoading = controller.allCountries.isEmpty;
           return dropDownValues(
+             listValues: controller.allCountries.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
             textController: controller.country,
-            controller: controller.country,
             labelText: 'Country',
             hintText: 'Enter Country',
             validate: true,
@@ -85,11 +88,14 @@ Widget addNewBranchOrEdit({
           var isCityLoading = controller.filterdCitiesByCountry.isEmpty;
 
           return dropDownValues(
+             listValues: controller.filterdCitiesByCountry.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
             suggestionsController: SuggestionsController(),
             onTapForTypeAheadField: SuggestionsController().refresh,
             labelText: 'City',
             hintText: 'Enter your city',
-            controller: controller,
             textController: controller.city,
             validate: true,
             menus:
@@ -101,7 +107,7 @@ Widget addNewBranchOrEdit({
             },
             onSelected: (suggestion) {
               controller.city.text = suggestion['name'];
-              controller.allCities.entries.where((entry) {
+              controller.filterdCitiesByCountry.entries.where((entry) {
                 return entry.value['name'] == suggestion['name'].toString();
               }).forEach((entry) {
                 controller.cityId.value = entry.key;

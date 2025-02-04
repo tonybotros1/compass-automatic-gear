@@ -37,6 +37,9 @@ Container customerSection() {
         ),
         GetX<EntityInformationsController>(builder: (controller) {
           return dropDownValues(
+            listValues: controller.salesManMap.values
+                .map((value) => value['name'].toString())
+                .toList(),
             textController: controller.salesMAn.value,
             onSelected: (suggestion) {
               controller.salesMAn.value.text = '${suggestion['name']}';
@@ -59,7 +62,6 @@ Container customerSection() {
                     : {}
                 : {},
             validate: false,
-            controller: controller,
           );
         }),
       ],

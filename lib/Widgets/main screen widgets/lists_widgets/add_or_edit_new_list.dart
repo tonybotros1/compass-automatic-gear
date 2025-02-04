@@ -41,6 +41,10 @@ Widget addNewListOrEdit({
             height: 10,
           ),
           dropDownValues(
+             listValues: controller.listMap.values
+                    .map((value) => value
+                        .toString()) 
+                    .toList(),
               onSelected: (suggestion) {
                 controller.masteredByForList.text = suggestion.toString();
                 controller.listMap.entries.where((entry) {
@@ -58,7 +62,6 @@ Widget addNewListOrEdit({
               hintText: 'Select the parent list for this list (Optional)',
               menus: controller.listMap,
               validate: false,
-              controller: controller,
               textController: masterdBy ?? controller.masteredByForList)
         ],
       ),

@@ -30,6 +30,10 @@ Widget addNewValueOrEdit({
             height: 20,
           ),
           dropDownValues(
+             listValues: controller.valueMap.values
+                    .map((value) => value
+                        .toString()) 
+                    .toList(),
               onSelected: (suggestion) {
                 controller.restrictedBy.text = suggestion.toString();
                 controller.valueMap.entries.where((entry) {
@@ -47,7 +51,6 @@ Widget addNewValueOrEdit({
               hintText: 'Select the parent Value for this Value (Optional)',
               menus: controller.valueMap,
               validate: false,
-              controller: controller,
               textController: restrictedBy ?? controller.restrictedBy)
         ],
       ),

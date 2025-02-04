@@ -11,7 +11,7 @@ Widget addNewConterOrEdit({
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
-    height: 270,
+    height: 300,
     child: ListView(
       children: [
         SizedBox(
@@ -54,6 +54,17 @@ Widget addNewConterOrEdit({
           controller: controller.value,
           labelText: 'Value',
           hintText: 'Enter counter Value',
+          validate: true,
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        myTextFormFieldWithBorder(
+          isnumber: true,
+          obscureText: false,
+          controller: controller.length,
+          labelText: 'Length',
+          hintText: 'Enter value length',
           validate: true,
         ),
       ],

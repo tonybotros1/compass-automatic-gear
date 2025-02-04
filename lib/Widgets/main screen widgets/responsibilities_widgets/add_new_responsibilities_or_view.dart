@@ -17,7 +17,7 @@ Widget addNewResponsibilityOrView({
         children: [
           myTextFormFieldWithBorder(
             obscureText: false,
-            controller:  controller.responsibilityName,
+            controller: controller.responsibilityName,
             labelText: 'Responsibility Name',
             hintText: 'Enter Responsibility name',
             keyboardType: TextInputType.name,
@@ -27,6 +27,9 @@ Widget addNewResponsibilityOrView({
             height: 10,
           ),
           dropDownValues(
+            listValues: controller.menuMap.values
+                .map((value) => '${value['name']} (${value['description']})'.toString())
+                .toList(),
             textController: controller.menuName,
             onSelected: (suggestion) {
               controller.menuName.text =
@@ -48,7 +51,6 @@ Widget addNewResponsibilityOrView({
             hintText: 'Select Menu',
             menus: controller.menuMap,
             validate: true,
-            controller: controller,
           ),
         ],
       ),

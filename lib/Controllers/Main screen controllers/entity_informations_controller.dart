@@ -706,18 +706,6 @@ class EntityInformationsController extends GetxController {
       });
     } else if (columnIndex == 2) {
       allEntities.sort((screen1, screen2) {
-        final String? value1 = screen1.get('entity_status')[0];
-        final String? value2 = screen2.get('entity_status')[0];
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 3) {
-      allEntities.sort((screen1, screen2) {
         final String? value1 = screen1.get('added_date');
         final String? value2 = screen2.get('added_date');
 

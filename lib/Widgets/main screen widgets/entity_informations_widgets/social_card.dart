@@ -77,6 +77,9 @@ Widget buildSmartField(EntityInformationsController controller,
                           isDropdown: true,
                           flex: 1,
                           dropdownConfig: DropdownConfig(
+                            listValues: controller.typeOfSocialsMap.values
+                                .map((value) => value['name'].toString())
+                                .toList(),
                             textController: controller
                                 .socialTypesControllers[index].controller,
                             labelText: isSocialTypeLoading ? 'Loading' : 'Type',

@@ -32,9 +32,9 @@ Widget contactsCardSection(EntityInformationsController controller) {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                 TextButton.icon(
+                TextButton.icon(
                   onPressed: () {
-                     controller.addPhoneLine();
+                    controller.addPhoneLine();
                   },
                   label: Text(
                     'More...',
@@ -46,7 +46,6 @@ Widget contactsCardSection(EntityInformationsController controller) {
                     color: Colors.blue,
                   ),
                 ),
-               
               ],
             )
           ],
@@ -78,6 +77,9 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: true,
                         flex: 1,
                         dropdownConfig: DropdownConfig(
+                            listValues: controller.phoneTypesMap.values
+                                .map((value) => value['name'].toString())
+                                .toList(),
                             textController: controller
                                 .phoneTypesControllers[index].controller,
                             labelText:

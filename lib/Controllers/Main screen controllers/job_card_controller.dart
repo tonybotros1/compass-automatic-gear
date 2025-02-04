@@ -1,10 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class JobCardController extends GetxController {
   TextEditingController jobCardCounter = TextEditingController();
+  Rx<TextEditingController> quotationCounter =
+      TextEditingController(text: 'Auto').obs;
+  Rx<TextEditingController> quotationDate =
+      TextEditingController(text: '${textToDate(DateTime.now())}').obs;
+  Rx<TextEditingController> quotationDays = TextEditingController().obs;
+  Rx<TextEditingController> validityEndDate = TextEditingController().obs;
+  Rx<TextEditingController> referenceNumber = TextEditingController().obs;
+  Rx<TextEditingController> deliveryTime = TextEditingController().obs;
+  Rx<TextEditingController> warrantyDays = TextEditingController().obs;
+  Rx<TextEditingController> warrantyKM = TextEditingController().obs;
+  TextEditingController quotationNotes = TextEditingController();
   TextEditingController plateNumber = TextEditingController();
   TextEditingController carCode = TextEditingController();
   TextEditingController carBrand = TextEditingController();
@@ -60,11 +73,14 @@ class JobCardController extends GetxController {
   RxBool isCashSelected = RxBool(true);
   RxBool isCreditSelected = RxBool(false);
   RxString payType = RxString('');
+  DateFormat format = DateFormat("dd-MM-yyyy");
+
   @override
   void onInit() async {
     super.onInit();
     await getCompanyId();
-    await getCurrentJobCardCounterNumber();
+    // getCurrentJobCardCounterNumber();
+    // getCurrentQuotationCounterNumber();
     getSalesMan();
     getBranches();
     getBranches();
@@ -74,6 +90,34 @@ class JobCardController extends GetxController {
     getCarsModelsAndBrands();
     getCountriesAndCities();
     getAllJobCards();
+  }
+
+  changingDaysDependingOnQuotationEndDate() {
+    DateTime specificDate = format.parse(validityEndDate.value.text);
+
+    quotationDays.value.text =
+        (specificDate.difference(format.parse(quotationDate.value.text)).inDays)
+            .toString();
+  }
+
+  changeQuotationEndDateDependingOnDays() {
+    DateTime date = format.parse(quotationDate.value.text);
+    DateTime newDate =
+        date.add(Duration(days: int.parse(quotationDays.value.text)));
+    validityEndDate.value.text = format.format(newDate);
+  }
+
+  Future<void> selectDateContext(BuildContext context, date) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null) {
+      date.value.text = textToDate(picked.toString());
+    }
   }
 
   void selectCashOrCredit(String selected, bool value) {
@@ -188,7 +232,45 @@ class JobCardController extends GetxController {
           .doc(jcnId)
           .snapshots()
           .listen((jcnCounter) {
-        jobCardCounter.text = (jcnCounter.data()!['value'] ?? '').toString();
+        jobCardCounter.text =
+            (jcnCounter.data()!['value'] + 1 ?? '').toString();
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  getCurrentQuotationCounterNumber() async {
+    try {
+      var qnId = '';
+      var qnDoc = await FirebaseFirestore.instance
+          .collection('counters')
+          .where('code', isEqualTo: 'QN')
+          .where('company_id', isEqualTo: companyId.value)
+          .get();
+
+      if (qnDoc.docs.isEmpty) {
+        var newCounter =
+            await FirebaseFirestore.instance.collection('counters').add({
+          'code': 'QN',
+          'description': 'Quotation Number',
+          'prefix': '',
+          'value': 0,
+          'added_date': DateTime.now().toString(),
+          'company_id': companyId.value,
+          'status': true,
+        });
+        qnId = newCounter.id;
+      } else {
+        qnId = qnDoc.docs.first.id;
+      }
+      FirebaseFirestore.instance
+          .collection('counters')
+          .doc(qnId)
+          .snapshots()
+          .listen((qnCounter) {
+        quotationCounter.value.text =
+            (qnCounter.data()!['value'] + 1 ?? '').toString();
       });
     } catch (e) {
       //
@@ -329,6 +411,7 @@ class JobCardController extends GetxController {
     try {
       FirebaseFirestore.instance
           .collection('job_cards')
+          .where('company_id', isEqualTo: companyId.value)
           .snapshots()
           .listen((jobCards) {
         allJobCards.assignAll(jobCards.docs);

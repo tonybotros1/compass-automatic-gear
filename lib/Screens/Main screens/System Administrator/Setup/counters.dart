@@ -244,6 +244,7 @@ ElevatedButton editSection(context, CountersController controller,
               controller.description.text = counterData['description'] ?? '';
               controller.prefix.text = counterData['prefix'] ?? '';
               controller.value.text = (counterData['value'] ?? '').toString();
+              controller.length.text = counterData['length'];
 
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -304,6 +305,7 @@ ElevatedButton newCounterButton(BuildContext context,
       controller.description.clear();
       controller.prefix.clear();
       controller.value.clear();
+      controller.length.clear();
       showDialog(
           context: context,
           builder: (context) {

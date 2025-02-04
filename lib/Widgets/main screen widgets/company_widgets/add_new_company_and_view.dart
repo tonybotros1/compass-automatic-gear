@@ -47,8 +47,11 @@ Widget addNewCompanyOrView({
                 child: GetX<CompanyController>(builder: (controller) {
                   final isIndustryLoading = controller.industryMap.isEmpty;
                   return dropDownValues(
+                     listValues: controller.industryMap.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                     textController: controller.industry,
-                    controller: controller.industry,
                     labelText: 'Industry',
                     hintText: 'Enter industry',
                     validate: true,
@@ -150,9 +153,12 @@ Widget addNewCompanyOrView({
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: dropDownValues(
+                     listValues: controller.allCountries.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                     labelText: 'Country',
                     hintText: 'Enter your country',
-                    controller: controller,
                     textController: country ?? controller.country,
                     validate: true,
                     menus: isCountriesLoading ? {} : controller.allCountries,
@@ -181,11 +187,14 @@ Widget addNewCompanyOrView({
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: dropDownValues(
+                     listValues: controller.filterdCitiesByCountry.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                     suggestionsController: SuggestionsController(),
                     onTapForTypeAheadField: SuggestionsController().refresh,
                     labelText: 'City',
                     hintText: 'Enter your city',
-                    controller: controller,
                     textController: city ?? controller.city,
                     validate: true,
                     menus: controller.filterdCitiesByCountry.isEmpty
@@ -198,7 +207,7 @@ Widget addNewCompanyOrView({
                     },
                     onSelected: (suggestion) {
                       controller.city.text = suggestion['name'];
-                      controller.allCities.entries.where((entry) {
+                      controller.filterdCitiesByCountry.entries.where((entry) {
                         return entry.value['name'] ==
                             suggestion['name'].toString();
                       }).forEach((entry) {
@@ -221,6 +230,10 @@ Widget addNewCompanyOrView({
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: dropDownValues(
+                         listValues: controller.allRoles.values
+                    .map((value) => value
+                        .toString()) 
+                    .toList(),
                         onSelected: (suggestion) {
                           controller.allRoles.entries.where((entry) {
                             return entry.value == suggestion.toString();

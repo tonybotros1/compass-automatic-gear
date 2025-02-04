@@ -2,6 +2,8 @@ import 'package:datahubai/Widgets/decimal_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'date_time_field.dart';
+
 Widget myTextFormFieldWithBorder(
     {String? labelText,
     String? hintText,
@@ -12,16 +14,23 @@ Widget myTextFormFieldWithBorder(
     Icon? icon,
     bool? isnumber,
     bool? isDouble,
+    bool? isDate,
+     maxLines = 1,
+    int? minLines,
     keyboardType,
     void Function(String)? onChanged,
     bool? isEnabled}) {
   return TextFormField(
+    minLines: minLines,
+    maxLines: maxLines,
     onChanged: onChanged,
     inputFormatters: isnumber == true
         ? [FilteringTextInputFormatter.digitsOnly]
         : isDouble == true
             ? [DecimalTextInputFormatter()]
-            : [],
+            : isDate == true
+                ? [DateTextFormatter()]
+                : [],
     enabled: isEnabled,
     obscureText: obscureText,
     keyboardType: keyboardType,

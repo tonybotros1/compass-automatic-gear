@@ -92,6 +92,9 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: true,
                         flex: 1,
                         dropdownConfig: DropdownConfig(
+                          listValues: controller.allCountries.values
+                              .map((value) => value['name'].toString())
+                              .toList(),
                           textController:
                               controller.countriesControllers[index].controller,
                           labelText:
@@ -127,6 +130,9 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: true,
                         flex: 1,
                         dropdownConfig: DropdownConfig(
+                          listValues: controller.filterdCitiesByCountry.values
+                              .map((value) => value['name'].toString())
+                              .toList(),
                           suggestionsController: SuggestionsController(),
                           onTap: SuggestionsController().refresh,
                           textController:
@@ -144,7 +150,8 @@ Widget buildSmartField(EntityInformationsController controller,
                           onSelected: (suggestion) {
                             controller.citiesControllers[index].controller!
                                 .text = suggestion['name'];
-                            controller.allCities.entries.where((entry) {
+                            controller.filterdCitiesByCountry.entries
+                                .where((entry) {
                               return entry.value['name'] ==
                                   suggestion['name'].toString();
                             }).forEach((entry) {

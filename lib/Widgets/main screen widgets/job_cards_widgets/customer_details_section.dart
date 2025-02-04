@@ -23,6 +23,9 @@ Container customerDetailsSection() {
               isDropdown: true,
               flex: 3,
               dropdownConfig: DropdownConfig(
+                listValues: controller.allCustomers.values
+                    .map((value) => value['entity_name'].toString())
+                    .toList(),
                 textController: controller.customerName,
                 labelText: isCustomersLoading ? 'Loading...' : 'Customer',
                 hintText: 'Select Customer',
@@ -84,6 +87,9 @@ Container customerDetailsSection() {
               isDropdown: true,
               flex: 2,
               dropdownConfig: DropdownConfig(
+                listValues: controller.salesManMap.values
+                    .map((value) => value['name'].toString())
+                    .toList(),
                 textController: controller.customerSaleMan,
                 labelText: isSalesManLoading ? 'Loading...' : 'Sales Man',
                 hintText: 'Select Sales Man',
@@ -94,7 +100,7 @@ Container customerDetailsSection() {
                   );
                 },
                 onSelected: (suggestion) {
-                  controller.customerName.text = suggestion['name'];
+                  controller.customerSaleMan.text = suggestion['name'];
                   controller.salesManMap.entries.where((entry) {
                     return entry.value['name'] == suggestion['name'].toString();
                   }).forEach(
@@ -123,6 +129,9 @@ Container customerDetailsSection() {
                     isDropdown: true,
                     flex: 2,
                     dropdownConfig: DropdownConfig(
+                      listValues: controller.allBranches.values
+                          .map((value) => value['name'].toString())
+                          .toList(),
                       textController: controller.customerBranch,
                       labelText: isBranchesLoading ? 'Loading...' : 'Branch',
                       hintText: 'Select Branch',
@@ -150,6 +159,9 @@ Container customerDetailsSection() {
                     isDropdown: true,
                     flex: 1,
                     dropdownConfig: DropdownConfig(
+                      listValues: controller.allCurrencies.values
+                          .map((value) => value['code'].toString())
+                          .toList(),
                       textController: controller.customerCurrency,
                       labelText: isBranchesLoading ? 'Loading...' : 'Currency',
                       hintText: 'Select Currency',
@@ -189,6 +201,9 @@ Container customerDetailsSection() {
                 ]);
               }),
             ),
+            SizedBox(
+              width: 5,
+            ),
             Container(
               padding: EdgeInsets.all(13),
               decoration: BoxDecoration(
@@ -221,7 +236,7 @@ Container customerDetailsSection() {
                     ],
                   ),
                   SizedBox(
-                    width: 15,
+                    width: 20,
                   ),
                   Row(
                     children: [

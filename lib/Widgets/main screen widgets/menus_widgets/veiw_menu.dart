@@ -106,6 +106,10 @@ Obx screenSection(MenusController controller, BoxConstraints constraints) {
                           child: Form(
                             key: controller.formKeyForDropDownListForScreens,
                             child: dropDownValues(
+                               listValues: controller.selectFromScreens.values
+                    .map((value) => value
+                        .toString()) 
+                    .toList(),
                               onSelected: (suggestion) {
                                 controller.selectFromScreens.entries
                                     .where((entry) {
@@ -263,6 +267,10 @@ Obx menuSection(MenusController controller, BoxConstraints constraints) {
                             child: Form(
                               key: controller.formKeyForDropDownListForMenus,
                               child: dropDownValues(
+                                 listValues: controller.selectFromMenus.values
+                    .map((value) => value
+                        .toString()) 
+                    .toList(),
                                 onSelected: (suggestion) {
                                   controller.selectFromMenus.entries
                                       .where((entry) {

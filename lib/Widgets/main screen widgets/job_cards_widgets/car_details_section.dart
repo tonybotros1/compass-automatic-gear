@@ -7,7 +7,7 @@ import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../Models/dynamic_field_models.dart';
 import '../dynamic_field.dart';
 
-Container carDetailsSection() {
+Widget carDetailsSection() {
   return Container(
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -24,6 +24,10 @@ Container carDetailsSection() {
                   isDropdown: true,
                   flex: 1,
                   dropdownConfig: DropdownConfig(
+                     listValues: controller.allBrands.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                     textController: controller.carBrand,
                     labelText: isBrandsLoading ? 'Loading...' : 'Brand',
                     hintText: 'Select Brand',
@@ -53,6 +57,10 @@ Container carDetailsSection() {
                   isDropdown: true,
                   flex: 2,
                   dropdownConfig: DropdownConfig(
+                     listValues: controller.filterdModelsByBrands.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                     suggestionsController: SuggestionsController(),
                     onTap: SuggestionsController().refresh,
                     textController: controller.carModel,
@@ -103,6 +111,10 @@ Container carDetailsSection() {
                   isDropdown: true,
                   flex: 2,
                   dropdownConfig: DropdownConfig(
+                     listValues: controller.allCountries.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                     textController: controller.country,
                     labelText: isCountriesLoading ? 'Loading...' : 'Country',
                     hintText: 'Select Country',
@@ -133,6 +145,10 @@ Container carDetailsSection() {
                   isDropdown: true,
                   flex: 1,
                   dropdownConfig: DropdownConfig(
+                     listValues: controller.filterdCitiesByCountry.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                     suggestionsController: SuggestionsController(),
                     onTap: SuggestionsController().refresh,
                     textController: controller.city,
@@ -181,6 +197,10 @@ Container carDetailsSection() {
                   isDropdown: true,
                   flex: 1,
                   dropdownConfig: DropdownConfig(
+                     listValues: controller.allColors.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                     textController: controller.color,
                     labelText: isColorsLoading ? 'Loading...' : 'Color',
                     hintText: 'Select Color',

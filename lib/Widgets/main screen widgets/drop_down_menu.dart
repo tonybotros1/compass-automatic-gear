@@ -9,16 +9,26 @@ Widget dropDownValues({
   required Widget Function(BuildContext, dynamic) itemBuilder,
   required void Function(dynamic)? onSelected,
   TextEditingController? textController,
-  controller,
   suggestionsController,
+  required List listValues,
   void Function()? onTapForTypeAheadField,
   icon,
 }) {
+  FocusNode focusNode = FocusNode(); // ✅ Add a focus node
+
+  // ✅ Listen for focus changes (when the user tabs or clicks away)
+  focusNode.addListener(() {
+    if (!focusNode.hasFocus) {
+      _validateAndShowAlert(focusNode.context!, textController, listValues);
+    }
+  });
+
   return TypeAheadField(
+    focusNode: focusNode,
     suggestionsController: suggestionsController,
     controller: textController,
     builder: (context, textEditingController, focusNode) => TextFormField(
-      onTap: () => onTapForTypeAheadField,
+      onTap: onTapForTypeAheadField,
       validator: validate
           ? (value) {
               if (value!.isEmpty) {
@@ -29,7 +39,7 @@ Widget dropDownValues({
           : null,
       controller: textEditingController,
       enabled: menus.isNotEmpty,
-      focusNode: focusNode,
+      focusNode: focusNode, // ✅ Attach the focus node
       decoration: InputDecoration(
         icon: icon,
         focusedBorder: OutlineInputBorder(
@@ -58,29 +68,6 @@ Widget dropDownValues({
         hintStyle: const TextStyle(color: Colors.grey),
         labelStyle: TextStyle(color: Colors.grey.shade700),
       ),
-      onFieldSubmitted: (value) {
-        // Check if the entered value exists in the menus list
-        if (!menus.values.contains(value)) {
-          // Show an alert dialog if not present
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Invalid Menu'),
-                content: Text('The menu "$value" does not exist.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        }
-      },
     ),
     suggestionsCallback: (pattern) async {
       return menus.values
@@ -117,4 +104,35 @@ Widget dropDownValues({
       );
     },
   );
+}
+
+
+/// ✅ Helper function to validate the input and show an alert if necessary
+void _validateAndShowAlert(
+    BuildContext context, TextEditingController? textController, List listValues) {
+  if (textController == null) return;
+
+  String value = textController.text;
+  if (value.isNotEmpty && !listValues.contains(value)) {
+  
+    textController.clear(); // ✅ Clear the invalid input
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Invalid Value'),
+          content: Text('The value "$value" does not exist.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // ✅ Close the dialog
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

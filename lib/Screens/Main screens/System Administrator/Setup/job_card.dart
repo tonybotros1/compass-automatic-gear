@@ -320,6 +320,6 @@ ElevatedButton newJobCardButton(BuildContext context,
           });
     },
     style: newButtonStyle,
-    child: const Text('New Job Card'),
+    child: const Text('New Card'),
   );
 }

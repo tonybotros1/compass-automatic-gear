@@ -98,6 +98,10 @@ Widget responsibilities({
               child: Form(
                 key: controller.formKeyForThirdMenu,
                 child: dropDownValues(
+                   listValues: controller.allRoles.values
+                    .map((value) => value
+                        .toString()) 
+                    .toList(),
                   onSelected: (suggestion) {
                     controller.allRoles.entries.where((entry) {
                       return entry.value == suggestion.toString();
@@ -318,6 +322,10 @@ Widget contactDetails({
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 2.5),
                         child: dropDownValues(
+                           listValues: controller.allCountries.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                           textController: controller.country,
                           labelText: 'Country',
                           hintText: 'Select Country',
@@ -349,6 +357,10 @@ Widget contactDetails({
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 2.5),
                         child: dropDownValues(
+                           listValues: controller.filterdCitiesByCountry.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                             suggestionsController: SuggestionsController(),
                             onTapForTypeAheadField:
                                 SuggestionsController().refresh,
@@ -366,7 +378,7 @@ Widget contactDetails({
                             },
                             onSelected: (suggestion) {
                               controller.city.text = suggestion['name'];
-                              controller.allCities.entries.where((entry) {
+                              controller.filterdCitiesByCountry.entries.where((entry) {
                                 return entry.value['name'] ==
                                     suggestion['name'].toString();
                               }).forEach((entry) {
@@ -442,10 +454,14 @@ Widget companyDetails({required RegisterScreenController controller}) {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),
                       child: dropDownValues(
+                         listValues: controller.industryMap.values
+                    .map((value) => value['name']
+                        .toString()) 
+                    .toList(),
                         textController: controller.industry,
                         labelText: 'Industry',
                         hintText: 'Enter industry',
-                        controller: controller.industry,
+                       
                         validate: true,
                         menus: controller.industryMap.isNotEmpty
                             ? controller.industryMap

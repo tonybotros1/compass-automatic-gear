@@ -16,6 +16,7 @@ Widget dynamicFields({
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: config.isDropdown
                 ? dropDownValues(
+                  listValues:config.dropdownConfig?.listValues ?? [],
                     suggestionsController:
                         config.dropdownConfig?.suggestionsController,
                     textController: config.dropdownConfig?.textController,
@@ -28,6 +29,8 @@ Widget dynamicFields({
                     onSelected: config.dropdownConfig?.onSelected,
                   )
                 : myTextFormFieldWithBorder(
+                    isDate: config.fieldConfig?.isDate,
+                    suffixIcon: config.fieldConfig?.suffixIcon,
                     isDouble: config.fieldConfig?.isDouble,
                     isnumber: config.fieldConfig?.isnumber,
                     isEnabled: config.fieldConfig?.isEnabled,
@@ -43,4 +46,3 @@ Widget dynamicFields({
     ],
   );
 }
-

@@ -1,7 +1,10 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'car_details_section.dart';
 import 'customer_details_section.dart';
+import 'quotations_section.dart';
+import 'title_bar.dart';
 
 Widget addNewJobCardOrEdit({
   required BoxConstraints constraints,
@@ -10,39 +13,12 @@ Widget addNewJobCardOrEdit({
   bool? canEdit,
 }) {
   return SizedBox(
-    width: constraints.maxWidth,
+    width: Get.width, //constraints.maxWidth,
     child: ListView(
       children: [
-        Row(
-          children: [
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              alignment: Alignment.centerLeft,
-              height: 50,
-              width: constraints.maxWidth,
-              decoration: BoxDecoration(
-                  color: Colors.grey[400],
-                  borderRadius: BorderRadius.circular(5)),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.directions_car,
-                    color: Colors.grey[700],
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Text(
-                    'Car Details',
-                    style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        titleBar(
+          title: 'Car Details',
+          icon: Icons.directions_car,
         ),
         SizedBox(
           height: 3,
@@ -51,22 +27,19 @@ Widget addNewJobCardOrEdit({
         SizedBox(
           height: 20,
         ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          alignment: Alignment.centerLeft,
-          height: 50,
-          decoration: BoxDecoration(
-              color: Colors.grey[400], borderRadius: BorderRadius.circular(5)),
-          child: Text(
-            'Customer Details',
-            style:
-                TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold),
-          ),
-        ),
+        titleBar(title: 'Customer Details', icon: Icons.person),
         SizedBox(
           height: 3,
         ),
         customerDetailsSection(),
+        SizedBox(
+          height: 20,
+        ),
+        titleBar(title: 'Quotation', icon: Icons.format_quote),
+        SizedBox(
+          height: 3,
+        ),
+        quotationsSection(context),
       ],
     ),
   );

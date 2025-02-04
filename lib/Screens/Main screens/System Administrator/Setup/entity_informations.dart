@@ -104,7 +104,6 @@ Widget tableOfScreens(
           text: 'Phone',
           constraints: constraints,
         ),
-        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(
