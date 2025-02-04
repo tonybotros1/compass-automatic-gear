@@ -68,7 +68,7 @@ class EntityInformationsController extends GetxController {
       'name': '',
       'email': '',
       'tob_title': '',
-      'isPrimary': false,
+      'isPrimary': true,
     }
   ]);
 
@@ -84,7 +84,7 @@ class EntityInformationsController extends GetxController {
       'line': '',
       'country': '',
       'city': '',
-      'isPrimary': false,
+      'isPrimary': true,
     }
   ]);
 
@@ -131,7 +131,7 @@ class EntityInformationsController extends GetxController {
       'line': '',
       'country': '',
       'city': '',
-      'isPrimary': false,
+      'isPrimary': true,
     });
 
     contactPhone.clear();
@@ -141,7 +141,7 @@ class EntityInformationsController extends GetxController {
       'name': '',
       'email': '',
       'tob_title': '',
-      'isPrimary': false,
+      'isPrimary': true,
     });
     contactSocial.clear();
     contactSocial.add({
