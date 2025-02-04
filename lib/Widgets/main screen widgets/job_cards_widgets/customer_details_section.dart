@@ -149,7 +149,7 @@ Container customerDetailsSection() {
                   ),
                   DynamicConfig(
                     isDropdown: true,
-                    flex: 2,
+                    flex: 1,
                     dropdownConfig: DropdownConfig(
                       listValues: controller.allBranches.values
                           .map((value) => value['name'].toString())
