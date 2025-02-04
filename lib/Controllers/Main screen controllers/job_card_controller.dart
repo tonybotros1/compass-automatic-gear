@@ -6,7 +6,26 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class JobCardController extends GetxController {
-  TextEditingController jobCardCounter = TextEditingController();
+  Rx<TextEditingController> jobCardCounter =
+      TextEditingController(text: 'Auto').obs;
+  Rx<TextEditingController> jobCardDate =
+      TextEditingController(text: '${textToDate(DateTime.now())}').obs;
+  Rx<TextEditingController> invoiceDate =
+      TextEditingController(text: '${textToDate(DateTime.now())}').obs;
+  Rx<TextEditingController> approvalDate = TextEditingController().obs;
+  Rx<TextEditingController> startDate =
+      TextEditingController(text: '${textToDate(DateTime.now())}').obs;
+  Rx<TextEditingController> finishDate = TextEditingController().obs;
+  Rx<TextEditingController> deliveryDate = TextEditingController().obs;
+  Rx<TextEditingController> jobWarrentyDays = TextEditingController().obs;
+  Rx<TextEditingController> jobWarrentyKM = TextEditingController().obs;
+  Rx<TextEditingController> jobWarrentyEndDate = TextEditingController().obs;
+  Rx<TextEditingController> reference1 = TextEditingController().obs;
+  Rx<TextEditingController> reference2 = TextEditingController().obs;
+  Rx<TextEditingController> reference3 = TextEditingController().obs;
+  Rx<TextEditingController> invoiceCounter =
+      TextEditingController(text: 'Auto').obs;
+  Rx<TextEditingController> lpoCounter = TextEditingController().obs;
   Rx<TextEditingController> quotationCounter =
       TextEditingController(text: 'Auto').obs;
   Rx<TextEditingController> quotationDate =
@@ -15,9 +34,11 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> validityEndDate = TextEditingController().obs;
   Rx<TextEditingController> referenceNumber = TextEditingController().obs;
   Rx<TextEditingController> deliveryTime = TextEditingController().obs;
-  Rx<TextEditingController> warrantyDays = TextEditingController().obs;
-  Rx<TextEditingController> warrantyKM = TextEditingController().obs;
+  Rx<TextEditingController> quotationWarrentyDays = TextEditingController().obs;
+  Rx<TextEditingController> quotationWarrentyKM = TextEditingController().obs;
   TextEditingController quotationNotes = TextEditingController();
+  TextEditingController jobNotes = TextEditingController();
+  TextEditingController deliveryNotes = TextEditingController();
   TextEditingController plateNumber = TextEditingController();
   TextEditingController carCode = TextEditingController();
   TextEditingController carBrand = TextEditingController();
@@ -234,7 +255,7 @@ class JobCardController extends GetxController {
           .doc(jcnId)
           .snapshots()
           .listen((jcnCounter) {
-        jobCardCounter.text =
+        jobCardCounter.value.text =
             (jcnCounter.data()!['value'] + 1 ?? '').toString();
       });
     } catch (e) {

@@ -1,6 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/dynamic_field.dart';
-import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -108,9 +107,9 @@ Container quotationsSection(
               flex: 2,
               fieldConfig: FieldConfig(
                 isnumber: true,
-                textController: controller.warrantyDays.value,
-                labelText: 'Warranty Days',
-                hintText: 'Enter Warranty Days',
+                textController: controller.quotationWarrentyDays.value,
+                labelText: 'Warrenty Days',
+                hintText: 'Enter Warrenty Days',
                 validate: false,
               ),
             ),
@@ -119,26 +118,27 @@ Container quotationsSection(
               flex: 2,
               fieldConfig: FieldConfig(
                 isnumber: true,
-                textController: controller.warrantyKM.value,
-                labelText: 'Warranty KM',
-                hintText: 'Enter Warranty KM',
+                textController: controller.quotationWarrentyKM.value,
+                labelText: 'Warrenty KM',
+                hintText: 'Enter Warrenty KM',
                 validate: false,
               ),
             ),
           ]);
         }),
         GetBuilder<JobCardController>(builder: (controller) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            child: myTextFormFieldWithBorder(
-              labelText: 'Notes',
-              hintText: 'Enter Notes',
-              controller: controller.quotationNotes,
-              maxLines: null,
-              minLines: 1,
-              keyboardType: TextInputType.multiline,
-            ),
-          );
+          return dynamicFields(dynamicConfigs: [
+            DynamicConfig(
+                isDropdown: false,
+                fieldConfig: FieldConfig(
+                  labelText: 'Quotation Notes',
+                  hintText: 'Enter Quotation Notes',
+                  textController: controller.quotationNotes,
+                  maxLines: null,
+                  minLines: 1,
+                  keyboardType: TextInputType.multiline,
+                ))
+          ]);
         })
       ]));
 }

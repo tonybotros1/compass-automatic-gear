@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'car_details_section.dart';
 import 'customer_details_section.dart';
+import 'job_card_section.dart';
 import 'quotations_section.dart';
 import 'title_bar.dart';
 
@@ -40,6 +41,14 @@ Widget addNewJobCardOrEdit({
           height: 3,
         ),
         quotationsSection(context),
+        SizedBox(
+          height: 20,
+        ),
+        titleBar(title: 'Job Card', icon: Icons.credit_card),
+        SizedBox(
+          height: 3,
+        ),
+        jobCardSection(context),
       ],
     ),
   );

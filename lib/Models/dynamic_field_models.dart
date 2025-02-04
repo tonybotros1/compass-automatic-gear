@@ -56,6 +56,9 @@ class FieldConfig {
   final bool? isDouble;
   final IconButton? suffixIcon;
   final bool? isDate;
+  final int? maxLines;
+  final int? minLines;
+  final TextInputType? keyboardType;
 
   FieldConfig({
     this.labelText,
@@ -69,5 +72,8 @@ class FieldConfig {
     this.isDouble,
     this.suffixIcon,
     this.isDate,
+    this.keyboardType,
+    this.maxLines = 1,
+    this.minLines,
   });
 }
