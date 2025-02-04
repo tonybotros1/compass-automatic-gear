@@ -1,4 +1,5 @@
 import 'package:datahubai/Widgets/main%20screen%20widgets/dynamic_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
@@ -66,6 +67,30 @@ Widget buildSmartField(EntityInformationsController controller,
       children: [
         Row(
           children: [
+            Row(
+              children: [
+                GetBuilder<EntityInformationsController>(
+                  builder: (controller) {
+                    return CupertinoRadio<bool>(
+                      value: true,
+                      groupValue: controller.contactAddress[index]['isPrimary'],
+                      onChanged: (value) {
+                        if (value != null) {
+                          controller.selectPrimaryAddressField(index, value);
+                        }
+                      },
+                    );
+                  }
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Text(
+                  'Primary?',
+                  style: TextStyle(color: Colors.grey[700]),
+                ),
+              ],
+            ),
             Expanded(
               child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),

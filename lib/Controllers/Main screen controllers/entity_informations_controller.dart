@@ -68,6 +68,7 @@ class EntityInformationsController extends GetxController {
       'name': '',
       'email': '',
       'tob_title': '',
+      'isPrimary': false,
     }
   ]);
 
@@ -83,6 +84,7 @@ class EntityInformationsController extends GetxController {
       'line': '',
       'country': '',
       'city': '',
+      'isPrimary': false,
     }
   ]);
 
@@ -129,6 +131,7 @@ class EntityInformationsController extends GetxController {
       'line': '',
       'country': '',
       'city': '',
+      'isPrimary': false,
     });
 
     contactPhone.clear();
@@ -138,6 +141,7 @@ class EntityInformationsController extends GetxController {
       'name': '',
       'email': '',
       'tob_title': '',
+      'isPrimary': false,
     });
     contactSocial.clear();
     contactSocial.add({
@@ -431,6 +435,24 @@ class EntityInformationsController extends GetxController {
     entityStatus.value = isCompany ? 'Company' : 'Individual';
   }
 
+  void selectPrimaryAddressField(int index, bool value) {
+    for (var element in contactAddress) {
+      element['isPrimary'] = false;
+    }
+    contactAddress[index]['isPrimary'] = true;
+
+    update();
+  }
+
+  void selectPrimaryPhonesField(int index, bool value) {
+    for (var element in contactPhone) {
+      element['isPrimary'] = false;
+    }
+    contactPhone[index]['isPrimary'] = true;
+
+    update();
+  }
+
   void onSelect(String selectedId) {
     filterdCitiesByCountry.clear();
     filterdCitiesByCountry.addAll(
@@ -618,6 +640,7 @@ class EntityInformationsController extends GetxController {
       'email': '',
       'name': '',
       'tob_title': '',
+      'isPrimary': false,
     });
     listKeyForPhoneLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
@@ -651,6 +674,7 @@ class EntityInformationsController extends GetxController {
       'line': '',
       'country': '',
       'city': '',
+      'isPrimary': false,
     });
     listKeyForAddressLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
