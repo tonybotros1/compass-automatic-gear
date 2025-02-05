@@ -394,43 +394,55 @@ class EntityInformationsController extends GetxController {
     entityStatus.value = isCompanySelected.isTrue ? 'Company' : 'Individual';
   }
 
-// this function is to set the entity address fro edit
   void updateEntityAddress(List entityAddressFromData) {
+    // contactAddress.clear();
     contactAddress.value = entityAddressFromData;
     generateControllerForAdressCountriesAndCities();
-    for (var i = 0; i < contactAddress.length; i++) {
+
+    final length = contactAddress.length;
+    for (var i = 0; i < length; i++) {
+      final address = contactAddress[i];
+
       countriesControllers[i].controller?.text =
-          getCountryName(contactAddress[i]['country'])!;
-      addressPrimary[i].isPrimary = contactAddress[i]['isPrimary'];
+          getCountryName(address['country']) ?? '';
+      addressPrimary[i].isPrimary = address['isPrimary'];
       citiesControllers[i].controller?.text =
-          getCityName(contactAddress[i]['city'])!;
-      linesControllers[i].controller?.text = contactAddress[i]['line'];
+          getCityName(address['city']) ?? '';
+      linesControllers[i].controller?.text = address['line'] ?? '';
     }
   }
 
-  // this function is to set the entity phone fro edit
   void updateEntityPhone(List entityPhoneFromData) {
+    // contactPhone.clear();
     contactPhone.value = entityPhoneFromData;
     generateControllerForPhoneTypes();
-    for (var i = 0; i < contactPhone.length; i++) {
+
+    final length = contactPhone.length;
+    for (var i = 0; i < length; i++) {
+      final phone = contactPhone[i];
+
       phoneTypesControllers[i].controller?.text =
-          getPhoneTypeName(contactPhone[i]['type'])!;
-      phonePrimary[i].isPrimary = contactPhone[i]['isPrimary'];
-      phoneNumbersControllers[i].controller?.text = contactPhone[i]['number'];
-      emailsControllers[i].controller?.text = contactPhone[i]['email'];
-      namesControllers[i].controller?.text = contactPhone[i]['name'];
-      jobTitlesControllers[i].controller?.text = contactPhone[i]['tob_title'];
+          getPhoneTypeName(phone['type']) ?? '';
+      phonePrimary[i].isPrimary = phone['isPrimary'];
+      phoneNumbersControllers[i].controller?.text = phone['number'] ?? '';
+      emailsControllers[i].controller?.text = phone['email'] ?? '';
+      namesControllers[i].controller?.text = phone['name'] ?? '';
+      jobTitlesControllers[i].controller?.text = phone['tob_title'] ?? '';
     }
+    print(phonePrimary.map((value)=> print(value.isPrimary)));
   }
 
-  // this function is to set the entity social fro edit
   void updateEntitySocial(List entitySocialFromData) {
     contactSocial.value = entitySocialFromData;
     generateControllerForSocialTypes();
-    for (var i = 0; i < contactSocial.length; i++) {
+
+    final length = contactSocial.length;
+    for (var i = 0; i < length; i++) {
+      final social = contactSocial[i];
+
       socialTypesControllers[i].controller?.text =
-          getSocialTypeName(contactSocial[i]['type'])!;
-      linksControllers[i].controller?.text = contactSocial[i]['link'];
+          getSocialTypeName(social['type']) ?? '';
+      linksControllers[i].controller?.text = social['link'] ?? '';
     }
   }
 
@@ -442,20 +454,60 @@ class EntityInformationsController extends GetxController {
     entityStatus.value = isCompany ? 'Company' : 'Individual';
   }
 
+  // void selectPrimaryAddressField(int index, bool value) {
+  //   for (var i = 0; i < contactAddress.length; i++) {
+  //     contactAddress[i]['isPrimary'] = false;
+  //     addressPrimary[i].isPrimary = false;
+  //   }
+
+  //   contactAddress[index]['isPrimary'] = true;
+  //   addressPrimary[index].isPrimary = true;
+
+  //   update();
+  // }
   void selectPrimaryAddressField(int index, bool value) {
-    for (var element in contactAddress) {
-      element['isPrimary'] = false;
+    if (contactAddress[index]['isPrimary'] == true) {
+      return;
     }
+
+    final previousPrimaryIndex =
+        contactAddress.indexWhere((e) => e['isPrimary'] == true);
+    if (previousPrimaryIndex != -1) {
+      contactAddress[previousPrimaryIndex]['isPrimary'] = false;
+      addressPrimary[previousPrimaryIndex].isPrimary = false;
+    }
+
     contactAddress[index]['isPrimary'] = true;
+    addressPrimary[index].isPrimary = true;
 
     update();
   }
 
+  // void selectPrimaryPhonesField(int index, bool value) {
+  //   for (var i = 0; i < contactPhone.length; i++) {
+  //     contactPhone[i]['isPrimary'] = false;
+  //     phonePrimary[i].isPrimary = false;
+  //   }
+
+  //   contactPhone[index]['isPrimary'] = true;
+  //   phonePrimary[index].isPrimary = true;
+
+  //   update();
+  // }
   void selectPrimaryPhonesField(int index, bool value) {
-    for (var element in contactPhone) {
-      element['isPrimary'] = false;
+    if (contactPhone[index]['isPrimary'] == true) {
+      return; // Exit early if already primary
     }
+
+    final previousPrimaryIndex =
+        contactPhone.indexWhere((e) => e['isPrimary'] == true);
+    if (previousPrimaryIndex != -1) {
+      contactPhone[previousPrimaryIndex]['isPrimary'] = false;
+      phonePrimary[previousPrimaryIndex].isPrimary = false;
+    }
+
     contactPhone[index]['isPrimary'] = true;
+    phonePrimary[index].isPrimary = true;
 
     update();
   }
@@ -517,57 +569,47 @@ class EntityInformationsController extends GetxController {
   }
 
   generateControllerForPhoneTypes() {
-    phoneTypesControllers.value = List.generate(
-      contactPhone.length + 1,
-      (index) =>
-          TypeModel(controller: TextEditingController()), // Return a TestModel
-    );
-    phoneNumbersControllers.value = List.generate(contactPhone.length + 1,
-        (index) => TypeModel(controller: TextEditingController()));
-    emailsControllers.value = List.generate(contactPhone.length + 1,
-        (index) => TypeModel(controller: TextEditingController()));
-    namesControllers.value = List.generate(contactPhone.length + 1,
-        (index) => TypeModel(controller: TextEditingController()));
-    jobTitlesControllers.value = List.generate(contactPhone.length + 1,
-        (index) => TypeModel(controller: TextEditingController()));
-    phonePrimary.value = List.generate(
-        contactPhone.length + 1,
-        (index) => index == 0
-            ? PrimaryModel(isPrimary: true)
-            : PrimaryModel(isPrimary: false));
+    final length = contactPhone.length + 1;
+
+    // Pre-generate the controllers and models once
+    final controllersList = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
+    final primaryModelsList =
+        List.generate(length, (index) => PrimaryModel(isPrimary: index == 0));
+
+    // Assign values to the respective controller lists
+    phoneTypesControllers.value = controllersList;
+    phoneNumbersControllers.value = controllersList;
+    emailsControllers.value = controllersList;
+    namesControllers.value = controllersList;
+    jobTitlesControllers.value = controllersList;
+    phonePrimary.value = primaryModelsList;
   }
 
   generateControllerForSocialTypes() {
-    socialTypesControllers.value = List.generate(
-      contactSocial.length + 1,
-      (index) =>
-          TypeModel(controller: TextEditingController()), // Return a TestModel
-    );
-    linksControllers.value = List.generate(
-      contactSocial.length + 1,
-      (index) =>
-          TypeModel(controller: TextEditingController()), // Return a TestModel
-    );
+    final length = contactSocial.length;
+
+    // Pre-generate the controllers once
+    final controllersList = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
+
+    // Assign values to the respective controller lists
+    socialTypesControllers.value = controllersList;
+    linksControllers.value = controllersList;
   }
 
   generateControllerForAdressCountriesAndCities() {
-    countriesControllers.value = List.generate(
-      contactAddress.length + 1,
-      (index) =>
-          TypeModel(controller: TextEditingController()), // Return a TestModel
-    );
-    citiesControllers.value = List.generate(
-      contactAddress.length + 1,
-      (index) =>
-          TypeModel(controller: TextEditingController()), // Return a TestModel
-    );
-    linesControllers.value = List.generate(contactAddress.length + 1,
-        (index) => TypeModel(controller: TextEditingController()));
-    addressPrimary.value = List.generate(
-        contactAddress.length + 1,
-        (index) => index == 0
-            ? PrimaryModel(isPrimary: true)
-            : PrimaryModel(isPrimary: false));
+    final length = contactAddress.length;
+
+    final controllersList = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
+    final primaryModelsList =
+        List.generate(length, (index) => PrimaryModel(isPrimary: index == 0));
+
+    countriesControllers.value = controllersList;
+    citiesControllers.value = controllersList;
+    linesControllers.value = controllersList;
+    addressPrimary.value = primaryModelsList;
   }
 
   // this function is to select an image for logo

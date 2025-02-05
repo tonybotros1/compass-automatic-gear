@@ -44,7 +44,7 @@ Widget addNewConterOrEdit({
             labelText: 'Prefix',
             hintText: 'Enter counter Prefix',
             validate: true,
-            isEnabled: canEdit),
+            ),
         SizedBox(
           height: 10,
         ),
@@ -55,7 +55,7 @@ Widget addNewConterOrEdit({
             labelText: 'Value',
             hintText: 'Enter counter Value',
             validate: true,
-            isEnabled: canEdit),
+           ),
         SizedBox(
           height: 10,
         ),

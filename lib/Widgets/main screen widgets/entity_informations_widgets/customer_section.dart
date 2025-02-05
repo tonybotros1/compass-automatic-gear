@@ -16,11 +16,24 @@ Container customerSection() {
         Expanded(
           child: Column(
             children: [
+              GetBuilder<EntityInformationsController>(builder: (controller) {
+                return myTextFormFieldWithBorder(
+                  obscureText: false,
+                  controller: controller.entityName,
+                  labelText: 'Name',
+                  hintText: 'Enter Entity Name',
+                  validate: true,
+                );
+              }),
+              SizedBox(
+                height: 15,
+              ),
               Row(
                 children: [
                   Expanded(
                     flex: 1,
-                    child: GetX<EntityInformationsController>(builder: (controller) {
+                    child: GetX<EntityInformationsController>(
+                        builder: (controller) {
                       return myTextFormFieldWithBorder(
                         isEnabled: controller.isCustomerSelected.isTrue,
                         isnumber: true,
@@ -47,7 +60,8 @@ Container customerSection() {
                   onSelected: (suggestion) {
                     controller.salesMAn.value.text = '${suggestion['name']}';
                     controller.salesManMap.entries.where((entry) {
-                      return entry.value['name'] == suggestion['name'].toString();
+                      return entry.value['name'] ==
+                          suggestion['name'].toString();
                     }).forEach((entry) {
                       controller.salesManId.value = entry.key;
                     });
@@ -69,14 +83,13 @@ Container customerSection() {
               }),
             ],
           ),
-          
         ),
-         SizedBox(
-                width: 50,
-              ),
-              GetBuilder<EntityInformationsController>(builder: (controller) {
-                return imageSection(controller);
-              }),
+        SizedBox(
+          width: 50,
+        ),
+        GetBuilder<EntityInformationsController>(builder: (controller) {
+          return imageSection(controller);
+        }),
       ],
     ),
   );

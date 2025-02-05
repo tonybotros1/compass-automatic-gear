@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
-import '../../my_text_field.dart';
 import 'address_card.dart';
 import 'company_section.dart';
 import 'contacts_card.dart';
@@ -26,16 +25,6 @@ Widget addNewEntityOrEdit({
         children: [
           SizedBox(
             height: 5,
-          ),
-          myTextFormFieldWithBorder(
-            obscureText: false,
-            controller: controller.entityName,
-            labelText: 'Name',
-            hintText: 'Enter Entity Name',
-            validate: true,
-          ),
-          SizedBox(
-            height: 10,
           ),
           labelContainer(
             lable: Row(
