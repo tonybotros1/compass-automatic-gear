@@ -101,6 +101,8 @@ class JobCardController extends GetxController {
 
   RxList internalNotes = RxList([]);
   RxBool loadingInternalNotes = RxBool(false);
+  RxBool isQuotationExpanded = RxBool(false);
+  RxBool isJobCardExpanded = RxBool(false);
 
   @override
   void onInit() async {
@@ -121,9 +123,9 @@ class JobCardController extends GetxController {
 
   addInternalNote(currentUserId, note) {
     internalNotes.add({
-      'note':note,
-      'currentUserID':currentUserId,
-      'time':DateTime.now(),
+      'note': note,
+      'currentUserID': currentUserId,
+      'time': DateTime.now(),
     });
   }
 

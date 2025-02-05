@@ -1,3 +1,4 @@
+import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 
 Widget titleBar({
@@ -10,7 +11,7 @@ Widget titleBar({
     height: 50,
     width: double.infinity,
     decoration: BoxDecoration(
-        color: Colors.grey[400], borderRadius: BorderRadius.circular(5)),
+        color: mainColor, borderRadius: BorderRadius.circular(5)),
     child: Row(
       children: [
         Icon(
