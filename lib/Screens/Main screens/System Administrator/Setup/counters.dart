@@ -246,6 +246,7 @@ ElevatedButton editSection(context, CountersController controller,
               controller.value.text = (counterData['value'] ?? '').toString();
               controller.length.text =
                   (counterData['length'] ?? '0').toString();
+              controller.separator.text = counterData['separator'] ?? '';
 
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),

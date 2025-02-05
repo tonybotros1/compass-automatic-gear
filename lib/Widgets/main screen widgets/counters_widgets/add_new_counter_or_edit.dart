@@ -39,23 +39,39 @@ Widget addNewConterOrEdit({
           height: 10,
         ),
         myTextFormFieldWithBorder(
-            obscureText: false,
-            controller: controller.prefix,
-            labelText: 'Prefix',
-            hintText: 'Enter counter Prefix',
-            validate: true,
-            ),
+          obscureText: false,
+          controller: controller.prefix,
+          labelText: 'Prefix',
+          hintText: 'Enter counter Prefix',
+          validate: true,
+        ),
         SizedBox(
           height: 10,
         ),
-        myTextFormFieldWithBorder(
-            isnumber: true,
-            obscureText: false,
-            controller: controller.value,
-            labelText: 'Value',
-            hintText: 'Enter counter Value',
-            validate: true,
-           ),
+        Row(
+          spacing: 10,
+          children: [
+            Expanded(
+              child: myTextFormFieldWithBorder(
+                isnumber: true,
+                obscureText: false,
+                controller: controller.value,
+                labelText: 'Value',
+                hintText: 'Enter counter Value',
+                validate: true,
+              ),
+            ),
+            Expanded(
+              child: myTextFormFieldWithBorder(
+                obscureText: false,
+                controller: controller.separator,
+                labelText: 'separator',
+                hintText: 'Enter separator',
+                validate: true,
+              ),
+            ),
+          ],
+        ),
         SizedBox(
           height: 10,
         ),

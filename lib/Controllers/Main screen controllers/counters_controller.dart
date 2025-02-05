@@ -9,6 +9,7 @@ class CountersController extends GetxController {
   TextEditingController description = TextEditingController();
   TextEditingController prefix = TextEditingController();
   TextEditingController value = TextEditingController();
+  TextEditingController separator = TextEditingController();
   TextEditingController length = TextEditingController();
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
@@ -131,8 +132,9 @@ class CountersController extends GetxController {
         'value': int.parse(value.text),
         'added_date': DateTime.now().toString(),
         'company_id': companyId,
-        'length':int.parse(length.text),
+        'length': int.parse(length.text),
         'status': true,
+        'separator':separator.text,
       });
       addingNewValue.value = false;
       Get.back();
@@ -164,8 +166,8 @@ class CountersController extends GetxController {
         'description': description.text,
         'prefix': prefix.text,
         'value': int.parse(value.text),
-        'length':int.parse(length.text),
-
+        'length': int.parse(length.text),
+        'separator':separator.text,
       });
       addingNewValue.value = false;
       Get.back();
