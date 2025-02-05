@@ -170,18 +170,63 @@ DataRow dataRowForTheTable(Map<String, dynamic> countryData, context,
       ),
     ),
     DataCell(Row(
+      spacing: 5,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        valSectionInTheTable(
+            controller, countryId, context, constraints, countryData),
         activeInActiveSection(controller, countryData, countryId),
-        Padding(
-          padding: const EdgeInsets.only(right: 5, left: 5),
-          child: editSection(
-              context, controller, countryData, constraints, countryId),
-        ),
+        editSection(context, controller, countryData, constraints, countryId),
         deleteSection(controller, countryId, context),
       ],
     )),
   ]);
+}
+
+ElevatedButton valSectionInTheTable(
+    CountriesController controller, countryId, context, constraints, countryData) {
+  return ElevatedButton(
+      style: viewButtonStyle,
+      onPressed: () {
+        // controller.valueMap.clear();
+        // controller.listIDToWorkWithNewValue.value = listId;
+        // controller.getListValues(listId, listData['mastered_by']);
+        // showDialog(
+        //     context: context,
+        //     builder: (context) {
+        //       return AlertDialog(
+        //         actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+        //         content: valuesSection(
+        //           controller: controller,
+        //           constraints: constraints,
+        //           context: context,
+        //         ),
+        //         actions: [
+        //           Padding(
+        //             padding: const EdgeInsets.all(8.0),
+        //             child: ElevatedButton(
+        //               onPressed: () {
+        //                 Get.back();
+        //               },
+        //               style: cancelButtonStyle,
+        //               child: controller.addingNewListValue.value == false
+        //                   ? const Text(
+        //                       'Cancel',
+        //                       style: TextStyle(color: Colors.white),
+        //                     )
+        //                   : const Padding(
+        //                       padding: EdgeInsets.all(8.0),
+        //                       child: CircularProgressIndicator(
+        //                         color: Colors.white,
+        //                       ),
+        //                     ),
+        //             ),
+        //           ),
+        //         ],
+        //       );
+        //     });
+      },
+      child: const Text('Values'));
 }
 
 ElevatedButton activeInActiveSection(CountriesController controller,
@@ -235,7 +280,8 @@ ElevatedButton editSection(context, CountriesController controller,
               controller.countryCallingCode.text = countryData['calling_code'];
               controller.countryCode.text = countryData['code'];
               controller.currencyId.value = countryData['based_currency'];
-              controller.currencyRate.text = (currency.value['rate'] ?? '').toString();
+              controller.currencyRate.text =
+                  (currency.value['rate'] ?? '').toString();
               controller.currency.text = currency.value['code'];
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
