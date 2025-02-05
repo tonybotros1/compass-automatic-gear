@@ -76,6 +76,9 @@ Widget addNewEntityOrEdit({
               spacing: 10,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                SizedBox(
+                  width: 4,
+                ),
                 Row(
                   spacing: 10,
                   children: [
