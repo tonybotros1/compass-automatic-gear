@@ -128,9 +128,10 @@ class CountersController extends GetxController {
         'code': code.text,
         'description': description.text,
         'prefix': prefix.text,
-        'value': value.text.padLeft(int.parse(length.text), '0'),
+        'value': int.parse(value.text),
         'added_date': DateTime.now().toString(),
         'company_id': companyId,
+        'length':int.parse(length.text),
         'status': true,
       });
       addingNewValue.value = false;
@@ -162,7 +163,9 @@ class CountersController extends GetxController {
         'code': code.text,
         'description': description.text,
         'prefix': prefix.text,
-        'value': value.text.padLeft(int.parse(length.text), '0'),
+        'value': int.parse(value.text),
+        'length':int.parse(length.text),
+
       });
       addingNewValue.value = false;
       Get.back();
@@ -195,7 +198,10 @@ class CountersController extends GetxController {
               saleman['description'].toString().toLowerCase().contains(query) ||
               saleman['prefix'].toString().toLowerCase().contains(query) ||
               saleman['value'].toString().toLowerCase().contains(query) ||
-              textToDate(saleman['added_date']).toString().toLowerCase().contains(query);
+              textToDate(saleman['added_date'])
+                  .toString()
+                  .toLowerCase()
+                  .contains(query);
         }).toList(),
       );
     }

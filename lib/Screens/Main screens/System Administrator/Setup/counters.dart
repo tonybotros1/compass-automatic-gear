@@ -244,15 +244,16 @@ ElevatedButton editSection(context, CountersController controller,
               controller.description.text = counterData['description'] ?? '';
               controller.prefix.text = counterData['prefix'] ?? '';
               controller.value.text = (counterData['value'] ?? '').toString();
-              controller.length.text = counterData['length'];
+              controller.length.text =
+                  (counterData['length'] ?? '0').toString();
 
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                 content: addNewConterOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                ),
+                    controller: controller,
+                    constraints: constraints,
+                    context: context,
+                    canEdit: false),
                 actions: [
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
