@@ -9,9 +9,7 @@ import '../dynamic_field.dart';
 Container customerDetailsSection() {
   return Container(
     padding: EdgeInsets.all(20),
-    decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(5)),
+    decoration: containerDecor,
     child: Column(
       children: [
         GetX<JobCardController>(builder: (controller) {
@@ -55,8 +53,8 @@ Container customerDetailsSection() {
               flex: 2,
               fieldConfig: FieldConfig(
                 textController: controller.customerEntityName,
-                labelText: 'Entity Name',
-                hintText: 'Enter Entity Name',
+                labelText: 'Contact Name',
+                hintText: 'Enter Contact Name',
                 validate: false,
               ),
             ),
@@ -65,8 +63,8 @@ Container customerDetailsSection() {
               flex: 2,
               fieldConfig: FieldConfig(
                 textController: controller.customerEntityPhoneNumber,
-                labelText: 'Phone Number',
-                hintText: 'Enter Phone Number',
+                labelText: 'Contact Number',
+                hintText: 'Enter Contact Number',
                 validate: false,
               ),
             ),
@@ -75,8 +73,8 @@ Container customerDetailsSection() {
               flex: 2,
               fieldConfig: FieldConfig(
                 textController: controller.customerEntityEmail,
-                labelText: 'Entity Email',
-                hintText: 'Enter Entity Email',
+                labelText: 'Contact Email',
+                hintText: 'Enter Contact Email',
                 validate: false,
               ),
             ),

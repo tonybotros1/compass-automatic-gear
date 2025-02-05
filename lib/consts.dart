@@ -189,7 +189,9 @@ var screenPadding = const EdgeInsets.only(
   top: 0,
 );
 
-var fontStyle3 = const TextStyle(fontSize: 16, color: Colors.white);
+var fontStyle1 = TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
+var fontStyle2 =
+    TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold);
 // var mainColor = const Color.fromARGB(255, 228, 200, 233);
 
 var mainColor = const Color(0xff005f95);
@@ -278,19 +280,26 @@ textToDate(inputDate) {
   }
 }
 
-
 Container labelContainer({
- required String lable,
+  required Widget lable,
 }) {
   return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
       alignment: Alignment.centerLeft,
       height: 50,
+      width: double.infinity,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5), color: Colors.grey[400]),
-      child: Text(
-       lable,
-        style: TextStyle(color: Colors.grey[700]),
-      ),
-    );
+          borderRadius: BorderRadius.only(
+              topRight: Radius.circular(5), topLeft: Radius.circular(5)),
+          color: mainColor),
+      child: lable);
 }
+
+Decoration containerDecor = BoxDecoration(
+    border: Border(
+      left: BorderSide(color: mainColor),
+      right: BorderSide(color: mainColor),
+      bottom: BorderSide(color: mainColor),
+    ),
+    borderRadius: BorderRadius.only(
+        bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5)));

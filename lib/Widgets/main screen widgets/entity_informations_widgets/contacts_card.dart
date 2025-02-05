@@ -10,17 +10,22 @@ import '../dynamic_field.dart';
 Widget contactsCardSection(EntityInformationsController controller) {
   return Column(
     children: [
-      labelContainer(lable: 'Contacts Details'),
-      SizedBox(
-        height: 3,
+      labelContainer(
+        lable: Text(
+          'Contacts Details',
+          style: fontStyle1,
+        ),
       ),
       Container(
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5)),
+        decoration: containerDecor,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Primary',
+              style: fontStyle2,
+            ),
             AnimatedList(
               key: controller.listKeyForPhoneLine,
               shrinkWrap: true,
@@ -66,29 +71,20 @@ Widget buildSmartField(EntityInformationsController controller,
       children: [
         Row(
           children: [
-               Row(
-              children: [
-                GetBuilder<EntityInformationsController>(
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: GetBuilder<EntityInformationsController>(
                   builder: (controller) {
-                    return CupertinoRadio<bool>(
-                      value: true,
-                      groupValue: controller.contactPhone[index]['isPrimary'],
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.selectPrimaryPhonesField(index, value);
-                        }
-                      },
-                    );
-                  }
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  'Primary?',
-                  style: TextStyle(color: Colors.grey[700]),
-                ),
-              ],
+                return CupertinoRadio<bool>(
+                  value: true,
+                  groupValue: controller.phonePrimary[index].isPrimary,
+                  onChanged: (value) {
+                    if (value != null) {
+                      controller.selectPrimaryPhonesField(index, value);
+                    }
+                  },
+                );
+              }),
             ),
             Expanded(
               child: Padding(

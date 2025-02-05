@@ -9,7 +9,6 @@ import 'address_card.dart';
 import 'company_section.dart';
 import 'contacts_card.dart';
 import 'customer_section.dart';
-import 'image_section.dart';
 
 Widget addNewEntityOrEdit({
   required BoxConstraints constraints,
@@ -38,18 +37,16 @@ Widget addNewEntityOrEdit({
           SizedBox(
             height: 10,
           ),
-          Container(
-            height: 50,
-            decoration: BoxDecoration(
-                color: Colors.grey[400],
-                borderRadius: BorderRadius.circular(5)),
-            child: Row(
+          labelContainer(
+            lable: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     GetX<EntityInformationsController>(builder: (controller) {
                       return CupertinoCheckbox(
+                          checkColor: mainColor,
+                          activeColor: Colors.white,
                           value: controller.isCustomerSelected.value,
                           onChanged: (value) {
                             controller.selectCustomer(value!);
@@ -57,7 +54,7 @@ Widget addNewEntityOrEdit({
                     }),
                     Text(
                       'Customer',
-                      style: regTextStyle,
+                      style: fontStyle1,
                     )
                   ],
                 ),
@@ -65,6 +62,8 @@ Widget addNewEntityOrEdit({
                   children: [
                     GetX<EntityInformationsController>(builder: (controller) {
                       return CupertinoCheckbox(
+                          checkColor: mainColor,
+                          activeColor: Colors.white,
                           value: controller.isVendorSelected.value,
                           onChanged: (value) {
                             controller.selectVendor(value!);
@@ -72,94 +71,70 @@ Widget addNewEntityOrEdit({
                     }),
                     Text(
                       'Vendor',
-                      style: regTextStyle,
+                      style: fontStyle1,
                     )
                   ],
                 )
               ],
             ),
           ),
-          SizedBox(
-            height: 3,
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: customerSection(),
-              ),
-              SizedBox(
-                width: 50,
-              ),
-              GetBuilder<EntityInformationsController>(builder: (controller) {
-                return imageSection(controller);
-              }),
-            ],
-          ),
+          customerSection(),
           SizedBox(
             height: 10,
           ),
-          Container(
-            height: 50,
-            decoration: BoxDecoration(
-                color: Colors.grey[400],
-                borderRadius: BorderRadius.circular(5)),
-            child: Row(
+          labelContainer(
+            lable: Row(
+              spacing: 10,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Row(
+                  spacing: 10,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(13.0),
-                      child: GetX<EntityInformationsController>(
-                          builder: (controller) {
-                        return CupertinoRadio<bool>(
-                          value: true,
-                          groupValue: controller.isCompanySelected.value,
-                          onChanged: (value) {
-                            if (value != null) {
-                              controller.selectCompanyOrIndividual(
-                                  'company', value);
-                            }
-                          },
-                        );
-                      }),
-                    ),
+                    GetX<EntityInformationsController>(builder: (controller) {
+                      return CupertinoRadio<bool>(
+                        fillColor: mainColor,
+                        activeColor: Colors.white,
+                        value: true,
+                        groupValue: controller.isCompanySelected.value,
+                        onChanged: (value) {
+                          if (value != null) {
+                            controller.selectCompanyOrIndividual(
+                                'company', value);
+                          }
+                        },
+                      );
+                    }),
                     Text(
                       'Company',
-                      style: regTextStyle,
+                      style: fontStyle1,
                     )
                   ],
                 ),
                 Row(
+                  spacing: 10,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(13.0),
-                      child: GetX<EntityInformationsController>(
-                          builder: (controller) {
-                        return CupertinoRadio<bool>(
-                          value: true,
-                          groupValue: controller.isIndividualSelected.value,
-                          onChanged: (value) {
-                            if (value != null) {
-                              controller.selectCompanyOrIndividual(
-                                  'individual', value);
-                            }
-                          },
-                        );
-                      }),
-                    ),
+                    GetX<EntityInformationsController>(builder: (controller) {
+                      return CupertinoRadio<bool>(
+                        fillColor: mainColor,
+                        activeColor: Colors.white,
+                        value: true,
+                        groupValue: controller.isIndividualSelected.value,
+                        onChanged: (value) {
+                          if (value != null) {
+                            controller.selectCompanyOrIndividual(
+                                'individual', value);
+                          }
+                        },
+                      );
+                    }),
                     Text(
                       'Individual',
-                      style: regTextStyle,
+                      style: fontStyle1,
                     )
                   ],
                 )
               ],
             ),
-          ),
-          SizedBox(
-            height: 3,
           ),
           companySection(),
           SizedBox(

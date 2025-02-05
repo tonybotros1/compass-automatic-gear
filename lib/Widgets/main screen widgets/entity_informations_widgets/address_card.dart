@@ -11,17 +11,22 @@ import '../../../consts.dart';
 Widget addressCardSection(EntityInformationsController controller) {
   return Column(
     children: [
-      labelContainer(lable: 'Address Details'),
-      SizedBox(
-        height: 3,
+      labelContainer(
+        lable: Text(
+          'Address Details',
+          style: fontStyle1,
+        ),
       ),
       Container(
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5)),
+        decoration: containerDecor,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Primary',
+              style: fontStyle2,
+            ),
             AnimatedList(
               key: controller.listKeyForAddressLine,
               shrinkWrap: true,
@@ -67,29 +72,20 @@ Widget buildSmartField(EntityInformationsController controller,
       children: [
         Row(
           children: [
-            Row(
-              children: [
-                GetBuilder<EntityInformationsController>(
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: GetBuilder<EntityInformationsController>(
                   builder: (controller) {
-                    return CupertinoRadio<bool>(
-                      value: true,
-                      groupValue: controller.contactAddress[index]['isPrimary'],
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.selectPrimaryAddressField(index, value);
-                        }
-                      },
-                    );
-                  }
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  'Primary?',
-                  style: TextStyle(color: Colors.grey[700]),
-                ),
-              ],
+                return CupertinoRadio<bool>(
+                  value: true,
+                  groupValue: controller.addressPrimary[index].isPrimary,
+                  onChanged: (value) {
+                    if (value != null) {
+                      controller.selectPrimaryAddressField(index, value);
+                    }
+                  },
+                );
+              }),
             ),
             Expanded(
               child: Padding(

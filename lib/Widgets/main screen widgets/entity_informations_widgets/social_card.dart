@@ -9,15 +9,15 @@ import '../dynamic_field.dart';
 Widget socialCardSection(EntityInformationsController controller) {
   return Column(
     children: [
-      labelContainer(lable: 'Social Details'),
-      SizedBox(
-        height: 3,
+      labelContainer(
+        lable: Text(
+          'Social Details',
+          style: fontStyle1,
+        ),
       ),
       Container(
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5)),
+        decoration: containerDecor,
         child: Column(
           children: [
             AnimatedList(

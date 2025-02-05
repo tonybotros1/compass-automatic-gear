@@ -2,14 +2,13 @@ import 'package:datahubai/Models/dynamic_field_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
+import '../../../consts.dart';
 import '../dynamic_field.dart';
 
 Container companySection() {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-    decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(5)),
+    decoration:containerDecor,
     child: Column(
       children: [
         GetX<EntityInformationsController>(builder: (controller) {

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Models/primary_model.dart';
 import 'package:datahubai/Models/type_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,8 @@ class EntityInformationsController extends GetxController {
   RxString salesManId = RxString('');
   RxString entityTypeId = RxString('');
   RxList<TypeModel> phoneTypesControllers = RxList<TypeModel>([]);
+  RxList<PrimaryModel> phonePrimary = RxList<PrimaryModel>([]);
+  RxList<PrimaryModel> addressPrimary = RxList<PrimaryModel>([]);
   RxList<TypeModel> socialTypesControllers = RxList<TypeModel>([]);
   RxList<TypeModel> countriesControllers = RxList<TypeModel>([]);
   RxList<TypeModel> citiesControllers = RxList<TypeModel>([]);
@@ -151,11 +154,13 @@ class EntityInformationsController extends GetxController {
     socialTypesControllers.clear();
     linksControllers.clear();
     phoneTypesControllers.clear();
+    phonePrimary.clear();
     phoneNumbersControllers.clear();
     emailsControllers.clear();
     namesControllers.clear();
     jobTitlesControllers.clear();
     countriesControllers.clear();
+    addressPrimary.clear();
     citiesControllers.clear();
     linesControllers.clear();
     generateControllerForAdressCountriesAndCities();
@@ -396,6 +401,7 @@ class EntityInformationsController extends GetxController {
     for (var i = 0; i < contactAddress.length; i++) {
       countriesControllers[i].controller?.text =
           getCountryName(contactAddress[i]['country'])!;
+      addressPrimary[i].isPrimary = contactAddress[i]['isPrimary'];
       citiesControllers[i].controller?.text =
           getCityName(contactAddress[i]['city'])!;
       linesControllers[i].controller?.text = contactAddress[i]['line'];
@@ -409,6 +415,7 @@ class EntityInformationsController extends GetxController {
     for (var i = 0; i < contactPhone.length; i++) {
       phoneTypesControllers[i].controller?.text =
           getPhoneTypeName(contactPhone[i]['type'])!;
+      phonePrimary[i].isPrimary = contactPhone[i]['isPrimary'];
       phoneNumbersControllers[i].controller?.text = contactPhone[i]['number'];
       emailsControllers[i].controller?.text = contactPhone[i]['email'];
       namesControllers[i].controller?.text = contactPhone[i]['name'];
@@ -523,6 +530,11 @@ class EntityInformationsController extends GetxController {
         (index) => TypeModel(controller: TextEditingController()));
     jobTitlesControllers.value = List.generate(contactPhone.length + 1,
         (index) => TypeModel(controller: TextEditingController()));
+    phonePrimary.value = List.generate(
+        contactPhone.length + 1,
+        (index) => index == 0
+            ? PrimaryModel(isPrimary: true)
+            : PrimaryModel(isPrimary: false));
   }
 
   generateControllerForSocialTypes() {
@@ -551,6 +563,11 @@ class EntityInformationsController extends GetxController {
     );
     linesControllers.value = List.generate(contactAddress.length + 1,
         (index) => TypeModel(controller: TextEditingController()));
+    addressPrimary.value = List.generate(
+        contactAddress.length + 1,
+        (index) => index == 0
+            ? PrimaryModel(isPrimary: true)
+            : PrimaryModel(isPrimary: false));
   }
 
   // this function is to select an image for logo
@@ -650,6 +667,7 @@ class EntityInformationsController extends GetxController {
     emailsControllers.add(TypeModel(controller: TextEditingController()));
     namesControllers.add(TypeModel(controller: TextEditingController()));
     jobTitlesControllers.add(TypeModel(controller: TextEditingController()));
+    phonePrimary.add(PrimaryModel(isPrimary: false));
   }
 
   // this function is to generate a new social field
@@ -681,6 +699,7 @@ class EntityInformationsController extends GetxController {
     countriesControllers.add(TypeModel(controller: TextEditingController()));
     citiesControllers.add(TypeModel(controller: TextEditingController()));
     linesControllers.add(TypeModel(controller: TextEditingController()));
+    addressPrimary.add(PrimaryModel(isPrimary: false));
   }
 
 // this function is to remove a phone field
@@ -693,6 +712,7 @@ class EntityInformationsController extends GetxController {
     emailsControllers.removeAt(index);
     namesControllers.removeAt(index);
     jobTitlesControllers.removeAt(index);
+    phonePrimary.removeAt(index);
   }
 
 // this function is to remove a social field
@@ -712,6 +732,7 @@ class EntityInformationsController extends GetxController {
     countriesControllers.removeAt(index);
     citiesControllers.removeAt(index);
     linesControllers.removeAt(index);
+    addressPrimary.removeAt(index);
   }
 
   // this function is to sort data in table

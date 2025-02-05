@@ -40,7 +40,7 @@ Container jobCardSection(
             ),
             DynamicConfig(
               isDropdown: false,
-              flex: 1,
+              flex: 3,
               fieldConfig: FieldConfig(
                 textController: controller.lpoCounter.value,
                 labelText: 'LPO No.',
@@ -197,6 +197,17 @@ Container jobCardSection(
               isDropdown: false,
               flex: 1,
               fieldConfig: FieldConfig(
+                isnumber: true,
+                textController: controller.minTestKms.value,
+                labelText: 'Min Test KMs',
+                hintText: 'Enter Min Test KMs',
+                validate: false,
+              ),
+            ),
+            DynamicConfig(
+              isDropdown: false,
+              flex: 1,
+              fieldConfig: FieldConfig(
                 textController: controller.reference1.value,
                 labelText: 'Reference 1',
                 hintText: 'Enter Reference 1',
@@ -220,17 +231,6 @@ Container jobCardSection(
                 textController: controller.reference3.value,
                 labelText: 'Reference 3',
                 hintText: 'Enter Reference 3',
-                validate: false,
-              ),
-            ),
-            DynamicConfig(
-              isDropdown: false,
-              flex: 1,
-              fieldConfig: FieldConfig(
-                isnumber: true,
-                textController: controller.minTestKms.value,
-                labelText: 'Min Test KMs',
-                hintText: 'Enter Min Test KMs',
                 validate: false,
               ),
             ),
