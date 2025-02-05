@@ -228,14 +228,15 @@ ElevatedButton editSection(context, CountriesController controller,
         showDialog(
             context: context,
             builder: (context) {
+              final currency =
+                  controller.getCurrencyCodeName(countryData['based_currency']);
               controller.countryCode.text = countryData['code'];
               controller.countryName.text = countryData['name'];
               controller.countryCallingCode.text = countryData['calling_code'];
               controller.countryCode.text = countryData['code'];
-              controller.currencyId.value = countryData['basd_currency'];
-              controller.currencyRate.text = countryData['rate'];
-              controller.currency.text =
-                  controller.getCurrencyCodeName(countryData['basd_currency'])!;
+              controller.currencyId.value = countryData['based_currency'];
+              controller.currencyRate.text = (currency.value['rate'] ?? '').toString();
+              controller.currency.text = currency.value['code'];
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                 content: addNewCountryOrEdit(

@@ -106,7 +106,7 @@ class CountriesController extends GetxController {
 
   editCountries(countryId) async {
     try {
-      addingNewValue.value = true;
+      Get.back();
       await FirebaseFirestore.instance
           .collection('all_countries')
           .doc(countryId)
@@ -114,13 +114,10 @@ class CountriesController extends GetxController {
         'code': countryCode.text,
         'name': countryName.text,
         'calling_code': countryCallingCode.text,
-        'basd_currency': currencyId.value,
-        'rate': currencyRate.text,
+        'based_currency': currencyId.value,
       });
-      addingNewValue.value = false;
     } catch (e) {
-      addingNewValue.value = false;
-
+//
     }
   }
 
@@ -131,8 +128,7 @@ class CountriesController extends GetxController {
         'code': countryCode.text,
         'name': countryName.text,
         'calling_code': countryCallingCode.text,
-        'basd_currency': currencyId.value,
-        'rate': currencyRate.text,
+        'based_currency': currencyId.value,
         'status': true,
         'added_date': DateTime.now().toString(),
       });
@@ -167,12 +163,13 @@ class CountriesController extends GetxController {
     }
   }
 
-  String? getCurrencyCodeName(String ccurrencyId) {
+  getCurrencyCodeName(String currencyId) {
     try {
       final currency = allCurrencies.entries.firstWhere(
         (currency) => currency.key == currencyId,
       );
-      return currency.value['code'];
+      print(currency.value['code']);
+      return currency;
     } catch (e) {
       return '';
     }
