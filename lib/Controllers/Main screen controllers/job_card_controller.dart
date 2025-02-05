@@ -103,7 +103,7 @@ class JobCardController extends GetxController {
   RxBool loadingInternalNotes = RxBool(false);
   RxBool isQuotationExpanded = RxBool(false);
   RxBool isJobCardExpanded = RxBool(false);
-
+  final ScrollController scrollController = ScrollController();
   @override
   void onInit() async {
     super.onInit();
@@ -119,6 +119,18 @@ class JobCardController extends GetxController {
     getCarsModelsAndBrands();
     getCountriesAndCities();
     getAllJobCards();
+  }
+
+  void scrollToBottom() {
+    Future.delayed(Duration(milliseconds: 100), () {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent * 5,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   addInternalNote(currentUserId, note) {

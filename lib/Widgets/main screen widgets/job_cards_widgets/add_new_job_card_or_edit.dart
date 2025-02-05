@@ -16,6 +16,7 @@ Widget addNewJobCardOrEdit({
   return SizedBox(
     width: Get.width, //constraints.maxWidth,
     child: ListView(
+      controller: controller.scrollController,
       children: [
         labelContainer(
             lable: Text(
@@ -47,6 +48,7 @@ Widget addNewJobCardOrEdit({
                       controller.isQuotationExpanded.value = false;
                     } else {
                       controller.isQuotationExpanded.value = true;
+                      controller.scrollToBottom();
                     }
                   });
             }),
@@ -82,6 +84,7 @@ Widget addNewJobCardOrEdit({
                       controller.isJobCardExpanded.value = false;
                     } else {
                       controller.isJobCardExpanded.value = true;
+                      controller.scrollToBottom();
                     }
                   });
             }),
