@@ -314,9 +314,9 @@ ElevatedButton newbrandButton(BuildContext context, BoxConstraints constraints,
   return ElevatedButton(
     onPressed: () {
       controller.imageBytes.value = Uint8List(0);
-      controller.brandName.clear();
       controller.logoUrl.value = '';
       controller.logoSelectedError.value = false;
+      controller.brandName.clear();
       showDialog(
           context: context,
           builder: (context) {

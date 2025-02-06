@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -104,6 +106,12 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
+          text: 'Flag',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
           text: 'Name',
         ),
         onSort: controller.onSort,
@@ -152,6 +160,12 @@ DataRow dataRowForTheTable(Map<String, dynamic> countryData, context,
     DataCell(Text(
       countryData['code'] ?? 'no code',
     )),
+    DataCell(countryData['flag'] != '' || countryData['flag'] != null
+        ? Image.network(
+            countryData['flag'],
+            width: 40,
+          )
+        : Text('no flag')),
     DataCell(
       Text(
         countryData['name'] ?? 'no name',
@@ -273,6 +287,10 @@ ElevatedButton editSection(context, CountriesController controller,
               controller.currencyRate.text =
                   (currency.value['rate'] ?? '').toString();
               controller.currency.text = currency.value['code'];
+
+              controller.flagUrl.value = countryData['flag'] ?? '';
+              controller.imageBytes.value = Uint8List(0);
+              controller.flagSelectedError.value = false;
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                 content: addNewCountryOrEdit(
@@ -282,33 +300,37 @@ ElevatedButton editSection(context, CountriesController controller,
                   canEdit: false,
                 ),
                 actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                      onPressed: controller.addingNewValue.value
-                          ? null
-                          : () {
-                              controller.editCountries(countryId);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
+                  GetX<CountriesController>(builder: (controller) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: ElevatedButton(
+                        onPressed: controller.addingNewValue.value
+                            ? null
+                            : () {
+                                controller.editCountries(countryId);
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
                         ),
-                      ),
-                      child: controller.addingNewValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
+                        child: controller.addingNewValue.value == false
+                            ? const Text(
+                                'Save',
+                                style: TextStyle(color: Colors.white),
+                              )
+                            : const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
                               ),
-                            ),
-                    ),
-                  ),
+                      ),
+                    );
+                  }),
                   ElevatedButton(
                       onPressed: () {
                         Get.back();
@@ -335,6 +357,9 @@ ElevatedButton newcountryButton(BuildContext context,
       controller.currency.clear();
       controller.currencyId.value = '';
       controller.currencyRate.clear();
+      controller.imageBytes.value = Uint8List(0);
+      controller.flagUrl.value = '';
+      controller.flagSelectedError.value = false;
       showDialog(
           context: context,
           builder: (context) {

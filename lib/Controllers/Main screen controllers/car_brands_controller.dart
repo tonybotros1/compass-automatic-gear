@@ -171,6 +171,9 @@ class CarBrandsController extends GetxController {
 
   editBrand(brandId) async {
     try {
+      var newData = {
+        'name': brandName.text,
+      };
       addingNewValue.value = true;
       if (imageBytes.value.isNotEmpty) {
         final Reference storageRef = FirebaseStorage.instance.ref().child(
@@ -182,13 +185,14 @@ class CarBrandsController extends GetxController {
 
         await uploadTask.then((p0) async {
           logoUrl.value = await storageRef.getDownloadURL();
+          newData['logo'] = logoUrl.value;
         });
       }
 
-      FirebaseFirestore.instance.collection('all_brands').doc(brandId).update({
-        'name': brandName.text,
-        'logo': logoUrl.value,
-      });
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .update(newData);
       addingNewValue.value = false;
       Get.back();
     } catch (e) {

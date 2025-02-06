@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'dart:html' as html;
 import '../../consts.dart';
 
 class CountriesController extends GetxController {
@@ -32,6 +35,9 @@ class CountriesController extends GetxController {
   RxString currencyId = RxString('');
   RxBool addingNewCityValue = RxBool(false);
   RxString countryIdToWorkWith = RxString('');
+  RxBool flagSelectedError = RxBool(false);
+  Rx<Uint8List> imageBytes = Uint8List(0).obs;
+  RxString flagUrl = RxString('');
 
   @override
   void onInit() {
@@ -60,7 +66,7 @@ class CountriesController extends GetxController {
 
         return compareString(ascending, value1, value2);
       });
-    } else if (columnIndex == 1) {
+    } else if (columnIndex == 2) {
       allCountries.sort((counter1, counter2) {
         final String? value1 = counter1.get('name');
         final String? value2 = counter2.get('name');
@@ -72,7 +78,7 @@ class CountriesController extends GetxController {
 
         return compareString(ascending, value1, value2);
       });
-    } else if (columnIndex == 3) {
+    } else if (columnIndex == 4) {
       allCountries.sort((counter1, counter2) {
         final String? value1 = counter1.get('added_date');
         final String? value2 = counter2.get('added_date');
@@ -114,7 +120,7 @@ class CountriesController extends GetxController {
 
         return compareString(ascending, value1, value2);
       });
-    }  else if (columnIndex == 2) {
+    } else if (columnIndex == 2) {
       allCities.sort((screen1, screen2) {
         final String? value1 = screen1.get('added_date');
         final String? value2 = screen2.get('added_date');
@@ -161,24 +167,56 @@ class CountriesController extends GetxController {
 
   editCountries(countryId) async {
     try {
-      Get.back();
-      await FirebaseFirestore.instance
-          .collection('all_countries')
-          .doc(countryId)
-          .update({
+      addingNewValue.value = true;
+      var newData = {
         'code': countryCode.text,
         'name': countryName.text,
         'calling_code': countryCallingCode.text,
         'based_currency': currencyId.value,
-      });
+      };
+      if (imageBytes.value.isNotEmpty) {
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+            'brands_logos/${formatPhrase(countryName.text)}_${DateTime.now()}.png');
+        final UploadTask uploadTask = storageRef.putData(
+          imageBytes.value,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        await uploadTask.then((p0) async {
+          flagUrl.value = await storageRef.getDownloadURL();
+          newData['flag'] = flagUrl.value;
+        });
+      }
+      await FirebaseFirestore.instance
+          .collection('all_countries')
+          .doc(countryId)
+          .update(newData);
+      addingNewValue.value = false;
+      Get.back();
     } catch (e) {
-//
+      addingNewValue.value = false;
     }
+  }
+
+  String formatPhrase(String phrase) {
+    return phrase.replaceAll(' ', '_');
   }
 
   addNewCountry() async {
     try {
       addingNewValue.value = true;
+      if (imageBytes.value.isNotEmpty) {
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+            'brands_logos/${formatPhrase(countryName.text)}_${DateTime.now()}.png');
+        final UploadTask uploadTask = storageRef.putData(
+          imageBytes.value,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        await uploadTask.then((p0) async {
+          flagUrl.value = await storageRef.getDownloadURL();
+        });
+      }
       FirebaseFirestore.instance.collection('all_countries').add({
         'code': countryCode.text,
         'name': countryName.text,
@@ -186,6 +224,7 @@ class CountriesController extends GetxController {
         'based_currency': currencyId.value,
         'status': true,
         'added_date': DateTime.now().toString(),
+        'flag': flagUrl.value,
       });
       addingNewValue.value = false;
       Get.back();
@@ -256,8 +295,14 @@ class CountriesController extends GetxController {
     } else {
       filteredCities.assignAll(
         allCities.where((city) {
-          return city['code'].toString().toLowerCase().contains(queryForCities.value) ||
-              city['name'].toString().toLowerCase().contains(queryForCities.value) ||
+          return city['code']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForCities.value) ||
+              city['name']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForCities.value) ||
               textToDate(city['added_date'])
                   .toString()
                   .toLowerCase()
@@ -349,6 +394,33 @@ class CountriesController extends GetxController {
       });
     } catch (e) {
 //
+    }
+  }
+
+  // this function is to select an image for logo
+  pickImage() async {
+    try {
+      flagSelectedError.value = false;
+      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      uploadInput.accept = 'image/*';
+      uploadInput.click();
+
+      uploadInput.onChange.listen((event) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files.first;
+          final reader = html.FileReader();
+
+          reader.readAsArrayBuffer(file);
+          reader.onLoadEnd.listen((event) async {
+            if (reader.result != null) {
+              imageBytes.value = reader.result as Uint8List;
+            }
+          });
+        }
+      });
+    } catch (e) {
+      //
     }
   }
 }
