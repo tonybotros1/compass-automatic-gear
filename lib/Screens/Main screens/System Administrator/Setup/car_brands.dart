@@ -218,7 +218,7 @@ ElevatedButton activeInActiveSection(CarBrandsController controller,
         } else {
           status = false;
         }
-        // controller.changebrandStatus(brandId, status);
+        controller.editActiveOrInActiveStatus(brandId, status);
       },
       child: brandData['status'] == true
           ? const Text('Active')
@@ -248,16 +248,10 @@ ElevatedButton editSection(context, CarBrandsController controller,
         showDialog(
             context: context,
             builder: (context) {
-              // final currency =
-              //     controller.getCurrencyCodeName(brandData['based_currency']);
-              // controller.brandCode.text = brandData['code'];
-              // controller.brandName.text = brandData['name'];
-              // controller.brandCallingCode.text = brandData['calling_code'];
-              // controller.brandCode.text = brandData['code'];
-              // controller.currencyId.value = brandData['based_currency'];
-              // controller.currencyRate.text =
-              //     (currency.value['rate'] ?? '').toString();
-              // controller.currency.text = currency.value['code'];
+              controller.brandName.text = brandData['name'];
+              controller.logoUrl.value = brandData['logo'];
+              controller.imageBytes = null;
+
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                 content: addNewBrandOrEdit(
@@ -267,33 +261,37 @@ ElevatedButton editSection(context, CarBrandsController controller,
                   canEdit: false,
                 ),
                 actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                      onPressed: controller.addingNewValue.value
-                          ? null
-                          : () {
-                              // controller.editCountries(brandId);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
+                  GetX<CarBrandsController>(builder: (controller) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: ElevatedButton(
+                        onPressed: controller.addingNewValue.value
+                            ? null
+                            : () {
+                                controller.editBrand(brandId);
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
                         ),
-                      ),
-                      child: controller.addingNewValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
+                        child: controller.addingNewValue.value == false
+                            ? const Text(
+                                'Save',
+                                style: TextStyle(color: Colors.white),
+                              )
+                            : const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
                               ),
-                            ),
-                    ),
-                  ),
+                      ),
+                    );
+                  }),
                   ElevatedButton(
                       onPressed: () {
                         Get.back();

@@ -161,6 +161,34 @@ class CarBrandsController extends GetxController {
         'name': brandName.text,
         'logo': logoUrl.value,
         'added_date': DateTime.now().toString(),
+        'status': true,
+      });
+      addingNewValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewValue.value = false;
+    }
+  }
+
+  editBrand(brandId) async {
+    try {
+      addingNewValue.value = true;
+      if (imageBytes != null && imageBytes!.isNotEmpty) {
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+            'brands_logos/${formatPhrase(brandName.text)}_${DateTime.now()}.png');
+        final UploadTask uploadTask = storageRef.putData(
+          imageBytes!,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        await uploadTask.then((p0) async {
+          logoUrl.value = await storageRef.getDownloadURL();
+        });
+      }
+
+      FirebaseFirestore.instance.collection('all_brands').doc(brandId).update({
+        'name': brandName.text,
+        'logo': logoUrl.value,
       });
       addingNewValue.value = false;
       Get.back();
@@ -178,6 +206,19 @@ class CarBrandsController extends GetxController {
           .delete();
     } catch (e) {
       //
+    }
+  }
+
+  editActiveOrInActiveStatus(companyId, bool status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(companyId)
+          .update({
+        'status': status,
+      });
+    } catch (e) {
+//
     }
   }
 
