@@ -114,19 +114,7 @@ class CountriesController extends GetxController {
 
         return compareString(ascending, value1, value2);
       });
-    } else if (columnIndex == 2) {
-      allCities.sort((screen1, screen2) {
-        final String? value1 = screen1.get('restricted_by');
-        final String? value2 = screen2.get('restricted_by');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 3) {
+    }  else if (columnIndex == 2) {
       allCities.sort((screen1, screen2) {
         final String? value1 = screen1.get('added_date');
         final String? value2 = screen2.get('added_date');
