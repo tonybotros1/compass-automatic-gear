@@ -1,0 +1,317 @@
+import 'package:datahubai/Controllers/Main%20screen%20controllers/car_brands_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../consts.dart';
+import '../../Auth screens widgets/register widgets/search_bar.dart';
+import '../auto_size_box.dart';
+import 'add_new_model_or_edit.dart';
+
+Widget modelsSection({
+  required BoxConstraints constraints,
+  required BuildContext context,
+}) {
+  return Container(
+    width: constraints.maxWidth,
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.grey),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Column(
+      children: [
+        GetX<CarBrandsController>(
+          builder: (controller) {
+            return searchBar(
+              search: controller.searchForModels,
+              constraints: constraints,
+              context: context,
+              controller: controller,
+              title: 'Search for models',
+              button: newModelButton(context, constraints, controller),
+            );
+          },
+        ),
+        Expanded(
+          child: GetX<CarBrandsController>(
+            builder: (controller) {
+              if (controller.loadingModels.value) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (controller.allModels.isEmpty) {
+                return const Center(
+                  child: Text('No Element'),
+                );
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: SizedBox(
+                  width: constraints.maxWidth,
+                  child: tableOfScreens(
+                    constraints: constraints,
+                    context: context,
+                    controller: controller,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget tableOfScreens(
+    {required constraints,
+    required context,
+    required CarBrandsController controller}) {
+  return DataTable(
+    dataRowMaxHeight: 40,
+    dataRowMinHeight: 30,
+    columnSpacing: 5,
+    showBottomBorder: true,
+    dataTextStyle: regTextStyle,
+    headingTextStyle: fontStyleForTableHeader,
+    sortColumnIndex: controller.sortColumnIndex.value,
+    sortAscending: controller.isAscending.value,
+    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    columns: [
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Name',
+        ),
+        onSort: controller.onSortForModels,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Creation Date',
+        ),
+        onSort: controller.onSortForModels,
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Action',
+        ),
+      ),
+    ],
+    rows: controller.filteredModels.isEmpty &&
+            controller.searchForModels.value.text.isEmpty
+        ? controller.allModels.map<DataRow>((model) {
+            final modelData = model.data() as Map<String, dynamic>;
+            final modelId = model.id;
+            return dataRowForTheTable(
+                modelData, context, constraints, modelId, controller);
+          }).toList()
+        : controller.filteredModels.map<DataRow>((model) {
+            final modelData = model.data() as Map<String, dynamic>;
+            final modelId = model.id;
+            return dataRowForTheTable(
+                modelData, context, constraints, modelId, controller);
+          }).toList(),
+  );
+}
+
+DataRow dataRowForTheTable(Map<String, dynamic> modelData, context, constraints,
+    String modelId, CarBrandsController controller) {
+  return DataRow(cells: [
+    DataCell(
+      Text(
+        modelData['name'] ?? 'no model',
+      ),
+    ),
+    DataCell(
+      Text(
+        modelData['added_date'] != null
+            ? textToDate(modelData['added_date'])
+            : 'N/A',
+      ),
+    ),
+    DataCell(Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        activeInActiveSection(modelData, controller, modelId),
+        Padding(
+          padding: const EdgeInsets.only(left: 5, right: 5),
+          child:
+              editSection(controller, modelData, context, constraints, modelId),
+        ),
+        deleteSection(context, controller, modelId),
+      ],
+    )),
+  ]);
+}
+
+ElevatedButton deleteSection(context, CarBrandsController controller, modelId) {
+  return ElevatedButton(
+      style: deleteButtonStyle,
+      onPressed: () {
+        alertDialog(
+            context: context,
+            controller: controller,
+            content: 'The model will be deleted permanently',
+            onPressed: () {
+              controller.deleteModel(
+                  controller.brandIdToWorkWith.value, modelId);
+            });
+      },
+      child: const Text('Delete'));
+}
+
+ElevatedButton editSection(CarBrandsController controller,
+    Map<String, dynamic> modelData, context, constraints, String modelId) {
+  return ElevatedButton(
+      style: editButtonStyle,
+      onPressed: () {
+        controller.modelName.text = modelData['name'];
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: addNewmodelOrEdit(
+                  controller: controller,
+                  constraints: constraints,
+                  context: context,
+                ),
+                actions: [
+                  GetX<CarBrandsController>(
+                      builder: (controller) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: ElevatedButton(
+                              onPressed: controller.addingNewmodelValue.value
+                                  ? null
+                                  : () async {
+                                      if (!controller.formKeyForAddingNewvalue
+                                          .currentState!
+                                          .validate()) {
+                                      } else {
+                                        controller.editmodel(
+                                            controller
+                                                .brandIdToWorkWith.value,
+                                            modelId);
+                                      }
+                                    },
+                              style: saveButtonStyle,
+                              child:
+                                  controller.addingNewmodelValue.value == false
+                                      ? const Text(
+                                          'Save',
+                                          style: TextStyle(color: Colors.white),
+                                        )
+                                      : const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                            ),
+                          )),
+                  ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      style: cancelButtonStyle,
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ],
+              );
+            });
+      },
+      child: Text('Edit'));
+}
+
+ElevatedButton activeInActiveSection(Map<String, dynamic> modelData,
+    CarBrandsController controller, String modelId) {
+  return ElevatedButton(
+      style: modelData['status'] == false
+          ? inActiveButtonStyle
+          : activeButtonStyle,
+      onPressed: () {
+        bool status;
+        if (modelData['status'] == false) {
+          status = true;
+        } else {
+          status = false;
+        }
+        controller.editHideOrUnhide(
+            controller.brandIdToWorkWith.value, modelId, status);
+      },
+      child: modelData['status'] == true
+          ? const Text('Active')
+          : const Text('Inactive'));
+}
+
+ElevatedButton newModelButton(BuildContext context, BoxConstraints constraints,
+    CarBrandsController controller) {
+  return ElevatedButton(
+    onPressed: () {
+      controller.modelName.clear();
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+              content: addNewmodelOrEdit(
+                controller: controller,
+                constraints: constraints,
+                context: context,
+              ),
+              actions: [
+                GetX<CarBrandsController>(
+                    builder: (controller) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: ElevatedButton(
+                            onPressed: controller.addingNewmodelValue.value
+                                ? null
+                                : () async {
+                                    if (!controller
+                                        .formKeyForAddingNewvalue.currentState!
+                                        .validate()) {
+                                    } else {
+                                      await controller.addNewModel(
+                                          controller.brandIdToWorkWith.value);
+                                    }
+                                  },
+                            style: saveButtonStyle,
+                            child: controller.addingNewmodelValue.value == false
+                                ? const Text(
+                                    'Save',
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                : const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                          ),
+                        )),
+                ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    style: cancelButtonStyle,
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ],
+            );
+          });
+    },
+    style: newButtonStyle,
+    child: const Text('New model'),
+  );
+}

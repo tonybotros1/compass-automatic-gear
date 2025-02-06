@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +8,7 @@ import '../../../../Controllers/Main screen controllers/car_brands_controller.da
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/car_brands_widgets/add_new_brand_or_edit.dart';
+import '../../../../Widgets/main screen widgets/car_brands_widgets/values_section_models.dart';
 import '../../../../consts.dart';
 
 class CarBrands extends StatelessWidget {
@@ -174,33 +177,33 @@ ElevatedButton valSectionInTheTable(
   return ElevatedButton(
       style: viewButtonStyle,
       onPressed: () {
-        // controller.getCitiesValues(brandId);
-        // controller.brandIdToWorkWith.value = brandId;
-        // showDialog(
-        //     context: context,
-        //     builder: (context) {
-        //       return AlertDialog(
-        //         actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-        //         content: citiesSection(
-        //           constraints: constraints,
-        //           context: context,
-        //         ),
-        //         actions: [
-        //           Padding(
-        //             padding: const EdgeInsets.all(8.0),
-        //             child: ElevatedButton(
-        //                 onPressed: () {
-        //                   Get.back();
-        //                 },
-        //                 style: cancelButtonStyle,
-        //                 child: const Text(
-        //                   'Cancel',
-        //                   style: TextStyle(color: Colors.white),
-        //                 )),
-        //           ),
-        //         ],
-        //       );
-        //     });
+        controller.getModelsValues(brandId);
+        controller.brandIdToWorkWith.value = brandId;
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: modelsSection(
+                  constraints: constraints,
+                  context: context,
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        style: cancelButtonStyle,
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  ),
+                ],
+              );
+            });
       },
       child: const Text('Values'));
 }
@@ -250,7 +253,8 @@ ElevatedButton editSection(context, CarBrandsController controller,
             builder: (context) {
               controller.brandName.text = brandData['name'];
               controller.logoUrl.value = brandData['logo'];
-              controller.imageBytes = null;
+              controller.imageBytes.value = Uint8List(0);
+              controller.logoSelectedError.value = false;
 
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -312,8 +316,10 @@ ElevatedButton newbrandButton(BuildContext context, BoxConstraints constraints,
     CarBrandsController controller) {
   return ElevatedButton(
     onPressed: () {
-      controller.imageBytes = null;
+      controller.imageBytes.value = Uint8List(0);
       controller.brandName.clear();
+      controller.logoUrl.value = '';
+      controller.logoSelectedError.value = false;
       showDialog(
           context: context,
           builder: (context) {
@@ -332,7 +338,14 @@ ElevatedButton newbrandButton(BuildContext context, BoxConstraints constraints,
                             onPressed: controller.addingNewValue.value
                                 ? null
                                 : () {
-                                    controller.addNewbrand();
+                                    if (!controller
+                                        .formKeyForAddingNewvalue.currentState!
+                                        .validate()) {}
+                                    if (controller.imageBytes.value.isEmpty) {
+                                      controller.logoSelectedError.value = true;
+                                    } else {
+                                      controller.addNewbrand();
+                                    }
                                   },
                             style: saveButtonStyle,
                             child: controller.addingNewValue.value == false

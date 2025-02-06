@@ -11,17 +11,24 @@ import '../../consts.dart';
 class CarBrandsController extends GetxController {
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
+  Rx<TextEditingController> searchForModels = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
   final RxList<DocumentSnapshot> allBrands = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allModels = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredBrands = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredModels = RxList<DocumentSnapshot>([]);
   TextEditingController brandName = TextEditingController();
+  TextEditingController modelName = TextEditingController();
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
-  Uint8List? imageBytes;
+  RxBool addingNewmodelValue = RxBool(false);
+  Rx<Uint8List> imageBytes = Uint8List(0).obs;
   RxString logoUrl = RxString('');
+  RxString brandIdToWorkWith = RxString('');
+  RxBool loadingModels = RxBool(false);
+  final GlobalKey<FormState> formKeyForAddingNewvalue = GlobalKey<FormState>();
+  RxBool logoSelectedError = RxBool(false);
 
   @override
   void onInit() {
@@ -144,11 +151,11 @@ class CarBrandsController extends GetxController {
   addNewbrand() async {
     try {
       addingNewValue.value = true;
-      if (imageBytes != null && imageBytes!.isNotEmpty) {
+      if (imageBytes.value.isNotEmpty) {
         final Reference storageRef = FirebaseStorage.instance.ref().child(
             'brands_logos/${formatPhrase(brandName.text)}_${DateTime.now()}.png');
         final UploadTask uploadTask = storageRef.putData(
-          imageBytes!,
+          imageBytes.value,
           SettableMetadata(contentType: 'image/png'),
         );
 
@@ -173,11 +180,11 @@ class CarBrandsController extends GetxController {
   editBrand(brandId) async {
     try {
       addingNewValue.value = true;
-      if (imageBytes != null && imageBytes!.isNotEmpty) {
+      if (imageBytes.value.isNotEmpty) {
         final Reference storageRef = FirebaseStorage.instance.ref().child(
             'brands_logos/${formatPhrase(brandName.text)}_${DateTime.now()}.png');
         final UploadTask uploadTask = storageRef.putData(
-          imageBytes!,
+          imageBytes.value,
           SettableMetadata(contentType: 'image/png'),
         );
 
@@ -225,6 +232,7 @@ class CarBrandsController extends GetxController {
   // this function is to select an image for logo
   pickImage() async {
     try {
+      logoSelectedError.value = false;
       html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
       uploadInput.accept = 'image/*';
       uploadInput.click();
@@ -238,8 +246,7 @@ class CarBrandsController extends GetxController {
           reader.readAsArrayBuffer(file);
           reader.onLoadEnd.listen((event) async {
             if (reader.result != null) {
-              imageBytes = reader.result as Uint8List;
-              update();
+              imageBytes.value = reader.result as Uint8List;
             }
           });
         }
@@ -263,6 +270,89 @@ class CarBrandsController extends GetxController {
                   .contains(query.value);
         }).toList(),
       );
+    }
+  }
+
+  getModelsValues(brandId) {
+    try {
+      loadingModels.value = true;
+
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .orderBy('name', descending: false)
+          .snapshots()
+          .listen((values) {
+        allModels.assignAll(values.docs);
+        loadingModels.value = false;
+      });
+    } catch (e) {
+      loadingModels.value = false;
+    }
+  }
+
+  addNewModel(brandId) {
+    try {
+      addingNewmodelValue.value = true;
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .add({
+        'name': modelName.text,
+        'added_date': DateTime.now().toString(),
+        'status': true,
+      });
+      addingNewmodelValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewmodelValue.value = false;
+    }
+  }
+
+  deleteModel(brandId, modelId) {
+    try {
+      Get.back();
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .doc(modelId)
+          .delete();
+    } catch (e) {
+      //
+    }
+  }
+
+  editmodel(brandId, modelId) {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .doc(modelId)
+          .update({
+        'name': modelName.text,
+      });
+      Get.back();
+    } catch (e) {
+      //
+    }
+  }
+
+  editHideOrUnhide(brandId, modelId, status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .doc(modelId)
+          .update({
+        'status': status,
+      });
+    } catch (e) {
+      //
     }
   }
 }
