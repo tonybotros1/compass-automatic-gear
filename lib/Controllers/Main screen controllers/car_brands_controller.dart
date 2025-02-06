@@ -10,6 +10,7 @@ import '../../consts.dart';
 
 class CarBrandsController extends GetxController {
   RxString query = RxString('');
+  RxString queryForModels = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   Rx<TextEditingController> searchForModels = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -35,6 +36,9 @@ class CarBrandsController extends GetxController {
     getCarBrands();
     search.value.addListener(() {
       filterBrands();
+    });
+    searchForModels.value.addListener(() {
+      filterModels();
     });
     super.onInit();
   }
@@ -256,6 +260,26 @@ class CarBrandsController extends GetxController {
                   .toString()
                   .toLowerCase()
                   .contains(query.value);
+        }).toList(),
+      );
+    }
+  }
+
+  void filterModels() {
+    queryForModels.value = searchForModels.value.text.toLowerCase();
+    if (queryForModels.value.isEmpty) {
+      filteredModels.clear();
+    } else {
+      filteredModels.assignAll(
+        allModels.where((model) {
+          return model['name']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForModels.value) ||
+              textToDate(model['added_date'])
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForModels.value);
         }).toList(),
       );
     }
