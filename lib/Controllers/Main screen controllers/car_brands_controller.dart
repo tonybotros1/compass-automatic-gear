@@ -85,18 +85,6 @@ class CarBrandsController extends GetxController {
   void onSortForModels(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
       allModels.sort((screen1, screen2) {
-        final String? value1 = screen1.get('code');
-        final String? value2 = screen2.get('code');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 1) {
-      allModels.sort((screen1, screen2) {
         final String? value1 = screen1.get('name');
         final String? value2 = screen2.get('name');
 
@@ -107,7 +95,7 @@ class CarBrandsController extends GetxController {
 
         return compareString(ascending, value1, value2);
       });
-    } else if (columnIndex == 2) {
+    } else if (columnIndex == 1) {
       allModels.sort((screen1, screen2) {
         final String? value1 = screen1.get('added_date');
         final String? value2 = screen2.get('added_date');
