@@ -429,7 +429,6 @@ class EntityInformationsController extends GetxController {
       namesControllers[i].controller?.text = phone['name'] ?? '';
       jobTitlesControllers[i].controller?.text = phone['tob_title'] ?? '';
     }
-    print(phonePrimary.map((value)=> print(value.isPrimary)));
   }
 
   void updateEntitySocial(List entitySocialFromData) {

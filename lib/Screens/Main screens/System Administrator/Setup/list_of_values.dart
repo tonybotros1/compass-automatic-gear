@@ -229,7 +229,6 @@ ElevatedButton valSectionInTheTable(
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                 content: valuesSection(
-                  controller: controller,
                   constraints: constraints,
                   context: context,
                 ),

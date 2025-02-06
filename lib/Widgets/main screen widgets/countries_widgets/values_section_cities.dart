@@ -1,13 +1,13 @@
-import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values_controller.dart';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/countries_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
-import 'add_or_edit_new_value_for_lists.dart';
 import '../auto_size_box.dart';
+import 'add_new_city_or_edit.dart';
 
-Widget valuesSection({
+Widget citiesSection({
   required BoxConstraints constraints,
   required BuildContext context,
 }) {
@@ -19,28 +19,27 @@ Widget valuesSection({
     ),
     child: Column(
       children: [
-        GetX<ListOfValuesController>(
-          init: ListOfValuesController(),
+        GetX<CountriesController>(
           builder: (controller) {
             return searchBar(
-              search: controller.searchForValues,
+              search: controller.searchForCities,
               constraints: constraints,
               context: context,
               controller: controller,
-              title: 'Search for values',
-              button: newValueButton(context, constraints, controller),
+              title: 'Search for cities',
+              button: newCityButton(context, constraints, controller),
             );
           },
         ),
         Expanded(
-          child: GetX<ListOfValuesController>(
+          child: GetX<CountriesController>(
             builder: (controller) {
-              if (controller.loadingValues.value) {
+              if (controller.loadingcities.value) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               }
-              if (controller.allValues.isEmpty) {
+              if (controller.allCities.isEmpty) {
                 return const Center(
                   child: Text('No Element'),
                 );
@@ -67,7 +66,7 @@ Widget valuesSection({
 Widget tableOfScreens(
     {required constraints,
     required context,
-    required ListOfValuesController controller}) {
+    required CountriesController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -82,23 +81,23 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Name',
+          text: 'Code',
         ),
-        onSort: controller.onSortForValues,
+        onSort: controller.onSortForCities,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Parent (Value)',
+          text: 'Name',
         ),
-        onSort: controller.onSortForValues,
+        onSort: controller.onSortForCities,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
           text: 'Creation Date',
         ),
-        onSort: controller.onSortForValues,
+        onSort: controller.onSortForCities,
       ),
       DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
@@ -108,118 +107,113 @@ Widget tableOfScreens(
         ),
       ),
     ],
-    rows: controller.filteredValues.isEmpty &&
-            controller.searchForValues.value.text.isEmpty
-        ? controller.allValues.map<DataRow>((value) {
-            final valueData = value.data() as Map<String, dynamic>;
-            final valueId = value.id;
+    rows: controller.filteredCities.isEmpty &&
+            controller.searchForCities.value.text.isEmpty
+        ? controller.allCities.map<DataRow>((city) {
+            final cityData = city.data() as Map<String, dynamic>;
+            final cityId = city.id;
             return dataRowForTheTable(
-                valueData, context, constraints, valueId, controller);
+                cityData, context, constraints, cityId, controller);
           }).toList()
-        : controller.filteredValues.map<DataRow>((value) {
-            final valueData = value.data() as Map<String, dynamic>;
-            final valueId = value.id;
+        : controller.filteredCities.map<DataRow>((city) {
+            final cityData = city.data() as Map<String, dynamic>;
+            final cityId = city.id;
             return dataRowForTheTable(
-                valueData, context, constraints, valueId, controller);
+                cityData, context, constraints, cityId, controller);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
-    String valueId, ListOfValuesController controller) {
+DataRow dataRowForTheTable(Map<String, dynamic> cityData, context, constraints,
+    String cityId, CountriesController controller) {
   return DataRow(cells: [
     DataCell(
       Text(
-        valueData['name'] ?? 'no value',
+        cityData['code'] ?? 'no code',
       ),
     ),
     DataCell(
       Text(
-        controller.getValueNameById(valueData['restricted_by']) ?? '',
+        cityData['name'] ?? 'no city',
       ),
     ),
     DataCell(
       Text(
-        valueData['added_date'] != null
-            ? textToDate(valueData['added_date'])
+        cityData['added_date'] != null
+            ? textToDate(cityData['added_date'])
             : 'N/A',
       ),
     ),
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        controller.userEmail.value == 'datahubai@gmail.com'
-            ? activeInActiveSection(valueData, controller, valueId)
-            : SizedBox(),
+        activeInActiveSection(cityData, controller, cityId),
         Padding(
           padding: const EdgeInsets.only(left: 5, right: 5),
           child:
-              editSection(controller, valueData, context, constraints, valueId),
+              editSection(controller, cityData, context, constraints, cityId),
         ),
-        deleteSection(context, controller, valueId),
+        deleteSection(context, controller, cityId),
       ],
     )),
   ]);
 }
 
-ElevatedButton deleteSection(
-    context, ListOfValuesController controller, valueId) {
+ElevatedButton deleteSection(context, CountriesController controller, cityId) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
         alertDialog(
             context: context,
             controller: controller,
-            content: 'The value will be deleted permanently',
+            content: 'The city will be deleted permanently',
             onPressed: () {
-              controller.deleteValue(
-                  controller.listIDToWorkWithNewValue.value, valueId);
+              controller.deleteCity(
+                  controller.countryIdToWorkWith.value, cityId);
             });
       },
       child: const Text('Delete'));
 }
 
-ElevatedButton editSection(ListOfValuesController controller,
-    Map<String, dynamic> valueData, context, constraints, String valueId) {
+ElevatedButton editSection(CountriesController controller,
+    Map<String, dynamic> cityData, context, constraints, String cityId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        controller.valueName.text = valueData['name'];
-        controller.restrictedBy.text =
-            controller.getValueNameById(valueData['restricted_by'])!;
-        controller.masteredByIdForValues.value = '';
+        controller.cityName.text = cityData['name'];
+        controller.cityCode.text = cityData['code'];
         showDialog(
             context: context,
             builder: (context) {
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewValueOrEdit(
+                content: addNewCityOrEdit(
                   controller: controller,
                   constraints: constraints,
                   context: context,
                   isEnabled: false,
                 ),
                 actions: [
-                  GetX<ListOfValuesController>(
+                  GetX<CountriesController>(
                       builder: (controller) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: ElevatedButton(
-                              onPressed: controller.addingNewListValue.value
+                              onPressed: controller.addingNewCityValue.value
                                   ? null
                                   : () async {
-                                      if (!controller
-                                          .formKeyForAddingNewList.currentState!
+                                      if (!controller.formKeyForAddingNewvalue
+                                          .currentState!
                                           .validate()) {
                                       } else {
-                                        controller.editValue(
+                                        controller.editcity(
                                             controller
-                                                .listIDToWorkWithNewValue.value,
-                                            valueId);
+                                                .countryIdToWorkWith.value,
+                                            cityId);
                                       }
                                     },
                               style: saveButtonStyle,
                               child:
-                                  controller.addingNewListValue.value == false
+                                  controller.addingNewCityValue.value == false
                                       ? const Text(
                                           'Save',
                                           style: TextStyle(color: Colors.white),
@@ -250,62 +244,62 @@ ElevatedButton editSection(ListOfValuesController controller,
       child: Text('Edit'));
 }
 
-ElevatedButton activeInActiveSection(Map<String, dynamic> valueData,
-    ListOfValuesController controller, String valueId) {
+ElevatedButton activeInActiveSection(Map<String, dynamic> cityData,
+    CountriesController controller, String cityId) {
   return ElevatedButton(
-      style: valueData['available'] == false
+      style: cityData['available'] == false
           ? inActiveButtonStyle
           : activeButtonStyle,
       onPressed: () {
         bool status;
-        if (valueData['available'] == false) {
+        if (cityData['available'] == false) {
           status = true;
         } else {
           status = false;
         }
         controller.editHideOrUnhide(
-            controller.listIDToWorkWithNewValue.value, valueId, status);
+            controller.countryIdToWorkWith.value, cityId, status);
       },
-      child: valueData['available'] == true
+      child: cityData['available'] == true
           ? const Text('Active')
           : const Text('Inactive'));
 }
 
-ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
-    ListOfValuesController controller) {
+ElevatedButton newCityButton(BuildContext context, BoxConstraints constraints,
+    CountriesController controller) {
   return ElevatedButton(
     onPressed: () {
-      controller.valueName.clear();
-      controller.restrictedBy.clear();
+      controller.cityName.clear();
+      controller.cityCode.clear();
       showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
               actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewValueOrEdit(
+              content: addNewCityOrEdit(
                 controller: controller,
                 constraints: constraints,
                 context: context,
                 isEnabled: true,
               ),
               actions: [
-                GetX<ListOfValuesController>(
+                GetX<CountriesController>(
                     builder: (controller) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ElevatedButton(
-                            onPressed: controller.addingNewListValue.value
+                            onPressed: controller.addingNewCityValue.value
                                 ? null
                                 : () async {
                                     if (!controller
-                                        .formKeyForAddingNewList.currentState!
+                                        .formKeyForAddingNewvalue.currentState!
                                         .validate()) {
                                     } else {
-                                      await controller.addNewValue(controller
-                                          .listIDToWorkWithNewValue.value);
+                                      await controller.addNewCity(
+                                          controller.countryIdToWorkWith.value);
                                     }
                                   },
                             style: saveButtonStyle,
-                            child: controller.addingNewListValue.value == false
+                            child: controller.addingNewCityValue.value == false
                                 ? const Text(
                                     'Save',
                                     style: TextStyle(color: Colors.white),
@@ -334,6 +328,6 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
           });
     },
     style: newButtonStyle,
-    child: const Text('New Value'),
+    child: const Text('New City'),
   );
 }

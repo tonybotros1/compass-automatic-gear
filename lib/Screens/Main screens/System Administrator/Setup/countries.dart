@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,6 +5,7 @@ import '../../../../Controllers/Main screen controllers/countries_controller.dar
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/countries_widgets/add_new_country_or_edit.dart';
+import '../../../../Widgets/main screen widgets/countries_widgets/values_section_cities.dart';
 import '../../../../consts.dart';
 
 class Countries extends StatelessWidget {
@@ -183,48 +183,38 @@ DataRow dataRowForTheTable(Map<String, dynamic> countryData, context,
   ]);
 }
 
-ElevatedButton valSectionInTheTable(
-    CountriesController controller, countryId, context, constraints, countryData) {
+ElevatedButton valSectionInTheTable(CountriesController controller, countryId,
+    context, constraints, countryData) {
   return ElevatedButton(
       style: viewButtonStyle,
       onPressed: () {
-        // controller.valueMap.clear();
-        // controller.listIDToWorkWithNewValue.value = listId;
-        // controller.getListValues(listId, listData['mastered_by']);
-        // showDialog(
-        //     context: context,
-        //     builder: (context) {
-        //       return AlertDialog(
-        //         actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-        //         content: valuesSection(
-        //           controller: controller,
-        //           constraints: constraints,
-        //           context: context,
-        //         ),
-        //         actions: [
-        //           Padding(
-        //             padding: const EdgeInsets.all(8.0),
-        //             child: ElevatedButton(
-        //               onPressed: () {
-        //                 Get.back();
-        //               },
-        //               style: cancelButtonStyle,
-        //               child: controller.addingNewListValue.value == false
-        //                   ? const Text(
-        //                       'Cancel',
-        //                       style: TextStyle(color: Colors.white),
-        //                     )
-        //                   : const Padding(
-        //                       padding: EdgeInsets.all(8.0),
-        //                       child: CircularProgressIndicator(
-        //                         color: Colors.white,
-        //                       ),
-        //                     ),
-        //             ),
-        //           ),
-        //         ],
-        //       );
-        //     });
+        controller.getCitiesValues(countryId);
+        controller.countryIdToWorkWith.value = countryId;
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                content: citiesSection(
+                  constraints: constraints,
+                  context: context,
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        style: cancelButtonStyle,
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  ),
+                ],
+              );
+            });
       },
       child: const Text('Values'));
 }
