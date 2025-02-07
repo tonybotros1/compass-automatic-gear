@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'dart:html' as html;
 
 var fontStyleForAppBar = TextStyle(
     fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
@@ -303,3 +306,32 @@ Decoration containerDecor = BoxDecoration(
     ),
     borderRadius: BorderRadius.only(
         bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5)));
+
+
+class ImagePickerService {
+  static Future<void> pickImage(Rx<Uint8List?> imageBytes, RxBool flagSelectedError) async {
+    try {
+      flagSelectedError.value = false;
+      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      uploadInput.accept = 'image/*';
+      uploadInput.click();
+
+      uploadInput.onChange.listen((event) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files.first;
+          final reader = html.FileReader();
+
+          reader.readAsArrayBuffer(file);
+          reader.onLoadEnd.listen((event) async {
+            if (reader.result != null) {
+              imageBytes.value = reader.result as Uint8List;
+            }
+          });
+        }
+      });
+    } catch (e) {
+      flagSelectedError.value = true; // Handle error
+    }
+  }
+}

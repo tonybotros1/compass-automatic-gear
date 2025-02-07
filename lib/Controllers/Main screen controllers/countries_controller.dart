@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:html' as html;
 import '../../consts.dart';
 
 class CountriesController extends GetxController {
@@ -262,7 +261,7 @@ class CountriesController extends GetxController {
       final currency = allCurrencies.entries.firstWhere(
         (currency) => currency.key == currencyId,
       );
-      return currency;
+      return currency.value;
     } catch (e) {
       return '';
     }
@@ -399,28 +398,6 @@ class CountriesController extends GetxController {
 
   // this function is to select an image for logo
   pickImage() async {
-    try {
-      flagSelectedError.value = false;
-      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-      uploadInput.accept = 'image/*';
-      uploadInput.click();
-
-      uploadInput.onChange.listen((event) {
-        final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files.first;
-          final reader = html.FileReader();
-
-          reader.readAsArrayBuffer(file);
-          reader.onLoadEnd.listen((event) async {
-            if (reader.result != null) {
-              imageBytes.value = reader.result as Uint8List;
-            }
-          });
-        }
-      });
-    } catch (e) {
-      //
-    }
+    ImagePickerService.pickImage(imageBytes, flagSelectedError);
   }
 }

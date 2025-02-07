@@ -285,8 +285,8 @@ ElevatedButton editSection(context, CountriesController controller,
               controller.countryCode.text = countryData['code'];
               controller.currencyId.value = countryData['based_currency'];
               controller.currencyRate.text =
-                  (currency.value['rate'] ?? '').toString();
-              controller.currency.text = currency.value['code'];
+                  (currency['rate'] ?? '').toString();
+              controller.currency.text = currency['code'] ?? '';
 
               controller.flagUrl.value = countryData['flag'] ?? '';
               controller.imageBytes.value = Uint8List(0);
@@ -378,7 +378,14 @@ ElevatedButton newcountryButton(BuildContext context,
                             onPressed: controller.addingNewValue.value
                                 ? null
                                 : () async {
-                                    await controller.addNewCountry();
+                                    if (!controller
+                                        .formKeyForAddingNewvalue.currentState!
+                                        .validate()) {}
+                                    if (controller.imageBytes.value.isEmpty) {
+                                      controller.flagSelectedError.value = true;
+                                    } else {
+                                      await controller.addNewCountry();
+                                    }
                                   },
                             style: saveButtonStyle,
                             child: controller.addingNewValue.value == false

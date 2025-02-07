@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:html' as html;
 
 import '../../consts.dart';
 
@@ -225,32 +224,11 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  // this function is to select an image for logo
+   // this function is to select an image for logo
   pickImage() async {
-    try {
-      logoSelectedError.value = false;
-      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-      uploadInput.accept = 'image/*';
-      uploadInput.click();
-
-      uploadInput.onChange.listen((event) {
-        final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files.first;
-          final reader = html.FileReader();
-
-          reader.readAsArrayBuffer(file);
-          reader.onLoadEnd.listen((event) async {
-            if (reader.result != null) {
-              imageBytes.value = reader.result as Uint8List;
-            }
-          });
-        }
-      });
-    } catch (e) {
-      //
-    }
+    ImagePickerService.pickImage(imageBytes, logoSelectedError);
   }
+
 
   void filterBrands() {
     query.value = search.value.text.toLowerCase();
