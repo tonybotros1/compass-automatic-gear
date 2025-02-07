@@ -41,8 +41,8 @@ Widget carDetailsSection() {
                   }).forEach(
                     (entry) {
                       controller.carModel.clear();
-                      controller.onSelectForBrandsAndModels(entry.key);
-
+                      // controller.onSelectForBrandsAndModels(entry.key);
+                      controller.getModelsByCarBrand(entry.key);
                       controller.carBrandId.value = entry.key;
                     },
                   );
@@ -53,7 +53,7 @@ Widget carDetailsSection() {
               isDropdown: true,
               flex: 2,
               dropdownConfig: DropdownConfig(
-                listValues: controller.filterdModelsByBrands.values
+                listValues: controller.allModels.values
                     .map((value) => value['name'].toString())
                     .toList(),
                 suggestionsController: SuggestionsController(),
@@ -61,9 +61,8 @@ Widget carDetailsSection() {
                 textController: controller.carModel,
                 labelText: 'Model',
                 hintText: 'Select Model',
-                menuValues: controller.filterdModelsByBrands.isEmpty
-                    ? {}
-                    : controller.filterdModelsByBrands,
+                menuValues:
+                    controller.allModels.isEmpty ? {} : controller.allModels,
                 itemBuilder: (context, suggestion) {
                   return ListTile(
                     title: Text('${suggestion['name']}'),
@@ -71,7 +70,7 @@ Widget carDetailsSection() {
                 },
                 onSelected: (suggestion) {
                   controller.carModel.text = suggestion['name'];
-                  controller.filterdModelsByBrands.entries.where((entry) {
+                  controller.allModels.entries.where((entry) {
                     return entry.value['name'] == suggestion['name'].toString();
                   }).forEach(
                     (entry) {
@@ -124,8 +123,8 @@ Widget carDetailsSection() {
                   }).forEach(
                     (entry) {
                       controller.city.clear();
-                      controller.onSelectForCountryAndCity(entry.key);
-
+                      // controller.onSelectForCountryAndCity(entry.key);
+                      controller.getCitiesByCountryID(entry.key);
                       controller.countryId.value = entry.key;
                     },
                   );
@@ -136,7 +135,7 @@ Widget carDetailsSection() {
               isDropdown: true,
               flex: 1,
               dropdownConfig: DropdownConfig(
-                listValues: controller.filterdCitiesByCountry.values
+                listValues: controller.allCities.values
                     .map((value) => value['name'].toString())
                     .toList(),
                 suggestionsController: SuggestionsController(),
@@ -144,9 +143,8 @@ Widget carDetailsSection() {
                 textController: controller.city,
                 labelText: 'City',
                 hintText: 'Select City',
-                menuValues: controller.filterdCitiesByCountry.isEmpty
-                    ? {}
-                    : controller.filterdCitiesByCountry,
+                menuValues:
+                    controller.allCities.isEmpty ? {} : controller.allCities,
                 itemBuilder: (context, suggestion) {
                   return ListTile(
                     title: Text('${suggestion['name']}'),
@@ -154,7 +152,7 @@ Widget carDetailsSection() {
                 },
                 onSelected: (suggestion) {
                   controller.city.text = suggestion['name'];
-                  controller.filterdCitiesByCountry.entries.where((entry) {
+                  controller.allCities.entries.where((entry) {
                     return entry.value['name'] == suggestion['name'].toString();
                   }).forEach((entry) {
                     controller.cityId.value = entry.key;

@@ -83,14 +83,14 @@ class JobCardController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxString companyId = RxString('');
   RxMap allCountries = RxMap({});
-  RxMap filterdCitiesByCountry = RxMap({});
+  // RxMap filterdCitiesByCountry = RxMap({});
   RxMap allCities = RxMap({});
   RxMap allColors = RxMap({});
   RxMap allBranches = RxMap({});
   RxMap allCurrencies = RxMap({});
 
   RxMap allBrands = RxMap({});
-  RxMap filterdModelsByBrands = RxMap({});
+  // RxMap filterdModelsByBrands = RxMap({});
   RxMap allModels = RxMap({});
   RxMap allCustomers = RxMap({});
   RxMap salesManMap = RxMap({});
@@ -116,8 +116,10 @@ class JobCardController extends GetxController {
     getCurrencies();
     getAllCustomers();
     getColors();
-    getCarsModelsAndBrands();
-    getCountriesAndCities();
+    getCarBrands();
+    getCountries();
+    // getCarsModelsAndBrands();
+    // getCountriesAndCities();
     getAllJobCards();
   }
 
@@ -326,87 +328,145 @@ class JobCardController extends GetxController {
     }
   }
 
-  getCountriesAndCities() async {
+  // getCountriesAndCities() async {
+  //   try {
+  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'COUNTRIES')
+  //         .get();
+  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'CITIES')
+  //         .get();
+
+  //     var countriesId = countries.docs.first.id;
+  //     var citiesId = cities.docs.first.id;
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(countriesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((countries) {
+  //       allCountries.value = {
+  //         for (var doc in countries.docs) doc.id: doc.data()
+  //       };
+  //     });
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(citiesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((cities) {
+  //       allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+  //     });
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
+
+  getCountries() {
     try {
-      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'COUNTRIES')
-          .get();
-      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'CITIES')
-          .get();
-
-      var countriesId = countries.docs.first.id;
-      var citiesId = cities.docs.first.id;
-
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(countriesId)
-          .collection('values')
-          .where('available', isEqualTo: true)
+          .collection('all_countries')
           .snapshots()
           .listen((countries) {
         allCountries.value = {
           for (var doc in countries.docs) doc.id: doc.data()
         };
       });
+    } catch (e) {
+      //
+    }
+  }
 
+  getCitiesByCountryID(countryID) {
+    try {
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(citiesId)
+          .collection('all_countries')
+          .doc(countryID)
           .collection('values')
-          .where('available', isEqualTo: true)
           .snapshots()
           .listen((cities) {
         allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
       });
     } catch (e) {
-      // print(e);
+      //
     }
   }
 
-  getCarsModelsAndBrands() async {
+  getCarBrands() {
     try {
-      QuerySnapshot<Map<String, dynamic>> brands = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'CAR_BRANDS')
-          .get();
-      QuerySnapshot<Map<String, dynamic>> models = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'CAR_MODELS')
-          .get();
-
-      var brandsId = brands.docs.first.id;
-      var modelsId = models.docs.first.id;
-
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(brandsId)
-          .collection('values')
-          .where('available', isEqualTo: true)
-          .snapshots()
-          .listen((models) {
-        allBrands.value = {for (var doc in models.docs) doc.id: doc.data()};
-      });
-
-      FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(modelsId)
-          .collection('values')
-          .where('available', isEqualTo: true)
+          .collection('all_brands')
           .snapshots()
           .listen((brands) {
-        allModels.value = {for (var doc in brands.docs) doc.id: doc.data()};
+        allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
       });
     } catch (e) {
-      // print(e);
+      //
     }
   }
+
+  getModelsByCarBrand(brandId) {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .snapshots()
+          .listen((models) {
+        allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  // getCarsModelsAndBrands() async {
+  //   try {
+  //     QuerySnapshot<Map<String, dynamic>> brands = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'CAR_BRANDS')
+  //         .get();
+  //     QuerySnapshot<Map<String, dynamic>> models = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'CAR_MODELS')
+  //         .get();
+
+  //     var brandsId = brands.docs.first.id;
+  //     var modelsId = models.docs.first.id;
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(brandsId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((models) {
+  //       allBrands.value = {for (var doc in models.docs) doc.id: doc.data()};
+  //     });
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(modelsId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((brands) {
+  //       allModels.value = {for (var doc in brands.docs) doc.id: doc.data()};
+  //     });
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
 
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
@@ -482,32 +542,32 @@ class JobCardController extends GetxController {
     }
   }
 
-  void onSelectForBrandsAndModels(String selectedId) {
-    filterdModelsByBrands.assignAll(
-      Map.fromEntries(
-        allModels.entries.where((entry) {
-          return entry.value['restricted_by']
-              .toString()
-              .toLowerCase()
-              .contains(selectedId.toLowerCase());
-        }),
-      ),
-    );
-  }
+  // void onSelectForBrandsAndModels(String selectedId) {
+  //   filterdModelsByBrands.assignAll(
+  //     Map.fromEntries(
+  //       allModels.entries.where((entry) {
+  //         return entry.value['restricted_by']
+  //             .toString()
+  //             .toLowerCase()
+  //             .contains(selectedId.toLowerCase());
+  //       }),
+  //     ),
+  //   );
+  // }
 
-  void onSelectForCountryAndCity(String selectedId) {
-    filterdCitiesByCountry.clear();
-    filterdCitiesByCountry.addAll(
-      Map.fromEntries(
-        allCities.entries.where((entry) {
-          return entry.value['restricted_by']
-              .toString()
-              .toLowerCase()
-              .contains(selectedId.toLowerCase());
-        }),
-      ),
-    );
-  }
+  // void onSelectForCountryAndCity(String selectedId) {
+  //   filterdCitiesByCountry.clear();
+  //   filterdCitiesByCountry.addAll(
+  //     Map.fromEntries(
+  //       allCities.entries.where((entry) {
+  //         return entry.value['restricted_by']
+  //             .toString()
+  //             .toLowerCase()
+  //             .contains(selectedId.toLowerCase());
+  //       }),
+  //     ),
+  //   );
+  // }
 
   void onSelectForCustomers(String selectedId) {
     var currentUserDetails = allCustomers.entries.firstWhere((entry) {
