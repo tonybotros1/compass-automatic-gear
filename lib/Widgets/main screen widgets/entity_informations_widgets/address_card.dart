@@ -106,6 +106,7 @@ Widget buildSmartField(EntityInformationsController controller,
                           validate: false,
                           onChanged: (value) {
                             controller.contactAddress[index]['line'] = value;
+                            print(controller.contactAddress);
                           },
                         ),
                       ),
@@ -172,8 +173,7 @@ Widget buildSmartField(EntityInformationsController controller,
                           onSelected: (suggestion) {
                             controller.citiesControllers[index].controller!
                                 .text = suggestion['name'];
-                            controller.allCities.entries
-                                .where((entry) {
+                            controller.allCities.entries.where((entry) {
                               return entry.value['name'] ==
                                   suggestion['name'].toString();
                             }).forEach((entry) {

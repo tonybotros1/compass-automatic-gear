@@ -603,45 +603,50 @@ class EntityInformationsController extends GetxController {
   generateControllerForPhoneTypes() {
     final length = contactPhone.length + 1;
 
-    // Pre-generate the controllers and models once
-    final controllersList = List.generate(
+    phoneTypesControllers.value = List.generate(
         length, (index) => TypeModel(controller: TextEditingController()));
-    final primaryModelsList =
-        List.generate(length, (index) => PrimaryModel(isPrimary: index == 0));
 
-    // Assign values to the respective controller lists
-    phoneTypesControllers.value = controllersList;
-    phoneNumbersControllers.value = controllersList;
-    emailsControllers.value = controllersList;
-    namesControllers.value = controllersList;
-    jobTitlesControllers.value = controllersList;
-    phonePrimary.value = primaryModelsList;
+    phoneNumbersControllers.value = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
+
+    emailsControllers.value = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
+
+    namesControllers.value = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
+
+    jobTitlesControllers.value = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
+
+    phonePrimary.value =
+        List.generate(length, (index) => PrimaryModel(isPrimary: index == 0));
   }
 
   generateControllerForSocialTypes() {
-    final length = contactSocial.length;
+    final length = contactSocial.length + 1;
 
-    // Pre-generate the controllers once
-    final controllersList = List.generate(
+    // Generate separate controller lists for social types and links
+    socialTypesControllers.value = List.generate(
         length, (index) => TypeModel(controller: TextEditingController()));
 
-    // Assign values to the respective controller lists
-    socialTypesControllers.value = controllersList;
-    linksControllers.value = controllersList;
+    linksControllers.value = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
   }
 
   generateControllerForAdressCountriesAndCities() {
-    final length = contactAddress.length;
+    final length = contactAddress.length + 1;
 
-    final controllersList = List.generate(
+    countriesControllers.value = List.generate(
         length, (index) => TypeModel(controller: TextEditingController()));
-    final primaryModelsList =
-        List.generate(length, (index) => PrimaryModel(isPrimary: index == 0));
 
-    countriesControllers.value = controllersList;
-    citiesControllers.value = controllersList;
-    linesControllers.value = controllersList;
-    addressPrimary.value = primaryModelsList;
+    citiesControllers.value = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
+
+    linesControllers.value = List.generate(
+        length, (index) => TypeModel(controller: TextEditingController()));
+
+    addressPrimary.value =
+        List.generate(length, (index) => PrimaryModel(isPrimary: index == 0));
   }
 
   // this function is to select an image for logo
