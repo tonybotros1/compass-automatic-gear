@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/Models/primary_model.dart';
 import 'package:datahubai/Models/type_model.dart';
+import 'package:datahubai/consts.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -145,7 +146,6 @@ class EntityInformationsController extends GetxController {
     entityTypeId.value = '';
 
     contactAddress.assign(EntityAddress(isPrimary: true));
-
     contactPhone.assign(EntityPhone(isPrimary: true));
     contactSocial.assign(EntitySocial());
 
@@ -313,12 +313,21 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  String? getCityName(String cityId) {
+  Future<String?> getCityName(countryId, cityId) async {
     try {
-      final city = allCities.entries.firstWhere(
-        (city) => city.key == cityId,
-      );
-      return city.value['name'];
+      // final city = allCities.entries.firstWhere(
+      //   (city) => city.key == cityId,
+      // );
+      // return city.value['name'];
+      var cities = await FirebaseFirestore.instance
+          .collection('all_countries')
+          .doc(countryId)
+          .collection('values')
+          .where(FieldPath.documentId, isEqualTo: cityId)
+          .get();
+      String cityName = cities.docs.first.data()['name'];
+
+      return cityName;
     } catch (e) {
       return '';
     }
@@ -389,13 +398,11 @@ class EntityInformationsController extends GetxController {
       final address = contactAddress[i];
 
       countriesControllers[i].controller?.text =
-          getCountryName('${address.country}') ?? ''; // ✅ Use object property
-      addressPrimary[i].isPrimary =
-          address.isPrimary ?? false; // ✅ Use object property
+          getCountryName('${address.country}') ?? '';
+      addressPrimary[i].isPrimary = address.isPrimary ?? false;
       citiesControllers[i].controller?.text =
-          getCityName('${address.city}') ?? ''; // ✅ Use object property
-      linesControllers[i].controller?.text =
-          address.line ?? ''; // ✅ Use object property
+         await getCityName('${address.country}', '${address.city}') ?? '';
+      linesControllers[i].controller?.text = address.line ?? '';
     }
   }
 
@@ -408,16 +415,12 @@ class EntityInformationsController extends GetxController {
       final phone = contactPhone[i];
 
       phoneTypesControllers[i].controller?.text =
-          getPhoneTypeName('${phone.type}') ?? ''; // ✅ Use object property
-      phonePrimary[i].isPrimary = phone.isPrimary; // ✅ Use object property
-      phoneNumbersControllers[i].controller?.text =
-          phone.number ?? ''; // ✅ Use object property
-      emailsControllers[i].controller?.text =
-          phone.email ?? ''; // ✅ Use object property
-      namesControllers[i].controller?.text =
-          phone.name ?? ''; // ✅ Use object property
-      jobTitlesControllers[i].controller?.text =
-          phone.jobTitle ?? ''; // ✅ Use object property
+          getPhoneTypeName('${phone.type}') ?? '';
+      phonePrimary[i].isPrimary = phone.isPrimary;
+      phoneNumbersControllers[i].controller?.text = phone.number ?? '';
+      emailsControllers[i].controller?.text = phone.email ?? '';
+      namesControllers[i].controller?.text = phone.name ?? '';
+      jobTitlesControllers[i].controller?.text = phone.jobTitle ?? '';
     }
   }
 
@@ -431,9 +434,8 @@ class EntityInformationsController extends GetxController {
         final social = contactSocial[i];
 
         socialTypesControllers[i].controller?.text =
-            getSocialTypeName('${social.type}') ?? ''; // ✅ Use object property
-        linksControllers[i].controller?.text =
-            social.link ?? ''; // ✅ Use object property
+            getSocialTypeName('${social.type}') ?? '';
+        linksControllers[i].controller?.text = social.link ?? '';
       }
     } catch (e) {
       //
@@ -783,11 +785,16 @@ class EntityInformationsController extends GetxController {
           bool nameMatches =
               entity['entity_name'].toString().toLowerCase().contains(query);
 
+          bool dataMatches = textToDate(entity['added_date'])
+              .toString()
+              .toLowerCase()
+              .contains(query);
+
           // Check if any phone number in entity_phone contains the query
           bool phoneMatches = (entity['entity_phone'] as List).any(
               (phoneData) => phoneData['number'].toString().contains(query));
 
-          return nameMatches || phoneMatches;
+          return nameMatches || phoneMatches || dataMatches;
         }).toList(),
       );
     }
