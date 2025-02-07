@@ -54,7 +54,7 @@ class EntityInformationsController extends GetxController {
   Uint8List? imageBytes;
   RxMap allCities = RxMap({});
   RxMap allCountries = RxMap({});
-  RxMap filterdCitiesByCountry = RxMap({});
+  // RxMap filterdCitiesByCountry = RxMap({});
   RxList entityCode = RxList([]);
   RxString entityStatus = RxString('');
   final GlobalKey<AnimatedListState> listKeyForPhoneLine =
@@ -93,9 +93,10 @@ class EntityInformationsController extends GetxController {
 
   @override
   void onInit() {
-    getCountriesAndCities().then((_) {
-      getEntities();
-    });
+    // getCountriesAndCities()
+    getCountries();
+    getEntities();
+
     generateControllerForAdressCountriesAndCities();
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
@@ -511,59 +512,91 @@ class EntityInformationsController extends GetxController {
     update();
   }
 
-  void onSelect(String selectedId) {
-    filterdCitiesByCountry.clear();
-    filterdCitiesByCountry.addAll(
-      Map.fromEntries(
-        allCities.entries.where((entry) {
-          return entry.value['restricted_by']
-              .toString()
-              .toLowerCase()
-              .contains(selectedId.toLowerCase());
-        }),
-      ),
-    );
-  }
+  // void onSelect(String selectedId) {
+  //   filterdCitiesByCountry.clear();
+  //   filterdCitiesByCountry.addAll(
+  //     Map.fromEntries(
+  //       allCities.entries.where((entry) {
+  //         return entry.value['restricted_by']
+  //             .toString()
+  //             .toLowerCase()
+  //             .contains(selectedId.toLowerCase());
+  //       }),
+  //     ),
+  //   );
+  // }
 
-  getCountriesAndCities() async {
+  // getCountriesAndCities() async {
+  //   try {
+  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'COUNTRIES')
+  //         .get();
+  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'CITIES')
+  //         .get();
+
+  //     var countriesId = countries.docs.first.id;
+  //     var citiesId = cities.docs.first.id;
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(countriesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((countries) {
+  //       allCountries.value = {
+  //         for (var doc in countries.docs) doc.id: doc.data()
+  //       };
+  //     });
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(citiesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((cities) {
+  //       allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+  //     });
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
+
+  getCountries() {
     try {
-      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'COUNTRIES')
-          .get();
-      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'CITIES')
-          .get();
-
-      var countriesId = countries.docs.first.id;
-      var citiesId = cities.docs.first.id;
-
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(countriesId)
-          .collection('values')
-          .where('available', isEqualTo: true)
+          .collection('all_countries')
           .snapshots()
           .listen((countries) {
         allCountries.value = {
           for (var doc in countries.docs) doc.id: doc.data()
         };
+        update();
       });
+    } catch (e) {
+      //
+    }
+  }
 
+  getCitiesByCountryID(countryID) {
+    try {
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(citiesId)
+          .collection('all_countries')
+          .doc(countryID)
           .collection('values')
-          .where('available', isEqualTo: true)
           .snapshots()
           .listen((cities) {
         allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+        update();
       });
     } catch (e) {
-      // print(e);
+      //
     }
   }
 

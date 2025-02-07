@@ -138,7 +138,8 @@ Widget buildSmartField(EntityInformationsController controller,
                               (entry) {
                                 controller.citiesControllers[index].controller!
                                     .clear();
-                                controller.onSelect(entry.key);
+                                // controller.onSelect(entry.key);
+                                controller.getCitiesByCountryID(entry.key);
 
                                 controller.contactAddress[index]['country'] =
                                     entry.key;
@@ -151,7 +152,7 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: true,
                         flex: 1,
                         dropdownConfig: DropdownConfig(
-                          listValues: controller.filterdCitiesByCountry.values
+                          listValues: controller.allCities.values
                               .map((value) => value['name'].toString())
                               .toList(),
                           suggestionsController: SuggestionsController(),
@@ -160,9 +161,9 @@ Widget buildSmartField(EntityInformationsController controller,
                               controller.citiesControllers[index].controller,
                           labelText: 'City',
                           hintText: 'Select Your City',
-                          menuValues: controller.filterdCitiesByCountry.isEmpty
+                          menuValues: controller.allCities.isEmpty
                               ? {}
-                              : controller.filterdCitiesByCountry,
+                              : controller.allCities,
                           itemBuilder: (context, suggestion) {
                             return ListTile(
                               title: Text('${suggestion['name']}'),
@@ -171,7 +172,7 @@ Widget buildSmartField(EntityInformationsController controller,
                           onSelected: (suggestion) {
                             controller.citiesControllers[index].controller!
                                 .text = suggestion['name'];
-                            controller.filterdCitiesByCountry.entries
+                            controller.allCities.entries
                                 .where((entry) {
                               return entry.value['name'] ==
                                   suggestion['name'].toString();

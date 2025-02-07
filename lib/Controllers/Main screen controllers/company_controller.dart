@@ -35,7 +35,7 @@ class CompanyController extends GetxController {
   RxMap allRoles = RxMap({});
   RxMap allCountries = RxMap({});
   RxMap allCities = RxMap({});
-  RxMap filterdCitiesByCountry = RxMap({});
+  // RxMap filterdCitiesByCountry = RxMap({});
   RxString selectedCountryId = RxString('');
   RxString selectedCityId = RxString('');
   RxString logoUrl = RxString('');
@@ -43,11 +43,11 @@ class CompanyController extends GetxController {
 
   @override
   void onInit() {
-    getCountriesAndCities().then((_) {
-      getIndustries();
-      getResponsibilities();
-      getCompanies();
-    });
+    getCountries();
+    getIndustries();
+    getResponsibilities();
+    getCompanies();
+
     search.value.addListener(() {
       filterCompanies();
     });
@@ -254,46 +254,77 @@ class CompanyController extends GetxController {
     return phrase.replaceAll(' ', '_');
   }
 
-  getCountriesAndCities() async {
+  // getCountriesAndCities() async {
+  //   try {
+  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'COUNTRIES')
+  //         .get();
+  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'CITIES')
+  //         .get();
+
+  //     var countriesId = countries.docs.first.id;
+  //     var citiesId = cities.docs.first.id;
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(countriesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((countries) {
+  //       allCountries.value = {
+  //         for (var doc in countries.docs) doc.id: doc.data()
+  //       };
+  //     });
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(citiesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((cities) {
+  //       allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+  //     });
+  //     update();
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
+  getCountries() {
     try {
-      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'COUNTRIES')
-          .get();
-      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'CITIES')
-          .get();
-
-      var countriesId = countries.docs.first.id;
-      var citiesId = cities.docs.first.id;
-
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(countriesId)
-          .collection('values')
-          .where('available', isEqualTo: true)
+          .collection('all_countries')
           .snapshots()
           .listen((countries) {
         allCountries.value = {
           for (var doc in countries.docs) doc.id: doc.data()
         };
+        update();
       });
+    } catch (e) {
+      //
+    }
+  }
 
+  getCitiesByCountryID(countryID) {
+    try {
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(citiesId)
+          .collection('all_countries')
+          .doc(countryID)
           .collection('values')
-          .where('available', isEqualTo: true)
           .snapshots()
           .listen((cities) {
         allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+        update();
       });
-      update();
     } catch (e) {
-      // print(e);
+      //
     }
   }
 
@@ -319,19 +350,19 @@ class CompanyController extends GetxController {
     }
   }
 
-  void onSelect(String selectedId) {
-    filterdCitiesByCountry.clear();
-    filterdCitiesByCountry.addAll(
-      Map.fromEntries(
-        allCities.entries.where((entry) {
-          return entry.value['restricted_by']
-              .toString()
-              .toLowerCase()
-              .contains(selectedId.toLowerCase());
-        }),
-      ),
-    );
-  }
+  // void onSelect(String selectedId) {
+  //   filterdCitiesByCountry.clear();
+  //   filterdCitiesByCountry.addAll(
+  //     Map.fromEntries(
+  //       allCities.entries.where((entry) {
+  //         return entry.value['restricted_by']
+  //             .toString()
+  //             .toLowerCase()
+  //             .contains(selectedId.toLowerCase());
+  //       }),
+  //     ),
+  //   );
+  // }
 
   // this function is to select an image for logo
   pickImage() async {

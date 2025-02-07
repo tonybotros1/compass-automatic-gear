@@ -98,10 +98,9 @@ Widget responsibilities({
               child: Form(
                 key: controller.formKeyForThirdMenu,
                 child: dropDownValues(
-                   listValues: controller.allRoles.values
-                    .map((value) => value
-                        .toString()) 
-                    .toList(),
+                  listValues: controller.allRoles.values
+                      .map((value) => value.toString())
+                      .toList(),
                   onSelected: (suggestion) {
                     controller.allRoles.entries.where((entry) {
                       return entry.value == suggestion.toString();
@@ -322,10 +321,9 @@ Widget contactDetails({
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 2.5),
                         child: dropDownValues(
-                           listValues: controller.allCountries.values
-                    .map((value) => value['name']
-                        .toString()) 
-                    .toList(),
+                          listValues: controller.allCountries.values
+                              .map((value) => value['name'].toString())
+                              .toList(),
                           textController: controller.country,
                           labelText: 'Country',
                           hintText: 'Select Country',
@@ -343,8 +341,8 @@ Widget contactDetails({
                                   suggestion['name'].toString();
                             }).forEach(
                               (entry) {
-                                controller.onSelect(entry.key);
-
+                                // controller.onSelect(entry.key);
+                                controller.getCitiesByCountryID(entry.key);
                                 controller.selectedCountryId.value = entry.key;
                               },
                             );
@@ -357,19 +355,18 @@ Widget contactDetails({
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 2.5),
                         child: dropDownValues(
-                           listValues: controller.filterdCitiesByCountry.values
-                    .map((value) => value['name']
-                        .toString()) 
-                    .toList(),
+                            listValues: controller.allCities.values
+                                .map((value) => value['name'].toString())
+                                .toList(),
                             suggestionsController: SuggestionsController(),
                             onTapForTypeAheadField:
                                 SuggestionsController().refresh,
                             textController: controller.city,
                             labelText: 'City',
                             hintText: 'Select City',
-                            menus: controller.filterdCitiesByCountry.isEmpty
+                            menus: controller.allCities.isEmpty
                                 ? {}
-                                : controller.filterdCitiesByCountry,
+                                : controller.allCities,
                             validate: true,
                             itemBuilder: (context, suggestion) {
                               return ListTile(
@@ -378,7 +375,8 @@ Widget contactDetails({
                             },
                             onSelected: (suggestion) {
                               controller.city.text = suggestion['name'];
-                              controller.filterdCitiesByCountry.entries.where((entry) {
+                              controller.allCities.entries
+                                  .where((entry) {
                                 return entry.value['name'] ==
                                     suggestion['name'].toString();
                               }).forEach((entry) {
@@ -454,14 +452,12 @@ Widget companyDetails({required RegisterScreenController controller}) {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),
                       child: dropDownValues(
-                         listValues: controller.industryMap.values
-                    .map((value) => value['name']
-                        .toString()) 
-                    .toList(),
+                        listValues: controller.industryMap.values
+                            .map((value) => value['name'].toString())
+                            .toList(),
                         textController: controller.industry,
                         labelText: 'Industry',
                         hintText: 'Enter industry',
-                       
                         validate: true,
                         menus: controller.industryMap.isNotEmpty
                             ? controller.industryMap

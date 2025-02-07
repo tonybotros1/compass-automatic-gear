@@ -47,10 +47,9 @@ Widget addNewCompanyOrView({
                 child: GetX<CompanyController>(builder: (controller) {
                   final isIndustryLoading = controller.industryMap.isEmpty;
                   return dropDownValues(
-                     listValues: controller.industryMap.values
-                    .map((value) => value['name']
-                        .toString()) 
-                    .toList(),
+                    listValues: controller.industryMap.values
+                        .map((value) => value['name'].toString())
+                        .toList(),
                     textController: controller.industry,
                     labelText: 'Industry',
                     hintText: 'Enter industry',
@@ -153,10 +152,9 @@ Widget addNewCompanyOrView({
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: dropDownValues(
-                     listValues: controller.allCountries.values
-                    .map((value) => value['name']
-                        .toString()) 
-                    .toList(),
+                    listValues: controller.allCountries.values
+                        .map((value) => value['name'].toString())
+                        .toList(),
                     labelText: 'Country',
                     hintText: 'Enter your country',
                     textController: country ?? controller.country,
@@ -174,7 +172,8 @@ Widget addNewCompanyOrView({
                             suggestion['name'].toString();
                       }).forEach(
                         (entry) {
-                          controller.onSelect(entry.key);
+                          // controller.onSelect(entry.key);
+                          controller.getCitiesByCountryID(entry.key);
                           controller.city.clear();
                           controller.selectedCountryId.value = entry.key;
                         },
@@ -187,19 +186,18 @@ Widget addNewCompanyOrView({
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: dropDownValues(
-                     listValues: controller.filterdCitiesByCountry.values
-                    .map((value) => value['name']
-                        .toString()) 
-                    .toList(),
+                    listValues: controller.allCities.values
+                        .map((value) => value['name'].toString())
+                        .toList(),
                     suggestionsController: SuggestionsController(),
                     onTapForTypeAheadField: SuggestionsController().refresh,
                     labelText: 'City',
                     hintText: 'Enter your city',
                     textController: city ?? controller.city,
                     validate: true,
-                    menus: controller.filterdCitiesByCountry.isEmpty
+                    menus: controller.allCities.isEmpty
                         ? {}
-                        : controller.filterdCitiesByCountry,
+                        : controller.allCities,
                     itemBuilder: (context, suggestion) {
                       return ListTile(
                         title: Text('${suggestion['name']}'),
@@ -207,7 +205,7 @@ Widget addNewCompanyOrView({
                     },
                     onSelected: (suggestion) {
                       controller.city.text = suggestion['name'];
-                      controller.filterdCitiesByCountry.entries.where((entry) {
+                      controller.allCities.entries.where((entry) {
                         return entry.value['name'] ==
                             suggestion['name'].toString();
                       }).forEach((entry) {
@@ -230,10 +228,9 @@ Widget addNewCompanyOrView({
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: dropDownValues(
-                         listValues: controller.allRoles.values
-                    .map((value) => value
-                        .toString()) 
-                    .toList(),
+                        listValues: controller.allRoles.values
+                            .map((value) => value.toString())
+                            .toList(),
                         onSelected: (suggestion) {
                           controller.allRoles.entries.where((entry) {
                             return entry.value == suggestion.toString();

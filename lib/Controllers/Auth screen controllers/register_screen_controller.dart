@@ -29,7 +29,7 @@ class RegisterScreenController extends GetxController {
   RxMap allRoles = RxMap({});
   RxMap allCountries = RxMap({});
   RxMap allCities = RxMap({});
-  RxMap filterdCitiesByCountry = RxMap({});
+  // RxMap filterdCitiesByCountry = RxMap({});
   RxList roleIDFromList = RxList([]);
   RxBool addingProcess = RxBool(false);
   RxString logoUrl = RxString('');
@@ -51,70 +51,103 @@ class RegisterScreenController extends GetxController {
 
   @override
   void onInit() {
-    getCountriesAndCities();
+    // getCountriesAndCities();
+    getCountries();
     getIndustries();
     getResponsibilities();
 
     super.onInit();
   }
 
-  void onSelect(String selectedId) {
-    filterdCitiesByCountry.clear();
-    filterdCitiesByCountry.addAll(
-      Map.fromEntries(
-        allCities.entries.where((entry) {
-          return entry.value['restricted_by']
-              .toString()
-              .toLowerCase()
-              .contains(selectedId.toLowerCase());
-        }),
-      ),
-    );
-    update();
-  }
+  // void onSelect(String selectedId) {
+  //   filterdCitiesByCountry.clear();
+  //   filterdCitiesByCountry.addAll(
+  //     Map.fromEntries(
+  //       allCities.entries.where((entry) {
+  //         return entry.value['restricted_by']
+  //             .toString()
+  //             .toLowerCase()
+  //             .contains(selectedId.toLowerCase());
+  //       }),
+  //     ),
+  //   );
+  //   update();
+  // }
 
-  getCountriesAndCities() async {
+  getCountries() {
     try {
-      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'COUNTRIES')
-          .get();
-      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'CITIES')
-          .get();
-
-      var countriesId = countries.docs.first.id;
-      var citiesId = cities.docs.first.id;
-
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(countriesId)
-          .collection('values')
-          .where('available', isEqualTo: true)
+          .collection('all_countries')
           .snapshots()
           .listen((countries) {
         allCountries.value = {
           for (var doc in countries.docs) doc.id: doc.data()
         };
+        update();
       });
+    } catch (e) {
+      //
+    }
+  }
 
+  getCitiesByCountryID(countryID) {
+    try {
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(citiesId)
+          .collection('all_countries')
+          .doc(countryID)
           .collection('values')
-          .where('available', isEqualTo: true)
           .snapshots()
           .listen((cities) {
         allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+        update();
       });
-      update();
     } catch (e) {
-      // print(e);
+      //
     }
   }
+
+  // getCountriesAndCities() async {
+  //   try {
+  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'COUNTRIES')
+  //         .get();
+  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'CITIES')
+  //         .get();
+
+  //     var countriesId = countries.docs.first.id;
+  //     var citiesId = cities.docs.first.id;
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(countriesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((countries) {
+  //       allCountries.value = {
+  //         for (var doc in countries.docs) doc.id: doc.data()
+  //       };
+  //     });
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(citiesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((cities) {
+  //       allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+  //     });
+  //     update();
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
 
   // this function is to remove a menu from the list
   removeMenuFromList(index) {
