@@ -54,7 +54,7 @@ class EntityInformationsController extends GetxController {
   RxMap typeOfSocialsMap = RxMap({});
   RxMap phoneTypesMap = RxMap({});
   Uint8List? imageBytes;
-  RxMap allCities = RxMap({});
+  List<RxMap> allCities = [];
   RxMap allCountries = RxMap({});
   // RxMap filterdCitiesByCountry = RxMap({});
   RxList entityCode = RxList([]);
@@ -397,11 +397,13 @@ class EntityInformationsController extends GetxController {
     for (var i = 0; i < length; i++) {
       final address = contactAddress[i];
 
+      getCitiesByCountryID(address.country, i);
+
       countriesControllers[i].controller?.text =
           getCountryName('${address.country}') ?? '';
       addressPrimary[i].isPrimary = address.isPrimary ?? false;
       citiesControllers[i].controller?.text =
-         await getCityName('${address.country}', '${address.city}') ?? '';
+          await getCityName('${address.country}', '${address.city}') ?? '';
       linesControllers[i].controller?.text = address.line ?? '';
     }
   }
@@ -506,7 +508,7 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  getCitiesByCountryID(countryID) {
+  getCitiesByCountryID(countryID, index) {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -514,7 +516,9 @@ class EntityInformationsController extends GetxController {
           .collection('values')
           .snapshots()
           .listen((cities) {
-        allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+        allCities[index].value = {
+          for (var doc in cities.docs) doc.id: doc.data()
+        };
         update();
       });
     } catch (e) {
@@ -558,9 +562,10 @@ class EntityInformationsController extends GetxController {
   generateControllerForAdressCountriesAndCities() {
     final length = contactAddress.length + 1;
 
-    countriesControllers.value = List.generate(
-        length, (index) => TypeModel(controller: TextEditingController()));
+    countriesControllers.assignAll(List.generate(
+        length, (index) => TypeModel(controller: TextEditingController())));
 
+    allCities.assignAll(List.generate(length, (index) => RxMap()));
     citiesControllers.value = List.generate(
         length, (index) => TypeModel(controller: TextEditingController()));
 
