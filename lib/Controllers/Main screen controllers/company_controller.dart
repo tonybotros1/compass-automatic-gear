@@ -328,6 +328,27 @@ class CompanyController extends GetxController {
     }
   }
 
+  
+  Future<String?> getCityName(countryId, cityId) async {
+    try {
+      // final city = allCities.entries.firstWhere(
+      //   (city) => city.key == cityId,
+      // );
+      // return city.value['name'];
+      var cities = await FirebaseFirestore.instance
+          .collection('all_countries')
+          .doc(countryId)
+          .collection('values')
+          .where(FieldPath.documentId, isEqualTo: cityId)
+          .get();
+      String cityName = cities.docs.first.data()['name'];
+
+      return cityName;
+    } catch (e) {
+      return '';
+    }
+  }
+
   String? getCountryName(String countryId) {
     try {
       final country = allCountries.entries.firstWhere(
@@ -339,16 +360,7 @@ class CompanyController extends GetxController {
     }
   }
 
-  String? getCityName(String cityId) {
-    try {
-      final city = allCities.entries.firstWhere(
-        (city) => city.key == cityId,
-      );
-      return city.value['name'];
-    } catch (e) {
-      return '';
-    }
-  }
+  
 
   // void onSelect(String selectedId) {
   //   filterdCitiesByCountry.clear();

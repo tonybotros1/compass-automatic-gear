@@ -165,7 +165,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
               )
             : const Text('no logo')),
     DataCell(Text(
-      '${controller.getCountryName(companyData['contact_details']['country'])} | ${controller.getCityName(companyData['contact_details']['city'])}',
+      '${controller.getCountryName(companyData['contact_details']['country'])}',
     )),
     DataCell(Text(
       companyData['contact_details']['phone'] ?? 'no phone number',
@@ -210,8 +210,9 @@ ElevatedButton deleteSection(CompanyController controller, companyId, context) {
 ElevatedButton activeInActiveSection(Map<String, dynamic> companyData,
     CompanyController controller, String companyId) {
   return ElevatedButton(
-      style:
-          companyData['status'] == false ? inActiveButtonStyle : activeButtonStyle,
+      style: companyData['status'] == false
+          ? inActiveButtonStyle
+          : activeButtonStyle,
       onPressed: () {
         bool status;
         if (companyData['status'] == false) {
@@ -230,10 +231,12 @@ ElevatedButton editEction(context, CompanyController controller,
     Map<String, dynamic> companyData, constraints, companyID) {
   return ElevatedButton(
       style: editButtonStyle,
-      onPressed: () {
+      onPressed: () async {
+        controller
+            .getCitiesByCountryID(companyData['contact_details']['country']);
         controller.companyName.text = companyData['company_name'] ?? '';
         controller.industry.text = companyData['type_of_business'] ?? '';
-            controller.industryId.value = companyData['type_of_business'] ?? '';
+        controller.industryId.value = companyData['type_of_business'] ?? '';
         controller.userName.text =
             controller.userDetails[companyData['contact_details']['user_id']]
                     ['user_name'] ??
@@ -248,8 +251,10 @@ ElevatedButton editEction(context, CompanyController controller,
             companyData['contact_details']['address'] ?? '';
         controller.country.text = controller
             .getCountryName(companyData['contact_details']['country'])!;
-        controller.city.text =
-            controller.getCityName(companyData['contact_details']['city'])!;
+        controller.city.text = await controller.getCityName(
+                companyData['contact_details']['country'],
+                companyData['contact_details']['city']) ??
+            '';
         controller.imageBytes = null;
         controller.roleIDFromList.assignAll(controller
             .userDetails[companyData['contact_details']['user_id']]['roles']);
@@ -334,6 +339,7 @@ ElevatedButton newCompanyButton(BuildContext context,
     BoxConstraints constraints, CompanyController controller) {
   return ElevatedButton(
     onPressed: () {
+      controller.allCities.clear();
       controller.companyName.clear();
       controller.industry.clear();
       controller.industryId.value = '';
@@ -367,8 +373,7 @@ ElevatedButton newCompanyButton(BuildContext context,
                                     if (controller.userName.text.isNotEmpty &&
                                         controller
                                             .companyName.text.isNotEmpty &&
-                                        controller
-                                            .industry.text.isNotEmpty &&
+                                        controller.industry.text.isNotEmpty &&
                                         controller.password.text.isNotEmpty &&
                                         controller
                                             .phoneNumber.text.isNotEmpty &&
