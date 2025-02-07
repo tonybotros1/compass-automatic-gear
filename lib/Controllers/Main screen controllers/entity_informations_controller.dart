@@ -128,15 +128,15 @@ class EntityInformationsController extends GetxController {
 
   clearAllVariables() {
     entityName.clear();
-    entityCode.clear();
+    entityCode.assign('Customer');
     isVendorSelected.value = false;
     creditLimit.clear();
     salesMAn.value.clear();
     salesManId.value = '';
     logoUrl.value = '';
     imageBytes = null;
-    entityStatus.value = '';
-    isIndividualSelected.value = false;
+    entityStatus.value = 'Company';
+    isCompanySelected.value = true;
     groupName.clear();
     industry.value.clear();
     industryId.value = '';
@@ -144,9 +144,9 @@ class EntityInformationsController extends GetxController {
     entityType.value.clear();
     entityTypeId.value = '';
 
-    contactAddress.assign(EntityAddress());
+    contactAddress.assign(EntityAddress(isPrimary: true));
 
-    contactPhone.assign(EntityPhone());
+    contactPhone.assign(EntityPhone(isPrimary: true));
     contactSocial.assign(EntitySocial());
 
     generateControllerForAdressCountriesAndCities();
@@ -187,9 +187,9 @@ class EntityInformationsController extends GetxController {
         'industry': industryId.value,
         'trn': trn.text,
         'entity_type': entityTypeId.value,
-        'entity_address': contactAddress,
-        'entity_phone': contactPhone,
-        'entity_social': contactSocial,
+        'entity_address': contactAddress.map((e) => e.toJson()).toList(),
+        'entity_phone': contactPhone.map((e) => e.toJson()).toList(),
+        'entity_social': contactSocial.map((e) => e.toJson()).toList(),
         'added_date': DateTime.now().toString(),
         'company_id': companyId,
         'status': true,
@@ -215,9 +215,9 @@ class EntityInformationsController extends GetxController {
         'industry': industryId.value,
         'trn': trn.text,
         'entity_type': entityTypeId.value,
-        'entity_address': contactAddress,
-        'entity_phone': contactPhone,
-        'entity_social': contactSocial,
+        'entity_address': contactAddress.map((e) => e.toJson()).toList(),
+        'entity_phone': contactPhone.map((e) => e.toJson()).toList(),
+        'entity_social': contactSocial.map((e) => e.toJson()).toList(),
       };
 
       if (imageBytes != null && imageBytes!.isNotEmpty) {
