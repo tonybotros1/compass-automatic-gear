@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/entity_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -62,7 +63,7 @@ Widget contactsCardSection(EntityInformationsController controller) {
 }
 
 Widget buildSmartField(EntityInformationsController controller,
-    Map<String, dynamic> item, Animation<double> animation, int index,
+    EntityPhone item, Animation<double> animation, int index,
     {bool isRemoving = false}) {
   return SizeTransition(
     sizeFactor: animation,
@@ -121,7 +122,7 @@ Widget buildSmartField(EntityInformationsController controller,
                                 return entry.value['name'] ==
                                     suggestion['name'].toString();
                               }).forEach((entry) {
-                                controller.contactPhone[index]['type'] =
+                                controller.contactPhone[index].type =
                                     entry.key;
                               });
                             })),
@@ -135,7 +136,7 @@ Widget buildSmartField(EntityInformationsController controller,
                         hintText: 'Enter Phone',
                         validate: false,
                         onChanged: (value) {
-                          controller.contactPhone[index]['number'] = value;
+                          controller.contactPhone[index].number = value;
                         },
                       ),
                     ),
@@ -149,7 +150,7 @@ Widget buildSmartField(EntityInformationsController controller,
                         hintText: 'Enter Email',
                         validate: false,
                         onChanged: (value) {
-                          controller.contactPhone[index]['email'] = value;
+                          controller.contactPhone[index].email = value;
                         },
                       ),
                     ),
@@ -163,7 +164,7 @@ Widget buildSmartField(EntityInformationsController controller,
                         hintText: 'Enter Name',
                         validate: false,
                         onChanged: (value) {
-                          controller.contactPhone[index]['name'] = value;
+                          controller.contactPhone[index].name = value;
                         },
                       ),
                     ),
@@ -177,7 +178,7 @@ Widget buildSmartField(EntityInformationsController controller,
                         hintText: 'Enter Job Title',
                         validate: false,
                         onChanged: (value) {
-                          controller.contactPhone[index]['tob_title'] = value;
+                          controller.contactPhone[index].jobTitle = value;
                         },
                       ),
                     )

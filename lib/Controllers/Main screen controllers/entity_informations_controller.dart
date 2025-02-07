@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/Models/primary_model.dart';
 import 'package:datahubai/Models/type_model.dart';
@@ -8,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:html' as html;
+
+import '../../Models/entity_model.dart';
 
 class EntityInformationsController extends GetxController {
   TextEditingController entityName = TextEditingController();
@@ -64,39 +65,17 @@ class EntityInformationsController extends GetxController {
   final GlobalKey<AnimatedListState> listKeyForAddressLine =
       GlobalKey<AnimatedListState>();
 
-  RxList contactPhone = RxList([
-    {
-      'type': '',
-      'number': '',
-      'name': '',
-      'email': '',
-      'tob_title': '',
-      'isPrimary': true,
-    }
-  ]);
+  List<EntityPhone> contactPhone = [];
 
-  RxList contactSocial = RxList([
-    {
-      'type': '',
-      'link': '',
-    }
-  ]);
+  List<EntitySocial> contactSocial = [];
 
-  RxList contactAddress = RxList([
-    {
-      'line': '',
-      'country': '',
-      'city': '',
-      'isPrimary': true,
-    }
-  ]);
+  List<EntityAddress> contactAddress = [];
 
   @override
   void onInit() {
     // getCountriesAndCities()
     getCountries();
     getEntities();
-
     generateControllerForAdressCountriesAndCities();
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
@@ -111,10 +90,45 @@ class EntityInformationsController extends GetxController {
     super.onInit();
   }
 
+  void loadEntityData(EntityModel entityData) {
+    imageBytes = null;
+
+    // Update entity text controllers
+    entityName.text = entityData.entityName ?? '';
+    entityCode.clear();
+    creditLimit.text = (entityData.creditLimit ?? '').toString();
+    groupName.text = entityData.groupName ?? '';
+    trn.text = entityData.trn ?? '';
+
+    isCustomerSelected.value =
+        entityData.entityCode?.contains('Customer') ?? false;
+    isVendorSelected.value = entityData.entityCode?.contains('Vendor') ?? false;
+
+    // Updating entity-related fields
+    updateEntityCode(entityData.entityCode ?? []);
+    updateEntityStatus(entityData.entityStatus ?? '');
+
+    salesMAn.value.text = getSaleManName('${entityData.salesMan}') ?? '';
+    salesManId.value = entityData.salesMan ?? '';
+
+    industry.value.text = getIndustryName('${entityData.industry}') ?? '';
+    industryId.value = entityData.industry ?? '';
+
+    entityType.value.text = getEntityTypeName('${entityData.entityType}') ?? '';
+    entityTypeId.value = entityData.entityType ?? '';
+
+    // Update logo URL
+    logoUrl.value = entityData.entityPicture ?? '';
+
+    // Updating entity-related lists
+    updateEntityAddress(entityData.entityAddress ?? []);
+    updateEntityPhone(entityData.entityPhone ?? []);
+    updateEntitySocial(entityData.entitySocial ?? []);
+  }
+
   clearAllVariables() {
     entityName.clear();
     entityCode.clear();
-    // isCustomerSelected.value = false;
     isVendorSelected.value = false;
     creditLimit.clear();
     salesMAn.value.clear();
@@ -122,7 +136,6 @@ class EntityInformationsController extends GetxController {
     logoUrl.value = '';
     imageBytes = null;
     entityStatus.value = '';
-    // isCompanySelected.value = false;
     isIndividualSelected.value = false;
     groupName.clear();
     industry.value.clear();
@@ -130,40 +143,12 @@ class EntityInformationsController extends GetxController {
     trn.clear();
     entityType.value.clear();
     entityTypeId.value = '';
-    contactAddress.clear();
-    contactAddress.add({
-      'line': '',
-      'country': '',
-      'city': '',
-      'isPrimary': true,
-    });
 
-    contactPhone.clear();
-    contactPhone.add({
-      'type': '',
-      'number': '',
-      'name': '',
-      'email': '',
-      'tob_title': '',
-      'isPrimary': true,
-    });
-    contactSocial.clear();
-    contactSocial.add({
-      'type': '',
-      'link': '',
-    });
-    socialTypesControllers.clear();
-    linksControllers.clear();
-    phoneTypesControllers.clear();
-    phonePrimary.clear();
-    phoneNumbersControllers.clear();
-    emailsControllers.clear();
-    namesControllers.clear();
-    jobTitlesControllers.clear();
-    countriesControllers.clear();
-    addressPrimary.clear();
-    citiesControllers.clear();
-    linesControllers.clear();
+    contactAddress.assign(EntityAddress());
+
+    contactPhone.assign(EntityPhone());
+    contactSocial.assign(EntitySocial());
+
     generateControllerForAdressCountriesAndCities();
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
@@ -395,27 +380,27 @@ class EntityInformationsController extends GetxController {
     entityStatus.value = isCompanySelected.isTrue ? 'Company' : 'Individual';
   }
 
-  void updateEntityAddress(List entityAddressFromData) {
-    // contactAddress.clear();
-    contactAddress.value = entityAddressFromData;
-    generateControllerForAdressCountriesAndCities();
+  void updateEntityAddress(List<EntityAddress> entityAddressFromData) async {
+    contactAddress.assignAll(entityAddressFromData);
+    await generateControllerForAdressCountriesAndCities();
 
     final length = contactAddress.length;
     for (var i = 0; i < length; i++) {
       final address = contactAddress[i];
 
       countriesControllers[i].controller?.text =
-          getCountryName(address['country']) ?? '';
-      addressPrimary[i].isPrimary = address['isPrimary'];
+          getCountryName('${address.country}') ?? ''; // ✅ Use object property
+      addressPrimary[i].isPrimary =
+          address.isPrimary ?? false; // ✅ Use object property
       citiesControllers[i].controller?.text =
-          getCityName(address['city']) ?? '';
-      linesControllers[i].controller?.text = address['line'] ?? '';
+          getCityName('${address.city}') ?? ''; // ✅ Use object property
+      linesControllers[i].controller?.text =
+          address.line ?? ''; // ✅ Use object property
     }
   }
 
-  void updateEntityPhone(List entityPhoneFromData) {
-    // contactPhone.clear();
-    contactPhone.value = entityPhoneFromData;
+  void updateEntityPhone(List<EntityPhone> entityPhoneFromData) {
+    contactPhone.assignAll(entityPhoneFromData);
     generateControllerForPhoneTypes();
 
     final length = contactPhone.length;
@@ -423,26 +408,35 @@ class EntityInformationsController extends GetxController {
       final phone = contactPhone[i];
 
       phoneTypesControllers[i].controller?.text =
-          getPhoneTypeName(phone['type']) ?? '';
-      phonePrimary[i].isPrimary = phone['isPrimary'];
-      phoneNumbersControllers[i].controller?.text = phone['number'] ?? '';
-      emailsControllers[i].controller?.text = phone['email'] ?? '';
-      namesControllers[i].controller?.text = phone['name'] ?? '';
-      jobTitlesControllers[i].controller?.text = phone['tob_title'] ?? '';
+          getPhoneTypeName('${phone.type}') ?? ''; // ✅ Use object property
+      phonePrimary[i].isPrimary = phone.isPrimary; // ✅ Use object property
+      phoneNumbersControllers[i].controller?.text =
+          phone.number ?? ''; // ✅ Use object property
+      emailsControllers[i].controller?.text =
+          phone.email ?? ''; // ✅ Use object property
+      namesControllers[i].controller?.text =
+          phone.name ?? ''; // ✅ Use object property
+      jobTitlesControllers[i].controller?.text =
+          phone.jobTitle ?? ''; // ✅ Use object property
     }
   }
 
-  void updateEntitySocial(List entitySocialFromData) {
-    contactSocial.value = entitySocialFromData;
-    generateControllerForSocialTypes();
+  void updateEntitySocial(List<EntitySocial> entitySocialFromData) {
+    try {
+      contactSocial.assignAll(entitySocialFromData);
+      generateControllerForSocialTypes();
 
-    final length = contactSocial.length;
-    for (var i = 0; i < length; i++) {
-      final social = contactSocial[i];
+      final length = contactSocial.length;
+      for (var i = 0; i < length; i++) {
+        final social = contactSocial[i];
 
-      socialTypesControllers[i].controller?.text =
-          getSocialTypeName(social['type']) ?? '';
-      linksControllers[i].controller?.text = social['link'] ?? '';
+        socialTypesControllers[i].controller?.text =
+            getSocialTypeName('${social.type}') ?? ''; // ✅ Use object property
+        linksControllers[i].controller?.text =
+            social.link ?? ''; // ✅ Use object property
+      }
+    } catch (e) {
+      //
     }
   }
 
@@ -454,119 +448,45 @@ class EntityInformationsController extends GetxController {
     entityStatus.value = isCompany ? 'Company' : 'Individual';
   }
 
-  // void selectPrimaryAddressField(int index, bool value) {
-  //   for (var i = 0; i < contactAddress.length; i++) {
-  //     contactAddress[i]['isPrimary'] = false;
-  //     addressPrimary[i].isPrimary = false;
-  //   }
-
-  //   contactAddress[index]['isPrimary'] = true;
-  //   addressPrimary[index].isPrimary = true;
-
-  //   update();
-  // }
   void selectPrimaryAddressField(int index, bool value) {
-    if (contactAddress[index]['isPrimary'] == true) {
+    if (contactAddress[index].isPrimary == true) {
       return;
     }
 
-    final previousPrimaryIndex =
-        contactAddress.indexWhere((e) => e['isPrimary'] == true);
-    if (previousPrimaryIndex != -1) {
-      contactAddress[previousPrimaryIndex]['isPrimary'] = false;
-      addressPrimary[previousPrimaryIndex].isPrimary = false;
+    // final previousPrimaryIndex =
+    //     contactAddress.indexWhere((e) => e['isPrimary'] == true);
+    // if (previousPrimaryIndex != -1) {
+    //   contactAddress[previousPrimaryIndex]['isPrimary'] = false;
+    //   addressPrimary[previousPrimaryIndex].isPrimary = false;
+    // }
+    for (var i = 0; i < contactAddress.length; i++) {
+      contactAddress[i].isPrimary = false;
+      addressPrimary[i].isPrimary = false;
     }
 
-    contactAddress[index]['isPrimary'] = true;
+    contactAddress[index].isPrimary = true;
     addressPrimary[index].isPrimary = true;
 
     update();
   }
 
-  // void selectPrimaryPhonesField(int index, bool value) {
-  //   for (var i = 0; i < contactPhone.length; i++) {
-  //     contactPhone[i]['isPrimary'] = false;
-  //     phonePrimary[i].isPrimary = false;
-  //   }
-
-  //   contactPhone[index]['isPrimary'] = true;
-  //   phonePrimary[index].isPrimary = true;
-
-  //   update();
-  // }
   void selectPrimaryPhonesField(int index, bool value) {
-    if (contactPhone[index]['isPrimary'] == true) {
+    if (contactPhone[index].isPrimary == true) {
       return; // Exit early if already primary
     }
 
     final previousPrimaryIndex =
-        contactPhone.indexWhere((e) => e['isPrimary'] == true);
+        contactPhone.indexWhere((e) => e.isPrimary == true);
     if (previousPrimaryIndex != -1) {
-      contactPhone[previousPrimaryIndex]['isPrimary'] = false;
+      contactPhone[previousPrimaryIndex].isPrimary = false;
       phonePrimary[previousPrimaryIndex].isPrimary = false;
     }
 
-    contactPhone[index]['isPrimary'] = true;
+    contactPhone[index].isPrimary = true;
     phonePrimary[index].isPrimary = true;
 
     update();
   }
-
-  // void onSelect(String selectedId) {
-  //   filterdCitiesByCountry.clear();
-  //   filterdCitiesByCountry.addAll(
-  //     Map.fromEntries(
-  //       allCities.entries.where((entry) {
-  //         return entry.value['restricted_by']
-  //             .toString()
-  //             .toLowerCase()
-  //             .contains(selectedId.toLowerCase());
-  //       }),
-  //     ),
-  //   );
-  // }
-
-  // getCountriesAndCities() async {
-  //   try {
-  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'COUNTRIES')
-  //         .get();
-  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'CITIES')
-  //         .get();
-
-  //     var countriesId = countries.docs.first.id;
-  //     var citiesId = cities.docs.first.id;
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(countriesId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((countries) {
-  //       allCountries.value = {
-  //         for (var doc in countries.docs) doc.id: doc.data()
-  //       };
-  //     });
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(citiesId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((cities) {
-  //       allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
-  //     });
-  //   } catch (e) {
-  //     // print(e);
-  //   }
-  // }
 
   getCountries() {
     try {
@@ -629,8 +549,8 @@ class EntityInformationsController extends GetxController {
     socialTypesControllers.value = List.generate(
         length, (index) => TypeModel(controller: TextEditingController()));
 
-    linksControllers.value = List.generate(
-        length, (index) => TypeModel(controller: TextEditingController()));
+    linksControllers.assignAll(List.generate(
+        length, (index) => TypeModel(controller: TextEditingController())));
   }
 
   generateControllerForAdressCountriesAndCities() {
@@ -642,8 +562,8 @@ class EntityInformationsController extends GetxController {
     citiesControllers.value = List.generate(
         length, (index) => TypeModel(controller: TextEditingController()));
 
-    linesControllers.value = List.generate(
-        length, (index) => TypeModel(controller: TextEditingController()));
+    linesControllers.assignAll(List.generate(
+        length, (index) => TypeModel(controller: TextEditingController())));
 
     addressPrimary.value =
         List.generate(length, (index) => PrimaryModel(isPrimary: index == 0));
@@ -730,14 +650,7 @@ class EntityInformationsController extends GetxController {
   addPhoneLine() {
     final index = contactPhone.length;
 
-    contactPhone.add({
-      'type': '',
-      'number': '',
-      'email': '',
-      'name': '',
-      'tob_title': '',
-      'isPrimary': false,
-    });
+    contactPhone.add(EntityPhone());
     listKeyForPhoneLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
 
@@ -753,10 +666,7 @@ class EntityInformationsController extends GetxController {
   addSocialLine() {
     final index = contactSocial.length;
 
-    contactSocial.add({
-      'type': '',
-      'link': '',
-    });
+    contactSocial.add(EntitySocial());
     listKeyForSocialLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
     socialTypesControllers.add(TypeModel(controller: TextEditingController()));
@@ -767,12 +677,7 @@ class EntityInformationsController extends GetxController {
   addAdressLine() {
     final index = contactAddress.length;
 
-    contactAddress.add({
-      'line': '',
-      'country': '',
-      'city': '',
-      'isPrimary': false,
-    });
+    contactAddress.add(EntityAddress());
     listKeyForAddressLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));
     countriesControllers.add(TypeModel(controller: TextEditingController()));

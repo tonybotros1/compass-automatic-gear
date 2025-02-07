@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/entity_model.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/dynamic_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +64,7 @@ Widget addressCardSection(EntityInformationsController controller) {
 }
 
 Widget buildSmartField(EntityInformationsController controller,
-    Map<String, dynamic> item, Animation<double> animation, int index,
+   EntityAddress item, Animation<double> animation, int index,
     {bool isRemoving = false}) {
   return SizeTransition(
     sizeFactor: animation,
@@ -105,8 +106,7 @@ Widget buildSmartField(EntityInformationsController controller,
                           hintText: 'Enter Line',
                           validate: false,
                           onChanged: (value) {
-                            controller.contactAddress[index]['line'] = value;
-                            print(controller.contactAddress);
+                            controller.contactAddress[index].line = value;
                           },
                         ),
                       ),
@@ -142,7 +142,7 @@ Widget buildSmartField(EntityInformationsController controller,
                                 // controller.onSelect(entry.key);
                                 controller.getCitiesByCountryID(entry.key);
 
-                                controller.contactAddress[index]['country'] =
+                                controller.contactAddress[index].country =
                                     entry.key;
                               },
                             );
@@ -177,7 +177,7 @@ Widget buildSmartField(EntityInformationsController controller,
                               return entry.value['name'] ==
                                   suggestion['name'].toString();
                             }).forEach((entry) {
-                              controller.contactAddress[index]['city'] =
+                              controller.contactAddress[index].city =
                                   entry.key;
                             });
                           },

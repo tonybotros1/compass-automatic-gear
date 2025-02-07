@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
+import '../../../../Models/entity_model.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
@@ -34,7 +35,7 @@ class EntityInformations extends StatelessWidget {
                         constraints: constraints,
                         context: context,
                         controller: controller,
-                        title: 'Search for Entities',
+                        title: 'Search for entities',
                         button:
                             newContactButton(context, constraints, controller),
                       );
@@ -146,7 +147,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
     DataCell(Text(
       (entityData['entity_phone'] as List)
               .map((phoneData) => phoneData['number'])
-              .take(2) 
+              .take(2)
               .join('/') +
           ((entityData['entity_phone'].length > 2) ? '...' : ''),
     )),
@@ -210,30 +211,8 @@ ElevatedButton editSection(context, EntityInformationsController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        controller.imageBytes = null;
-        controller.entityName.text = entityData['entity_name'];
-        controller.entityCode.clear();
-        controller.isCustomerSelected.value = false;
-        controller.isVendorSelected.value = false;
-        controller.updateEntityCode(entityData['entity_code']);
-        controller.creditLimit.text =
-            (entityData['credit_limit'] ?? '').toString();
-        controller.salesMAn.value.text =
-            controller.getSaleManName(entityData['sales_man'])!;
-        controller.salesManId.value = entityData['sales_man'];
-        controller.updateEntityStatus(entityData['entity_status']);
-        controller.groupName.text = entityData['group_name'];
-        controller.industry.value.text =
-            controller.getIndustryName(entityData['industry'])!;
-        controller.industryId.value = entityData['industry'];
-        controller.trn.text = entityData['trn'];
-        controller.entityType.value.text =
-            controller.getEntityTypeName(entityData['entity_type'])!;
-        controller.entityTypeId.value = entityData['entity_type'];
-        controller.logoUrl.value = entityData['entity_picture'];
-        controller.updateEntityAddress(entityData['entity_address']);
-        controller.updateEntityPhone(entityData['entity_phone']);
-        controller.updateEntitySocial(entityData['entity_social']);
+       
+        controller.loadEntityData(EntityModel.fromJson(entityData));
         showDialog(
             context: context,
             builder: (context) {

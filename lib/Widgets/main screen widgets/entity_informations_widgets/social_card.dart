@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/entity_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -56,7 +57,7 @@ Widget socialCardSection(EntityInformationsController controller) {
 }
 
 Widget buildSmartField(EntityInformationsController controller,
-    Map<String, dynamic> item, Animation<double> animation, int index,
+   EntitySocial item, Animation<double> animation, int index,
     {bool isRemoving = false}) {
   return SizeTransition(
     sizeFactor: animation,
@@ -100,7 +101,7 @@ Widget buildSmartField(EntityInformationsController controller,
                                 return entry.value['name'] ==
                                     suggestion['name'].toString();
                               }).forEach((entry) {
-                                controller.contactSocial[index]['type'] =
+                                controller.contactSocial[index].type =
                                     entry.key;
                               });
                             },
@@ -115,7 +116,7 @@ Widget buildSmartField(EntityInformationsController controller,
                           hintText: 'Enter Link',
                           validate: false,
                           onChanged: (value) {
-                            controller.contactSocial[index]['link'] = value;
+                            controller.contactSocial[index].link = value;
                           },
                         ),
                       ),
