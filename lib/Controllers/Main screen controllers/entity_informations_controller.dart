@@ -683,7 +683,7 @@ class EntityInformationsController extends GetxController {
   // this function is to generate a new address field
   addAdressLine() {
     final index = contactAddress.length;
-
+    allCities.add(RxMap());
     contactAddress.add(EntityAddress());
     listKeyForAddressLine.currentState
         ?.insertItem(index, duration: const Duration(milliseconds: 300));

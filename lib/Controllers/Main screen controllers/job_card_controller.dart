@@ -99,17 +99,32 @@ class JobCardController extends GetxController {
   RxString payType = RxString('');
   DateFormat format = DateFormat("dd-MM-yyyy");
 
-  RxList internalNotes = RxList([]);
   RxBool loadingInternalNotes = RxBool(false);
   RxBool isQuotationExpanded = RxBool(false);
   RxBool isJobCardExpanded = RxBool(false);
   final ScrollController scrollController = ScrollController();
+  RxMap allUsers = RxMap();
+  RxList<Map> internalNotes = RxList<Map>([
+    {
+      'note': 'hi',
+      'user_id': 'ggg',
+      'time': DateTime.now(),
+    }
+  ]);
+  Rx<TextEditingController> internalNote = TextEditingController().obs;
+  RxString userId = RxString('');
+  RxString noteMessage = RxString('');
+  final ScrollController scrollControllerForNotes = ScrollController();
+  FocusNode textFieldFocusNode = FocusNode();
+
   @override
   void onInit() async {
     super.onInit();
     await getCompanyId();
     // getCurrentJobCardCounterNumber();
     // getCurrentQuotationCounterNumber();
+    getUserId();
+    getAllUsers();
     getSalesMan();
     getBranches();
     getBranches();
@@ -121,6 +136,78 @@ class JobCardController extends GetxController {
     // getCarsModelsAndBrands();
     // getCountriesAndCities();
     getAllJobCards();
+  }
+
+  @override
+  void onClose() {
+    textFieldFocusNode.dispose(); // Dispose to prevent memory leaks
+    super.onClose();
+  }
+
+  getUserNameByUserId(userId) {
+    try {
+      final user = allUsers.entries.firstWhere(
+        (user) => user.key == userId,
+      );
+      return user.value['user_name'];
+    } catch (e) {
+      return '';
+    }
+  }
+
+  getAllUsers() {
+    try {
+      FirebaseFirestore.instance
+          .collection('sys-users')
+          .where('company_id', isEqualTo: companyId.value)
+          .snapshots()
+          .listen((users) {
+        allUsers.value = {for (var doc in users.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+        //
+      }
+  }
+
+  List<dynamic> buildCombinedItems(List<Map<String, dynamic>> sortedNotes) {
+    List<dynamic> combinedItems = [];
+    DateTime? currentDate;
+
+    for (var note in sortedNotes) {
+      final noteTime = note['time'] as DateTime;
+      final noteDate = DateTime(noteTime.year, noteTime.month, noteTime.day);
+
+      if (currentDate == null || noteDate != currentDate) {
+        combinedItems.add(noteDate);
+        currentDate = noteDate;
+      }
+      combinedItems.add(note);
+    }
+
+    return combinedItems;
+  }
+
+  List<Map<String, dynamic>> get sortedNotes {
+    // Convert RxList<Map<dynamic, dynamic>> to List<Map<String, dynamic>>
+    final notes = internalNotes
+        .map((e) => Map<String, dynamic>.from(e)) // Explicit type conversion
+        .toList();
+
+    notes.sort((a, b) => a['time'].compareTo(b['time']));
+    return notes;
+  }
+
+  getUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId.value = prefs.getString('userId')!;
+  }
+
+  addNewNote() {
+    internalNotes.add({
+      'note': noteMessage.value,
+      'user_id': userId.value,
+      'time': DateTime.now(),
+    });
   }
 
   void scrollToBottom() {
