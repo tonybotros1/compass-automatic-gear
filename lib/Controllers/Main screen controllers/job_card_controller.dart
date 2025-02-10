@@ -104,13 +104,7 @@ class JobCardController extends GetxController {
   RxBool isJobCardExpanded = RxBool(false);
   final ScrollController scrollController = ScrollController();
   RxMap allUsers = RxMap();
-  RxList<Map> internalNotes = RxList<Map>([
-    {
-      'note': 'hi',
-      'user_id': 'ggg',
-      'time': DateTime.now(),
-    }
-  ]);
+  RxList<Map> internalNotes = RxList<Map>([]);
   Rx<TextEditingController> internalNote = TextEditingController().obs;
   RxString userId = RxString('');
   RxString noteMessage = RxString('');
@@ -165,8 +159,8 @@ class JobCardController extends GetxController {
         allUsers.value = {for (var doc in users.docs) doc.id: doc.data()};
       });
     } catch (e) {
-        //
-      }
+      //
+    }
   }
 
   List<dynamic> buildCombinedItems(List<Map<String, dynamic>> sortedNotes) {
@@ -204,7 +198,7 @@ class JobCardController extends GetxController {
 
   addNewNote() {
     internalNotes.add({
-      'note': noteMessage.value,
+      'note': noteMessage.value.trim(),
       'user_id': userId.value,
       'time': DateTime.now(),
     });

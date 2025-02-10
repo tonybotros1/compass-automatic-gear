@@ -1,5 +1,6 @@
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -104,45 +105,51 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                           controller.userId.value == note['user_id'];
 
                       return Align(
-                        alignment: isUserNote
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
+                        alignment: Alignment.centerLeft,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 4, horizontal: 12),
-                          child: Container(
-                            constraints: const BoxConstraints(maxWidth: 280),
-                            decoration: BoxDecoration(
-                              color: isUserNote ? mainColor : secColor,
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  controller
-                                      .getUserNameByUserId(note['user_id']),
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      color: isUserNote
-                                          ? Colors.yellow
-                                          : Colors.deepOrange),
+                              vertical: 12, horizontal: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                    color: Colors.grey[350],
+                                    borderRadius: BorderRadius.circular(5)),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      textAlign: TextAlign.start,
+                                      '${controller.getUserNameByUserId(note['user_id'])}',
+                                      style: TextStyle(
+                                          color: isUserNote
+                                              ? Colors.deepOrangeAccent
+                                              : Colors.green),
+                                    ),
+                                    Text(
+                                      textAlign: TextAlign.end,
+                                      DateFormat.jm().format(note['time']),
+                                      style: TextStyle(
+                                        color: mainColor,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                                child: Text(
+                                  textAlign: TextAlign.start,
                                   note['note'],
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                Text(
-                                  DateFormat.jm().format(note['time']),
                                   style: TextStyle(
-                                    color: Colors.grey[300],
-                                    fontSize: 12,
+                                    color: Colors.grey[800],
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -153,7 +160,7 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
             ),
           ),
           Container(
-              height: 70,
+              constraints: BoxConstraints(minHeight: 70, maxHeight: 140),
               width: double.infinity,
               decoration: BoxDecoration(
                   color: Colors.white,
@@ -167,40 +174,67 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                     Expanded(
                       child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-                          child: TextFormField(
-                            onFieldSubmitted: controller.noteMessage.value != ''
-                                ? (value) {
-                                    if (value.trim().isNotEmpty) {
-                                      controller.addNewNote();
-                                      controller.internalNote.value.clear();
-                                      controller.noteMessage.value = '';
+                          child: KeyboardListener(
+                            autofocus: true,
+                            focusNode: FocusNode(),
+                            onKeyEvent: (KeyEvent event) {
+                              if (event is KeyDownEvent) {
+                                bool shiftPressed = HardwareKeyboard
+                                        .instance.logicalKeysPressed
+                                        .contains(
+                                            LogicalKeyboardKey.shiftLeft) ||
+                                    HardwareKeyboard.instance.logicalKeysPressed
+                                        .contains(
+                                            LogicalKeyboardKey.shiftRight);
 
-                                      Future.delayed(
-                                          Duration(milliseconds: 100), () {
-                                        controller.textFieldFocusNode
-                                            .requestFocus();
-                                      });
-                                    }
-                                  }
-                                : (value) {
+                                if (event.logicalKey ==
+                                        LogicalKeyboardKey.enter &&
+                                    shiftPressed) {
+                                  controller.internalNote.value.text += '\n';
+                                  controller.internalNote.value.selection =
+                                      TextSelection.fromPosition(TextPosition(
+                                          offset: controller
+                                              .internalNote.value.text.length));
+                                } else if (event.logicalKey ==
+                                    LogicalKeyboardKey.enter) {
+                                  if (controller.noteMessage.value
+                                      .trim()
+                                      .isNotEmpty) {
+                                    controller.addNewNote();
+                                    controller.internalNote.value.clear();
+                                    controller.noteMessage.value = '';
                                     Future.delayed(Duration(milliseconds: 100),
                                         () {
                                       controller.textFieldFocusNode
                                           .requestFocus();
                                     });
-                                  },
-                            focusNode: controller.textFieldFocusNode,
-                            onChanged: (value) {
-                              controller.noteMessage.value = value;
+                                  }
+                                }
+                              }
                             },
-                            controller: controller.internalNote.value,
-                            decoration: InputDecoration(
-                              hintStyle: const TextStyle(color: Colors.grey),
-                              hintText: 'Type here...',
-                              labelStyle:
-                                  TextStyle(color: Colors.grey.shade700),
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
+                            child: TextFormField(
+                              textInputAction: TextInputAction.none,
+                              onFieldSubmitted: (value) {
+                                Future.delayed(Duration(milliseconds: 100), () {
+                                  controller.textFieldFocusNode.requestFocus();
+                                });
+                              },
+                              focusNode: controller.textFieldFocusNode,
+                              controller: controller.internalNote.value,
+                              minLines: 1,
+                              maxLines: null,
+                              // keyboardType: TextInputType.multiline,
+                              onChanged: (value) {
+                                controller.noteMessage.value = value;
+                              },
+                              decoration: InputDecoration(
+                                hintStyle: const TextStyle(color: Colors.grey),
+                                hintText: 'Type here...',
+                                labelStyle:
+                                    TextStyle(color: Colors.grey.shade700),
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                              ),
                             ),
                           )),
                     ),
