@@ -141,13 +141,60 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                               ),
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                                child: Text(
-                                  textAlign: TextAlign.start,
-                                  note['note'],
-                                  style: TextStyle(
-                                    color: Colors.grey[800],
-                                  ),
-                                ),
+                                child: note['type'] == 'Text'
+                                    ? Text(
+                                        textAlign: TextAlign.start,
+                                        note['note'],
+                                        style: TextStyle(
+                                          color: Colors.grey[800],
+                                        ),
+                                      )
+                                    : note['type'] == 'Image'
+                                        ? Image.memory(
+                                            note['note'],
+                                            fit: BoxFit.contain,
+                                            height: 200,
+                                          )
+                                        : Container(
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                color: Colors.grey[300],
+                                                borderRadius:
+                                                    BorderRadius.circular(5)),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              spacing: 10,
+                                              children: [
+                                                Text('PDF'),
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  spacing: 20,
+                                                  children: [
+                                                    ElevatedButton(
+                                                        onPressed: () {
+                                                          FilePickerService
+                                                              .openPdf(
+                                                                 note['note'],
+                                                                note['file_type']);
+                                                        },
+                                                        child: Text('Open')),
+                                                    ElevatedButton(
+                                                        onPressed: () {
+                                                          FilePickerService
+                                                              .saveFile(
+                                                                 note['note'],
+                                                                note['file_type'],
+                                                                  '');
+                                                        },
+                                                        child:
+                                                            Text('Save as...')),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                               ),
                             ],
                           ),
@@ -171,72 +218,103 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
               child: GetX<JobCardController>(builder: (controller) {
                 return Row(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 10, 0, 16),
+                      child: InkWell(
+                          onTap: () {
+                            FilePickerService.pickFile(
+                                controller.fileBytes, controller.fileType);
+                          },
+                          child: Icon(
+                            Icons.attach_file_rounded,
+                            color: Colors.grey,
+                          )),
+                    ),
                     Expanded(
                       child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-                          child: KeyboardListener(
-                            autofocus: true,
-                            focusNode: FocusNode(),
-                            onKeyEvent: (KeyEvent event) {
-                              if (event is KeyDownEvent) {
-                                bool shiftPressed = HardwareKeyboard
-                                        .instance.logicalKeysPressed
-                                        .contains(
-                                            LogicalKeyboardKey.shiftLeft) ||
-                                    HardwareKeyboard.instance.logicalKeysPressed
-                                        .contains(
-                                            LogicalKeyboardKey.shiftRight);
+                          padding: const EdgeInsets.fromLTRB(8, 10, 16, 16),
+                          child: controller.fileBytes.value != null
+                              ? controller.fileType.value.startsWith('image/')
+                                  ? Image.memory(controller.fileBytes.value!,
+                                      height: 200)
+                                  : controller.fileType.value
+                                          .startsWith('application/pdf')
+                                      ? Text("PDF Selected: Cannot preview",
+                                          style: TextStyle(fontSize: 16))
+                                      : SizedBox()
+                              : KeyboardListener(
+                                  autofocus: true,
+                                  focusNode: FocusNode(),
+                                  onKeyEvent: (KeyEvent event) {
+                                    if (event is KeyDownEvent) {
+                                      bool shiftPressed = HardwareKeyboard
+                                              .instance.logicalKeysPressed
+                                              .contains(LogicalKeyboardKey
+                                                  .shiftLeft) ||
+                                          HardwareKeyboard
+                                              .instance.logicalKeysPressed
+                                              .contains(LogicalKeyboardKey
+                                                  .shiftRight);
 
-                                if (event.logicalKey ==
-                                        LogicalKeyboardKey.enter &&
-                                    shiftPressed) {
-                                  controller.internalNote.value.text += '\n';
-                                  controller.internalNote.value.selection =
-                                      TextSelection.fromPosition(TextPosition(
-                                          offset: controller
-                                              .internalNote.value.text.length));
-                                } else if (event.logicalKey ==
-                                    LogicalKeyboardKey.enter) {
-                                  if (controller.noteMessage.value
-                                      .trim()
-                                      .isNotEmpty) {
-                                    controller.addNewNote();
-                                    controller.internalNote.value.clear();
-                                    controller.noteMessage.value = '';
-                                    Future.delayed(Duration(milliseconds: 100),
-                                        () {
-                                      controller.textFieldFocusNode
-                                          .requestFocus();
-                                    });
-                                  }
-                                }
-                              }
-                            },
-                            child: TextFormField(
-                              textInputAction: TextInputAction.none,
-                              onFieldSubmitted: (value) {
-                                Future.delayed(Duration(milliseconds: 100), () {
-                                  controller.textFieldFocusNode.requestFocus();
-                                });
-                              },
-                              focusNode: controller.textFieldFocusNode,
-                              controller: controller.internalNote.value,
-                              minLines: 1,
-                              maxLines: null,
-                              // keyboardType: TextInputType.multiline,
-                              onChanged: (value) {
-                                controller.noteMessage.value = value;
-                              },
-                              decoration: InputDecoration(
-                                hintStyle: const TextStyle(color: Colors.grey),
-                                hintText: 'Type here...',
-                                labelStyle:
-                                    TextStyle(color: Colors.grey.shade700),
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                              ),
-                            ),
-                          )),
+                                      if (event.logicalKey ==
+                                              LogicalKeyboardKey.enter &&
+                                          shiftPressed) {
+                                        controller.internalNote.value.text +=
+                                            '\n';
+                                        controller
+                                                .internalNote.value.selection =
+                                            TextSelection.fromPosition(
+                                                TextPosition(
+                                                    offset: controller
+                                                        .internalNote
+                                                        .value
+                                                        .text
+                                                        .length));
+                                      } else if (event.logicalKey ==
+                                          LogicalKeyboardKey.enter) {
+                                        if (controller.noteMessage.value
+                                            .trim()
+                                            .isNotEmpty) {
+                                          controller.addNewNote();
+                                          controller.internalNote.value.clear();
+                                          controller.noteMessage.value = '';
+                                          Future.delayed(
+                                              Duration(milliseconds: 100), () {
+                                            controller.textFieldFocusNode
+                                                .requestFocus();
+                                          });
+                                        }
+                                      }
+                                    }
+                                  },
+                                  child: TextFormField(
+                                    textInputAction: TextInputAction.none,
+                                    onFieldSubmitted: (value) {
+                                      Future.delayed(
+                                          Duration(milliseconds: 100), () {
+                                        controller.textFieldFocusNode
+                                            .requestFocus();
+                                      });
+                                    },
+                                    focusNode: controller.textFieldFocusNode,
+                                    controller: controller.internalNote.value,
+                                    minLines: 1,
+                                    maxLines: null,
+                                    // keyboardType: TextInputType.multiline,
+                                    onChanged: (value) {
+                                      controller.noteMessage.value = value;
+                                    },
+                                    decoration: InputDecoration(
+                                      hintStyle:
+                                          const TextStyle(color: Colors.grey),
+                                      hintText: 'Type here...',
+                                      labelStyle: TextStyle(
+                                          color: Colors.grey.shade700),
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                    ),
+                                  ),
+                                )),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -252,7 +330,16 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                                         .requestFocus();
                                   });
                                 }
-                              : () {
+                              : () async {
+                                  if (controller.fileBytes.value != null) {
+                                    await controller.addNewMediaNote(
+                                        type: controller.fileType.value
+                                                .startsWith("image/")
+                                            ? 'Image'
+                                            : 'PDF');
+                                    controller.fileBytes.value = null;
+                                    controller.fileType.value = '';
+                                  }
                                   Future.delayed(Duration(milliseconds: 100),
                                       () {
                                     controller.textFieldFocusNode

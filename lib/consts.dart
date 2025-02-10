@@ -307,9 +307,9 @@ Decoration containerDecor = BoxDecoration(
     borderRadius: BorderRadius.only(
         bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5)));
 
-
 class ImagePickerService {
-  static Future<void> pickImage(Rx<Uint8List?> imageBytes, RxBool flagSelectedError) async {
+  static Future<void> pickImage(
+      Rx<Uint8List?> imageBytes, RxBool flagSelectedError) async {
     try {
       flagSelectedError.value = false;
       html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
@@ -332,6 +332,61 @@ class ImagePickerService {
       });
     } catch (e) {
       flagSelectedError.value = true; // Handle error
+    }
+  }
+}
+
+class FilePickerService {
+  static Future<void> pickFile(
+      Rx<Uint8List?> fileBytes, RxString fileType) async {
+    try {
+      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      uploadInput.accept = 'image/*,application/pdf';
+      uploadInput.click();
+
+      uploadInput.onChange.listen((event) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files.first;
+          final reader = html.FileReader();
+
+          reader.readAsArrayBuffer(file);
+          reader.onLoadEnd.listen((event) async {
+            if (reader.result != null) {
+              fileBytes.value = reader.result as Uint8List;
+              fileType.value = file.type; // Store file type (image/pdf)
+            }
+          });
+        }
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  static void openPdf(Rx<Uint8List?> fileBytes, RxString fileType) {
+    try {
+      if (fileBytes.value != null && fileType.value == 'application/pdf') {
+        final blob = html.Blob([fileBytes.value!], fileType.value);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        html.window.open(url, '_blank');
+        html.Url.revokeObjectUrl(url);
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static void saveFile(
+      Rx<Uint8List?> fileBytes, RxString fileType, String fileName) {
+    if (fileBytes.value != null) {
+      final blob = html.Blob([fileBytes.value!], fileType.value);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      html.AnchorElement(href: url)
+        ..setAttribute(
+            "download", fileName.isNotEmpty ? fileName : "downloaded_file")
+        ..click();
+      html.Url.revokeObjectUrl(url);
     }
   }
 }

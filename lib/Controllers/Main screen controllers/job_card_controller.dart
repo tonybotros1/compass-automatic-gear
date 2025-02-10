@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
@@ -110,6 +112,8 @@ class JobCardController extends GetxController {
   RxString noteMessage = RxString('');
   final ScrollController scrollControllerForNotes = ScrollController();
   FocusNode textFieldFocusNode = FocusNode();
+  Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
+  RxString fileType = RxString('');
 
   @override
   void onInit() async {
@@ -198,7 +202,20 @@ class JobCardController extends GetxController {
 
   addNewNote() {
     internalNotes.add({
+      'type': 'Text',
       'note': noteMessage.value.trim(),
+      'user_id': userId.value,
+      'time': DateTime.now(),
+    });
+  }
+
+  addNewMediaNote({
+    required type
+  }) {
+    internalNotes.add({
+      'type': type,
+      'note' : fileBytes,
+      'file_type': fileType,
       'user_id': userId.value,
       'time': DateTime.now(),
     });
