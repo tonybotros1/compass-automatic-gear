@@ -355,7 +355,7 @@ class UsersController extends GetxController {
           .where('company_id', isEqualTo: companyId)
           .snapshots()
           .listen((event) {
-        allUsers.assignAll(event.docs);
+        allUsers.assignAll(List<DocumentSnapshot>.from(event.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

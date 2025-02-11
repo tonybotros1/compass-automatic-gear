@@ -156,7 +156,7 @@ class CountriesController extends GetxController {
           .collection('all_countries')
           .snapshots()
           .listen((countries) {
-        allCountries.assignAll(countries.docs);
+        allCountries.assignAll(List<DocumentSnapshot>.from(countries.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {
@@ -322,7 +322,7 @@ class CountriesController extends GetxController {
           .orderBy('name', descending: false)
           .snapshots()
           .listen((values) {
-        allCities.assignAll(values.docs);
+        allCities.assignAll(List<DocumentSnapshot>.from(values.docs));
         loadingcities.value = false;
       });
     } catch (e) {

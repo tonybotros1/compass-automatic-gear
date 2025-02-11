@@ -178,7 +178,7 @@ class BranchesController extends GetxController {
           .where('company_id', isEqualTo: companyId.value)
           .snapshots()
           .listen((branches) {
-        allBranches.assignAll(branches.docs);
+        allBranches.assignAll(List<DocumentSnapshot>.from(branches.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

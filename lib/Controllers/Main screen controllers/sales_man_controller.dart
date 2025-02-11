@@ -84,7 +84,7 @@ class SalesManController extends GetxController {
           .where('company_id', isEqualTo: companyId)
           .snapshots()
           .listen((salesman) {
-        allSalesMan.assignAll(salesman.docs);
+        allSalesMan.assignAll(List<DocumentSnapshot>.from(salesman.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

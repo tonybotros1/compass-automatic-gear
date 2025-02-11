@@ -112,7 +112,7 @@ class InvoiceItemsController extends GetxController {
           .collection('invoice_items')
           .snapshots()
           .listen((items) {
-        allInvoiceItems.assignAll(items.docs);
+        allInvoiceItems.assignAll(List<DocumentSnapshot>.from(items.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

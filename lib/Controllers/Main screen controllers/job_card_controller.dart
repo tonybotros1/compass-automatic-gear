@@ -614,7 +614,7 @@ class JobCardController extends GetxController {
           .where('company_id', isEqualTo: companyId.value)
           .snapshots()
           .listen((jobCards) {
-        allJobCards.assignAll(jobCards.docs);
+        allJobCards.assignAll(List<DocumentSnapshot>.from(jobCards.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

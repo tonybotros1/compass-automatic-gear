@@ -212,7 +212,7 @@ class ListOfValuesController extends GetxController {
           for (var list in lists.docs) {
             listMap[list.id] = list.data()['list_name'];
           }
-          allLists.assignAll(lists.docs);
+          allLists.assignAll(List<DocumentSnapshot>.from(lists.docs));
           isScreenLoding.value = false;
         });
       }
@@ -255,7 +255,7 @@ class ListOfValuesController extends GetxController {
             .orderBy('name', descending: false)
             .snapshots()
             .listen((values) {
-          allValues.assignAll(values.docs);
+          allValues.assignAll(List<DocumentSnapshot>.from(values.docs));
         });
         FirebaseFirestore.instance
             .collection('all_lists')
@@ -277,7 +277,7 @@ class ListOfValuesController extends GetxController {
             .where('available', isEqualTo: true)
             .snapshots()
             .listen((values) {
-          allValues.assignAll(values.docs);
+          allValues.assignAll(List<DocumentSnapshot>.from(values.docs));
           loadingValues.value = false;
         });
       }

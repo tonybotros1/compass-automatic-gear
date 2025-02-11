@@ -98,7 +98,7 @@ class CurrencyController extends GetxController {
           .where('company_id', isEqualTo: companyId.value)
           .snapshots()
           .listen((currencies) {
-        allCurrencies.assignAll(currencies.docs);
+        allCurrencies.assignAll(List<DocumentSnapshot>.from(currencies.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

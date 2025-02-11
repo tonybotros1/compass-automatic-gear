@@ -126,7 +126,7 @@ class CarBrandsController extends GetxController {
           .collection('all_brands')
           .snapshots()
           .listen((brands) {
-        allBrands.assignAll(brands.docs);
+        allBrands.assignAll(List<DocumentSnapshot>.from(brands.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

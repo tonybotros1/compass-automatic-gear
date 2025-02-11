@@ -82,7 +82,7 @@ class FunctionsController extends GetxController {
           .collection('screens')
           .snapshots()
           .listen((screens) {
-        allScreens.assignAll(screens.docs);
+        allScreens.assignAll(List<DocumentSnapshot>.from(screens.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

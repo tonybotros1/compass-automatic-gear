@@ -772,7 +772,7 @@ class EntityInformationsController extends GetxController {
           .where('company_id', isEqualTo: companyId)
           .snapshots()
           .listen((contacts) {
-        allEntities.assignAll(contacts.docs);
+        allEntities.assignAll(List<DocumentSnapshot>.from(contacts.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

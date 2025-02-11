@@ -125,7 +125,7 @@ class SystemVariablesController extends GetxController {
           .collection('system_variables')
           .snapshots()
           .listen((variables) {
-        allVariables.assignAll(variables.docs);
+        allVariables.assignAll(List<DocumentSnapshot>.from(variables.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

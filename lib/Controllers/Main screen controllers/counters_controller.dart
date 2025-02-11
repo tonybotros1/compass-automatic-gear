@@ -111,8 +111,8 @@ class CountersController extends GetxController {
           .collection('counters')
           .where('company_id', isEqualTo: companyId)
           .snapshots()
-          .listen((contres) {
-        allCounters.assignAll(contres.docs);
+          .listen((countres) {
+        allCounters.assignAll(List<DocumentSnapshot>.from(countres.docs));
         isScreenLoding.value = false;
       });
     } catch (e) {

@@ -496,7 +496,7 @@ class CompanyController extends GetxController {
           .snapshots()
           .listen((companySnapshot) {
         // Update allCompanies with the latest data
-        allCompanies.assignAll(companySnapshot.docs);
+        allCompanies.assignAll(List<DocumentSnapshot>.from(companySnapshot.docs));
 
         // Fetch user details for each company contact
         for (var com in companySnapshot.docs) {
