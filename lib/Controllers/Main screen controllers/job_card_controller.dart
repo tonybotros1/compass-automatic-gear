@@ -75,9 +75,14 @@ class JobCardController extends GetxController {
   RxString customerCurrencyId = RxString('');
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
+  Rx<TextEditingController> searchForInvoiceItems = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
+  RxBool loadingInvoiceItems = RxBool(true);
   final RxList<DocumentSnapshot> allJobCards = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allInvoiceItems = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredJobCards =
+      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredInvoiceItems =
       RxList<DocumentSnapshot>([]);
 
   RxInt sortColumnIndex = RxInt(0);
@@ -115,6 +120,7 @@ class JobCardController extends GetxController {
   Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
   RxString fileType = RxString('');
   RxString fileName = RxString('');
+  RxBool addingNewinvoiceItemsValue = RxBool(false);
 
   @override
   void onInit() async {
@@ -210,13 +216,11 @@ class JobCardController extends GetxController {
     });
   }
 
-  addNewMediaNote({
-    required type
-  }) {
+  addNewMediaNote({required type}) {
     internalNotes.add({
       'file_name': fileName.value,
       'type': type,
-      'note' : fileBytes.value,
+      'note': fileBytes.value,
       'user_id': userId.value,
       'time': DateTime.now(),
     });
@@ -419,48 +423,6 @@ class JobCardController extends GetxController {
     }
   }
 
-  // getCountriesAndCities() async {
-  //   try {
-  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'COUNTRIES')
-  //         .get();
-  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'CITIES')
-  //         .get();
-
-  //     var countriesId = countries.docs.first.id;
-  //     var citiesId = cities.docs.first.id;
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(countriesId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((countries) {
-  //       allCountries.value = {
-  //         for (var doc in countries.docs) doc.id: doc.data()
-  //       };
-  //     });
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(citiesId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((cities) {
-  //       allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
-  //     });
-  //   } catch (e) {
-  //     // print(e);
-  //   }
-  // }
-
   getCountries() {
     try {
       FirebaseFirestore.instance
@@ -519,48 +481,51 @@ class JobCardController extends GetxController {
     }
   }
 
-  // getCarsModelsAndBrands() async {
-  //   try {
-  //     QuerySnapshot<Map<String, dynamic>> brands = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'CAR_BRANDS')
-  //         .get();
-  //     QuerySnapshot<Map<String, dynamic>> models = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'CAR_MODELS')
-  //         .get();
-
-  //     var brandsId = brands.docs.first.id;
-  //     var modelsId = models.docs.first.id;
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(brandsId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((models) {
-  //       allBrands.value = {for (var doc in models.docs) doc.id: doc.data()};
-  //     });
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(modelsId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((brands) {
-  //       allModels.value = {for (var doc in brands.docs) doc.id: doc.data()};
-  //     });
-  //   } catch (e) {
-  //     // print(e);
-  //   }
-  // }
-
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
+    if (columnIndex == 0) {
+      allJobCards.sort((counter1, counter2) {
+        final String? value1 = counter1.get('code');
+        final String? value2 = counter2.get('code');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 1) {
+      allJobCards.sort((counter1, counter2) {
+        final String? value1 = counter1.get('name');
+        final String? value2 = counter2.get('name');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 2) {
+      allJobCards.sort((counter1, counter2) {
+        final String? value1 = counter1.get('added_date');
+        final String? value2 = counter2.get('added_date');
+
+        // Handle nulls: put nulls at the end
+        if (value1 == null && value2 == null) return 0;
+        if (value1 == null) return 1;
+        if (value2 == null) return -1;
+
+        return compareString(ascending, value1, value2);
+      });
+    }
+    sortColumnIndex.value = columnIndex;
+    isAscending.value = ascending;
+  }
+
+  // this function is to sort data in table
+  void onSortForInvoiceItems(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
       allJobCards.sort((counter1, counter2) {
         final String? value1 = counter1.get('code');
@@ -632,33 +597,6 @@ class JobCardController extends GetxController {
       return '';
     }
   }
-
-  // void onSelectForBrandsAndModels(String selectedId) {
-  //   filterdModelsByBrands.assignAll(
-  //     Map.fromEntries(
-  //       allModels.entries.where((entry) {
-  //         return entry.value['restricted_by']
-  //             .toString()
-  //             .toLowerCase()
-  //             .contains(selectedId.toLowerCase());
-  //       }),
-  //     ),
-  //   );
-  // }
-
-  // void onSelectForCountryAndCity(String selectedId) {
-  //   filterdCitiesByCountry.clear();
-  //   filterdCitiesByCountry.addAll(
-  //     Map.fromEntries(
-  //       allCities.entries.where((entry) {
-  //         return entry.value['restricted_by']
-  //             .toString()
-  //             .toLowerCase()
-  //             .contains(selectedId.toLowerCase());
-  //       }),
-  //     ),
-  //   );
-  // }
 
   void onSelectForCustomers(String selectedId) {
     var currentUserDetails = allCustomers.entries.firstWhere((entry) {

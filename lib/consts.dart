@@ -61,6 +61,14 @@ var internalNotesButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var innvoiceItemsButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.teal,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
 
 var openPDFButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey,

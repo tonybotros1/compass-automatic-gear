@@ -177,6 +177,7 @@ ElevatedButton valSectionInTheTable(
         controller.getModelsValues(brandId);
         controller.brandIdToWorkWith.value = brandId;
         showDialog(
+          barrierDismissible: true,
             context: context,
             builder: (context) {
               return AlertDialog(

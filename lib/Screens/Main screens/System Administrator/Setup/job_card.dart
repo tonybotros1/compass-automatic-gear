@@ -6,6 +6,7 @@ import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dar
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/internal_notes_widget.dart';
+import '../../../../Widgets/main screen widgets/job_cards_widgets/invoice_items_widget.dart';
 import '../../../../consts.dart';
 
 class JobCard extends StatelessWidget {
@@ -193,7 +194,7 @@ ElevatedButton editSection(context, JobCardController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               // controller.onSelect(branchData['country_id']);
@@ -282,6 +283,7 @@ ElevatedButton newJobCardButton(BuildContext context,
               ),
               actions: [
                 Row(
+                  spacing: 10,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElevatedButton(
@@ -291,46 +293,49 @@ ElevatedButton newJobCardButton(BuildContext context,
                       },
                       child: Text('Internal Notes'),
                     ),
-                    Row(
-                      children: [
-                        GetX<JobCardController>(
-                          builder: (controller) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ElevatedButton(
-                              onPressed: controller.addingNewValue.value
-                                  ? null
-                                  : () async {
-                                      // await controller.addNewBranch();
-                                    },
-                              style: saveButtonStyle,
-                              child: controller.addingNewValue.value == false
-                                  ? const Text(
-                                      'Save',
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  : SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                            ),
-                          ),
+                    ElevatedButton(
+                      style: innvoiceItemsButtonStyle,
+                      onPressed: () {
+                        invoiceItemsDialog(context, controller, constraints);
+                      },
+                      child: Text('Invoice Items'),
+                    ),
+                    Spacer(),
+                    GetX<JobCardController>(
+                      builder: (controller) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: ElevatedButton(
+                          onPressed: controller.addingNewValue.value
+                              ? null
+                              : () async {
+                                  // await controller.addNewBranch();
+                                },
+                          style: saveButtonStyle,
+                          child: controller.addingNewValue.value == false
+                              ? const Text(
+                                  'Save',
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              : SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                ),
                         ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          style: cancelButtonStyle,
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      style: cancelButtonStyle,
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
