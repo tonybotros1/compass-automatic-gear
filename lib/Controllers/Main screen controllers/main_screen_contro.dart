@@ -2,6 +2,7 @@ import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/ca
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/countries.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/currency.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/invoice_items.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_card.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/list_of_values.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/sales_man.dart';
@@ -107,6 +108,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Countries());
       case '/carBrands':
         return const SizedBox(child: CarBrands());
+      case '/invoiceItems':
+        return const SizedBox(child: InvoiceItems());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

@@ -15,7 +15,7 @@ Widget myTextFormFieldWithBorder(
     bool? isnumber,
     bool? isDouble,
     bool? isDate,
-     maxLines = 1,
+    maxLines = 1,
     int? minLines,
     keyboardType,
     void Function(String)? onChanged,
@@ -40,6 +40,7 @@ Widget myTextFormFieldWithBorder(
       suffixIcon: suffixIcon,
       hintStyle: const TextStyle(color: Colors.grey),
       labelText: labelText,
+      alignLabelWithHint: true,
       hintText: hintText,
       labelStyle: TextStyle(color: Colors.grey.shade700),
       focusedBorder: OutlineInputBorder(
