@@ -263,13 +263,23 @@ ElevatedButton newJobCardButton(BuildContext context,
     BoxConstraints constraints, JobCardController controller) {
   return ElevatedButton(
     onPressed: () {
-      // controller.code.clear();
-      // controller.name.clear();
-      // controller.line.clear();
-      // controller.country.clear();
-      // controller.countryId.value = '';
-      // controller.city.clear();
-      // controller.cityId.value = '';
+      controller.country.text = controller.getCountryName(
+          controller.companyDetails['contact_details']['country'])!;
+      controller.countryId.value =
+          controller.companyDetails['contact_details']['country'];
+      controller.getCitiesByCountryID(
+          controller.companyDetails['contact_details']['country']);
+      controller.mileageIn.value.text = '0';
+      controller.mileageOut.value.text = '0';
+      controller.inOutDiff.value.text = '0';
+      controller.customerCreditNumber.text = '0';
+      controller.customerOutstanding.text = '0';
+      controller.isCashSelected.value = true;
+      controller.payType.value = 'Cash';
+      controller.jobCardDate.value.text = DateTime.now().toString();
+      controller.invoiceDate.value.text = DateTime.now().toString();
+      controller.startDate.value.text = DateTime.now().toString();
+      controller.clearValues();
       showDialog(
           barrierDismissible: false,
           context: context,
@@ -296,7 +306,34 @@ ElevatedButton newJobCardButton(BuildContext context,
                     ElevatedButton(
                       style: innvoiceItemsButtonStyle,
                       onPressed: () {
-                        invoiceItemsDialog(context, controller, constraints);
+                        showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                actionsPadding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                content: invoiceItemsDialog(
+                                  constraints: constraints,
+                                  context: context,
+                                ),
+                                actions: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Get.back();
+                                      },
+                                      style: cancelButtonStyle,
+                                      child: const Text(
+                                        'Cancel',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            });
                       },
                       child: Text('Invoice Items'),
                     ),
@@ -308,7 +345,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                           onPressed: controller.addingNewValue.value
                               ? null
                               : () async {
-                                  // await controller.addNewBranch();
+                                  await controller.addNewJobCardAndQuotation();
                                 },
                           style: saveButtonStyle,
                           child: controller.addingNewValue.value == false

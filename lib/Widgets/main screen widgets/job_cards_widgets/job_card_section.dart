@@ -1,9 +1,10 @@
+import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
 import 'package:flutter/material.dart';
 import '../../../Models/dynamic_field_models.dart';
 import '../../../consts.dart';
 import '../dynamic_field.dart';
 
-Container jobCardSection(context, controller) {
+Container jobCardSection(context,JobCardController controller) {
   return Container(
       padding: EdgeInsets.all(20),
       decoration: containerDecor,

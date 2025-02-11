@@ -7,18 +7,15 @@ import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../auto_size_box.dart';
 import 'add_new_invoice_item_or_edit.dart';
 
-Future invoiceItemsDialog(BuildContext context, JobCardController controller,
-    BoxConstraints constraints) {
-  return Get.dialog(
-      barrierDismissible: false,
-      Dialog(
-          child: Container(
-        height: constraints.maxHeight,
-        width: constraints.maxWidth,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
+Widget invoiceItemsDialog(
+    {required BuildContext context, required BoxConstraints constraints}) {
+  return Container(
+    width: constraints.maxWidth,
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.grey),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Column(
       children: [
         GetX<JobCardController>(
           builder: (controller) {
@@ -61,10 +58,8 @@ Future invoiceItemsDialog(BuildContext context, JobCardController controller,
         ),
       ],
     ),
-      )));
+  );
 }
-
-
 
 Widget tableOfScreens(
     {required constraints,
@@ -113,22 +108,24 @@ Widget tableOfScreens(
     rows: controller.filteredInvoiceItems.isEmpty &&
             controller.searchForInvoiceItems.value.text.isEmpty
         ? controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-            final invoiceItemsData = invoiceItems.data() as Map<String, dynamic>;
+            final invoiceItemsData =
+                invoiceItems.data() as Map<String, dynamic>;
             final invoiceItemsId = invoiceItems.id;
-            return dataRowForTheTable(
-                invoiceItemsData, context, constraints, invoiceItemsId, controller);
+            return dataRowForTheTable(invoiceItemsData, context, constraints,
+                invoiceItemsId, controller);
           }).toList()
         : controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
-            final invoiceItemsData = invoiceItems.data() as Map<String, dynamic>;
+            final invoiceItemsData =
+                invoiceItems.data() as Map<String, dynamic>;
             final invoiceItemsId = invoiceItems.id;
-            return dataRowForTheTable(
-                invoiceItemsData, context, constraints, invoiceItemsId, controller);
+            return dataRowForTheTable(invoiceItemsData, context, constraints,
+                invoiceItemsId, controller);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> invoiceItemsData, context, constraints,
-    String invoiceItemsId, JobCardController controller) {
+DataRow dataRowForTheTable(Map<String, dynamic> invoiceItemsData, context,
+    constraints, String invoiceItemsId, JobCardController controller) {
   return DataRow(cells: [
     DataCell(
       Text(
@@ -151,14 +148,16 @@ DataRow dataRowForTheTable(Map<String, dynamic> invoiceItemsData, context, const
       spacing: 5,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        editSection(controller, invoiceItemsData, context, constraints, invoiceItemsId),
+        editSection(
+            controller, invoiceItemsData, context, constraints, invoiceItemsId),
         deleteSection(context, controller, invoiceItemsId),
       ],
     )),
   ]);
 }
 
-ElevatedButton deleteSection(context, JobCardController controller, invoiceItemsId) {
+ElevatedButton deleteSection(
+    context, JobCardController controller, invoiceItemsId) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
@@ -174,15 +173,19 @@ ElevatedButton deleteSection(context, JobCardController controller, invoiceItems
       child: const Text('Delete'));
 }
 
-ElevatedButton editSection(JobCardController controller,
-    Map<String, dynamic> invoiceItemsData, context, constraints, String invoiceItemsId) {
+ElevatedButton editSection(
+    JobCardController controller,
+    Map<String, dynamic> invoiceItemsData,
+    context,
+    constraints,
+    String invoiceItemsId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
         // controller.invoiceItemsName.text = invoiceItemsData['name'];
         // controller.invoiceItemsCode.text = invoiceItemsData['code'];
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -198,22 +201,24 @@ ElevatedButton editSection(JobCardController controller,
                       builder: (controller) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: ElevatedButton(
-                              onPressed: controller.addingNewinvoiceItemsValue.value
-                                  ? null
-                                  : () async {
-                                      // if (!controller.formKeyForAddingNewvalue
-                                      //     .currentState!
-                                      //     .validate()) {
-                                      // } else {
-                                      //   controller.editinvoiceItems(
-                                      //       controller
-                                      //           .countryIdToWorkWith.value,
-                                      //       invoiceItemsId);
-                                      // }
-                                    },
+                              onPressed:
+                                  controller.addingNewinvoiceItemsValue.value
+                                      ? null
+                                      : () async {
+                                          // if (!controller.formKeyForAddingNewvalue
+                                          //     .currentState!
+                                          //     .validate()) {
+                                          // } else {
+                                          //   controller.editinvoiceItems(
+                                          //       controller
+                                          //           .countryIdToWorkWith.value,
+                                          //       invoiceItemsId);
+                                          // }
+                                        },
                               style: saveButtonStyle,
                               child:
-                                  controller.addingNewinvoiceItemsValue.value == false
+                                  controller.addingNewinvoiceItemsValue.value ==
+                                          false
                                       ? const Text(
                                           'Save',
                                           style: TextStyle(color: Colors.white),
@@ -244,15 +249,14 @@ ElevatedButton editSection(JobCardController controller,
       child: Text('Edit'));
 }
 
-
-ElevatedButton newinvoiceItemsButton(BuildContext context, BoxConstraints constraints,
-    JobCardController controller) {
+ElevatedButton newinvoiceItemsButton(BuildContext context,
+    BoxConstraints constraints, JobCardController controller) {
   return ElevatedButton(
     onPressed: () {
       // controller.invoiceItemsName.clear();
       // controller.invoiceItemsCode.clear();
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -268,31 +272,34 @@ ElevatedButton newinvoiceItemsButton(BuildContext context, BoxConstraints constr
                     builder: (controller) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ElevatedButton(
-                            onPressed: controller.addingNewinvoiceItemsValue.value
-                                ? null
-                                : () async {
-                                    // if (!controller
-                                    //     .formKeyForAddingNewvalue.currentState!
-                                    //     .validate()) {
-                                    // } else {
-                                    //   await controller.addNewinvoiceItems(
-                                    //       controller.countryIdToWorkWith.value);
-                                    // }
-                                  },
+                            onPressed:
+                                controller.addingNewinvoiceItemsValue.value
+                                    ? null
+                                    : () async {
+                                        // if (!controller
+                                        //     .formKeyForAddingNewvalue.currentState!
+                                        //     .validate()) {
+                                        // } else {
+                                        //   await controller.addNewinvoiceItems(
+                                        //       controller.countryIdToWorkWith.value);
+                                        // }
+                                      },
                             style: saveButtonStyle,
-                            child: controller.addingNewinvoiceItemsValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
+                            child:
+                                controller.addingNewinvoiceItemsValue.value ==
+                                        false
+                                    ? const Text(
+                                        'Save',
+                                        style: TextStyle(color: Colors.white),
+                                      )
+                                    : const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
                           ),
                         )),
                 ElevatedButton(

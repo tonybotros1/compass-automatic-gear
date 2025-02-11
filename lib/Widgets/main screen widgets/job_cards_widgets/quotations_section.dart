@@ -1,10 +1,11 @@
+import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/dynamic_field.dart';
 import 'package:flutter/material.dart';
 
 import '../../../Models/dynamic_field_models.dart';
 import '../../../consts.dart';
 
-Container quotationsSection(context, controller) {
+Container quotationsSection(context,JobCardController controller) {
   return Container(
       padding: EdgeInsets.all(20),
       decoration: containerDecor,

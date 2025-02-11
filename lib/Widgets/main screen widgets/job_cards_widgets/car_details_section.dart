@@ -94,7 +94,7 @@ Widget carDetailsSection() {
               isDropdown: false,
               flex: 1,
               fieldConfig: FieldConfig(
-                textController: controller.carCode,
+                textController: controller.plateCode,
                 labelText: 'Code',
                 hintText: 'Enter Plate Code',
                 validate: false,

@@ -43,7 +43,7 @@ class JobCardController extends GetxController {
   TextEditingController jobNotes = TextEditingController();
   TextEditingController deliveryNotes = TextEditingController();
   TextEditingController plateNumber = TextEditingController();
-  TextEditingController carCode = TextEditingController();
+  TextEditingController plateCode = TextEditingController();
   TextEditingController carBrand = TextEditingController();
   TextEditingController carModel = TextEditingController();
   TextEditingController country = TextEditingController();
@@ -84,11 +84,11 @@ class JobCardController extends GetxController {
       RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredInvoiceItems =
       RxList<DocumentSnapshot>([]);
-
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
   RxString companyId = RxString('');
+  RxMap companyDetails = RxMap({});
   RxMap allCountries = RxMap({});
   // RxMap filterdCitiesByCountry = RxMap({});
   RxMap allCities = RxMap({});
@@ -103,12 +103,12 @@ class JobCardController extends GetxController {
   RxMap salesManMap = RxMap({});
   RxBool isCashSelected = RxBool(true);
   RxBool isCreditSelected = RxBool(false);
-  RxString payType = RxString('');
+  RxString payType = RxString('Cash');
   DateFormat format = DateFormat("dd-MM-yyyy");
-
+  // internal notes section
   RxBool loadingInternalNotes = RxBool(false);
   RxBool isQuotationExpanded = RxBool(false);
-  RxBool isJobCardExpanded = RxBool(false);
+  RxBool isJobCardExpanded = RxBool(true);
   final ScrollController scrollController = ScrollController();
   RxMap allUsers = RxMap();
   RxList<Map> internalNotes = RxList<Map>([]);
@@ -120,12 +120,14 @@ class JobCardController extends GetxController {
   Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
   RxString fileType = RxString('');
   RxString fileName = RxString('');
+  // invoice items section
   RxBool addingNewinvoiceItemsValue = RxBool(false);
 
   @override
   void onInit() async {
     super.onInit();
     await getCompanyId();
+    getCompanyDetails();
     // getCurrentJobCardCounterNumber();
     // getCurrentQuotationCounterNumber();
     getUserId();
@@ -138,15 +140,135 @@ class JobCardController extends GetxController {
     getColors();
     getCarBrands();
     getCountries();
-    // getCarsModelsAndBrands();
-    // getCountriesAndCities();
     getAllJobCards();
   }
 
   @override
   void onClose() {
-    textFieldFocusNode.dispose(); // Dispose to prevent memory leaks
+    textFieldFocusNode.dispose();
     super.onClose();
+  }
+
+  clearValues() {
+    carBrand.clear();
+    carBrandId.value = '';
+    carModel.clear();
+    carModelId.value = '';
+    plateNumber.clear();
+    plateCode.clear();
+    city.clear();
+    year.clear();
+    color.clear();
+    colorId.value = '';
+    vin.clear();
+    customerName.clear();
+    customerId.value = '';
+    customerEntityName.clear();
+    customerEntityPhoneNumber.clear();
+    customerEntityEmail.clear();
+    customerSaleManId.value = '';
+    customerSaleMan.clear();
+    customerBranchId.value = '';
+    customerBranch.clear();
+    customerCurrencyRate.clear();
+    customerCurrencyId.value = '';
+    customerCurrency.clear();
+    quotationDays.value.clear();
+    validityEndDate.value.clear();
+    referenceNumber.value.clear();
+    deliveryTime.value.clear();
+    quotationWarrentyDays.value.text = '0';
+    quotationWarrentyKM.value.text = '0';
+    quotationNotes.clear();
+    lpoCounter.value.clear();
+    approvalDate.value.clear();
+    finishDate.value.clear();
+    deliveryDate.value.clear();
+    jobWarrentyDays.value.text = '0';
+    jobWarrentyKM.value.text = '0';
+    jobWarrentyEndDate.value.clear();
+    minTestKms.value.clear();
+    reference1.value.clear();
+    reference2.value.clear();
+    reference3.value.clear();
+    jobNotes.clear();
+    deliveryNotes.clear();
+  }
+
+  int safeParseInt(String? value, {int defaultValue = 0}) {
+    if (value == null || value.trim().isEmpty) return defaultValue;
+    return int.tryParse(value) ?? defaultValue;
+  }
+
+  Future<void> addNewJobCardAndQuotation() async {
+    try {
+      // Indicate that a new value is being added
+      addingNewValue.value = true;
+
+      // Ensure quotation and job card counters are updated
+      await getCurrentQuotationCounterNumber();
+      await getCurrentJobCardCounterNumber();
+      await getCurrentInvoiceCounterNumber();
+
+      await FirebaseFirestore.instance.collection('job_cards').add({
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'plate_number': plateNumber.text,
+        'plate_code': plateCode.text,
+        'country': countryId.value,
+        'city': cityId.value,
+        'year': year.text,
+        'color': colorId.value,
+        'vehicle_identification_number': vin.text,
+        'mileage_in': safeParseInt(mileageIn.value.text),
+        'mileage_out': safeParseInt(mileageOut.value.text),
+        'mileage_in_out_diff': safeParseInt(inOutDiff.value.text),
+        'customer': customerId.value,
+        'contact_name': customerEntityName.text,
+        'contact_number': customerEntityPhoneNumber.text,
+        'contact_email': customerEntityEmail.text,
+        'credit_limit': safeParseInt(customerCreditNumber.text),
+        'outstanding': safeParseInt(customerOutstanding.text),
+        'saleMan': customerSaleManId.value,
+        'branch': customerBranchId.value,
+        'currency': customerCurrencyId.value,
+        'rate': customerCurrencyRate.text,
+        'payment_method': payType.value,
+        'quotation_number': safeParseInt(quotationCounter.value.text),
+        'quotation_date': quotationDate.value.text,
+        'validity_days': quotationDays.value.text,
+        'validity_end_date': validityEndDate.value.text,
+        'reference_number': referenceNumber.value.text,
+        'delivery_time': deliveryTime.value.text,
+        'quotation_warrenty_days':
+            safeParseInt(quotationWarrentyDays.value.text),
+        'quotation_warrenty_km': safeParseInt(quotationWarrentyKM.value.text),
+        'quotation_notes': quotationNotes.text,
+        'job_number': safeParseInt(jobCardCounter.value.text),
+        'invoice_number': safeParseInt(invoiceCounter.value.text),
+        'lpo_number': lpoCounter.value.text,
+        'job_date': jobCardDate.value.text,
+        'invoice_date': invoiceDate.value.text,
+        'job_approval_date': approvalDate.value.text,
+        'job_start_date': startDate.value.text,
+        'job_finish_date': finishDate.value.text,
+        'job_delivery_date': deliveryDate.value.text,
+        'job_warrenty_days': safeParseInt(jobWarrentyDays.value.text),
+        'job_warrenty_km': safeParseInt(jobWarrentyKM.value.text),
+        'job_warrenty_end_date': jobWarrentyEndDate.value.text,
+        'job_min_test_km': safeParseInt(minTestKms.value.text),
+        'job_reference_1': reference1.value.text,
+        'job_reference_2': reference2.value.text,
+        'job_reference_3': reference3.value.text,
+        'job_notes': jobNotes.text,
+        'job_delivery_notes': deliveryNotes.text,
+      });
+
+      addingNewValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewValue.value = false;
+    }
   }
 
   getUserNameByUserId(userId) {
@@ -307,6 +429,32 @@ class JobCardController extends GetxController {
     companyId.value = prefs.getString('companyId')!;
   }
 
+  getCompanyDetails() {
+    try {
+      FirebaseFirestore.instance
+          .collection('companies')
+          .where(FieldPath.documentId, isEqualTo: companyId.value)
+          .snapshots()
+          .listen((company) {
+        companyDetails.assignAll(
+            Map<String, dynamic>.from(company.docs.first.data() as Map));
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  String? getCountryName(String countryId) {
+    try {
+      final country = allCountries.entries.firstWhere(
+        (country) => country.key == countryId,
+      );
+      return country.value['name'];
+    } catch (e) {
+      return '';
+    }
+  }
+
   inOutDiffCalculating() {
     inOutDiff.value.text =
         (int.parse(mileageOut.value.text) - int.parse(mileageIn.value.text))
@@ -349,7 +497,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  getCurrentJobCardCounterNumber() async {
+  Future<void> getCurrentJobCardCounterNumber() async {
     try {
       var jcnId = '';
       var jcnDoc = await FirebaseFirestore.instance
@@ -363,30 +511,75 @@ class JobCardController extends GetxController {
             await FirebaseFirestore.instance.collection('counters').add({
           'code': 'JCN',
           'description': 'Job Card Number',
-          'prefix': '',
-          'value': 0,
+          'prefix': 'JCN',
+          'value': 1,
+          'length': 0,
+          'separator': '-',
           'added_date': DateTime.now().toString(),
           'company_id': companyId.value,
           'status': true,
         });
         jcnId = newCounter.id;
+        jobCardCounter.value.text = "1";
       } else {
-        jcnId = jcnDoc.docs.first.id;
+        var firstDoc = jcnDoc.docs.first;
+        jcnId = firstDoc.id;
+        jobCardCounter.value.text = (firstDoc.data()['value'] + 1).toString();
       }
-      FirebaseFirestore.instance
+
+      await FirebaseFirestore.instance
           .collection('counters')
           .doc(jcnId)
-          .snapshots()
-          .listen((jcnCounter) {
-        jobCardCounter.value.text =
-            (jcnCounter.data()!['value'] + 1 ?? '').toString();
+          .update({
+        'value': int.parse(jobCardCounter.value.text), // Incrementing value
       });
     } catch (e) {
-      //
+      // print("Error in getCurrentJobCardCounterNumber: $e");
     }
   }
 
-  getCurrentQuotationCounterNumber() async {
+  Future<void> getCurrentInvoiceCounterNumber() async {
+    try {
+      var jciId = '';
+      var jciDoc = await FirebaseFirestore.instance
+          .collection('counters')
+          .where('code', isEqualTo: 'JCI')
+          .where('company_id', isEqualTo: companyId.value)
+          .get();
+
+      if (jciDoc.docs.isEmpty) {
+        var newCounter =
+            await FirebaseFirestore.instance.collection('counters').add({
+          'code': 'JCI',
+          'description': 'Job Card Invoice Number',
+          'prefix': 'JCI',
+          'value': 1,
+          'length': 0,
+          'separator': '-',
+          'added_date': DateTime.now().toString(),
+          'company_id': companyId.value,
+          'status': true,
+        });
+        jciId = newCounter.id;
+        invoiceCounter.value.text = "1";
+      } else {
+        var firstDoc = jciDoc.docs.first;
+        jciId = firstDoc.id;
+        invoiceCounter.value.text = (firstDoc.data()['value'] + 1).toString();
+      }
+
+      await FirebaseFirestore.instance
+          .collection('counters')
+          .doc(jciId)
+          .update({
+        'value': int.parse(invoiceCounter.value.text), // Incrementing value
+      });
+    } catch (e) {
+      // print("Error in getCurrentJobCardCounterNumber: $e");
+    }
+  }
+
+  Future<void> getCurrentQuotationCounterNumber() async {
     try {
       var qnId = '';
       var qnDoc = await FirebaseFirestore.instance
@@ -400,26 +593,28 @@ class JobCardController extends GetxController {
             await FirebaseFirestore.instance.collection('counters').add({
           'code': 'QN',
           'description': 'Quotation Number',
-          'prefix': '',
-          'value': 0,
+          'prefix': 'QN',
+          'value': 1,
+          'length': 0,
+          'separator': '-',
           'added_date': DateTime.now().toString(),
           'company_id': companyId.value,
           'status': true,
         });
         qnId = newCounter.id;
+        quotationCounter.value.text = "1";
       } else {
-        qnId = qnDoc.docs.first.id;
+        var firstDoc = qnDoc.docs.first;
+        qnId = firstDoc.id;
+        var currentValue = firstDoc.data()['value'] ?? 0;
+        quotationCounter.value.text = (currentValue + 1).toString();
       }
-      FirebaseFirestore.instance
-          .collection('counters')
-          .doc(qnId)
-          .snapshots()
-          .listen((qnCounter) {
-        quotationCounter.value.text =
-            (qnCounter.data()!['value'] + 1 ?? '').toString();
+
+      await FirebaseFirestore.instance.collection('counters').doc(qnId).update({
+        'value': int.parse(quotationCounter.value.text),
       });
     } catch (e) {
-      //
+      // print("Error in getCurrentQuotationCounterNumber: $e");
     }
   }
 

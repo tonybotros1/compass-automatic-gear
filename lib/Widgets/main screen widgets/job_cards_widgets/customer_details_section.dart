@@ -39,7 +39,7 @@ Container customerDetailsSection() {
                         suggestion['entity_name'].toString();
                   }).forEach(
                     (entry) {
-                      controller.carModel.clear();
+                    
                       controller.onSelectForCustomers(entry.key);
 
                       controller.customerId.value = entry.key;
@@ -201,7 +201,7 @@ Container customerDetailsSection() {
                           (entry) {
                             controller.customerCurrencyId.value = entry.key;
                             controller.customerCurrencyRate.text =
-                                (entry.value['rate'] ?? '0').toString();
+                                (entry.value['rate'] ?? '1').toString();
                           },
                         );
                       },
