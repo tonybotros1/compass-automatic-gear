@@ -213,6 +213,7 @@ ElevatedButton editSection(context, BranchesController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.onSelect(branchData['country_id']);
@@ -289,6 +290,7 @@ ElevatedButton newBranchesButton(BuildContext context,
       controller.city.clear();
       controller.cityId.value = '';
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

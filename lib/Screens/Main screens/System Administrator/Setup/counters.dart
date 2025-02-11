@@ -238,6 +238,7 @@ ElevatedButton editSection(context, CountersController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.code.text = counterData['code'] ?? '';
@@ -309,6 +310,7 @@ ElevatedButton newCounterButton(BuildContext context,
       controller.value.clear();
       controller.length.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

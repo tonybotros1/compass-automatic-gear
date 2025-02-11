@@ -85,6 +85,7 @@ ElevatedButton newResponsibilityButton(
         controller.responsibilityName.clear();
         controller.menuName.clear();
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -307,6 +308,7 @@ Widget editSection(
       style: editButtonStyle,
       onPressed: () async {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.responsibilityName.text = roleData['role_name'] ?? '';

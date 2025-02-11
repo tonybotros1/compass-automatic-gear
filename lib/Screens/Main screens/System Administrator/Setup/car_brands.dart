@@ -202,7 +202,7 @@ ElevatedButton valSectionInTheTable(
               );
             });
       },
-      child: const Text('Values'));
+      child: const Text('Models'));
 }
 
 ElevatedButton activeInActiveSection(CarBrandsController controller,
@@ -246,6 +246,7 @@ ElevatedButton editSection(context, CarBrandsController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.brandName.text = brandData['name'];
@@ -318,6 +319,7 @@ ElevatedButton newbrandButton(BuildContext context, BoxConstraints constraints,
       controller.logoSelectedError.value = false;
       controller.brandName.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

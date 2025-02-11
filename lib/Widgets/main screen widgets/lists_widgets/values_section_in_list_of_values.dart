@@ -189,6 +189,7 @@ ElevatedButton editSection(ListOfValuesController controller,
             controller.getValueNameById(valueData['restricted_by'])!;
         controller.masteredByIdForValues.value = '';
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -278,6 +279,7 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
       controller.valueName.clear();
       controller.restrictedBy.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

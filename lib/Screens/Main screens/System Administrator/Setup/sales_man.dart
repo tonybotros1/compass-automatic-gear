@@ -193,6 +193,7 @@ ElevatedButton editSection(context, SalesManController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.name.text = salemanData['name'] ?? '';
@@ -258,6 +259,7 @@ ElevatedButton newSalesManButton(BuildContext context,
       controller.name.clear();
       controller.target.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

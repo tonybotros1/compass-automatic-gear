@@ -214,6 +214,7 @@ ElevatedButton editSection(context, EntityInformationsController controller,
        
         controller.loadEntityData(EntityModel.fromJson(entityData));
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -273,6 +274,7 @@ ElevatedButton newContactButton(BuildContext context,
     onPressed: () {
       controller.clearAllVariables();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

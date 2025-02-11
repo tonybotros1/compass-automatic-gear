@@ -226,6 +226,7 @@ ElevatedButton editSection(context, CurrencyController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.code.text = currencyData['code'] ?? '';
@@ -291,6 +292,7 @@ ElevatedButton newCurrencyButton(BuildContext context,
       controller.name.clear();
       controller.rate.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

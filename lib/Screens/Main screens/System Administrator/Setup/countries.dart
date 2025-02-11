@@ -230,7 +230,7 @@ ElevatedButton valSectionInTheTable(CountriesController controller, countryId,
               );
             });
       },
-      child: const Text('Values'));
+      child: const Text('Cities'));
 }
 
 ElevatedButton activeInActiveSection(CountriesController controller,
@@ -275,6 +275,7 @@ ElevatedButton editSection(context, CountriesController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               final currency =
@@ -361,6 +362,7 @@ ElevatedButton newcountryButton(BuildContext context,
       controller.flagUrl.value = '';
       controller.flagSelectedError.value = false;
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

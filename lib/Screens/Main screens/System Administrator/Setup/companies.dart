@@ -265,6 +265,7 @@ ElevatedButton editEction(context, CompanyController controller,
             companyData['contact_details']['city'] ?? '';
 
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -353,6 +354,7 @@ ElevatedButton newCompanyButton(BuildContext context,
       controller.roleIDFromList.clear();
       controller.imageBytes = null;
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

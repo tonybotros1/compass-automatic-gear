@@ -170,6 +170,7 @@ ElevatedButton editSection(CarBrandsController controller,
       onPressed: () {
         controller.modelName.text = modelData['name'];
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -257,6 +258,7 @@ ElevatedButton newModelButton(BuildContext context, BoxConstraints constraints,
     onPressed: () {
       controller.modelName.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

@@ -61,6 +61,16 @@ var internalNotesButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+
+var openPDFButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.grey,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var viewButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blue,
   foregroundColor: Colors.white,
@@ -338,7 +348,7 @@ class ImagePickerService {
 
 class FilePickerService {
   static Future<void> pickFile(
-      Rx<Uint8List?> fileBytes, RxString fileType) async {
+      Rx<Uint8List?> fileBytes, RxString fileType, RxString fileName) async {
     try {
       html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
       uploadInput.accept = 'image/*,application/pdf';
@@ -348,6 +358,7 @@ class FilePickerService {
         final files = uploadInput.files;
         if (files != null && files.isNotEmpty) {
           final file = files.first;
+           fileName.value = file.name;
           final reader = html.FileReader();
 
           reader.readAsArrayBuffer(file);
@@ -364,23 +375,23 @@ class FilePickerService {
     }
   }
 
-  static void openPdf(Rx<Uint8List?> fileBytes, RxString fileType) {
+  static void openPdf(Uint8List? fileBytes, String fileType) {
     try {
-      if (fileBytes.value != null && fileType.value == 'application/pdf') {
-        final blob = html.Blob([fileBytes.value!], fileType.value);
+      if (fileBytes!= null && fileType == 'application/pdf') {
+        final blob = html.Blob([fileBytes], fileType);
         final url = html.Url.createObjectUrlFromBlob(blob);
         html.window.open(url, '_blank');
         html.Url.revokeObjectUrl(url);
       }
     } catch (e) {
-      print(e);
+      //
     }
   }
 
   static void saveFile(
-      Rx<Uint8List?> fileBytes, RxString fileType, String fileName) {
-    if (fileBytes.value != null) {
-      final blob = html.Blob([fileBytes.value!], fileType.value);
+      Uint8List? fileBytes, String fileType, String fileName) {
+    if (fileBytes != null) {
+      final blob = html.Blob([fileBytes], fileType);
       final url = html.Url.createObjectUrlFromBlob(blob);
       html.AnchorElement(href: url)
         ..setAttribute(

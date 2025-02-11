@@ -114,6 +114,7 @@ class JobCardController extends GetxController {
   FocusNode textFieldFocusNode = FocusNode();
   Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
   RxString fileType = RxString('');
+  RxString fileName = RxString('');
 
   @override
   void onInit() async {
@@ -213,9 +214,9 @@ class JobCardController extends GetxController {
     required type
   }) {
     internalNotes.add({
+      'file_name': fileName.value,
       'type': type,
-      'note' : fileBytes,
-      'file_type': fileType,
+      'note' : fileBytes.value,
       'user_id': userId.value,
       'time': DateTime.now(),
     });
@@ -230,14 +231,6 @@ class JobCardController extends GetxController {
           curve: Curves.easeInOut,
         );
       }
-    });
-  }
-
-  addInternalNote(currentUserId, note) {
-    internalNotes.add({
-      'note': note,
-      'currentUserID': currentUserId,
-      'time': DateTime.now(),
     });
   }
 

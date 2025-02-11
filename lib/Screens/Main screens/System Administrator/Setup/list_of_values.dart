@@ -224,6 +224,7 @@ ElevatedButton valSectionInTheTable(
         controller.listIDToWorkWithNewValue.value = listId;
         controller.getListValues(listId, listData['mastered_by']);
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -285,6 +286,7 @@ ElevatedButton editButton(
       controller.masteredByForList.text =
           controller.getListNameById(listData['mastered_by'])!;
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -359,6 +361,7 @@ ElevatedButton newListButton(BuildContext context, BoxConstraints constraints,
       controller.masteredByIdForList.value = '';
 
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

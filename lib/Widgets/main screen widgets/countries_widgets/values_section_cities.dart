@@ -183,6 +183,7 @@ ElevatedButton editSection(CountriesController controller,
         controller.cityName.text = cityData['name'];
         controller.cityCode.text = cityData['code'];
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -272,6 +273,7 @@ ElevatedButton newCityButton(BuildContext context, BoxConstraints constraints,
       controller.cityName.clear();
       controller.cityCode.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

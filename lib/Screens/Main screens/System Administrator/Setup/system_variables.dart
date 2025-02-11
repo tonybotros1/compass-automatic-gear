@@ -85,6 +85,7 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
       controller.code.clear();
       controller.value.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -253,6 +254,7 @@ ElevatedButton editSection(context, SystemVariablesController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.code.text = variableData['code'] ?? '';

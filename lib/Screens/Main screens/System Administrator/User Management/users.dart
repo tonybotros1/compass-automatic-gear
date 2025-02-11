@@ -79,6 +79,7 @@ class Users extends StatelessWidget {
         usersController.pass.clear();
         usersController.email.clear();
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               usersController.email.clear();
@@ -288,6 +289,7 @@ class Users extends StatelessWidget {
         style: editButtonStyle,
         onPressed: () {
           showDialog(
+             barrierDismissible: false,
               context: context,
               builder: (context) {
                 usersController.email.text = userData['email'];

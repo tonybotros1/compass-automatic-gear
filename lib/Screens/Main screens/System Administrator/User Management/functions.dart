@@ -85,6 +85,7 @@ ElevatedButton newScreenButton(
       controller.screenName.clear();
       controller.route.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -252,6 +253,7 @@ ElevatedButton editSection(context, controller, Map<String, dynamic> screenData,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.screenName.text = screenData['name'] ?? '';

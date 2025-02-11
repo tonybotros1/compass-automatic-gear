@@ -9,6 +9,7 @@ import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 Future internalNotesDialog(BuildContext context, JobCardController controller,
     BoxConstraints constraints) {
   return Get.dialog(
+    barrierDismissible: false,
     Dialog(
         child: Container(
       height: constraints.maxHeight,
@@ -30,14 +31,14 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
             child: Row(
               spacing: 20,
               children: [
-                SizedBox(
-                  width: 10,
-                ),
-                Icon(
-                  Icons.message_outlined,
-                  color: Colors.white,
-                  size: 25,
-                  weight: 2,
+                Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: Icon(
+                    Icons.message_outlined,
+                    color: Colors.white,
+                    size: 25,
+                    weight: 2,
+                  ),
                 ),
                 Text(
                   'Internal Notes',
@@ -45,6 +46,18 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                       color: Colors.white,
                       fontSize: 25,
                       fontWeight: FontWeight.bold),
+                ),
+                Spacer(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: IconButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      icon: Icon(
+                        Icons.close,
+                        color: Colors.red,
+                      )),
                 )
               ],
             ),
@@ -149,16 +162,18 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                                           color: Colors.grey[800],
                                         ),
                                       )
-                                    : note['type'] == 'Image'
+                                    : note['type'] == 'image'
                                         ? Image.memory(
                                             note['note'],
                                             fit: BoxFit.contain,
                                             height: 200,
                                           )
                                         : Container(
+                                            constraints:
+                                                BoxConstraints(maxWidth: 300),
                                             padding: EdgeInsets.all(8),
                                             decoration: BoxDecoration(
-                                                color: Colors.grey[300],
+                                                color: Colors.grey[400],
                                                 borderRadius:
                                                     BorderRadius.circular(5)),
                                             child: Column(
@@ -166,26 +181,52 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                                                   CrossAxisAlignment.center,
                                               spacing: 10,
                                               children: [
-                                                Text('PDF'),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Image.asset(
+                                                          'assets/pdf.png',
+                                                          width: 50),
+                                                    ),
+                                                    Text(
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      note['file_name'] ??
+                                                          'No Name',
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                    ),
+                                                  ],
+                                                ),
                                                 Row(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
                                                   spacing: 20,
                                                   children: [
                                                     ElevatedButton(
+                                                        style:
+                                                            openPDFButtonStyle,
                                                         onPressed: () {
                                                           FilePickerService
                                                               .openPdf(
-                                                                 note['note'],
-                                                                note['file_type']);
+                                                                  note['note'],
+                                                                  note['type']);
                                                         },
                                                         child: Text('Open')),
                                                     ElevatedButton(
+                                                        style:
+                                                            openPDFButtonStyle,
                                                         onPressed: () {
                                                           FilePickerService
                                                               .saveFile(
-                                                                 note['note'],
-                                                                note['file_type'],
+                                                                  note['note'],
+                                                                  note['type'],
                                                                   '');
                                                         },
                                                         child:
@@ -222,8 +263,8 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                       padding: const EdgeInsets.fromLTRB(8, 10, 0, 16),
                       child: InkWell(
                           onTap: () {
-                            FilePickerService.pickFile(
-                                controller.fileBytes, controller.fileType);
+                            FilePickerService.pickFile(controller.fileBytes,
+                                controller.fileType, controller.fileName);
                           },
                           child: Icon(
                             Icons.attach_file_rounded,
@@ -335,10 +376,11 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                                     await controller.addNewMediaNote(
                                         type: controller.fileType.value
                                                 .startsWith("image/")
-                                            ? 'Image'
-                                            : 'PDF');
+                                            ? 'image'
+                                            : 'application/pdf');
                                     controller.fileBytes.value = null;
                                     controller.fileType.value = '';
+                                    controller.fileName.value = '';
                                   }
                                   Future.delayed(Duration(milliseconds: 100),
                                       () {

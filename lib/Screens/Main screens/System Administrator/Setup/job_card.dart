@@ -193,6 +193,7 @@ ElevatedButton editSection(context, JobCardController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
+           barrierDismissible: false,
             context: context,
             builder: (context) {
               // controller.onSelect(branchData['country_id']);
@@ -269,6 +270,7 @@ ElevatedButton newJobCardButton(BuildContext context,
       // controller.city.clear();
       // controller.cityId.value = '';
       showDialog(
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -340,4 +342,3 @@ ElevatedButton newJobCardButton(BuildContext context,
     child: const Text('New Card'),
   );
 }
-

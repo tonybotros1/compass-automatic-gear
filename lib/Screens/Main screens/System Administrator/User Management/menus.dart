@@ -265,6 +265,7 @@ ElevatedButton viewSection(controller, menuId, context, constraints) {
             await controller.getMenusScreens(menuId);
             controller.setButtonLoading(menuId, false); // Stop loading
             showDialog(
+               barrierDismissible: false,
                 context: context,
                 builder: (context) {
                   controller.selectedMenuID.value = '';
@@ -321,6 +322,7 @@ ElevatedButton newMenuButton(
       controller.menuName.clear();
       controller.description.clear();
       showDialog(
+         barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(
