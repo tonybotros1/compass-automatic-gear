@@ -105,15 +105,15 @@ class JobCardController extends GetxController {
   RxBool isCreditSelected = RxBool(false);
   RxString payType = RxString('Cash');
   DateFormat format = DateFormat("dd-MM-yyyy");
-  // internal notes section
-  RxBool loadingInternalNotes = RxBool(false);
   RxBool isQuotationExpanded = RxBool(false);
   RxBool isJobCardExpanded = RxBool(true);
-  final ScrollController scrollController = ScrollController();
   RxMap allUsers = RxMap();
+  RxString userId = RxString('');
+  // internal notes section
+  RxBool loadingInternalNotes = RxBool(false);
+  final ScrollController scrollController = ScrollController();
   RxList<Map> internalNotes = RxList<Map>([]);
   Rx<TextEditingController> internalNote = TextEditingController().obs;
-  RxString userId = RxString('');
   RxString noteMessage = RxString('');
   final ScrollController scrollControllerForNotes = ScrollController();
   FocusNode textFieldFocusNode = FocusNode();
@@ -127,19 +127,16 @@ class JobCardController extends GetxController {
   void onInit() async {
     super.onInit();
     await getCompanyId();
+    getAllCustomers();
+    getCarBrands();
+    getCountries();
     getCompanyDetails();
-    // getCurrentJobCardCounterNumber();
-    // getCurrentQuotationCounterNumber();
     getUserId();
     getAllUsers();
     getSalesMan();
     getBranches();
-    getBranches();
     getCurrencies();
-    getAllCustomers();
     getColors();
-    getCarBrands();
-    getCountries();
     getAllJobCards();
   }
 
@@ -193,9 +190,10 @@ class JobCardController extends GetxController {
     reference3.value.clear();
     jobNotes.clear();
     deliveryNotes.clear();
+    internalNotes.clear();
   }
 
-  int safeParseInt(String? value, {int defaultValue = 0}) {
+  int safeParseInt(String? value, {defaultValue = ''}) {
     if (value == null || value.trim().isEmpty) return defaultValue;
     return int.tryParse(value) ?? defaultValue;
   }
@@ -208,9 +206,10 @@ class JobCardController extends GetxController {
       // Ensure quotation and job card counters are updated
       await getCurrentQuotationCounterNumber();
       await getCurrentJobCardCounterNumber();
-      await getCurrentInvoiceCounterNumber();
+      // await getCurrentInvoiceCounterNumber();
 
       await FirebaseFirestore.instance.collection('job_cards').add({
+        'company_id': companyId.value,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
         'plate_number': plateNumber.text,
@@ -450,6 +449,47 @@ class JobCardController extends GetxController {
         (country) => country.key == countryId,
       );
       return country.value['name'];
+    } catch (e) {
+      return '';
+    }
+  }
+
+  String? getBrandName(String brandId) {
+    try {
+      final brand = allBrands.entries.firstWhere(
+        (brand) => brand.key == brandId,
+      );
+      return brand.value['name'];
+    } catch (e) {
+      return '';
+    }
+  }
+
+  Future<String> getCityName(String countryId, String cityId) async {
+    try {
+      var cities = await FirebaseFirestore.instance
+          .collection('all_countries')
+          .doc(countryId)
+          .collection('values')
+          .doc(cityId)
+          .get();
+
+      if (cities.exists) {
+        return cities.data()!['name'].toString();
+      } else {
+        return 'ffffffffff';
+      }
+    } catch (e) {
+      return ''; // Return empty string on error
+    }
+  }
+
+  String? getCustomerName(String customerId) {
+    try {
+      final customer = allCustomers.entries.firstWhere(
+        (customer) => customer.key == customerId,
+      );
+      return customer.value['entity_name'];
     } catch (e) {
       return '';
     }

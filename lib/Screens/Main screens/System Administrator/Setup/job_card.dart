@@ -97,22 +97,71 @@ Widget tableOfScreens(
     columns: [
       DataColumn(
         label: AutoSizedText(
+          text: 'Job No.',
+          constraints: constraints,
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'LPO No.',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Car Brand',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Plate No.',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
           text: 'Code',
-          constraints: constraints,
         ),
         onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Name',
+          text: 'City',
         ),
         onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Creation Date',
+          text: 'Customer Name',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Invoice No.',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Inv Date',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Job Date',
         ),
         onSort: controller.onSort,
       ),
@@ -145,47 +194,70 @@ DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
     constraints, branchId, JobCardController controller) {
   return DataRow(cells: [
     DataCell(Text(
-      branchData['code'] ?? 'no code',
+      '${branchData['job_number']}',
     )),
     DataCell(
       Text(
-        branchData['name'] ?? 'no name',
+        '${branchData['lpo_number']}',
       ),
     ),
     DataCell(
       Text(
-        branchData['added_date'] != null && branchData['added_date'] != ''
-            ? textToDate(branchData['added_date']) //
-            : 'N/A',
+        '${controller.getBrandName(branchData['car_brand'])}',
+      ),
+    ),
+    DataCell(
+      Text(
+        '${branchData['plate_number']}',
+      ),
+    ),
+    DataCell(
+      Text(
+        '${branchData['plate_code']}',
+      ),
+    ),
+  DataCell(
+  FutureBuilder<String>(
+    future: controller.getCityName(branchData['country'], branchData['city']),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Text('Loading...');
+      } else if (snapshot.hasError) {
+        return Text('Error');
+      } else {
+        return Text(snapshot.data ?? ''); 
+      }
+    },
+  ),
+),
+
+    DataCell(
+      Text(
+        '${controller.getCustomerName(branchData['customer'])}',
+      ),
+    ),
+    DataCell(
+      Text(
+        '${branchData['invoice_number']}',
+      ),
+    ),
+    DataCell(
+      Text(
+        '${textToDate(branchData['invoice_date'])}',
+      ),
+    ),
+    DataCell(
+      Text(
+        '${textToDate(branchData['job_date'])}',
       ),
     ),
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 5),
-          child: editSection(
-              context, controller, branchData, constraints, branchId),
-        ),
-        deleteSection(controller, branchId, context),
+        editSection(context, controller, branchData, constraints, branchId),
       ],
     )),
   ]);
-}
-
-ElevatedButton deleteSection(JobCardController controller, branchId, context) {
-  return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            controller: controller,
-            content: "The branch will be deleted permanently",
-            onPressed: () {
-              // controller.deleteBranch(branchId);
-            });
-      },
-      child: const Text("Delete"));
 }
 
 ElevatedButton editSection(context, JobCardController controller,
