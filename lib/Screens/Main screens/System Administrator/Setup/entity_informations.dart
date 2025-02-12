@@ -141,32 +141,28 @@ Widget tableOfScreens(
 DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
     constraints, entityId, EntityInformationsController controller) {
   return DataRow(cells: [
-    DataCell(Text(
-      entityData['entity_name'] ?? 'no name',
-    )),
-    DataCell(Text(
-      (entityData['entity_phone'] as List)
-              .map((phoneData) => phoneData['number'])
-              .take(2)
-              .join('/') +
-          ((entityData['entity_phone'].length > 2) ? '...' : ''),
-    )),
+    DataCell(
+      textForDataRowInTable(text:  entityData['entity_name'] ?? 'no name')
+     ),
+    DataCell(
+       textForDataRowInTable(text: (entityData['entity_phone'] as List ).map((phoneData) => phoneData['number']).take(2).join('/')),
+   
+    ),
     DataCell(
       Text(
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
         entityData['added_date'] != null && entityData['added_date'] != ''
             ? textToDate(entityData['added_date']) //
             : 'N/A',
       ),
     ),
     DataCell(Row(
+      spacing: 5,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         activeInActiveSection(controller, entityData, entityId),
-        Padding(
-          padding: const EdgeInsets.only(right: 5, left: 5),
-          child: editSection(
-              context, controller, entityData, constraints, entityId),
-        ),
+        editSection(context, controller, entityData, constraints, entityId),
         deleteSection(controller, entityId, context),
       ],
     )),
@@ -211,10 +207,9 @@ ElevatedButton editSection(context, EntityInformationsController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-       
         controller.loadEntityData(EntityModel.fromJson(entityData));
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -274,7 +269,7 @@ ElevatedButton newContactButton(BuildContext context,
     onPressed: () {
       controller.clearAllVariables();
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

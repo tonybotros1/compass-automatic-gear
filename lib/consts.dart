@@ -366,7 +366,7 @@ class FilePickerService {
         final files = uploadInput.files;
         if (files != null && files.isNotEmpty) {
           final file = files.first;
-           fileName.value = file.name;
+          fileName.value = file.name;
           final reader = html.FileReader();
 
           reader.readAsArrayBuffer(file);
@@ -385,7 +385,7 @@ class FilePickerService {
 
   static void openPdf(Uint8List? fileBytes, String fileType) {
     try {
-      if (fileBytes!= null && fileType == 'application/pdf') {
+      if (fileBytes != null && fileType == 'application/pdf') {
         final blob = html.Blob([fileBytes], fileType);
         final url = html.Url.createObjectUrlFromBlob(blob);
         html.window.open(url, '_blank');
@@ -396,8 +396,7 @@ class FilePickerService {
     }
   }
 
-  static void saveFile(
-      Uint8List? fileBytes, String fileType, String fileName) {
+  static void saveFile(Uint8List? fileBytes, String fileType, String fileName) {
     if (fileBytes != null) {
       final blob = html.Blob([fileBytes], fileType);
       final url = html.Url.createObjectUrlFromBlob(blob);
@@ -408,4 +407,19 @@ class FilePickerService {
       html.Url.revokeObjectUrl(url);
     }
   }
+}
+
+Widget textForDataRowInTable({
+  required String text,
+}) {
+  return Container(
+    constraints: BoxConstraints(
+      maxWidth: 150
+    ),
+    child: Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    ),
+  );
 }

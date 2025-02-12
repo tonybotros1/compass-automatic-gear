@@ -193,64 +193,38 @@ Widget tableOfScreens(
 DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
     constraints, branchId, JobCardController controller) {
   return DataRow(cells: [
-    DataCell(Text(
-      '${branchData['job_number']}',
-    )),
+    DataCell(textForDataRowInTable(text: '${branchData['job_number']}')),
+    DataCell(textForDataRowInTable(text: '${branchData['lpo_number']}')),
+    DataCell(textForDataRowInTable(
+        text: '${controller.getBrandName(branchData['car_brand'])}')),
     DataCell(
       Text(
-        '${branchData['lpo_number']}',
-      ),
-    ),
-    DataCell(
-      Text(
-        '${controller.getBrandName(branchData['car_brand'])}',
-      ),
-    ),
-    DataCell(
-      Text(
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
         '${branchData['plate_number']}',
       ),
     ),
+    DataCell(textForDataRowInTable(text: '${branchData['plate_code']}')),
     DataCell(
-      Text(
-        '${branchData['plate_code']}',
+      FutureBuilder<String>(
+        future:
+            controller.getCityName(branchData['country'], branchData['city']),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Text('Loading...');
+          } else if (snapshot.hasError) {
+            return Text('Error');
+          } else {
+            return textForDataRowInTable(text: '${snapshot.data}');
+          }
+        },
       ),
     ),
-  DataCell(
-  FutureBuilder<String>(
-    future: controller.getCityName(branchData['country'], branchData['city']),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Text('Loading...');
-      } else if (snapshot.hasError) {
-        return Text('Error');
-      } else {
-        return Text(snapshot.data ?? ''); 
-      }
-    },
-  ),
-),
-
-    DataCell(
-      Text(
-        '${controller.getCustomerName(branchData['customer'])}',
-      ),
-    ),
-    DataCell(
-      Text(
-        '${branchData['invoice_number']}',
-      ),
-    ),
-    DataCell(
-      Text(
-        '${textToDate(branchData['invoice_date'])}',
-      ),
-    ),
-    DataCell(
-      Text(
-        '${textToDate(branchData['job_date'])}',
-      ),
-    ),
+    DataCell(textForDataRowInTable(
+        text: '${controller.getCustomerName(branchData['customer'])}')),
+    DataCell(textForDataRowInTable(text: '${branchData['invoice_number']}')),
+    DataCell(textForDataRowInTable(text: '${textToDate(branchData['invoice_date'])}')),
+    DataCell(textForDataRowInTable(text: '${textToDate(branchData['job_date'])}')),
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
