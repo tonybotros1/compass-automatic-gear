@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/consts.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -77,7 +78,7 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> search = TextEditingController().obs;
   Rx<TextEditingController> searchForInvoiceItems = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
-  RxBool loadingInvoiceItems = RxBool(true);
+  RxBool loadingInvoiceItems = RxBool(false);
   final RxList<DocumentSnapshot> allJobCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allInvoiceItems = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredJobCards =
@@ -110,9 +111,12 @@ class JobCardController extends GetxController {
   RxMap allUsers = RxMap();
   RxString userId = RxString('');
   // internal notes section
+  RxBool addingNewInternalNotProcess = RxBool(false);
+  RxBool jobCardAdded = RxBool(false);
+  RxString curreentJobCardId = RxString('');
+  RxBool canAddInternalNotes = RxBool(false);
   RxBool loadingInternalNotes = RxBool(false);
   final ScrollController scrollController = ScrollController();
-  RxList<Map> internalNotes = RxList<Map>([]);
   Rx<TextEditingController> internalNote = TextEditingController().obs;
   RxString noteMessage = RxString('');
   final ScrollController scrollControllerForNotes = ScrollController();
@@ -120,6 +124,8 @@ class JobCardController extends GetxController {
   Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
   RxString fileType = RxString('');
   RxString fileName = RxString('');
+  RxString imageUrl = RxString('');
+  RxString pdfUrl = RxString('');
   // invoice items section
   RxBool addingNewinvoiceItemsValue = RxBool(false);
 
@@ -147,6 +153,8 @@ class JobCardController extends GetxController {
   }
 
   clearValues() {
+    curreentJobCardId.value = '';
+    jobCardAdded.value = false;
     carBrand.clear();
     carBrandId.value = '';
     carModel.clear();
@@ -190,96 +198,267 @@ class JobCardController extends GetxController {
     reference3.value.clear();
     jobNotes.clear();
     deliveryNotes.clear();
-    internalNotes.clear();
   }
 
-  int safeParseInt(String? value, {defaultValue = ''}) {
-    if (value == null || value.trim().isEmpty) return defaultValue;
-    return int.tryParse(value) ?? defaultValue;
+  // int safeParseInt(String? value, {defaultValue = ''}) {
+  //   if (value == null || value.trim().isEmpty) return defaultValue;
+  //   return int.tryParse(value) ?? defaultValue;
+  // }
+
+  loadValues(Map<String, dynamic> data) {
+    carBrandId.value = data['car_brand'];
+    carBrand.text = getdataName(data['car_brand'], allBrands)!;
+    carModelId.value = data['car_model'];
+    getModelName(data['car_brand'], data['car_model']).then((value) {
+      carModel.text = value;
+    });
+    plateNumber.text = data['plate_number'];
+    plateCode.text = data['plate_code'];
+    countryId.value = data['country'];
+    country.text = getdataName(data['country'], allCountries)!;
+    cityId.value = data['city'];
+    getCityName(data['country'], data['city']).then((value) {
+      city.text = value;
+    });
+    year.text = data['year'];
+    colorId.value = data['color'];
+    color.text = getdataName(data['color'], allColors)!;
+    vin.text = data['vehicle_identification_number'];
+    mileageIn.value.text = data['mileage_in'];
+    mileageOut.value.text = data['mileage_out'];
+    inOutDiff.value.text = data['mileage_in_out_diff'];
+    customerId.value = data['customer'];
+    customerName.text =
+        getdataName(data['customer'], allCustomers, title: 'entity_name')!;
+    customerEntityName.text = data['contact_name'];
+    customerEntityPhoneNumber.text = data['contact_number'];
+    customerEntityEmail.text = data['contact_email'];
+    customerCreditNumber.text = data['credit_limit'];
+    customerOutstanding.text = data['outstanding'];
+    customerSaleManId.value = data['saleMan'];
+    customerSaleMan.text = getdataName(data['saleMan'], salesManMap)!;
+    customerBranchId.value = data['branch'];
+    customerBranch.text = getdataName(data['branch'], allBranches)!;
+    customerCurrencyId.value = data['currency'];
+    customerCurrency.text = getdataName(data['currency'], allCurrencies)!;
+    customerCurrencyRate.text = data['rate'];
+    payType.value = data['payment_method'];
+    data['payment_method'] == 'Cash'
+        ? (isCashSelected.value = true) && (isCreditSelected.value = false)
+        : (isCreditSelected.value = true) && (isCashSelected.value = false);
+    quotationCounter.value.text = data['quotation_number'];
+    quotationDate.value.text = textToDate(data['quotation_date']);
+    quotationDays.value.text = data['validity_days'];
+    validityEndDate.value.text = textToDate(data['validity_end_date']);
+    referenceNumber.value.text = data['reference_number'];
+    deliveryTime.value.text = data['delivery_time'];
+    quotationWarrentyDays.value.text = data['quotation_warrenty_days'];
+    quotationWarrentyKM.value.text = data['quotation_warrenty_km'];
+    quotationNotes.text = data['quotation_notes'];
+    jobCardCounter.value.text = data['job_number'];
+    invoiceCounter.value.text = data['invoice_number'];
+    lpoCounter.value.text = data['lpo_number'];
+    jobCardDate.value.text = textToDate(data['job_date']);
+    invoiceDate.value.text = textToDate(data['invoice_date']);
+    approvalDate.value.text = textToDate(data['job_approval_date']);
+    startDate.value.text = textToDate(data['job_start_date']);
+    finishDate.value.text = textToDate(data['job_finish_date']);
+    deliveryDate.value.text = textToDate(data['job_delivery_date']);
+    jobWarrentyDays.value.text = data['job_warrenty_days'];
+    jobWarrentyKM.value.text = data['job_warrenty_km'];
+    jobWarrentyEndDate.value.text = textToDate(data['job_warrenty_end_date']);
+    minTestKms.value.text = data['job_min_test_km'];
+    reference1.value.text = data['job_reference_1'];
+    reference2.value.text = data['job_reference_2'];
+    reference3.value.text = data['job_reference_3'];
+    jobNotes.text = data['job_notes'];
+    deliveryNotes.text = data['job_delivery_notes'];
   }
 
   Future<void> addNewJobCardAndQuotation() async {
     try {
-      // Indicate that a new value is being added
       addingNewValue.value = true;
+      var finalInternalNotes = [];
 
-      // Ensure quotation and job card counters are updated
       await getCurrentQuotationCounterNumber();
       await getCurrentJobCardCounterNumber();
-      // await getCurrentInvoiceCounterNumber();
-
-      await FirebaseFirestore.instance.collection('job_cards').add({
-        'company_id': companyId.value,
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': plateCode.text,
-        'country': countryId.value,
-        'city': cityId.value,
-        'year': year.text,
-        'color': colorId.value,
-        'vehicle_identification_number': vin.text,
-        'mileage_in': safeParseInt(mileageIn.value.text),
-        'mileage_out': safeParseInt(mileageOut.value.text),
-        'mileage_in_out_diff': safeParseInt(inOutDiff.value.text),
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': safeParseInt(customerCreditNumber.text),
-        'outstanding': safeParseInt(customerOutstanding.text),
-        'saleMan': customerSaleManId.value,
-        'branch': customerBranchId.value,
-        'currency': customerCurrencyId.value,
-        'rate': customerCurrencyRate.text,
-        'payment_method': payType.value,
-        'quotation_number': safeParseInt(quotationCounter.value.text),
-        'quotation_date': quotationDate.value.text,
-        'validity_days': quotationDays.value.text,
-        'validity_end_date': validityEndDate.value.text,
-        'reference_number': referenceNumber.value.text,
-        'delivery_time': deliveryTime.value.text,
-        'quotation_warrenty_days':
-            safeParseInt(quotationWarrentyDays.value.text),
-        'quotation_warrenty_km': safeParseInt(quotationWarrentyKM.value.text),
-        'quotation_notes': quotationNotes.text,
-        'job_number': safeParseInt(jobCardCounter.value.text),
-        'invoice_number': safeParseInt(invoiceCounter.value.text),
-        'lpo_number': lpoCounter.value.text,
-        'job_date': jobCardDate.value.text,
-        'invoice_date': invoiceDate.value.text,
-        'job_approval_date': approvalDate.value.text,
-        'job_start_date': startDate.value.text,
-        'job_finish_date': finishDate.value.text,
-        'job_delivery_date': deliveryDate.value.text,
-        'job_warrenty_days': safeParseInt(jobWarrentyDays.value.text),
-        'job_warrenty_km': safeParseInt(jobWarrentyKM.value.text),
-        'job_warrenty_end_date': jobWarrentyEndDate.value.text,
-        'job_min_test_km': safeParseInt(minTestKms.value.text),
-        'job_reference_1': reference1.value.text,
-        'job_reference_2': reference2.value.text,
-        'job_reference_3': reference3.value.text,
-        'job_notes': jobNotes.text,
-        'job_delivery_notes': deliveryNotes.text,
-      });
-
+      // if (internalNotes.isNotEmpty && canAddInternalNotes.isTrue) {
+      //   finalInternalNotes = await addNewInternalNotes();
+      // }
+      if (jobCardAdded.isFalse) {
+        var newJob =
+            await FirebaseFirestore.instance.collection('job_cards').add({
+          'internal_notes': finalInternalNotes,
+          'company_id': companyId.value,
+          'car_brand': carBrandId.value,
+          'car_model': carModelId.value,
+          'plate_number': plateNumber.text,
+          'plate_code': plateCode.text,
+          'country': countryId.value,
+          'city': cityId.value,
+          'year': year.text,
+          'color': colorId.value,
+          'vehicle_identification_number': vin.text,
+          'mileage_in': mileageIn.value.text,
+          'mileage_out': mileageOut.value.text,
+          'mileage_in_out_diff': inOutDiff.value.text,
+          'customer': customerId.value,
+          'contact_name': customerEntityName.text,
+          'contact_number': customerEntityPhoneNumber.text,
+          'contact_email': customerEntityEmail.text,
+          'credit_limit': customerCreditNumber.text,
+          'outstanding': customerOutstanding.text,
+          'saleMan': customerSaleManId.value,
+          'branch': customerBranchId.value,
+          'currency': customerCurrencyId.value,
+          'rate': customerCurrencyRate.text,
+          'payment_method': payType.value,
+          'quotation_number': quotationCounter.value.text,
+          'quotation_date': quotationDate.value.text,
+          'validity_days': quotationDays.value.text,
+          'validity_end_date': validityEndDate.value.text,
+          'reference_number': referenceNumber.value.text,
+          'delivery_time': deliveryTime.value.text,
+          'quotation_warrenty_days': quotationWarrentyDays.value.text,
+          'quotation_warrenty_km': quotationWarrentyKM.value.text,
+          'quotation_notes': quotationNotes.text,
+          'job_number': jobCardCounter.value.text,
+          'invoice_number': invoiceCounter.value.text,
+          'lpo_number': lpoCounter.value.text,
+          'job_date': jobCardDate.value.text,
+          'invoice_date': invoiceDate.value.text,
+          'job_approval_date': approvalDate.value.text,
+          'job_start_date': startDate.value.text,
+          'job_finish_date': finishDate.value.text,
+          'job_delivery_date': deliveryDate.value.text,
+          'job_warrenty_days': jobWarrentyDays.value.text,
+          'job_warrenty_km': jobWarrentyKM.value.text,
+          'job_warrenty_end_date': jobWarrentyEndDate.value.text,
+          'job_min_test_km': minTestKms.value.text,
+          'job_reference_1': reference1.value.text,
+          'job_reference_2': reference2.value.text,
+          'job_reference_3': reference3.value.text,
+          'job_notes': jobNotes.text,
+          'job_delivery_notes': deliveryNotes.text,
+        });
+        jobCardAdded.value = true;
+        curreentJobCardId.value = newJob.id;
+      }
+      canAddInternalNotes.value = true;
       addingNewValue.value = false;
-      Get.back();
     } catch (e) {
+      print(e);
+      canAddInternalNotes.value = false;
       addingNewValue.value = false;
     }
   }
 
-  getUserNameByUserId(userId) {
+  addNewInternalNote(String jobcardID, Map<String, dynamic> note) async {
     try {
-      final user = allUsers.entries.firstWhere(
-        (user) => user.key == userId,
-      );
-      return user.value['user_name'];
+      addingNewInternalNotProcess.value = true;
+      var jobDoc = FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobcardID)
+          .collection('internal_notes');
+      if (note['type'] == 'Text') {
+        await jobDoc.add(note);
+      } else if (note['type'] == 'image') {
+        final Reference storageRef = FirebaseStorage.instance
+            .ref()
+            .child('internal_notes/${note['file_name']}_${DateTime.now()}.png');
+        final UploadTask uploadTask = storageRef.putData(
+          note['note'],
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        await uploadTask.then((p0) async {
+          imageUrl.value = await storageRef.getDownloadURL();
+        });
+        await jobDoc.add({
+          'file_name': note['file_name'],
+          'type': note['type'],
+          'note': imageUrl.value,
+          'user_id': note['user_id'],
+          'time': note['time'],
+        });
+      } else if (note['type'] == 'application/pdf') {
+        final Reference storageRef = FirebaseStorage.instance
+            .ref()
+            .child('internal_notes/${note['file_name']}_${DateTime.now()}.pdf');
+        final UploadTask uploadTask = storageRef.putData(
+          note['note'],
+          SettableMetadata(contentType: 'application/pdf'),
+        );
+
+        await uploadTask.then((p0) async {
+          pdfUrl.value = await storageRef.getDownloadURL();
+        });
+        await jobDoc.add({
+          'file_name': note['file_name'],
+          'type': note['type'],
+          'note': pdfUrl.value,
+          'user_id': note['user_id'],
+          'time': note['time'],
+        });
+      }
+      addingNewInternalNotProcess.value = false;
     } catch (e) {
-      return '';
+      addingNewInternalNotProcess.value = false;
     }
   }
+
+  // addNewInternalNotes() async {
+  //   try {
+  //     var finalInternalNotes = [];
+  //     for (var element in internalNotes) {
+  //       if (element['type'] == 'Text') {
+  //         finalInternalNotes.add(element);
+  //       } else if (element['type'] == 'image') {
+  //         final Reference storageRef = FirebaseStorage.instance.ref().child(
+  //             'internal_notes/${element['file_name']}_${DateTime.now()}.png');
+  //         final UploadTask uploadTask = storageRef.putData(
+  //           element['note'],
+  //           SettableMetadata(contentType: 'image/png'),
+  //         );
+
+  //         await uploadTask.then((p0) async {
+  //           imageUrl.value = await storageRef.getDownloadURL();
+  //         });
+  //         finalInternalNotes.add({
+  //           'file_name': element['file_name'],
+  //           'type': element['type'],
+  //           'note': imageUrl.value,
+  //           'user_id': element['user_id'],
+  //           'time': element['time'],
+  //         });
+  //       } else if (element['type'] == 'application/pdf') {
+  //         final Reference storageRef = FirebaseStorage.instance.ref().child(
+  //             'internal_notes/${element['file_name']}_${DateTime.now()}.pdf');
+  //         final UploadTask uploadTask = storageRef.putData(
+  //           element['note'],
+  //           SettableMetadata(contentType: 'application/pdf'),
+  //         );
+
+  //         await uploadTask.then((p0) async {
+  //           pdfUrl.value = await storageRef.getDownloadURL();
+  //         });
+
+  //         finalInternalNotes.add({
+  //           'file_name': element['file_name'],
+  //           'type': element['type'],
+  //           'note': pdfUrl.value, // Store PDF URL
+  //           'user_id': element['user_id'],
+  //           'time': element['time'],
+  //         });
+  //       }
+  //     }
+  //     return finalInternalNotes;
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
+
+  
 
   getAllUsers() {
     try {
@@ -313,40 +492,13 @@ class JobCardController extends GetxController {
     return combinedItems;
   }
 
-  List<Map<String, dynamic>> get sortedNotes {
-    // Convert RxList<Map<dynamic, dynamic>> to List<Map<String, dynamic>>
-    final notes = internalNotes
-        .map((e) => Map<String, dynamic>.from(e)) // Explicit type conversion
-        .toList();
-
-    notes.sort((a, b) => a['time'].compareTo(b['time']));
-    return notes;
-  }
 
   getUserId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     userId.value = prefs.getString('userId')!;
   }
 
-  addNewNote() {
-    internalNotes.add({
-      'type': 'Text',
-      'note': noteMessage.value.trim(),
-      'user_id': userId.value,
-      'time': DateTime.now(),
-    });
-  }
-
-  addNewMediaNote({required type}) {
-    internalNotes.add({
-      'file_name': fileName.value,
-      'type': type,
-      'note': fileBytes.value,
-      'user_id': userId.value,
-      'time': DateTime.now(),
-    });
-  }
-
+ 
   void scrollToBottom() {
     Future.delayed(Duration(milliseconds: 100), () {
       if (scrollController.hasClients) {
@@ -413,13 +565,12 @@ class JobCardController extends GetxController {
     });
   }
 
-// this function is to get all sales man in the system
   getSalesMan() {
     FirebaseFirestore.instance
         .collection('sales_man')
         .snapshots()
-        .listen((saleMan) {
-      salesManMap.value = {for (var doc in saleMan.docs) doc.id: doc.data()};
+        .listen((branches) {
+      salesManMap.value = {for (var doc in branches.docs) doc.id: doc.data()};
     });
   }
 
@@ -443,28 +594,6 @@ class JobCardController extends GetxController {
     }
   }
 
-  String? getCountryName(String countryId) {
-    try {
-      final country = allCountries.entries.firstWhere(
-        (country) => country.key == countryId,
-      );
-      return country.value['name'];
-    } catch (e) {
-      return '';
-    }
-  }
-
-  String? getBrandName(String brandId) {
-    try {
-      final brand = allBrands.entries.firstWhere(
-        (brand) => brand.key == brandId,
-      );
-      return brand.value['name'];
-    } catch (e) {
-      return '';
-    }
-  }
-
   Future<String> getCityName(String countryId, String cityId) async {
     try {
       var cities = await FirebaseFirestore.instance
@@ -477,21 +606,29 @@ class JobCardController extends GetxController {
       if (cities.exists) {
         return cities.data()!['name'].toString();
       } else {
-        return 'ffffffffff';
+        return '';
       }
     } catch (e) {
       return ''; // Return empty string on error
     }
   }
 
-  String? getCustomerName(String customerId) {
+  Future<String> getModelName(String brandId, String modelId) async {
     try {
-      final customer = allCustomers.entries.firstWhere(
-        (customer) => customer.key == customerId,
-      );
-      return customer.value['entity_name'];
+      var cities = await FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .doc(modelId)
+          .get();
+
+      if (cities.exists) {
+        return cities.data()!['name'].toString();
+      } else {
+        return '';
+      }
     } catch (e) {
-      return '';
+      return ''; // Return empty string on error
     }
   }
 
@@ -822,12 +959,51 @@ class JobCardController extends GetxController {
     }
   }
 
-  String? getSaleManName(String saleManId) {
+  // getJobCardInternalNotes(jobcardID) {
+  //   try {
+  //     var notes = FirebaseFirestore.instance
+  //         .collection('job_cards')
+  //         .doc(jobcardID)
+  //         .collection('intrnal_notes')
+  //         .snapshots()
+  //         .listen((notes) {
+  //       for (var note in notes.docs) {
+  //         internalNotes.add(note as Map);
+  //       }
+  //     });
+
+  //     return notes;
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
+
+  Stream<List<Map<String, dynamic>>> getJobCardInternalNotes(String jobId) {
+    return FirebaseFirestore.instance
+        .collection('job_cards')
+        .doc(jobId)
+        .collection('internal_notes').orderBy('time')
+        .snapshots()
+        .map((querySnapshot) {
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.map((doc) {
+          return {
+            'id': doc.id,
+            ...doc.data(),
+          };
+        }).toList();
+      } else {
+        return [];
+      }
+    });
+  }
+
+  String? getdataName(String id, Map allData, {title = 'name'}) {
     try {
-      final salesMan = salesManMap.entries.firstWhere(
-        (saleMan) => saleMan.key == saleManId,
+      final data = allData.entries.firstWhere(
+        (data) => data.key == id,
       );
-      return salesMan.value['name'];
+      return data.value[title];
     } catch (e) {
       return '';
     }
@@ -854,6 +1030,6 @@ class JobCardController extends GetxController {
         (currentUserDetails.value['credit_limit'] ?? '0').toString();
     customerSaleManId.value = currentUserDetails.value['sales_man'];
     customerSaleMan.text =
-        getSaleManName(currentUserDetails.value['sales_man'])!;
+        getdataName(currentUserDetails.value['sales_man'], salesManMap)!;
   }
 }

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,8 +7,8 @@ import 'package:intl/intl.dart';
 
 import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 
-Future internalNotesDialog(BuildContext context, JobCardController controller,
-    BoxConstraints constraints) {
+Future internalNotesDialog(
+    JobCardController controller, BoxConstraints constraints, String jobId) {
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
@@ -65,181 +66,203 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
           Expanded(
             child: SizedBox(
               width: double.infinity,
-              child: GetX<JobCardController>(
-                builder: (controller) {
-                  if (controller.internalNotes.isEmpty) {
-                    return const Center(
-                        child: Text('Empty',
-                            style: TextStyle(color: Colors.grey)));
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream: controller.getJobCardInternalNotes(jobId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text("Error: ${snapshot.error}"));
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(
+                        child: Text(
+                      "Empty",
+                      style: TextStyle(color: Colors.grey),
+                    ));
                   }
 
-                  // Auto-scroll to bottom
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (controller.scrollControllerForNotes.hasClients) {
-                      controller.scrollControllerForNotes.jumpTo(controller
-                          .scrollControllerForNotes.position.maxScrollExtent);
+                      controller.scrollControllerForNotes.animateTo(
+                        controller
+                            .scrollControllerForNotes.position.maxScrollExtent,
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
                     }
                   });
 
-                  final combinedItems =
-                      controller.buildCombinedItems(controller.sortedNotes);
+                  var items = snapshot.data!;
 
                   return ListView.builder(
                     controller: controller.scrollControllerForNotes,
-                    itemCount: combinedItems.length,
+                    itemCount: items.length,
                     itemBuilder: (context, index) {
-                      final item = combinedItems[index];
-
-                      if (item is DateTime) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                DateFormat.yMMMd().format(item),
-                                style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
-                      final note = item as Map<String, dynamic>;
+                      var note = items[index];
                       bool isUserNote =
                           controller.userId.value == note['user_id'];
 
-                      return Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                    color: Colors.grey[350],
-                                    borderRadius: BorderRadius.circular(5)),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      textAlign: TextAlign.start,
-                                      '${controller.getUserNameByUserId(note['user_id'])}',
-                                      style: TextStyle(
-                                          color: isUserNote
-                                              ? Colors.deepOrangeAccent
-                                              : Colors.green),
+                      DateTime noteTime;
+                      if (note['time'] is Timestamp) {
+                        noteTime = (note['time'] as Timestamp).toDate();
+                      } else if (note['time'] is DateTime) {
+                        noteTime = note['time'] as DateTime;
+                      } else {
+                        noteTime = DateTime.now();
+                      }
+
+                      bool showHeader = false;
+                      if (index == 0) {
+                        showHeader = true;
+                      } else {
+                        var previousNote = items[index - 1];
+                        DateTime previousNoteTime;
+                        if (previousNote['time'] is Timestamp) {
+                          previousNoteTime =
+                              (previousNote['time'] as Timestamp).toDate();
+                        } else if (previousNote['time'] is DateTime) {
+                          previousNoteTime = previousNote['time'] as DateTime;
+                        } else {
+                          previousNoteTime = DateTime.now();
+                        }
+                        if (noteTime.year != previousNoteTime.year ||
+                            noteTime.month != previousNoteTime.month ||
+                            noteTime.day != previousNoteTime.day) {
+                          showHeader = true;
+                        }
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (showHeader)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    DateFormat.yMMMd().format(noteTime),
+                                    style: TextStyle(
+                                      color: Colors.grey[700],
+                                      fontSize: 12,
                                     ),
-                                    Text(
-                                      textAlign: TextAlign.end,
-                                      DateFormat.jm().format(note['time']),
-                                      style: TextStyle(
-                                        color: mainColor,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                                child: note['type'] == 'Text'
-                                    ? Text(
-                                        textAlign: TextAlign.start,
-                                        note['note'],
-                                        style: TextStyle(
-                                          color: Colors.grey[800],
-                                        ),
-                                      )
-                                    : note['type'] == 'image'
-                                        ? Image.memory(
-                                            note['note'],
-                                            fit: BoxFit.contain,
-                                            height: 200,
-                                          )
-                                        : Container(
-                                            constraints:
-                                                BoxConstraints(maxWidth: 300),
-                                            padding: EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                                color: Colors.grey[400],
-                                                borderRadius:
-                                                    BorderRadius.circular(5)),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              spacing: 10,
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Image.asset(
-                                                          'assets/pdf.png',
-                                                          width: 50),
-                                                    ),
-                                                    Text(
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      note['file_name'] ??
-                                                          'No Name',
-                                                      style: TextStyle(
-                                                          color: Colors.white),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  spacing: 20,
-                                                  children: [
-                                                    ElevatedButton(
-                                                        style:
-                                                            openPDFButtonStyle,
-                                                        onPressed: () {
-                                                          FilePickerService
-                                                              .openPdf(
-                                                                  note['note'],
-                                                                  note['type']);
-                                                        },
-                                                        child: Text('Open')),
-                                                    ElevatedButton(
-                                                        style:
-                                                            openPDFButtonStyle,
-                                                        onPressed: () {
-                                                          FilePickerService
-                                                              .saveFile(
-                                                                  note['note'],
-                                                                  note['type'],
-                                                                  '');
-                                                        },
-                                                        child:
-                                                            Text('Save as...')),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
+                            ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[350],
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          textAlign: TextAlign.start,
+                                          '${controller.getdataName(note['user_id'], controller.allUsers, title: 'user_name')}',
+                                          style: TextStyle(
+                                            color: isUserNote
+                                                ? Colors.deepOrangeAccent
+                                                : Colors.green,
                                           ),
+                                        ),
+                                        Text(
+                                          textAlign: TextAlign.end,
+                                          DateFormat.jm().format(noteTime),
+                                          style: TextStyle(
+                                            color: mainColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                                    child: note['type'] == 'Text'
+                                        ? Text(
+                                            textAlign: TextAlign.start,
+                                            note['note'],
+                                            style: TextStyle(
+                                              color: Colors.grey[800],
+                                            ),
+                                          )
+                                        : note['type'] == 'image'
+                                            ? Image.network(
+                                                note['note'],
+                                                fit: BoxFit.contain,
+                                                height: 200,
+                                              )
+                                            : InkWell(
+                                                onTap: () {
+                                                  FilePickerService.openPdf(
+                                                    note['note'],
+                                                  );
+                                                },
+                                                child: Container(
+                                                  constraints: BoxConstraints(
+                                                      maxWidth: 300),
+                                                  padding: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey[400],
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            5),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Image.asset(
+                                                          'assets/pdf.png',
+                                                          width: 50,
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: Text(
+                                                          note['file_name'] ??
+                                                              'No Name',
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       );
                     },
                   );
@@ -286,7 +309,7 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                               : KeyboardListener(
                                   autofocus: true,
                                   focusNode: FocusNode(),
-                                  onKeyEvent: (KeyEvent event) {
+                                  onKeyEvent: (KeyEvent event) async {
                                     if (event is KeyDownEvent) {
                                       bool shiftPressed = HardwareKeyboard
                                               .instance.logicalKeysPressed
@@ -316,9 +339,38 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                                         if (controller.noteMessage.value
                                             .trim()
                                             .isNotEmpty) {
-                                          controller.addNewNote();
+                                          controller.addNewInternalNote(jobId, {
+                                            'type': 'Text',
+                                            'note': controller.noteMessage.value
+                                                .trim(),
+                                            'user_id': controller.userId.value,
+                                            'time': DateTime.now(),
+                                          });
                                           controller.internalNote.value.clear();
                                           controller.noteMessage.value = '';
+                                          Future.delayed(
+                                              Duration(milliseconds: 100), () {
+                                            controller.textFieldFocusNode
+                                                .requestFocus();
+                                          });
+                                        } else if (controller.fileBytes.value !=
+                                            null) {
+                                          await controller
+                                              .addNewInternalNote(jobId, {
+                                            'file_name':
+                                                controller.fileName.value,
+                                            'type': controller.fileType.value
+                                                    .startsWith("image/")
+                                                ? 'image'
+                                                : 'application/pdf',
+                                            'note': controller.fileBytes.value,
+                                            'user_id': controller.userId.value,
+                                            'time': DateTime.now(),
+                                          });
+
+                                          controller.fileBytes.value = null;
+                                          controller.fileType.value = '';
+                                          controller.fileName.value = '';
                                           Future.delayed(
                                               Duration(milliseconds: 100), () {
                                             controller.textFieldFocusNode
@@ -359,39 +411,68 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
                     ),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: IconButton(
-                          onPressed: controller.noteMessage.value != ''
-                              ? () {
-                                  controller.internalNote.value.clear();
-                                  controller.addNewNote();
-                                  controller.noteMessage.value = '';
-                                  Future.delayed(Duration(milliseconds: 100),
-                                      () {
-                                    controller.textFieldFocusNode
-                                        .requestFocus();
-                                  });
-                                }
-                              : () async {
-                                  if (controller.fileBytes.value != null) {
-                                    await controller.addNewMediaNote(
-                                        type: controller.fileType.value
-                                                .startsWith("image/")
-                                            ? 'image'
-                                            : 'application/pdf');
-                                    controller.fileBytes.value = null;
-                                    controller.fileType.value = '';
-                                    controller.fileName.value = '';
-                                  }
-                                  Future.delayed(Duration(milliseconds: 100),
-                                      () {
-                                    controller.textFieldFocusNode
-                                        .requestFocus();
-                                  });
-                                },
-                          icon: Icon(
-                            Icons.send_rounded,
-                            color: mainColor,
-                          )),
+                      child: GetX<JobCardController>(builder: (controller) {
+                        return controller.addingNewInternalNotProcess.isFalse
+                            ? IconButton(
+                                onPressed: controller.noteMessage.value != ''
+                                    ? () {
+                                        controller.internalNote.value.clear();
+                                        controller.addNewInternalNote(jobId, {
+                                          'type': 'Text',
+                                          'note': controller.noteMessage.value
+                                              .trim(),
+                                          'user_id': controller.userId.value,
+                                          'time': DateTime.now(),
+                                        });
+                                        controller.noteMessage.value = '';
+                                        Future.delayed(
+                                            Duration(milliseconds: 100), () {
+                                          controller.textFieldFocusNode
+                                              .requestFocus();
+                                        });
+                                      }
+                                    : () async {
+                                        if (controller.fileBytes.value !=
+                                            null) {
+                                          await controller
+                                              .addNewInternalNote(jobId, {
+                                            'file_name':
+                                                controller.fileName.value,
+                                            'type': controller.fileType.value
+                                                    .startsWith("image/")
+                                                ? 'image'
+                                                : 'application/pdf',
+                                            'note': controller.fileBytes.value,
+                                            'user_id': controller.userId.value,
+                                            'time': DateTime.now(),
+                                          });
+
+                                          controller.fileBytes.value = null;
+                                          controller.fileType.value = '';
+                                          controller.fileName.value = '';
+                                        }
+                                        Future.delayed(
+                                            Duration(milliseconds: 100), () {
+                                          controller.textFieldFocusNode
+                                              .requestFocus();
+                                        });
+                                      },
+                                icon: Icon(
+                                  Icons.send_rounded,
+                                  color: mainColor,
+                                ))
+                            : Padding(
+                                padding: const EdgeInsets.only(right: 15),
+                                child: SizedBox(
+                                  width: 25,
+                                  height: 25,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: mainColor,
+                                  ),
+                                ),
+                              );
+                      }),
                     )
                   ],
                 );
@@ -401,3 +482,184 @@ Future internalNotesDialog(BuildContext context, JobCardController controller,
     )),
   );
 }
+
+// GetX<JobCardController>(
+//                 builder: (controller) {
+//                   if (controller.internalNotes.isEmpty) {
+//                     return const Center(
+//                         child: Text('Empty',
+//                             style: TextStyle(color: Colors.grey)));
+//                   }
+
+//                   // Auto-scroll to bottom
+//                   WidgetsBinding.instance.addPostFrameCallback((_) {
+//                     if (controller.scrollControllerForNotes.hasClients) {
+//                       controller.scrollControllerForNotes.jumpTo(controller
+//                           .scrollControllerForNotes.position.maxScrollExtent);
+//                     }
+//                   });
+
+//                   final combinedItems =
+//                       controller.buildCombinedItems(controller.sortedNotes);
+
+//                   return ListView.builder(
+//                     controller: controller.scrollControllerForNotes,
+//                     itemCount: combinedItems.length,
+//                     itemBuilder: (context, index) {
+//                       final item = combinedItems[index];
+
+//                       if (item is DateTime) {
+//                         return Padding(
+//                           padding: const EdgeInsets.symmetric(vertical: 8),
+//                           child: Center(
+//                             child: Container(
+//                               padding: const EdgeInsets.symmetric(
+//                                   horizontal: 12, vertical: 4),
+//                               decoration: BoxDecoration(
+//                                 color: Colors.grey[300],
+//                                 borderRadius: BorderRadius.circular(12),
+//                               ),
+//                               child: Text(
+//                                 DateFormat.yMMMd().format(item),
+//                                 style: TextStyle(
+//                                   color: Colors.grey[700],
+//                                   fontSize: 12,
+//                                 ),
+//                               ),
+//                             ),
+//                           ),
+//                         );
+//                       }
+
+//                       final note = item as Map<String, dynamic>;
+//                       bool isUserNote =
+//                           controller.userId.value == note['user_id'];
+
+//                       return Align(
+//                         alignment: Alignment.centerLeft,
+//                         child: Padding(
+//                           padding: const EdgeInsets.symmetric(
+//                               vertical: 12, horizontal: 12),
+//                           child: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               Container(
+//                                 padding: EdgeInsets.all(8),
+//                                 decoration: BoxDecoration(
+//                                     color: Colors.grey[350],
+//                                     borderRadius: BorderRadius.circular(5)),
+//                                 child: Row(
+//                                   mainAxisAlignment:
+//                                       MainAxisAlignment.spaceBetween,
+//                                   children: [
+//                                     Text(
+//                                       textAlign: TextAlign.start,
+//                                       '${controller.getUserNameByUserId(note['user_id'])}',
+//                                       style: TextStyle(
+//                                           color: isUserNote
+//                                               ? Colors.deepOrangeAccent
+//                                               : Colors.green),
+//                                     ),
+//                                     Text(
+//                                       textAlign: TextAlign.end,
+//                                       DateFormat.jm().format(note['time']),
+//                                       style: TextStyle(
+//                                         color: mainColor,
+//                                       ),
+//                                     ),
+//                                   ],
+//                                 ),
+//                               ),
+//                               Padding(
+//                                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+//                                 child: note['type'] == 'Text'
+//                                     ? Text(
+//                                         textAlign: TextAlign.start,
+//                                         note['note'],
+//                                         style: TextStyle(
+//                                           color: Colors.grey[800],
+//                                         ),
+//                                       )
+//                                     : note['type'] == 'image'
+//                                         ? Image.memory(
+//                                             note['note'],
+//                                             fit: BoxFit.contain,
+//                                             height: 200,
+//                                           )
+//                                         : Container(
+//                                             constraints:
+//                                                 BoxConstraints(maxWidth: 300),
+//                                             padding: EdgeInsets.all(8),
+//                                             decoration: BoxDecoration(
+//                                                 color: Colors.grey[400],
+//                                                 borderRadius:
+//                                                     BorderRadius.circular(5)),
+//                                             child: Column(
+//                                               crossAxisAlignment:
+//                                                   CrossAxisAlignment.center,
+//                                               spacing: 10,
+//                                               children: [
+//                                                 Row(
+//                                                   mainAxisAlignment:
+//                                                       MainAxisAlignment.start,
+//                                                   children: [
+//                                                     Padding(
+//                                                       padding:
+//                                                           const EdgeInsets.all(
+//                                                               8.0),
+//                                                       child: Image.asset(
+//                                                           'assets/pdf.png',
+//                                                           width: 50),
+//                                                     ),
+//                                                     Text(
+//                                                       maxLines: 1,
+//                                                       overflow:
+//                                                           TextOverflow.ellipsis,
+//                                                       note['file_name'] ??
+//                                                           'No Name',
+//                                                       style: TextStyle(
+//                                                           color: Colors.white),
+//                                                     ),
+//                                                   ],
+//                                                 ),
+//                                                 Row(
+//                                                   mainAxisSize:
+//                                                       MainAxisSize.min,
+//                                                   spacing: 20,
+//                                                   children: [
+//                                                     ElevatedButton(
+//                                                         style:
+//                                                             openPDFButtonStyle,
+//                                                         onPressed: () {
+//                                                           FilePickerService
+//                                                               .openPdf(
+//                                                                   note['note'],
+//                                                                   note['type']);
+//                                                         },
+//                                                         child: Text('Open')),
+//                                                     ElevatedButton(
+//                                                         style:
+//                                                             openPDFButtonStyle,
+//                                                         onPressed: () {
+//                                                           FilePickerService
+//                                                               .saveFile(
+//                                                                   note['note'],
+//                                                                   note['type'],
+//                                                                   '');
+//                                                         },
+//                                                         child:
+//                                                             Text('Save as...')),
+//                                                   ],
+//                                                 ),
+//                                               ],
+//                                             ),
+//                                           ),
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       );
+//                     },
+//                   );
+//                 },
+//               ),

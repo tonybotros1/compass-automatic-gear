@@ -383,30 +383,17 @@ class FilePickerService {
     }
   }
 
-  static void openPdf(Uint8List? fileBytes, String fileType) {
+  static void openPdf(String? fileUrl) {
     try {
-      if (fileBytes != null && fileType == 'application/pdf') {
-        final blob = html.Blob([fileBytes], fileType);
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        html.window.open(url, '_blank');
-        html.Url.revokeObjectUrl(url);
+      if (fileUrl != null && fileUrl.isNotEmpty) {
+        // Open the file URL in a new browser tab.
+        html.window.open(fileUrl, '_blank');
       }
     } catch (e) {
       //
-    }
+      }
   }
 
-  static void saveFile(Uint8List? fileBytes, String fileType, String fileName) {
-    if (fileBytes != null) {
-      final blob = html.Blob([fileBytes], fileType);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      html.AnchorElement(href: url)
-        ..setAttribute(
-            "download", fileName.isNotEmpty ? fileName : "downloaded_file")
-        ..click();
-      html.Url.revokeObjectUrl(url);
-    }
-  }
 }
 
 Widget textForDataRowInTable({

@@ -175,40 +175,40 @@ Widget tableOfScreens(
     ],
     rows: controller.filteredJobCards.isEmpty &&
             controller.search.value.text.isEmpty
-        ? controller.allJobCards.map<DataRow>((branch) {
-            final branchData = branch.data() as Map<String, dynamic>;
-            final branchId = branch.id;
+        ? controller.allJobCards.map<DataRow>((job) {
+            final jobData = job.data() as Map<String, dynamic>;
+            final jobId = job.id;
             return dataRowForTheTable(
-                branchData, context, constraints, branchId, controller);
+                jobData, context, constraints, jobId, controller);
           }).toList()
-        : controller.filteredJobCards.map<DataRow>((branch) {
-            final branchData = branch.data() as Map<String, dynamic>;
-            final branchId = branch.id;
+        : controller.filteredJobCards.map<DataRow>((job) {
+            final jobData = job.data() as Map<String, dynamic>;
+            final jobId = job.id;
             return dataRowForTheTable(
-                branchData, context, constraints, branchId, controller);
+                jobData, context, constraints, jobId, controller);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
-    constraints, branchId, JobCardController controller) {
+DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
+    jobId, JobCardController controller) {
   return DataRow(cells: [
-    DataCell(textForDataRowInTable(text: '${branchData['job_number']}')),
-    DataCell(textForDataRowInTable(text: '${branchData['lpo_number']}')),
+    DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
+    DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
     DataCell(textForDataRowInTable(
-        text: '${controller.getBrandName(branchData['car_brand'])}')),
+        text:
+            '${controller.getdataName(jobData['car_brand'], controller.allBrands)}')),
     DataCell(
       Text(
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
-        '${branchData['plate_number']}',
+        '${jobData['plate_number']}',
       ),
     ),
-    DataCell(textForDataRowInTable(text: '${branchData['plate_code']}')),
+    DataCell(textForDataRowInTable(text: '${jobData['plate_code']}')),
     DataCell(
       FutureBuilder<String>(
-        future:
-            controller.getCityName(branchData['country'], branchData['city']),
+        future: controller.getCityName(jobData['country'], jobData['city']),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Text('Loading...');
@@ -221,38 +221,32 @@ DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
       ),
     ),
     DataCell(textForDataRowInTable(
-        text: '${controller.getCustomerName(branchData['customer'])}')),
-    DataCell(textForDataRowInTable(text: '${branchData['invoice_number']}')),
-    DataCell(textForDataRowInTable(text: '${textToDate(branchData['invoice_date'])}')),
-    DataCell(textForDataRowInTable(text: '${textToDate(branchData['job_date'])}')),
+        text:
+            '${controller.getdataName(jobData['customer'], controller.allCustomers, title: 'entity_name')}')),
+    DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
+    DataCell(
+        textForDataRowInTable(text: '${textToDate(jobData['invoice_date'])}')),
+    DataCell(textForDataRowInTable(text: '${textToDate(jobData['job_date'])}')),
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        editSection(context, controller, branchData, constraints, branchId),
+        editSection(context, controller, jobData, constraints, jobId),
       ],
     )),
   ]);
 }
 
 ElevatedButton editSection(context, JobCardController controller,
-    Map<String, dynamic> branchData, constraints, branchId) {
+    Map<String, dynamic> jobData, constraints, jobId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
+        controller.loadValues(jobData);
         showDialog(
             barrierDismissible: false,
             context: context,
             builder: (context) {
-              // controller.onSelect(branchData['country_id']);
-              // controller.code.text = branchData['code'] ?? '';
-              // controller.name.text = branchData['name'] ?? '';
-              // controller.line.text = branchData['line'] ?? '';
-              // controller.country.text =
-              //     controller.getCountryName(branchData['country_id'])!;
-              // controller.city.text =
-              //     controller.getCityName(branchData['city_id'])!;
-              // controller.countryId.value = branchData['country_id'];
-              // controller.cityId.value = branchData['city_id'];
+              controller.loadValues(jobData);
 
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -262,42 +256,90 @@ ElevatedButton editSection(context, JobCardController controller,
                   context: context,
                 ),
                 actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                      onPressed: controller.addingNewValue.value
-                          ? null
-                          : () {
-                              // controller.editBranch(branchId);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
+                  Row(
+                    spacing: 10,
+                    children: [
+                      ElevatedButton(
+                        style: internalNotesButtonStyle,
+                        onPressed: () async {
+                          internalNotesDialog(controller, constraints,jobId);
+                        },
+                        child: Text('Internal Notes'),
+                      ),
+                      ElevatedButton(
+                        style: innvoiceItemsButtonStyle,
+                        onPressed: () {
+                          showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  actionsPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  content: invoiceItemsDialog(
+                                    constraints: constraints,
+                                    context: context,
+                                  ),
+                                  actions: [
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 10),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Get.back();
+                                        },
+                                        style: cancelButtonStyle,
+                                        child: const Text(
+                                          'Cancel',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              });
+                        },
+                        child: Text('Invoice Items'),
+                      ),
+                      Spacer(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: ElevatedButton(
+                          onPressed: controller.addingNewValue.value
+                              ? null
+                              : () {
+                                  // controller.editjob(jobId);
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                          child: controller.addingNewValue.value == false
+                              ? const Text(
+                                  'Save',
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              : const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
-                      child: controller.addingNewValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
+                      ElevatedButton(
+                          onPressed: () {
+                            Get.back();
+                          },
+                          style: cancelButtonStyle,
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                    ],
                   ),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
                 ],
               );
             });
@@ -309,8 +351,9 @@ ElevatedButton newJobCardButton(BuildContext context,
     BoxConstraints constraints, JobCardController controller) {
   return ElevatedButton(
     onPressed: () {
-      controller.country.text = controller.getCountryName(
-          controller.companyDetails['contact_details']['country'])!;
+      controller.country.text = controller.getdataName(
+          controller.companyDetails['contact_details']['country'],
+          controller.allCountries)!;
       controller.countryId.value =
           controller.companyDetails['contact_details']['country'];
       controller.getCitiesByCountryID(
@@ -342,13 +385,18 @@ ElevatedButton newJobCardButton(BuildContext context,
                   spacing: 10,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    ElevatedButton(
-                      style: internalNotesButtonStyle,
-                      onPressed: () {
-                        internalNotesDialog(context, controller, constraints);
-                      },
-                      child: Text('Internal Notes'),
-                    ),
+                    GetX<JobCardController>(builder: (controller) {
+                      return ElevatedButton(
+                        style: internalNotesButtonStyle,
+                        onPressed: controller.canAddInternalNotes.isTrue
+                            ? () async {
+                               
+                                internalNotesDialog(controller, constraints,controller.curreentJobCardId.value);
+                              }
+                            : null,
+                        child: Text('Internal Notes'),
+                      );
+                    }),
                     ElevatedButton(
                       style: innvoiceItemsButtonStyle,
                       onPressed: () {
