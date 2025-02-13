@@ -115,7 +115,6 @@ class JobCardController extends GetxController {
   RxBool jobCardAdded = RxBool(false);
   RxString curreentJobCardId = RxString('');
   RxBool canAddInternalNotes = RxBool(false);
-  RxBool loadingInternalNotes = RxBool(false);
   final ScrollController scrollController = ScrollController();
   Rx<TextEditingController> internalNote = TextEditingController().obs;
   RxString noteMessage = RxString('');
