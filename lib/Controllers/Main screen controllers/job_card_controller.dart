@@ -173,12 +173,11 @@ class JobCardController extends GetxController {
     if (vat.text.isEmpty) vat.text = '0';
     final currwnQquanity = int.tryParse(quantity.text) ?? 0;
     final currentPrice = double.tryParse(price.text) ?? 0.0;
-    final currentVat = double.tryParse(vat.text) ?? 0.0;
     final currentDiscount = double.tryParse(discount.text) ?? 0.0;
     amount.text = (currwnQquanity * currentPrice).toString();
     total.text = (double.tryParse(amount.text)! - currentDiscount).toString();
-    net.text = (double.tryParse(total.text)! + currentVat).toString();
     vat.text = ((double.tryParse(total.text)! * 5) / 100).toString();
+    net.text = (double.tryParse(total.text)! + double.tryParse(vat.text)!).toString();
   }
 
   void updateAmount() {
@@ -187,7 +186,7 @@ class JobCardController extends GetxController {
       total.text =
           (double.tryParse(net.text)! - double.tryParse(vat.text)!).toString();
       amount.text =
-          (double.tryParse(total.text)! - double.tryParse(discount.text)!)
+          (double.tryParse(total.text)! + double.tryParse(discount.text)!)
               .toString();
       price.text =
           (double.tryParse(amount.text)! / double.tryParse(quantity.text)!)
