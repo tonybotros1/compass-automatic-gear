@@ -247,7 +247,6 @@ ElevatedButton editSection(context, JobCardController controller,
             context: context,
             builder: (context) {
               controller.loadValues(jobData);
-
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                 content: addNewJobCardOrEdit(
@@ -269,6 +268,7 @@ ElevatedButton editSection(context, JobCardController controller,
                       ElevatedButton(
                         style: innvoiceItemsButtonStyle,
                         onPressed: () {
+                          controller.getAllInvoiceItems(jobId);
                           showDialog(
                               barrierDismissible: false,
                               context: context,
@@ -277,10 +277,9 @@ ElevatedButton editSection(context, JobCardController controller,
                                   actionsPadding: const EdgeInsets.symmetric(
                                       horizontal: 20),
                                   content: invoiceItemsDialog(
-                                    constraints: constraints,
-                                    context: context,
-                                   jobId:  jobId
-                                  ),
+                                      constraints: constraints,
+                                      context: context,
+                                      jobId: jobId),
                                   actions: [
                                     Padding(
                                       padding:
@@ -413,10 +412,10 @@ ElevatedButton newJobCardButton(BuildContext context,
                                           const EdgeInsets.symmetric(
                                               horizontal: 20),
                                       content: invoiceItemsDialog(
-                                        constraints: constraints,
-                                        context: context,
-                                        jobId: controller.curreentJobCardId.value
-                                      ),
+                                          constraints: constraints,
+                                          context: context,
+                                          jobId: controller
+                                              .curreentJobCardId.value),
                                       actions: [
                                         Padding(
                                           padding:

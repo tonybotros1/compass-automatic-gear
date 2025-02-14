@@ -43,6 +43,15 @@ var saveButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var clearVariablesButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.brown,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var cancelButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.red,
   foregroundColor: Colors.white,

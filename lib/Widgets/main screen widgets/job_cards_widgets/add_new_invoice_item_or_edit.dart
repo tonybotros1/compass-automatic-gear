@@ -7,11 +7,10 @@ Widget addNewinvoiceItemsOrEdit({
   required BoxConstraints constraints,
   required BuildContext context,
   required JobCardController controller,
-  bool? canEdit,
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2,
-    height: 500,
+    height: 400,
     child: Column(
       spacing: 20,
       children: [

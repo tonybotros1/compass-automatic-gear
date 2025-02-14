@@ -129,13 +129,13 @@ class JobCardController extends GetxController {
   RxBool addingNewinvoiceItemsValue = RxBool(false);
   TextEditingController lineNumber = TextEditingController();
   TextEditingController description = TextEditingController();
-  TextEditingController quantity = TextEditingController(text: '0');
-  TextEditingController price = TextEditingController(text: '0');
-  TextEditingController amount = TextEditingController(text: '0');
-  TextEditingController discount = TextEditingController(text: '0');
-  TextEditingController total = TextEditingController(text: '0');
-  TextEditingController vat = TextEditingController(text: '0');
-  TextEditingController net = TextEditingController(text: '0');
+  TextEditingController quantity = TextEditingController();
+  TextEditingController price = TextEditingController();
+  TextEditingController amount = TextEditingController();
+  TextEditingController discount = TextEditingController();
+  TextEditingController total = TextEditingController();
+  TextEditingController vat = TextEditingController();
+  TextEditingController net = TextEditingController();
 
   @override
   void onInit() async {
@@ -189,6 +189,18 @@ class JobCardController extends GetxController {
   //   final dis = double.tryParse(discount.text) ?? 0.0;
   //   total.text = (amou - dis).toString();
   // }
+  void clearInvoiceItemsVariables(){
+    lineNumber.clear();
+      description.clear();
+     quantity.text = '0';
+      price.text = '0';
+      amount.text = '0';
+      discount.text = '0';
+      total.text = '0';
+      vat.text = '0';
+      net.text = '0';
+  }
+
 
   clearValues() {
     curreentJobCardId.value = '';
@@ -445,56 +457,68 @@ class JobCardController extends GetxController {
     }
   }
 
-  // addNewInternalNotes() async {
-  //   try {
-  //     var finalInternalNotes = [];
-  //     for (var element in internalNotes) {
-  //       if (element['type'] == 'Text') {
-  //         finalInternalNotes.add(element);
-  //       } else if (element['type'] == 'image') {
-  //         final Reference storageRef = FirebaseStorage.instance.ref().child(
-  //             'internal_notes/${element['file_name']}_${DateTime.now()}.png');
-  //         final UploadTask uploadTask = storageRef.putData(
-  //           element['note'],
-  //           SettableMetadata(contentType: 'image/png'),
-  //         );
+  addNewInvoiceItem(String jobId) async {
+    try {
+      addingNewinvoiceItemsValue.value = true;
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .collection('invoice_items')
+          .add({
+        'line_number': lineNumber.text,
+        'description': description.text,
+        'quantity': quantity.text,
+        'price': price.text,
+        'amount': amount.text,
+        'discount': discount.text,
+        'total': total.text,
+        'vat': vat.text,
+        'net': net.text,
+        'added_date': DateTime.now().toString(),
+      });
+      addingNewinvoiceItemsValue.value = false;
+    } catch (e) {
+      addingNewinvoiceItemsValue.value = false;
+    }
+  }
 
-  //         await uploadTask.then((p0) async {
-  //           imageUrl.value = await storageRef.getDownloadURL();
-  //         });
-  //         finalInternalNotes.add({
-  //           'file_name': element['file_name'],
-  //           'type': element['type'],
-  //           'note': imageUrl.value,
-  //           'user_id': element['user_id'],
-  //           'time': element['time'],
-  //         });
-  //       } else if (element['type'] == 'application/pdf') {
-  //         final Reference storageRef = FirebaseStorage.instance.ref().child(
-  //             'internal_notes/${element['file_name']}_${DateTime.now()}.pdf');
-  //         final UploadTask uploadTask = storageRef.putData(
-  //           element['note'],
-  //           SettableMetadata(contentType: 'application/pdf'),
-  //         );
+  editInvoiceItem(String jobId, String itemId) async {
+    try {
+      Get.back();
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .collection('invoice_items')
+          .doc(itemId)
+          .update({
+        'line_number': lineNumber.text,
+        'description': description.text,
+        'quantity': quantity.text,
+        'price': price.text,
+        'amount': amount.text,
+        'discount': discount.text,
+        'total': total.text,
+        'vat': vat.text,
+        'net': net.text,
+      });
+    } catch (e) {
+      //
+    }
+  }
 
-  //         await uploadTask.then((p0) async {
-  //           pdfUrl.value = await storageRef.getDownloadURL();
-  //         });
-
-  //         finalInternalNotes.add({
-  //           'file_name': element['file_name'],
-  //           'type': element['type'],
-  //           'note': pdfUrl.value, // Store PDF URL
-  //           'user_id': element['user_id'],
-  //           'time': element['time'],
-  //         });
-  //       }
-  //     }
-  //     return finalInternalNotes;
-  //   } catch (e) {
-  //     //
-  //   }
-  // }
+  deleteInvoiceItem(String jobId, String itemId) {
+    try {
+      Get.back();
+      FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .collection('invoice_items')
+          .doc(itemId)
+          .delete();
+    } catch (e) {
+      //
+    }
+  }
 
   getAllUsers() {
     try {
@@ -930,49 +954,6 @@ class JobCardController extends GetxController {
     isAscending.value = ascending;
   }
 
-  // this function is to sort data in table
-  void onSortForInvoiceItems(int columnIndex, bool ascending) {
-    if (columnIndex == 0) {
-      allJobCards.sort((counter1, counter2) {
-        final String? value1 = counter1.get('code');
-        final String? value2 = counter2.get('code');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 1) {
-      allJobCards.sort((counter1, counter2) {
-        final String? value1 = counter1.get('name');
-        final String? value2 = counter2.get('name');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 2) {
-      allJobCards.sort((counter1, counter2) {
-        final String? value1 = counter1.get('added_date');
-        final String? value2 = counter2.get('added_date');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    }
-    sortColumnIndex.value = columnIndex;
-    isAscending.value = ascending;
-  }
-
   int compareString(bool ascending, String value1, String value2) {
     int comparison = value1.compareTo(value2);
     return ascending ? comparison : -comparison; // Reverse if descending
@@ -993,25 +974,6 @@ class JobCardController extends GetxController {
     }
   }
 
-  // getJobCardInternalNotes(jobcardID) {
-  //   try {
-  //     var notes = FirebaseFirestore.instance
-  //         .collection('job_cards')
-  //         .doc(jobcardID)
-  //         .collection('intrnal_notes')
-  //         .snapshots()
-  //         .listen((notes) {
-  //       for (var note in notes.docs) {
-  //         internalNotes.add(note as Map);
-  //       }
-  //     });
-
-  //     return notes;
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // }
-
   Stream<List<Map<String, dynamic>>> getJobCardInternalNotes(String jobId) {
     return FirebaseFirestore.instance
         .collection('job_cards')
@@ -1031,6 +993,23 @@ class JobCardController extends GetxController {
         return [];
       }
     });
+  }
+
+  getAllInvoiceItems(jobId) {
+    try {
+      loadingInvoiceItems.value = true;
+      FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .collection('invoice_items')
+          .snapshots()
+          .listen((items) {
+        allInvoiceItems.assignAll(List<DocumentSnapshot>.from(items.docs));
+        loadingInvoiceItems.value = false;
+      });
+    } catch (e) {
+      loadingInvoiceItems.value = false;
+    }
   }
 
   String? getdataName(String id, Map allData, {title = 'name'}) {

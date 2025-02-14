@@ -8,7 +8,9 @@ import '../auto_size_box.dart';
 import 'add_new_invoice_item_or_edit.dart';
 
 Widget invoiceItemsDialog(
-    {required BuildContext context, required BoxConstraints constraints, required jobId}) {
+    {required BuildContext context,
+    required BoxConstraints constraints,
+    required jobId}) {
   return Container(
     width: constraints.maxWidth,
     decoration: BoxDecoration(
@@ -25,7 +27,8 @@ Widget invoiceItemsDialog(
               context: context,
               controller: controller,
               title: 'Search for invoices',
-              button: newinvoiceItemsButton(context, constraints, controller),
+              button: newinvoiceItemsButton(
+                  context, constraints, controller, jobId),
             );
           },
         ),
@@ -50,6 +53,7 @@ Widget invoiceItemsDialog(
                     constraints: constraints,
                     context: context,
                     controller: controller,
+                    jobId: jobId,
                   ),
                 ),
               );
@@ -64,7 +68,8 @@ Widget invoiceItemsDialog(
 Widget tableOfScreens(
     {required constraints,
     required context,
-    required JobCardController controller}) {
+    required JobCardController controller,
+    required String jobId}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -79,23 +84,62 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Code',
+          text: 'Line No.',
         ),
-        onSort: controller.onSortForInvoiceItems,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Name',
+          text: 'Description',
         ),
-        onSort: controller.onSortForInvoiceItems,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Quantity',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Price',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Amount',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Discount',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Total',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'VAT',
+        ),
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'NET',
+        ),
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
           text: 'Creation Date',
         ),
-        onSort: controller.onSortForInvoiceItems,
       ),
       DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
@@ -112,31 +156,35 @@ Widget tableOfScreens(
                 invoiceItems.data() as Map<String, dynamic>;
             final invoiceItemsId = invoiceItems.id;
             return dataRowForTheTable(invoiceItemsData, context, constraints,
-                invoiceItemsId, controller);
+                invoiceItemsId, controller, jobId);
           }).toList()
         : controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
             final invoiceItemsData =
                 invoiceItems.data() as Map<String, dynamic>;
             final invoiceItemsId = invoiceItems.id;
             return dataRowForTheTable(invoiceItemsData, context, constraints,
-                invoiceItemsId, controller);
+                invoiceItemsId, controller, jobId);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> invoiceItemsData, context,
-    constraints, String invoiceItemsId, JobCardController controller) {
+DataRow dataRowForTheTable(
+    Map<String, dynamic> invoiceItemsData,
+    context,
+    constraints,
+    String invoiceItemsId,
+    JobCardController controller,
+    String jobId) {
   return DataRow(cells: [
-    DataCell(
-      Text(
-        invoiceItemsData['code'] ?? 'no code',
-      ),
-    ),
-    DataCell(
-      Text(
-        invoiceItemsData['name'] ?? 'no invoiceItems',
-      ),
-    ),
+    DataCell(textForDataRowInTable(text: '${invoiceItemsData['line_number']}')),
+    DataCell(textForDataRowInTable(text: '${invoiceItemsData['description']}')),
+    DataCell(textForDataRowInTable(text: '${invoiceItemsData['quantity']}')),
+    DataCell(textForDataRowInTable(text: '${invoiceItemsData['price']}')),
+    DataCell(textForDataRowInTable(text: '${invoiceItemsData['amount']}')),
+    DataCell(textForDataRowInTable(text: '${invoiceItemsData['discount']}')),
+    DataCell(textForDataRowInTable(text: '${invoiceItemsData['total']}')),
+    DataCell(textForDataRowInTable(text: '${invoiceItemsData['vat']}')),
+    DataCell(textForDataRowInTable(text: '${invoiceItemsData['net']}')),
     DataCell(
       Text(
         invoiceItemsData['added_date'] != null
@@ -148,32 +196,32 @@ DataRow dataRowForTheTable(Map<String, dynamic> invoiceItemsData, context,
       spacing: 5,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        editSection(
-            controller, invoiceItemsData, context, constraints, invoiceItemsId),
-        deleteSection(context, controller, invoiceItemsId),
+        editSection(jobId, controller, invoiceItemsData, context, constraints,
+            invoiceItemsId),
+        deleteSection(jobId, context, controller, invoiceItemsId),
       ],
     )),
   ]);
 }
 
 ElevatedButton deleteSection(
-    context, JobCardController controller, invoiceItemsId) {
+    String jobId, context, JobCardController controller, invoiceItemsId) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
         alertDialog(
             context: context,
             controller: controller,
-            content: 'The invoiceItems will be deleted permanently',
+            content: 'This will be deleted permanently',
             onPressed: () {
-              // controller.deleteinvoiceItems(
-              //     controller.countryIdToWorkWith.value, invoiceItemsId);
+              controller.deleteInvoiceItem(jobId, invoiceItemsId);
             });
       },
       child: const Text('Delete'));
 }
 
 ElevatedButton editSection(
+    String jobId,
     JobCardController controller,
     Map<String, dynamic> invoiceItemsData,
     context,
@@ -182,8 +230,15 @@ ElevatedButton editSection(
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        // controller.invoiceItemsName.text = invoiceItemsData['name'];
-        // controller.invoiceItemsCode.text = invoiceItemsData['code'];
+        controller.lineNumber.text = invoiceItemsData['line_number'];
+        controller.description.text = invoiceItemsData['description'];
+        controller.quantity.text = invoiceItemsData['quantity'];
+        controller.price.text = invoiceItemsData['price'];
+        controller.amount.text = invoiceItemsData['amount'];
+        controller.discount.text = invoiceItemsData['discount'];
+        controller.total.text = invoiceItemsData['total'];
+        controller.vat.text = invoiceItemsData['vat'];
+        controller.net.text = invoiceItemsData['net'];
         showDialog(
             barrierDismissible: false,
             context: context,
@@ -194,7 +249,6 @@ ElevatedButton editSection(
                   controller: controller,
                   constraints: constraints,
                   context: context,
-                  // isEnabled: false,
                 ),
                 actions: [
                   GetX<JobCardController>(
@@ -204,16 +258,9 @@ ElevatedButton editSection(
                               onPressed:
                                   controller.addingNewinvoiceItemsValue.value
                                       ? null
-                                      : () async {
-                                          // if (!controller.formKeyForAddingNewvalue
-                                          //     .currentState!
-                                          //     .validate()) {
-                                          // } else {
-                                          //   controller.editinvoiceItems(
-                                          //       controller
-                                          //           .countryIdToWorkWith.value,
-                                          //       invoiceItemsId);
-                                          // }
+                                      : () {
+                                          controller.editInvoiceItem(
+                                              jobId, invoiceItemsId);
                                         },
                               style: saveButtonStyle,
                               child:
@@ -250,11 +297,11 @@ ElevatedButton editSection(
 }
 
 ElevatedButton newinvoiceItemsButton(BuildContext context,
-    BoxConstraints constraints, JobCardController controller) {
+    BoxConstraints constraints, JobCardController controller, String jobId) {
   return ElevatedButton(
     onPressed: () {
-      // controller.invoiceItemsName.clear();
-      // controller.invoiceItemsCode.clear();
+      controller.clearInvoiceItemsVariables();
+
       showDialog(
           barrierDismissible: false,
           context: context,
@@ -265,28 +312,31 @@ ElevatedButton newinvoiceItemsButton(BuildContext context,
                 controller: controller,
                 constraints: constraints,
                 context: context,
-                // isEnabled: true,
               ),
               actions: [
-                GetX<JobCardController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed:
-                                controller.addingNewinvoiceItemsValue.value
-                                    ? null
-                                    : () async {
-                                        // if (!controller
-                                        //     .formKeyForAddingNewvalue.currentState!
-                                        //     .validate()) {
-                                        // } else {
-                                        //   await controller.addNewinvoiceItems(
-                                        //       controller.countryIdToWorkWith.value);
-                                        // }
-                                      },
-                            style: saveButtonStyle,
-                            child:
-                                controller.addingNewinvoiceItemsValue.value ==
+                Row(
+                  spacing: 20,
+                  children: [
+                    ElevatedButton(
+                        style: clearVariablesButtonStyle,
+                        onPressed: () {
+                          controller.clearInvoiceItemsVariables();
+                        },
+                        child: Text('Clear All')),
+                    Spacer(),
+                    GetX<JobCardController>(
+                        builder: (controller) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: ElevatedButton(
+                                onPressed:
+                                    controller.addingNewinvoiceItemsValue.value
+                                        ? null
+                                        : () async {
+                                            controller.addNewInvoiceItem(jobId);
+                                          },
+                                style: saveButtonStyle,
+                                child: controller
+                                            .addingNewinvoiceItemsValue.value ==
                                         false
                                     ? const Text(
                                         'Save',
@@ -300,17 +350,19 @@ ElevatedButton newinvoiceItemsButton(BuildContext context,
                                           strokeWidth: 2,
                                         ),
                                       ),
-                          ),
+                              ),
+                            )),
+                    ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        style: cancelButtonStyle,
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.white),
                         )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
+                  ],
+                ),
               ],
             );
           });
