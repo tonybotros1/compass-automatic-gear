@@ -368,7 +368,7 @@ class FilePickerService {
       Rx<Uint8List?> fileBytes, RxString fileType, RxString fileName) async {
     try {
       html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-      uploadInput.accept = 'image/*,application/pdf';
+      uploadInput.accept = '*/*'; // Accept all file types
       uploadInput.click();
 
       uploadInput.onChange.listen((event) {
@@ -382,7 +382,7 @@ class FilePickerService {
           reader.onLoadEnd.listen((event) async {
             if (reader.result != null) {
               fileBytes.value = reader.result as Uint8List;
-              fileType.value = file.type; // Store file type (image/pdf)
+              fileType.value = file.type; // Store file type
             }
           });
         }
@@ -392,26 +392,94 @@ class FilePickerService {
     }
   }
 
-  static void openPdf(String? fileUrl) {
+  static Future<void> openFile(String? fileUrl) async {
     try {
-      if (fileUrl != null && fileUrl.isNotEmpty) {
-        // Open the file URL in a new browser tab.
-        html.window.open(fileUrl, '_blank');
+      if (fileUrl == null || fileUrl.isEmpty) return;
+
+      final isPdf = await _isPdfFile(fileUrl);
+
+      if (isPdf) {
+        // Open PDF in new window
+        final newWindow = html.window.open('', '_blank');
+        newWindow.location.href = fileUrl;
+      } else {
+        // Download logic with proper filename handling
+        final fileName = _getFileNameFromUrl(fileUrl);
+        final mimeType = await _getContentType(fileUrl);
+        final extension = _getExtensionFromMimeType(mimeType) ?? 'bin';
+
+        final anchor = html.AnchorElement(href: fileUrl)
+          ..download =
+              fileName.contains('.') ? fileName : '$fileName.$extension'
+          ..style.display = 'none';
+
+        html.document.body?.children.add(anchor);
+        anchor.click();
+        html.document.body?.children.remove(anchor);
       }
     } catch (e) {
-      //
-      }
+      html.window.open(fileUrl ?? '', '_blank');
+    }
   }
 
+// Helper to extract filename from URL
+  static String _getFileNameFromUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      final path = Uri.decodeComponent(uri.path);
+      return path.split('/').last;
+    } catch (e) {
+      return 'download';
+    }
+  }
+
+// Updated PDF detection
+  static Future<bool> _isPdfFile(String url) async {
+    try {
+      final response = await html.HttpRequest.request(
+        url,
+        method: 'HEAD',
+      );
+      final contentType =
+          response.responseHeaders['Content-Type']?.toLowerCase();
+      return contentType?.contains('application/pdf') ?? false;
+    } catch (e) {
+      return url.toLowerCase().contains('.pdf');
+    }
+  }
+
+// Updated content type detection
+  static Future<String?> _getContentType(String url) async {
+    try {
+      final response = await html.HttpRequest.request(
+        url,
+        method: 'HEAD',
+      );
+      return response.responseHeaders['Content-Type'];
+    } catch (e) {
+      return null;
+    }
+  }
+
+// Keep existing mime type mapping
+  static String? _getExtensionFromMimeType(String? mimeType) {
+    const mimeMap = {
+      'application/pdf': 'pdf',
+      'application/msword': 'doc',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+          'docx',
+      // ... rest of your mime type mappings
+    };
+    return mimeType != null ? mimeMap[mimeType.split(';').first] : null;
+  }
 }
 
 Widget textForDataRowInTable({
   required String text,
+  maxWidth = 150,
 }) {
   return Container(
-    constraints: BoxConstraints(
-      maxWidth: 150
-    ),
+    constraints: BoxConstraints(maxWidth: maxWidth),
     child: Text(
       text,
       maxLines: 1,

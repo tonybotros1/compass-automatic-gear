@@ -151,19 +151,13 @@ Widget tableOfScreens(
 DataRow dataRowForTheTable(Map<String, dynamic> invoiceItemsData, context,
     constraints, invoiceItemsId, InvoiceItemsController controller) {
   return DataRow(cells: [
-    DataCell(Text(
-      invoiceItemsData['name'] ?? 'no name',
+    DataCell(textForDataRowInTable(
+        text: '${invoiceItemsData['name']}', maxWidth: 300)),
+    DataCell(textForDataRowInTable(
+        text: '${invoiceItemsData['description']}', maxWidth: 300)),
+    DataCell(textForDataRowInTable(
+      text: '${invoiceItemsData['price']}',
     )),
-    DataCell(
-      Text(
-        invoiceItemsData['description'] ?? 'no description',
-      ),
-    ),
-    DataCell(
-      Text(
-        '${invoiceItemsData['price']}',
-      ),
-    ),
     DataCell(
       Text(
         invoiceItemsData['added_date'] != null &&

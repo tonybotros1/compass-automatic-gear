@@ -95,6 +95,7 @@ class JobCardController extends GetxController {
   RxMap allColors = RxMap({});
   RxMap allBranches = RxMap({});
   RxMap allCurrencies = RxMap({});
+  RxMap allInvoiceItemsFromCollection = RxMap({});
 
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
@@ -108,6 +109,7 @@ class JobCardController extends GetxController {
   RxBool isJobCardExpanded = RxBool(true);
   RxMap allUsers = RxMap();
   RxString userId = RxString('');
+  RxBool canSaveJobCard = RxBool(true);
   // internal notes section
   RxBool addingNewInternalNotProcess = RxBool(false);
   RxBool jobCardAdded = RxBool(false);
@@ -125,6 +127,8 @@ class JobCardController extends GetxController {
   RxString pdfUrl = RxString('');
   // invoice items section
   RxBool addingNewinvoiceItemsValue = RxBool(false);
+  TextEditingController invoiceItemName = TextEditingController();
+  RxString invoiceItemNameId = RxString('');
   TextEditingController lineNumber = TextEditingController();
   TextEditingController description = TextEditingController();
   TextEditingController quantity = TextEditingController();
@@ -150,7 +154,10 @@ class JobCardController extends GetxController {
     getCurrencies();
     getColors();
     getAllJobCards();
-    search.value.addListener(() {});
+    getInvoiceItemsFromCollection();
+    search.value.addListener(() {
+      filterJobCards();
+    });
   }
 
   @override
@@ -181,6 +188,8 @@ class JobCardController extends GetxController {
   }
 
   void clearInvoiceItemsVariables() {
+    invoiceItemName.clear();
+    invoiceItemNameId.value = '';
     lineNumber.clear();
     description.clear();
     quantity.text = '0';
@@ -193,6 +202,8 @@ class JobCardController extends GetxController {
   }
 
   clearValues() {
+    canSaveJobCard.value = true;
+    allModels.clear();
     jobCardCounter.value.clear();
     quotationCounter.value.clear();
     invoiceCounter.value.clear();
@@ -247,6 +258,8 @@ class JobCardController extends GetxController {
     carBrandId.value = data['car_brand'];
     carBrand.text = getdataName(data['car_brand'], allBrands)!;
     carModelId.value = data['car_model'];
+    getCitiesByCountryID(data['country']);
+    getModelsByCarBrand(data['car_brand']);
     getModelName(data['car_brand'], data['car_model']).then((value) {
       carModel.text = value;
     });
@@ -316,7 +329,6 @@ class JobCardController extends GetxController {
   Future<void> addNewJobCardAndQuotation() async {
     try {
       addingNewValue.value = true;
-      var finalInternalNotes = [];
 
       await getCurrentQuotationCounterNumber();
       await getCurrentJobCardCounterNumber();
@@ -324,7 +336,6 @@ class JobCardController extends GetxController {
       if (jobCardAdded.isFalse) {
         var newJob =
             await FirebaseFirestore.instance.collection('job_cards').add({
-          'internal_notes': finalInternalNotes,
           'company_id': companyId.value,
           'car_brand': carBrandId.value,
           'car_model': carModelId.value,
@@ -381,6 +392,7 @@ class JobCardController extends GetxController {
         curreentJobCardId.value = newJob.id;
       }
       canAddInternalNotesAndInvoiceItems.value = true;
+      canSaveJobCard.value = false;
       addingNewValue.value = false;
     } catch (e) {
       canAddInternalNotesAndInvoiceItems.value = false;
@@ -388,50 +400,65 @@ class JobCardController extends GetxController {
     }
   }
 
-  addNewInternalNote(String jobcardID, Map<String, dynamic> note) async {
+  Future<void> addNewInternalNote(
+      String jobcardID, Map<String, dynamic> note) async {
     try {
       addingNewInternalNotProcess.value = true;
-      var jobDoc = FirebaseFirestore.instance
+      final jobDoc = FirebaseFirestore.instance
           .collection('job_cards')
           .doc(jobcardID)
           .collection('internal_notes');
+
       if (note['type'] == 'Text') {
         await jobDoc.add(note);
-      } else if (note['type'] == 'image') {
+      } else {
+        // Extract original filename with extension
+        final originalFileName = note['file_name'] as String;
+
+        // Split filename and extension
+        final extIndex = originalFileName.lastIndexOf('.');
+        final (String fileName, String extension) = extIndex != -1
+            ? (
+                originalFileName.substring(0, extIndex),
+                originalFileName.substring(extIndex + 1),
+              )
+            : (originalFileName, '');
+
+        // Create timestamped filename with original extension
+        final timestamp = DateTime.now()
+            .toIso8601String()
+            .replaceAll(RegExp(r'[^0-9T-]'), '_');
+        final storageFileName = extension.isNotEmpty
+            ? '${fileName}_$timestamp.$extension'
+            : '${fileName}_$timestamp';
+
+        // Create storage reference with proper extension
         final Reference storageRef = FirebaseStorage.instance
             .ref()
-            .child('internal_notes/${note['file_name']}_${DateTime.now()}.png');
-        final UploadTask uploadTask = storageRef.putData(
+            .child('internal_notes/$storageFileName');
+
+        // Get MIME type from original file extension if not provided
+        final mimeType =
+            note['type'] as String? ?? _getMimeTypeFromExtension(extension);
+
+        // Upload file with metadata
+         storageRef.putData(
           note['note'],
-          SettableMetadata(contentType: 'image/png'),
+          SettableMetadata(
+            contentType: mimeType,
+            customMetadata: {'original_filename': originalFileName},
+          ),
         );
 
-        await uploadTask.then((p0) async {
-          imageUrl.value = await storageRef.getDownloadURL();
-        });
-        await jobDoc.add({
-          'file_name': note['file_name'],
-          'type': note['type'],
-          'note': imageUrl.value,
-          'user_id': note['user_id'],
-          'time': note['time'],
-        });
-      } else if (note['type'] == 'application/pdf') {
-        final Reference storageRef = FirebaseStorage.instance
-            .ref()
-            .child('internal_notes/${note['file_name']}_${DateTime.now()}.pdf');
-        final UploadTask uploadTask = storageRef.putData(
-          note['note'],
-          SettableMetadata(contentType: 'application/pdf'),
-        );
+        // Get download URL
+        final String fileUrl = await storageRef.getDownloadURL();
 
-        await uploadTask.then((p0) async {
-          pdfUrl.value = await storageRef.getDownloadURL();
-        });
+        // Store original filename with extension in Firestore
         await jobDoc.add({
-          'file_name': note['file_name'],
-          'type': note['type'],
-          'note': pdfUrl.value,
+          'file_name':
+              originalFileName, // Store original filename with extension
+          'type': mimeType ?? 'application/octet-stream',
+          'note': fileUrl,
           'user_id': note['user_id'],
           'time': note['time'],
         });
@@ -439,7 +466,26 @@ class JobCardController extends GetxController {
       addingNewInternalNotProcess.value = false;
     } catch (e) {
       addingNewInternalNotProcess.value = false;
+      // Consider adding error handling
     }
+  }
+
+// Helper to get MIME type from file extension
+  String? _getMimeTypeFromExtension(String extension) {
+    const mimeTypes = {
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx':
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'xls': 'application/vnd.ms-excel',
+      'xlsx':
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'ppt': 'application/vnd.ms-powerpoint',
+      'pptx':
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'txt': 'text/plain',
+    };
+    return mimeTypes[extension.toLowerCase()];
   }
 
   addNewInvoiceItem(String jobId) async {
@@ -450,6 +496,7 @@ class JobCardController extends GetxController {
           .doc(jobId)
           .collection('invoice_items')
           .add({
+        'name': invoiceItemNameId.value,
         'line_number': lineNumber.text,
         'description': description.text,
         'quantity': quantity.text,
@@ -605,6 +652,17 @@ class JobCardController extends GetxController {
         .snapshots()
         .listen((branches) {
       allBranches.value = {for (var doc in branches.docs) doc.id: doc.data()};
+    });
+  }
+
+  getInvoiceItemsFromCollection() {
+    FirebaseFirestore.instance
+        .collection('invoice_items')
+        .snapshots()
+        .listen((items) {
+      allInvoiceItemsFromCollection.value = {
+        for (var doc in items.docs) doc.id: doc.data()
+      };
     });
   }
 

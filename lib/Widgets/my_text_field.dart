@@ -19,7 +19,7 @@ Widget myTextFormFieldWithBorder(
     int? minLines,
     keyboardType,
     void Function(String)? onChanged,
-    bool? isEnabled}) {
+    bool? isEnabled = true}) {
   return TextFormField(
     minLines: minLines,
     maxLines: maxLines,
@@ -45,7 +45,7 @@ Widget myTextFormFieldWithBorder(
       labelStyle: TextStyle(
         color: isEnabled == false ? Colors.grey.shade500 : Colors.grey.shade700,
       ),
-      filled: isEnabled == false, 
+      filled: isEnabled == true, 
       fillColor: Colors.grey.shade200, 
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5),

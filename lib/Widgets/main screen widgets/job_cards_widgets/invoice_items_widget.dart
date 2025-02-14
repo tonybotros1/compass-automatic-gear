@@ -136,12 +136,6 @@ Widget tableOfScreens(
         ),
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
-      ),
-      DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
         label: AutoSizedText(
           constraints: constraints,
@@ -177,7 +171,8 @@ DataRow dataRowForTheTable(
     String jobId) {
   return DataRow(cells: [
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['line_number']}')),
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['description']}')),
+    DataCell(textForDataRowInTable(
+        text: '${invoiceItemsData['description']}', maxWidth: 200)),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['quantity']}')),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['price']}')),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['amount']}')),
@@ -185,13 +180,6 @@ DataRow dataRowForTheTable(
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['total']}')),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['vat']}')),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['net']}')),
-    DataCell(
-      Text(
-        invoiceItemsData['added_date'] != null
-            ? textToDate(invoiceItemsData['added_date'])
-            : 'N/A',
-      ),
-    ),
     DataCell(Row(
       spacing: 5,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -230,6 +218,10 @@ ElevatedButton editSection(
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
+        controller.invoiceItemNameId.value = invoiceItemsData['name'];
+        controller.invoiceItemName.text = controller.getdataName(
+            invoiceItemsData['name'],
+            controller.allInvoiceItemsFromCollection)!;
         controller.lineNumber.text = invoiceItemsData['line_number'];
         controller.description.text = invoiceItemsData['description'];
         controller.quantity.text = invoiceItemsData['quantity'];
@@ -368,6 +360,6 @@ ElevatedButton newinvoiceItemsButton(BuildContext context,
           });
     },
     style: newButtonStyle,
-    child: const Text('New invoice'),
+    child: const Text('New item'),
   );
 }

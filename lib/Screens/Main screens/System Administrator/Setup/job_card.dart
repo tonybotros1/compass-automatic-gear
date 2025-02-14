@@ -105,6 +105,13 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
+          text: 'Job Date',
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
           text: 'LPO No.',
         ),
         onSort: controller.onSort,
@@ -147,7 +154,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Inv No.',
+          text: 'Invoice No.',
         ),
         onSort: controller.onSort,
       ),
@@ -155,13 +162,6 @@ Widget tableOfScreens(
         label: AutoSizedText(
           constraints: constraints,
           text: 'Inv Date',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Job Date',
         ),
         onSort: controller.onSort,
       ),
@@ -194,6 +194,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
     jobId, JobCardController controller) {
   return DataRow(cells: [
     DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
+    DataCell(textForDataRowInTable(text: '${textToDate(jobData['job_date'])}')),
     DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
     DataCell(textForDataRowInTable(
         text:
@@ -226,7 +227,6 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
     DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
     DataCell(
         textForDataRowInTable(text: '${textToDate(jobData['invoice_date'])}')),
-    DataCell(textForDataRowInTable(text: '${textToDate(jobData['job_date'])}')),
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -444,11 +444,14 @@ ElevatedButton newJobCardButton(BuildContext context,
                       builder: (controller) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: ElevatedButton(
-                          onPressed: controller.addingNewValue.value
-                              ? null
-                              : () async {
-                                  await controller.addNewJobCardAndQuotation();
-                                },
+                          onPressed: controller.canSaveJobCard.isTrue
+                              ? controller.addingNewValue.value
+                                  ? null
+                                  : () async {
+                                      await controller
+                                          .addNewJobCardAndQuotation();
+                                    }
+                              : null,
                           style: saveButtonStyle,
                           child: controller.addingNewValue.value == false
                               ? const Text(

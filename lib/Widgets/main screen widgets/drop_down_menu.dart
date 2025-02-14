@@ -41,7 +41,7 @@ Widget dropDownValues({
       enabled: menus.isNotEmpty,
       focusNode: focusNode, // ✅ Attach the focus node
       decoration: InputDecoration(
-        filled: menus.isEmpty,
+        filled: menus.isNotEmpty,
         fillColor: Colors.grey.shade200,
         icon: icon,
         focusedBorder: OutlineInputBorder(

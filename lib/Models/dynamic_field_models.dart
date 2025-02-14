@@ -67,7 +67,7 @@ class FieldConfig {
     this.flex = 1,
     this.onChanged,
     this.textController,
-    this.isEnabled,
+    this.isEnabled = true,
     this.isnumber,
     this.isDouble,
     this.suffixIcon,

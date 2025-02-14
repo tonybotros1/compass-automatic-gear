@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
 import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 
 Future internalNotesDialog(
@@ -206,7 +204,7 @@ Future internalNotesDialog(
                                               color: Colors.grey[800],
                                             ),
                                           )
-                                        : note['type'] == 'image'
+                                        : note['type'].startsWith("image")
                                             ? Image.network(
                                                 note['note'],
                                                 fit: BoxFit.contain,
@@ -214,47 +212,37 @@ Future internalNotesDialog(
                                               )
                                             : InkWell(
                                                 onTap: () {
-                                                  FilePickerService.openPdf(
+                                                  FilePickerService.openFile(
                                                     note['note'],
                                                   );
                                                 },
-                                                child: Container(
-                                                  constraints: BoxConstraints(
-                                                      maxWidth: 300),
-                                                  padding: EdgeInsets.all(8),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey[400],
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Image.asset(
-                                                          'assets/pdf.png',
-                                                          width: 50,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Image.asset(
+                                                        'assets/file.png',
+                                                        width: 50,
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(
+                                                        note['file_name'] ??
+                                                            'No Name',
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: TextStyle(
+                                                          color:
+                                                              Colors.grey[800],
                                                         ),
                                                       ),
-                                                      Expanded(
-                                                        child: Text(
-                                                          note['file_name'] ??
-                                                              'No Name',
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: TextStyle(
-                                                            color: Colors.white,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                   ),
@@ -299,96 +287,71 @@ Future internalNotesDialog(
                           padding: const EdgeInsets.fromLTRB(8, 10, 16, 16),
                           child: controller.fileBytes.value != null
                               ? controller.fileType.value.startsWith('image/')
-                                  ? Image.memory(controller.fileBytes.value!,
-                                      height: 200)
+                                  ? Row(
+                                      spacing: 20,
+                                      children: [
+                                        IconButton(
+                                            onPressed: () {
+                                              controller.fileBytes.value = null;
+                                            },
+                                            icon: Icon(Icons.clear)),
+                                        Image.memory(
+                                            controller.fileBytes.value!,
+                                            height: 200),
+                                      ],
+                                    )
                                   : controller.fileType.value
                                           .startsWith('application/pdf')
-                                      ? Text("PDF Selected: Cannot preview",
-                                          style: TextStyle(fontSize: 16))
-                                      : SizedBox()
-                              : KeyboardListener(
-                                  autofocus: true,
-                                  focusNode: FocusNode(),
-                                  onKeyEvent: (KeyEvent event) async {
-                                    if (event is KeyDownEvent) {
-                                      bool shiftPressed = HardwareKeyboard
-                                              .instance.logicalKeysPressed
-                                              .contains(LogicalKeyboardKey
-                                                  .shiftLeft) ||
-                                          HardwareKeyboard
-                                              .instance.logicalKeysPressed
-                                              .contains(LogicalKeyboardKey
-                                                  .shiftRight);
-
-                                      if (event.logicalKey ==
-                                              LogicalKeyboardKey.enter &&
-                                          shiftPressed) {
-                                        controller.internalNote.value.text +=
-                                            '\n';
-                                        controller
-                                                .internalNote.value.selection =
-                                            TextSelection.fromPosition(
-                                                TextPosition(
-                                                    offset: controller
-                                                        .internalNote
-                                                        .value
-                                                        .text
-                                                        .length));
-                                      } else if (event.logicalKey ==
-                                          LogicalKeyboardKey.enter) {
-                                        if (controller.noteMessage.value
-                                            .trim()
-                                            .isNotEmpty) {
-                                          controller.addNewInternalNote(jobId, {
-                                            'type': 'Text',
-                                            'note': controller.noteMessage.value
-                                                .trim(),
-                                            'user_id': controller.userId.value,
-                                            'time': DateTime.now(),
-                                          });
-                                          controller.internalNote.value.clear();
-                                          controller.noteMessage.value = '';
-                                          Future.delayed(
-                                              Duration(milliseconds: 100), () {
-                                            controller.textFieldFocusNode
-                                                .requestFocus();
-                                          });
-                                        } else {
-                                          Future.delayed(
-                                              Duration(milliseconds: 100), () {
-                                            controller.textFieldFocusNode
-                                                .requestFocus();
-                                          });
-                                        }
-                                      }
-                                    }
+                                      ? Row(
+                                          spacing: 20,
+                                          children: [
+                                            IconButton(
+                                                onPressed: () {
+                                                  controller.fileBytes.value =
+                                                      null;
+                                                },
+                                                icon: Icon(Icons.clear)),
+                                            Text("PDF Selected: Cannot preview",
+                                                style: TextStyle(fontSize: 16)),
+                                          ],
+                                        )
+                                      : Row(
+                                          spacing: 20,
+                                          children: [
+                                            IconButton(
+                                                onPressed: () {
+                                                  controller.fileBytes.value =
+                                                      null;
+                                                },
+                                                icon: Icon(Icons.clear)),
+                                            Text(
+                                                'File selected:  Cannot preview'),
+                                          ],
+                                        )
+                              : TextFormField(
+                                  textInputAction: TextInputAction.newline,
+                                  onFieldSubmitted: (value) {
+                                    Future.delayed(Duration(milliseconds: 100),
+                                        () {
+                                      controller.textFieldFocusNode
+                                          .requestFocus();
+                                    });
                                   },
-                                  child: TextFormField(
-                                    textInputAction: TextInputAction.none,
-                                    onFieldSubmitted: (value) {
-                                      Future.delayed(
-                                          Duration(milliseconds: 100), () {
-                                        controller.textFieldFocusNode
-                                            .requestFocus();
-                                      });
-                                    },
-                                    focusNode: controller.textFieldFocusNode,
-                                    controller: controller.internalNote.value,
-                                    minLines: 1,
-                                    maxLines: null,
-                                    // keyboardType: TextInputType.multiline,
-                                    onChanged: (value) {
-                                      controller.noteMessage.value = value;
-                                    },
-                                    decoration: InputDecoration(
-                                      hintStyle:
-                                          const TextStyle(color: Colors.grey),
-                                      hintText: 'Type here...',
-                                      labelStyle: TextStyle(
-                                          color: Colors.grey.shade700),
-                                      enabledBorder: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                    ),
+                                  focusNode: controller.textFieldFocusNode,
+                                  controller: controller.internalNote.value,
+                                  minLines: 1,
+                                  maxLines: null,
+                                  onChanged: (value) {
+                                    controller.noteMessage.value = value;
+                                  },
+                                  decoration: InputDecoration(
+                                    hintStyle:
+                                        const TextStyle(color: Colors.grey),
+                                    hintText: 'Type here...',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey.shade700),
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
                                   ),
                                 )),
                     ),
@@ -397,53 +360,43 @@ Future internalNotesDialog(
                       child: GetX<JobCardController>(builder: (controller) {
                         return controller.addingNewInternalNotProcess.isFalse
                             ? IconButton(
-                                onPressed: controller.noteMessage.value != ''
-                                    ? () {
-                                        controller.internalNote.value.clear();
-                                        controller.addNewInternalNote(jobId, {
-                                          'type': 'Text',
-                                          'note': controller.noteMessage.value
-                                              .trim(),
-                                          'user_id': controller.userId.value,
-                                          'time': DateTime.now(),
-                                        });
-                                        controller.noteMessage.value = '';
-                                        Future.delayed(
-                                            Duration(milliseconds: 100), () {
-                                          controller.textFieldFocusNode
-                                              .requestFocus();
-                                        });
-                                      }
-                                    : () async {
-                                        if (controller.fileBytes.value !=
-                                            null) {
-                                          await controller
-                                              .addNewInternalNote(jobId, {
-                                            'file_name':
-                                                controller.fileName.value,
-                                            'type': controller.fileType.value
-                                                    .startsWith("image/")
-                                                ? 'image'
-                                                : 'application/pdf',
-                                            'note': controller.fileBytes.value,
-                                            'user_id': controller.userId.value,
-                                            'time': DateTime.now(),
-                                          });
-
-                                          controller.fileBytes.value = null;
-                                          controller.fileType.value = '';
-                                          controller.fileName.value = '';
-                                        }
-                                        Future.delayed(
-                                            Duration(milliseconds: 100), () {
-                                          controller.textFieldFocusNode
-                                              .requestFocus();
-                                        });
-                                      },
+                                onPressed: () async {
+                                  if (controller.noteMessage.value
+                                      .trim()
+                                      .isNotEmpty) {
+                                    controller.internalNote.value.clear();
+                                    await controller.addNewInternalNote(jobId, {
+                                      'type': 'Text',
+                                      'note':
+                                          controller.noteMessage.value.trim(),
+                                      'user_id': controller.userId.value,
+                                      'time': DateTime.now(),
+                                    });
+                                    controller.noteMessage.value = '';
+                                  } else if (controller.fileBytes.value !=
+                                      null) {
+                                    await controller.addNewInternalNote(jobId, {
+                                      'file_name': controller.fileName.value,
+                                      'type': controller.fileType.value,
+                                      'note': controller.fileBytes.value,
+                                      'user_id': controller.userId.value,
+                                      'time': DateTime.now(),
+                                    });
+                                    controller.fileBytes.value = null;
+                                    controller.fileType.value = '';
+                                    controller.fileName.value = '';
+                                  }
+                                  Future.delayed(Duration(milliseconds: 100),
+                                      () {
+                                    controller.textFieldFocusNode
+                                        .requestFocus();
+                                  });
+                                },
                                 icon: Icon(
                                   Icons.send_rounded,
                                   color: mainColor,
-                                ))
+                                ),
+                              )
                             : Padding(
                                 padding: const EdgeInsets.only(right: 15),
                                 child: SizedBox(
