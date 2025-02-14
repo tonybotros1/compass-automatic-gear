@@ -193,6 +193,9 @@ class JobCardController extends GetxController {
   }
 
   clearValues() {
+    jobCardCounter.value.clear();
+    quotationCounter.value.clear();
+    invoiceCounter.value.clear();
     curreentJobCardId.value = '';
     jobCardAdded.value = false;
     carBrand.clear();
@@ -1037,10 +1040,7 @@ class JobCardController extends GetxController {
     } else {
       filteredJobCards.assignAll(
         allJobCards.where((card) {
-          return card['description']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
+          return card['description'].toString().toLowerCase().contains(query) ||
               card['name'].toString().toLowerCase().contains(query) ||
               card['price'].toString().toLowerCase().contains(query) ||
               textToDate(card['added_date'])
