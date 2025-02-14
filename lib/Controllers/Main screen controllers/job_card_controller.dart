@@ -91,14 +91,12 @@ class JobCardController extends GetxController {
   RxString companyId = RxString('');
   RxMap companyDetails = RxMap({});
   RxMap allCountries = RxMap({});
-  // RxMap filterdCitiesByCountry = RxMap({});
   RxMap allCities = RxMap({});
   RxMap allColors = RxMap({});
   RxMap allBranches = RxMap({});
   RxMap allCurrencies = RxMap({});
 
   RxMap allBrands = RxMap({});
-  // RxMap filterdModelsByBrands = RxMap({});
   RxMap allModels = RxMap({});
   RxMap allCustomers = RxMap({});
   RxMap salesManMap = RxMap({});
@@ -152,6 +150,7 @@ class JobCardController extends GetxController {
     getCurrencies();
     getColors();
     getAllJobCards();
+    search.value.addListener(() {});
   }
 
   @override
@@ -170,8 +169,6 @@ class JobCardController extends GetxController {
     final currentVat = double.tryParse(vat.text) ?? 0.0;
     final currentDiscount = double.tryParse(discount.text) ?? 0.0;
     amount.text = (currwnQquanity * currentPrice).toString();
-    // quantity.text = pri != 0 ? (amou / pri).toString() : '0';
-    // price.text = quan != 0 ? (amou / quan).toString() : '0';
     total.text = (double.tryParse(amount.text)! - currentDiscount).toString();
     net.text = (double.tryParse(total.text)! + currentVat).toString();
   }
@@ -179,28 +176,21 @@ class JobCardController extends GetxController {
   void updatevat() {
     if (net.text.isEmpty) net.text = '0';
 
-    // net.text = (double.tryParse(total.text)! + double.tryParse(vat.text)! ?? 0.0).toString();
     vat.text =
         (double.tryParse(net.text)! - double.tryParse(total.text)!).toString();
   }
 
-  // void updateTotal() {
-  //   final amou = double.tryParse(amount.text) ?? 0.0;
-  //   final dis = double.tryParse(discount.text) ?? 0.0;
-  //   total.text = (amou - dis).toString();
-  // }
-  void clearInvoiceItemsVariables(){
+  void clearInvoiceItemsVariables() {
     lineNumber.clear();
-      description.clear();
-     quantity.text = '0';
-      price.text = '0';
-      amount.text = '0';
-      discount.text = '0';
-      total.text = '0';
-      vat.text = '0';
-      net.text = '0';
+    description.clear();
+    quantity.text = '0';
+    price.text = '0';
+    amount.text = '0';
+    discount.text = '0';
+    total.text = '0';
+    vat.text = '0';
+    net.text = '0';
   }
-
 
   clearValues() {
     curreentJobCardId.value = '';
@@ -249,11 +239,6 @@ class JobCardController extends GetxController {
     jobNotes.clear();
     deliveryNotes.clear();
   }
-
-  // int safeParseInt(String? value, {defaultValue = ''}) {
-  //   if (value == null || value.trim().isEmpty) return defaultValue;
-  //   return int.tryParse(value) ?? defaultValue;
-  // }
 
   loadValues(Map<String, dynamic> data) {
     carBrandId.value = data['car_brand'];
@@ -332,9 +317,7 @@ class JobCardController extends GetxController {
 
       await getCurrentQuotationCounterNumber();
       await getCurrentJobCardCounterNumber();
-      // if (internalNotes.isNotEmpty && canAddInternalNotes.isTrue) {
-      //   finalInternalNotes = await addNewInternalNotes();
-      // }
+
       if (jobCardAdded.isFalse) {
         var newJob =
             await FirebaseFirestore.instance.collection('job_cards').add({
@@ -397,7 +380,6 @@ class JobCardController extends GetxController {
       canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
     } catch (e) {
-      print(e);
       canAddInternalNotesAndInvoiceItems.value = false;
       addingNewValue.value = false;
     }
@@ -1045,5 +1027,28 @@ class JobCardController extends GetxController {
     customerSaleManId.value = currentUserDetails.value['sales_man'];
     customerSaleMan.text =
         getdataName(currentUserDetails.value['sales_man'], salesManMap)!;
+  }
+
+  // this function is to filter the search results for web
+  void filterJobCards() {
+    query.value = search.value.text.toLowerCase();
+    if (query.value.isEmpty) {
+      filteredJobCards.clear();
+    } else {
+      filteredJobCards.assignAll(
+        allJobCards.where((card) {
+          return card['description']
+                  .toString()
+                  .toLowerCase()
+                  .contains(query) ||
+              card['name'].toString().toLowerCase().contains(query) ||
+              card['price'].toString().toLowerCase().contains(query) ||
+              textToDate(card['added_date'])
+                  .toString()
+                  .toLowerCase()
+                  .contains(query);
+        }).toList(),
+      );
+    }
   }
 }

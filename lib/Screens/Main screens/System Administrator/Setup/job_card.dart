@@ -147,7 +147,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Invoice No.',
+          text: 'Inv No.',
         ),
         onSort: controller.onSort,
       ),
