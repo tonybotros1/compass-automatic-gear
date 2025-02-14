@@ -178,10 +178,21 @@ class JobCardController extends GetxController {
     amount.text = (currwnQquanity * currentPrice).toString();
     total.text = (double.tryParse(amount.text)! - currentDiscount).toString();
     net.text = (double.tryParse(total.text)! + currentVat).toString();
+    vat.text = ((double.tryParse(total.text)! * 5) / 100).toString();
   }
 
-  void updatevat() {
+  void updateAmount() {
     if (net.text.isEmpty) net.text = '0';
+    if (net.text != '0') {
+      total.text =
+          (double.tryParse(net.text)! - double.tryParse(vat.text)!).toString();
+      amount.text =
+          (double.tryParse(total.text)! - double.tryParse(discount.text)!)
+              .toString();
+      price.text =
+          (double.tryParse(amount.text)! / double.tryParse(quantity.text)!)
+              .toString();
+    }
 
     // vat.text =
     //     (double.tryParse(net.text)! - double.tryParse(total.text)!).toString();
@@ -442,7 +453,7 @@ class JobCardController extends GetxController {
             note['type'] as String? ?? _getMimeTypeFromExtension(extension);
 
         // Upload file with metadata
-         storageRef.putData(
+        storageRef.putData(
           note['note'],
           SettableMetadata(
             contentType: mimeType,

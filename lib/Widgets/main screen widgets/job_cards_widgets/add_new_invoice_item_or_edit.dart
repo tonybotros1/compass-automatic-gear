@@ -130,7 +130,7 @@ Widget addNewinvoiceItemsOrEdit({
           SizedBox(
             width: 200,
             child: myTextFormFieldWithBorder(
-              onChanged: (_) => controller.updatevat(),
+              onChanged: (_) => controller.updateAmount(),
               isDouble: true,
               controller: controller.net,
               labelText: 'Net',
