@@ -19,7 +19,7 @@ Widget addNewCompanyOrView({
   TextEditingController? country,
   String companyLogo = '',
   List? roleIDFromList,
-  bool? canEdit,
+  bool? canEdit = true,
 }) {
   return SizedBox(
     width: constraints.maxWidth / 1.5,

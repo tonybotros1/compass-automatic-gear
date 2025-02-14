@@ -19,7 +19,6 @@ class BranchesController extends GetxController {
   final RxList<DocumentSnapshot> filteredBranches =
       RxList<DocumentSnapshot>([]);
   RxMap allCountries = RxMap({});
-  RxMap filterdCitiesByCountry = RxMap({});
   RxMap allCities = RxMap({});
 
   RxInt sortColumnIndex = RxInt(0);
@@ -28,11 +27,10 @@ class BranchesController extends GetxController {
   RxString companyId = RxString('');
 
   @override
-  void onInit() {
-    getCompanyId();
-    getCountriesAndCities().then((_) {
-      getAllBranches();
-    });
+  void onInit() async {
+    await getCompanyId();
+    getAllBranches();
+    getCountries();
     search.value.addListener(() {
       filterBranches();
     });
@@ -92,46 +90,76 @@ class BranchesController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  getCountriesAndCities() async {
+  // getCountriesAndCities() async {
+  //   try {
+  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'COUNTRIES')
+  //         .get();
+  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
+  //         .instance
+  //         .collection('all_lists')
+  //         .where('code', isEqualTo: 'CITIES')
+  //         .get();
+
+  //     var countriesId = countries.docs.first.id;
+  //     var citiesId = cities.docs.first.id;
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(countriesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((countries) {
+  //       allCountries.value = {
+  //         for (var doc in countries.docs) doc.id: doc.data()
+  //       };
+  //     });
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_lists')
+  //         .doc(citiesId)
+  //         .collection('values')
+  //         .where('available', isEqualTo: true)
+  //         .snapshots()
+  //         .listen((cities) {
+  //       allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+  //     });
+  //     update();
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
+
+  getCountries() {
     try {
-      QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'COUNTRIES')
-          .get();
-      QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-          .instance
-          .collection('all_lists')
-          .where('code', isEqualTo: 'CITIES')
-          .get();
-
-      var countriesId = countries.docs.first.id;
-      var citiesId = cities.docs.first.id;
-
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(countriesId)
-          .collection('values')
-          .where('available', isEqualTo: true)
+          .collection('all_countries')
           .snapshots()
           .listen((countries) {
         allCountries.value = {
           for (var doc in countries.docs) doc.id: doc.data()
         };
       });
+    } catch (e) {
+      //
+    }
+  }
 
+  getCitiesByCountryID(countryID) {
+    try {
       FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(citiesId)
+          .collection('all_countries')
+          .doc(countryID)
           .collection('values')
-          .where('available', isEqualTo: true)
           .snapshots()
           .listen((cities) {
         allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
       });
-      update();
     } catch (e) {
-      // print(e);
+      //
     }
   }
 
@@ -146,29 +174,20 @@ class BranchesController extends GetxController {
     }
   }
 
-  String? getCityName(String cityId) {
+  Future<String?> getCityName(countryId, cityId) async {
     try {
-      final city = allCities.entries.firstWhere(
-        (city) => city.key == cityId,
-      );
-      return city.value['name'];
+      var cities = await FirebaseFirestore.instance
+          .collection('all_countries')
+          .doc(countryId)
+          .collection('values')
+          .where(FieldPath.documentId, isEqualTo: cityId)
+          .get();
+      String cityName = cities.docs.first.data()['name'];
+
+      return cityName;
     } catch (e) {
       return '';
     }
-  }
-
-  void onSelect(String selectedId) {
-    filterdCitiesByCountry.clear();
-    filterdCitiesByCountry.addAll(
-      Map.fromEntries(
-        allCities.entries.where((entry) {
-          return entry.value['restricted_by']
-              .toString()
-              .toLowerCase()
-              .contains(selectedId.toLowerCase());
-        }),
-      ),
-    );
   }
 
   getAllBranches() {

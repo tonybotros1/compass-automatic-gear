@@ -183,8 +183,8 @@ class JobCardController extends GetxController {
   void updatevat() {
     if (net.text.isEmpty) net.text = '0';
 
-    vat.text =
-        (double.tryParse(net.text)! - double.tryParse(total.text)!).toString();
+    // vat.text =
+    //     (double.tryParse(net.text)! - double.tryParse(total.text)!).toString();
   }
 
   void clearInvoiceItemsVariables() {

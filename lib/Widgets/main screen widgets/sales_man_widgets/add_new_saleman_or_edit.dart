@@ -8,7 +8,6 @@ Widget addNewSaleManOrEdit({
   required SalesManController controller,
   TextEditingController? name,
   TextEditingController? target,
-  bool? canEdit,
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
@@ -25,7 +24,6 @@ Widget addNewSaleManOrEdit({
           labelText: 'Name',
           hintText: 'Enter Sale Man Name',
           validate: true,
-          isEnabled: canEdit,
         ),
         SizedBox(
           height: 10,

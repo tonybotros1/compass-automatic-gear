@@ -211,22 +211,22 @@ ElevatedButton editSection(context, BranchesController controller,
     Map<String, dynamic> branchData, constraints, branchId) {
   return ElevatedButton(
       style: editButtonStyle,
-      onPressed: () {
+      onPressed: () async {
+        controller.city.text = (await controller.getCityName(
+            branchData['country_id'], branchData['city_id']))!;
+        controller.getCitiesByCountryID(branchData['country_id']);
+        controller.code.text = branchData['code'] ?? '';
+        controller.name.text = branchData['name'] ?? '';
+        controller.line.text = branchData['line'] ?? '';
+        controller.country.text =
+            controller.getCountryName(branchData['country_id'])!;
+
+        controller.countryId.value = branchData['country_id'];
+        controller.cityId.value = branchData['city_id'];
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
-              controller.onSelect(branchData['country_id']);
-              controller.code.text = branchData['code'] ?? '';
-              controller.name.text = branchData['name'] ?? '';
-              controller.line.text = branchData['line'] ?? '';
-              controller.country.text =
-                  controller.getCountryName(branchData['country_id'])!;
-              controller.city.text =
-                  controller.getCityName(branchData['city_id'])!;
-              controller.countryId.value = branchData['country_id'];
-              controller.cityId.value = branchData['city_id'];
-
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                 content: addNewBranchOrEdit(
@@ -282,6 +282,7 @@ ElevatedButton newBranchesButton(BuildContext context,
     BoxConstraints constraints, BranchesController controller) {
   return ElevatedButton(
     onPressed: () {
+      controller.allCities.clear();
       controller.code.clear();
       controller.name.clear();
       controller.line.clear();
@@ -290,7 +291,7 @@ ElevatedButton newBranchesButton(BuildContext context,
       controller.city.clear();
       controller.cityId.value = '';
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

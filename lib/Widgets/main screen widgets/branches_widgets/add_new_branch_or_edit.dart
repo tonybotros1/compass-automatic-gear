@@ -53,15 +53,14 @@ Widget addNewBranchOrEdit({
         GetX<BranchesController>(builder: (controller) {
           var isCountryLoading = controller.allCountries.isEmpty;
           return dropDownValues(
-             listValues: controller.allCountries.values
-                    .map((value) => value['name']
-                        .toString()) 
-                    .toList(),
-            textController: controller.country,
+            listValues: controller.allCountries.values
+                .map((value) => value['name'].toString())
+                .toList(),
             labelText: 'Country',
-            hintText: 'Enter Country',
+            hintText: 'Enter your country',
+            textController: controller.country,
             validate: true,
-            menus: isCountryLoading == false ? controller.allCountries : {},
+            menus: isCountryLoading ? {} : controller.allCountries,
             itemBuilder: (context, suggestion) {
               return ListTile(
                 title: Text('${suggestion['name']}'),
@@ -73,7 +72,8 @@ Widget addNewBranchOrEdit({
                 return entry.value['name'] == suggestion['name'].toString();
               }).forEach(
                 (entry) {
-                  controller.onSelect(entry.key);
+                  // controller.onSelect(entry.key);
+                  controller.getCitiesByCountryID(entry.key);
                   controller.city.clear();
                   controller.countryId.value = entry.key;
                 },
@@ -85,21 +85,19 @@ Widget addNewBranchOrEdit({
           height: 10,
         ),
         GetX<BranchesController>(builder: (controller) {
-          var isCityLoading = controller.filterdCitiesByCountry.isEmpty;
+          var isCityLoading = controller.allCities.isEmpty;
 
           return dropDownValues(
-             listValues: controller.filterdCitiesByCountry.values
-                    .map((value) => value['name']
-                        .toString()) 
-                    .toList(),
+            listValues: controller.allCities.values
+                .map((value) => value['name'].toString())
+                .toList(),
             suggestionsController: SuggestionsController(),
             onTapForTypeAheadField: SuggestionsController().refresh,
             labelText: 'City',
             hintText: 'Enter your city',
             textController: controller.city,
             validate: true,
-            menus:
-                isCityLoading == false ? controller.filterdCitiesByCountry : {},
+            menus: isCityLoading ? {} : controller.allCities,
             itemBuilder: (context, suggestion) {
               return ListTile(
                 title: Text('${suggestion['name']}'),
@@ -107,7 +105,7 @@ Widget addNewBranchOrEdit({
             },
             onSelected: (suggestion) {
               controller.city.text = suggestion['name'];
-              controller.filterdCitiesByCountry.entries.where((entry) {
+              controller.allCities.entries.where((entry) {
                 return entry.value['name'] == suggestion['name'].toString();
               }).forEach((entry) {
                 controller.cityId.value = entry.key;

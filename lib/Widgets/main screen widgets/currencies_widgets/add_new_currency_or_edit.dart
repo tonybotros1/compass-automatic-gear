@@ -6,7 +6,7 @@ Widget addNewCurrencyOrEdit({
   required BoxConstraints constraints,
   required BuildContext context,
   required CurrencyController controller,
-  bool? canEdit,
+  bool? canEdit = true,
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,

@@ -7,7 +7,7 @@ Widget addNewConterOrEdit({
   required BoxConstraints constraints,
   required BuildContext context,
   required CountersController controller,
-  bool? canEdit,
+  bool? canEdit = true,
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,

@@ -254,48 +254,6 @@ class CompanyController extends GetxController {
     return phrase.replaceAll(' ', '_');
   }
 
-  // getCountriesAndCities() async {
-  //   try {
-  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'COUNTRIES')
-  //         .get();
-  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'CITIES')
-  //         .get();
-
-  //     var countriesId = countries.docs.first.id;
-  //     var citiesId = cities.docs.first.id;
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(countriesId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((countries) {
-  //       allCountries.value = {
-  //         for (var doc in countries.docs) doc.id: doc.data()
-  //       };
-  //     });
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(citiesId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((cities) {
-  //       allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
-  //     });
-  //     update();
-  //   } catch (e) {
-  //     // print(e);
-  //   }
-  // }
   getCountries() {
     try {
       FirebaseFirestore.instance

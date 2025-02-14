@@ -8,7 +8,7 @@ Widget addNewVariableOrEdit({
   required SystemVariablesController controller,
   TextEditingController? code,
   TextEditingController? value,
-  bool? canEdit,
+  bool? canEdit = true,
 }) {
   return SizedBox(
     width: constraints.maxWidth / 2.5,
