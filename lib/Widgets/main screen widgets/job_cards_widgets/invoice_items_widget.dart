@@ -8,7 +8,7 @@ import '../auto_size_box.dart';
 import 'add_new_invoice_item_or_edit.dart';
 
 Widget invoiceItemsDialog(
-    {required BuildContext context, required BoxConstraints constraints}) {
+    {required BuildContext context, required BoxConstraints constraints, required jobId}) {
   return Container(
     width: constraints.maxWidth,
     decoration: BoxDecoration(

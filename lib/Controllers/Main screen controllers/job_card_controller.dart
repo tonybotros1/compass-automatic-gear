@@ -114,7 +114,7 @@ class JobCardController extends GetxController {
   RxBool addingNewInternalNotProcess = RxBool(false);
   RxBool jobCardAdded = RxBool(false);
   RxString curreentJobCardId = RxString('');
-  RxBool canAddInternalNotes = RxBool(false);
+  RxBool canAddInternalNotesAndInvoiceItems = RxBool(false);
   final ScrollController scrollController = ScrollController();
   Rx<TextEditingController> internalNote = TextEditingController().obs;
   RxString noteMessage = RxString('');
@@ -127,6 +127,15 @@ class JobCardController extends GetxController {
   RxString pdfUrl = RxString('');
   // invoice items section
   RxBool addingNewinvoiceItemsValue = RxBool(false);
+  TextEditingController lineNumber = TextEditingController();
+  TextEditingController description = TextEditingController();
+  TextEditingController quantity = TextEditingController(text: '0');
+  TextEditingController price = TextEditingController(text: '0');
+  TextEditingController amount = TextEditingController(text: '0');
+  TextEditingController discount = TextEditingController(text: '0');
+  TextEditingController total = TextEditingController(text: '0');
+  TextEditingController vat = TextEditingController(text: '0');
+  TextEditingController net = TextEditingController(text: '0');
 
   @override
   void onInit() async {
@@ -150,6 +159,36 @@ class JobCardController extends GetxController {
     textFieldFocusNode.dispose();
     super.onClose();
   }
+
+  void updateCalculating() {
+    if (price.text.isEmpty) price.text = '0';
+    if (quantity.text.isEmpty) quantity.text = '0';
+    if (discount.text.isEmpty) discount.text = '0';
+    if (vat.text.isEmpty) vat.text = '0';
+    final currwnQquanity = int.tryParse(quantity.text) ?? 0;
+    final currentPrice = double.tryParse(price.text) ?? 0.0;
+    final currentVat = double.tryParse(vat.text) ?? 0.0;
+    final currentDiscount = double.tryParse(discount.text) ?? 0.0;
+    amount.text = (currwnQquanity * currentPrice).toString();
+    // quantity.text = pri != 0 ? (amou / pri).toString() : '0';
+    // price.text = quan != 0 ? (amou / quan).toString() : '0';
+    total.text = (double.tryParse(amount.text)! - currentDiscount).toString();
+    net.text = (double.tryParse(total.text)! + currentVat).toString();
+  }
+
+  void updatevat() {
+    if (net.text.isEmpty) net.text = '0';
+
+    // net.text = (double.tryParse(total.text)! + double.tryParse(vat.text)! ?? 0.0).toString();
+    vat.text =
+        (double.tryParse(net.text)! - double.tryParse(total.text)!).toString();
+  }
+
+  // void updateTotal() {
+  //   final amou = double.tryParse(amount.text) ?? 0.0;
+  //   final dis = double.tryParse(discount.text) ?? 0.0;
+  //   total.text = (amou - dis).toString();
+  // }
 
   clearValues() {
     curreentJobCardId.value = '';
@@ -343,11 +382,11 @@ class JobCardController extends GetxController {
         jobCardAdded.value = true;
         curreentJobCardId.value = newJob.id;
       }
-      canAddInternalNotes.value = true;
+      canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
     } catch (e) {
       print(e);
-      canAddInternalNotes.value = false;
+      canAddInternalNotesAndInvoiceItems.value = false;
       addingNewValue.value = false;
     }
   }
@@ -457,8 +496,6 @@ class JobCardController extends GetxController {
   //   }
   // }
 
-  
-
   getAllUsers() {
     try {
       FirebaseFirestore.instance
@@ -491,13 +528,11 @@ class JobCardController extends GetxController {
     return combinedItems;
   }
 
-
   getUserId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     userId.value = prefs.getString('userId')!;
   }
 
- 
   void scrollToBottom() {
     Future.delayed(Duration(milliseconds: 100), () {
       if (scrollController.hasClients) {
@@ -981,7 +1016,8 @@ class JobCardController extends GetxController {
     return FirebaseFirestore.instance
         .collection('job_cards')
         .doc(jobId)
-        .collection('internal_notes').orderBy('time')
+        .collection('internal_notes')
+        .orderBy('time')
         .snapshots()
         .map((querySnapshot) {
       if (querySnapshot.docs.isNotEmpty) {

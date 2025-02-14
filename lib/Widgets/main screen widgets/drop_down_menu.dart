@@ -41,6 +41,8 @@ Widget dropDownValues({
       enabled: menus.isNotEmpty,
       focusNode: focusNode, // ✅ Attach the focus node
       decoration: InputDecoration(
+        filled: menus.isEmpty,
+        fillColor: Colors.grey.shade200,
         icon: icon,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
@@ -49,6 +51,10 @@ Widget dropDownValues({
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
           borderSide: BorderSide(color: Colors.grey, width: 1.0),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5),
+          borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
@@ -66,7 +72,9 @@ Widget dropDownValues({
         hintText: hintText,
         labelText: labelText,
         hintStyle: const TextStyle(color: Colors.grey),
-        labelStyle: TextStyle(color: Colors.grey.shade700),
+        labelStyle: TextStyle(
+          color: menus.isEmpty ? Colors.grey.shade500 : Colors.grey.shade700,
+        ),
       ),
     ),
     suggestionsCallback: (pattern) async {
@@ -106,15 +114,13 @@ Widget dropDownValues({
   );
 }
 
-
 /// ✅ Helper function to validate the input and show an alert if necessary
-void _validateAndShowAlert(
-    BuildContext context, TextEditingController? textController, List listValues) {
+void _validateAndShowAlert(BuildContext context,
+    TextEditingController? textController, List listValues) {
   if (textController == null) return;
 
   String value = textController.text;
   if (value.isNotEmpty && !listValues.contains(value)) {
-  
     textController.clear(); // ✅ Clear the invalid input
 
     showDialog(

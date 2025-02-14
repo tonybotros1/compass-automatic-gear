@@ -42,7 +42,11 @@ Widget myTextFormFieldWithBorder(
       labelText: labelText,
       alignLabelWithHint: true,
       hintText: hintText,
-      labelStyle: TextStyle(color: Colors.grey.shade700),
+      labelStyle: TextStyle(
+        color: isEnabled == false ? Colors.grey.shade500 : Colors.grey.shade700,
+      ),
+      filled: isEnabled == false, 
+      fillColor: Colors.grey.shade200, 
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.grey, width: 2.0),
@@ -50,6 +54,10 @@ Widget myTextFormFieldWithBorder(
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.grey, width: 1.0),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5),
+        borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5),

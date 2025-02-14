@@ -262,7 +262,7 @@ ElevatedButton editSection(context, JobCardController controller,
                       ElevatedButton(
                         style: internalNotesButtonStyle,
                         onPressed: () async {
-                          internalNotesDialog(controller, constraints,jobId);
+                          internalNotesDialog(controller, constraints, jobId);
                         },
                         child: Text('Internal Notes'),
                       ),
@@ -279,6 +279,7 @@ ElevatedButton editSection(context, JobCardController controller,
                                   content: invoiceItemsDialog(
                                     constraints: constraints,
                                     context: context,
+                                   jobId:  jobId
                                   ),
                                   actions: [
                                     Padding(
@@ -388,47 +389,55 @@ ElevatedButton newJobCardButton(BuildContext context,
                     GetX<JobCardController>(builder: (controller) {
                       return ElevatedButton(
                         style: internalNotesButtonStyle,
-                        onPressed: controller.canAddInternalNotes.isTrue
-                            ? () async {
-                               
-                                internalNotesDialog(controller, constraints,controller.curreentJobCardId.value);
-                              }
-                            : null,
+                        onPressed:
+                            controller.canAddInternalNotesAndInvoiceItems.isTrue
+                                ? () async {
+                                    internalNotesDialog(controller, constraints,
+                                        controller.curreentJobCardId.value);
+                                  }
+                                : null,
                         child: Text('Internal Notes'),
                       );
                     }),
                     ElevatedButton(
                       style: innvoiceItemsButtonStyle,
-                      onPressed: () {
-                        showDialog(
-                            barrierDismissible: false,
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                actionsPadding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                content: invoiceItemsDialog(
-                                  constraints: constraints,
+                      onPressed: controller
+                              .canAddInternalNotesAndInvoiceItems.isTrue
+                          ? () {
+                              showDialog(
+                                  barrierDismissible: false,
                                   context: context,
-                                ),
-                                actions: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Get.back();
-                                      },
-                                      style: cancelButtonStyle,
-                                      child: const Text(
-                                        'Cancel',
-                                        style: TextStyle(color: Colors.white),
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      actionsPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 20),
+                                      content: invoiceItemsDialog(
+                                        constraints: constraints,
+                                        context: context,
+                                        jobId: controller.curreentJobCardId.value
                                       ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            });
-                      },
+                                      actions: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 10),
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              Get.back();
+                                            },
+                                            style: cancelButtonStyle,
+                                            child: const Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  });
+                            }
+                          : null,
                       child: Text('Invoice Items'),
                     ),
                     Spacer(),
