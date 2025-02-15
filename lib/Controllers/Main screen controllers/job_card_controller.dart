@@ -166,6 +166,11 @@ class JobCardController extends GetxController {
     super.onClose();
   }
 
+  void openImageViewer(List imageUrls, int index) {
+    Get.toNamed('/imageViewer',
+        arguments: {'images': imageUrls, 'index': index});
+  }
+
   void updateCalculating() {
     if (price.text.isEmpty) price.text = '0';
     if (quantity.text.isEmpty) quantity.text = '0';
@@ -423,10 +428,9 @@ class JobCardController extends GetxController {
       if (note['type'] == 'Text') {
         await jobDoc.add(note);
       } else {
-        // Extract original filename with extension
         final originalFileName = note['file_name'] as String;
 
-        // Split filename and extension
+        // Extract filename and extension
         final extIndex = originalFileName.lastIndexOf('.');
         final (String fileName, String extension) = extIndex != -1
             ? (
@@ -435,7 +439,7 @@ class JobCardController extends GetxController {
               )
             : (originalFileName, '');
 
-        // Create timestamped filename with original extension
+        // Create timestamped filename
         final timestamp = DateTime.now()
             .toIso8601String()
             .replaceAll(RegExp(r'[^0-9T-]'), '_');
@@ -443,31 +447,33 @@ class JobCardController extends GetxController {
             ? '${fileName}_$timestamp.$extension'
             : '${fileName}_$timestamp';
 
-        // Create storage reference with proper extension
+        // Create storage reference
         final Reference storageRef = FirebaseStorage.instance
             .ref()
             .child('internal_notes/$storageFileName');
 
-        // Get MIME type from original file extension if not provided
+        // Determine MIME type
         final mimeType =
             note['type'] as String? ?? _getMimeTypeFromExtension(extension);
 
-        // Upload file with metadata
-        storageRef.putData(
+        // Upload file and wait for completion
+        final UploadTask uploadTask = storageRef.putData(
           note['note'],
           SettableMetadata(
-            contentType: mimeType,
+            contentType: mimeType ?? 'application/octet-stream',
             customMetadata: {'original_filename': originalFileName},
           ),
         );
 
-        // Get download URL
-        final String fileUrl = await storageRef.getDownloadURL();
+        // Wait for upload to complete
+        final TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
 
-        // Store original filename with extension in Firestore
+        // Get download URL after upload completion
+        final String fileUrl = await snapshot.ref.getDownloadURL();
+
+        // Store the note in Firestore
         await jobDoc.add({
-          'file_name':
-              originalFileName, // Store original filename with extension
+          'file_name': originalFileName,
           'type': mimeType ?? 'application/octet-stream',
           'note': fileUrl,
           'user_id': note['user_id'],
@@ -477,7 +483,6 @@ class JobCardController extends GetxController {
       addingNewInternalNotProcess.value = false;
     } catch (e) {
       addingNewInternalNotProcess.value = false;
-      // Consider adding error handling
     }
   }
 
@@ -607,7 +612,6 @@ class JobCardController extends GetxController {
       addingNewValue.value = false;
     } catch (e) {
       addingNewValue.value = false;
-
     }
   }
 

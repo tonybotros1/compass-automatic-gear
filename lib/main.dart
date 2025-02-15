@@ -5,10 +5,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Middleware/auth_middleware.dart';
+import 'Middleware/route_middleware.dart';
 import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
 import 'Screens/Auth Screens/register_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
+import 'Widgets/main screen widgets/job_cards_widgets/image_gallery_viewer.dart';
 import 'security.dart';
 
 SharedPreferences? globalPrefs;
@@ -35,11 +37,15 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/', page: () => const LoadingScreen()),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
-        GetPage(name: '/registerScreen', page: () => const RegisterScreen()),
+        GetPage(name: '/registerScreen', page: () => const RegisterScreen(),middlewares: [InitialRedirectMiddleware()]),
+        GetPage(
+            name: '/imageViewer',
+            page: () => ImageGalleryViewer(),
+            middlewares: [AuthMiddleware(),InitialRedirectMiddleware()]),
         GetPage(
             name: '/mainScreen',
             page: () => MainScreen(),
-            middlewares: [AuthMiddleware()])
+            middlewares: [AuthMiddleware(),InitialRedirectMiddleware()]),
       ],
     );
   }

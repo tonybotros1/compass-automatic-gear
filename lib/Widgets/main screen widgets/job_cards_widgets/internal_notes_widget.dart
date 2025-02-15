@@ -75,12 +75,14 @@ Future internalNotesDialog(
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Center(
-                        child: Text(
-                      "Empty",
-                      style: TextStyle(color: Colors.grey),
-                    ));
+                      child: Text(
+                        "Empty",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    );
                   }
 
+                  // Scroll to the bottom once the frame is built.
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (controller.scrollControllerForNotes.hasClients) {
                       controller.scrollControllerForNotes.animateTo(
@@ -93,6 +95,13 @@ Future internalNotesDialog(
                   });
 
                   var items = snapshot.data!;
+
+                  // Filter only valid image URLs from the notes.
+                  List<String> listOfImages = [
+                    for (int i = 0; i < items.length; i++)
+                      if (items[i]['type'].startsWith('image'))
+                        items[i]['note'].toString()
+                  ];
 
                   return ListView.builder(
                     controller: controller.scrollControllerForNotes,
@@ -204,11 +213,26 @@ Future internalNotesDialog(
                                               color: Colors.grey[800],
                                             ),
                                           )
-                                        : note['type'].startsWith("image")
-                                            ? Image.network(
-                                                note['note'],
-                                                fit: BoxFit.contain,
-                                                height: 200,
+                                        : note['type']
+                                                .toString()
+                                                .startsWith("image")
+                                            ? InkWell(
+                                                onTap: () {
+                                                  // Calculate the tapped image index within the filtered list.
+                                                  final tappedIndex =
+                                                      listOfImages.indexWhere(
+                                                    (url) =>
+                                                        url == note['note'],
+                                                  );
+                                                  controller.openImageViewer(
+                                                      listOfImages,
+                                                      tappedIndex);
+                                                },
+                                                child: Image.network(
+                                                  note['note'],
+                                                  fit: BoxFit.contain,
+                                                  height: 200,
+                                                ),
                                               )
                                             : InkWell(
                                                 onTap: () {
