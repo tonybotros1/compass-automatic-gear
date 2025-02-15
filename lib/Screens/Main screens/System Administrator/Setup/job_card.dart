@@ -246,7 +246,6 @@ ElevatedButton editSection(context, JobCardController controller,
             barrierDismissible: false,
             context: context,
             builder: (context) {
-              controller.loadValues(jobData);
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                 content: addNewJobCardOrEdit(
@@ -308,7 +307,7 @@ ElevatedButton editSection(context, JobCardController controller,
                           onPressed: controller.addingNewValue.value
                               ? null
                               : () {
-                                  // controller.editjob(jobId);
+                                  controller.editJobCardAndQuotation(jobId);
                                 },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
