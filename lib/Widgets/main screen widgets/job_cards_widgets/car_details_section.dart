@@ -181,7 +181,7 @@ Widget carDetailsSection() {
             ),
             DynamicConfig(
               isDropdown: true,
-              flex: 1,
+              flex: 2,
               dropdownConfig: DropdownConfig(
                 listValues: controller.allColors.values
                     .map((value) => value['name'].toString())
@@ -202,6 +202,44 @@ Widget carDetailsSection() {
                   }).forEach(
                     (entry) {
                       controller.colorId.value = entry.key;
+                    },
+                  );
+                },
+              ),
+            ),
+            DynamicConfig(
+              isDropdown: false,
+              flex: 2,
+              fieldConfig: FieldConfig(
+                textController: controller.transmissionType,
+                labelText: 'Transmission Type',
+                hintText: 'Enter Transmission Type',
+                validate: false,
+              ),
+            ),
+            DynamicConfig(
+              isDropdown: true,
+              flex: 2,
+              dropdownConfig: DropdownConfig(
+                listValues: controller.allEngineType.values
+                    .map((value) => value['name'].toString())
+                    .toList(),
+                textController: controller.engineType,
+                labelText: isColorsLoading ? 'Loading...' : 'Engine Type',
+                hintText: 'Select Engine Type',
+                menuValues: isColorsLoading ? {} : controller.allEngineType,
+                itemBuilder: (context, suggestion) {
+                  return ListTile(
+                    title: Text('${suggestion['name']}'),
+                  );
+                },
+                onSelected: (suggestion) {
+                  controller.engineType.text = suggestion['name'];
+                  controller.allEngineType.entries.where((entry) {
+                    return entry.value['name'] == suggestion['name'].toString();
+                  }).forEach(
+                    (entry) {
+                      controller.engineTypeId.value = entry.key;
                     },
                   );
                 },

@@ -397,46 +397,50 @@ ElevatedButton newJobCardButton(BuildContext context,
                         child: Text('Internal Notes'),
                       );
                     }),
-                    ElevatedButton(
-                      style: innvoiceItemsButtonStyle,
-                      onPressed: controller
-                              .canAddInternalNotesAndInvoiceItems.isTrue
-                          ? () {
-                              showDialog(
-                                  barrierDismissible: false,
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      actionsPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                      content: invoiceItemsDialog(
-                                          constraints: constraints,
-                                          context: context,
-                                          jobId: controller
-                                              .curreentJobCardId.value),
-                                      actions: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 10),
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              Get.back();
-                                            },
-                                            style: cancelButtonStyle,
-                                            child: const Text(
-                                              'Cancel',
-                                              style: TextStyle(
-                                                  color: Colors.white),
+                    GetX<JobCardController>(
+                      builder: (controller) {
+                        return ElevatedButton(
+                          style: innvoiceItemsButtonStyle,
+                          onPressed: controller
+                                  .canAddInternalNotesAndInvoiceItems.isTrue
+                              ? () {
+                                  showDialog(
+                                      barrierDismissible: false,
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          actionsPadding:
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 20),
+                                          content: invoiceItemsDialog(
+                                              constraints: constraints,
+                                              context: context,
+                                              jobId: controller
+                                                  .curreentJobCardId.value),
+                                          actions: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.only(bottom: 10),
+                                              child: ElevatedButton(
+                                                onPressed: () {
+                                                  Get.back();
+                                                },
+                                                style: cancelButtonStyle,
+                                                child: const Text(
+                                                  'Cancel',
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  });
-                            }
-                          : null,
-                      child: Text('Invoice Items'),
+                                          ],
+                                        );
+                                      });
+                                }
+                              : null,
+                          child: Text('Invoice Items'),
+                        );
+                      }
                     ),
                     Spacer(),
                     GetX<JobCardController>(

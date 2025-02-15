@@ -51,7 +51,9 @@ class JobCardController extends GetxController {
   TextEditingController city = TextEditingController();
   TextEditingController year = TextEditingController();
   TextEditingController vin = TextEditingController();
+  TextEditingController transmissionType = TextEditingController();
   TextEditingController color = TextEditingController();
+  TextEditingController engineType = TextEditingController();
   TextEditingController customerName = TextEditingController();
   TextEditingController customerEntityName = TextEditingController();
   TextEditingController customerEntityEmail = TextEditingController();
@@ -69,6 +71,7 @@ class JobCardController extends GetxController {
   RxString carModelId = RxString('');
   RxString countryId = RxString('');
   RxString colorId = RxString('');
+  RxString engineTypeId = RxString('');
   RxString cityId = RxString('');
   RxString customerId = RxString('');
   RxString customerSaleManId = RxString('');
@@ -93,6 +96,7 @@ class JobCardController extends GetxController {
   RxMap allCountries = RxMap({});
   RxMap allCities = RxMap({});
   RxMap allColors = RxMap({});
+  RxMap allEngineType = RxMap({});
   RxMap allBranches = RxMap({});
   RxMap allCurrencies = RxMap({});
   RxMap allInvoiceItemsFromCollection = RxMap({});
@@ -153,6 +157,7 @@ class JobCardController extends GetxController {
     getBranches();
     getCurrencies();
     getColors();
+    getEngineTypes();
     getAllJobCards();
     getInvoiceItemsFromCollection();
     search.value.addListener(() {
@@ -234,8 +239,11 @@ class JobCardController extends GetxController {
     city.clear();
     year.clear();
     color.clear();
+    engineType.clear();
     colorId.value = '';
+    engineTypeId.value = '';
     vin.clear();
+    transmissionType.clear();
     customerName.clear();
     customerId.value = '';
     customerEntityName.clear();
@@ -289,8 +297,11 @@ class JobCardController extends GetxController {
     });
     year.text = data['year'];
     colorId.value = data['color'];
+    engineTypeId.value = data['engine_type'];
     color.text = getdataName(data['color'], allColors)!;
+    engineType.text = getdataName(data['engine_type'], allEngineType)!;
     vin.text = data['vehicle_identification_number'];
+    transmissionType.text = data['transmission_type'];
     mileageIn.value.text = data['mileage_in'];
     mileageOut.value.text = data['mileage_out'];
     inOutDiff.value.text = data['mileage_in_out_diff'];
@@ -361,7 +372,9 @@ class JobCardController extends GetxController {
           'city': cityId.value,
           'year': year.text,
           'color': colorId.value,
+          'engine_type': engineTypeId.value,
           'vehicle_identification_number': vin.text,
+          'transmission_type': transmissionType.text,
           'mileage_in': mileageIn.value.text,
           'mileage_out': mileageOut.value.text,
           'mileage_in_out_diff': inOutDiff.value.text,
@@ -566,7 +579,9 @@ class JobCardController extends GetxController {
         'city': cityId.value,
         'year': year.text,
         'color': colorId.value,
+        'engine_type': engineTypeId.value,
         'vehicle_identification_number': vin.text,
+        'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
         'mileage_out': mileageOut.value.text,
         'mileage_in_out_diff': inOutDiff.value.text,
@@ -823,16 +838,37 @@ class JobCardController extends GetxController {
         .where('code', isEqualTo: 'COLORS')
         .get();
 
-    var typrId = typeDoc.docs.first.id;
+    var typeId = typeDoc.docs.first.id;
 
     FirebaseFirestore.instance
         .collection('all_lists')
-        .doc(typrId)
+        .doc(typeId)
         .collection('values')
         .where('available', isEqualTo: true)
         .snapshots()
         .listen((colors) {
       allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
+    });
+  }
+
+// this function is to get industries
+  getEngineTypes() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'ENGINE_TYPES')
+        .get();
+
+    var typeId = typeDoc.docs.first.id;
+
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typeId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .orderBy('name')
+        .snapshots()
+        .listen((types) {
+      allEngineType.value = {for (var doc in types.docs) doc.id: doc.data()};
     });
   }
 
@@ -855,6 +891,7 @@ class JobCardController extends GetxController {
   Future<void> getCurrentJobCardCounterNumber() async {
     try {
       var jcnId = '';
+      var updateJobCard = '';
       var jcnDoc = await FirebaseFirestore.instance
           .collection('counters')
           .where('code', isEqualTo: 'JCN')
@@ -862,33 +899,45 @@ class JobCardController extends GetxController {
           .get();
 
       if (jcnDoc.docs.isEmpty) {
+        // Define constants for the new counter values
+        const prefix = 'JCN';
+        const separator = '-';
+        const initialValue = 1;
+
         var newCounter =
             await FirebaseFirestore.instance.collection('counters').add({
           'code': 'JCN',
           'description': 'Job Card Number',
-          'prefix': 'JCN',
-          'value': 1,
+          'prefix': prefix,
+          'value': initialValue,
           'length': 0,
-          'separator': '-',
+          'separator': separator,
           'added_date': DateTime.now().toString(),
           'company_id': companyId.value,
           'status': true,
         });
         jcnId = newCounter.id;
-        jobCardCounter.value.text = "1";
+        // Set the counter text with prefix and separator
+        jobCardCounter.value.text = '$prefix$separator$initialValue';
+        updateJobCard = initialValue.toString();
       } else {
         var firstDoc = jcnDoc.docs.first;
         jcnId = firstDoc.id;
-        jobCardCounter.value.text = (firstDoc.data()['value'] + 1).toString();
+        var currentValue = firstDoc.data()['value'] ?? 0;
+        // Use the existing prefix and separator from the document
+        jobCardCounter.value.text =
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString()}';
+        updateJobCard = (currentValue + 1).toString();
       }
 
       await FirebaseFirestore.instance
           .collection('counters')
           .doc(jcnId)
           .update({
-        'value': int.parse(jobCardCounter.value.text), // Incrementing value
+        'value': int.parse(updateJobCard),
       });
     } catch (e) {
+      // Optionally handle errors here
       // print("Error in getCurrentJobCardCounterNumber: $e");
     }
   }
@@ -896,6 +945,7 @@ class JobCardController extends GetxController {
   Future<void> getCurrentInvoiceCounterNumber() async {
     try {
       var jciId = '';
+      var updateInvoice = '';
       var jciDoc = await FirebaseFirestore.instance
           .collection('counters')
           .where('code', isEqualTo: 'JCI')
@@ -903,40 +953,52 @@ class JobCardController extends GetxController {
           .get();
 
       if (jciDoc.docs.isEmpty) {
+        // Define constants for the new counter values
+        const prefix = 'JCI';
+        const separator = '-';
+        const initialValue = 1;
+
         var newCounter =
             await FirebaseFirestore.instance.collection('counters').add({
           'code': 'JCI',
           'description': 'Job Card Invoice Number',
-          'prefix': 'JCI',
-          'value': 1,
+          'prefix': prefix,
+          'value': initialValue,
           'length': 0,
-          'separator': '-',
+          'separator': separator,
           'added_date': DateTime.now().toString(),
           'company_id': companyId.value,
           'status': true,
         });
         jciId = newCounter.id;
-        invoiceCounter.value.text = "1";
+        // Set the counter text with prefix and separator
+        invoiceCounter.value.text = '$prefix$separator$initialValue';
+        updateInvoice = initialValue.toString();
       } else {
         var firstDoc = jciDoc.docs.first;
         jciId = firstDoc.id;
-        invoiceCounter.value.text = (firstDoc.data()['value'] + 1).toString();
+        var currentValue = firstDoc.data()['value'] ?? 0;
+        invoiceCounter.value.text =
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString()}';
+        updateInvoice = (currentValue + 1).toString();
       }
 
       await FirebaseFirestore.instance
           .collection('counters')
           .doc(jciId)
           .update({
-        'value': int.parse(invoiceCounter.value.text), // Incrementing value
+        'value': int.parse(updateInvoice), // Increment the value
       });
     } catch (e) {
-      // print("Error in getCurrentJobCardCounterNumber: $e");
+      // Optionally handle the error here
+      // print("Error in getCurrentInvoiceCounterNumber: $e");
     }
   }
 
   Future<void> getCurrentQuotationCounterNumber() async {
     try {
       var qnId = '';
+      var updateqn = '';
       var qnDoc = await FirebaseFirestore.instance
           .collection('counters')
           .where('code', isEqualTo: 'QN')
@@ -944,32 +1006,41 @@ class JobCardController extends GetxController {
           .get();
 
       if (qnDoc.docs.isEmpty) {
+        // Define constants for new counter values
+        const prefix = 'QN';
+        const separator = '-';
+        const initialValue = 1;
+
         var newCounter =
             await FirebaseFirestore.instance.collection('counters').add({
           'code': 'QN',
           'description': 'Quotation Number',
-          'prefix': 'QN',
-          'value': 1,
+          'prefix': prefix,
+          'value': initialValue,
           'length': 0,
-          'separator': '-',
+          'separator': separator,
           'added_date': DateTime.now().toString(),
           'company_id': companyId.value,
           'status': true,
         });
         qnId = newCounter.id;
-        quotationCounter.value.text = "1";
+        // Set the counter text with prefix and separator
+        quotationCounter.value.text = '$prefix$separator$initialValue';
+        updateqn = initialValue.toString();
       } else {
         var firstDoc = qnDoc.docs.first;
         qnId = firstDoc.id;
         var currentValue = firstDoc.data()['value'] ?? 0;
-        quotationCounter.value.text = (currentValue + 1).toString();
+        quotationCounter.value.text =
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString()}';
+        updateqn = (currentValue + 1).toString();
       }
 
       await FirebaseFirestore.instance.collection('counters').doc(qnId).update({
-        'value': int.parse(quotationCounter.value.text),
+        'value': int.parse(updateqn),
       });
     } catch (e) {
-      // print("Error in getCurrentQuotationCounterNumber: $e");
+      //
     }
   }
 
