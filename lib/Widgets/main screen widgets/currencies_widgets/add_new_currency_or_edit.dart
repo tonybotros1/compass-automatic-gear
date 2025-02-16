@@ -1,6 +1,9 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/currency_controller.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../drop_down_menu.dart';
 
 Widget addNewCurrencyOrEdit({
   required BoxConstraints constraints,
@@ -16,18 +19,41 @@ Widget addNewCurrencyOrEdit({
         SizedBox(
           height: 10,
         ),
-        myTextFormFieldWithBorder(
-          obscureText: false,
-          controller: controller.code,
-          labelText: 'Code',
-          hintText: 'Enter Code',
-          validate: true,
-          isEnabled: canEdit,
-        ),
+        GetX<CurrencyController>(builder: (controller) {
+          bool isCountryLoading = controller.allCountries.isEmpty;
+          return dropDownValues(
+            listValues: controller.allCountries.values
+                .map((value) => '${value['currency_code']}'.toString())
+                .toList(),
+            textController: controller.code,
+            onSelected: (suggestion) {
+              controller.name.text = suggestion['currency_name'];
+              controller.code.text = '${suggestion['currency_code']}';
+              controller.allCountries.entries.where((entry) {
+                return entry.value['currency_code'] ==
+                        suggestion['currency_code'].toString() &&
+                    entry.value['currency_name'] == suggestion['currency_name'];
+              }).forEach((entry) {
+                controller.countryId.value = entry.key;
+              });
+            },
+            itemBuilder: (context, suggestion) {
+              return ListTile(
+                title: Text(
+                    '${suggestion['currency_code']} (${suggestion['currency_name']})'),
+              );
+            },
+            labelText: 'Code',
+            hintText: 'Select Code',
+            menus: isCountryLoading ? {} : controller.allCountries,
+            validate: true,
+          );
+        }),
         SizedBox(
           height: 10,
         ),
         myTextFormFieldWithBorder(
+          isEnabled: false,
           obscureText: false,
           controller: controller.name,
           labelText: 'Name',

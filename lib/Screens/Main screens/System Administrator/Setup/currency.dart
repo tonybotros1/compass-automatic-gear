@@ -82,6 +82,7 @@ Widget tableOfScreens(
     {required constraints,
     required context,
     required CurrencyController controller}) {
+      
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -148,13 +149,15 @@ Widget tableOfScreens(
 
 DataRow dataRowForTheTable(Map<String, dynamic> currencyData, context,
     constraints, currencyId, CurrencyController controller) {
+        List data = controller.getdataName(currencyData['country_id'],controller.allCountries);
+
   return DataRow(cells: [
     DataCell(Text(
-      currencyData['code'] ?? 'no code',
+      '${data[0]}',
     )),
     DataCell(
       Text(
-        currencyData['name'] ?? 'no name',
+        '${data[1]}',
       ),
     ),
     DataCell(
@@ -225,14 +228,14 @@ ElevatedButton editSection(context, CurrencyController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
+        List data = controller.getdataName(currencyData['country_id'],controller.allCountries);
+        controller.code.text = data[0] ?? '';
+        controller.name.text = data[1] ?? '';
+        controller.rate.text = (currencyData['rate'] ?? '').toString();
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
-              controller.code.text = currencyData['code'] ?? '';
-              controller.name.text = currencyData['name'] ?? '';
-              controller.rate.text = (currencyData['rate'] ?? '').toString();
-
               return AlertDialog(
                 actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
                 content: addNewCurrencyOrEdit(
@@ -292,7 +295,7 @@ ElevatedButton newCurrencyButton(BuildContext context,
       controller.name.clear();
       controller.rate.clear();
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

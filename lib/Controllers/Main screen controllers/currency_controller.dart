@@ -19,11 +19,13 @@ class CurrencyController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
   RxString companyId = RxString('');
-
+  RxString countryId = RxString('');
+  RxMap allCountries = RxMap({});
   @override
   void onInit() {
     getCompanyId().then((_) {
       getAllCurrencies();
+      getCurrencyFromCountries();
     });
     search.value.addListener(() {
       filterCurrencies();
@@ -115,8 +117,7 @@ class CurrencyController extends GetxController {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance.collection('currencies').add({
-        'code': code.text,
-        'name': name.text,
+        'country_id': countryId.value,
         'rate': double.parse(rate.text),
         'added_date': DateTime.now().toString(),
         'company_id': companyId.value,
@@ -136,8 +137,7 @@ class CurrencyController extends GetxController {
           .collection('currencies')
           .doc(currencyId)
           .update({
-        'code': code.text,
-        'name': name.text,
+        'country_id': countryId.value,
         'rate': double.parse(rate.text),
       });
     } catch (e) {
@@ -169,6 +169,33 @@ class CurrencyController extends GetxController {
     }
   }
 
+  getCurrencyFromCountries() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_countries')
+          .snapshots()
+          .listen((countries) {
+        allCountries.value = {
+          for (var doc in countries.docs) doc.id: doc.data()
+        };
+        update();
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  List getdataName(String id, Map allData) {
+    try {
+      final data = allData.entries.firstWhere(
+        (data) => data.key == id,
+      );
+      return [data.value['currency_code'], data.value['currency_name']];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // this function is to filter the search results for web
   void filterCurrencies() {
     query.value = search.value.text.toLowerCase();
@@ -176,11 +203,17 @@ class CurrencyController extends GetxController {
       filteredCurrencies.clear();
     } else {
       filteredCurrencies.assignAll(
-        allCurrencies.where((saleman) {
-          return saleman['code'].toString().toLowerCase().contains(query) ||
-              saleman['name'].toString().toLowerCase().contains(query) ||
-              saleman['rate'].toString().toLowerCase().contains(query) ||
-              textToDate(saleman['added_date'])
+        allCurrencies.where((currency) {
+          return getdataName(currency['country_id'], allCountries)[0]
+                  .toString()
+                  .toLowerCase()
+                  .contains(query) ||
+              getdataName(currency['country_id'], allCountries)[1]
+                  .toString()
+                  .toLowerCase()
+                  .contains(query) ||
+              currency['rate'].toString().toLowerCase().contains(query) ||
+              textToDate(currency['added_date'])
                   .toString()
                   .toLowerCase()
                   .contains(query);
