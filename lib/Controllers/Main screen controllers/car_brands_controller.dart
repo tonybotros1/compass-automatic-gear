@@ -226,7 +226,8 @@ class CarBrandsController extends GetxController {
 
    // this function is to select an image for logo
   pickImage() async {
-    ImagePickerService.pickImage(imageBytes, logoSelectedError);
+    final imagePicker = ImagePickerService();
+    imagePicker.pickImage(imageBytes, logoSelectedError);
   }
 
 

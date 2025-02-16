@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:html' as html;
+import 'package:datahubai/j_s_uint8_array_factory.dart';
+import 'package:web/web.dart' as web;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
@@ -179,29 +180,37 @@ class RegisterScreenController extends GetxController {
   }
 
 // this function is to select an image for logo
-  pickImage() async {
+
+  Future<void> pickImage() async {
     try {
-      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      // Create a file input element using web.HTMLInputElement.
+      final uploadInput =
+          web.document.createElement('input') as web.HTMLInputElement;
+      uploadInput.type = 'file';
       uploadInput.accept = 'image/*';
       uploadInput.click();
 
+      // Listen for changes on the file input element.
       uploadInput.onChange.listen((event) {
         final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files.first;
-          final reader = html.FileReader();
-
-          reader.readAsArrayBuffer(file);
-          reader.onLoadEnd.listen((event) async {
-            if (reader.result != null) {
-              imageBytes = reader.result as Uint8List;
-              update();
-            }
-          });
+        if (files != null && files.length > 0) {
+          final file = files.item(0);
+          if (file != null) {
+            final reader = web.FileReader();
+            // Read the file as an ArrayBuffer.
+            reader.readAsArrayBuffer(file);
+            reader.onLoadEnd.listen((event) {
+              if (reader.result != null) {
+                // Convert the JS ArrayBuffer to a Dart Uint8List.
+                imageBytes = convertJSArrayBufferToUint8List(reader.result!);
+                update();
+              }
+            });
+          }
         }
       });
     } catch (e) {
-      //
+      // print('Error picking image: $e');
     }
   }
 

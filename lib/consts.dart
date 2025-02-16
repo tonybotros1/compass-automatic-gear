@@ -1,10 +1,13 @@
+import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:datahubai/j_s_uint8_array_factory.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
+import 'package:http/http.dart' as http;
 
 var fontStyleForAppBar = TextStyle(
     fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
@@ -335,60 +338,96 @@ Decoration containerDecor = BoxDecoration(
         bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5)));
 
 class ImagePickerService {
-  static Future<void> pickImage(
+  Future<void> pickImage(
       Rx<Uint8List?> imageBytes, RxBool flagSelectedError) async {
     try {
       flagSelectedError.value = false;
-      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      final uploadInput =
+          web.document.createElement('input') as web.HTMLInputElement;
+      uploadInput.type = 'file';
       uploadInput.accept = 'image/*';
       uploadInput.click();
 
       uploadInput.onChange.listen((event) {
         final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files.first;
-          final reader = html.FileReader();
-
-          reader.readAsArrayBuffer(file);
-          reader.onLoadEnd.listen((event) async {
-            if (reader.result != null) {
-              imageBytes.value = reader.result as Uint8List;
-            }
-          });
+        if (files != null && files.length > 0) {
+          final file = files.item(0);
+          if (file != null) {
+            final reader = web.FileReader();
+            reader.readAsArrayBuffer(file);
+            reader.onLoadEnd.listen((event) {
+              if (reader.result != null) {
+                imageBytes.value =
+                    convertJSArrayBufferToUint8List(reader.result!);
+              }
+            });
+          }
         }
       });
     } catch (e) {
-      flagSelectedError.value = true; // Handle error
+      flagSelectedError.value = true;
     }
   }
+
+  // static Future<void> pickImage(
+  //     Rx<Uint8List?> imageBytes, RxBool flagSelectedError) async {
+  //   try {
+  //     flagSelectedError.value = false;
+  //     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+  //     uploadInput.accept = 'image/*';
+  //     uploadInput.click();
+
+  //     uploadInput.onChange.listen((event) {
+  //       final files = uploadInput.files;
+  //       if (files != null && files.isNotEmpty) {
+  //         final file = files.first;
+  //         final reader = html.FileReader();
+
+  //         reader.readAsArrayBuffer(file);
+  //         reader.onLoadEnd.listen((event) async {
+  //           if (reader.result != null) {
+  //             imageBytes.value = reader.result as Uint8List;
+  //           }
+  //         });
+  //       }
+  //     });
+  //   } catch (e) {
+  //     flagSelectedError.value = true; // Handle error
+  //   }
+  // }
 }
 
 class FilePickerService {
   static Future<void> pickFile(
       Rx<Uint8List?> fileBytes, RxString fileType, RxString fileName) async {
     try {
-      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      final uploadInput =
+          web.document.createElement('input') as web.HTMLInputElement;
+      uploadInput.type = 'file';
       uploadInput.accept = '*/*'; // Accept all file types
       uploadInput.click();
 
       uploadInput.onChange.listen((event) {
         final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files.first;
-          fileName.value = file.name;
-          final reader = html.FileReader();
+        if (files != null && files.length > 0) {
+          final file = files.item(0);
+          if (file != null) {
+            fileName.value = file.name;
+            final reader = web.FileReader();
+            reader.readAsArrayBuffer(file);
 
-          reader.readAsArrayBuffer(file);
-          reader.onLoadEnd.listen((event) async {
-            if (reader.result != null) {
-              fileBytes.value = reader.result as Uint8List;
-              fileType.value = file.type; // Store file type
-            }
-          });
+            reader.onLoadEnd.listen((event) {
+              if (reader.result != null) {
+                fileBytes.value =
+                    convertJSArrayBufferToUint8List(reader.result!);
+                fileType.value = file.type; // Store file type
+              }
+            });
+          }
         }
       });
     } catch (e) {
-      //
+      // print('Error picking file: $e');
     }
   }
 
@@ -399,76 +438,85 @@ class FilePickerService {
       final isPdf = await _isPdfFile(fileUrl);
 
       if (isPdf) {
-        // Open PDF in new window
-        final newWindow = html.window.open('', '_blank');
-        newWindow.location.href = fileUrl;
+        // Open PDF in a new window
+        final newWindow = web.window.open('', '_blank');
+        newWindow!.location.href = fileUrl;
       } else {
-        // Download logic with proper filename handling
+        // Handle downloads properly
         final fileName = _getFileNameFromUrl(fileUrl);
         final mimeType = await _getContentType(fileUrl);
         final extension = _getExtensionFromMimeType(mimeType) ?? 'bin';
 
-        final anchor = html.AnchorElement(href: fileUrl)
+        final anchor = web.document.createElement('a') as web.HTMLAnchorElement
+          ..href = fileUrl
           ..download =
               fileName.contains('.') ? fileName : '$fileName.$extension'
           ..style.display = 'none';
 
-        html.document.body?.children.add(anchor);
+        web.document.body?.appendChild(anchor);
         anchor.click();
-        html.document.body?.children.remove(anchor);
+        anchor.remove();
       }
     } catch (e) {
-      html.window.open(fileUrl ?? '', '_blank');
+      web.window.open(fileUrl ?? '', '_blank');
     }
   }
 
-// Helper to extract filename from URL
+  /// Helper to convert JS ArrayBuffer to Uint8List
+  static Uint8List convertJSArrayBufferToUint8List(JSAny jsArrayBuffer) {
+    final jsUint8Array = JSUint8Array(jsArrayBuffer);
+    final len = jsUint8Array.length;
+    final result = Uint8List(len);
+    for (int i = 0; i < len; i++) {
+      result[i] = jsUint8Array[i];
+    }
+    return result;
+  }
+
+  /// Extracts filename from URL
   static String _getFileNameFromUrl(String url) {
     try {
       final uri = Uri.parse(url);
-      final path = Uri.decodeComponent(uri.path);
-      return path.split('/').last;
+      return Uri.decodeComponent(uri.path.split('/').last);
     } catch (e) {
       return 'download';
     }
   }
 
-// Updated PDF detection
+  /// Checks if a file is a PDF
   static Future<bool> _isPdfFile(String url) async {
     try {
-      final response = await html.HttpRequest.request(
-        url,
-        method: 'HEAD',
-      );
-      final contentType =
-          response.responseHeaders['Content-Type']?.toLowerCase();
+      final response = await http.head(Uri.parse(url));
+      final contentType = response.headers['content-type']?.toLowerCase();
       return contentType?.contains('application/pdf') ?? false;
     } catch (e) {
-      return url.toLowerCase().contains('.pdf');
+      return url.toLowerCase().endsWith('.pdf');
     }
   }
 
-// Updated content type detection
+  /// Gets file content type from the server
   static Future<String?> _getContentType(String url) async {
     try {
-      final response = await html.HttpRequest.request(
-        url,
-        method: 'HEAD',
-      );
-      return response.responseHeaders['Content-Type'];
+      final response = await http.head(Uri.parse(url));
+      return response.headers['content-type'];
     } catch (e) {
       return null;
     }
   }
 
-// Keep existing mime type mapping
+  /// Maps MIME type to file extensions
   static String? _getExtensionFromMimeType(String? mimeType) {
     const mimeMap = {
       'application/pdf': 'pdf',
       'application/msword': 'doc',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
           'docx',
-      // ... rest of your mime type mappings
+      'image/png': 'png',
+      'image/jpeg': 'jpg',
+      'image/gif': 'gif',
+      'application/zip': 'zip',
+      'application/json': 'json',
+      // Add more MIME types as needed
     };
     return mimeType != null ? mimeMap[mimeType.split(';').first] : null;
   }

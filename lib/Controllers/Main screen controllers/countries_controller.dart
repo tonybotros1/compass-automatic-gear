@@ -398,6 +398,7 @@ class CountriesController extends GetxController {
 
   // this function is to select an image for logo
   pickImage() async {
-    ImagePickerService.pickImage(imageBytes, flagSelectedError);
+    final imagePicker = ImagePickerService();
+    imagePicker.pickImage(imageBytes, flagSelectedError);
   }
 }
