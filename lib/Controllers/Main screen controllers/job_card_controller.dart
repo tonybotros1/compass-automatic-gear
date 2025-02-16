@@ -223,6 +223,7 @@ class JobCardController extends GetxController {
   }
 
   clearValues() {
+    isQuotationExpanded.value = false;
     canSaveJobCard.value = true;
     allModels.clear();
     jobCardCounter.value.clear();
@@ -327,6 +328,9 @@ class JobCardController extends GetxController {
         ? (isCashSelected.value = true) && (isCreditSelected.value = false)
         : (isCreditSelected.value = true) && (isCashSelected.value = false);
     quotationCounter.value.text = data['quotation_number'];
+    quotationCounter.value.text.isNotEmpty
+        ? isQuotationExpanded.value = true
+        : isQuotationExpanded.value = false;
     quotationDate.value.text = textToDate(data['quotation_date']);
     quotationDays.value.text = data['validity_days'];
     validityEndDate.value.text = textToDate(data['validity_end_date']);
@@ -336,6 +340,9 @@ class JobCardController extends GetxController {
     quotationWarrentyKM.value.text = data['quotation_warrenty_km'];
     quotationNotes.text = data['quotation_notes'];
     jobCardCounter.value.text = data['job_number'];
+    jobCardCounter.value.text.isNotEmpty
+        ? isJobCardExpanded.value = true
+        : isJobCardExpanded.value = false;
     invoiceCounter.value.text = data['invoice_number'];
     lpoCounter.value.text = data['lpo_number'];
     jobCardDate.value.text = textToDate(data['job_date']);
@@ -359,8 +366,12 @@ class JobCardController extends GetxController {
     try {
       addingNewValue.value = true;
 
-      await getCurrentQuotationCounterNumber();
-      await getCurrentJobCardCounterNumber();
+      if (isQuotationExpanded.isTrue) {
+        await getCurrentQuotationCounterNumber();
+      }
+      if (isJobCardExpanded.isTrue) {
+        await getCurrentJobCardCounterNumber();
+      }
 
       if (jobCardAdded.isFalse) {
         var newJob =
@@ -928,7 +939,7 @@ class JobCardController extends GetxController {
         var currentValue = firstDoc.data()['value'] ?? 0;
         // Use the existing prefix and separator from the document
         jobCardCounter.value.text =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString()}';
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
         updateJobCard = (currentValue + 1).toString();
       }
 
@@ -981,7 +992,7 @@ class JobCardController extends GetxController {
         jciId = firstDoc.id;
         var currentValue = firstDoc.data()['value'] ?? 0;
         invoiceCounter.value.text =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString()}';
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
         updateInvoice = (currentValue + 1).toString();
       }
 
@@ -1034,7 +1045,7 @@ class JobCardController extends GetxController {
         qnId = firstDoc.id;
         var currentValue = firstDoc.data()['value'] ?? 0;
         quotationCounter.value.text =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString()}';
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
         updateqn = (currentValue + 1).toString();
       }
 

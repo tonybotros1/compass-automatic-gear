@@ -241,7 +241,13 @@ ElevatedButton editSection(context, JobCardController controller,
     Map<String, dynamic> jobData, constraints, jobId) {
   return ElevatedButton(
       style: editButtonStyle,
-      onPressed: () {
+      onPressed: () async {
+        if (jobData['quotation_number'] != '' && controller.isQuotationExpanded.isTrue) {
+          await controller.getCurrentQuotationCounterNumber();
+        }
+        if (jobData['job_number'] != '' && controller.isJobCardExpanded.isTrue) {
+         await controller. getCurrentJobCardCounterNumber();
+        }
         controller.loadValues(jobData);
         showDialog(
             barrierDismissible: false,

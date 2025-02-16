@@ -1,4 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
@@ -40,10 +41,11 @@ Widget addNewJobCardOrEdit({
             lable: Row(
           children: [
             GetX<JobCardController>(builder: (controller) {
-              return ExpandIcon(
-                  color: Colors.white,
-                  isExpanded: controller.isQuotationExpanded.value,
-                  onPressed: (value) {
+              return CupertinoCheckbox(
+                  checkColor: mainColor,
+                  activeColor: Colors.white,
+                  value: controller.isQuotationExpanded.value,
+                  onChanged: (value) {
                     if (controller.isQuotationExpanded.isTrue) {
                       controller.isQuotationExpanded.value = false;
                     } else {
@@ -76,10 +78,11 @@ Widget addNewJobCardOrEdit({
             lable: Row(
           children: [
             GetX<JobCardController>(builder: (controller) {
-              return ExpandIcon(
-                  color: Colors.white,
-                  isExpanded: controller.isJobCardExpanded.value,
-                  onPressed: (value) {
+              return CupertinoCheckbox(
+                  checkColor: mainColor,
+                  activeColor: Colors.white,
+                  value: controller.isJobCardExpanded.value,
+                  onChanged: (value) {
                     if (controller.isJobCardExpanded.isTrue) {
                       controller.isJobCardExpanded.value = false;
                     } else {

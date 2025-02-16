@@ -22,7 +22,7 @@ void main() async {
       ? await Firebase.initializeApp(options: options)
       : await Firebase.initializeApp();
   globalPrefs = await SharedPreferences.getInstance();
-   if (web.window.location.pathname != '/') {
+  if (web.window.location.pathname != '/') {
     // Replace the current URL with '/'
     web.window.history.replaceState(null, 'DataHub AI', '/');
   }
@@ -42,16 +42,18 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/', page: () => const LoadingScreen()),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
-        GetPage(name: '/registerScreen', page: () => const RegisterScreen(),),
+        GetPage(
+          name: '/registerScreen',
+          page: () => const RegisterScreen(),
+        ),
         GetPage(
             name: '/imageViewer',
             page: () => ImageGalleryViewer(),
-            middlewares: [AuthMiddleware(),InitialRedirectMiddleware()]
-            ),
+            middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
         GetPage(
             name: '/mainScreen',
             page: () => MainScreen(),
-            middlewares: [AuthMiddleware()]),
+            middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
       ],
     );
   }
