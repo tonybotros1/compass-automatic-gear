@@ -197,8 +197,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
     DataCell(textForDataRowInTable(text: '${textToDate(jobData['job_date'])}')),
     DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
     DataCell(textForDataRowInTable(
-        text:
-            '${controller.getdataName(jobData['car_brand'], controller.allBrands)}')),
+        text: controller.getdataName(
+            jobData['car_brand'], controller.allBrands))),
     DataCell(
       Text(
         overflow: TextOverflow.ellipsis,
@@ -222,8 +222,9 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
       ),
     ),
     DataCell(textForDataRowInTable(
-        text:
-            '${controller.getdataName(jobData['customer'], controller.allCustomers, title: 'entity_name')}')),
+        text: controller.getdataName(
+            jobData['customer'], controller.allCustomers,
+            title: 'entity_name'))),
     DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
     DataCell(
         textForDataRowInTable(text: '${textToDate(jobData['invoice_date'])}')),
@@ -289,7 +290,7 @@ ElevatedButton editSection(context, JobCardController controller,
                                         },
                                         style: cancelButtonStyle,
                                         child: const Text(
-                                          'Cancel',
+                                          'Exit',
                                           style: TextStyle(color: Colors.white),
                                         ),
                                       ),
@@ -334,7 +335,7 @@ ElevatedButton editSection(context, JobCardController controller,
                           },
                           style: cancelButtonStyle,
                           child: const Text(
-                            'Cancel',
+                            'Exit',
                             style: TextStyle(color: Colors.white),
                           )),
                     ],
@@ -352,7 +353,7 @@ ElevatedButton newJobCardButton(BuildContext context,
     onPressed: () {
       controller.country.text = controller.getdataName(
           controller.companyDetails['contact_details']['country'],
-          controller.allCountries)!;
+          controller.allCountries);
       controller.countryId.value =
           controller.companyDetails['contact_details']['country'];
       controller.getCitiesByCountryID(
@@ -364,9 +365,9 @@ ElevatedButton newJobCardButton(BuildContext context,
       controller.customerOutstanding.text = '0';
       controller.isCashSelected.value = true;
       controller.payType.value = 'Cash';
-      controller.jobCardDate.value.text = DateTime.now().toString();
-      controller.invoiceDate.value.text = DateTime.now().toString();
-      controller.startDate.value.text = DateTime.now().toString();
+      controller.jobCardDate.value.text = textToDate(DateTime.now());
+      controller.invoiceDate.value.text = textToDate(DateTime.now());
+      controller.startDate.value.text = textToDate(DateTime.now());
       controller.clearValues();
       showDialog(
           barrierDismissible: false,
@@ -397,51 +398,49 @@ ElevatedButton newJobCardButton(BuildContext context,
                         child: Text('Internal Notes'),
                       );
                     }),
-                    GetX<JobCardController>(
-                      builder: (controller) {
-                        return ElevatedButton(
-                          style: innvoiceItemsButtonStyle,
-                          onPressed: controller
-                                  .canAddInternalNotesAndInvoiceItems.isTrue
-                              ? () {
-                                  showDialog(
-                                      barrierDismissible: false,
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          actionsPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 20),
-                                          content: invoiceItemsDialog(
-                                              constraints: constraints,
-                                              context: context,
-                                              jobId: controller
-                                                  .curreentJobCardId.value),
-                                          actions: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.only(bottom: 10),
-                                              child: ElevatedButton(
-                                                onPressed: () {
-                                                  Get.back();
-                                                },
-                                                style: cancelButtonStyle,
-                                                child: const Text(
-                                                  'Cancel',
-                                                  style: TextStyle(
-                                                      color: Colors.white),
+                    GetX<JobCardController>(builder: (controller) {
+                      return ElevatedButton(
+                        style: innvoiceItemsButtonStyle,
+                        onPressed:
+                            controller.canAddInternalNotesAndInvoiceItems.isTrue
+                                ? () {
+                                    showDialog(
+                                        barrierDismissible: false,
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            actionsPadding:
+                                                const EdgeInsets.symmetric(
+                                                    horizontal: 20),
+                                            content: invoiceItemsDialog(
+                                                constraints: constraints,
+                                                context: context,
+                                                jobId: controller
+                                                    .curreentJobCardId.value),
+                                            actions: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    bottom: 10),
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    Get.back();
+                                                  },
+                                                  style: cancelButtonStyle,
+                                                  child: const Text(
+                                                    'Exit',
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
-                                        );
-                                      });
-                                }
-                              : null,
-                          child: Text('Invoice Items'),
-                        );
-                      }
-                    ),
+                                            ],
+                                          );
+                                        });
+                                  }
+                                : null,
+                        child: Text('Invoice Items'),
+                      );
+                    }),
                     Spacer(),
                     GetX<JobCardController>(
                       builder: (controller) => Padding(
@@ -478,7 +477,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                       },
                       style: cancelButtonStyle,
                       child: const Text(
-                        'Cancel',
+                        'Exit',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),

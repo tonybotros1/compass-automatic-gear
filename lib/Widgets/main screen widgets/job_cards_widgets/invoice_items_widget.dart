@@ -90,7 +90,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Description',
+          text: 'Name',
         ),
       ),
       DataColumn(
@@ -172,7 +172,9 @@ DataRow dataRowForTheTable(
   return DataRow(cells: [
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['line_number']}')),
     DataCell(textForDataRowInTable(
-        text: '${invoiceItemsData['description']}', maxWidth: 200)),
+        text: controller.getdataName(
+            invoiceItemsData['name'], controller.allInvoiceItemsFromCollection),
+        maxWidth: 300)),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['quantity']}')),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['price']}')),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['amount']}')),
@@ -221,7 +223,7 @@ ElevatedButton editSection(
         controller.invoiceItemNameId.value = invoiceItemsData['name'];
         controller.invoiceItemName.text = controller.getdataName(
             invoiceItemsData['name'],
-            controller.allInvoiceItemsFromCollection)!;
+            controller.allInvoiceItemsFromCollection);
         controller.lineNumber.text = invoiceItemsData['line_number'];
         controller.description.text = invoiceItemsData['description'];
         controller.quantity.text = invoiceItemsData['quantity'];

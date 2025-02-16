@@ -39,7 +39,6 @@ Container customerDetailsSection() {
                         suggestion['entity_name'].toString();
                   }).forEach(
                     (entry) {
-                    
                       controller.onSelectForCustomers(entry.key);
 
                       controller.customerId.value = entry.key;
@@ -180,23 +179,31 @@ Container customerDetailsSection() {
                     flex: 1,
                     dropdownConfig: DropdownConfig(
                       listValues: controller.allCurrencies.values
-                          .map((value) => value['code'].toString())
+                          .map((value) => controller.getdataName(
+                              value['country_id'], controller.allCountries,
+                              title: 'currency_code'))
                           .toList(),
                       textController: controller.customerCurrency,
-                      labelText: isBranchesLoading ? 'Loading...' : 'Currency',
+                      labelText:
+                          isCurrenciesLoading ? 'Loading...' : 'Currency',
                       hintText: 'Select Currency',
                       menuValues:
                           isCurrenciesLoading ? {} : controller.allCurrencies,
                       itemBuilder: (context, suggestion) {
                         return ListTile(
-                          title: Text('${suggestion['code']}'),
+                          title: Text(controller.getdataName(
+                              suggestion['country_id'], controller.allCountries,
+                              title: 'currency_code')),
                         );
                       },
                       onSelected: (suggestion) {
-                        controller.customerCurrency.text = suggestion['code'];
+                        controller.customerCurrency.text =
+                            controller.getdataName(suggestion['country_id'],
+                                controller.allCountries,
+                                title: 'currency_code');
                         controller.allCurrencies.entries.where((entry) {
-                          return entry.value['code'] ==
-                              suggestion['code'].toString();
+                          return entry.value['country_id'] ==
+                              suggestion['country_id'].toString();
                         }).forEach(
                           (entry) {
                             controller.customerCurrencyId.value = entry.key;

@@ -280,7 +280,7 @@ class JobCardController extends GetxController {
 
   loadValues(Map<String, dynamic> data) {
     carBrandId.value = data['car_brand'];
-    carBrand.text = getdataName(data['car_brand'], allBrands)!;
+    carBrand.text = getdataName(data['car_brand'], allBrands);
     carModelId.value = data['car_model'];
     getCitiesByCountryID(data['country']);
     getModelsByCarBrand(data['car_brand']);
@@ -290,7 +290,7 @@ class JobCardController extends GetxController {
     plateNumber.text = data['plate_number'];
     plateCode.text = data['plate_code'];
     countryId.value = data['country'];
-    country.text = getdataName(data['country'], allCountries)!;
+    country.text = getdataName(data['country'], allCountries);
     cityId.value = data['city'];
     getCityName(data['country'], data['city']).then((value) {
       city.text = value;
@@ -298,8 +298,8 @@ class JobCardController extends GetxController {
     year.text = data['year'];
     colorId.value = data['color'];
     engineTypeId.value = data['engine_type'];
-    color.text = getdataName(data['color'], allColors)!;
-    engineType.text = getdataName(data['engine_type'], allEngineType)!;
+    color.text = getdataName(data['color'], allColors);
+    engineType.text = getdataName(data['engine_type'], allEngineType);
     vin.text = data['vehicle_identification_number'];
     transmissionType.text = data['transmission_type'];
     mileageIn.value.text = data['mileage_in'];
@@ -307,18 +307,20 @@ class JobCardController extends GetxController {
     inOutDiff.value.text = data['mileage_in_out_diff'];
     customerId.value = data['customer'];
     customerName.text =
-        getdataName(data['customer'], allCustomers, title: 'entity_name')!;
+        getdataName(data['customer'], allCustomers, title: 'entity_name');
     customerEntityName.text = data['contact_name'];
     customerEntityPhoneNumber.text = data['contact_number'];
     customerEntityEmail.text = data['contact_email'];
     customerCreditNumber.text = data['credit_limit'];
     customerOutstanding.text = data['outstanding'];
     customerSaleManId.value = data['saleMan'];
-    customerSaleMan.text = getdataName(data['saleMan'], salesManMap)!;
+    customerSaleMan.text = getdataName(data['saleMan'], salesManMap);
     customerBranchId.value = data['branch'];
-    customerBranch.text = getdataName(data['branch'], allBranches)!;
+    customerBranch.text = getdataName(data['branch'], allBranches);
     customerCurrencyId.value = data['currency'];
-    customerCurrency.text = getdataName(data['currency'], allCurrencies)!;
+    customerCurrency.text = data['currency'] != ''
+        ? getdataName(data['country'], allCountries, title: 'currency_code')
+        : '';
     customerCurrencyRate.text = data['rate'];
     payType.value = data['payment_method'];
     data['payment_method'] == 'Cash'
@@ -1203,7 +1205,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  String? getdataName(String id, Map allData, {title = 'name'}) {
+  String getdataName(String id, Map allData, {title = 'name'}) {
     try {
       final data = allData.entries.firstWhere(
         (data) => data.key == id,
@@ -1235,7 +1237,7 @@ class JobCardController extends GetxController {
         (currentUserDetails.value['credit_limit'] ?? '0').toString();
     customerSaleManId.value = currentUserDetails.value['sales_man'];
     customerSaleMan.text =
-        getdataName(currentUserDetails.value['sales_man'], salesManMap)!;
+        getdataName(currentUserDetails.value['sales_man'], salesManMap);
   }
 
   // this function is to filter the search results for web
