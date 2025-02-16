@@ -1,4 +1,3 @@
-import 'package:datahubai/Widgets/main%20screen%20widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -61,45 +60,29 @@ Widget addNewCountryOrEdit({
             spacing: 10,
             children: [
               Expanded(
-                child: GetX<CountriesController>(builder: (controller) {
-                  final isCurrenciesLoading = controller.allCurrencies.isEmpty;
-      
-                  return dropDownValues(
-                    textController: controller.currency,
-                    labelText: 'Based Currency',
-                    hintText: 'Select Based Currency',
-                    menus: isCurrenciesLoading ? {} : controller.allCurrencies,
-                    validate: true,
-                    itemBuilder: (context, suggestion) {
-                      return ListTile(
-                        title: Text('${suggestion['code']}'),
-                      );
-                    },
-                    onSelected: (suggestion) {
-                      controller.currency.text = suggestion['code'];
-                      controller.allCurrencies.entries.where((entry) {
-                        return entry.value['code'] ==
-                            suggestion['code'].toString();
-                      }).forEach(
-                        (entry) {
-                          controller.currencyId.value = entry.key;
-                          controller.currencyRate.text =
-                              (entry.value['rate'] ?? '0').toString();
-                        },
-                      );
-                    },
-                    listValues: controller.allCurrencies.values
-                        .map((value) => value['code'].toString())
-                        .toList(),
-                  );
-                }),
+                child: myTextFormFieldWithBorder(
+                  obscureText: false,
+                  controller: controller.currencyName,
+                  labelText: 'Currency Name',
+                  hintText: 'Enter Currency Name',
+                  validate: true,
+                ),
               ),
               Expanded(
                 child: myTextFormFieldWithBorder(
                   obscureText: false,
-                  controller: controller.currencyRate,
-                  labelText: 'Currency Rate',
-                  hintText: 'Enter Calling Code',
+                  controller: controller.currencyCode,
+                  labelText: 'Currency Code',
+                  hintText: 'Enter Currency Code',
+                  validate: true,
+                ),
+              ),
+              Expanded(
+                child: myTextFormFieldWithBorder(
+                  obscureText: false,
+                  controller: controller.vat,
+                  labelText: 'VAT',
+                  hintText: 'Enter VAT',
                   validate: true,
                 ),
               ),

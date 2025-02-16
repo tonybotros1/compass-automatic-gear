@@ -275,19 +275,15 @@ ElevatedButton editSection(context, CountriesController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
-              final currency =
-                  controller.getCurrencyCodeName(countryData['based_currency']);
-              controller.countryCode.text = countryData['code'];
               controller.countryName.text = countryData['name'];
               controller.countryCallingCode.text = countryData['calling_code'];
               controller.countryCode.text = countryData['code'];
-              controller.currencyId.value = countryData['based_currency'];
-              controller.currencyRate.text =
-                  (currency['rate'] ?? '').toString();
-              controller.currency.text = currency['code'] ?? '';
+              controller.currencyName.text = countryData['currency_name'];
+              controller.currencyCode.text = countryData['currency_code'];
+              controller.vat.text = countryData['vat'];
 
               controller.flagUrl.value = countryData['flag'] ?? '';
               controller.imageBytes.value = Uint8List(0);
@@ -355,14 +351,14 @@ ElevatedButton newcountryButton(BuildContext context,
       controller.countryCode.clear();
       controller.countryName.clear();
       controller.countryCallingCode.clear();
-      controller.currency.clear();
-      controller.currencyId.value = '';
-      controller.currencyRate.clear();
+      controller.currencyName.clear();
+      controller.currencyCode.clear();
+      controller.vat.clear();
       controller.imageBytes.value = Uint8List(0);
       controller.flagUrl.value = '';
       controller.flagSelectedError.value = false;
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

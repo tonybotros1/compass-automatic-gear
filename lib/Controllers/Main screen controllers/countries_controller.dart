@@ -9,13 +9,14 @@ import '../../consts.dart';
 class CountriesController extends GetxController {
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
-  TextEditingController currency = TextEditingController();
   TextEditingController countryCode = TextEditingController();
   TextEditingController cityCode = TextEditingController();
   TextEditingController countryName = TextEditingController();
   TextEditingController cityName = TextEditingController();
   TextEditingController countryCallingCode = TextEditingController();
-  TextEditingController currencyRate = TextEditingController();
+  TextEditingController currencyName = TextEditingController();
+  TextEditingController currencyCode = TextEditingController();
+  TextEditingController vat = TextEditingController();
   RxBool isScreenLoding = RxBool(true);
   final RxList<DocumentSnapshot> allCountries = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allCities = RxList<DocumentSnapshot>([]);
@@ -31,7 +32,6 @@ class CountriesController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
   RxMap allCurrencies = RxMap({});
-  RxString currencyId = RxString('');
   RxBool addingNewCityValue = RxBool(false);
   RxString countryIdToWorkWith = RxString('');
   RxBool flagSelectedError = RxBool(false);
@@ -171,7 +171,9 @@ class CountriesController extends GetxController {
         'code': countryCode.text,
         'name': countryName.text,
         'calling_code': countryCallingCode.text,
-        'based_currency': currencyId.value,
+         'currency_name':currencyName.text,
+        'currency_code':currencyCode.text,
+        'vat':vat.text,
       };
       if (imageBytes.value.isNotEmpty) {
         final Reference storageRef = FirebaseStorage.instance.ref().child(
@@ -220,7 +222,10 @@ class CountriesController extends GetxController {
         'code': countryCode.text,
         'name': countryName.text,
         'calling_code': countryCallingCode.text,
-        'based_currency': currencyId.value,
+        'currency_name':currencyName.text,
+        'currency_code':currencyCode.text,
+        'vat':vat.text,
+
         'status': true,
         'added_date': DateTime.now().toString(),
         'flag': flagUrl.value,
@@ -253,17 +258,6 @@ class CountriesController extends GetxController {
           .delete();
     } catch (e) {
       //
-    }
-  }
-
-  getCurrencyCodeName(String currencyId) {
-    try {
-      final currency = allCurrencies.entries.firstWhere(
-        (currency) => currency.key == currencyId,
-      );
-      return currency.value;
-    } catch (e) {
-      return '';
     }
   }
 
