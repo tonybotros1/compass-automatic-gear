@@ -9,8 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class JobCardController extends GetxController {
-  Rx<TextEditingController> jobCardCounter =
-      TextEditingController(text: 'Auto').obs;
+  Rx<TextEditingController> jobCardCounter = TextEditingController().obs;
   Rx<TextEditingController> jobCardDate =
       TextEditingController(text: '${textToDate(DateTime.now())}').obs;
   Rx<TextEditingController> invoiceDate =
@@ -27,11 +26,9 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> reference2 = TextEditingController().obs;
   Rx<TextEditingController> reference3 = TextEditingController().obs;
   Rx<TextEditingController> minTestKms = TextEditingController().obs;
-  Rx<TextEditingController> invoiceCounter =
-      TextEditingController(text: 'Auto').obs;
+  Rx<TextEditingController> invoiceCounter = TextEditingController().obs;
   Rx<TextEditingController> lpoCounter = TextEditingController().obs;
-  Rx<TextEditingController> quotationCounter =
-      TextEditingController(text: 'Auto').obs;
+  Rx<TextEditingController> quotationCounter = TextEditingController().obs;
   Rx<TextEditingController> quotationDate =
       TextEditingController(text: '${textToDate(DateTime.now())}').obs;
   Rx<TextEditingController> quotationDays = TextEditingController().obs;
