@@ -185,7 +185,10 @@ Future internalNotesDialog(
                                       children: [
                                         Text(
                                           textAlign: TextAlign.start,
-                                          '${controller.getdataName(note['user_id'], controller.allUsers, title: 'user_name')}',
+                                          controller.getdataName(
+                                              note['user_id'],
+                                              controller.allUsers,
+                                              title: 'user_name'),
                                           style: TextStyle(
                                             color: isUserNote
                                                 ? Colors.deepOrangeAccent
@@ -237,8 +240,7 @@ Future internalNotesDialog(
                                             : InkWell(
                                                 onTap: () {
                                                   FilePickerService.openFile(
-                                                    note['note'],
-                                                  );
+                                                      note['note']);
                                                 },
                                                 child: Row(
                                                   mainAxisAlignment:
@@ -248,9 +250,53 @@ Future internalNotesDialog(
                                                       padding:
                                                           const EdgeInsets.all(
                                                               8.0),
-                                                      child: Image.asset(
-                                                        'assets/file.png',
-                                                        width: 50,
+                                                      // Using a Builder to compute the asset path dynamically
+                                                      child: Builder(
+                                                        builder: (context) {
+                                                          // Retrieve the file name; if null, use an empty string
+                                                          final fileName = note[
+                                                                  'file_name'] ??
+                                                              "";
+                                                          // Check if there's a dot in the filename to extract the extension
+                                                          final extension = fileName
+                                                                  .contains('.')
+                                                              ? fileName
+                                                                  .split('.')
+                                                                  .last
+                                                                  .toLowerCase()
+                                                              : "";
+                                                          // Determine asset path based on extension
+                                                          String assetPath;
+                                                          switch (extension) {
+                                                            case 'pdf':
+                                                              assetPath =
+                                                                  'assets/pdf.png';
+                                                              break;
+                                                            case 'doc':
+                                                            case 'docx':
+                                                              assetPath =
+                                                                  'assets/word.png';
+                                                              break;
+                                                            case 'xls':
+                                                            case 'xlsx':
+                                                              assetPath =
+                                                                  'assets/excel.png';
+                                                              break;
+                                                            case 'ppt':
+                                                            case 'pptx':
+                                                              assetPath =
+                                                                  'assets/powerpoint.png';
+                                                              break;
+                                                            // Add more cases as needed
+                                                            default:
+                                                              assetPath =
+                                                                  'assets/file.png';
+                                                          }
+                                                          return Image.asset(
+                                                            assetPath,
+                                                            width: 50,
+                                                          );
+                                                        },
                                                       ),
                                                     ),
                                                     Expanded(

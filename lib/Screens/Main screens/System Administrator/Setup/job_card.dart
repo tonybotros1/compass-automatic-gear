@@ -242,12 +242,6 @@ ElevatedButton editSection(context, JobCardController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () async {
-        if (jobData['quotation_number'] != '' && controller.isQuotationExpanded.isTrue) {
-          await controller.getCurrentQuotationCounterNumber();
-        }
-        if (jobData['job_number'] != '' && controller.isJobCardExpanded.isTrue) {
-         await controller. getCurrentJobCardCounterNumber();
-        }
         controller.loadValues(jobData);
         showDialog(
             barrierDismissible: false,
@@ -313,7 +307,17 @@ ElevatedButton editSection(context, JobCardController controller,
                         child: ElevatedButton(
                           onPressed: controller.addingNewValue.value
                               ? null
-                              : () {
+                              : () async {
+                                  if (jobData['quotation_number'] != '' &&
+                                      controller.isQuotationExpanded.isTrue) {
+                                    await controller
+                                        .getCurrentQuotationCounterNumber();
+                                  }
+                                  if (jobData['job_number'] != '' &&
+                                      controller.isJobCardExpanded.isTrue) {
+                                    await controller
+                                        .getCurrentJobCardCounterNumber();
+                                  }
                                   controller.editJobCardAndQuotation(jobId);
                                 },
                           style: ElevatedButton.styleFrom(
