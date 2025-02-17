@@ -21,16 +21,16 @@ Widget carDetailsSection() {
             children: [
               controller.carBrandLogo.value.isNotEmpty
                   ? SizedBox(
-                      height: 50,
-                      width: 50,
+                      height: 60,
+                      width: 60,
                       child: Image.network(
                         controller.carBrandLogo.value,
-                        width: 50,
+                        width: 60,
                       ),
                     )
                   : SizedBox(
-                      height: 50,
-                      width: 50,
+                      height: 60,
+                      width: 60,
                     ),
               Expanded(
                 child: dynamicFields(dynamicConfigs: [

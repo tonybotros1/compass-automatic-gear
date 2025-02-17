@@ -107,7 +107,7 @@ class JobCardController extends GetxController {
   RxBool isJobCardExpanded = RxBool(true);
   RxMap allUsers = RxMap();
   RxString userId = RxString('');
-  RxBool canSaveJobCard = RxBool(true);
+  // RxBool canSaveJobCard = RxBool(true);
   // internal notes section
   RxBool addingNewInternalNotProcess = RxBool(false);
   RxBool jobCardAdded = RxBool(false);
@@ -224,7 +224,7 @@ class JobCardController extends GetxController {
   clearValues() {
     carBrandLogo.value = '';
     isQuotationExpanded.value = false;
-    canSaveJobCard.value = true;
+    // canSaveJobCard.value = true;
     allModels.clear();
     jobCardCounter.value.clear();
     quotationCounter.value.clear();
@@ -370,76 +370,84 @@ class JobCardController extends GetxController {
     try {
       addingNewValue.value = true;
 
-      if (isQuotationExpanded.isTrue) {
+      if (isQuotationExpanded.isTrue && quotationCounter.value.text.isEmpty) {
         await getCurrentQuotationCounterNumber();
       }
-      if (isJobCardExpanded.isTrue) {
+      if (isJobCardExpanded.isTrue && jobCardCounter.value.text.isEmpty) {
         await getCurrentJobCardCounterNumber();
       }
 
+      Map<String, dynamic> newDate = {
+        'car_brand_logo': carBrandLogo.value,
+        'company_id': companyId.value,
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'plate_number': plateNumber.text,
+        'plate_code': plateCode.text,
+        'country': countryId.value,
+        'city': cityId.value,
+        'year': year.text,
+        'color': colorId.value,
+        'engine_type': engineTypeId.value,
+        'vehicle_identification_number': vin.text,
+        'transmission_type': transmissionType.text,
+        'mileage_in': mileageIn.value.text,
+        'mileage_out': mileageOut.value.text,
+        'mileage_in_out_diff': inOutDiff.value.text,
+        'customer': customerId.value,
+        'contact_name': customerEntityName.text,
+        'contact_number': customerEntityPhoneNumber.text,
+        'contact_email': customerEntityEmail.text,
+        'credit_limit': customerCreditNumber.text,
+        'outstanding': customerOutstanding.text,
+        'saleMan': customerSaleManId.value,
+        'branch': customerBranchId.value,
+        'currency': customerCurrencyId.value,
+        'rate': customerCurrencyRate.text,
+        'payment_method': payType.value,
+        'quotation_number': quotationCounter.value.text,
+        'quotation_date': quotationDate.value.text,
+        'validity_days': quotationDays.value.text,
+        'validity_end_date': validityEndDate.value.text,
+        'reference_number': referenceNumber.value.text,
+        'delivery_time': deliveryTime.value.text,
+        'quotation_warrenty_days': quotationWarrentyDays.value.text,
+        'quotation_warrenty_km': quotationWarrentyKM.value.text,
+        'quotation_notes': quotationNotes.text,
+        'job_number': jobCardCounter.value.text,
+        'invoice_number': invoiceCounter.value.text,
+        'lpo_number': lpoCounter.value.text,
+        'job_date': jobCardDate.value.text,
+        'invoice_date': invoiceDate.value.text,
+        'job_approval_date': approvalDate.value.text,
+        'job_start_date': startDate.value.text,
+        'job_finish_date': finishDate.value.text,
+        'job_delivery_date': deliveryDate.value.text,
+        'job_warrenty_days': jobWarrentyDays.value.text,
+        'job_warrenty_km': jobWarrentyKM.value.text,
+        'job_warrenty_end_date': jobWarrentyEndDate.value.text,
+        'job_min_test_km': minTestKms.value.text,
+        'job_reference_1': reference1.value.text,
+        'job_reference_2': reference2.value.text,
+        'job_reference_3': reference3.value.text,
+        'job_notes': jobNotes.text,
+        'job_delivery_notes': deliveryNotes.text,
+      };
+
       if (jobCardAdded.isFalse) {
-        var newJob =
-            await FirebaseFirestore.instance.collection('job_cards').add({
-          'car_brand_logo': carBrandLogo.value,
-          'company_id': companyId.value,
-          'car_brand': carBrandId.value,
-          'car_model': carModelId.value,
-          'plate_number': plateNumber.text,
-          'plate_code': plateCode.text,
-          'country': countryId.value,
-          'city': cityId.value,
-          'year': year.text,
-          'color': colorId.value,
-          'engine_type': engineTypeId.value,
-          'vehicle_identification_number': vin.text,
-          'transmission_type': transmissionType.text,
-          'mileage_in': mileageIn.value.text,
-          'mileage_out': mileageOut.value.text,
-          'mileage_in_out_diff': inOutDiff.value.text,
-          'customer': customerId.value,
-          'contact_name': customerEntityName.text,
-          'contact_number': customerEntityPhoneNumber.text,
-          'contact_email': customerEntityEmail.text,
-          'credit_limit': customerCreditNumber.text,
-          'outstanding': customerOutstanding.text,
-          'saleMan': customerSaleManId.value,
-          'branch': customerBranchId.value,
-          'currency': customerCurrencyId.value,
-          'rate': customerCurrencyRate.text,
-          'payment_method': payType.value,
-          'quotation_number': quotationCounter.value.text,
-          'quotation_date': quotationDate.value.text,
-          'validity_days': quotationDays.value.text,
-          'validity_end_date': validityEndDate.value.text,
-          'reference_number': referenceNumber.value.text,
-          'delivery_time': deliveryTime.value.text,
-          'quotation_warrenty_days': quotationWarrentyDays.value.text,
-          'quotation_warrenty_km': quotationWarrentyKM.value.text,
-          'quotation_notes': quotationNotes.text,
-          'job_number': jobCardCounter.value.text,
-          'invoice_number': invoiceCounter.value.text,
-          'lpo_number': lpoCounter.value.text,
-          'job_date': jobCardDate.value.text,
-          'invoice_date': invoiceDate.value.text,
-          'job_approval_date': approvalDate.value.text,
-          'job_start_date': startDate.value.text,
-          'job_finish_date': finishDate.value.text,
-          'job_delivery_date': deliveryDate.value.text,
-          'job_warrenty_days': jobWarrentyDays.value.text,
-          'job_warrenty_km': jobWarrentyKM.value.text,
-          'job_warrenty_end_date': jobWarrentyEndDate.value.text,
-          'job_min_test_km': minTestKms.value.text,
-          'job_reference_1': reference1.value.text,
-          'job_reference_2': reference2.value.text,
-          'job_reference_3': reference3.value.text,
-          'job_notes': jobNotes.text,
-          'job_delivery_notes': deliveryNotes.text,
-        });
+        var newJob = await FirebaseFirestore.instance
+            .collection('job_cards')
+            .add(newDate);
         jobCardAdded.value = true;
         curreentJobCardId.value = newJob.id;
+      } else {
+        await FirebaseFirestore.instance
+            .collection('job_cards')
+            .doc(curreentJobCardId.value)
+            .update(newDate);
       }
       canAddInternalNotesAndInvoiceItems.value = true;
-      canSaveJobCard.value = false;
+      // canSaveJobCard.value = false;
       addingNewValue.value = false;
     } catch (e) {
       canAddInternalNotesAndInvoiceItems.value = false;

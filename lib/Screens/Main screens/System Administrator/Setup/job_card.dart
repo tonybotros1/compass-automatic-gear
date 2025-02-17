@@ -468,14 +468,9 @@ ElevatedButton newJobCardButton(BuildContext context,
                       builder: (controller) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: ElevatedButton(
-                          onPressed: controller.canSaveJobCard.isTrue
-                              ? controller.addingNewValue.value
-                                  ? null
-                                  : () async {
-                                      await controller
-                                          .addNewJobCardAndQuotation();
-                                    }
-                              : null,
+                          onPressed: () async {
+                            await controller.addNewJobCardAndQuotation();
+                          },
                           style: saveButtonStyle,
                           child: controller.addingNewValue.value == false
                               ? const Text(
