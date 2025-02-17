@@ -40,7 +40,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
-        GetPage(name: '/', page: () => const LoadingScreen()),
+        GetPage(
+            name: '/',
+            page: () => const LoadingScreen(),
+            middlewares: [InitialRedirectMiddleware()]),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
         GetPage(
           name: '/registerScreen',

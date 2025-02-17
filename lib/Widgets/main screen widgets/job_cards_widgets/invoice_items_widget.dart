@@ -12,6 +12,7 @@ Widget invoiceItemsDialog(
     required BoxConstraints constraints,
     required jobId}) {
   return Container(
+    height: constraints.maxHeight / 1.5,
     width: constraints.maxWidth,
     decoration: BoxDecoration(
       border: Border.all(color: Colors.grey),
@@ -222,8 +223,7 @@ ElevatedButton editSection(
       onPressed: () {
         controller.invoiceItemNameId.value = invoiceItemsData['name'];
         controller.invoiceItemName.text = controller.getdataName(
-            invoiceItemsData['name'],
-            controller.allInvoiceItemsFromCollection);
+            invoiceItemsData['name'], controller.allInvoiceItemsFromCollection);
         controller.lineNumber.text = invoiceItemsData['line_number'];
         controller.description.text = invoiceItemsData['description'];
         controller.quantity.text = invoiceItemsData['quantity'];

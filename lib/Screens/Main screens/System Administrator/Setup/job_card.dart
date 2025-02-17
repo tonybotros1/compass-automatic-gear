@@ -375,9 +375,9 @@ ElevatedButton newJobCardButton(BuildContext context,
       controller.customerOutstanding.text = '0';
       controller.isCashSelected.value = true;
       controller.payType.value = 'Cash';
-      controller.jobCardDate.value.text = textToDate(DateTime.now());
-      controller.invoiceDate.value.text = textToDate(DateTime.now());
-      controller.startDate.value.text = textToDate(DateTime.now());
+      controller.jobCardDate.value.text = textToDate(DateTime.now().toString());
+      controller.invoiceDate.value.text = textToDate(DateTime.now().toString());
+      controller.startDate.value.text = textToDate(DateTime.now().toString());
       controller.clearValues();
       showDialog(
           barrierDismissible: false,
