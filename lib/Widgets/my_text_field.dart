@@ -21,6 +21,12 @@ Widget myTextFormFieldWithBorder(
     void Function(String)? onChanged,
     bool? isEnabled = true}) {
   return TextFormField(
+    onTap: () {
+      controller!.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: controller.text.length,
+      );
+    },
     minLines: minLines,
     maxLines: maxLines,
     onChanged: onChanged,
@@ -45,8 +51,8 @@ Widget myTextFormFieldWithBorder(
       labelStyle: TextStyle(
         color: isEnabled == false ? Colors.grey.shade500 : Colors.grey.shade700,
       ),
-      filled: isEnabled == true, 
-      fillColor: Colors.grey.shade200, 
+      filled: isEnabled == true,
+      fillColor: Colors.grey.shade200,
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5),
         borderSide: BorderSide(color: Colors.grey, width: 2.0),

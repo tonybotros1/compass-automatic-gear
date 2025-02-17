@@ -175,7 +175,7 @@ DataRow dataRowForTheTable(
     DataCell(textForDataRowInTable(
         text: controller.getdataName(
             invoiceItemsData['name'], controller.allInvoiceItemsFromCollection),
-        maxWidth: 300)),
+        maxWidth: null)),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['quantity']}')),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['price']}')),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['amount']}')),

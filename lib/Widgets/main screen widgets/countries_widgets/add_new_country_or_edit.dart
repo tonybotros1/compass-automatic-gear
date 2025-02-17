@@ -79,6 +79,7 @@ Widget addNewCountryOrEdit({
               ),
               Expanded(
                 child: myTextFormFieldWithBorder(
+                  isDouble: true,
                   obscureText: false,
                   controller: controller.vat,
                   labelText: 'VAT',

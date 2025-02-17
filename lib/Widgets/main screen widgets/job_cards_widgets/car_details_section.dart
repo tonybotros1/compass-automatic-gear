@@ -17,150 +17,177 @@ Widget carDetailsSection() {
           var isBrandsLoading = controller.allBrands.isEmpty;
           final isCountriesLoading = controller.allCountries.isEmpty;
 
-          return dynamicFields(dynamicConfigs: [
-            DynamicConfig(
-              isDropdown: true,
-              flex: 1,
-              dropdownConfig: DropdownConfig(
-                listValues: controller.allBrands.values
-                    .map((value) => value['name'].toString())
-                    .toList(),
-                textController: controller.carBrand,
-                labelText: isBrandsLoading ? 'Loading...' : 'Brand',
-                hintText: 'Select Brand',
-                menuValues: isBrandsLoading ? {} : controller.allBrands,
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text('${suggestion['name']}'),
-                  );
-                },
-                onSelected: (suggestion) {
-                  controller.carBrand.text = suggestion['name'];
-                  controller.allBrands.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach(
-                    (entry) {
-                      controller.carModel.clear();
-                      // controller.onSelectForBrandsAndModels(entry.key);
-                      controller.getModelsByCarBrand(entry.key);
-                      controller.carBrandId.value = entry.key;
-                    },
-                  );
-                },
+          return Row(
+            children: [
+              controller.carBrandLogo.value.isNotEmpty
+                  ? SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: Image.network(
+                        controller.carBrandLogo.value,
+                        width: 50,
+                      ),
+                    )
+                  : SizedBox(
+                      height: 50,
+                      width: 50,
+                    ),
+              Expanded(
+                child: dynamicFields(dynamicConfigs: [
+                  DynamicConfig(
+                    isDropdown: true,
+                    flex: 1,
+                    dropdownConfig: DropdownConfig(
+                      listValues: controller.allBrands.values
+                          .map((value) => value['name'].toString())
+                          .toList(),
+                      textController: controller.carBrand,
+                      labelText: isBrandsLoading ? 'Loading...' : 'Brand',
+                      hintText: 'Select Brand',
+                      menuValues: isBrandsLoading ? {} : controller.allBrands,
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          title: Text('${suggestion['name']}'),
+                        );
+                      },
+                      onSelected: (suggestion) {
+                        controller.carBrandLogo.value = suggestion['logo'];
+                        controller.carBrand.text = suggestion['name'];
+                        controller.allBrands.entries.where((entry) {
+                          return entry.value['name'] ==
+                              suggestion['name'].toString();
+                        }).forEach(
+                          (entry) {
+                            controller.carModel.clear();
+                            // controller.onSelectForBrandsAndModels(entry.key);
+                            controller.getModelsByCarBrand(entry.key);
+                            controller.carBrandId.value = entry.key;
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: true,
+                    flex: 2,
+                    dropdownConfig: DropdownConfig(
+                      listValues: controller.allModels.values
+                          .map((value) => value['name'].toString())
+                          .toList(),
+                      suggestionsController: SuggestionsController(),
+                      onTap: SuggestionsController().refresh,
+                      textController: controller.carModel,
+                      labelText: 'Model',
+                      hintText: 'Select Model',
+                      menuValues: controller.allModels.isEmpty
+                          ? {}
+                          : controller.allModels,
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          title: Text('${suggestion['name']}'),
+                        );
+                      },
+                      onSelected: (suggestion) {
+                        controller.carModel.text = suggestion['name'];
+                        controller.allModels.entries.where((entry) {
+                          return entry.value['name'] ==
+                              suggestion['name'].toString();
+                        }).forEach(
+                          (entry) {
+                            controller.carModelId.value = entry.key;
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: false,
+                    flex: 1,
+                    fieldConfig: FieldConfig(
+                      textController: controller.plateNumber,
+                      labelText: 'Plate No.',
+                      hintText: 'Enter Plate No.',
+                      validate: false,
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: false,
+                    flex: 1,
+                    fieldConfig: FieldConfig(
+                      textController: controller.plateCode,
+                      labelText: 'Code',
+                      hintText: 'Enter Plate Code',
+                      validate: false,
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: true,
+                    flex: 2,
+                    dropdownConfig: DropdownConfig(
+                      listValues: controller.allCountries.values
+                          .map((value) => value['name'].toString())
+                          .toList(),
+                      textController: controller.country,
+                      labelText: isCountriesLoading ? 'Loading...' : 'Country',
+                      hintText: 'Select Country',
+                      menuValues:
+                          isCountriesLoading ? {} : controller.allCountries,
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          title: Text('${suggestion['name']}'),
+                        );
+                      },
+                      onSelected: (suggestion) {
+                        controller.country.text = suggestion['name'];
+                        controller.allCountries.entries.where((entry) {
+                          return entry.value['name'] ==
+                              suggestion['name'].toString();
+                        }).forEach(
+                          (entry) {
+                            controller.city.clear();
+                            // controller.onSelectForCountryAndCity(entry.key);
+                            controller.getCitiesByCountryID(entry.key);
+                            controller.countryId.value = entry.key;
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: true,
+                    flex: 1,
+                    dropdownConfig: DropdownConfig(
+                      listValues: controller.allCities.values
+                          .map((value) => value['name'].toString())
+                          .toList(),
+                      suggestionsController: SuggestionsController(),
+                      onTap: SuggestionsController().refresh,
+                      textController: controller.city,
+                      labelText: 'City',
+                      hintText: 'Select City',
+                      menuValues: controller.allCities.isEmpty
+                          ? {}
+                          : controller.allCities,
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          title: Text('${suggestion['name']}'),
+                        );
+                      },
+                      onSelected: (suggestion) {
+                        controller.city.text = suggestion['name'];
+                        controller.allCities.entries.where((entry) {
+                          return entry.value['name'] ==
+                              suggestion['name'].toString();
+                        }).forEach((entry) {
+                          controller.cityId.value = entry.key;
+                        });
+                      },
+                    ),
+                  ),
+                ]),
               ),
-            ),
-            DynamicConfig(
-              isDropdown: true,
-              flex: 2,
-              dropdownConfig: DropdownConfig(
-                listValues: controller.allModels.values
-                    .map((value) => value['name'].toString())
-                    .toList(),
-                suggestionsController: SuggestionsController(),
-                onTap: SuggestionsController().refresh,
-                textController: controller.carModel,
-                labelText: 'Model',
-                hintText: 'Select Model',
-                menuValues:
-                    controller.allModels.isEmpty ? {} : controller.allModels,
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text('${suggestion['name']}'),
-                  );
-                },
-                onSelected: (suggestion) {
-                  controller.carModel.text = suggestion['name'];
-                  controller.allModels.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach(
-                    (entry) {
-                      controller.carModelId.value = entry.key;
-                    },
-                  );
-                },
-              ),
-            ),
-            DynamicConfig(
-              isDropdown: false,
-              flex: 1,
-              fieldConfig: FieldConfig(
-                textController: controller.plateNumber,
-                labelText: 'Plate No.',
-                hintText: 'Enter Plate No.',
-                validate: false,
-              ),
-            ),
-            DynamicConfig(
-              isDropdown: false,
-              flex: 1,
-              fieldConfig: FieldConfig(
-                textController: controller.plateCode,
-                labelText: 'Code',
-                hintText: 'Enter Plate Code',
-                validate: false,
-              ),
-            ),
-            DynamicConfig(
-              isDropdown: true,
-              flex: 2,
-              dropdownConfig: DropdownConfig(
-                listValues: controller.allCountries.values
-                    .map((value) => value['name'].toString())
-                    .toList(),
-                textController: controller.country,
-                labelText: isCountriesLoading ? 'Loading...' : 'Country',
-                hintText: 'Select Country',
-                menuValues: isCountriesLoading ? {} : controller.allCountries,
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text('${suggestion['name']}'),
-                  );
-                },
-                onSelected: (suggestion) {
-                  controller.country.text = suggestion['name'];
-                  controller.allCountries.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach(
-                    (entry) {
-                      controller.city.clear();
-                      // controller.onSelectForCountryAndCity(entry.key);
-                      controller.getCitiesByCountryID(entry.key);
-                      controller.countryId.value = entry.key;
-                    },
-                  );
-                },
-              ),
-            ),
-            DynamicConfig(
-              isDropdown: true,
-              flex: 1,
-              dropdownConfig: DropdownConfig(
-                listValues: controller.allCities.values
-                    .map((value) => value['name'].toString())
-                    .toList(),
-                suggestionsController: SuggestionsController(),
-                onTap: SuggestionsController().refresh,
-                textController: controller.city,
-                labelText: 'City',
-                hintText: 'Select City',
-                menuValues:
-                    controller.allCities.isEmpty ? {} : controller.allCities,
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text('${suggestion['name']}'),
-                  );
-                },
-                onSelected: (suggestion) {
-                  controller.city.text = suggestion['name'];
-                  controller.allCities.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach((entry) {
-                    controller.cityId.value = entry.key;
-                  });
-                },
-              ),
-            ),
-          ]);
+            ],
+          );
         }),
         SizedBox(
           height: 20,

@@ -521,13 +521,12 @@ class FilePickerService {
     return mimeType != null ? mimeMap[mimeType.split(';').first] : null;
   }
 }
-
 Widget textForDataRowInTable({
   required String text,
-  maxWidth = 150,
+   maxWidth = 150,
 }) {
   return Container(
-    constraints: BoxConstraints(maxWidth: maxWidth),
+    constraints: maxWidth != null ? BoxConstraints(maxWidth: maxWidth.toDouble()) : null,
     child: Text(
       text,
       maxLines: 1,
@@ -535,3 +534,4 @@ Widget textForDataRowInTable({
     ),
   );
 }
+

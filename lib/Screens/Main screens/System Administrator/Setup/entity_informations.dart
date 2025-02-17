@@ -107,13 +107,6 @@ Widget tableOfScreens(
         ),
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
         label: AutoSizedText(
           constraints: constraints,
@@ -141,21 +134,14 @@ Widget tableOfScreens(
 DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
     constraints, entityId, EntityInformationsController controller) {
   return DataRow(cells: [
+    DataCell(textForDataRowInTable(
+        maxWidth: null, text: entityData['entity_name'] ?? 'no name')),
     DataCell(
-      textForDataRowInTable(text:  entityData['entity_name'] ?? 'no name')
-     ),
-    DataCell(
-       textForDataRowInTable(text: (entityData['entity_phone'] as List ).map((phoneData) => phoneData['number']).take(2).join('/')),
-   
-    ),
-    DataCell(
-      Text(
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-        entityData['added_date'] != null && entityData['added_date'] != ''
-            ? textToDate(entityData['added_date']) //
-            : 'N/A',
-      ),
+      textForDataRowInTable(
+          text: (entityData['entity_phone'] as List)
+              .map((phoneData) => phoneData['number'])
+              .take(2)
+              .join('/')),
     ),
     DataCell(Row(
       spacing: 5,

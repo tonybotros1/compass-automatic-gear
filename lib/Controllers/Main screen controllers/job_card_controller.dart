@@ -61,6 +61,7 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> mileageOut = TextEditingController().obs;
   Rx<TextEditingController> inOutDiff = TextEditingController().obs;
   RxString carBrandId = RxString('');
+  RxString carBrandLogo = RxString('');
   RxString carModelId = RxString('');
   RxString countryId = RxString('');
   RxString colorId = RxString('');
@@ -113,6 +114,7 @@ class JobCardController extends GetxController {
   RxString curreentJobCardId = RxString('');
   RxBool canAddInternalNotesAndInvoiceItems = RxBool(false);
   final ScrollController scrollController = ScrollController();
+  final ScrollController scrollControllerFotTable = ScrollController();
   Rx<TextEditingController> internalNote = TextEditingController().obs;
   RxString noteMessage = RxString('');
   final ScrollController scrollControllerForNotes = ScrollController();
@@ -134,6 +136,7 @@ class JobCardController extends GetxController {
   TextEditingController discount = TextEditingController();
   TextEditingController total = TextEditingController();
   TextEditingController vat = TextEditingController();
+  RxString currentCountryVAT = RxString('');
   TextEditingController net = TextEditingController();
 
   @override
@@ -179,7 +182,10 @@ class JobCardController extends GetxController {
     final currentDiscount = double.tryParse(discount.text) ?? 0.0;
     amount.text = (currwnQquanity * currentPrice).toString();
     total.text = (double.tryParse(amount.text)! - currentDiscount).toString();
-    vat.text = ((double.tryParse(total.text)! * 5) / 100).toString();
+    vat.text = ((double.tryParse(total.text))! *
+            (double.parse(currentCountryVAT.value)) /
+            100)
+        .toString();
     net.text =
         (double.tryParse(total.text)! + double.tryParse(vat.text)!).toString();
   }
@@ -206,7 +212,7 @@ class JobCardController extends GetxController {
     invoiceItemNameId.value = '';
     lineNumber.clear();
     description.clear();
-    quantity.text = '0';
+    quantity.text = '1';
     price.text = '0';
     amount.text = '0';
     discount.text = '0';
@@ -216,6 +222,7 @@ class JobCardController extends GetxController {
   }
 
   clearValues() {
+    carBrandLogo.value = '';
     isQuotationExpanded.value = false;
     canSaveJobCard.value = true;
     allModels.clear();
@@ -273,6 +280,7 @@ class JobCardController extends GetxController {
   }
 
   loadValues(Map<String, dynamic> data) {
+    carBrandLogo.value = data['car_brand_logo'];
     carBrandId.value = data['car_brand'];
     carBrand.text = getdataName(data['car_brand'], allBrands);
     carModelId.value = data['car_model'];
@@ -313,7 +321,10 @@ class JobCardController extends GetxController {
     customerBranch.text = getdataName(data['branch'], allBranches);
     customerCurrencyId.value = data['currency'];
     customerCurrency.text = data['currency'] != ''
-        ? getdataName(data['country'], allCountries, title: 'currency_code')
+        ? getdataName(
+            getdataName(data['currency'], allCurrencies, title: 'country_id'),
+            allCountries,
+            title: 'currency_code')
         : '';
     customerCurrencyRate.text = data['rate'];
     payType.value = data['payment_method'];
@@ -369,6 +380,7 @@ class JobCardController extends GetxController {
       if (jobCardAdded.isFalse) {
         var newJob =
             await FirebaseFirestore.instance.collection('job_cards').add({
+          'car_brand_logo': carBrandLogo.value,
           'company_id': companyId.value,
           'car_brand': carBrandId.value,
           'car_model': carModelId.value,
@@ -576,8 +588,8 @@ class JobCardController extends GetxController {
 
   void editJobCardAndQuotation(jobId) {
     try {
-      addingNewValue.value = true;
       FirebaseFirestore.instance.collection('job_cards').doc(jobId).update({
+        'car_brand_logo': carBrandLogo.value,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
         'plate_number': plateNumber.text,
@@ -1200,6 +1212,7 @@ class JobCardController extends GetxController {
           .collection('job_cards')
           .doc(jobId)
           .collection('invoice_items')
+          .orderBy('line_number')
           .snapshots()
           .listen((items) {
         allInvoiceItems.assignAll(List<DocumentSnapshot>.from(items.docs));

@@ -84,129 +84,99 @@ Widget tableOfScreens(
     {required constraints,
     required context,
     required JobCardController controller}) {
-  return DataTable(
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
-    columnSpacing: 5,
-    showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
-    sortColumnIndex: controller.sortColumnIndex.value,
-    sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-    columns: [
-      DataColumn(
-        label: AutoSizedText(
-          text: 'Job No.',
-          constraints: constraints,
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Job Date',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'LPO No.',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Car Brand',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Plate No.',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Code',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'City',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Customer Name',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Invoice No.',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Inv Date',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
+  return Column(
+    children: [
+      Scrollbar(
+        trackVisibility: true,
+        scrollbarOrientation: ScrollbarOrientation.top,
+        interactive: true,
+        controller: controller.scrollControllerFotTable,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          controller: controller.scrollControllerFotTable,
+          child: DataTable(
+            dataRowMaxHeight: 40,
+            dataRowMinHeight: 30,
+            columnSpacing: 10,
+            showBottomBorder: true,
+            dataTextStyle: regTextStyle,
+            headingTextStyle: fontStyleForTableHeader,
+            sortColumnIndex: controller.sortColumnIndex.value,
+            sortAscending: controller.isAscending.value,
+            headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+            columns: [
+              DataColumn(
+                  label: AutoSizedText(
+                      text: 'Quotation No.', constraints: constraints),
+                  onSort: controller.onSort),
+              DataColumn(
+                  label:
+                      AutoSizedText(text: 'Job No.', constraints: constraints),
+                  onSort: controller.onSort),
+              DataColumn(
+                  label:
+                      AutoSizedText(constraints: constraints, text: 'Job Date'),
+                  onSort: controller.onSort),
+              DataColumn(
+                  label:
+                      AutoSizedText(constraints: constraints, text: 'LPO No.'),
+                  onSort: controller.onSort),
+              DataColumn(
+                  label: AutoSizedText(
+                      constraints: constraints, text: 'Car Brand'),
+                  onSort: controller.onSort),
+              DataColumn(
+                  label: AutoSizedText(constraints: constraints, text: 'Plate'),
+                  onSort: controller.onSort),
+              DataColumn(
+                  label: AutoSizedText(
+                      constraints: constraints, text: 'Customer Name'),
+                  onSort: controller.onSort),
+              DataColumn(
+                  label: AutoSizedText(
+                      constraints: constraints, text: 'Invoice No.'),
+                  onSort: controller.onSort),
+              DataColumn(
+                  label:
+                      AutoSizedText(constraints: constraints, text: 'Inv Date'),
+                  onSort: controller.onSort),
+              DataColumn(
+                  headingRowAlignment: MainAxisAlignment.center,
+                  label:
+                      AutoSizedText(constraints: constraints, text: 'Action'))
+            ],
+            rows: controller.filteredJobCards.isEmpty &&
+                    controller.search.value.text.isEmpty
+                ? controller.allJobCards.map<DataRow>((job) {
+                    final jobData = job.data() as Map<String, dynamic>;
+                    final jobId = job.id;
+                    return dataRowForTheTable(
+                        jobData, context, constraints, jobId, controller);
+                  }).toList()
+                : controller.filteredJobCards.map<DataRow>((job) {
+                    final jobData = job.data() as Map<String, dynamic>;
+                    final jobId = job.id;
+                    return dataRowForTheTable(
+                        jobData, context, constraints, jobId, controller);
+                  }).toList(),
+          ),
         ),
       ),
     ],
-    rows: controller.filteredJobCards.isEmpty &&
-            controller.search.value.text.isEmpty
-        ? controller.allJobCards.map<DataRow>((job) {
-            final jobData = job.data() as Map<String, dynamic>;
-            final jobId = job.id;
-            return dataRowForTheTable(
-                jobData, context, constraints, jobId, controller);
-          }).toList()
-        : controller.filteredJobCards.map<DataRow>((job) {
-            final jobData = job.data() as Map<String, dynamic>;
-            final jobId = job.id;
-            return dataRowForTheTable(
-                jobData, context, constraints, jobId, controller);
-          }).toList(),
   );
 }
 
 DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
     jobId, JobCardController controller) {
   return DataRow(cells: [
+    DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
     DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
     DataCell(textForDataRowInTable(text: '${textToDate(jobData['job_date'])}')),
     DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
     DataCell(textForDataRowInTable(
         text: controller.getdataName(
             jobData['car_brand'], controller.allBrands))),
-    DataCell(
-      Text(
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-        '${jobData['plate_number']}',
-      ),
-    ),
-    DataCell(textForDataRowInTable(text: '${jobData['plate_code']}')),
     DataCell(
       FutureBuilder<String>(
         future: controller.getCityName(jobData['country'], jobData['city']),
@@ -216,12 +186,15 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
           } else if (snapshot.hasError) {
             return Text('Error');
           } else {
-            return textForDataRowInTable(text: '${snapshot.data}');
+            return textForDataRowInTable(
+                text:
+                    '${jobData['plate_code']}-${jobData['plate_number']}-${snapshot.data}');
           }
         },
       ),
     ),
     DataCell(textForDataRowInTable(
+        maxWidth: null,
         text: controller.getdataName(
             jobData['customer'], controller.allCustomers,
             title: 'entity_name'))),
@@ -242,6 +215,10 @@ ElevatedButton editSection(context, JobCardController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () async {
+         controller.currentCountryVAT.value = controller.getdataName(
+          controller.companyDetails['contact_details']['country'],
+          controller.allCountries,
+          title: 'vat');
         controller.loadValues(jobData);
         showDialog(
             barrierDismissible: false,
@@ -304,40 +281,46 @@ ElevatedButton editSection(context, JobCardController controller,
                       Spacer(),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: ElevatedButton(
-                          onPressed: controller.addingNewValue.value
-                              ? null
-                              : () async {
-                                  if (jobData['quotation_number'] != '' &&
-                                      controller.isQuotationExpanded.isTrue) {
-                                    await controller
-                                        .getCurrentQuotationCounterNumber();
-                                  }
-                                  if (jobData['job_number'] != '' &&
-                                      controller.isJobCardExpanded.isTrue) {
-                                    await controller
-                                        .getCurrentJobCardCounterNumber();
-                                  }
-                                  controller.editJobCardAndQuotation(jobId);
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
+                        child: GetX<JobCardController>(builder: (controller) {
+                          return ElevatedButton(
+                            onPressed: controller.addingNewValue.value
+                                ? null
+                                : () async {
+                                    controller.addingNewValue.value = true;
+
+                                    if (jobData['quotation_number'] == '' &&
+                                        controller.isQuotationExpanded.isTrue) {
+                                      await controller
+                                          .getCurrentQuotationCounterNumber();
+                                    }
+                                    if (jobData['job_number'] == '' &&
+                                        controller.isJobCardExpanded.isTrue) {
+                                      await controller
+                                          .getCurrentJobCardCounterNumber();
+                                    }
+                                    controller.editJobCardAndQuotation(jobId);
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
                             ),
-                          ),
-                          child: controller.addingNewValue.value == false
-                              ? const Text(
-                                  'Save',
-                                  style: TextStyle(color: Colors.white),
-                                )
-                              : const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
+                            child: controller.addingNewValue.value == false
+                                ? const Text(
+                                    'Save',
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                : SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
                                   ),
-                                ),
-                        ),
+                          );
+                        }),
                       ),
                       ElevatedButton(
                           onPressed: () {
@@ -361,6 +344,10 @@ ElevatedButton newJobCardButton(BuildContext context,
     BoxConstraints constraints, JobCardController controller) {
   return ElevatedButton(
     onPressed: () {
+      controller.currentCountryVAT.value = controller.getdataName(
+          controller.companyDetails['contact_details']['country'],
+          controller.allCountries,
+          title: 'vat');
       controller.country.text = controller.getdataName(
           controller.companyDetails['contact_details']['country'],
           controller.allCountries);

@@ -115,13 +115,6 @@ Widget tableOfScreens(
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
         label: AutoSizedText(
           constraints: constraints,
@@ -152,20 +145,12 @@ DataRow dataRowForTheTable(Map<String, dynamic> invoiceItemsData, context,
     constraints, invoiceItemsId, InvoiceItemsController controller) {
   return DataRow(cells: [
     DataCell(textForDataRowInTable(
-        text: '${invoiceItemsData['name']}', maxWidth: 300)),
+        text: '${invoiceItemsData['name']}', maxWidth: null)),
     DataCell(textForDataRowInTable(
         text: '${invoiceItemsData['description']}', maxWidth: 300)),
     DataCell(textForDataRowInTable(
       text: '${invoiceItemsData['price']}',
     )),
-    DataCell(
-      Text(
-        invoiceItemsData['added_date'] != null &&
-                invoiceItemsData['added_date'] != ''
-            ? textToDate(invoiceItemsData['added_date']) //
-            : 'N/A',
-      ),
-    ),
     DataCell(Row(
       spacing: 5,
       mainAxisAlignment: MainAxisAlignment.center,
