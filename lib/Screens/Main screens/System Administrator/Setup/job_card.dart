@@ -81,88 +81,98 @@ class JobCard extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
+    {required BoxConstraints constraints,
     required context,
     required JobCardController controller}) {
   return Column(
     children: [
-      Scrollbar(
-        trackVisibility: true,
-        scrollbarOrientation: ScrollbarOrientation.top,
-        interactive: true,
-        controller: controller.scrollControllerFotTable,
-        thumbVisibility: true,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+      LayoutBuilder(builder: (context, constraints) {
+        return Scrollbar(
+          trackVisibility: true,
+          scrollbarOrientation: ScrollbarOrientation.top,
+          interactive: true,
           controller: controller.scrollControllerFotTable,
-          child: DataTable(
-            dataRowMaxHeight: 40,
-            dataRowMinHeight: 30,
-            columnSpacing: 10,
-            showBottomBorder: true,
-            dataTextStyle: regTextStyle,
-            headingTextStyle: fontStyleForTableHeader,
-            sortColumnIndex: controller.sortColumnIndex.value,
-            sortAscending: controller.isAscending.value,
-            headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-            columns: [
-              DataColumn(
-                  label: AutoSizedText(
-                      text: 'Quotation No.', constraints: constraints),
-                  onSort: controller.onSort),
-              DataColumn(
-                  label:
-                      AutoSizedText(text: 'Job No.', constraints: constraints),
-                  onSort: controller.onSort),
-              DataColumn(
-                  label:
-                      AutoSizedText(constraints: constraints, text: 'Job Date'),
-                  onSort: controller.onSort),
-              DataColumn(
-                  label:
-                      AutoSizedText(constraints: constraints, text: 'LPO No.'),
-                  onSort: controller.onSort),
-              DataColumn(
-                  label: AutoSizedText(
-                      constraints: constraints, text: 'Car Brand'),
-                  onSort: controller.onSort),
-              DataColumn(
-                  label: AutoSizedText(constraints: constraints, text: 'Plate'),
-                  onSort: controller.onSort),
-              DataColumn(
-                  label: AutoSizedText(
-                      constraints: constraints, text: 'Customer Name'),
-                  onSort: controller.onSort),
-              DataColumn(
-                  label: AutoSizedText(
-                      constraints: constraints, text: 'Invoice No.'),
-                  onSort: controller.onSort),
-              DataColumn(
-                  label:
-                      AutoSizedText(constraints: constraints, text: 'Inv Date'),
-                  onSort: controller.onSort),
-              DataColumn(
-                  headingRowAlignment: MainAxisAlignment.center,
-                  label:
-                      AutoSizedText(constraints: constraints, text: 'Action'))
-            ],
-            rows: controller.filteredJobCards.isEmpty &&
-                    controller.search.value.text.isEmpty
-                ? controller.allJobCards.map<DataRow>((job) {
-                    final jobData = job.data() as Map<String, dynamic>;
-                    final jobId = job.id;
-                    return dataRowForTheTable(
-                        jobData, context, constraints, jobId, controller);
-                  }).toList()
-                : controller.filteredJobCards.map<DataRow>((job) {
-                    final jobData = job.data() as Map<String, dynamic>;
-                    final jobId = job.id;
-                    return dataRowForTheTable(
-                        jobData, context, constraints, jobId, controller);
-                  }).toList(),
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: controller.scrollControllerFotTable,
+            child: Container(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: DataTable(
+                dataRowMaxHeight: 40,
+                dataRowMinHeight: 30,
+                columnSpacing: 5,
+                showBottomBorder: true,
+                dataTextStyle: regTextStyle,
+                headingTextStyle: fontStyleForTableHeader,
+                sortColumnIndex: controller.sortColumnIndex.value,
+                sortAscending: controller.isAscending.value,
+                headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+                columns: [
+                  DataColumn(
+                      label: AutoSizedText(
+                          text: 'Quotation No.', constraints: constraints),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      label: AutoSizedText(
+                          text: 'Quotation Date', constraints: constraints),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      label: AutoSizedText(
+                          text: 'Job No.', constraints: constraints),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      label: AutoSizedText(
+                          constraints: constraints, text: 'Job Date'),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      label: AutoSizedText(
+                          constraints: constraints, text: 'Invoice No.'),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      label: AutoSizedText(
+                          constraints: constraints, text: 'Inv Date'),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      label: AutoSizedText(
+                          constraints: constraints, text: 'LPO No.'),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      label: AutoSizedText(
+                          constraints: constraints, text: 'Car Brand'),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      label: AutoSizedText(
+                          constraints: constraints, text: 'Plate Number'),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      label: AutoSizedText(
+                          constraints: constraints, text: 'Customer Name'),
+                      onSort: controller.onSort),
+                  DataColumn(
+                      headingRowAlignment: MainAxisAlignment.center,
+                      label: AutoSizedText(
+                          constraints: constraints, text: 'Action'))
+                ],
+                rows: controller.filteredJobCards.isEmpty &&
+                        controller.search.value.text.isEmpty
+                    ? controller.allJobCards.map<DataRow>((job) {
+                        final jobData = job.data() as Map<String, dynamic>;
+                        final jobId = job.id;
+                        return dataRowForTheTable(
+                            jobData, context, constraints, jobId, controller);
+                      }).toList()
+                    : controller.filteredJobCards.map<DataRow>((job) {
+                        final jobData = job.data() as Map<String, dynamic>;
+                        final jobId = job.id;
+                        return dataRowForTheTable(
+                            jobData, context, constraints, jobId, controller);
+                      }).toList(),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     ],
   );
 }
@@ -171,12 +181,30 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
     jobId, JobCardController controller) {
   return DataRow(cells: [
     DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
+    DataCell(textForDataRowInTable(text: '${jobData['quotation_date']}')),
     DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
     DataCell(textForDataRowInTable(text: '${textToDate(jobData['job_date'])}')),
+    DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
+    DataCell(
+        textForDataRowInTable(text: '${textToDate(jobData['invoice_date'])}')),
     DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
-    DataCell(textForDataRowInTable(
-        text: controller.getdataName(
-            jobData['car_brand'], controller.allBrands))),
+    DataCell(
+      FutureBuilder<String>(
+        future:
+            controller.getModelName(jobData['car_brand'], jobData['car_model']),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Text('Loading...');
+          } else if (snapshot.hasError) {
+            return Text('Error');
+          } else {
+            return textForDataRowInTable(
+                text:
+                    '${controller.getdataName(jobData['car_brand'], controller.allBrands)}-${snapshot.data}');
+          }
+        },
+      ),
+    ),
     DataCell(
       FutureBuilder<String>(
         future: controller.getCityName(jobData['country'], jobData['city']),
@@ -188,7 +216,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
           } else {
             return textForDataRowInTable(
                 text:
-                    '${jobData['plate_code']}-${jobData['plate_number']}-${snapshot.data}');
+                    '${jobData['plate_number']}-${jobData['plate_code']}-${snapshot.data}');
           }
         },
       ),
@@ -198,9 +226,6 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
         text: controller.getdataName(
             jobData['customer'], controller.allCustomers,
             title: 'entity_name'))),
-    DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
-    DataCell(
-        textForDataRowInTable(text: '${textToDate(jobData['invoice_date'])}')),
     DataCell(Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -215,10 +240,10 @@ ElevatedButton editSection(context, JobCardController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () async {
-         controller.currentCountryVAT.value = controller.getdataName(
-          controller.companyDetails['contact_details']['country'],
-          controller.allCountries,
-          title: 'vat');
+        controller.currentCountryVAT.value = controller.getdataName(
+            controller.companyDetails['contact_details']['country'],
+            controller.allCountries,
+            title: 'vat');
         controller.loadValues(jobData);
         showDialog(
             barrierDismissible: false,

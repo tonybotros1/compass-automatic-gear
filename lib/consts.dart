@@ -521,17 +521,21 @@ class FilePickerService {
     return mimeType != null ? mimeMap[mimeType.split(';').first] : null;
   }
 }
+
 Widget textForDataRowInTable({
   required String text,
-   maxWidth = 150,
+  double? maxWidth = 150,
 }) {
-  return Container(
-    constraints: maxWidth != null ? BoxConstraints(maxWidth: maxWidth.toDouble()) : null,
-    child: Text(
-      text,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+  return Tooltip(
+    message: text, // Show the full text as a tooltip
+    preferBelow: false, // Display the tooltip above the widget
+    child: Container(
+      constraints: maxWidth != null ? BoxConstraints(maxWidth: maxWidth) : null,
+      child: SelectableText(
+        text,
+        maxLines: 1,
+        style: TextStyle(overflow: TextOverflow.ellipsis),
+      ),
     ),
   );
 }
-
