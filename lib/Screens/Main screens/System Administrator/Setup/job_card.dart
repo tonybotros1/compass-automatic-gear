@@ -162,6 +162,10 @@ Widget tableOfScreens({
                         text: 'Customer Name', constraints: constraints),
                     // onSort: controller.onSort,
                   ),
+                  DataColumn(
+                    label: AutoSizedText(text: 'VIN', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                 ],
                 rows: _getOtherRows(controller, context, constraints),
               ),
@@ -276,6 +280,12 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
             text: controller.getdataName(
                 jobData['customer'], controller.allCustomers,
                 title: 'entity_name'),
+          ),
+        ),
+        DataCell(
+          textForDataRowInTable(
+            maxWidth: null,
+            text: jobData['vehicle_identification_number'],
           ),
         ),
       ],
