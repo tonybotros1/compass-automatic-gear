@@ -381,12 +381,17 @@ ElevatedButton newinvoiceItemsButton(BuildContext context,
                         builder: (controller) => Padding(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: ElevatedButton(
-                                onPressed:
-                                    controller.addingNewinvoiceItemsValue.value
-                                        ? null
-                                        : () async {
-                                            controller.addNewInvoiceItem(jobId);
-                                          },
+                                onPressed: controller
+                                        .addingNewinvoiceItemsValue.value
+                                    ? null
+                                    : () async {
+                                        if (!controller.formKeyForInvoiceItems
+                                            .currentState!
+                                            .validate()) {
+                                        } else {
+                                          controller.addNewInvoiceItem(jobId);
+                                        }
+                                      },
                                 style: saveButtonStyle,
                                 child: controller
                                             .addingNewinvoiceItemsValue.value ==

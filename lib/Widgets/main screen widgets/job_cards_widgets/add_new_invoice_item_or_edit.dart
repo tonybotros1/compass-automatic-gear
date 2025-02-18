@@ -27,34 +27,38 @@ Widget addNewinvoiceItemsOrEdit({
               validate: true,
             ),
           ),
-          GetX<JobCardController>(builder: (context) {
-            return dropDownValues(
-              textController: controller.invoiceItemName,
-              labelText: 'Name',
-              hintText: 'Select Name',
-              menus: controller.allInvoiceItemsFromCollection,
-              validate: false,
-              itemBuilder: (context, suggestion) {
-                return ListTile(
-                  title: Text('${suggestion['name']}'),
-                );
-              },
-              onSelected: (suggestion) {
-                controller.invoiceItemName.text = suggestion['name'];
-                controller.description.text = suggestion['description'];
-                controller.allInvoiceItemsFromCollection.entries.where((entry) {
-                  return entry.value['name'] == suggestion['name'].toString();
-                }).forEach(
-                  (entry) {
-                    controller.invoiceItemNameId.value = entry.key;
-                  },
-                );
-              },
-              listValues: controller.allInvoiceItemsFromCollection.values
-                  .map((value) => value['name'].toString())
-                  .toList(),
-            );
-          }),
+          Form(
+            key: controller.formKeyForInvoiceItems,
+            child: GetX<JobCardController>(builder: (context) {
+              return dropDownValues(
+                textController: controller.invoiceItemName,
+                labelText: 'Name',
+                hintText: 'Select Name',
+                menus: controller.allInvoiceItemsFromCollection,
+                validate: true,
+                itemBuilder: (context, suggestion) {
+                  return ListTile(
+                    title: Text('${suggestion['name']}'),
+                  );
+                },
+                onSelected: (suggestion) {
+                  controller.invoiceItemName.text = suggestion['name'];
+                  controller.description.text = suggestion['description'];
+                  controller.allInvoiceItemsFromCollection.entries
+                      .where((entry) {
+                    return entry.value['name'] == suggestion['name'].toString();
+                  }).forEach(
+                    (entry) {
+                      controller.invoiceItemNameId.value = entry.key;
+                    },
+                  );
+                },
+                listValues: controller.allInvoiceItemsFromCollection.values
+                    .map((value) => value['name'].toString())
+                    .toList(),
+              );
+            }),
+          ),
           myTextFormFieldWithBorder(
             maxLines: 4,
             controller: controller.description,

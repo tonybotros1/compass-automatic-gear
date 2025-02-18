@@ -125,6 +125,7 @@ class JobCardController extends GetxController {
   RxString imageUrl = RxString('');
   RxString pdfUrl = RxString('');
   // invoice items section
+  final GlobalKey<FormState> formKeyForInvoiceItems = GlobalKey<FormState>();
   RxBool addingNewinvoiceItemsValue = RxBool(false);
   TextEditingController invoiceItemName = TextEditingController();
   RxString invoiceItemNameId = RxString('');
