@@ -56,8 +56,7 @@ class JobCard extends StatelessWidget {
                           );
                         }
                         return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
+                          scrollDirection: Axis.vertical,
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
@@ -80,24 +79,28 @@ class JobCard extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens(
-    {required BoxConstraints constraints,
-    required context,
-    required JobCardController controller}) {
-  return Column(
-    children: [
-      LayoutBuilder(builder: (context, constraints) {
-        return Scrollbar(
-          trackVisibility: true,
-          scrollbarOrientation: ScrollbarOrientation.top,
-          interactive: true,
-          controller: controller.scrollControllerFotTable,
-          thumbVisibility: true,
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required JobCardController controller,
+}) {
+  return Scrollbar(
+    trackVisibility: true,
+    scrollbarOrientation: ScrollbarOrientation.top,
+    interactive: true,
+    controller: controller.scrollControllerFotTable,
+    thumbVisibility: true,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             controller: controller.scrollControllerFotTable,
             child: Container(
-              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              constraints: BoxConstraints(
+                minWidth: constraints.maxWidth - 30,
+              ),
               child: DataTable(
                 dataRowMaxHeight: 40,
                 dataRowMinHeight: 30,
@@ -110,129 +113,174 @@ Widget tableOfScreens(
                 headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
                 columns: [
                   DataColumn(
-                      label: AutoSizedText(
-                          text: 'Quotation No.', constraints: constraints),
-                      onSort: controller.onSort),
+                    label: AutoSizedText(
+                        text: 'Quotation No.', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                   DataColumn(
-                      label: AutoSizedText(
-                          text: 'Quotation Date', constraints: constraints),
-                      onSort: controller.onSort),
+                    label: AutoSizedText(
+                        text: 'Quotation Date', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                   DataColumn(
-                      label: AutoSizedText(
-                          text: 'Job No.', constraints: constraints),
-                      onSort: controller.onSort),
+                    label: AutoSizedText(
+                        text: 'Job No.', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                   DataColumn(
-                      label: AutoSizedText(
-                          constraints: constraints, text: 'Job Date'),
-                      onSort: controller.onSort),
+                    label: AutoSizedText(
+                        text: 'Job Date', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                   DataColumn(
-                      label: AutoSizedText(
-                          constraints: constraints, text: 'Invoice No.'),
-                      onSort: controller.onSort),
+                    label: AutoSizedText(
+                        text: 'Invoice No.', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                   DataColumn(
-                      label: AutoSizedText(
-                          constraints: constraints, text: 'Inv Date'),
-                      onSort: controller.onSort),
+                    label: AutoSizedText(
+                        text: 'Inv Date', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                   DataColumn(
-                      label: AutoSizedText(
-                          constraints: constraints, text: 'LPO No.'),
-                      onSort: controller.onSort),
+                    label: AutoSizedText(
+                        text: 'LPO No.', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                   DataColumn(
-                      label: AutoSizedText(
-                          constraints: constraints, text: 'Car Brand'),
-                      onSort: controller.onSort),
+                    label: AutoSizedText(
+                        text: 'Car Brand', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                   DataColumn(
-                      label: AutoSizedText(
-                          constraints: constraints, text: 'Plate Number'),
-                      onSort: controller.onSort),
+                    label: AutoSizedText(
+                        text: 'Plate Number', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                   DataColumn(
-                      label: AutoSizedText(
-                          constraints: constraints, text: 'Customer Name'),
-                      onSort: controller.onSort),
-                  DataColumn(
-                      headingRowAlignment: MainAxisAlignment.center,
-                      label: AutoSizedText(
-                          constraints: constraints, text: 'Action'))
+                    label: AutoSizedText(
+                        text: 'Customer Name', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
                 ],
-                rows: controller.filteredJobCards.isEmpty &&
-                        controller.search.value.text.isEmpty
-                    ? controller.allJobCards.map<DataRow>((job) {
-                        final jobData = job.data() as Map<String, dynamic>;
-                        final jobId = job.id;
-                        return dataRowForTheTable(
-                            jobData, context, constraints, jobId, controller);
-                      }).toList()
-                    : controller.filteredJobCards.map<DataRow>((job) {
-                        final jobData = job.data() as Map<String, dynamic>;
-                        final jobId = job.id;
-                        return dataRowForTheTable(
-                            jobData, context, constraints, jobId, controller);
-                      }).toList(),
+                rows: _getOtherRows(controller, context, constraints),
               ),
             ),
           ),
-        );
-      }),
-    ],
+        ),
+        SizedBox(
+          width: 120,
+          child: DataTable(
+            dataRowMaxHeight: 40,
+            dataRowMinHeight: 30,
+            columnSpacing: 0,
+            showBottomBorder: true,
+            dataTextStyle: regTextStyle,
+            headingTextStyle: fontStyleForTableHeader,
+            headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+            columns: [
+              DataColumn(
+                headingRowAlignment: MainAxisAlignment.center,
+                label: AutoSizedText(constraints: constraints, text: 'Action'),
+              ),
+            ],
+            rows: _getActionRows(controller, context, constraints),
+          ),
+        ),
+      ],
+    ),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
-    jobId, JobCardController controller) {
-  return DataRow(cells: [
-    DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
-    DataCell(textForDataRowInTable(text: '${jobData['quotation_date']}')),
-    DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
-    DataCell(textForDataRowInTable(text: '${textToDate(jobData['job_date'])}')),
-    DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
-    DataCell(
-        textForDataRowInTable(text: '${textToDate(jobData['invoice_date'])}')),
-    DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
-    DataCell(
-      FutureBuilder<String>(
-        future:
-            controller.getModelName(jobData['car_brand'], jobData['car_model']),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Text('Loading...');
-          } else if (snapshot.hasError) {
-            return Text('Error');
-          } else {
-            return textForDataRowInTable(
-                text:
-                    '${controller.getdataName(jobData['car_brand'], controller.allBrands)}-${snapshot.data}');
-          }
-        },
-      ),
-    ),
-    DataCell(
-      FutureBuilder<String>(
-        future: controller.getCityName(jobData['country'], jobData['city']),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Text('Loading...');
-          } else if (snapshot.hasError) {
-            return Text('Error');
-          } else {
-            return textForDataRowInTable(
-                text:
-                    '${jobData['plate_number']}-${jobData['plate_code']}-${snapshot.data}');
-          }
-        },
-      ),
-    ),
-    DataCell(textForDataRowInTable(
-        maxWidth: null,
-        text: controller.getdataName(
-            jobData['customer'], controller.allCustomers,
-            title: 'entity_name'))),
-    DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        editSection(context, controller, jobData, constraints, jobId),
+/// Generates rows for the fixed Action column.
+List<DataRow> _getActionRows(JobCardController controller, BuildContext context,
+    BoxConstraints constraints) {
+  final jobs = controller.filteredJobCards.isEmpty &&
+          controller.search.value.text.isEmpty
+      ? controller.allJobCards
+      : controller.filteredJobCards;
+  return jobs.map<DataRow>((job) {
+    final jobData = job.data() as Map<String, dynamic>;
+    final jobId = job.id;
+    return DataRow(
+      cells: [
+        DataCell(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              editSection(context, controller, jobData, constraints, jobId),
+            ],
+          ),
+        ),
       ],
-    )),
-  ]);
+    );
+  }).toList();
+}
+
+/// Generates rows for all columns except the Action column.
+List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
+    BoxConstraints constraints) {
+  final jobs = controller.filteredJobCards.isEmpty &&
+          controller.search.value.text.isEmpty
+      ? controller.allJobCards
+      : controller.filteredJobCards;
+  return jobs.map<DataRow>((job) {
+    final jobData = job.data() as Map<String, dynamic>;
+    return DataRow(
+      cells: [
+        DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
+        DataCell(textForDataRowInTable(text: '${jobData['quotation_date']}')),
+        DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
+        DataCell(textForDataRowInTable(text: '${jobData['job_date']}')),
+        DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
+        DataCell(textForDataRowInTable(text: '${jobData['invoice_date']}')),
+        DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
+        DataCell(
+          FutureBuilder<String>(
+            future: controller.getModelName(
+                jobData['car_brand'], jobData['car_model']),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('Loading...');
+              } else if (snapshot.hasError) {
+                return const Text('Error');
+              } else {
+                return textForDataRowInTable(
+                  text:
+                      '${controller.getdataName(jobData['car_brand'], controller.allBrands)}-${snapshot.data}',
+                );
+              }
+            },
+          ),
+        ),
+        DataCell(
+          FutureBuilder<String>(
+            future: controller.getCityName(jobData['country'], jobData['city']),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('Loading...');
+              } else if (snapshot.hasError) {
+                return const Text('Error');
+              } else {
+                return textForDataRowInTable(
+                  text:
+                      '${jobData['plate_number']}-${jobData['plate_code']}-${snapshot.data}',
+                );
+              }
+            },
+          ),
+        ),
+        DataCell(
+          textForDataRowInTable(
+            maxWidth: null,
+            text: controller.getdataName(
+                jobData['customer'], controller.allCustomers,
+                title: 'entity_name'),
+          ),
+        ),
+      ],
+    );
+  }).toList();
 }
 
 ElevatedButton editSection(context, JobCardController controller,
@@ -303,6 +351,18 @@ ElevatedButton editSection(context, JobCardController controller,
                         },
                         child: Text('Invoice Items'),
                       ),
+                      ElevatedButton(
+                          style: deleteButtonStyle,
+                          onPressed: () {
+                            alertDialog(
+                                context: context,
+                                controller: controller,
+                                content: "Theis will be deleted permanently",
+                                onPressed: () {
+                                  controller.deleteJobCard(jobId);
+                                });
+                          },
+                          child: Text('Delete')),
                       Spacer(),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -387,9 +447,9 @@ ElevatedButton newJobCardButton(BuildContext context,
       controller.customerOutstanding.text = '0';
       controller.isCashSelected.value = true;
       controller.payType.value = 'Cash';
-      controller.jobCardDate.value.text = textToDate(DateTime.now().toString());
-      controller.invoiceDate.value.text = textToDate(DateTime.now().toString());
-      controller.startDate.value.text = textToDate(DateTime.now().toString());
+      controller.jobCardDate.value.text = textToDate(DateTime.now());
+      controller.invoiceDate.value.text = textToDate(DateTime.now());
+      controller.startDate.value.text = textToDate(DateTime.now());
       controller.clearValues();
       showDialog(
           barrierDismissible: false,

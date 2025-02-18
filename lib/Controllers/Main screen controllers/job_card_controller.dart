@@ -138,7 +138,8 @@ class JobCardController extends GetxController {
   TextEditingController vat = TextEditingController();
   RxString currentCountryVAT = RxString('');
   TextEditingController net = TextEditingController();
-
+  RxString totalOfVAT = RxString('');
+  RxString totalOfNET = RxString('');
   @override
   void onInit() async {
     super.onInit();
@@ -170,6 +171,19 @@ class JobCardController extends GetxController {
   void openImageViewer(List imageUrls, int index) {
     Get.toNamed('/imageViewer',
         arguments: {'images': imageUrls, 'index': index});
+  }
+
+  List<double> calculateTotals() {
+    double sumofTotal = 0.0;
+    double sumofVAT = 0.0;
+    double sumofNET = 0.0;
+    for (var job in allInvoiceItems) {
+      var data = job.data() as Map<String, dynamic>?;
+      sumofTotal += double.parse(data?['total']);
+      sumofNET += double.parse(data?['net']);
+      sumofVAT += double.parse(data?['vat']);
+    }
+    return [sumofTotal, sumofVAT, sumofNET];
   }
 
   void updateCalculating() {
@@ -376,7 +390,6 @@ class JobCardController extends GetxController {
       if (isJobCardExpanded.isTrue && jobCardCounter.value.text.isEmpty) {
         await getCurrentJobCardCounterNumber();
       }
-
       Map<String, dynamic> newDate = {
         'car_brand_logo': carBrandLogo.value,
         'company_id': companyId.value,
@@ -671,6 +684,19 @@ class JobCardController extends GetxController {
     }
   }
 
+  deleteJobCard(jobId) async {
+    try {
+      Get.back();
+      Get.back();
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .delete();
+    } catch (e) {
+      //
+    }
+  }
+
   getAllUsers() {
     try {
       FirebaseFirestore.instance
@@ -843,7 +869,7 @@ class JobCardController extends GetxController {
           .get();
 
       if (cities.exists) {
-        return cities.data()!['name'].toString();
+        return cities.data()!['name'];
       } else {
         return '';
       }
@@ -1266,23 +1292,68 @@ class JobCardController extends GetxController {
         getdataName(currentUserDetails.value['sales_man'], salesManMap);
   }
 
-  // this function is to filter the search results for web
-  void filterJobCards() {
-    query.value = search.value.text.toLowerCase();
-    if (query.value.isEmpty) {
+  void filterJobCards() async {
+    final searchQuery = search.value.text.toLowerCase();
+    query.value = searchQuery;
+
+    if (searchQuery.isEmpty) {
       filteredJobCards.clear();
-    } else {
-      filteredJobCards.assignAll(
-        allJobCards.where((card) {
-          return card['description'].toString().toLowerCase().contains(query) ||
-              card['name'].toString().toLowerCase().contains(query) ||
-              card['price'].toString().toLowerCase().contains(query) ||
-              textToDate(card['added_date'])
-                  .toString()
-                  .toLowerCase()
-                  .contains(query);
-        }).toList(),
-      );
+      return;
     }
+
+    // Map each card to a Future that returns the card if it matches, else null.
+    List<Future<DocumentSnapshot<Object?>?>> futures =
+        allJobCards.map((card) async {
+      final data = card.data() as Map<String, dynamic>;
+
+      // Run asynchronous operations concurrently.
+      final results = await Future.wait([
+        getModelName(data['car_brand'], data['car_model']),
+        getCityName(data['country'], data['city']),
+      ]);
+      final modelName = results[0];
+      final cityName = results[1];
+
+      final brandName = getdataName(data['car_brand'], allBrands).toLowerCase();
+      final customerName =
+          getdataName(data['customer'], allCustomers, title: 'entity_name')
+              .toLowerCase();
+
+      // Check if any field contains the search query.
+      bool matches = data['quotation_number']
+              .toString()
+              .toLowerCase()
+              .contains(searchQuery) ||
+          data['quotation_date']
+              .toString()
+              .toLowerCase()
+              .contains(searchQuery) ||
+          data['job_number'].toString().toLowerCase().contains(searchQuery) ||
+          data['job_date'].toString().toLowerCase().contains(searchQuery) ||
+          data['invoice_number']
+              .toString()
+              .toLowerCase()
+              .contains(searchQuery) ||
+          data['invoice_date'].toString().toLowerCase().contains(searchQuery) ||
+          data['lpo_number'].toString().toLowerCase().contains(searchQuery) ||
+          brandName.contains(searchQuery) ||
+          modelName.toLowerCase().contains(searchQuery) ||
+          data['plate_number'].toString().toLowerCase().contains(searchQuery) ||
+          data['plate_code'].toString().toLowerCase().contains(searchQuery) ||
+          cityName.toLowerCase().contains(searchQuery) ||
+          customerName.contains(searchQuery);
+
+      // Return the card if it matches, otherwise return null.
+      return matches ? card : null;
+    }).toList();
+
+    // Await all asynchronous operations concurrently.
+    final resultsList = await Future.wait(futures);
+
+    // Filter out null values.
+    final filtered = resultsList
+        .where((card) => card != null)
+        .cast<DocumentSnapshot<Object?>>();
+    filteredJobCards.assignAll(filtered.toList());
   }
 }

@@ -95,42 +95,49 @@ Widget tableOfScreens(
         ),
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
           text: 'Quantity',
         ),
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
           text: 'Price',
         ),
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
           text: 'Amount',
         ),
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
           text: 'Discount',
         ),
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
           text: 'Total',
         ),
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
           text: 'VAT',
         ),
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
           text: 'NET',
@@ -146,13 +153,51 @@ Widget tableOfScreens(
     ],
     rows: controller.filteredInvoiceItems.isEmpty &&
             controller.searchForInvoiceItems.value.text.isEmpty
-        ? controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-            final invoiceItemsData =
-                invoiceItems.data() as Map<String, dynamic>;
-            final invoiceItemsId = invoiceItems.id;
-            return dataRowForTheTable(invoiceItemsData, context, constraints,
-                invoiceItemsId, controller, jobId);
-          }).toList()
+        ? [
+            ...controller.allInvoiceItems.map<DataRow>((invoiceItems) {
+              final invoiceItemsData =
+                  invoiceItems.data() as Map<String, dynamic>;
+              final invoiceItemsId = invoiceItems.id;
+              return dataRowForTheTable(invoiceItemsData, context, constraints,
+                  invoiceItemsId, controller, jobId);
+            }),
+            DataRow(cells: [
+              DataCell(Text('')),
+              DataCell(Text('')),
+              DataCell(Text('')),
+              DataCell(Text('')),
+              DataCell(Text('')),
+              DataCell(Align(
+                  alignment: Alignment.centerRight,
+                  child: textForDataRowInTable(
+                      text: 'Totals', color: Colors.black, isBold: true))),
+              DataCell(Container(
+                color: Colors.blue.shade200,
+                child: Align(
+                    alignment: Alignment.centerRight,
+                    child: textForDataRowInTable(
+                        text: '${controller.calculateTotals()[0]}',
+                        isBold: true)),
+              )),
+              DataCell(Container(
+                color: Colors.green.shade200,
+                child: Align(
+                    alignment: Alignment.centerRight,
+                    child: textForDataRowInTable(
+                        text: '${controller.calculateTotals()[1]}',
+                        isBold: true)),
+              )),
+              DataCell(Container(
+                color: Colors.red.shade200,
+                child: Align(
+                    alignment: Alignment.centerRight,
+                    child: textForDataRowInTable(
+                        text: '${controller.calculateTotals()[2]}',
+                        isBold: true)),
+              )),
+              DataCell(Text('')),
+            ])
+          ]
         : controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
             final invoiceItemsData =
                 invoiceItems.data() as Map<String, dynamic>;
@@ -176,13 +221,27 @@ DataRow dataRowForTheTable(
         text: controller.getdataName(
             invoiceItemsData['name'], controller.allInvoiceItemsFromCollection),
         maxWidth: null)),
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['quantity']}')),
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['price']}')),
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['amount']}')),
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['discount']}')),
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['total']}')),
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['vat']}')),
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['net']}')),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: '${invoiceItemsData['quantity']}'))),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: '${invoiceItemsData['price']}'))),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: '${invoiceItemsData['amount']}'))),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: '${invoiceItemsData['discount']}'))),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: '${invoiceItemsData['total']}'))),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: '${invoiceItemsData['vat']}'))),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: '${invoiceItemsData['net']}'))),
     DataCell(Row(
       spacing: 5,
       mainAxisAlignment: MainAxisAlignment.center,

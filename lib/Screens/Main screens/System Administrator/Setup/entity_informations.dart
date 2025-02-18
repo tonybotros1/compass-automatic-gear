@@ -138,6 +138,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> entityData, context,
         maxWidth: null, text: entityData['entity_name'] ?? 'no name')),
     DataCell(
       textForDataRowInTable(
+          maxWidth: 300,
           text: (entityData['entity_phone'] as List)
               .map((phoneData) => phoneData['number'])
               .take(2)

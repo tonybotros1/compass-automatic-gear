@@ -525,17 +525,28 @@ class FilePickerService {
 Widget textForDataRowInTable({
   required String text,
   double? maxWidth = 150,
+  Color? color,
+  bool isBold = false,
 }) {
-  return Tooltip(
-    message: text, // Show the full text as a tooltip
-    preferBelow: false, // Display the tooltip above the widget
-    child: Container(
-      constraints: maxWidth != null ? BoxConstraints(maxWidth: maxWidth) : null,
-      child: SelectableText(
-        text,
-        maxLines: 1,
-        style: TextStyle(overflow: TextOverflow.ellipsis),
+  // Try parsing the text as a double
+  String formattedText = text;
+  double? parsedValue = double.tryParse(text);
+
+  if (parsedValue != null) {
+    formattedText = NumberFormat("#,##0.00").format(parsedValue); // Formats as double
+  }
+
+  return Container(
+    constraints: maxWidth != null ? BoxConstraints(maxWidth: maxWidth) : null,
+    child: SelectableText(
+      formattedText,
+      maxLines: 1,
+      style: TextStyle(
+        overflow: TextOverflow.ellipsis,
+        color: color,
+        fontWeight: isBold ? FontWeight.bold : null,
       ),
     ),
   );
 }
+
