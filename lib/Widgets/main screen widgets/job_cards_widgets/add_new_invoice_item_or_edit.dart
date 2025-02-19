@@ -123,6 +123,7 @@ Widget addNewinvoiceItemsOrEdit({
           SizedBox(
             width: 200,
             child: myTextFormFieldWithBorder(
+              isEnabled: false,
               onChanged: (_) => controller.updateCalculating(),
               isDouble: true,
               controller: controller.vat,

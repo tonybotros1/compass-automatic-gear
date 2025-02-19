@@ -216,7 +216,7 @@ DataRow dataRowForTheTable(
     JobCardController controller,
     String jobId) {
   return DataRow(cells: [
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['line_number']}')),
+    DataCell(Text('${invoiceItemsData['line_number']}')),
     DataCell(textForDataRowInTable(
         text: controller.getdataName(
             invoiceItemsData['name'], controller.allInvoiceItemsFromCollection),

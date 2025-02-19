@@ -195,27 +195,33 @@ class JobCardController extends GetxController {
     final currwnQquanity = int.tryParse(quantity.text) ?? 0;
     final currentPrice = double.tryParse(price.text) ?? 0.0;
     final currentDiscount = double.tryParse(discount.text) ?? 0.0;
-    amount.text = (currwnQquanity * currentPrice).toString();
-    total.text = (double.tryParse(amount.text)! - currentDiscount).toString();
+    amount.text = (currwnQquanity * currentPrice).toStringAsFixed(2);
+    total.text =
+        (double.tryParse(amount.text)! - currentDiscount).toStringAsFixed(2);
     vat.text = ((double.tryParse(total.text))! *
             (double.parse(currentCountryVAT.value)) /
             100)
-        .toString();
-    net.text =
-        (double.tryParse(total.text)! + double.tryParse(vat.text)!).toString();
+        .toStringAsFixed(2);
+    net.text = (double.tryParse(total.text)! + double.tryParse(vat.text)!)
+        .toStringAsFixed(2);
   }
 
   void updateAmount() {
     if (net.text.isEmpty) net.text = '0';
     if (net.text != '0') {
-      total.text =
-          (double.tryParse(net.text)! - double.tryParse(vat.text)!).toString();
+      total.text = (double.tryParse(net.text)! /
+              (1 + double.tryParse(currentCountryVAT.value)! / 100))
+          .toStringAsFixed(2);
       amount.text =
           (double.tryParse(total.text)! + double.tryParse(discount.text)!)
-              .toString();
+              .toStringAsFixed(2);
       price.text =
           (double.tryParse(amount.text)! / double.tryParse(quantity.text)!)
-              .toString();
+              .toStringAsFixed(2);
+      vat.text = ((double.tryParse(total.text))! *
+              (double.parse(currentCountryVAT.value)) /
+              100)
+          .toStringAsFixed(2);
     }
 
     // vat.text =
@@ -350,9 +356,9 @@ class JobCardController extends GetxController {
     quotationCounter.value.text.isNotEmpty
         ? isQuotationExpanded.value = true
         : isQuotationExpanded.value = false;
-    quotationDate.value.text = textToDate(data['quotation_date']);
+    quotationDate.value.text = data['quotation_date'];
     quotationDays.value.text = data['validity_days'];
-    validityEndDate.value.text = textToDate(data['validity_end_date']);
+    validityEndDate.value.text = data['validity_end_date'];
     referenceNumber.value.text = data['reference_number'];
     deliveryTime.value.text = data['delivery_time'];
     quotationWarrentyDays.value.text = data['quotation_warrenty_days'];
@@ -364,15 +370,15 @@ class JobCardController extends GetxController {
         : isJobCardExpanded.value = false;
     invoiceCounter.value.text = data['invoice_number'];
     lpoCounter.value.text = data['lpo_number'];
-    jobCardDate.value.text = textToDate(data['job_date']);
-    invoiceDate.value.text = textToDate(data['invoice_date']);
-    approvalDate.value.text = textToDate(data['job_approval_date']);
-    startDate.value.text = textToDate(data['job_start_date']);
-    finishDate.value.text = textToDate(data['job_finish_date']);
-    deliveryDate.value.text = textToDate(data['job_delivery_date']);
+    jobCardDate.value.text = data['job_date'];
+    invoiceDate.value.text = data['invoice_date'];
+    approvalDate.value.text = data['job_approval_date'];
+    startDate.value.text = data['job_start_date'];
+    finishDate.value.text = data['job_finish_date'];
+    deliveryDate.value.text = data['job_delivery_date'];
     jobWarrentyDays.value.text = data['job_warrenty_days'];
     jobWarrentyKM.value.text = data['job_warrenty_km'];
-    jobWarrentyEndDate.value.text = textToDate(data['job_warrenty_end_date']);
+    jobWarrentyEndDate.value.text = data['job_warrenty_end_date'];
     minTestKms.value.text = data['job_min_test_km'];
     reference1.value.text = data['job_reference_1'];
     reference2.value.text = data['job_reference_2'];
@@ -566,7 +572,7 @@ class JobCardController extends GetxController {
           .collection('invoice_items')
           .add({
         'name': invoiceItemNameId.value,
-        'line_number': lineNumber.text,
+        'line_number': int.parse(lineNumber.text),
         'description': description.text,
         'quantity': quantity.text,
         'price': price.text,
@@ -593,7 +599,8 @@ class JobCardController extends GetxController {
           .collection('invoice_items')
           .doc(itemId)
           .update({
-        'line_number': lineNumber.text,
+        'name': invoiceItemNameId.value,
+        'line_number': int.parse(lineNumber.text),
         'description': description.text,
         'quantity': quantity.text,
         'price': price.text,
@@ -1342,7 +1349,11 @@ class JobCardController extends GetxController {
           data['plate_number'].toString().toLowerCase().contains(searchQuery) ||
           data['plate_code'].toString().toLowerCase().contains(searchQuery) ||
           cityName.toLowerCase().contains(searchQuery) ||
-          customerName.contains(searchQuery);
+          customerName.contains(searchQuery) ||
+          data['vehicle_identification_number']
+              .toString()
+              .toLowerCase()
+              .contains(query.value);
 
       // Return the card if it matches, otherwise return null.
       return matches ? card : null;
