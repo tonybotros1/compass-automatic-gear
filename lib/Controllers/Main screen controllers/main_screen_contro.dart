@@ -103,7 +103,7 @@ class MainScreenController extends GetxController {
       case '/branches':
         return const SizedBox(child: Branches());
       case '/jobCards':
-        return const SizedBox(child: JobCard());
+        return  SizedBox(child: JobCard());
       case '/countries':
         return const SizedBox(child: Countries());
       case '/carBrands':

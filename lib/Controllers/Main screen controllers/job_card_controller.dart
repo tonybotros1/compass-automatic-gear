@@ -139,8 +139,6 @@ class JobCardController extends GetxController {
   TextEditingController vat = TextEditingController();
   RxString currentCountryVAT = RxString('');
   TextEditingController net = TextEditingController();
-  RxString totalOfVAT = RxString('');
-  RxString totalOfNET = RxString('');
   @override
   void onInit() async {
     super.onInit();
@@ -174,7 +172,34 @@ class JobCardController extends GetxController {
         arguments: {'images': imageUrls, 'index': index});
   }
 
+  Stream<Map<String, double>> calculateGrandSums() {
+    return FirebaseFirestore.instance
+        .collectionGroup('invoice_items')
+        .snapshots()
+        .map((invoiceItemsSnapshot) {
+      double grandTotal = 0.0;
+      double grandVAT = 0.0;
+      double grandNET = 0.0;
+
+      for (var job in invoiceItemsSnapshot.docs) {
+        var data = job.data() as Map<String, dynamic>?;
+
+        grandTotal += double.tryParse(data?['total']?.toString() ?? '0') ?? 0;
+        print(grandTotal);
+        grandVAT += double.tryParse(data?['vat']?.toString() ?? '0') ?? 0;
+        grandNET += double.tryParse(data?['net']?.toString() ?? '0') ?? 0;
+      }
+
+      return {
+        'total': grandTotal,
+        'vat': grandVAT,
+        'net': grandNET,
+      };
+    });
+  }
+
   List<double> calculateTotals() {
+    // this is for invoice items
     double sumofTotal = 0.0;
     double sumofVAT = 0.0;
     double sumofNET = 0.0;
@@ -185,6 +210,57 @@ class JobCardController extends GetxController {
       sumofVAT += double.parse(data?['vat']);
     }
     return [sumofTotal, sumofVAT, sumofNET];
+  }
+
+  Stream<double> calculateAllTotals(String jobId) {
+    return FirebaseFirestore.instance
+        .collection('job_cards')
+        .doc(jobId)
+        .collection('invoice_items')
+        .snapshots()
+        .map((snapshot) {
+      double sumOfTotal = 0.0;
+
+      for (var job in snapshot.docs) {
+        var data = job.data() as Map<String, dynamic>?;
+        sumOfTotal += double.tryParse(data?['total']?.toString() ?? '0') ?? 0;
+      }
+      return sumOfTotal;
+    });
+  }
+
+  Stream<double> calculateAllVATs(String jobId) {
+    return FirebaseFirestore.instance
+        .collection('job_cards')
+        .doc(jobId)
+        .collection('invoice_items')
+        .snapshots()
+        .map((snapshot) {
+      double sumOfVAT = 0.0;
+
+      for (var job in snapshot.docs) {
+        var data = job.data() as Map<String, dynamic>?;
+        sumOfVAT += double.tryParse(data?['vat']?.toString() ?? '0') ?? 0;
+      }
+      return sumOfVAT;
+    });
+  }
+
+  Stream<double> calculateAllNETs(String jobId) {
+    return FirebaseFirestore.instance
+        .collection('job_cards')
+        .doc(jobId)
+        .collection('invoice_items')
+        .snapshots()
+        .map((snapshot) {
+      double sumOfNET = 0.0;
+
+      for (var job in snapshot.docs) {
+        var data = job.data() as Map<String, dynamic>?;
+        sumOfNET += double.tryParse(data?['net']?.toString() ?? '0') ?? 0;
+      }
+      return sumOfNET;
+    });
   }
 
   void updateCalculating() {
@@ -572,7 +648,7 @@ class JobCardController extends GetxController {
           .collection('invoice_items')
           .add({
         'name': invoiceItemNameId.value,
-        'line_number': int.parse(lineNumber.text),
+        'line_number': int.tryParse(lineNumber.text),
         'description': description.text,
         'quantity': quantity.text,
         'price': price.text,

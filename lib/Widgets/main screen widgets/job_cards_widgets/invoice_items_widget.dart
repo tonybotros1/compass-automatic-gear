@@ -11,56 +11,132 @@ Widget invoiceItemsDialog(
     {required BuildContext context,
     required BoxConstraints constraints,
     required jobId}) {
-  return Container(
+  return SizedBox(
     height: constraints.maxHeight / 1.5,
     width: constraints.maxWidth,
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey),
-      borderRadius: BorderRadius.circular(10),
-    ),
     child: Column(
       children: [
-        GetX<JobCardController>(
-          builder: (controller) {
-            return searchBar(
-              search: controller.searchForInvoiceItems,
-              constraints: constraints,
-              context: context,
-              controller: controller,
-              title: 'Search for invoices',
-              button: newinvoiceItemsButton(
-                  context, constraints, controller, jobId),
-            );
-          },
-        ),
         Expanded(
-          child: GetX<JobCardController>(
-            builder: (controller) {
-              if (controller.loadingInvoiceItems.value) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (controller.allInvoiceItems.isEmpty) {
-                return const Center(
-                  child: Text('No Element'),
-                );
-              }
-              return SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SizedBox(
-                  width: constraints.maxWidth,
-                  child: tableOfScreens(
-                    constraints: constraints,
-                    context: context,
-                    controller: controller,
-                    jobId: jobId,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              children: [
+                GetX<JobCardController>(
+                  builder: (controller) {
+                    return searchBar(
+                      search: controller.searchForInvoiceItems,
+                      constraints: constraints,
+                      context: context,
+                      controller: controller,
+                      title: 'Search for invoices',
+                      button: newinvoiceItemsButton(
+                          context, constraints, controller, jobId),
+                    );
+                  },
+                ),
+                Expanded(
+                  child: GetX<JobCardController>(
+                    builder: (controller) {
+                      if (controller.loadingInvoiceItems.value) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (controller.allInvoiceItems.isEmpty) {
+                        return const Center(
+                          child: Text('No Element'),
+                        );
+                      }
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
+                            jobId: jobId,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              );
-            },
+              ],
+            ),
           ),
         ),
+        SizedBox(
+          height: 10,
+        ),
+        GetX<JobCardController>(builder: (controller) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            spacing: 20,
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                color: Colors.blue[200],
+                height: 40,
+                child: Row(
+                  spacing: 10,
+                  children: [
+                    Text(
+                      'Totals:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      controller.calculateTotals()[0].toStringAsFixed(2),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(8),
+                color: Colors.green[200],
+                height: 40,
+                child: Row(
+                  spacing: 10,
+                  children: [
+                    Text(
+                      'VATs:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      controller.calculateTotals()[1].toStringAsFixed(2),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(8),
+                color: Colors.red[200],
+                height: 40,
+                child: Row(
+                  spacing: 10,
+                  children: [
+                    Text(
+                      'NETs:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      controller.calculateTotals()[2].toStringAsFixed(2),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          );
+        })
       ],
     ),
   );
@@ -216,7 +292,7 @@ DataRow dataRowForTheTable(
     JobCardController controller,
     String jobId) {
   return DataRow(cells: [
-    DataCell(Text('${invoiceItemsData['line_number']}')),
+    DataCell(Text('${invoiceItemsData['line_number'] ?? ''}')),
     DataCell(textForDataRowInTable(
         text: controller.getdataName(
             invoiceItemsData['name'], controller.allInvoiceItemsFromCollection),
@@ -283,7 +359,8 @@ ElevatedButton editSection(
         controller.invoiceItemNameId.value = invoiceItemsData['name'];
         controller.invoiceItemName.text = controller.getdataName(
             invoiceItemsData['name'], controller.allInvoiceItemsFromCollection);
-        controller.lineNumber.text = invoiceItemsData['line_number'];
+        controller.lineNumber.text =
+            (invoiceItemsData['line_number']).toString();
         controller.description.text = invoiceItemsData['description'];
         controller.quantity.text = invoiceItemsData['quantity'];
         controller.price.text = invoiceItemsData['price'];

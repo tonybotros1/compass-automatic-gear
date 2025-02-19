@@ -10,7 +10,8 @@ import '../../../../Widgets/main screen widgets/job_cards_widgets/invoice_items_
 import '../../../../consts.dart';
 
 class JobCard extends StatelessWidget {
-  const JobCard({super.key});
+   JobCard({super.key});
+  final JobCardController jobCardController = Get.put(JobCardController());
 
   @override
   Widget build(BuildContext context) {
@@ -20,55 +21,92 @@ class JobCard extends StatelessWidget {
         builder: (context, constraints) {
           return Padding(
             padding: screenPadding,
-            child: Container(
+            child: SizedBox(
               width: constraints.maxWidth,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
               child: Column(
                 children: [
-                  GetX<JobCardController>(
-                    init: JobCardController(),
-                    builder: (controller) {
-                      return searchBar(
-                        search: controller.search,
-                        constraints: constraints,
-                        context: context,
-                        controller: controller,
-                        title: 'Search for job cards',
-                        button:
-                            newJobCardButton(context, constraints, controller),
-                      );
-                    },
-                  ),
                   Expanded(
-                    child: GetX<JobCardController>(
-                      builder: (controller) {
-                        if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        if (controller.allJobCards.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
-                        }
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        children: [
+                          GetX<JobCardController>(
+                            init: JobCardController(),
+                            builder: (controller) {
+                              return searchBar(
+                                search: controller.search,
+                                constraints: constraints,
+                                context: context,
+                                controller: controller,
+                                title: 'Search for job cards',
+                                button: newJobCardButton(
+                                    context, constraints, controller),
+                              );
+                            },
+                          ),
+                          Expanded(
+                            child: GetX<JobCardController>(
+                              builder: (controller) {
+                                if (controller.isScreenLoding.value) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                if (controller.allJobCards.isEmpty) {
+                                  return const Center(
+                                    child: Text('No Element'),
+                                  );
+                                }
+                                return SingleChildScrollView(
+                                  scrollDirection: Axis.vertical,
+                                  child: SizedBox(
+                                    width: constraints.maxWidth,
+                                    child: tableOfScreens(
+                                      constraints: constraints,
+                                      context: context,
+                                      controller: controller,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: StreamBuilder<Map<String, double>>(
+                      stream:
+                          jobCardController.calculateGrandSums(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text('Loading...');
+                        } else if (snapshot.hasError) {
+                          return const Text('Error');
+                        } else {
+                          var data = snapshot.data ??
+                              {'total': 0.0, 'vat': 0.0, 'net': 0.0};
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              _buildSummaryBox(
+                                  'Totals:', data['total'], Colors.blue[200]),
+                              _buildSummaryBox(
+                                  'VATs:', data['vat'], Colors.green[200]),
+                              _buildSummaryBox(
+                                  'NETs:', data['net'], Colors.red[200]),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                  )
                 ],
               ),
             ),
@@ -77,6 +115,25 @@ class JobCard extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildSummaryBox(String label, double? value, Color? color) {
+  return Container(
+    padding: const EdgeInsets.all(8),
+    color: color,
+    height: 40,
+    child: Row(
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(width: 10),
+        Text(
+          value?.toStringAsFixed(2) ?? '0.00',
+          style:
+              TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
+        ),
+      ],
+    ),
+  );
 }
 
 Widget tableOfScreens({
@@ -164,6 +221,24 @@ Widget tableOfScreens({
                   ),
                   DataColumn(
                     label: AutoSizedText(text: 'VIN', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
+                    headingRowAlignment: MainAxisAlignment.end,
+                    label: AutoSizedText(
+                        text: 'Total Job', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
+                    headingRowAlignment: MainAxisAlignment.end,
+
+                    label: AutoSizedText(text: 'VAT', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
+                    headingRowAlignment: MainAxisAlignment.end,
+
+                    label: AutoSizedText(text: 'NET', constraints: constraints),
                     // onSort: controller.onSort,
                   ),
                 ],
@@ -286,6 +361,63 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
           textForDataRowInTable(
             maxWidth: null,
             text: jobData['vehicle_identification_number'],
+          ),
+        ),
+        DataCell(
+          Align(
+            alignment: Alignment.centerRight,
+            child: StreamBuilder<double>(
+              stream: controller.calculateAllTotals(job.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Text('Loading...');
+                } else if (snapshot.hasError) {
+                  return const Text('Error');
+                } else {
+                  return textForDataRowInTable(
+                    text: '${snapshot.data}',
+                  );
+                }
+              },
+            ),
+          ),
+        ),
+        DataCell(
+          Align(
+            alignment: Alignment.centerRight,
+            child: StreamBuilder<double>(
+              stream: controller.calculateAllVATs(job.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Text('Loading...');
+                } else if (snapshot.hasError) {
+                  return const Text('Error');
+                } else {
+                  return textForDataRowInTable(
+                    text: '${snapshot.data}',
+                  );
+                }
+              },
+            ),
+          ),
+        ),
+        DataCell(
+          Align(
+            alignment: Alignment.centerRight,
+            child: StreamBuilder<double>(
+              stream: controller.calculateAllNETs(job.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Text('Loading...');
+                } else if (snapshot.hasError) {
+                  return const Text('Error');
+                } else {
+                  return textForDataRowInTable(
+                    text: '${snapshot.data}',
+                  );
+                }
+              },
+            ),
           ),
         ),
       ],
