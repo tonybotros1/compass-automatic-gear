@@ -82,11 +82,11 @@ Widget tableOfScreens(
     {required constraints,
     required context,
     required CurrencyController controller}) {
-      
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -122,13 +122,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredCurrencies.isEmpty &&
             controller.search.value.text.isEmpty
@@ -149,7 +143,8 @@ Widget tableOfScreens(
 
 DataRow dataRowForTheTable(Map<String, dynamic> currencyData, context,
     constraints, currencyId, CurrencyController controller) {
-        List data = controller.getdataName(currencyData['country_id'],controller.allCountries);
+  List data = controller.getdataName(
+      currencyData['country_id'], controller.allCountries);
 
   return DataRow(cells: [
     DataCell(Text(
@@ -173,7 +168,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> currencyData, context,
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         activeInActiveSection(controller, currencyData, currencyId),
         Padding(
@@ -228,7 +223,8 @@ ElevatedButton editSection(context, CurrencyController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        List data = controller.getdataName(currencyData['country_id'],controller.allCountries);
+        List data = controller.getdataName(
+            currencyData['country_id'], controller.allCountries);
         controller.code.text = data[0] ?? '';
         controller.name.text = data[1] ?? '';
         controller.rate.text = (currencyData['rate'] ?? '').toString();

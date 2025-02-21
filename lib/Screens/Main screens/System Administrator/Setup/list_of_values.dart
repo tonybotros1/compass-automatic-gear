@@ -88,6 +88,7 @@ Widget tableOfScreens(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -125,10 +126,7 @@ Widget tableOfScreens(
       ),
       DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
+        label: Text('')
       ),
     ],
     rows: controller.filteredLists.isEmpty &&
@@ -170,7 +168,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         valSectionInTheTable(
             controller, listId, context, constraints, listData),

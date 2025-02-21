@@ -79,7 +79,7 @@ class Users extends StatelessWidget {
         usersController.pass.clear();
         usersController.email.clear();
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               usersController.email.clear();
@@ -153,6 +153,7 @@ class Users extends StatelessWidget {
       dataRowMinHeight: 30,
       columnSpacing: 5,
       showBottomBorder: true,
+      horizontalMargin: horizontalMarginForTable,
       dataTextStyle: regTextStyle,
       headingTextStyle: fontStyleForTableHeader,
       sortColumnIndex: usersController.sortColumnIndex.value,
@@ -187,13 +188,7 @@ class Users extends StatelessWidget {
           ),
           onSort: usersController.onSort,
         ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.center,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Action',
-          ),
-        ),
+        DataColumn(label: Text('')),
       ],
       rows: usersController.filteredUsers.isEmpty &&
               usersController.search.value.text.isEmpty
@@ -234,7 +229,7 @@ class Users extends StatelessWidget {
         ),
       ),
       DataCell(Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           activeInActiveSection(userData, uid),
           Padding(
@@ -289,7 +284,7 @@ class Users extends StatelessWidget {
         style: editButtonStyle,
         onPressed: () {
           showDialog(
-             barrierDismissible: false,
+              barrierDismissible: false,
               context: context,
               builder: (context) {
                 usersController.email.text = userData['email'];

@@ -85,7 +85,7 @@ ElevatedButton newScreenButton(
       controller.screenName.clear();
       controller.route.clear();
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -146,6 +146,7 @@ Widget tableOfScreens(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -174,13 +175,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredScreens.isEmpty &&
             controller.search.value.text.isEmpty
@@ -218,7 +213,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Padding(
           padding: const EdgeInsets.only(right: 5),
@@ -253,7 +248,7 @@ ElevatedButton editSection(context, controller, Map<String, dynamic> screenData,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.screenName.text = screenData['name'] ?? '';

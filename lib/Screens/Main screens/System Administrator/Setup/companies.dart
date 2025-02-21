@@ -86,6 +86,7 @@ Widget tableOfCompanies(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -126,13 +127,7 @@ Widget tableOfCompanies(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredCompanies.isEmpty &&
             controller.search.value.text.isEmpty
@@ -178,7 +173,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> companyData, context,
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         activeInActiveSection(companyData, controller, companyId),
         Padding(
@@ -265,7 +260,7 @@ ElevatedButton editEction(context, CompanyController controller,
             companyData['contact_details']['city'] ?? '';
 
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -354,7 +349,7 @@ ElevatedButton newCompanyButton(BuildContext context,
       controller.roleIDFromList.clear();
       controller.imageBytes = null;
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

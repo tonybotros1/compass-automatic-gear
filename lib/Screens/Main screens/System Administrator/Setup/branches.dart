@@ -83,6 +83,7 @@ Widget tableOfScreens(
     required context,
     required BranchesController controller}) {
   return DataTable(
+    horizontalMargin: horizontalMarginForTable,
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
@@ -115,10 +116,8 @@ Widget tableOfScreens(
         onSort: controller.onSort,
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
+        label: Text(
+         ''
         ),
       ),
     ],
@@ -158,7 +157,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         activeInActiveSection(controller, branchData, branchId),
         Padding(

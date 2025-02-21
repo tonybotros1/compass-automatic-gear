@@ -88,6 +88,7 @@ Widget tableOfScreens(
     columnSpacing: 5,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
+    horizontalMargin: horizontalMarginForTable,
     headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
@@ -128,13 +129,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredCounters.isEmpty &&
             controller.search.value.text.isEmpty
@@ -182,7 +177,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> counterData, context,
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         activeInActiveSection(controller, counterData, counterId),
         Padding(
@@ -238,7 +233,7 @@ ElevatedButton editSection(context, CountersController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.code.text = counterData['code'] ?? '';
@@ -310,7 +305,7 @@ ElevatedButton newCounterButton(BuildContext context,
       controller.value.clear();
       controller.length.clear();
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

@@ -222,6 +222,8 @@ var screenPadding = const EdgeInsets.only(
   top: 0,
 );
 
+double horizontalMarginForTable = 8;
+
 var fontStyle1 = TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
 var fontStyle2 =
     TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold);
@@ -533,7 +535,8 @@ Widget textForDataRowInTable({
   double? parsedValue = double.tryParse(text);
 
   if (parsedValue != null) {
-    formattedText = NumberFormat("#,##0.00").format(parsedValue); // Formats as double
+    formattedText =
+        NumberFormat("#,##0.00").format(parsedValue); // Formats as double
   }
 
   return Container(
@@ -549,4 +552,3 @@ Widget textForDataRowInTable({
     ),
   );
 }
-

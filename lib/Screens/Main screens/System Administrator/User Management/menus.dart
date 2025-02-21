@@ -99,6 +99,7 @@ Widget tableOfMenus(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -128,11 +129,7 @@ Widget tableOfMenus(
         onSort: controller.onSort,
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
+        label:Text('')
       ),
     ],
     rows:
@@ -169,7 +166,7 @@ DataRow dataRowForTheTable(
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         viewSection(controller, menuId, context, constraints),
         Padding(

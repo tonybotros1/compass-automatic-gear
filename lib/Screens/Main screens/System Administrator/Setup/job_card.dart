@@ -10,7 +10,7 @@ import '../../../../Widgets/main screen widgets/job_cards_widgets/invoice_items_
 import '../../../../consts.dart';
 
 class JobCard extends StatelessWidget {
-   JobCard({super.key});
+  JobCard({super.key});
   final JobCardController jobCardController = Get.put(JobCardController());
 
   @override
@@ -78,35 +78,6 @@ class JobCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: StreamBuilder<Map<String, double>>(
-                      stream:
-                          jobCardController.calculateGrandSums(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Text('Loading...');
-                        } else if (snapshot.hasError) {
-                          return const Text('Error');
-                        } else {
-                          var data = snapshot.data ??
-                              {'total': 0.0, 'vat': 0.0, 'net': 0.0};
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              _buildSummaryBox(
-                                  'Totals:', data['total'], Colors.blue[200]),
-                              _buildSummaryBox(
-                                  'VATs:', data['vat'], Colors.green[200]),
-                              _buildSummaryBox(
-                                  'NETs:', data['net'], Colors.red[200]),
-                            ],
-                          );
-                        }
-                      },
-                    ),
-                  )
                 ],
               ),
             ),
@@ -115,25 +86,6 @@ class JobCard extends StatelessWidget {
       ),
     );
   }
-}
-
-Widget _buildSummaryBox(String label, double? value, Color? color) {
-  return Container(
-    padding: const EdgeInsets.all(8),
-    color: color,
-    height: 40,
-    child: Row(
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(width: 10),
-        Text(
-          value?.toStringAsFixed(2) ?? '0.00',
-          style:
-              TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
-        ),
-      ],
-    ),
-  );
 }
 
 Widget tableOfScreens({

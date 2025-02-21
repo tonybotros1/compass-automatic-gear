@@ -87,6 +87,7 @@ Widget tableOfScreens(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -115,10 +116,8 @@ Widget tableOfScreens(
         onSort: controller.onSort,
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
+        label: Text(''
+        
         ),
       ),
     ],
@@ -157,7 +156,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> brandData, context, constraints,
     ),
     DataCell(Row(
       spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         valSectionInTheTable(
             controller, brandId, context, constraints, brandData),

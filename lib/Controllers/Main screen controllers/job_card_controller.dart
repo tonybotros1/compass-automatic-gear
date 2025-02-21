@@ -72,6 +72,7 @@ class JobCardController extends GetxController {
   RxString customerBranchId = RxString('');
   RxString customerCurrencyId = RxString('');
   RxString query = RxString('');
+  RxString queryForInvoiceItems = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   Rx<TextEditingController> searchForInvoiceItems = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -159,6 +160,9 @@ class JobCardController extends GetxController {
     search.value.addListener(() {
       filterJobCards();
     });
+    searchForInvoiceItems.value.addListener(() {
+      filterInvoiceItems();
+    });
   }
 
   @override
@@ -172,43 +176,47 @@ class JobCardController extends GetxController {
         arguments: {'images': imageUrls, 'index': index});
   }
 
-  Stream<Map<String, double>> calculateGrandSums() {
-    return FirebaseFirestore.instance
-        .collectionGroup('invoice_items')
-        .snapshots()
-        .map((invoiceItemsSnapshot) {
-      double grandTotal = 0.0;
-      double grandVAT = 0.0;
-      double grandNET = 0.0;
+  // Stream<Map<String, double>> calculateGrandSums() {
+  //   return FirebaseFirestore.instance
+  //       .collectionGroup('invoice_items')
+  //       .where('company_id', isEqualTo: companyId.value)
+  //       .snapshots()
+  //       .map((invoiceItemsSnapshot) {
+  //     double grandTotal = 0.0;
+  //     double grandVAT = 0.0;
+  //     double grandNET = 0.0;
 
-      for (var job in invoiceItemsSnapshot.docs) {
-        var data = job.data() as Map<String, dynamic>?;
+  //     for (var job in invoiceItemsSnapshot.docs) {
+  //       var data = job.data() as Map<String, dynamic>?;
 
-        grandTotal += double.tryParse(data?['total']?.toString() ?? '0') ?? 0;
-        print(grandTotal);
-        grandVAT += double.tryParse(data?['vat']?.toString() ?? '0') ?? 0;
-        grandNET += double.tryParse(data?['net']?.toString() ?? '0') ?? 0;
-      }
+  //       grandTotal += double.tryParse(data?['total']?.toString() ?? '0') ?? 0;
+  //       grandVAT += double.tryParse(data?['vat']?.toString() ?? '0') ?? 0;
+  //       grandNET += double.tryParse(data?['net']?.toString() ?? '0') ?? 0;
+  //     }
 
-      return {
-        'total': grandTotal,
-        'vat': grandVAT,
-        'net': grandNET,
-      };
-    });
-  }
+  //     return {
+  //       'total': grandTotal,
+  //       'vat': grandVAT,
+  //       'net': grandNET,
+  //     };
+  //   });
+  // }
 
   List<double> calculateTotals() {
     // this is for invoice items
     double sumofTotal = 0.0;
     double sumofVAT = 0.0;
     double sumofNET = 0.0;
-    for (var job in allInvoiceItems) {
+
+    for (var job in filteredInvoiceItems.isEmpty && searchForInvoiceItems.value.text.isEmpty
+        ? allInvoiceItems
+        : filteredInvoiceItems) {
       var data = job.data() as Map<String, dynamic>?;
       sumofTotal += double.parse(data?['total']);
       sumofNET += double.parse(data?['net']);
       sumofVAT += double.parse(data?['vat']);
     }
+
     return [sumofTotal, sumofVAT, sumofNET];
   }
 
@@ -647,6 +655,7 @@ class JobCardController extends GetxController {
           .doc(jobId)
           .collection('invoice_items')
           .add({
+        'company_id': companyId.value,
         'name': invoiceItemNameId.value,
         'line_number': int.tryParse(lineNumber.text),
         'description': description.text,
@@ -1374,6 +1383,54 @@ class JobCardController extends GetxController {
     customerSaleManId.value = currentUserDetails.value['sales_man'];
     customerSaleMan.text =
         getdataName(currentUserDetails.value['sales_man'], salesManMap);
+  }
+
+  void filterInvoiceItems() async {
+    final searchQuery = searchForInvoiceItems.value.text.toLowerCase();
+    queryForInvoiceItems.value = searchQuery;
+    if (searchQuery.isEmpty) {
+      filteredInvoiceItems.clear();
+    } else {
+      filteredInvoiceItems.assignAll(
+        allInvoiceItems.where((item) {
+          return item['line_number']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForInvoiceItems) ||
+              item['description']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForInvoiceItems) ||
+              item['discount']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForInvoiceItems) ||
+              item['net']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForInvoiceItems) ||
+              item['price']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForInvoiceItems) ||
+              item['quantity']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForInvoiceItems) ||
+              item['total']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForInvoiceItems) ||
+              item['vat']
+                  .toString()
+                  .toLowerCase()
+                  .contains(queryForInvoiceItems) ||
+              getdataName(item['name'], allCustomers, title: 'entity_name')
+                  .toLowerCase()
+                  .contains(queryForInvoiceItems);
+        }).toList(),
+      );
+    }
   }
 
   void filterJobCards() async {

@@ -85,6 +85,7 @@ Widget tableOfScreens(
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
+    horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
@@ -107,11 +108,7 @@ Widget tableOfScreens(
         ),
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
+        label: Text('')
       ),
     ],
     rows: controller.filteredEntities.isEmpty &&

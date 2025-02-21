@@ -71,6 +71,7 @@ Widget tableOfScreens(
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
+    horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
@@ -100,13 +101,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSortForValues,
       ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredValues.isEmpty &&
             controller.searchForValues.value.text.isEmpty
@@ -146,7 +141,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         controller.userEmail.value == 'datahubai@gmail.com'
             ? activeInActiveSection(valueData, controller, valueId)
@@ -189,7 +184,7 @@ ElevatedButton editSection(ListOfValuesController controller,
             controller.getValueNameById(valueData['restricted_by'])!;
         controller.masteredByIdForValues.value = '';
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -279,7 +274,7 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
       controller.valueName.clear();
       controller.restrictedBy.clear();
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

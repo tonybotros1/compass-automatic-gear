@@ -89,6 +89,7 @@ Widget tableOfScreens(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -130,12 +131,7 @@ Widget tableOfScreens(
         onSort: controller.onSort,
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
-      ),
+          headingRowAlignment: MainAxisAlignment.center, label: Text('')),
     ],
     rows: controller.filteredCountries.isEmpty &&
             controller.search.value.text.isEmpty
@@ -185,7 +181,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> countryData, context,
     ),
     DataCell(Row(
       spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         valSectionInTheTable(
             controller, countryId, context, constraints, countryData),

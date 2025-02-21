@@ -87,6 +87,7 @@ Widget tableOfScreens(
     dataRowMinHeight: 30,
     columnSpacing: 5,
     showBottomBorder: true,
+    horizontalMargin: horizontalMarginForTable,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
@@ -114,13 +115,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredSalesMan.isEmpty &&
             controller.search.value.text.isEmpty
@@ -158,7 +153,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> salemanData, context,
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Padding(
           padding: const EdgeInsets.only(right: 5),
@@ -193,7 +188,7 @@ ElevatedButton editSection(context, SalesManController controller,
       style: editButtonStyle,
       onPressed: () {
         showDialog(
-           barrierDismissible: false,
+            barrierDismissible: false,
             context: context,
             builder: (context) {
               controller.name.text = salemanData['name'] ?? '';
@@ -259,7 +254,7 @@ ElevatedButton newSalesManButton(BuildContext context,
       controller.name.clear();
       controller.target.clear();
       showDialog(
-         barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return AlertDialog(

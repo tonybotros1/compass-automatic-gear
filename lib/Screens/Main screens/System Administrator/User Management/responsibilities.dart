@@ -162,6 +162,7 @@ Widget tableOfScreens(
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
+    horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
@@ -191,11 +192,7 @@ Widget tableOfScreens(
         onSort: controller.onSort,
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
+        label:Text('')
       ),
     ],
     rows: controller.filteredResponsibilities.isEmpty &&
@@ -243,7 +240,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
         DataCell(Align(
           // alignment: Alignment.center,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               publicPrivateSection(roleData, controller, roleId),
               Padding(

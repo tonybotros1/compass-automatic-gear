@@ -72,6 +72,7 @@ Widget tableOfScreens(
     dataRowMinHeight: 30,
     columnSpacing: 5,
     showBottomBorder: true,
+    horizontalMargin: horizontalMarginForTable,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
@@ -100,11 +101,7 @@ Widget tableOfScreens(
         onSort: controller.onSortForCities,
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
+        label: Text('')
       ),
     ],
     rows: controller.filteredCities.isEmpty &&
@@ -145,7 +142,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> cityData, context, constraints,
       ),
     ),
     DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         activeInActiveSection(cityData, controller, cityId),
         Padding(

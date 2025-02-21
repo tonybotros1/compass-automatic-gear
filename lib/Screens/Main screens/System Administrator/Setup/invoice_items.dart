@@ -85,6 +85,7 @@ Widget tableOfScreens(
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
+    horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
@@ -114,13 +115,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Action',
-        ),
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredInvoiceItems.isEmpty &&
             controller.search.value.text.isEmpty
@@ -153,7 +148,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> invoiceItemsData, context,
     )),
     DataCell(Row(
       spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         editSection(
             context, controller, invoiceItemsData, constraints, invoiceItemsId),

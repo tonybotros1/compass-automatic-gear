@@ -15,6 +15,8 @@ Widget invoiceItemsDialog(
     height: constraints.maxHeight / 1.5,
     width: constraints.maxWidth,
     child: Column(
+      spacing: 2,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Expanded(
           child: Container(
@@ -69,74 +71,30 @@ Widget invoiceItemsDialog(
             ),
           ),
         ),
-        SizedBox(
-          height: 10,
-        ),
         GetX<JobCardController>(builder: (controller) {
+          List data = controller.calculateTotals();
           return Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            spacing: 20,
+            spacing: 10,
             children: [
-              Container(
-                padding: EdgeInsets.all(8),
-                color: Colors.blue[200],
-                height: 40,
-                child: Row(
-                  spacing: 10,
-                  children: [
-                    Text(
-                      'Totals:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      controller.calculateTotals()[0].toStringAsFixed(2),
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.grey[700]),
-                    )
-                  ],
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(8),
-                color: Colors.green[200],
-                height: 40,
-                child: Row(
-                  spacing: 10,
-                  children: [
-                    Text(
-                      'VATs:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      controller.calculateTotals()[1].toStringAsFixed(2),
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.grey[700]),
-                    )
-                  ],
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(8),
-                color: Colors.red[200],
-                height: 40,
-                child: Row(
-                  spacing: 10,
-                  children: [
-                    Text(
-                      'NETs:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      controller.calculateTotals()[2].toStringAsFixed(2),
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.grey[700]),
-                    )
-                  ],
-                ),
-              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Totals:',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.blue[500])),
+                Text('VATs:',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.green[500])),
+                Text('NETs:',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.red[500]))
+              ]),
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text(data[0].toStringAsFixed(2), style: fontStyle2),
+                Text(data[1].toStringAsFixed(2), style: fontStyle2),
+                Text(data[2].toStringAsFixed(2), style: fontStyle2),
+              ]),
             ],
           );
-        })
+        }),
       ],
     ),
   );
@@ -151,6 +109,7 @@ Widget tableOfScreens(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -229,51 +188,13 @@ Widget tableOfScreens(
     ],
     rows: controller.filteredInvoiceItems.isEmpty &&
             controller.searchForInvoiceItems.value.text.isEmpty
-        ? [
-            ...controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-              final invoiceItemsData =
-                  invoiceItems.data() as Map<String, dynamic>;
-              final invoiceItemsId = invoiceItems.id;
-              return dataRowForTheTable(invoiceItemsData, context, constraints,
-                  invoiceItemsId, controller, jobId);
-            }),
-            DataRow(cells: [
-              DataCell(Text('')),
-              DataCell(Text('')),
-              DataCell(Text('')),
-              DataCell(Text('')),
-              DataCell(Text('')),
-              DataCell(Align(
-                  alignment: Alignment.centerRight,
-                  child: textForDataRowInTable(
-                      text: 'Totals', color: Colors.black, isBold: true))),
-              DataCell(Container(
-                color: Colors.blue.shade200,
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: textForDataRowInTable(
-                        text: '${controller.calculateTotals()[0]}',
-                        isBold: true)),
-              )),
-              DataCell(Container(
-                color: Colors.green.shade200,
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: textForDataRowInTable(
-                        text: '${controller.calculateTotals()[1]}',
-                        isBold: true)),
-              )),
-              DataCell(Container(
-                color: Colors.red.shade200,
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: textForDataRowInTable(
-                        text: '${controller.calculateTotals()[2]}',
-                        isBold: true)),
-              )),
-              DataCell(Text('')),
-            ])
-          ]
+        ? controller.allInvoiceItems.map<DataRow>((invoiceItems) {
+            final invoiceItemsData =
+                invoiceItems.data() as Map<String, dynamic>;
+            final invoiceItemsId = invoiceItems.id;
+            return dataRowForTheTable(invoiceItemsData, context, constraints,
+                invoiceItemsId, controller, jobId);
+          }).toList()
         : controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
             final invoiceItemsData =
                 invoiceItems.data() as Map<String, dynamic>;
