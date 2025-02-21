@@ -208,7 +208,8 @@ class JobCardController extends GetxController {
     double sumofVAT = 0.0;
     double sumofNET = 0.0;
 
-    for (var job in filteredInvoiceItems.isEmpty && searchForInvoiceItems.value.text.isEmpty
+    for (var job in filteredInvoiceItems.isEmpty &&
+            searchForInvoiceItems.value.text.isEmpty
         ? allInvoiceItems
         : filteredInvoiceItems) {
       var data = job.data() as Map<String, dynamic>?;
@@ -685,7 +686,7 @@ class JobCardController extends GetxController {
           .doc(itemId)
           .update({
         'name': invoiceItemNameId.value,
-        'line_number': int.parse(lineNumber.text),
+        'line_number': int.tryParse(lineNumber.text),
         'description': description.text,
         'quantity': quantity.text,
         'price': price.text,

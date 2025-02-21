@@ -212,7 +212,7 @@ Widget tableOfScreens({
             columns: [
               DataColumn(
                 headingRowAlignment: MainAxisAlignment.center,
-                label: AutoSizedText(constraints: constraints, text: 'Action'),
+                label: AutoSizedText(constraints: constraints, text: ''),
               ),
             ],
             rows: _getActionRows(controller, context, constraints),
