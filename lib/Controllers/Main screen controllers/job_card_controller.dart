@@ -19,6 +19,7 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> jobWarrentyDays = TextEditingController().obs;
   Rx<TextEditingController> jobWarrentyKM = TextEditingController().obs;
   Rx<TextEditingController> jobWarrentyEndDate = TextEditingController().obs;
+  Rx<TextEditingController> jobCancelationDate = TextEditingController().obs;
   Rx<TextEditingController> reference1 = TextEditingController().obs;
   Rx<TextEditingController> reference2 = TextEditingController().obs;
   Rx<TextEditingController> reference3 = TextEditingController().obs;
@@ -111,6 +112,7 @@ class JobCardController extends GetxController {
   RxString jobStatus1 = RxString('');
   RxString jobStatus2 = RxString('');
   RxString quotationStatus = RxString('');
+  RxBool postingJob = RxBool(false);
   // RxBool canSaveJobCard = RxBool(true);
   // internal notes section
   RxBool addingNewInternalNotProcess = RxBool(false);
@@ -331,6 +333,10 @@ class JobCardController extends GetxController {
   }
 
   clearValues() {
+    jobCancelationDate.value.text = '';
+    jobStatus1.value = '';
+    jobStatus2.value = '';
+    quotationStatus.value = '';
     carBrandLogo.value = '';
     isQuotationExpanded.value = false;
     // canSaveJobCard.value = true;
@@ -389,6 +395,7 @@ class JobCardController extends GetxController {
   }
 
   loadValues(Map<String, dynamic> data) {
+    jobCancelationDate.value.text = textToDate(data['job_cancelation_date']);
     jobStatus1.value = data['job_status_1'];
     jobStatus2.value = data['job_status_2'];
     quotationStatus.value = data['quotation_status'];
@@ -528,6 +535,7 @@ class JobCardController extends GetxController {
         'invoice_date': invoiceDate.value.text,
         'job_approval_date': approvalDate.value.text,
         'job_start_date': startDate.value.text,
+        'job_cancelation_date': jobCancelationDate.value.text,
         'job_finish_date': finishDate.value.text,
         'job_delivery_date': deliveryDate.value.text,
         'job_warrenty_days': jobWarrentyDays.value.text,
@@ -782,20 +790,110 @@ class JobCardController extends GetxController {
   }
 
   editApproveForJobCard(jobId, status) async {
-    await FirebaseFirestore.instance.collection('job_cards').doc(jobId).update({
-      'job_status_2': status,
-      'job_approval_date': DateTime.now().toString()
-    });
+    try {
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({
+        'job_status_2': status,
+        'job_approval_date': DateTime.now().toString()
+      });
+    } catch (e) {
+      //
+    }
   }
 
   editReadyForJobCard(jobId, status) async {
-    await FirebaseFirestore.instance.collection('job_cards').doc(jobId).update(
-        {'job_status_2': status, 'job_finish_date': DateTime.now().toString()});
+    try {
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({
+        'job_status_2': status,
+        'job_finish_date': DateTime.now().toString()
+      });
+    } catch (e) {
+      //
+    }
   }
 
-   editNewForJobCard(jobId, status) async {
-    await FirebaseFirestore.instance.collection('job_cards').doc(jobId).update(
-        {'job_status_2': status, 'job_finish_date': '','job_approval_date':''});
+  editNewForJobCard(jobId, status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({
+        'job_status_2': status,
+        'job_status_1': status,
+        'job_finish_date': '',
+        'job_approval_date': ''
+      });
+      finishDate.value.text = '';
+      approvalDate.value.text = '';
+      jobStatus2.value = 'New';
+      jobStatus1.value = 'New';
+    } catch (e) {
+      //
+    }
+  }
+
+  editCancelForJobCard(jobId, status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({
+        'job_status_1': status,
+        'job_status_2': status,
+        'job_cancelation_date': DateTime.now().toString()
+      });
+      jobCancelationDate.value.text = textToDate(DateTime.now());
+      jobStatus1.value = status;
+      jobStatus2.value = status;
+    } catch (e) {
+      //
+    }
+  }
+
+  editPostForJobCard(jobId) async {
+    try {
+      var status2 = '';
+      postingJob.value = true;
+      if (isBeforeToday(jobWarrentyEndDate.value.text)) {
+        status2 = 'Closed';
+      } else {
+        status2 = 'Under Warranty';
+      }
+      await getCurrentInvoiceCounterNumber();
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({
+        'invoice_number': invoiceCounter.value.text,
+        'invoice_date': DateTime.now().toString(),
+        'job_status_1': 'Posted',
+        'job_status_2': status2,
+      });
+
+      jobStatus1.value = 'Posted';
+      jobStatus2.value = status2;
+
+      postingJob.value = false;
+    } catch (e) {
+      postingJob.value = false;
+    }
+  }
+
+// this function is to see if the warrant date is end or not
+  bool isBeforeToday(String dateStr) {
+    DateFormat format = DateFormat("dd-MM-yyyy");
+
+    DateTime inputDate = format.parse(dateStr);
+
+    DateTime today = DateTime.now();
+    DateTime todayOnly = DateTime(today.year, today.month, today.day);
+
+    return inputDate.isBefore(todayOnly);
   }
 
   deleteInvoiceItem(String jobId, String itemId) {

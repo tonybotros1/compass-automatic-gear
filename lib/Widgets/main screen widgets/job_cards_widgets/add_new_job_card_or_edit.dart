@@ -147,7 +147,7 @@ Container statusBox(String status) {
             : status == 'Posted'
                 ? Colors.tealAccent
                 : status == 'Canceled'
-                    ? Colors.red
+                    ? Colors.redAccent
                     : status == 'Approved'
                         ? Colors.pinkAccent
                         : status == 'Ready'

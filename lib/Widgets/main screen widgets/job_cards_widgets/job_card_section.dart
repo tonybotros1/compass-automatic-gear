@@ -225,6 +225,23 @@ Container jobCardSection(context,JobCardController controller) {
               validate: false,
             ),
           ),
+           DynamicConfig(
+            isDropdown: false,
+            flex: 1,
+            fieldConfig: FieldConfig(
+              suffixIcon: IconButton(
+                  onPressed: () {
+                    controller.selectDateContext(
+                        context, controller.jobCancelationDate);
+                  },
+                  icon: Icon(Icons.date_range)),
+              isDate: true,
+              textController: controller.jobCancelationDate.value,
+              labelText: 'Cancelation Date',
+              hintText: 'Enter Cancelation Date',
+              validate: false,
+            ),
+          ),
         ]),
         dynamicFields(dynamicConfigs: [
           DynamicConfig(

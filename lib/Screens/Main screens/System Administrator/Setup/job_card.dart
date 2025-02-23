@@ -392,7 +392,11 @@ ElevatedButton editSection(context, JobCardController controller,
             context: context,
             builder: (context) {
               return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                actionsPadding: const EdgeInsets.symmetric(horizontal: 10),
                 content: addNewJobCardOrEdit(
                   controller: controller,
                   constraints: constraints,
@@ -481,13 +485,45 @@ ElevatedButton editSection(context, JobCardController controller,
                             onPressed: controller.jobStatus1.value == 'New' &&
                                     controller.jobStatus2.value != 'New'
                                 ? () {
-                                    controller.finishDate.value.text = '';
-                                    controller.approvalDate.value.text = '';
-                                    controller.jobStatus2.value = 'New';
                                     controller.editNewForJobCard(jobId, 'New');
                                   }
                                 : null,
                             child: Text('New'));
+                      }),
+                      GetX<JobCardController>(builder: (controller) {
+                        return ElevatedButton(
+                            style: newButtonStyle,
+                            onPressed: controller.jobStatus1.value !=
+                                        'Posted' &&
+                                    controller.jobWarrentyEndDate.value.text !=
+                                        '' &&
+                                    controller.jobStatus1.value != 'Canceled'
+                                ? () {
+                                    controller.editPostForJobCard(jobId);
+                                  }
+                                : null,
+                            child: controller.postingJob.isFalse
+                                ? Text('Post Job')
+                                : SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ));
+                      }),
+                      GetX<JobCardController>(builder: (controller) {
+                        return ElevatedButton(
+                            style: cancelJobButtonStyle,
+                            onPressed: controller.jobStatus1.value !=
+                                        'Canceled' &&
+                                    controller.jobStatus2.value != 'Canceled'
+                                ? () {
+                                    controller.editCancelForJobCard(
+                                        jobId, 'Canceled');
+                                  }
+                                : null,
+                            child: Text('Cancel Job'));
                       }),
                       ElevatedButton(
                           style: deleteButtonStyle,
@@ -594,7 +630,10 @@ ElevatedButton newJobCardButton(BuildContext context,
           context: context,
           builder: (context) {
             return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)),
+              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+              actionsPadding: const EdgeInsets.symmetric(horizontal: 10),
               content: addNewJobCardOrEdit(
                 controller: controller,
                 constraints: constraints,
