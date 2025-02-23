@@ -153,6 +153,16 @@ var deleteButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+
+var approveButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.pinkAccent,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var welcomButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: mainColor,
   foregroundColor: Colors.white,

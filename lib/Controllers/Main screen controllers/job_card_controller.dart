@@ -108,6 +108,9 @@ class JobCardController extends GetxController {
   RxBool isJobCardExpanded = RxBool(true);
   RxMap allUsers = RxMap();
   RxString userId = RxString('');
+  RxString jobStatus1 = RxString('');
+  RxString jobStatus2 = RxString('');
+  RxString quotationStatus = RxString('');
   // RxBool canSaveJobCard = RxBool(true);
   // internal notes section
   RxBool addingNewInternalNotProcess = RxBool(false);
@@ -386,6 +389,9 @@ class JobCardController extends GetxController {
   }
 
   loadValues(Map<String, dynamic> data) {
+    jobStatus1.value = data['job_status_1'];
+    jobStatus2.value = data['job_status_2'];
+    quotationStatus.value = data['quotation_status'];
     carBrandLogo.value = data['car_brand_logo'];
     carBrandId.value = data['car_brand'];
     carBrand.text = getdataName(data['car_brand'], allBrands);
@@ -457,7 +463,7 @@ class JobCardController extends GetxController {
     lpoCounter.value.text = data['lpo_number'];
     jobCardDate.value.text = data['job_date'];
     invoiceDate.value.text = data['invoice_date'];
-    approvalDate.value.text = data['job_approval_date'];
+    approvalDate.value.text = textToDate(data['job_approval_date']);
     startDate.value.text = data['job_start_date'];
     finishDate.value.text = data['job_finish_date'];
     deliveryDate.value.text = data['job_delivery_date'];
@@ -475,14 +481,10 @@ class JobCardController extends GetxController {
   Future<void> addNewJobCardAndQuotation() async {
     try {
       addingNewValue.value = true;
-
-      if (isQuotationExpanded.isTrue && quotationCounter.value.text.isEmpty) {
-        await getCurrentQuotationCounterNumber();
-      }
-      if (isJobCardExpanded.isTrue && jobCardCounter.value.text.isEmpty) {
-        await getCurrentJobCardCounterNumber();
-      }
-      Map<String, dynamic> newDate = {
+      Map<String, dynamic> newData = {
+        'job_status_1': '',
+        'job_status_2': '',
+        'quotation_status': '',
         'car_brand_logo': carBrandLogo.value,
         'company_id': companyId.value,
         'car_brand': carBrandId.value,
@@ -539,17 +541,32 @@ class JobCardController extends GetxController {
         'job_delivery_notes': deliveryNotes.text,
       };
 
+      if (isQuotationExpanded.isTrue && quotationCounter.value.text.isEmpty) {
+        quotationStatus.value = 'New';
+        newData['quotation_status'] = quotationStatus;
+
+        await getCurrentQuotationCounterNumber();
+      }
+      if (isJobCardExpanded.isTrue && jobCardCounter.value.text.isEmpty) {
+        jobStatus1.value = 'New';
+        jobStatus2.value = 'New';
+
+        newData['job_status_1'] = jobStatus1;
+        newData['job_status_2'] = jobStatus2;
+        await getCurrentJobCardCounterNumber();
+      }
+
       if (jobCardAdded.isFalse) {
         var newJob = await FirebaseFirestore.instance
             .collection('job_cards')
-            .add(newDate);
+            .add(newData);
         jobCardAdded.value = true;
         curreentJobCardId.value = newJob.id;
       } else {
         await FirebaseFirestore.instance
             .collection('job_cards')
             .doc(curreentJobCardId.value)
-            .update(newDate);
+            .update(newData);
       }
       canAddInternalNotesAndInvoiceItems.value = true;
       // canSaveJobCard.value = false;
@@ -762,6 +779,16 @@ class JobCardController extends GetxController {
     } catch (e) {
       addingNewValue.value = false;
     }
+  }
+
+  editApproveForJobCard(jobId,status) async {
+    await FirebaseFirestore.instance
+        .collection('job_cards')
+        .doc(jobId)
+        .update({
+          'job_status_2': status,
+          'job_approval_date' : DateTime.now().toString()
+        });
   }
 
   deleteInvoiceItem(String jobId, String itemId) {

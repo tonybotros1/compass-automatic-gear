@@ -445,6 +445,21 @@ ElevatedButton editSection(context, JobCardController controller,
                         },
                         child: Text('Invoice Items'),
                       ),
+                      GetX<JobCardController>(builder: (controller) {
+                        return ElevatedButton(
+                            style: approveButtonStyle,
+                            onPressed: controller.jobStatus1.value == 'New' &&
+                                    controller.jobStatus2.value != 'Approved'
+                                ? () {
+                                    controller.approvalDate.value.text =
+                                        textToDate(DateTime.now());
+                                    controller.jobStatus2.value = 'Approved';
+                                    controller.editApproveForJobCard(
+                                        jobId, 'Approved');
+                                  }
+                                : null,
+                            child: Text('Approve'));
+                      }),
                       ElevatedButton(
                           style: deleteButtonStyle,
                           onPressed: () {

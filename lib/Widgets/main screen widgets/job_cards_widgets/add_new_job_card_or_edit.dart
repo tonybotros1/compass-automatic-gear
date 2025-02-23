@@ -58,6 +58,14 @@ Widget addNewJobCardOrEdit({
               'Quotation',
               style: fontStyle1,
             ),
+            SizedBox(width: 10),
+            controller.quotationStatus.value != ''
+                ? GetX<JobCardController>(
+                  builder: (controller) {
+                    return statusBox(controller.quotationStatus.value);
+                  }
+                )
+                : SizedBox()
           ],
         )),
         GetX<JobCardController>(builder: (controller) {
@@ -95,6 +103,22 @@ Widget addNewJobCardOrEdit({
               'Job Card',
               style: fontStyle1,
             ),
+            SizedBox(width: 10),
+            controller.jobStatus1.value != ''
+                ? GetX<JobCardController>(
+                  builder: (controller) {
+                    return statusBox(controller.jobStatus1.value);
+                  }
+                )
+                : SizedBox(),
+            SizedBox(width: 10),
+            controller.jobStatus2.value != ''
+                ? GetX<JobCardController>(
+                  builder: (controller) {
+                    return statusBox(controller.jobStatus2.value);
+                  }
+                )
+                : SizedBox()
           ],
         )),
         GetX<JobCardController>(builder: (controller) {
@@ -109,6 +133,36 @@ Widget addNewJobCardOrEdit({
           );
         }),
       ],
+    ),
+  );
+}
+
+Container statusBox(String status) {
+  return Container(
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        color: status == 'New'
+            ? Colors.green
+            : status == 'Posted'
+                ? Colors.tealAccent
+                : status == 'Canceled'
+                    ? Colors.red
+                    : status == 'Approved'
+                        ? Colors.pinkAccent
+                        : status == 'Ready'
+                            ? Colors.lightGreenAccent
+                            : status == 'Closed'
+                                ? Colors.black
+                                : status == 'Under Warranty'
+                                    ? Colors.lime
+                                    : Colors.brown),
+    height: 30,
+    width: null,
+    padding: EdgeInsets.symmetric(horizontal: 16),
+    child: Text(
+      status,
+      style: TextStyle(color: Colors.white),
     ),
   );
 }
