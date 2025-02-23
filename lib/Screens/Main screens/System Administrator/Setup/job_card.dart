@@ -460,6 +460,35 @@ ElevatedButton editSection(context, JobCardController controller,
                                 : null,
                             child: Text('Approve'));
                       }),
+                      GetX<JobCardController>(builder: (controller) {
+                        return ElevatedButton(
+                            style: readyButtonStyle,
+                            onPressed: controller.jobStatus1.value == 'New' &&
+                                    controller.jobStatus2.value != 'Ready'
+                                ? () {
+                                    controller.finishDate.value.text =
+                                        textToDate(DateTime.now());
+                                    controller.jobStatus2.value = 'Ready';
+                                    controller.editReadyForJobCard(
+                                        jobId, 'Ready');
+                                  }
+                                : null,
+                            child: Text('Ready'));
+                      }),
+                      GetX<JobCardController>(builder: (controller) {
+                        return ElevatedButton(
+                            style: newButtonStyle,
+                            onPressed: controller.jobStatus1.value == 'New' &&
+                                    controller.jobStatus2.value != 'New'
+                                ? () {
+                                    controller.finishDate.value.text = '';
+                                    controller.approvalDate.value.text = '';
+                                    controller.jobStatus2.value = 'New';
+                                    controller.editNewForJobCard(jobId, 'New');
+                                  }
+                                : null,
+                            child: Text('New'));
+                      }),
                       ElevatedButton(
                           style: deleteButtonStyle,
                           onPressed: () {

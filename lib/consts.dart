@@ -163,6 +163,16 @@ var approveButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+
+var readyButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.lightGreenAccent,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var welcomButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: mainColor,
   foregroundColor: Colors.white,

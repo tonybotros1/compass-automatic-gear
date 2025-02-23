@@ -781,14 +781,21 @@ class JobCardController extends GetxController {
     }
   }
 
-  editApproveForJobCard(jobId,status) async {
-    await FirebaseFirestore.instance
-        .collection('job_cards')
-        .doc(jobId)
-        .update({
-          'job_status_2': status,
-          'job_approval_date' : DateTime.now().toString()
-        });
+  editApproveForJobCard(jobId, status) async {
+    await FirebaseFirestore.instance.collection('job_cards').doc(jobId).update({
+      'job_status_2': status,
+      'job_approval_date': DateTime.now().toString()
+    });
+  }
+
+  editReadyForJobCard(jobId, status) async {
+    await FirebaseFirestore.instance.collection('job_cards').doc(jobId).update(
+        {'job_status_2': status, 'job_finish_date': DateTime.now().toString()});
+  }
+
+   editNewForJobCard(jobId, status) async {
+    await FirebaseFirestore.instance.collection('job_cards').doc(jobId).update(
+        {'job_status_2': status, 'job_finish_date': '','job_approval_date':''});
   }
 
   deleteInvoiceItem(String jobId, String itemId) {
