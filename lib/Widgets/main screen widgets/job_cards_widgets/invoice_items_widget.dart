@@ -71,30 +71,7 @@ Widget invoiceItemsDialog(
             ),
           ),
         ),
-        GetX<JobCardController>(builder: (controller) {
-          List data = controller.calculateTotals();
-          return Row(
-            spacing: 10,
-            children: [
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Totals:',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.blue[500])),
-                Text('VATs:',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.green[500])),
-                Text('NETs:',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.red[500]))
-              ]),
-              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text(data[0].toStringAsFixed(2), style: fontStyle2),
-                Text(data[1].toStringAsFixed(2), style: fontStyle2),
-                Text(data[2].toStringAsFixed(2), style: fontStyle2),
-              ]),
-            ],
-          );
-        }),
+        
       ],
     ),
   );
@@ -105,105 +82,158 @@ Widget tableOfScreens(
     required context,
     required JobCardController controller,
     required String jobId}) {
+  List data = controller.calculateTotals();
+
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
-    child: DataTable(
-      dataRowMaxHeight: 40,
-      dataRowMinHeight: 30,
-      columnSpacing: 5,
-      horizontalMargin: horizontalMarginForTable,
-      showBottomBorder: true,
-      dataTextStyle: regTextStyle,
-      headingTextStyle: fontStyleForTableHeader,
-      sortColumnIndex: controller.sortColumnIndex.value,
-      sortAscending: controller.isAscending.value,
-      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-      columns: [
-        DataColumn(
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Line No.',
+    child: SizedBox(
+      width: constraints.maxWidth,
+      child: DataTable(
+        dataRowMaxHeight: 40,
+        dataRowMinHeight: 30,
+        columnSpacing: 5,
+        horizontalMargin: horizontalMarginForTable,
+        showBottomBorder: true,
+        dataTextStyle: regTextStyle,
+        headingTextStyle: fontStyleForTableHeader,
+        sortColumnIndex: controller.sortColumnIndex.value,
+        sortAscending: controller.isAscending.value,
+        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+        columns: [
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Line No.',
+            ),
           ),
-        ),
-        DataColumn(
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Name',
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Name',
+            ),
           ),
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Quantity',
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Quantity',
+            ),
           ),
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Price',
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Price',
+            ),
           ),
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Amount',
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Amount',
+            ),
           ),
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Discount',
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Discount',
+            ),
           ),
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Total',
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Total',
+            ),
           ),
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'VAT',
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'VAT',
+            ),
           ),
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'NET',
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'NET',
+            ),
           ),
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.center,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Action',
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.center,
+            label:SizedBox()
           ),
-        ),
-      ],
-      rows: controller.filteredInvoiceItems.isEmpty &&
-              controller.searchForInvoiceItems.value.text.isEmpty
-          ? controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-              final invoiceItemsData =
-                  invoiceItems.data() as Map<String, dynamic>;
-              final invoiceItemsId = invoiceItems.id;
-              return dataRowForTheTable(invoiceItemsData, context, constraints,
-                  invoiceItemsId, controller, jobId);
-            }).toList()
-          : controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
-              final invoiceItemsData =
-                  invoiceItems.data() as Map<String, dynamic>;
-              final invoiceItemsId = invoiceItems.id;
-              return dataRowForTheTable(invoiceItemsData, context, constraints,
-                  invoiceItemsId, controller, jobId);
-            }).toList(),
+        ],
+        rows: controller.filteredInvoiceItems.isEmpty &&
+                controller.searchForInvoiceItems.value.text.isEmpty
+            ? [
+                ...controller.allInvoiceItems.map<DataRow>((invoiceItems) {
+                  final invoiceItemsData =
+                      invoiceItems.data() as Map<String, dynamic>;
+                  final invoiceItemsId = invoiceItems.id;
+                  return dataRowForTheTable(invoiceItemsData, context,
+                      constraints, invoiceItemsId, controller, jobId);
+                }),
+                DataRow(selected: true, cells: [
+                  DataCell(Text('')),
+                  DataCell(Text('')),
+                  DataCell(Text('')),
+                  DataCell(Text('')),
+                  DataCell(Text('')),
+                  DataCell(Align(
+                      alignment: Alignment.centerRight, child: Text('Totals'))),
+                  DataCell(
+                    Align(
+                    alignment: Alignment.centerRight,
+                    child: textForDataRowInTable(
+                        text: '${data[0]}', color: Colors.blue),
+                  )),
+                  DataCell(Align(
+                      alignment: Alignment.centerRight,
+                      child: textForDataRowInTable(
+                          text: '${data[1]}', color: Colors.green))),
+                  DataCell(Align(
+                      alignment: Alignment.centerRight,
+                      child: textForDataRowInTable(
+                          text: '${data[2]}', color: Colors.red))),
+                  DataCell(Text('')),
+                ])
+              ]
+            : [
+                ...controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
+                  final invoiceItemsData =
+                      invoiceItems.data() as Map<String, dynamic>;
+                  final invoiceItemsId = invoiceItems.id;
+                  return dataRowForTheTable(invoiceItemsData, context,
+                      constraints, invoiceItemsId, controller, jobId);
+                }),
+                DataRow(selected: true, cells: [
+                  DataCell(Text('')),
+                  DataCell(Text('')),
+                  DataCell(Text('')),
+                  DataCell(Text('')),
+                  DataCell(Text('')),
+                  DataCell(Align(
+                      alignment: Alignment.centerRight, child: Text('Totals'))),
+                  DataCell(Align(
+                    alignment: Alignment.centerRight,
+                    child: textForDataRowInTable(
+                        text: '${data[0]}', color: Colors.blue),
+                  )),
+                  DataCell(Align(
+                      alignment: Alignment.centerRight,
+                      child: textForDataRowInTable(
+                          text: '${data[1]}', color: Colors.green))),
+                  DataCell(Align(
+                      alignment: Alignment.centerRight,
+                      child: textForDataRowInTable(
+                          text: '${data[2]}', color: Colors.red))),
+                  DataCell(Text('')),
+                ])
+              ],
+      ),
     ),
   );
 }
@@ -244,7 +274,7 @@ DataRow dataRowForTheTable(
         child: textForDataRowInTable(text: '${invoiceItemsData['net']}'))),
     DataCell(Row(
       spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         editSection(jobId, controller, invoiceItemsData, context, constraints,
             invoiceItemsId),
