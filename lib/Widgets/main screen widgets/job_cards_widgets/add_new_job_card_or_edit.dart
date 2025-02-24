@@ -59,13 +59,13 @@ Widget addNewJobCardOrEdit({
               style: fontStyle1,
             ),
             SizedBox(width: 10),
-            controller.quotationStatus.value != ''
-                ? GetX<JobCardController>(
-                  builder: (controller) {
-                    return statusBox(controller.quotationStatus.value);
-                  }
-                )
-                : SizedBox()
+            GetX<JobCardController>(builder: (controller) {
+              if (controller.quotationStatus.value.isNotEmpty) {
+                return statusBox(controller.quotationStatus.value);
+              } else {
+                return SizedBox();
+              }
+            })
           ],
         )),
         GetX<JobCardController>(builder: (controller) {
@@ -104,21 +104,21 @@ Widget addNewJobCardOrEdit({
               style: fontStyle1,
             ),
             SizedBox(width: 10),
-            controller.jobStatus1.value != ''
-                ? GetX<JobCardController>(
-                  builder: (controller) {
-                    return statusBox(controller.jobStatus1.value);
-                  }
-                )
-                : SizedBox(),
+            GetX<JobCardController>(builder: (controller) {
+              if (controller.jobStatus1.value.isNotEmpty) {
+                return statusBox(controller.jobStatus1.value);
+              } else {
+                return SizedBox();
+              }
+            }),
             SizedBox(width: 10),
-            controller.jobStatus2.value != ''
-                ? GetX<JobCardController>(
-                  builder: (controller) {
-                    return statusBox(controller.jobStatus2.value);
-                  }
-                )
-                : SizedBox()
+            GetX<JobCardController>(builder: (controller) {
+              if (controller.jobStatus2.value.isNotEmpty) {
+                return statusBox(controller.jobStatus2.value);
+              } else {
+                return SizedBox();
+              }
+            })
           ],
         )),
         GetX<JobCardController>(builder: (controller) {

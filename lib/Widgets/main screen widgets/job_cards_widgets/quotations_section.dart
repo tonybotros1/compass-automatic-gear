@@ -30,7 +30,7 @@ Container quotationsSection(context,JobCardController controller) {
               suffixIcon: IconButton(
                   onPressed: () {
                     controller.selectDateContext(
-                        context, controller.quotationDate);
+                        context, controller.quotationDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               textController: controller.quotationDate.value,
@@ -67,7 +67,7 @@ Container quotationsSection(context,JobCardController controller) {
               suffixIcon: IconButton(
                   onPressed: () async {
                     await controller.selectDateContext(
-                        context, controller.validityEndDate);
+                        context, controller.validityEndDate.value);
                     controller.changingDaysDependingOnQuotationEndDate();
                   },
                   icon: Icon(Icons.date_range)),

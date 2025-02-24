@@ -490,19 +490,19 @@ ElevatedButton editSection(context, JobCardController controller,
                                 : null,
                             child: Text('New'));
                       }),
-                      GetX<JobCardController>(builder: (controller) {
+                      GetX<JobCardController>(builder: (controllerr) {
                         return ElevatedButton(
-                            style: newButtonStyle,
-                            onPressed: controller.jobStatus1.value !=
+                            style: postButtonStyle,
+                            onPressed: controllerr.jobStatus1.value !=
                                         'Posted' &&
-                                    controller.jobWarrentyEndDate.value.text !=
-                                        '' &&
-                                    controller.jobStatus1.value != 'Canceled'
+                                    controllerr.jobWarrentyEndDate.value.text.isNotEmpty
+                                        &&
+                                    controllerr.jobStatus1.value != 'Canceled'
                                 ? () {
-                                    controller.editPostForJobCard(jobId);
+                                    controllerr.editPostForJobCard(jobId);
                                   }
                                 : null,
-                            child: controller.postingJob.isFalse
+                            child: controllerr.postingJob.isFalse
                                 ? Text('Post Job')
                                 : SizedBox(
                                     height: 20,
@@ -549,11 +549,14 @@ ElevatedButton editSection(context, JobCardController controller,
 
                                     if (jobData['quotation_number'] == '' &&
                                         controller.isQuotationExpanded.isTrue) {
+                                      controller.quotationStatus.value = 'New';
                                       await controller
                                           .getCurrentQuotationCounterNumber();
                                     }
                                     if (jobData['job_number'] == '' &&
                                         controller.isJobCardExpanded.isTrue) {
+                                      controller.jobStatus1.value = 'New';
+                                      controller.jobStatus2.value = 'New';
                                       await controller
                                           .getCurrentJobCardCounterNumber();
                                     }

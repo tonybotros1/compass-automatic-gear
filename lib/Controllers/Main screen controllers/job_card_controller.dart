@@ -113,7 +113,6 @@ class JobCardController extends GetxController {
   RxString jobStatus2 = RxString('');
   RxString quotationStatus = RxString('');
   RxBool postingJob = RxBool(false);
-  // RxBool canSaveJobCard = RxBool(true);
   // internal notes section
   RxBool addingNewInternalNotProcess = RxBool(false);
   RxBool jobCardAdded = RxBool(false);
@@ -148,6 +147,7 @@ class JobCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+  
     await getCompanyId();
     getAllCustomers();
     getCarBrands();
@@ -339,7 +339,6 @@ class JobCardController extends GetxController {
     quotationStatus.value = '';
     carBrandLogo.value = '';
     isQuotationExpanded.value = false;
-    // canSaveJobCard.value = true;
     allModels.clear();
     jobCardCounter.value.clear();
     quotationCounter.value.clear();
@@ -551,17 +550,19 @@ class JobCardController extends GetxController {
 
       if (isQuotationExpanded.isTrue && quotationCounter.value.text.isEmpty) {
         quotationStatus.value = 'New';
-        newData['quotation_status'] = quotationStatus;
+        newData['quotation_status'] = 'New';
 
         await getCurrentQuotationCounterNumber();
+        newData['quotation_number'] = quotationCounter.value.text;
       }
       if (isJobCardExpanded.isTrue && jobCardCounter.value.text.isEmpty) {
         jobStatus1.value = 'New';
         jobStatus2.value = 'New';
 
-        newData['job_status_1'] = jobStatus1;
-        newData['job_status_2'] = jobStatus2;
+        newData['job_status_1'] = 'New';
+        newData['job_status_2'] = 'New';
         await getCurrentJobCardCounterNumber();
+        newData['job_number'] = jobCardCounter.value.text;
       }
 
       if (jobCardAdded.isFalse) {
@@ -577,7 +578,6 @@ class JobCardController extends GetxController {
             .update(newData);
       }
       canAddInternalNotesAndInvoiceItems.value = true;
-      // canSaveJobCard.value = false;
       addingNewValue.value = false;
     } catch (e) {
       canAddInternalNotesAndInvoiceItems.value = false;
@@ -729,6 +729,9 @@ class JobCardController extends GetxController {
   void editJobCardAndQuotation(jobId) {
     try {
       FirebaseFirestore.instance.collection('job_cards').doc(jobId).update({
+        'job_status_1': jobStatus1.value,
+        'job_status_2': jobStatus2.value,
+        'quotation_status': quotationStatus.value,
         'car_brand_logo': carBrandLogo.value,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
@@ -987,7 +990,8 @@ class JobCardController extends GetxController {
     validityEndDate.value.text = format.format(newDate);
   }
 
-  Future<void> selectDateContext(BuildContext context, date) async {
+  Future<void> selectDateContext(
+      BuildContext context, TextEditingController date) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -996,9 +1000,10 @@ class JobCardController extends GetxController {
     );
 
     if (picked != null) {
-      date.value.text = textToDate(picked.toString());
+      date.text = textToDate(picked.toString());
     }
   }
+  
 
   void selectCashOrCredit(String selected, bool value) {
     bool isCash = selected == 'cash';

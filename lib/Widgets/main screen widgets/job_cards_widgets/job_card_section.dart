@@ -49,7 +49,7 @@ Container jobCardSection(context,JobCardController controller) {
               suffixIcon: IconButton(
                   onPressed: () {
                     controller.selectDateContext(
-                        context, controller.jobCardDate);
+                        context, controller.jobCardDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               isDate: true,
@@ -66,7 +66,7 @@ Container jobCardSection(context,JobCardController controller) {
               suffixIcon: IconButton(
                   onPressed: () {
                     controller.selectDateContext(
-                        context, controller.invoiceDate);
+                        context, controller.invoiceDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               isDate: true,
@@ -83,7 +83,7 @@ Container jobCardSection(context,JobCardController controller) {
               suffixIcon: IconButton(
                   onPressed: () {
                     controller.selectDateContext(
-                        context, controller.approvalDate);
+                        context, controller.approvalDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               isDate: true,
@@ -99,7 +99,7 @@ Container jobCardSection(context,JobCardController controller) {
             fieldConfig: FieldConfig(
               suffixIcon: IconButton(
                   onPressed: () {
-                    controller.selectDateContext(context, controller.startDate);
+                    controller.selectDateContext(context, controller.startDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               isDate: true,
@@ -116,7 +116,7 @@ Container jobCardSection(context,JobCardController controller) {
               suffixIcon: IconButton(
                   onPressed: () {
                     controller.selectDateContext(
-                        context, controller.finishDate);
+                        context, controller.finishDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               isDate: true,
@@ -135,7 +135,7 @@ Container jobCardSection(context,JobCardController controller) {
               suffixIcon: IconButton(
                   onPressed: () {
                     controller.selectDateContext(
-                        context, controller.deliveryDate);
+                        context, controller.deliveryDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               isDate: true,
@@ -174,7 +174,7 @@ Container jobCardSection(context,JobCardController controller) {
               suffixIcon: IconButton(
                   onPressed: () {
                     controller.selectDateContext(
-                        context, controller.jobWarrentyEndDate);
+                        context, controller.jobWarrentyEndDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               isDate: true,
@@ -232,7 +232,7 @@ Container jobCardSection(context,JobCardController controller) {
               suffixIcon: IconButton(
                   onPressed: () {
                     controller.selectDateContext(
-                        context, controller.jobCancelationDate);
+                        context, controller.jobCancelationDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               isDate: true,
