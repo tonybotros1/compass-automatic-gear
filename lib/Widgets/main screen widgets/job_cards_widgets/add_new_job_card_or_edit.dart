@@ -137,27 +137,27 @@ Widget addNewJobCardOrEdit({
   );
 }
 
-Container statusBox(String status, {hieght = 30,width}) {
+Container statusBox(String status, {hieght = 30, width}) {
   return Container(
     alignment: Alignment.center,
     decoration: BoxDecoration(
+        border: Border.all(color: Colors.white, width: 2),
+        borderRadius: BorderRadius.circular(5),
         color: status == 'New'
             ? Colors.green
             : status == 'Posted'
-                ? Colors.tealAccent
+                ? Colors.teal
                 : status == 'Canceled'
-                    ? Colors.redAccent
+                    ? Colors.red
                     : status == 'Approved'
-                        ? Colors.pinkAccent
+                        ? Color(0xffD2665A)
                         : status == 'Ready'
-                            ? Colors.lightGreenAccent
-                            : status == 'Closed'
+                            ? Color(0xff7886C7)
+                            : status == 'Closed' || status == 'Under Warranty'
                                 ? Colors.black
-                                : status == 'Under Warranty'
-                                    ? Colors.lime
-                                    : Colors.brown),
+                                : Colors.brown),
     height: hieght,
-    width:width,
+    width: width,
     padding: EdgeInsets.symmetric(horizontal: 16),
     child: Text(
       status,

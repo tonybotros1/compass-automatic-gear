@@ -37,11 +37,18 @@ var newButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
-
+var new2ButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Colors.green,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
 
 var postButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.tealAccent,
-  foregroundColor: Colors.white,
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Colors.teal,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -76,8 +83,8 @@ var cancelButtonStyle = ElevatedButton.styleFrom(
 );
 
 var cancelJobButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.redAccent,
-  foregroundColor: Colors.white,
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Colors.red,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -85,8 +92,8 @@ var cancelJobButtonStyle = ElevatedButton.styleFrom(
 );
 
 var internalNotesButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xffFA812F),
-  foregroundColor: Colors.white,
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Color(0xffFA812F),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -94,8 +101,8 @@ var internalNotesButtonStyle = ElevatedButton.styleFrom(
 );
 
 var innvoiceItemsButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.teal,
-  foregroundColor: Colors.white,
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Colors.teal,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -173,20 +180,18 @@ var deleteButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
-
 var approveButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.pinkAccent,
-  foregroundColor: Colors.white,
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Color(0xffD2665A),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
   minimumSize: const Size(100, 40),
 );
 
-
 var readyButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.lightGreenAccent,
-  foregroundColor: Colors.white,
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Color(0xff7886C7),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),

@@ -412,179 +412,393 @@ ElevatedButton editSection(context, JobCardController controller,
             controller.allCountries,
             title: 'vat');
         controller.loadValues(jobData);
-        showDialog(
+        Get.dialog(
             barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                insetPadding:
-                    EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            Dialog(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5)),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                actionsPadding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                content: addNewJobCardOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                ),
-                actions: [
-                  Column(
+                insetPadding: EdgeInsets.all(8),
+                child: LayoutBuilder(builder: (context, constraints) {
+                  return Column(
                     children: [
-                      Row(
-                        spacing: 10,
-                        children: [
-                          ElevatedButton(
-                            style: internalNotesButtonStyle,
-                            onPressed: () async {
-                              internalNotesDialog(
-                                  controller, constraints, jobId);
-                            },
-                            child: Text('Internal Notes'),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: addNewJobCardOrEdit(
+                            controller: controller,
+                            constraints: constraints,
+                            context: context,
                           ),
-                          ElevatedButton(
-                            style: innvoiceItemsButtonStyle,
-                            onPressed: () {
-                              controller.getAllInvoiceItems(jobId);
-                              showDialog(
-                                  barrierDismissible: false,
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      actionsPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                      content: invoiceItemsDialog(
-                                          constraints: constraints,
-                                          context: context,
-                                          jobId: jobId),
-                                      actions: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 10),
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              Get.back();
-                                            },
-                                            style: cancelButtonStyle,
-                                            child: const Text(
-                                              'Exit',
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  });
-                            },
-                            child: Text('Invoice Items'),
-                          ),
-                          GetX<JobCardController>(builder: (controller) {
-                            return ElevatedButton(
-                                style: approveButtonStyle,
-                                onPressed:
-                                    controller.jobStatus1.value == 'New' &&
-                                            controller.jobStatus2.value !=
-                                                'Approved'
-                                        ? () {
-                                            controller.approvalDate.value.text =
-                                                textToDate(DateTime.now());
-                                            controller.jobStatus2.value =
-                                                'Approved';
-                                            controller.editApproveForJobCard(
-                                                jobId, 'Approved');
-                                          }
-                                        : null,
-                                child: Text('Approve'));
-                          }),
-                          GetX<JobCardController>(builder: (controller) {
-                            return ElevatedButton(
-                                style: readyButtonStyle,
-                                onPressed: controller.jobStatus1.value ==
-                                            'New' &&
-                                        controller.jobStatus2.value != 'Ready'
-                                    ? () {
-                                        controller.finishDate.value.text =
-                                            textToDate(DateTime.now());
-                                        controller.jobStatus2.value = 'Ready';
-                                        controller.editReadyForJobCard(
-                                            jobId, 'Ready');
-                                      }
-                                    : null,
-                                child: Text('Ready'));
-                          }),
-                          GetX<JobCardController>(builder: (controller) {
-                            return ElevatedButton(
-                                style: newButtonStyle,
-                                onPressed:
-                                    controller.jobStatus1.value == 'New' &&
-                                            controller.jobStatus2.value != 'New'
-                                        ? () {
-                                            controller.editNewForJobCard(
-                                                jobId, 'New');
-                                          }
-                                        : null,
-                                child: Text('New'));
-                          }),
-                          GetX<JobCardController>(builder: (controllerr) {
-                            return ElevatedButton(
-                                style: postButtonStyle,
-                                onPressed: controllerr.jobStatus1.value !=
-                                            'Posted' &&
-                                        controllerr.jobWarrentyEndDate.value
-                                            .text.isNotEmpty &&
-                                        controllerr.jobStatus1.value !=
-                                            'Canceled'
-                                    ? () {
-                                        controllerr.editPostForJobCard(jobId);
-                                      }
-                                    : null,
-                                child: controllerr.postingJob.isFalse
-                                    ? Text('Post Job')
-                                    : SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      ));
-                          }),
-                          GetX<JobCardController>(builder: (controller) {
-                            return ElevatedButton(
-                                style: cancelJobButtonStyle,
-                                onPressed:
-                                    controller.jobStatus1.value != 'Canceled' &&
-                                            controller.jobStatus2.value !=
-                                                'Canceled' &&
-                                            controller.jobStatus1.value != ''
-                                        ? () {
-                                            controller.editCancelForJobCard(
-                                                jobId, 'Canceled');
-                                          }
-                                        : null,
-                                child: Text('Cancel Job'));
-                          }),
-                          ElevatedButton(
-                              style: deleteButtonStyle,
-                              onPressed: () {
-                                alertDialog(
-                                    context: context,
-                                    controller: controller,
-                                    content:
-                                        "Theis will be deleted permanently",
-                                    onPressed: () {
-                                      controller.deleteJobCard(jobId);
-                                    });
-                              },
-                              child: Text('Delete')),
-                          Spacer(),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child:
-                                GetX<JobCardController>(builder: (controller) {
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        height: null,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          spacing: 10,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(color: Colors.grey)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 10,
+                                children: [
+                                  Row(
+                                    spacing: 10,
+                                    children: [
+                                      ElevatedButton(
+                                        style: internalNotesButtonStyle,
+                                        onPressed: () async {
+                                          internalNotesDialog(
+                                              controller, constraints, jobId);
+                                        },
+                                        child: Text('Internal Notes'),
+                                      ),
+                                      ElevatedButton(
+                                        style: innvoiceItemsButtonStyle,
+                                        onPressed: () {
+                                          controller.getAllInvoiceItems(jobId);
+                                          showDialog(
+                                              barrierDismissible: false,
+                                              context: context,
+                                              builder: (context) {
+                                                return AlertDialog(
+                                                  actionsPadding:
+                                                      const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 20),
+                                                  content: invoiceItemsDialog(
+                                                      constraints: constraints,
+                                                      context: context,
+                                                      jobId: jobId),
+                                                  actions: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              bottom: 10),
+                                                      child: ElevatedButton(
+                                                        onPressed: () {
+                                                          Get.back();
+                                                        },
+                                                        style:
+                                                            cancelButtonStyle,
+                                                        child: const Text(
+                                                          'Exit',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              });
+                                        },
+                                        child: Text('Invoice Items'),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      ElevatedButton(
+                                          style: new2ButtonStyle,
+                                          onPressed: () {
+                                            EntityInformationsController
+                                                otherController = Get.put(
+                                                    EntityInformationsController());
+
+                                            otherController.clearAllVariables();
+
+                                            showDialog(
+                                                barrierDismissible: false,
+                                                context: context,
+                                                builder: (context) {
+                                                  return AlertDialog(
+                                                    actionsPadding:
+                                                        const EdgeInsets
+                                                            .symmetric(
+                                                            horizontal: 20),
+                                                    content: addNewEntityOrEdit(
+                                                      controller:
+                                                          otherController,
+                                                      constraints: constraints,
+                                                      context: context,
+                                                    ),
+                                                    actions: [
+                                                      Obx(() => Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical:
+                                                                        16),
+                                                            child:
+                                                                ElevatedButton(
+                                                              onPressed:
+                                                                  otherController
+                                                                          .addingNewEntity
+                                                                          .value
+                                                                      ? null
+                                                                      : () async {
+                                                                          await otherController
+                                                                              .addNewEntity();
+                                                                        },
+                                                              style:
+                                                                  saveButtonStyle,
+                                                              child: otherController
+                                                                          .addingNewEntity
+                                                                          .value ==
+                                                                      false
+                                                                  ? const Text(
+                                                                      'Save',
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              Colors.white),
+                                                                    )
+                                                                  : SizedBox(
+                                                                      height:
+                                                                          20,
+                                                                      width: 20,
+                                                                      child:
+                                                                          CircularProgressIndicator(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        strokeWidth:
+                                                                            2,
+                                                                      ),
+                                                                    ),
+                                                            ),
+                                                          )),
+                                                      ElevatedButton(
+                                                          onPressed: () {
+                                                            Get.back();
+                                                          },
+                                                          style:
+                                                              cancelButtonStyle,
+                                                          child: const Text(
+                                                            'Cancel',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          )),
+                                                    ],
+                                                  );
+                                                });
+                                          },
+                                          child: Text('New Customer')),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(color: Colors.grey)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 10,
+                                children: [
+                                  Row(
+                                    spacing: 10,
+                                    children: [
+                                      GetX<JobCardController>(
+                                          builder: (controller) {
+                                        return ElevatedButton(
+                                            style: new2ButtonStyle,
+                                            onPressed:
+                                                controller.jobStatus1.value ==
+                                                            'New' &&
+                                                        controller.jobStatus2
+                                                                .value !=
+                                                            'New'
+                                                    ? () {
+                                                        controller
+                                                            .editNewForJobCard(
+                                                                jobId, 'New');
+                                                      }
+                                                    : null,
+                                            child: Text('New'));
+                                      }),
+                                      GetX<JobCardController>(
+                                          builder: (controller) {
+                                        return ElevatedButton(
+                                            style: approveButtonStyle,
+                                            onPressed: controller
+                                                            .jobStatus1.value ==
+                                                        'New' &&
+                                                    controller
+                                                            .jobStatus2.value !=
+                                                        'Approved'
+                                                ? () {
+                                                    controller.approvalDate
+                                                            .value.text =
+                                                        textToDate(
+                                                            DateTime.now());
+                                                    controller.jobStatus2
+                                                        .value = 'Approved';
+                                                    controller
+                                                        .editApproveForJobCard(
+                                                            jobId, 'Approved');
+                                                  }
+                                                : null,
+                                            child: Text('Approve'));
+                                      }),
+                                      GetX<JobCardController>(
+                                          builder: (controller) {
+                                        return ElevatedButton(
+                                            style: readyButtonStyle,
+                                            onPressed:
+                                                controller.jobStatus1.value ==
+                                                            'New' &&
+                                                        controller.jobStatus2
+                                                                .value !=
+                                                            'Ready'
+                                                    ? () {
+                                                        controller.finishDate
+                                                                .value.text =
+                                                            textToDate(
+                                                                DateTime.now());
+                                                        controller.jobStatus2
+                                                            .value = 'Ready';
+                                                        controller
+                                                            .editReadyForJobCard(
+                                                                jobId, 'Ready');
+                                                      }
+                                                    : null,
+                                            child: Text('Ready'));
+                                      }),
+                                    ],
+                                  ),
+                                  Row(
+                                    spacing: 10,
+                                    children: [
+                                      GetX<JobCardController>(
+                                          builder: (controllerr) {
+                                        return ElevatedButton(
+                                            style: postButtonStyle,
+                                            onPressed:
+                                                controllerr.jobStatus1.value !=
+                                                            'Posted' &&
+                                                        controllerr
+                                                            .jobWarrentyEndDate
+                                                            .value
+                                                            .text
+                                                            .isNotEmpty &&
+                                                        controllerr.jobStatus1
+                                                                .value !=
+                                                            'Canceled'
+                                                    ? () {
+                                                        controllerr
+                                                            .editPostForJobCard(
+                                                                jobId);
+                                                      }
+                                                    : null,
+                                            child:
+                                                controllerr.postingJob.isFalse
+                                                    ? Text('Post Job')
+                                                    : SizedBox(
+                                                        height: 20,
+                                                        width: 20,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                        ),
+                                                      ));
+                                      }),
+                                      GetX<JobCardController>(
+                                          builder: (controller) {
+                                        return ElevatedButton(
+                                            style: cancelJobButtonStyle,
+                                            onPressed: controller
+                                                            .jobStatus1.value !=
+                                                        'Canceled' &&
+                                                    controller
+                                                            .jobStatus2.value !=
+                                                        'Canceled' &&
+                                                    controller
+                                                            .jobStatus1.value !=
+                                                        ''
+                                                ? () {
+                                                    controller
+                                                        .editCancelForJobCard(
+                                                            jobId, 'Canceled');
+                                                  }
+                                                : null,
+                                            child: Text('Cancel Job'));
+                                      }),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(color: Colors.grey)),
+                              child: Column(
+                                spacing: 10,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GetX<JobCardController>(
+                                      builder: (controller) {
+                                    return ElevatedButton(
+                                        style: postButtonStyle,
+                                        onPressed: controller.quotationStatus
+                                                        .value !=
+                                                    'Posted' &&
+                                                controller.quotationStatus
+                                                        .value !=
+                                                    'Canceled' &&
+                                                controller.quotationStatus.value
+                                                    .isNotEmpty
+                                            ? () {
+                                                controller.editPostForQuotation(
+                                                    jobId);
+                                              }
+                                            : null,
+                                        child: Text('Post Quotation'));
+                                  }),
+                                  GetX<JobCardController>(
+                                      builder: (controller) {
+                                    return ElevatedButton(
+                                        style: cancelJobButtonStyle,
+                                        onPressed:
+                                            controller.quotationStatus.value !=
+                                                        'Canceled' &&
+                                                    controller.quotationStatus
+                                                        .value.isNotEmpty
+                                                ? () {
+                                                    controller
+                                                        .editCancelForQuotation(
+                                                            jobId);
+                                                  }
+                                                : null,
+                                        child: Text('Cancel Quotation'));
+                                  }),
+                                ],
+                              ),
+                            ),
+                            ElevatedButton(
+                                style: deleteButtonStyle,
+                                onPressed: () {
+                                  alertDialog(
+                                      context: context,
+                                      controller: controller,
+                                      content:
+                                          "Theis will be deleted permanently",
+                                      onPressed: () {
+                                        controller.deleteJobCard(jobId);
+                                      });
+                                },
+                                child: Text('Delete')),
+                            Spacer(),
+                            GetX<JobCardController>(builder: (controller) {
                               return ElevatedButton(
                                 onPressed: controller.addingNewValue.value
                                     ? null
@@ -631,128 +845,21 @@ ElevatedButton editSection(context, JobCardController controller,
                                       ),
                               );
                             }),
-                          ),
-                          ElevatedButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              style: cancelButtonStyle,
-                              child: const Text(
-                                'Exit',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                        ],
-                      ),
-                      Row(
-                        spacing: 10,
-                        children: [
-                          ElevatedButton(
-                              style: newButtonStyle,
-                              onPressed: () {
-                                EntityInformationsController otherController =
-                                    Get.put(EntityInformationsController());
-
-                                otherController.clearAllVariables();
-
-                                showDialog(
-                                    barrierDismissible: false,
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        actionsPadding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 20),
-                                        content: addNewEntityOrEdit(
-                                          controller: otherController,
-                                          constraints: constraints,
-                                          context: context,
-                                        ),
-                                        actions: [
-                                          Obx(() => Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 16),
-                                                child: ElevatedButton(
-                                                  onPressed: otherController
-                                                          .addingNewEntity.value
-                                                      ? null
-                                                      : () async {
-                                                          await otherController
-                                                              .addNewEntity();
-                                                        },
-                                                  style: saveButtonStyle,
-                                                  child: otherController
-                                                              .addingNewEntity
-                                                              .value ==
-                                                          false
-                                                      ? const Text(
-                                                          'Save',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white),
-                                                        )
-                                                      : SizedBox(
-                                                          height: 20,
-                                                          width: 20,
-                                                          child:
-                                                              CircularProgressIndicator(
-                                                            color: Colors.white,
-                                                            strokeWidth: 2,
-                                                          ),
-                                                        ),
-                                                ),
-                                              )),
-                                          ElevatedButton(
-                                              onPressed: () {
-                                                Get.back();
-                                              },
-                                              style: cancelButtonStyle,
-                                              child: const Text(
-                                                'Cancel',
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              )),
-                                        ],
-                                      );
-                                    });
-                              },
-                              child: Text('New Customer')),
-                          GetX<JobCardController>(builder: (controller) {
-                            return ElevatedButton(
-                                style: postButtonStyle,
-                                onPressed: controller.quotationStatus.value !=
-                                            'Posted' &&
-                                        controller.quotationStatus.value !=
-                                            'Canceled' &&
-                                        controller
-                                            .quotationStatus.value.isNotEmpty
-                                    ? () {
-                                        controller.editPostForQuotation(jobId);
-                                      }
-                                    : null,
-                                child: Text('Post Quotation'));
-                          }),
-                          GetX<JobCardController>(builder: (controller) {
-                            return ElevatedButton(
-                                style: cancelJobButtonStyle,
-                                onPressed: controller.quotationStatus.value !=
-                                            'Canceled' &&
-                                        controller
-                                            .quotationStatus.value.isNotEmpty
-                                    ? () {
-                                        controller
-                                            .editCancelForQuotation(jobId);
-                                      }
-                                    : null,
-                                child: Text('Cancel Quotation'));
-                          }),
-                        ],
+                            ElevatedButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                style: cancelButtonStyle,
+                                child: const Text(
+                                  'Exit',
+                                  style: TextStyle(color: Colors.white),
+                                )),
+                          ],
+                        ),
                       )
                     ],
-                  ),
-                ],
-              );
-            });
+                  );
+                })));
       },
       child: const Text('Edit'));
 }
