@@ -284,9 +284,12 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
         DataCell(textForDataRowInTable(text: '${jobData['job_date']}')),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_date']}')),
-        DataCell(statusBox('${jobData['job_status_1']}', hieght: 35)),
-        DataCell(statusBox('${jobData['job_status_2']}', hieght: 35)),
-        DataCell(statusBox('${jobData['quotation_status']}', hieght: 35)),
+        DataCell(
+            statusBox('${jobData['job_status_1']}', hieght: 35, width: 100)),
+        DataCell(
+            statusBox('${jobData['job_status_2']}', hieght: 35, width: 100)),
+        DataCell(statusBox('${jobData['quotation_status']}',
+            hieght: 35, width: 100)),
         DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
         DataCell(
           FutureBuilder<String>(

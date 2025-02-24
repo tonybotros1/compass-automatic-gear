@@ -137,7 +137,7 @@ Widget addNewJobCardOrEdit({
   );
 }
 
-Container statusBox(String status, {hieght = 30}) {
+Container statusBox(String status, {hieght = 30,width}) {
   return Container(
     alignment: Alignment.center,
     decoration: BoxDecoration(
@@ -157,7 +157,7 @@ Container statusBox(String status, {hieght = 30}) {
                                     ? Colors.lime
                                     : Colors.brown),
     height: hieght,
-    width: null,
+    width:width,
     padding: EdgeInsets.symmetric(horizontal: 16),
     child: Text(
       status,
