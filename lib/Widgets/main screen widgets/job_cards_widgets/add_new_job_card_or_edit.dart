@@ -137,11 +137,10 @@ Widget addNewJobCardOrEdit({
   );
 }
 
-Container statusBox(String status) {
+Container statusBox(String status, {hieght = 30}) {
   return Container(
     alignment: Alignment.center,
     decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
         color: status == 'New'
             ? Colors.green
             : status == 'Posted'
@@ -157,7 +156,7 @@ Container statusBox(String status) {
                                 : status == 'Under Warranty'
                                     ? Colors.lime
                                     : Colors.brown),
-    height: 30,
+    height: hieght,
     width: null,
     padding: EdgeInsets.symmetric(horizontal: 16),
     child: Text(

@@ -157,6 +157,21 @@ Widget tableOfScreens({
                   ),
                   DataColumn(
                     label: AutoSizedText(
+                        text: 'Job Status 1', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
+                    label: AutoSizedText(
+                        text: 'Job Status 2', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
+                    label: AutoSizedText(
+                        text: 'Quotation Status', constraints: constraints),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
+                    label: AutoSizedText(
                         text: 'LPO No.', constraints: constraints),
                     // onSort: controller.onSort,
                   ),
@@ -269,6 +284,9 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
         DataCell(textForDataRowInTable(text: '${jobData['job_date']}')),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_date']}')),
+        DataCell(statusBox('${jobData['job_status_1']}', hieght: 35)),
+        DataCell(statusBox('${jobData['job_status_2']}', hieght: 35)),
+        DataCell(statusBox('${jobData['quotation_status']}', hieght: 35)),
         DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
         DataCell(
           FutureBuilder<String>(
