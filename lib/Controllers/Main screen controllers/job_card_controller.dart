@@ -491,9 +491,9 @@ class JobCardController extends GetxController {
     try {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
-        'job_status_1': '',
-        'job_status_2': '',
-        'quotation_status': '',
+        'job_status_1': jobStatus1.value,
+        'job_status_2': jobStatus2.value,
+        'quotation_status': quotationStatus.value,
         'car_brand_logo': carBrandLogo.value,
         'company_id': companyId.value,
         'car_brand': carBrandId.value,
