@@ -147,6 +147,10 @@ class JobCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    jobWarrentyEndDate.value.addListener(() {
+      // Refresh the Rx to notify GetX that something changed
+      jobWarrentyEndDate.refresh();
+    });
     await getCompanyId();
     getAllCustomers();
     getCarBrands();

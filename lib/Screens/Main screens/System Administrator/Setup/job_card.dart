@@ -537,7 +537,8 @@ ElevatedButton editSection(context, JobCardController controller,
                                 onPressed:
                                     controller.jobStatus1.value != 'Canceled' &&
                                             controller.jobStatus2.value !=
-                                                'Canceled'
+                                                'Canceled' &&
+                                            controller.jobStatus1.value != ''
                                         ? () {
                                             controller.editCancelForJobCard(
                                                 jobId, 'Canceled');
@@ -702,8 +703,8 @@ ElevatedButton editSection(context, JobCardController controller,
                                             'Posted' &&
                                         controller.quotationStatus.value !=
                                             'Canceled' &&
-                                        controller.quotationCounter.value.text
-                                            .isNotEmpty
+                                        controller
+                                            .quotationStatus.value.isNotEmpty
                                     ? () {
                                         controller.editPostForQuotation(jobId);
                                       }
@@ -715,8 +716,8 @@ ElevatedButton editSection(context, JobCardController controller,
                                 style: cancelJobButtonStyle,
                                 onPressed: controller.quotationStatus.value !=
                                             'Canceled' &&
-                                        controller.quotationCounter.value.text
-                                            .isNotEmpty
+                                        controller
+                                            .quotationStatus.value.isNotEmpty
                                     ? () {
                                         controller
                                             .editCancelForQuotation(jobId);
