@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart'
+    show EntityInformationsController;
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart'
+    show addNewEntityOrEdit;
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/internal_notes_widget.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/invoice_items_widget.dart';
@@ -622,7 +626,74 @@ ElevatedButton editSection(context, JobCardController controller,
                         children: [
                           ElevatedButton(
                               style: newButtonStyle,
-                              onPressed: () {},
+                              onPressed: () {
+                                EntityInformationsController otherController =
+                                    Get.put(EntityInformationsController());
+
+                                otherController.clearAllVariables();
+
+                                showDialog(
+                                    barrierDismissible: false,
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        actionsPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 20),
+                                        content: addNewEntityOrEdit(
+                                          controller: otherController,
+                                          constraints: constraints,
+                                          context: context,
+                                        ),
+                                        actions: [
+                                          Obx(() => Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 16),
+                                                child: ElevatedButton(
+                                                  onPressed: otherController
+                                                          .addingNewEntity.value
+                                                      ? null
+                                                      : () async {
+                                                          await otherController
+                                                              .addNewEntity();
+                                                        },
+                                                  style: saveButtonStyle,
+                                                  child: otherController
+                                                              .addingNewEntity
+                                                              .value ==
+                                                          false
+                                                      ? const Text(
+                                                          'Save',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white),
+                                                        )
+                                                      : SizedBox(
+                                                          height: 20,
+                                                          width: 20,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                            color: Colors.white,
+                                                            strokeWidth: 2,
+                                                          ),
+                                                        ),
+                                                ),
+                                              )),
+                                          ElevatedButton(
+                                              onPressed: () {
+                                                Get.back();
+                                              },
+                                              style: cancelButtonStyle,
+                                              child: const Text(
+                                                'Cancel',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              )),
+                                        ],
+                                      );
+                                    });
+                              },
                               child: Text('New Customer')),
                           GetX<JobCardController>(builder: (controller) {
                             return ElevatedButton(

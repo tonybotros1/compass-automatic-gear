@@ -147,7 +147,6 @@ class JobCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-
     await getCompanyId();
     getAllCustomers();
     getCarBrands();
@@ -899,7 +898,7 @@ class JobCardController extends GetxController {
     }
   }
 
-   editCancelForQuotation(jobId) async {
+  editCancelForQuotation(jobId) async {
     try {
       await FirebaseFirestore.instance
           .collection('job_cards')

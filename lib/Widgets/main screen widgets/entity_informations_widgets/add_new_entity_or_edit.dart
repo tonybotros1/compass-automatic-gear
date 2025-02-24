@@ -13,9 +13,6 @@ Widget addNewEntityOrEdit({
   required BoxConstraints constraints,
   required BuildContext context,
   required EntityInformationsController controller,
-  TextEditingController? name,
-  TextEditingController? groupName,
-  TextEditingController? typrOfBusiness,
 }) {
   return SizedBox(
     height: constraints.maxHeight,
