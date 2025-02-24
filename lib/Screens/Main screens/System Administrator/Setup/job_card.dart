@@ -392,207 +392,269 @@ ElevatedButton editSection(context, JobCardController controller,
             context: context,
             builder: (context) {
               return AlertDialog(
+                insetPadding:
+                    EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5)),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 10),
+                actionsPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 content: addNewJobCardOrEdit(
                   controller: controller,
                   constraints: constraints,
                   context: context,
                 ),
                 actions: [
-                  Row(
-                    spacing: 10,
+                  Column(
                     children: [
-                      ElevatedButton(
-                        style: internalNotesButtonStyle,
-                        onPressed: () async {
-                          internalNotesDialog(controller, constraints, jobId);
-                        },
-                        child: Text('Internal Notes'),
-                      ),
-                      ElevatedButton(
-                        style: innvoiceItemsButtonStyle,
-                        onPressed: () {
-                          controller.getAllInvoiceItems(jobId);
-                          showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  actionsPadding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
-                                  content: invoiceItemsDialog(
-                                      constraints: constraints,
-                                      context: context,
-                                      jobId: jobId),
-                                  actions: [
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 10),
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          Get.back();
-                                        },
-                                        style: cancelButtonStyle,
-                                        child: const Text(
-                                          'Exit',
-                                          style: TextStyle(color: Colors.white),
+                      Row(
+                        spacing: 10,
+                        children: [
+                          ElevatedButton(
+                            style: internalNotesButtonStyle,
+                            onPressed: () async {
+                              internalNotesDialog(
+                                  controller, constraints, jobId);
+                            },
+                            child: Text('Internal Notes'),
+                          ),
+                          ElevatedButton(
+                            style: innvoiceItemsButtonStyle,
+                            onPressed: () {
+                              controller.getAllInvoiceItems(jobId);
+                              showDialog(
+                                  barrierDismissible: false,
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      actionsPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 20),
+                                      content: invoiceItemsDialog(
+                                          constraints: constraints,
+                                          context: context,
+                                          jobId: jobId),
+                                      actions: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 10),
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              Get.back();
+                                            },
+                                            style: cancelButtonStyle,
+                                            child: const Text(
+                                              'Exit',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  });
+                            },
+                            child: Text('Invoice Items'),
+                          ),
+                          GetX<JobCardController>(builder: (controller) {
+                            return ElevatedButton(
+                                style: approveButtonStyle,
+                                onPressed:
+                                    controller.jobStatus1.value == 'New' &&
+                                            controller.jobStatus2.value !=
+                                                'Approved'
+                                        ? () {
+                                            controller.approvalDate.value.text =
+                                                textToDate(DateTime.now());
+                                            controller.jobStatus2.value =
+                                                'Approved';
+                                            controller.editApproveForJobCard(
+                                                jobId, 'Approved');
+                                          }
+                                        : null,
+                                child: Text('Approve'));
+                          }),
+                          GetX<JobCardController>(builder: (controller) {
+                            return ElevatedButton(
+                                style: readyButtonStyle,
+                                onPressed: controller.jobStatus1.value ==
+                                            'New' &&
+                                        controller.jobStatus2.value != 'Ready'
+                                    ? () {
+                                        controller.finishDate.value.text =
+                                            textToDate(DateTime.now());
+                                        controller.jobStatus2.value = 'Ready';
+                                        controller.editReadyForJobCard(
+                                            jobId, 'Ready');
+                                      }
+                                    : null,
+                                child: Text('Ready'));
+                          }),
+                          GetX<JobCardController>(builder: (controller) {
+                            return ElevatedButton(
+                                style: newButtonStyle,
+                                onPressed:
+                                    controller.jobStatus1.value == 'New' &&
+                                            controller.jobStatus2.value != 'New'
+                                        ? () {
+                                            controller.editNewForJobCard(
+                                                jobId, 'New');
+                                          }
+                                        : null,
+                                child: Text('New'));
+                          }),
+                          GetX<JobCardController>(builder: (controllerr) {
+                            return ElevatedButton(
+                                style: postButtonStyle,
+                                onPressed: controllerr.jobStatus1.value !=
+                                            'Posted' &&
+                                        controllerr.jobWarrentyEndDate.value
+                                            .text.isNotEmpty &&
+                                        controllerr.jobStatus1.value !=
+                                            'Canceled'
+                                    ? () {
+                                        controllerr.editPostForJobCard(jobId);
+                                      }
+                                    : null,
+                                child: controllerr.postingJob.isFalse
+                                    ? Text('Post Job')
+                                    : SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ));
+                          }),
+                          GetX<JobCardController>(builder: (controller) {
+                            return ElevatedButton(
+                                style: cancelJobButtonStyle,
+                                onPressed:
+                                    controller.jobStatus1.value != 'Canceled' &&
+                                            controller.jobStatus2.value !=
+                                                'Canceled'
+                                        ? () {
+                                            controller.editCancelForJobCard(
+                                                jobId, 'Canceled');
+                                          }
+                                        : null,
+                                child: Text('Cancel Job'));
+                          }),
+                          ElevatedButton(
+                              style: deleteButtonStyle,
+                              onPressed: () {
+                                alertDialog(
+                                    context: context,
+                                    controller: controller,
+                                    content:
+                                        "Theis will be deleted permanently",
+                                    onPressed: () {
+                                      controller.deleteJobCard(jobId);
+                                    });
+                              },
+                              child: Text('Delete')),
+                          Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child:
+                                GetX<JobCardController>(builder: (controller) {
+                              return ElevatedButton(
+                                onPressed: controller.addingNewValue.value
+                                    ? null
+                                    : () async {
+                                        controller.addingNewValue.value = true;
+
+                                        if (jobData['quotation_number'] == '' &&
+                                            controller
+                                                .isQuotationExpanded.isTrue) {
+                                          controller.quotationStatus.value =
+                                              'New';
+                                          await controller
+                                              .getCurrentQuotationCounterNumber();
+                                        }
+                                        if (jobData['job_number'] == '' &&
+                                            controller
+                                                .isJobCardExpanded.isTrue) {
+                                          controller.jobStatus1.value = 'New';
+                                          controller.jobStatus2.value = 'New';
+                                          await controller
+                                              .getCurrentJobCardCounterNumber();
+                                        }
+                                        controller
+                                            .editJobCardAndQuotation(jobId);
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                ),
+                                child: controller.addingNewValue.value == false
+                                    ? const Text(
+                                        'Save',
+                                        style: TextStyle(color: Colors.white),
+                                      )
+                                    : SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              });
-                        },
-                        child: Text('Invoice Items'),
+                              );
+                            }),
+                          ),
+                          ElevatedButton(
+                              onPressed: () {
+                                Get.back();
+                              },
+                              style: cancelButtonStyle,
+                              child: const Text(
+                                'Exit',
+                                style: TextStyle(color: Colors.white),
+                              )),
+                        ],
                       ),
-                      GetX<JobCardController>(builder: (controller) {
-                        return ElevatedButton(
-                            style: approveButtonStyle,
-                            onPressed: controller.jobStatus1.value == 'New' &&
-                                    controller.jobStatus2.value != 'Approved'
-                                ? () {
-                                    controller.approvalDate.value.text =
-                                        textToDate(DateTime.now());
-                                    controller.jobStatus2.value = 'Approved';
-                                    controller.editApproveForJobCard(
-                                        jobId, 'Approved');
-                                  }
-                                : null,
-                            child: Text('Approve'));
-                      }),
-                      GetX<JobCardController>(builder: (controller) {
-                        return ElevatedButton(
-                            style: readyButtonStyle,
-                            onPressed: controller.jobStatus1.value == 'New' &&
-                                    controller.jobStatus2.value != 'Ready'
-                                ? () {
-                                    controller.finishDate.value.text =
-                                        textToDate(DateTime.now());
-                                    controller.jobStatus2.value = 'Ready';
-                                    controller.editReadyForJobCard(
-                                        jobId, 'Ready');
-                                  }
-                                : null,
-                            child: Text('Ready'));
-                      }),
-                      GetX<JobCardController>(builder: (controller) {
-                        return ElevatedButton(
-                            style: newButtonStyle,
-                            onPressed: controller.jobStatus1.value == 'New' &&
-                                    controller.jobStatus2.value != 'New'
-                                ? () {
-                                    controller.editNewForJobCard(jobId, 'New');
-                                  }
-                                : null,
-                            child: Text('New'));
-                      }),
-                      GetX<JobCardController>(builder: (controllerr) {
-                        return ElevatedButton(
-                            style: postButtonStyle,
-                            onPressed: controllerr.jobStatus1.value !=
-                                        'Posted' &&
-                                    controllerr.jobWarrentyEndDate.value.text.isNotEmpty
-                                        &&
-                                    controllerr.jobStatus1.value != 'Canceled'
-                                ? () {
-                                    controllerr.editPostForJobCard(jobId);
-                                  }
-                                : null,
-                            child: controllerr.postingJob.isFalse
-                                ? Text('Post Job')
-                                : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ));
-                      }),
-                      GetX<JobCardController>(builder: (controller) {
-                        return ElevatedButton(
-                            style: cancelJobButtonStyle,
-                            onPressed: controller.jobStatus1.value !=
-                                        'Canceled' &&
-                                    controller.jobStatus2.value != 'Canceled'
-                                ? () {
-                                    controller.editCancelForJobCard(
-                                        jobId, 'Canceled');
-                                  }
-                                : null,
-                            child: Text('Cancel Job'));
-                      }),
-                      ElevatedButton(
-                          style: deleteButtonStyle,
-                          onPressed: () {
-                            alertDialog(
-                                context: context,
-                                controller: controller,
-                                content: "Theis will be deleted permanently",
-                                onPressed: () {
-                                  controller.deleteJobCard(jobId);
-                                });
-                          },
-                          child: Text('Delete')),
-                      Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: GetX<JobCardController>(builder: (controller) {
-                          return ElevatedButton(
-                            onPressed: controller.addingNewValue.value
-                                ? null
-                                : () async {
-                                    controller.addingNewValue.value = true;
-
-                                    if (jobData['quotation_number'] == '' &&
-                                        controller.isQuotationExpanded.isTrue) {
-                                      controller.quotationStatus.value = 'New';
-                                      await controller
-                                          .getCurrentQuotationCounterNumber();
-                                    }
-                                    if (jobData['job_number'] == '' &&
-                                        controller.isJobCardExpanded.isTrue) {
-                                      controller.jobStatus1.value = 'New';
-                                      controller.jobStatus2.value = 'New';
-                                      await controller
-                                          .getCurrentJobCardCounterNumber();
-                                    }
-                                    controller.editJobCardAndQuotation(jobId);
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          );
-                        }),
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          style: cancelButtonStyle,
-                          child: const Text(
-                            'Exit',
-                            style: TextStyle(color: Colors.white),
-                          )),
+                      Row(
+                        spacing: 10,
+                        children: [
+                          ElevatedButton(
+                              style: newButtonStyle,
+                              onPressed: () {},
+                              child: Text('New Customer')),
+                          GetX<JobCardController>(builder: (controller) {
+                            return ElevatedButton(
+                                style: postButtonStyle,
+                                onPressed: controller.quotationStatus.value !=
+                                            'Posted' &&
+                                        controller.quotationStatus.value !=
+                                            'Canceled' &&
+                                        controller.quotationCounter.value.text
+                                            .isNotEmpty
+                                    ? () {
+                                        controller.editPostForQuotation(jobId);
+                                      }
+                                    : null,
+                                child: Text('Post Quotation'));
+                          }),
+                          GetX<JobCardController>(builder: (controller) {
+                            return ElevatedButton(
+                                style: cancelJobButtonStyle,
+                                onPressed: controller.quotationStatus.value !=
+                                            'Canceled' &&
+                                        controller.quotationCounter.value.text
+                                            .isNotEmpty
+                                    ? () {
+                                        controller
+                                            .editCancelForQuotation(jobId);
+                                      }
+                                    : null,
+                                child: Text('Cancel Quotation'));
+                          }),
+                        ],
+                      )
                     ],
                   ),
                 ],

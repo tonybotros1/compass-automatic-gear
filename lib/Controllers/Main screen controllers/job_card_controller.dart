@@ -147,7 +147,7 @@ class JobCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-  
+
     await getCompanyId();
     getAllCustomers();
     getCarBrands();
@@ -887,6 +887,30 @@ class JobCardController extends GetxController {
     }
   }
 
+  editPostForQuotation(jobId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({'quotation_status': 'Posted'});
+      quotationStatus.value = 'Posted';
+    } catch (e) {
+      //
+    }
+  }
+
+   editCancelForQuotation(jobId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({'quotation_status': 'Canceled'});
+      quotationStatus.value = 'Canceled';
+    } catch (e) {
+      //
+    }
+  }
+
 // this function is to see if the warrant date is end or not
   bool isBeforeToday(String dateStr) {
     DateFormat format = DateFormat("dd-MM-yyyy");
@@ -1003,7 +1027,6 @@ class JobCardController extends GetxController {
       date.text = textToDate(picked.toString());
     }
   }
-  
 
   void selectCashOrCredit(String selected, bool value) {
     bool isCash = selected == 'cash';
