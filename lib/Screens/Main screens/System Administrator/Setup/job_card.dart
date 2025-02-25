@@ -280,8 +280,9 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        
                         AutoSizedText(text: 'Plate', constraints: constraints),
-                        AutoSizedText(text: 'Number', constraints: constraints),
+                        Text('Number',maxLines: 1,)
                       ],
                     ),
                     // onSort: controller.onSort,
@@ -949,7 +950,7 @@ ElevatedButton editSection(context, JobCardController controller,
                                                             .isNotEmpty &&
                                                         controllerr.jobStatus1
                                                                 .value !=
-                                                            'Canceled'
+                                                            'Cancelled'
                                                     ? () {
                                                         controllerr
                                                             .editPostForJobCard(
@@ -977,17 +978,17 @@ ElevatedButton editSection(context, JobCardController controller,
                                             style: cancelJobButtonStyle,
                                             onPressed: controller
                                                             .jobStatus1.value !=
-                                                        'Canceled' &&
+                                                        'Cancelled' &&
                                                     controller
                                                             .jobStatus2.value !=
-                                                        'Canceled' &&
+                                                        'Cancelled' &&
                                                     controller
                                                             .jobStatus1.value !=
                                                         ''
                                                 ? () {
                                                     controller
                                                         .editCancelForJobCard(
-                                                            jobId, 'Canceled');
+                                                            jobId, 'Cancelled');
                                                   }
                                                 : null,
                                             child: Text('Cancel Job',
@@ -1016,7 +1017,7 @@ ElevatedButton editSection(context, JobCardController controller,
                                                         'Posted' &&
                                                     controller.quotationStatus
                                                             .value !=
-                                                        'Canceled' &&
+                                                        'Cancelled' &&
                                                     controller.quotationStatus
                                                         .value.isNotEmpty
                                                 ? () {
@@ -1037,7 +1038,7 @@ ElevatedButton editSection(context, JobCardController controller,
                                             onPressed: controller
                                                             .quotationStatus
                                                             .value !=
-                                                        'Canceled' &&
+                                                        'Cancelled' &&
                                                     controller.quotationStatus
                                                         .value.isNotEmpty
                                                 ? () {

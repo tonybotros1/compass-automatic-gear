@@ -143,17 +143,17 @@ Container statusBox(String status, {hieght = 30, width}) {
     decoration: BoxDecoration(
         border: Border.all(color: Colors.white, width: 2),
         borderRadius: BorderRadius.circular(5),
-        color: status == 'New' || status == 'N'
+        color: status == 'New' 
             ? Colors.green
-            : status == 'Posted' || status == 'P'
+            : status == 'Posted' 
                 ? Colors.teal
-                : status == 'Canceled' || status == 'C'
+                : status == 'Cancelled'
                     ? Colors.red
-                    : status == 'Approved' || status == 'A'
+                    : status == 'Approved' 
                         ? Color(0xffD2665A)
-                        : status == 'Ready' || status == 'R'
+                        : status == 'Ready' 
                             ? Color(0xff7886C7)
-                            : status == 'Closed' || status == 'Under Warranty' || status == 'CLS' ||status == 'UW'
+                            : status == 'Closed' || status == 'Under Warranty' 
                                 ? Colors.black
                                 : Colors.brown),
     height: hieght,
