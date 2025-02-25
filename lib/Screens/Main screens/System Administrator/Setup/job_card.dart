@@ -117,6 +117,7 @@ Widget tableOfScreens({
               child: DataTable(
                 dataRowMaxHeight: 40,
                 dataRowMinHeight: 30,
+                headingRowHeight: 70,
                 columnSpacing: 5,
                 showBottomBorder: true,
                 dataTextStyle: regTextStyle,
@@ -126,90 +127,251 @@ Widget tableOfScreens({
                 headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
                 columns: [
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Quotation No.', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(
+                            text: 'Quotation', constraints: constraints),
+                        AutoSizedText(text: 'Number', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Quotation Date', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'Date', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Job No.', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'Status', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Job Date', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: 'Job', constraints: constraints),
+                        AutoSizedText(text: 'Number', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Invoice No.', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'Date', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Inv Date', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'Status', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Job Status 1', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(
+                            text: 'Sub Status', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Job Status 2', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(
+                            text: 'Invoice', constraints: constraints),
+                        AutoSizedText(text: 'Number', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Quotation Status', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'Date', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'LPO No.', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(
+                            text: 'LPO Number', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Car Brand', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: 'Car', constraints: constraints),
+                        AutoSizedText(text: 'Brand', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Plate Number', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'Model', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(
-                        text: 'Customer Name', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: 'Plate', constraints: constraints),
+                        AutoSizedText(text: 'Number', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
-                    label: AutoSizedText(text: 'VIN', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'Code', constraints: constraints),
+                      ],
+                    ),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'City', constraints: constraints),
+                      ],
+                    ),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(
+                            text: 'Customer Name', constraints: constraints),
+                      ],
+                    ),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'VIN', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
                     headingRowAlignment: MainAxisAlignment.end,
-                    label: AutoSizedText(
-                        text: 'Total Job', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(
+                            text: 'Total Job', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
                     headingRowAlignment: MainAxisAlignment.end,
 
-                    label: AutoSizedText(text: 'VAT', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'VAT', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                   DataColumn(
                     headingRowAlignment: MainAxisAlignment.end,
 
-                    label: AutoSizedText(text: 'NET', constraints: constraints),
+                    label: Column(
+                      spacing: 5,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        AutoSizedText(text: '', constraints: constraints),
+                        AutoSizedText(text: 'NET', constraints: constraints),
+                      ],
+                    ),
                     // onSort: controller.onSort,
                   ),
                 ],
@@ -221,6 +383,7 @@ Widget tableOfScreens({
         SizedBox(
           width: 120,
           child: DataTable(
+            headingRowHeight: 70,
             dataRowMaxHeight: 40,
             dataRowMinHeight: 30,
             columnSpacing: 0,
@@ -280,17 +443,20 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
       cells: [
         DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
         DataCell(textForDataRowInTable(text: '${jobData['quotation_date']}')),
+        DataCell(statusBox('${jobData['quotation_status']}',
+            hieght: 35, width: 100)),
         DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
         DataCell(textForDataRowInTable(text: '${jobData['job_date']}')),
-        DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
-        DataCell(textForDataRowInTable(text: '${jobData['invoice_date']}')),
         DataCell(
             statusBox('${jobData['job_status_1']}', hieght: 35, width: 100)),
         DataCell(
             statusBox('${jobData['job_status_2']}', hieght: 35, width: 100)),
-        DataCell(statusBox('${jobData['quotation_status']}',
-            hieght: 35, width: 100)),
+        DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
+        DataCell(textForDataRowInTable(text: '${jobData['invoice_date']}')),
         DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
+        DataCell(textForDataRowInTable(
+            text: controller.getdataName(
+                jobData['car_brand'], controller.allBrands))),
         DataCell(
           FutureBuilder<String>(
             future: controller.getModelName(
@@ -302,13 +468,14 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
                 return const Text('Error');
               } else {
                 return textForDataRowInTable(
-                  text:
-                      '${controller.getdataName(jobData['car_brand'], controller.allBrands)}-${snapshot.data}',
+                  text: '${snapshot.data}',
                 );
               }
             },
           ),
         ),
+        DataCell(textForDataRowInTable(text: '${jobData['plate_number']}')),
+        DataCell(textForDataRowInTable(text: '${jobData['plate_code']}')),
         DataCell(
           FutureBuilder<String>(
             future: controller.getCityName(jobData['country'], jobData['city']),
@@ -319,8 +486,7 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
                 return const Text('Error');
               } else {
                 return textForDataRowInTable(
-                  text:
-                      '${jobData['plate_number']}-${jobData['plate_code']}-${snapshot.data}',
+                  text: '${snapshot.data}',
                 );
               }
             },
@@ -434,29 +600,114 @@ ElevatedButton editSection(context, JobCardController controller,
                       Container(
                         padding: EdgeInsets.all(8),
                         height: null,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          spacing: 10,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 3,
                           children: [
-                            Container(
-                              padding: EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(color: Colors.grey)),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 10,
-                                children: [
-                                  Row(
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 3,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(color: Colors.grey)),
+                                  child: Row(
                                     spacing: 10,
                                     children: [
+                                      GetX<JobCardController>(
+                                          builder: (controller) {
+                                        return ElevatedButton(
+                                          onPressed:
+                                              controller.addingNewValue.value
+                                                  ? null
+                                                  : () async {
+                                                      controller.addingNewValue
+                                                          .value = true;
+
+                                                      if (jobData['quotation_number'] ==
+                                                              '' &&
+                                                          controller
+                                                              .isQuotationExpanded
+                                                              .isTrue) {
+                                                        controller
+                                                            .quotationStatus
+                                                            .value = 'New';
+                                                        await controller
+                                                            .getCurrentQuotationCounterNumber();
+                                                      }
+                                                      if (jobData['job_number'] ==
+                                                              '' &&
+                                                          controller
+                                                              .isJobCardExpanded
+                                                              .isTrue) {
+                                                        controller.jobStatus1
+                                                            .value = 'New';
+                                                        controller.jobStatus2
+                                                            .value = 'New';
+                                                        await controller
+                                                            .getCurrentJobCardCounterNumber();
+                                                      }
+                                                      controller
+                                                          .editJobCardAndQuotation(
+                                                              jobId);
+                                                    },
+                                          style: new2ButtonStyle,
+                                          child:
+                                              controller.addingNewValue.value ==
+                                                      false
+                                                  ? const Text(
+                                                      'Save',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    )
+                                                  : SizedBox(
+                                                      width: 20,
+                                                      height: 20,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        color: Colors.white,
+                                                        strokeWidth: 2,
+                                                      ),
+                                                    ),
+                                        );
+                                      }),
+                                      ElevatedButton(
+                                          style: cancelJobButtonStyle,
+                                          onPressed: controller
+                                                      .jobStatus1.value ==
+                                                  'New'
+                                              ? () {
+                                                  alertDialog(
+                                                      context: context,
+                                                      controller: controller,
+                                                      content:
+                                                          "Theis will be deleted permanently",
+                                                      onPressed: () {
+                                                        controller
+                                                            .deleteJobCard(
+                                                                jobId);
+                                                      });
+                                                }
+                                              : null,
+                                          child: Text('Delete',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold))),
                                       ElevatedButton(
                                         style: internalNotesButtonStyle,
                                         onPressed: () async {
                                           internalNotesDialog(
                                               controller, constraints, jobId);
                                         },
-                                        child: Text('Internal Notes'),
+                                        child: Text(
+                                          'Internal Notes',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
                                       ),
                                       ElevatedButton(
                                         style: innvoiceItemsButtonStyle,
@@ -498,12 +749,10 @@ ElevatedButton editSection(context, JobCardController controller,
                                                 );
                                               });
                                         },
-                                        child: Text('Invoice Items'),
+                                        child: Text('Invoice Items',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
                                       ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
                                       ElevatedButton(
                                           style: new2ButtonStyle,
                                           onPressed: () {
@@ -588,22 +837,27 @@ ElevatedButton editSection(context, JobCardController controller,
                                                   );
                                                 });
                                           },
-                                          child: Text('New Customer')),
+                                          child: Text(
+                                            'New Customer',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          )),
                                     ],
-                                  )
-                                ],
-                              ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            Container(
-                              padding: EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(color: Colors.grey)),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 10,
-                                children: [
-                                  Row(
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              spacing: 3,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(color: Colors.grey)),
+                                  child: Row(
                                     spacing: 10,
                                     children: [
                                       GetX<JobCardController>(
@@ -622,7 +876,10 @@ ElevatedButton editSection(context, JobCardController controller,
                                                                 jobId, 'New');
                                                       }
                                                     : null,
-                                            child: Text('New'));
+                                            child: Text('New',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)));
                                       }),
                                       GetX<JobCardController>(
                                           builder: (controller) {
@@ -646,7 +903,10 @@ ElevatedButton editSection(context, JobCardController controller,
                                                             jobId, 'Approved');
                                                   }
                                                 : null,
-                                            child: Text('Approve'));
+                                            child: Text('Approve',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)));
                                       }),
                                       GetX<JobCardController>(
                                           builder: (controller) {
@@ -670,13 +930,11 @@ ElevatedButton editSection(context, JobCardController controller,
                                                                 jobId, 'Ready');
                                                       }
                                                     : null,
-                                            child: Text('Ready'));
+                                            child: Text('Ready',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)));
                                       }),
-                                    ],
-                                  ),
-                                  Row(
-                                    spacing: 10,
-                                    children: [
                                       GetX<JobCardController>(
                                           builder: (controllerr) {
                                         return ElevatedButton(
@@ -698,17 +956,20 @@ ElevatedButton editSection(context, JobCardController controller,
                                                                 jobId);
                                                       }
                                                     : null,
-                                            child:
-                                                controllerr.postingJob.isFalse
-                                                    ? Text('Post Job')
-                                                    : SizedBox(
-                                                        height: 20,
-                                                        width: 20,
-                                                        child:
-                                                            CircularProgressIndicator(
-                                                          strokeWidth: 2,
-                                                        ),
-                                                      ));
+                                            child: controllerr
+                                                    .postingJob.isFalse
+                                                ? Text('Post Job',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold))
+                                                : SizedBox(
+                                                    height: 20,
+                                                    width: 20,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
+                                                  ));
                                       }),
                                       GetX<JobCardController>(
                                           builder: (controller) {
@@ -729,47 +990,53 @@ ElevatedButton editSection(context, JobCardController controller,
                                                             jobId, 'Canceled');
                                                   }
                                                 : null,
-                                            child: Text('Cancel Job'));
+                                            child: Text('Cancel Job',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)));
                                       }),
                                     ],
-                                  )
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(color: Colors.grey)),
-                              child: Column(
-                                spacing: 10,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  GetX<JobCardController>(
-                                      builder: (controller) {
-                                    return ElevatedButton(
-                                        style: postButtonStyle,
-                                        onPressed: controller.quotationStatus
-                                                        .value !=
-                                                    'Posted' &&
-                                                controller.quotationStatus
-                                                        .value !=
-                                                    'Canceled' &&
-                                                controller.quotationStatus.value
-                                                    .isNotEmpty
-                                            ? () {
-                                                controller.editPostForQuotation(
-                                                    jobId);
-                                              }
-                                            : null,
-                                        child: Text('Post Quotation'));
-                                  }),
-                                  GetX<JobCardController>(
-                                      builder: (controller) {
-                                    return ElevatedButton(
-                                        style: cancelJobButtonStyle,
-                                        onPressed:
-                                            controller.quotationStatus.value !=
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(color: Colors.grey)),
+                                  child: Row(
+                                    spacing: 10,
+                                    children: [
+                                      GetX<JobCardController>(
+                                          builder: (controller) {
+                                        return ElevatedButton(
+                                            style: postButtonStyle,
+                                            onPressed: controller
+                                                            .quotationStatus
+                                                            .value !=
+                                                        'Posted' &&
+                                                    controller.quotationStatus
+                                                            .value !=
+                                                        'Canceled' &&
+                                                    controller.quotationStatus
+                                                        .value.isNotEmpty
+                                                ? () {
+                                                    controller
+                                                        .editPostForQuotation(
+                                                            jobId);
+                                                  }
+                                                : null,
+                                            child: Text('Post Quotation',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)));
+                                      }),
+                                      GetX<JobCardController>(
+                                          builder: (controller) {
+                                        return ElevatedButton(
+                                            style: cancelJobButtonStyle,
+                                            onPressed: controller
+                                                            .quotationStatus
+                                                            .value !=
                                                         'Canceled' &&
                                                     controller.quotationStatus
                                                         .value.isNotEmpty
@@ -779,81 +1046,26 @@ ElevatedButton editSection(context, JobCardController controller,
                                                             jobId);
                                                   }
                                                 : null,
-                                        child: Text('Cancel Quotation'));
-                                  }),
-                                ],
-                              ),
-                            ),
-                            ElevatedButton(
-                                style: deleteButtonStyle,
-                                onPressed: () {
-                                  alertDialog(
-                                      context: context,
-                                      controller: controller,
-                                      content:
-                                          "Theis will be deleted permanently",
-                                      onPressed: () {
-                                        controller.deleteJobCard(jobId);
-                                      });
-                                },
-                                child: Text('Delete')),
-                            Spacer(),
-                            GetX<JobCardController>(builder: (controller) {
-                              return ElevatedButton(
-                                onPressed: controller.addingNewValue.value
-                                    ? null
-                                    : () async {
-                                        controller.addingNewValue.value = true;
-
-                                        if (jobData['quotation_number'] == '' &&
-                                            controller
-                                                .isQuotationExpanded.isTrue) {
-                                          controller.quotationStatus.value =
-                                              'New';
-                                          await controller
-                                              .getCurrentQuotationCounterNumber();
-                                        }
-                                        if (jobData['job_number'] == '' &&
-                                            controller
-                                                .isJobCardExpanded.isTrue) {
-                                          controller.jobStatus1.value = 'New';
-                                          controller.jobStatus2.value = 'New';
-                                          await controller
-                                              .getCurrentJobCardCounterNumber();
-                                        }
-                                        controller
-                                            .editJobCardAndQuotation(jobId);
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
+                                            child: Text('Cancel Quotation',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)));
+                                      }),
+                                    ],
                                   ),
                                 ),
-                                child: controller.addingNewValue.value == false
-                                    ? const Text(
-                                        'Save',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                              );
-                            }),
-                            ElevatedButton(
-                                onPressed: () {
-                                  Get.back();
-                                },
-                                style: cancelButtonStyle,
-                                child: const Text(
-                                  'Exit',
-                                  style: TextStyle(color: Colors.white),
-                                )),
+                                Spacer(),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Get.back();
+                                    },
+                                    style: cancelButtonStyle,
+                                    child: const Text(
+                                      'Exit',
+                                      style: TextStyle(color: Colors.white),
+                                    )),
+                              ],
+                            ),
                           ],
                         ),
                       )

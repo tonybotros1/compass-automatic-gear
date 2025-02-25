@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../Models/dynamic_field_models.dart';
 import '../../../consts.dart';
 
-Container quotationsSection(context,JobCardController controller) {
+Container quotationsSection(context, JobCardController controller) {
   return Container(
       padding: EdgeInsets.all(20),
       decoration: containerDecor,
@@ -28,9 +28,10 @@ Container quotationsSection(context,JobCardController controller) {
             fieldConfig: FieldConfig(
               isDate: true,
               suffixIcon: IconButton(
-                  onPressed: () {
-                    controller.selectDateContext(
+                  onPressed: ()async {
+                   await controller.selectDateContext(
                         context, controller.quotationDate.value);
+                    controller.changeQuotationEndDateDependingOnDays();
                   },
                   icon: Icon(Icons.date_range)),
               textController: controller.quotationDate.value,
