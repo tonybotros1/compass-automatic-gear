@@ -20,7 +20,7 @@ Future internalNotesDialog(
         children: [
           Container(
             decoration: BoxDecoration(
-                color: headerColor,
+                color: mainColor,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(10),
                   topRight: Radius.circular(10),
@@ -55,7 +55,7 @@ Future internalNotesDialog(
                       },
                       icon: Icon(
                         Icons.close,
-                        color: Colors.red,
+                        color: Colors.white,
                       )),
                 )
               ],
@@ -199,7 +199,7 @@ Future internalNotesDialog(
                                           textAlign: TextAlign.end,
                                           DateFormat.jm().format(noteTime),
                                           style: TextStyle(
-                                            color: headerColor,
+                                            color: mainColor,
                                           ),
                                         ),
                                       ],
@@ -464,7 +464,7 @@ Future internalNotesDialog(
                                 },
                                 icon: Icon(
                                   Icons.send_rounded,
-                                  color:headerColor,
+                                  color: mainColor,
                                 ),
                               )
                             : Padding(
@@ -474,7 +474,7 @@ Future internalNotesDialog(
                                   height: 25,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: headerColor,
+                                    color: mainColor,
                                   ),
                                 ),
                               );

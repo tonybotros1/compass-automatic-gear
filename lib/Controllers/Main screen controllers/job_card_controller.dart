@@ -804,6 +804,8 @@ class JobCardController extends GetxController {
         'job_status_2': status,
         'job_approval_date': DateTime.now().toString()
       });
+      approvalDate.value.text = textToDate(DateTime.now());
+      jobStatus2.value = 'Approved';
     } catch (e) {
       //
     }
@@ -818,6 +820,8 @@ class JobCardController extends GetxController {
         'job_status_2': status,
         'job_finish_date': DateTime.now().toString()
       });
+      finishDate.value.text = textToDate(DateTime.now());
+      jobStatus2.value = 'Ready';
     } catch (e) {
       //
     }

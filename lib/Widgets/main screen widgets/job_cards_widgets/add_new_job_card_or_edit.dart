@@ -76,18 +76,28 @@ Widget addNewJobCardOrEdit(
                         return controller.isQuotationExpanded.isTrue
                             ? ElevatedButton(
                                 style: postButtonStyle,
-                                onPressed:
-                                    controller.quotationStatus.value !=
-                                                'Posted' &&
-                                            controller.quotationStatus.value !=
-                                                'Cancelled' &&
-                                            controller.quotationStatus.value
-                                                .isNotEmpty
-                                        ? () {
-                                            controller
-                                                .editPostForQuotation(jobId);
-                                          }
-                                        : null,
+                                onPressed: () {
+                                  if (controller.quotationStatus.value !=
+                                          'Posted' &&
+                                      controller.quotationStatus.value !=
+                                          'Cancelled' &&
+                                      controller
+                                          .quotationStatus.value.isNotEmpty) {
+                                    controller.editPostForQuotation(jobId);
+                                  } else if (controller.quotationStatus.value ==
+                                      'Posted') {
+                                    showSnackBar(
+                                        'Alert', 'Quotation is Already Posted');
+                                  } else if (controller.quotationStatus.value ==
+                                      'Cancelled') {
+                                    showSnackBar(
+                                        'Alert', 'Quotation is Cancelled');
+                                  } else if (controller
+                                      .quotationStatus.value.isEmpty) {
+                                    showSnackBar('Alert',
+                                        'Please Save The Quotation First');
+                                  }
+                                },
                                 child: Text('Post',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
@@ -97,15 +107,22 @@ Widget addNewJobCardOrEdit(
                         return controller.isQuotationExpanded.isTrue
                             ? ElevatedButton(
                                 style: cancelJobButtonStyle,
-                                onPressed: controller.quotationStatus.value !=
-                                            'Cancelled' &&
-                                        controller
-                                            .quotationStatus.value.isNotEmpty
-                                    ? () {
-                                        controller
-                                            .editCancelForQuotation(jobId);
-                                      }
-                                    : null,
+                                onPressed: () {
+                                  if (controller.quotationStatus.value !=
+                                          'Cancelled' &&
+                                      controller
+                                          .quotationStatus.value.isNotEmpty) {
+                                    controller.editCancelForQuotation(jobId);
+                                  } else if (controller.quotationStatus.value ==
+                                      'Cancelled') {
+                                    showSnackBar(
+                                        'Alert', 'Quotation Already Cancelled');
+                                  } else if (controller
+                                      .quotationStatus.value.isEmpty) {
+                                    showSnackBar('Alert',
+                                        'Please Save The Quotation First');
+                                  }
+                                },
                                 child: Text('Cancel',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
@@ -178,14 +195,25 @@ Widget addNewJobCardOrEdit(
                         return controller.isJobCardExpanded.isTrue
                             ? ElevatedButton(
                                 style: new2ButtonStyle,
-                                onPressed:
-                                    controller.jobStatus1.value == 'New' &&
-                                            controller.jobStatus2.value != 'New'
-                                        ? () {
-                                            controller.editNewForJobCard(
-                                                jobId, 'New');
-                                          }
-                                        : null,
+                                onPressed: () {
+                                  if (controller.jobStatus1.value == 'New' &&
+                                      controller.jobStatus2.value != 'New') {
+                                    controller.editNewForJobCard(jobId, 'New');
+                                  } else if (controller.jobStatus2.value ==
+                                      'New') {
+                                    showSnackBar('Alert', 'Job is Already New');
+                                  } else if (controller.jobStatus1.value ==
+                                      'Cancelled') {
+                                    showSnackBar('Alert', 'Job is Cancelled');
+                                  } else if (controller.jobStatus1.value ==
+                                      'Posted') {
+                                    showSnackBar('Alert', 'Job is Posted');
+                                  } else if (controller
+                                      .jobStatus1.value.isEmpty) {
+                                    showSnackBar(
+                                        'Alert', 'Please Save The Job First');
+                                  }
+                                },
                                 child: Text('New',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
@@ -195,19 +223,28 @@ Widget addNewJobCardOrEdit(
                         return controller.isJobCardExpanded.isTrue
                             ? ElevatedButton(
                                 style: approveButtonStyle,
-                                onPressed:
-                                    controller.jobStatus1.value == 'New' &&
-                                            controller.jobStatus2.value !=
-                                                'Approved'
-                                        ? () {
-                                            controller.approvalDate.value.text =
-                                                textToDate(DateTime.now());
-                                            controller.jobStatus2.value =
-                                                'Approved';
-                                            controller.editApproveForJobCard(
-                                                jobId, 'Approved');
-                                          }
-                                        : null,
+                                onPressed: () {
+                                  if (controller.jobStatus1.value == 'New' &&
+                                      controller.jobStatus2.value !=
+                                          'Approved') {
+                                    controller.editApproveForJobCard(
+                                        jobId, 'Approved');
+                                  } else if (controller.jobStatus2.value ==
+                                      'Approved') {
+                                    showSnackBar(
+                                        'Alert', 'Job is Already Approved');
+                                  } else if (controller.jobStatus1.value ==
+                                      'Posted') {
+                                    showSnackBar('Alert', 'Job is Posted');
+                                  } else if (controller.jobStatus1.value ==
+                                      'Cancelled') {
+                                    showSnackBar('Alert', 'Job is Cancelled');
+                                  } else if (controller
+                                      .jobStatus1.value.isEmpty) {
+                                    showSnackBar(
+                                        'Alert', 'Please Save The Job First');
+                                  }
+                                },
                                 child: Text('Approve',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
@@ -217,17 +254,27 @@ Widget addNewJobCardOrEdit(
                         return controller.isJobCardExpanded.isTrue
                             ? ElevatedButton(
                                 style: readyButtonStyle,
-                                onPressed: controller.jobStatus1.value ==
-                                            'New' &&
-                                        controller.jobStatus2.value != 'Ready'
-                                    ? () {
-                                        controller.finishDate.value.text =
-                                            textToDate(DateTime.now());
-                                        controller.jobStatus2.value = 'Ready';
-                                        controller.editReadyForJobCard(
-                                            jobId, 'Ready');
-                                      }
-                                    : null,
+                                onPressed: () {
+                                  if (controller.jobStatus1.value == 'New' &&
+                                      controller.jobStatus2.value != 'Ready') {
+                                    controller.editReadyForJobCard(
+                                        jobId, 'Ready');
+                                  } else if (controller.jobStatus2.value ==
+                                      'Ready') {
+                                    showSnackBar(
+                                        'Alert', 'Job is Already Ready');
+                                  } else if (controller.jobStatus1.value ==
+                                      'Posted') {
+                                    showSnackBar('Alert', 'Job is Posted');
+                                  } else if (controller.jobStatus1.value ==
+                                      'Cancelled') {
+                                    showSnackBar('Alert', 'Job is Cancelled');
+                                  } else if (controller
+                                      .jobStatus1.value.isEmpty) {
+                                    showSnackBar(
+                                        'Alert', 'Please Save The Job First');
+                                  }
+                                },
                                 child: Text('Ready',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
@@ -237,16 +284,28 @@ Widget addNewJobCardOrEdit(
                         return controller.isJobCardExpanded.isTrue
                             ? ElevatedButton(
                                 style: postButtonStyle,
-                                onPressed: controllerr.jobStatus1.value !=
-                                            'Posted' &&
-                                        controllerr.jobWarrentyEndDate.value
-                                            .text.isNotEmpty &&
-                                        controllerr.jobStatus1.value !=
-                                            'Cancelled'
-                                    ? () {
-                                        controllerr.editPostForJobCard(jobId);
-                                      }
-                                    : null,
+                                onPressed: () {
+                                  if (controller.jobStatus1.value == 'Posted') {
+                                    showSnackBar(
+                                        'Alert', 'Job is Already Posted');
+                                  } else if (controller.jobStatus1.value ==
+                                      'Cancelled') {
+                                    showSnackBar('Alert', 'Job is Cancelled');
+                                  } else if (controller.jobWarrentyEndDate.value
+                                          .text.isEmpty && controller.jobStatus1.value.isNotEmpty &&
+                                      controller.jobStatus1.value !=
+                                          'Cancelled' &&
+                                      controller.jobStatus1.value != 'Posted') {
+                                    showSnackBar('Alert',
+                                        'You Must Enter Warranty End Date First');
+                                  } else if (controller
+                                      .jobStatus1.value.isEmpty) {
+                                    showSnackBar(
+                                        'Alert', 'Please Save The Job First');
+                                  } else {
+                                    controllerr.editPostForJobCard(jobId);
+                                  }
+                                },
                                 child: controllerr.postingJob.isFalse
                                     ? Text('Post',
                                         style: TextStyle(
@@ -264,16 +323,27 @@ Widget addNewJobCardOrEdit(
                         return controller.isJobCardExpanded.isTrue
                             ? ElevatedButton(
                                 style: cancelJobButtonStyle,
-                                onPressed: controller.jobStatus1.value !=
-                                            'Cancelled' &&
-                                        controller.jobStatus2.value !=
-                                            'Cancelled' &&
-                                        controller.jobStatus1.value != ''
-                                    ? () {
-                                        controller.editCancelForJobCard(
-                                            jobId, 'Cancelled');
-                                      }
-                                    : null,
+                                onPressed: () {
+                                  if (controller.jobStatus1.value ==
+                                      'Cancelled') {
+                                    showSnackBar(
+                                        'Alert', 'Job is Already Cancelled');
+                                  } else if (controller.jobStatus1.value ==
+                                      'Posted') {
+                                    showSnackBar('Alert', 'Job is Cancelled');
+                                  } else if (controller.jobStatus1.value !=
+                                          'Cancelled' &&
+                                      controller.jobStatus2.value !=
+                                          'Cancelled' &&
+                                      controller.jobStatus1.value != '') {
+                                    controller.editCancelForJobCard(
+                                        jobId, 'Cancelled');
+                                  } else if (controller
+                                      .jobStatus1.value.isEmpty) {
+                                    showSnackBar(
+                                        'Alert', 'Please Save The Job First');
+                                  }
+                                },
                                 child: Text('Cancel',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))

@@ -289,7 +289,7 @@ var secColor = const Color(0xff7E99A3);
 // var secColor = const Color(0xff526D82);
 var containerColor = const Color(0xffF5F5F5);
 
-Color headerColor = Colors.blue.shade900;
+// Color headerColor = Colors.blue.shade900;
 
 // new colors
 var mainColorForWeb = const Color(0xFFF4F4F8);
@@ -324,13 +324,13 @@ void showSnackBar(title, body) {
   Get.snackbar(
     title,
     body,
-    snackPosition: SnackPosition.BOTTOM,
+    snackPosition: SnackPosition.TOP,
     snackStyle: SnackStyle.FLOATING,
     margin: const EdgeInsets.only(left: 20, bottom: 20),
     borderRadius: 10,
     backgroundColor: Colors.black87,
     colorText: Colors.white,
-    duration: const Duration(seconds: 3),
+    duration: const Duration(seconds: 2),
     maxWidth: 300,
     isDismissible: true,
     forwardAnimationCurve: Curves.easeOutBack,
@@ -399,7 +399,7 @@ Container labelContainer({
       decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
               topRight: Radius.circular(5), topLeft: Radius.circular(5)),
-          color: mainColor),
+          color: secColor),
       child: lable);
 }
 

@@ -446,14 +446,18 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
       cells: [
         DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
         DataCell(textForDataRowInTable(text: '${jobData['quotation_date']}')),
-        DataCell(statusBox('${jobData['quotation_status']}',
-            hieght: 35, width: 100)),
+        DataCell(jobData['quotation_status'] != ''
+            ? statusBox('${jobData['quotation_status']}',
+                hieght: 35, width: 100)
+            : SizedBox()),
         DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
         DataCell(textForDataRowInTable(text: '${jobData['job_date']}')),
-        DataCell(
-            statusBox('${jobData['job_status_1']}', hieght: 35, width: 100)),
-        DataCell(
-            statusBox('${jobData['job_status_2']}', hieght: 35, width: 100)),
+        DataCell(jobData['job_status_1'] != ''
+            ? statusBox('${jobData['job_status_1']}', hieght: 35, width: 100)
+            : SizedBox()),
+        DataCell(jobData['job_status_2'] != ''
+            ? statusBox('${jobData['job_status_2']}', hieght: 35, width: 100)
+            : SizedBox()),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
         DataCell(textForDataRowInTable(
             text: '${textToDate(jobData['invoice_date'])}')),
@@ -596,15 +600,15 @@ ElevatedButton editSection(context, JobCardController controller,
                           borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(5),
                               topRight: Radius.circular(5)),
-                          color: headerColor,
+                          color: mainColor,
                         ),
-                        padding: EdgeInsets.all(8),
+                        padding: EdgeInsets.all(16),
                         width: constraints.maxWidth,
                         child: Row(
                           spacing: 10,
                           children: [
                             Text(
-                              'Enter and Maintain Card',
+                              '💳 Enter and Maintain Card',
                               style:
                                   TextStyle(fontSize: 20, color: Colors.white),
                             ),
@@ -654,18 +658,21 @@ ElevatedButton editSection(context, JobCardController controller,
                             }),
                             ElevatedButton(
                                 style: cancelJobButtonStyle,
-                                onPressed: controller.jobStatus1.value == 'New'
-                                    ? () {
-                                        alertDialog(
-                                            context: context,
-                                            controller: controller,
-                                            content:
-                                                "Theis will be deleted permanently",
-                                            onPressed: () {
-                                              controller.deleteJobCard(jobId);
-                                            });
-                                      }
-                                    : null,
+                                onPressed: () {
+                                  if (controller.jobStatus1.value == 'New') {
+                                    alertDialog(
+                                        context: context,
+                                        controller: controller,
+                                        content:
+                                            "Theis will be deleted permanently",
+                                        onPressed: () {
+                                          controller.deleteJobCard(jobId);
+                                        });
+                                  } else {
+                                    showSnackBar('Can Not Delete',
+                                        'Only New Cards Can be Deleted');
+                                  }
+                                },
                                 child: Text('Delete',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold))),
@@ -701,9 +708,9 @@ ElevatedButton editSection(context, JobCardController controller,
                                                     topLeft: Radius.circular(5),
                                                     topRight:
                                                         Radius.circular(5)),
-                                                color: headerColor,
+                                                color: mainColor,
                                               ),
-                                              padding: EdgeInsets.all(8),
+                                              padding: EdgeInsets.all(16),
                                               child: Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
@@ -720,7 +727,7 @@ ElevatedButton editSection(context, JobCardController controller,
                                                       Get.back();
                                                     },
                                                     icon: Icon(Icons.close,
-                                                        color: Colors.red),
+                                                        color: Colors.white),
                                                   )
                                                 ],
                                               ),
@@ -881,13 +888,13 @@ ElevatedButton newJobCardButton(BuildContext context,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(5),
                             topRight: Radius.circular(5)),
-                        color: headerColor,
+                        color: mainColor,
                       ),
-                      padding: EdgeInsets.all(8),
+                      padding: EdgeInsets.all(16),
                       width: constraints.maxWidth,
                       child: Row(spacing: 10, children: [
                         Text(
-                          'Enter Card',
+                          '💳 Enter and Maintain Card',
                           style: TextStyle(fontSize: 20, color: Colors.white),
                         ),
                         Spacer(),
@@ -909,7 +916,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                                           borderRadius: BorderRadius.only(
                                               topLeft: Radius.circular(5),
                                               topRight: Radius.circular(5)),
-                                          color: headerColor,
+                                          color: mainColor,
                                         ),
                                         padding: EdgeInsets.all(8),
                                         child: Row(
@@ -927,7 +934,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                                                 Get.back();
                                               },
                                               icon: Icon(Icons.close,
-                                                  color: Colors.red),
+                                                  color: Colors.white),
                                             )
                                           ],
                                         ),
@@ -950,7 +957,10 @@ ElevatedButton newJobCardButton(BuildContext context,
                               showSnackBar('Alert', 'Please Save Job First');
                             }
                           },
-                          child: Text('Invoice Items'),
+                          child: Text(
+                            'Invoice Items',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                         ElevatedButton(
                           style: internalNotesButtonStyle,
@@ -963,7 +973,10 @@ ElevatedButton newJobCardButton(BuildContext context,
                               showSnackBar('Alert', 'Please Save Job First');
                             }
                           },
-                          child: Text('Internal Notes'),
+                          child: Text(
+                            'Internal Notes',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                         GetX<JobCardController>(
                           builder: (controller) => ElevatedButton(
