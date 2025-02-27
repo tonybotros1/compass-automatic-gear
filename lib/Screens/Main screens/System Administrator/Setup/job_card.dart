@@ -820,15 +820,7 @@ ElevatedButton editSection(context, JobCardController controller,
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 )),
                             // Spacer(),
-                            ElevatedButton(
-                                style: closeButtonStyle,
-                                onPressed: () {
-                                  Get.back();
-                                },
-                                child: Text(
-                                  'Close',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ))
+                            closeButton
                           ],
                         ),
                       ),
@@ -876,122 +868,138 @@ ElevatedButton newJobCardButton(BuildContext context,
       controller.invoiceDate.value.text = textToDate(DateTime.now());
       controller.startDate.value.text = textToDate(DateTime.now());
       controller.clearValues();
-      showDialog(
+      Get.dialog(
           barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
+          Dialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5)),
-              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 10),
-              content: addNewJobCardOrEdit(
-                jobId: null,
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                Row(
-                  spacing: 10,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GetX<JobCardController>(builder: (controller) {
-                      return ElevatedButton(
-                        style: internalNotesButtonStyle,
-                        onPressed:
-                            controller.canAddInternalNotesAndInvoiceItems.isTrue
-                                ? () async {
-                                    internalNotesDialog(controller, constraints,
-                                        controller.curreentJobCardId.value);
-                                  }
-                                : null,
-                        child: Text('Internal Notes'),
-                      );
-                    }),
-                    GetX<JobCardController>(builder: (controller) {
-                      return ElevatedButton(
-                        style: innvoiceItemsButtonStyle,
-                        onPressed:
-                            controller.canAddInternalNotesAndInvoiceItems.isTrue
-                                ? () {
-                                    showDialog(
-                                        barrierDismissible: false,
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            actionsPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 20),
-                                            content: invoiceItemsDialog(
-                                                constraints: constraints,
-                                                context: context,
-                                                jobId: controller
-                                                    .curreentJobCardId.value),
-                                            actions: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    bottom: 10),
-                                                child: ElevatedButton(
-                                                  onPressed: () {
-                                                    Get.back();
-                                                  },
-                                                  style: cancelButtonStyle,
-                                                  child: const Text(
-                                                    'Close',
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        });
-                                  }
-                                : null,
-                        child: Text('Invoice Items'),
-                      );
-                    }),
-                    Spacer(),
-                    GetX<JobCardController>(
-                      builder: (controller) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller.addNewJobCardAndQuotation();
-                          },
-                          style: saveButtonStyle,
-                          child: controller.addingNewValue.value == false
-                              ? const Text(
-                                  'Save',
-                                  style: TextStyle(color: Colors.white),
-                                )
-                              : SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
+              insetPadding: EdgeInsets.all(8),
+              child: LayoutBuilder(builder: (context, constraints) {
+                return Column(children: [
+                  Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5)),
+                        color: headerColor,
+                      ),
+                      padding: EdgeInsets.all(8),
+                      width: constraints.maxWidth,
+                      child: Row(spacing: 10, children: [
+                        Text(
+                          'Enter Card',
+                          style: TextStyle(fontSize: 20, color: Colors.white),
                         ),
-                      ),
+                        Spacer(),
+                        ElevatedButton(
+                          style: innvoiceItemsButtonStyle,
+                          onPressed: () {
+                            if (controller
+                                .canAddInternalNotesAndInvoiceItems.isTrue) {
+                              Dialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5)),
+                                insetPadding: EdgeInsets.all(40),
+                                child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                  return Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(5),
+                                              topRight: Radius.circular(5)),
+                                          color: headerColor,
+                                        ),
+                                        padding: EdgeInsets.all(8),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Invoice Items',
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.white),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                Get.back();
+                                              },
+                                              icon: Icon(Icons.close,
+                                                  color: Colors.red),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: invoiceItemsDialog(
+                                              constraints: constraints,
+                                              context: context,
+                                              jobId: controller
+                                                  .curreentJobCardId.value),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              );
+                            } else {
+                              showSnackBar('Alert', 'Please Save Job First');
+                            }
+                          },
+                          child: Text('Invoice Items'),
+                        ),
+                        ElevatedButton(
+                          style: internalNotesButtonStyle,
+                          onPressed: () {
+                            if (controller
+                                .canAddInternalNotesAndInvoiceItems.isTrue) {
+                              internalNotesDialog(controller, constraints,
+                                  controller.curreentJobCardId.value);
+                            } else {
+                              showSnackBar('Alert', 'Please Save Job First');
+                            }
+                          },
+                          child: Text('Internal Notes'),
+                        ),
+                        GetX<JobCardController>(
+                          builder: (controller) => ElevatedButton(
+                            onPressed: () async {
+                              await controller.addNewJobCardAndQuotation();
+                            },
+                            style: saveButtonStyle,
+                            child: controller.addingNewValue.value == false
+                                ? const Text(
+                                    'Save',
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                : SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        closeButton
+                      ])),
+                  Expanded(
+                      child: Padding(
+                    padding: EdgeInsets.all(8),
+                    child: addNewJobCardOrEdit(
+                      jobId: null,
+                      controller: controller,
+                      constraints: constraints,
+                      context: context,
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Close',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          });
+                  ))
+                ]);
+              })));
     },
     style: newButtonStyle,
     child: const Text('New Card'),

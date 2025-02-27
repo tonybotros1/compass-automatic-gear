@@ -309,6 +309,16 @@ Widget verticalSpace({int space = 20}) {
   );
 }
 
+var closeButton = ElevatedButton(
+    style: closeButtonStyle,
+    onPressed: () {
+      Get.back();
+    },
+    child: Text(
+      'Close',
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
+
 // snack bar
 void showSnackBar(title, body) {
   Get.snackbar(
