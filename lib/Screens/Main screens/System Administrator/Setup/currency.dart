@@ -147,14 +147,16 @@ DataRow dataRowForTheTable(Map<String, dynamic> currencyData, context,
       currencyData['country_id'], controller.allCountries);
 
   return DataRow(cells: [
-    DataCell(Text(
-      '${data[0]}',
-    )),
-    DataCell(
-      Text(
-        '${data[1]}',
-      ),
-    ),
+    DataCell(data.isNotEmpty
+        ? Text(
+            '${data[0]}',
+          )
+        : SizedBox()),
+    DataCell(data.isNotEmpty
+        ? Text(
+            '${data[1]}',
+          )
+        : SizedBox()),
     DataCell(
       Text(
         '${currencyData['rate']}',
@@ -223,10 +225,10 @@ ElevatedButton editSection(context, CurrencyController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        List data = controller.getdataName(
+        List<String> data = controller.getdataName(
             currencyData['country_id'], controller.allCountries);
-        controller.code.text = data[0] ?? '';
-        controller.name.text = data[1] ?? '';
+        controller.code.value = data[0];
+        controller.name.text = data[1];
         controller.rate.text = (currencyData['rate'] ?? '').toString();
         showDialog(
             barrierDismissible: false,
@@ -309,7 +311,12 @@ ElevatedButton newCurrencyButton(BuildContext context,
                             onPressed: controller.addingNewValue.value
                                 ? null
                                 : () async {
-                                    await controller.addNewCurrency();
+                                    if (!controller
+                                        .formKeyForAddingNewvalue.currentState!
+                                        .validate()) {
+                                    } else {
+                                      await controller.addNewCurrency();
+                                    }
                                   },
                             style: saveButtonStyle,
                             child: controller.addingNewValue.value == false

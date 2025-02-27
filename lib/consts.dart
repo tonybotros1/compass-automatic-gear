@@ -180,6 +180,15 @@ var deleteButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var closeButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Colors.red,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(10, 40),
+);
+
 var approveButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Color(0xffD2665A),
@@ -280,6 +289,8 @@ var secColor = const Color(0xff7E99A3);
 // var secColor = const Color(0xff526D82);
 var containerColor = const Color(0xffF5F5F5);
 
+Color headerColor = Colors.blue.shade900;
+
 // new colors
 var mainColorForWeb = const Color(0xFFF4F4F8);
 
@@ -304,9 +315,16 @@ void showSnackBar(title, body) {
     title,
     body,
     snackPosition: SnackPosition.BOTTOM,
-    duration: const Duration(seconds: 3),
-    backgroundColor: Colors.grey,
+    snackStyle: SnackStyle.FLOATING,
+    margin: const EdgeInsets.only(left: 20, bottom: 20),
+    borderRadius: 10,
+    backgroundColor: Colors.black87,
     colorText: Colors.white,
+    duration: const Duration(seconds: 3),
+    maxWidth: 300,
+    isDismissible: true,
+    forwardAnimationCurve: Curves.easeOutBack,
+    animationDuration: const Duration(milliseconds: 500),
   );
 }
 

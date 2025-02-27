@@ -55,6 +55,7 @@ dependencies:
   photo_view: ^0.15.0
   web: ^1.1.0
   data_table_2: ^2.5.18
+  animated_custom_dropdown: ^3.1.1
   
 dev_dependencies:
   flutter_test:

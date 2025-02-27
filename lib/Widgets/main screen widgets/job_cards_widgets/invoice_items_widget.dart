@@ -12,8 +12,6 @@ Widget invoiceItemsDialog(
     required BoxConstraints constraints,
     required jobId}) {
   return SizedBox(
-    height: constraints.maxHeight / 1.5,
-    width: constraints.maxWidth,
     child: Column(
       spacing: 2,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -54,14 +52,11 @@ Widget invoiceItemsDialog(
                       }
                       return SingleChildScrollView(
                         scrollDirection: Axis.vertical,
-                        child: SizedBox(
-                          width: constraints.maxWidth,
-                          child: tableOfScreens(
-                            constraints: constraints,
-                            context: context,
-                            controller: controller,
-                            jobId: jobId,
-                          ),
+                        child: tableOfScreens(
+                          constraints: constraints,
+                          context: context,
+                          controller: controller,
+                          jobId: jobId,
                         ),
                       );
                     },
@@ -71,7 +66,6 @@ Widget invoiceItemsDialog(
             ),
           ),
         ),
-        
       ],
     ),
   );
@@ -87,7 +81,7 @@ Widget tableOfScreens(
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: SizedBox(
-      width: constraints.maxWidth,
+      width: constraints.maxWidth - 17,
       child: DataTable(
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
@@ -162,9 +156,7 @@ Widget tableOfScreens(
             ),
           ),
           DataColumn(
-            headingRowAlignment: MainAxisAlignment.center,
-            label:SizedBox()
-          ),
+              headingRowAlignment: MainAxisAlignment.center, label: SizedBox()),
         ],
         rows: controller.filteredInvoiceItems.isEmpty &&
                 controller.searchForInvoiceItems.value.text.isEmpty
@@ -184,8 +176,7 @@ Widget tableOfScreens(
                   DataCell(Text('')),
                   DataCell(Align(
                       alignment: Alignment.centerRight, child: Text('Totals'))),
-                  DataCell(
-                    Align(
+                  DataCell(Align(
                     alignment: Alignment.centerRight,
                     child: textForDataRowInTable(
                         text: '${data[0]}', color: Colors.blue),

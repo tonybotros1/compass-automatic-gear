@@ -1,3 +1,4 @@
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CurrencyController extends GetxController {
-  TextEditingController code = TextEditingController();
+  SingleSelectController<String> code = SingleSelectController('');
   TextEditingController name = TextEditingController();
   TextEditingController rate = TextEditingController();
   RxString query = RxString('');
@@ -14,6 +15,7 @@ class CurrencyController extends GetxController {
   final RxList<DocumentSnapshot> allCurrencies = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredCurrencies =
       RxList<DocumentSnapshot>([]);
+  final GlobalKey<FormState> formKeyForAddingNewvalue = GlobalKey<FormState>();
 
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
@@ -185,7 +187,7 @@ class CurrencyController extends GetxController {
     }
   }
 
-  List getdataName(String id, Map allData) {
+  List<String> getdataName(String id, Map allData) {
     try {
       final data = allData.entries.firstWhere(
         (data) => data.key == id,

@@ -868,7 +868,7 @@ class JobCardController extends GetxController {
       if (isBeforeToday(jobWarrentyEndDate.value.text)) {
         status2 = 'Closed';
       } else {
-        status2 = 'Under Warranty';
+        status2 = 'Warranty';
       }
       await getCurrentInvoiceCounterNumber();
       await FirebaseFirestore.instance
@@ -908,7 +908,7 @@ class JobCardController extends GetxController {
           .collection('job_cards')
           .doc(jobId)
           .update({'quotation_status': 'Canceled'});
-      quotationStatus.value = 'Canceled';
+      quotationStatus.value = 'Cancelled';
     } catch (e) {
       //
     }
