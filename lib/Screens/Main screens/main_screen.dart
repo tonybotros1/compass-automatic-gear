@@ -45,8 +45,10 @@ class MainScreen extends StatelessWidget {
                         ),
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
-                        child: Obx(() =>
-                            mainScreenController.selectedScreenName.value),
+                        child: Obx(() => Text(
+                              mainScreenController.selectedScreenName.value,
+                              style: fontStyleForAppBar,
+                            )),
                       ),
                       Padding(
                           padding: const EdgeInsets.only(right: 16),
@@ -443,8 +445,7 @@ class MainScreen extends StatelessWidget {
                               mainScreenController
                                   .getScreenFromRoute(entry.node.routeName);
                           mainScreenController.selectedScreenName.value =
-                              mainScreenController
-                                  .getScreenName(entry.node.title);
+                              entry.node.title;
                         },
                         child: TreeIndentation(
                           entry: entry,

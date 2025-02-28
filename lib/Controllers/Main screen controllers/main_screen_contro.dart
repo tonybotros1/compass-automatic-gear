@@ -33,7 +33,7 @@ class MainScreenController extends GetxController {
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
   Rx<Widget> selectedScreen = const SizedBox().obs;
-  Rx<Text> selectedScreenName = const Text('').obs;
+  Rx<String> selectedScreenName = RxString('');
   RxString userName = RxString('');
   RxString userEmail = RxString('');
   RxString userJoiningDate = RxString('');

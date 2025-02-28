@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/main_screen_contro.dart';
 import 'package:datahubai/Models/primary_model.dart';
 import 'package:datahubai/Models/type_model.dart';
 import 'package:datahubai/consts.dart';
@@ -89,6 +90,12 @@ class EntityInformationsController extends GetxController {
       filterEntities();
     });
     super.onInit();
+  }
+
+  getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   void loadEntityData(EntityModel entityData) {
@@ -577,39 +584,40 @@ class EntityInformationsController extends GetxController {
   }
 
   // this function is to select an image for logo
- 
-Future<void> pickImage() async {
-  try {
-    // Create a file input element using web.HTMLInputElement.
-    final uploadInput =
-        web.document.createElement('input') as web.HTMLInputElement;
-    uploadInput.type = 'file';
-    uploadInput.accept = 'image/*';
-    uploadInput.click();
 
-    // Listen for changes on the file input element.
-    uploadInput.onChange.listen((event) {
-      final files = uploadInput.files;
-      if (files != null && files.length > 0) {
-        final file = files.item(0);
-        if (file != null) {
-          final reader = web.FileReader();
-          // Read the file as an ArrayBuffer.
-          reader.readAsArrayBuffer(file);
-          reader.onLoadEnd.listen((event) {
-            if (reader.result != null) {
-              // Convert the JS ArrayBuffer to a Dart Uint8List.
-              imageBytes = convertJSArrayBufferToUint8List(reader.result!);
-              update();
-            }
-          });
+  Future<void> pickImage() async {
+    try {
+      // Create a file input element using web.HTMLInputElement.
+      final uploadInput =
+          web.document.createElement('input') as web.HTMLInputElement;
+      uploadInput.type = 'file';
+      uploadInput.accept = 'image/*';
+      uploadInput.click();
+
+      // Listen for changes on the file input element.
+      uploadInput.onChange.listen((event) {
+        final files = uploadInput.files;
+        if (files != null && files.length > 0) {
+          final file = files.item(0);
+          if (file != null) {
+            final reader = web.FileReader();
+            // Read the file as an ArrayBuffer.
+            reader.readAsArrayBuffer(file);
+            reader.onLoadEnd.listen((event) {
+              if (reader.result != null) {
+                // Convert the JS ArrayBuffer to a Dart Uint8List.
+                imageBytes = convertJSArrayBufferToUint8List(reader.result!);
+                update();
+              }
+            });
+          }
         }
-      }
-    });
-  } catch (e) {
-    // print('Error picking image: $e');
+      });
+    } catch (e) {
+      // print('Error picking image: $e');
+    }
   }
-}
+
 // this function is to get the business types
   getIndustries() async {
     var typeDoc = await FirebaseFirestore.instance

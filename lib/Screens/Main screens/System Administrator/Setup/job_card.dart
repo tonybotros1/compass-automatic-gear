@@ -608,7 +608,7 @@ ElevatedButton editSection(context, JobCardController controller,
                           spacing: 10,
                           children: [
                             Text(
-                              '💳 Enter and Maintain Card',
+                              '${controller.getScreenName()}',
                               style:
                                   TextStyle(fontSize: 20, color: Colors.white),
                             ),
@@ -758,74 +758,84 @@ ElevatedButton editSection(context, JobCardController controller,
                                       Get.put(EntityInformationsController());
 
                                   otherController.clearAllVariables();
-
-                                  showDialog(
+                                  Get.dialog(
                                       barrierDismissible: false,
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          actionsPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 20),
-                                          content: addNewEntityOrEdit(
-                                            controller: otherController,
-                                            constraints: constraints,
-                                          ),
-                                          actions: [
-                                            Obx(() => Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(vertical: 16),
-                                                  child: ElevatedButton(
-                                                    onPressed: otherController
-                                                            .addingNewEntity
-                                                            .value
-                                                        ? null
-                                                        : () async {
-                                                            await otherController
-                                                                .addNewEntity();
-                                                          },
-                                                    style: saveButtonStyle,
-                                                    child: otherController
+                                      Dialog(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5)),
+                                        insetPadding: EdgeInsets.all(40),
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.all(16),
+                                              width: constraints.maxWidth,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.only(
+                                                    topLeft: Radius.circular(5),
+                                                    topRight:
+                                                        Radius.circular(5)),
+                                                color: mainColor,
+                                              ),
+                                              child: Row(
+                                                spacing: 10,
+                                                children: [
+                                                  Spacer(),
+                                                  Obx(() => ElevatedButton(
+                                                        onPressed: otherController
                                                                 .addingNewEntity
-                                                                .value ==
-                                                            false
-                                                        ? const Text(
-                                                            'Save',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white),
-                                                          )
-                                                        : SizedBox(
-                                                            height: 20,
-                                                            width: 20,
-                                                            child:
-                                                                CircularProgressIndicator(
-                                                              color:
-                                                                  Colors.white,
-                                                              strokeWidth: 2,
-                                                            ),
-                                                          ),
-                                                  ),
-                                                )),
-                                            ElevatedButton(
-                                                onPressed: () {
-                                                  Get.back();
-                                                },
-                                                style: cancelButtonStyle,
-                                                child: const Text(
-                                                  'Cancel',
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                )),
+                                                                .value
+                                                            ? null
+                                                            : () async {
+                                                                await otherController
+                                                                    .addNewEntity();
+                                                              },
+                                                        style: new2ButtonStyle,
+                                                        child: otherController
+                                                                    .addingNewEntity
+                                                                    .value ==
+                                                                false
+                                                            ? const Text(
+                                                                'Save',
+                                                                style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              )
+                                                            : SizedBox(
+                                                                height: 20,
+                                                                width: 20,
+                                                                child:
+                                                                    CircularProgressIndicator(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  strokeWidth:
+                                                                      2,
+                                                                ),
+                                                              ),
+                                                      )),
+                                                  closeButton
+                                                ],
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: addNewEntityOrEdit(
+                                                  controller: otherController,
+                                                  constraints: constraints,
+                                                ),
+                                              ),
+                                            )
                                           ],
-                                        );
-                                      });
+                                        ),
+                                      ));
                                 },
                                 child: Text(
                                   'New Customer',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 )),
-                            // Spacer(),
                             closeButton
                           ],
                         ),
@@ -893,7 +903,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                       width: constraints.maxWidth,
                       child: Row(spacing: 10, children: [
                         Text(
-                          '💳 Enter and Maintain Card',
+                          '${controller.getScreenName()}',
                           style: TextStyle(fontSize: 20, color: Colors.white),
                         ),
                         Spacer(),
@@ -982,11 +992,12 @@ ElevatedButton newJobCardButton(BuildContext context,
                             onPressed: () async {
                               await controller.addNewJobCardAndQuotation();
                             },
-                            style: saveButtonStyle,
+                            style: new2ButtonStyle,
                             child: controller.addingNewValue.value == false
                                 ? const Text(
                                     'Save',
-                                    style: TextStyle(color: Colors.white),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   )
                                 : SizedBox(
                                     height: 20,

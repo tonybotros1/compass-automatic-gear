@@ -11,6 +11,8 @@ import 'package:http/http.dart' as http;
 
 var fontStyleForAppBar = TextStyle(
     fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
+var fontStyleForScreenNameUsedInButtons =
+    TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
 var fontStyleForTableHeader = TextStyle(
     color: Colors.grey[700], fontWeight: FontWeight.bold, fontSize: 12);
 var iconStyleForTableHeaderDown =

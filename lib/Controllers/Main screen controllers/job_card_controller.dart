@@ -8,6 +8,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'main_screen_contro.dart';
+
 class JobCardController extends GetxController {
   Rx<TextEditingController> jobCardCounter = TextEditingController().obs;
   Rx<TextEditingController> jobCardDate = TextEditingController().obs;
@@ -182,6 +184,12 @@ class JobCardController extends GetxController {
   void openImageViewer(List imageUrls, int index) {
     Get.toNamed('/imageViewer',
         arguments: {'images': imageUrls, 'index': index});
+  }
+
+  getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // Stream<Map<String, double>> calculateGrandSums() {

@@ -211,7 +211,10 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                       child: Row(
                         spacing: 10,
                         children: [
-                          Text(''),
+                          Text(
+                            controller.getScreenName(),
+                            style: fontStyleForScreenNameUsedInButtons,
+                          ),
                           Spacer(),
                           GetX<EntityInformationsController>(
                               builder: (controller) {
@@ -221,16 +224,12 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                                   : () {
                                       controller.editEntity(entityId);
                                     },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
+                              style: new2ButtonStyle,
                               child: controller.addingNewEntity.value == false
                                   ? const Text(
                                       'Save',
-                                      style: TextStyle(color: Colors.white),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     )
                                   : const Padding(
                                       padding: EdgeInsets.all(8.0),
@@ -240,15 +239,7 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                                     ),
                             );
                           }),
-                          ElevatedButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              style: cancelButtonStyle,
-                              child: const Text(
-                                'Cancel',
-                                style: TextStyle(color: Colors.white),
-                              )),
+                          closeButton
                         ],
                       ),
                     ),
@@ -264,7 +255,6 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                 );
               }),
             ));
-        
       },
       child: const Text('Edit'));
 }
@@ -295,7 +285,10 @@ ElevatedButton newContactButton(BuildContext context,
                     child: Row(
                       spacing: 10,
                       children: [
-                        Text(''),
+                        Text(
+                          controller.getScreenName(),
+                          style: fontStyleForScreenNameUsedInButtons,
+                        ),
                         Spacer(),
                         GetX<EntityInformationsController>(
                             builder: (controller) => ElevatedButton(
@@ -304,12 +297,12 @@ ElevatedButton newContactButton(BuildContext context,
                                       : () async {
                                           await controller.addNewEntity();
                                         },
-                                  style: saveButtonStyle,
+                                  style: new2ButtonStyle,
                                   child: controller.addingNewEntity.value ==
                                           false
                                       ? const Text(
                                           'Save',
-                                          style: TextStyle(color: Colors.white),
+                                          style: TextStyle(fontWeight: FontWeight.bold),
                                         )
                                       : SizedBox(
                                           height: 20,
@@ -320,15 +313,7 @@ ElevatedButton newContactButton(BuildContext context,
                                           ),
                                         ),
                                 )),
-                        ElevatedButton(
-                            onPressed: () {
-                              Get.back();
-                            },
-                            style: cancelButtonStyle,
-                            child: const Text(
-                              'Cancel',
-                              style: TextStyle(color: Colors.white),
-                            )),
+                        closeButton
                       ],
                     ),
                   ),
