@@ -1,4 +1,3 @@
-import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CurrencyController extends GetxController {
-  SingleSelectController<String> code = SingleSelectController('');
+  TextEditingController code = TextEditingController();
   TextEditingController name = TextEditingController();
   TextEditingController rate = TextEditingController();
   RxString query = RxString('');
