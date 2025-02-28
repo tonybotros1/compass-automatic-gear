@@ -107,9 +107,7 @@ Widget tableOfScreens(
           constraints: constraints,
         ),
       ),
-      DataColumn(
-        label: Text('')
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredEntities.isEmpty &&
             controller.search.value.text.isEmpty
@@ -192,57 +190,81 @@ ElevatedButton editSection(context, EntityInformationsController controller,
       style: editButtonStyle,
       onPressed: () {
         controller.loadEntityData(EntityModel.fromJson(entityData));
-        showDialog(
+        Get.dialog(
             barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewEntityOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                      onPressed: controller.addingNewEntity.value
-                          ? null
-                          : () {
-                              controller.editEntity(entityId);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
+            Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)),
+              insetPadding: EdgeInsets.all(8),
+              child: LayoutBuilder(builder: (context, constraints) {
+                return Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      width: constraints.maxWidth,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5)),
+                        color: mainColor,
                       ),
-                      child: controller.addingNewEntity.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
+                      child: Row(
+                        spacing: 10,
+                        children: [
+                          Text(''),
+                          Spacer(),
+                          GetX<EntityInformationsController>(
+                              builder: (controller) {
+                            return ElevatedButton(
+                              onPressed: controller.addingNewEntity.value
+                                  ? null
+                                  : () {
+                                      controller.editEntity(entityId);
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
                               ),
-                            ),
+                              child: controller.addingNewEntity.value == false
+                                  ? const Text(
+                                      'Save',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            );
+                          }),
+                          ElevatedButton(
+                              onPressed: () {
+                                Get.back();
+                              },
+                              style: cancelButtonStyle,
+                              child: const Text(
+                                'Cancel',
+                                style: TextStyle(color: Colors.white),
+                              )),
+                        ],
+                      ),
                     ),
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+                    Expanded(
+                        child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: addNewEntityOrEdit(
+                        controller: controller,
+                        constraints: constraints,
+                      ),
+                    ))
+                  ],
+                );
+              }),
+            ));
+        
       },
       child: const Text('Edit'));
 }
@@ -252,55 +274,76 @@ ElevatedButton newContactButton(BuildContext context,
   return ElevatedButton(
     onPressed: () {
       controller.clearAllVariables();
-      showDialog(
+      Get.dialog(
           barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewEntityOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<EntityInformationsController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewEntity.value
-                                ? null
-                                : () async {
-                                    await controller.addNewEntity();
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewEntity.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+          Dialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            insetPadding: EdgeInsets.all(8),
+            child: LayoutBuilder(builder: (context, constraints) {
+              return Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    width: constraints.maxWidth,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(5),
+                          topRight: Radius.circular(5)),
+                      color: mainColor,
+                    ),
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        Text(''),
+                        Spacer(),
+                        GetX<EntityInformationsController>(
+                            builder: (controller) => ElevatedButton(
+                                  onPressed: controller.addingNewEntity.value
+                                      ? null
+                                      : () async {
+                                          await controller.addNewEntity();
+                                        },
+                                  style: saveButtonStyle,
+                                  child: controller.addingNewEntity.value ==
+                                          false
+                                      ? const Text(
+                                          'Save',
+                                          style: TextStyle(color: Colors.white),
+                                        )
+                                      : SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                )),
+                        ElevatedButton(
+                            onPressed: () {
+                              Get.back();
+                            },
+                            style: cancelButtonStyle,
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.white),
+                            )),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                      child: Padding(
+                    padding: EdgeInsets.all(8),
+                    child: addNewEntityOrEdit(
+                      controller: controller,
+                      constraints: constraints,
+                    ),
+                  ))
+                ],
+              );
+            }),
+          ));
     },
     style: newButtonStyle,
     child: const Text('New Entity'),

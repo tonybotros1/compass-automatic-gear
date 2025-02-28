@@ -11,12 +11,10 @@ import 'customer_section.dart';
 
 Widget addNewEntityOrEdit({
   required BoxConstraints constraints,
-  required BuildContext context,
   required EntityInformationsController controller,
 }) {
   return SizedBox(
-    height: constraints.maxHeight,
-    width: constraints.maxWidth / 1.1,
+   
     child: SingleChildScrollView(
       child: Column(
         children: [

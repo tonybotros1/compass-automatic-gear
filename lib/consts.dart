@@ -405,9 +405,9 @@ Container labelContainer({
 
 Decoration containerDecor = BoxDecoration(
     border: Border(
-      left: BorderSide(color: mainColor),
-      right: BorderSide(color: mainColor),
-      bottom: BorderSide(color: mainColor),
+      left: BorderSide(color: secColor),
+      right: BorderSide(color: secColor),
+      bottom: BorderSide(color: secColor),
     ),
     borderRadius: BorderRadius.only(
         bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5)));

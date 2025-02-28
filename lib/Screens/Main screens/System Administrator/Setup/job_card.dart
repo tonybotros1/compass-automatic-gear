@@ -770,7 +770,6 @@ ElevatedButton editSection(context, JobCardController controller,
                                           content: addNewEntityOrEdit(
                                             controller: otherController,
                                             constraints: constraints,
-                                            context: context,
                                           ),
                                           actions: [
                                             Obx(() => Padding(
