@@ -24,10 +24,11 @@ Widget addNewCurrencyOrEdit({
           GetX<CurrencyController>(builder: (controller) {
             bool isCountryLoading = controller.allCountries.isEmpty;
             return CustomDropdown(
+              
               // enabled: false,
               textcontroller: controller.code.text,
               validator: true,
-              showedSelectedName: 'code',
+              showedSelectedName: 'currency_code',
               onChanged: (key, value) {
                 controller.name.text = value['currency_name'];
                 controller.countryId.value = key;
@@ -36,7 +37,7 @@ Widget addNewCurrencyOrEdit({
               items: isCountryLoading ? {} : controller.allCountries,
               itemBuilder: (context, key, value) {
                 return ListTile(
-                    title: Text('${value["code"]} (${value['name']})'));
+                    title: Text('${value["currency_code"]} (${value['name']})'));
               },
             );
           }),

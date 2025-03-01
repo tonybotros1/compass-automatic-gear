@@ -10,6 +10,8 @@ class DropdownController extends GetxController {
   RxMap filteredItems = {}.obs;
   RxBool isValid = true.obs;
   Rx<TextEditingController> query = TextEditingController().obs;
+  RxString textController = RxString('');
+  RxString showedSelectedName = RxString('');
 
   /// A function that extracts the search text from the itemBuilder widget.
   String extractSearchableText(Widget widget) {
@@ -103,32 +105,44 @@ class DropdownController extends GetxController {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: filteredItems.entries.map((entry) {
+                                print(showedSelectedName);
                                 bool isHovered =
                                     hoveredItemKey.value == entry.key;
                                 return MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  onEnter: (_) =>
-                                      hoveredItemKey.value = entry.key,
-                                  onExit: (_) => hoveredItemKey.value = null,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      selectedKey.value = entry.key;
-                                      selectedValue.value = entry.value;
-                                      isValid.value = true;
-                                      hideDropdown();
-                                      if (onChanged != null) {
-                                        onChanged(entry.key, entry.value);
-                                      }
-                                    },
-                                    child: Container(
-                                      color: isHovered
-                                          ? Colors.grey[300]
-                                          : Colors.transparent,
-                                      child: itemBuilder(
-                                          context, entry.key, entry.value),
-                                    ),
-                                  ),
-                                );
+                                    cursor: SystemMouseCursors.click,
+                                    onEnter: (_) =>
+                                        hoveredItemKey.value = entry.key,
+                                    onExit: (_) => hoveredItemKey.value = null,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        selectedKey.value = entry.key;
+                                        selectedValue.value = entry.value;
+                                        isValid.value = true;
+                                        hideDropdown();
+                                        if (onChanged != null) {
+                                          onChanged(entry.key, entry.value);
+                                        }
+                                      },
+                                      // .toString()
+                                      //                   .toLowerCase()
+                                      //                   .startsWith(textController
+                                      //                       .value
+                                      //                       .toLowerCase())
+                                      child: Container(
+                                        color: selectedKey.value == entry.key ||
+                                                (entry.value[showedSelectedName.value]
+                                                        == textController.value &&
+                                                    textController.isNotEmpty)
+                                            ? Colors.lightBlueAccent
+                                            : isHovered
+                                                ? Colors.grey[
+                                                    300] // Highlight when hovered
+                                                : Colors
+                                                    .transparent, // Default background
+                                        child: itemBuilder(
+                                            context, entry.key, entry.value),
+                                      ),
+                                    ));
                               }).toList(),
                             ),
                           ),
@@ -236,16 +250,18 @@ class CustomDropdown extends StatelessWidget {
     );
 
     // Default text styles.
-    TextStyle defaultEnabledTextStyle = showedSelectedName.isEmpty && textControllerValue.isEmpty 
-        ? TextStyle(fontSize: 16, color: Colors.grey.shade700)
-        : TextStyle(fontSize: 16, color: Colors.black);
+    TextStyle defaultEnabledTextStyle =
+        showedSelectedName.isEmpty && textControllerValue.isEmpty
+            ? TextStyle(fontSize: 16, color: Colors.grey.shade700)
+            : TextStyle(fontSize: 16, color: Colors.black);
     TextStyle defaultDisabledTextStyle =
         const TextStyle(color: Colors.grey, fontSize: 16);
 
     textControllerValue.value = textcontroller;
 
     bool isEnabled = items.isEmpty ? false : enabled ?? true;
-
+    controller.textController.value = textcontroller;
+    controller.showedSelectedName.value = showedSelectedName;
     return FormField<dynamic>(
       validator: (value) {
         if (validator == true) {

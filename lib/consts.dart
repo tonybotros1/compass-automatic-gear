@@ -374,21 +374,30 @@ Future<dynamic> alertDialog(
 }
 
 // function to convert text to date and make the format dd-mm-yyyy
-textToDate(inputDate) {
+String textToDate(dynamic inputDate) {
   if (inputDate is String) {
-    if (inputDate == '') {
+    if (inputDate.isEmpty) {
       return '';
     }
-    DateTime parsedDate = DateFormat("yyyy-MM-dd").parse(inputDate);
-    String formattedDate = DateFormat("dd-MM-yyyy").format(parsedDate);
+    
+    // Check if the input is already in dd-MM-yyyy format
+    final RegExp dateFormatRegex = RegExp(r'^\d{2}-\d{2}-\d{4}$');
+    if (dateFormatRegex.hasMatch(inputDate)) {
+      return inputDate;
+    }
 
-    return formattedDate;
+    try {
+      DateTime parsedDate = DateFormat("yyyy-MM-dd").parse(inputDate);
+      return DateFormat("dd-MM-yyyy").format(parsedDate);
+    } catch (e) {
+      return ''; // Return empty string if parsing fails
+    }
   } else if (inputDate is DateTime) {
-    String formattedDate = DateFormat("dd-MM-yyyy").format(inputDate);
-
-    return formattedDate;
+    return DateFormat("dd-MM-yyyy").format(inputDate);
   }
+  return ''; // Return empty string for unsupported types
 }
+
 
 Container labelContainer({
   required Widget lable,

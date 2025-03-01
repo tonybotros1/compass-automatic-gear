@@ -460,7 +460,7 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
             : SizedBox()),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
         DataCell(textForDataRowInTable(
-            text: '${textToDate(jobData['invoice_date'])}')),
+            text: textToDate(jobData['invoice_date']))),
         DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
         DataCell(textForDataRowInTable(
             text: controller.getdataName(
