@@ -445,13 +445,17 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
     return DataRow(
       cells: [
         DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
-        DataCell(textForDataRowInTable(text: '${jobData['quotation_date']}')),
+        DataCell(textForDataRowInTable(
+            text: jobData['quotation_number'] != ''
+                ? '${jobData['quotation_date']}'
+                : '')),
         DataCell(jobData['quotation_status'] != ''
             ? statusBox('${jobData['quotation_status']}',
                 hieght: 35, width: 100)
             : SizedBox()),
         DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
-        DataCell(textForDataRowInTable(text: '${jobData['job_date']}')),
+        DataCell(textForDataRowInTable(
+            text: jobData['job_number'] != '' ? '${jobData['job_date']}' : '')),
         DataCell(jobData['job_status_1'] != ''
             ? statusBox('${jobData['job_status_1']}', hieght: 35, width: 100)
             : SizedBox()),
@@ -460,8 +464,13 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
             : SizedBox()),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
         DataCell(textForDataRowInTable(
-            text: textToDate(jobData['invoice_date']))),
-        DataCell(textForDataRowInTable(text: '${jobData['lpo_number']}')),
+            text: jobData['invoice_number'] != ''
+                ? textToDate(jobData['invoice_date'])
+                : '')),
+        DataCell(SelectableText(
+          '${jobData['lpo_number']}',
+          maxLines: 1,
+        )),
         DataCell(textForDataRowInTable(
             text: controller.getdataName(
                 jobData['car_brand'], controller.allBrands))),
@@ -482,8 +491,14 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
             },
           ),
         ),
-        DataCell(textForDataRowInTable(text: '${jobData['plate_number']}')),
-        DataCell(textForDataRowInTable(text: '${jobData['plate_code']}')),
+        DataCell(SelectableText(
+          jobData['plate_number'],
+          maxLines: 1,
+        )),
+        DataCell(SelectableText(
+          jobData['plate_code'],
+          maxLines: 1,
+        )),
         DataCell(
           FutureBuilder<String>(
             future: controller.getCityName(jobData['country'], jobData['city']),

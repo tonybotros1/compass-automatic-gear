@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class DropdownController extends GetxController {
@@ -12,8 +13,19 @@ class DropdownController extends GetxController {
   Rx<TextEditingController> query = TextEditingController().obs;
   RxString textController = RxString('');
   RxString showedSelectedName = RxString('');
+  FocusNode overlayFocusNode = FocusNode();
+  FocusNode searchFocusNode = FocusNode();
+  ScrollController scrollController = ScrollController();
+  RxString highlightedKey = RxString('');
 
-  /// A function that extracts the search text from the itemBuilder widget.
+  @override
+  void onClose() {
+    overlayFocusNode.dispose();
+    searchFocusNode.dispose();
+    scrollController.dispose();
+    super.onClose();
+  }
+
   String extractSearchableText(Widget widget) {
     if (widget is ListTile) {
       if (widget.title is Text) {
@@ -25,7 +37,6 @@ class DropdownController extends GetxController {
     return "";
   }
 
-  /// Shows the dropdown overlay.
   void showDropdown(
     BuildContext context,
     GlobalKey buttonKey,
@@ -42,112 +53,119 @@ class DropdownController extends GetxController {
     RenderBox renderBox =
         buttonKey.currentContext!.findRenderObject() as RenderBox;
     Offset offset = renderBox.localToGlobal(Offset.zero);
-    final hoveredItemKey = Rxn<dynamic>(); // Track hovered item
 
     overlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
-          // Tapping outside closes the dropdown.
           Positioned.fill(
             child: GestureDetector(
               onTap: hideDropdown,
               child: Container(color: Colors.transparent),
             ),
           ),
-          // Dropdown overlay.
           Positioned(
             left: offset.dx,
             top: offset.dy + renderBox.size.height,
             width: renderBox.size.width,
-            child: Material(
-              elevation: 4.0,
-              borderRadius: BorderRadius.circular(5),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Search bar with clear (X) button.
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      controller: query.value,
-                      onChanged: (query) {
-                        searchQuery.value = query;
-                        filterItems(itemBuilder);
-                      },
-                      decoration: InputDecoration(
-                        hintText: "Search...",
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.close),
-                          onPressed: () {
-                            searchQuery.value = '';
-                            query.value.clear();
-                            filterItems(itemBuilder);
-                          },
+            child: Focus(
+              focusNode: overlayFocusNode,
+              onKeyEvent: (node, event) {
+                if (event is KeyDownEvent) {
+                  if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                    _moveHighlight(1);
+                    return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                    _moveHighlight(-1);
+                    return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.enter) {
+                    _selectHighlightedItem(onChanged);
+                    return KeyEventResult.handled;
+                  }
+                }
+                return KeyEventResult.ignored;
+              },
+              child: Material(
+                elevation: 4.0,
+                borderRadius: BorderRadius.circular(5),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        autofocus: true,
+                        focusNode: searchFocusNode,
+                        controller: query.value,
+                        onChanged: (query) {
+                          searchQuery.value = query;
+                          filterItems(itemBuilder);
+                        },
+                        decoration: InputDecoration(
+                          hintText: "Search...",
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              searchQuery.value = '';
+                              query.value.clear();
+                              filterItems(itemBuilder);
+                            },
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            borderSide: BorderSide(
+                                color: Colors.grey.shade700, width: 2.0),
+                          ),
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 10),
                         ),
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5)),
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 10),
                       ),
                     ),
-                  ),
-                  // List of filtered items built via the custom itemBuilder.
-                  Obx(() => filteredItems.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: const Text("No results found",
-                              style: TextStyle(color: Colors.grey)),
-                        )
-                      : Container(
-                          constraints: BoxConstraints(maxHeight: 200),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: filteredItems.entries.map((entry) {
-                                print(showedSelectedName);
-                                bool isHovered =
-                                    hoveredItemKey.value == entry.key;
-                                return MouseRegion(
+                    Obx(() => filteredItems.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Text("No results found",
+                                style: TextStyle(color: Colors.grey)),
+                          )
+                        : Container(
+                            constraints: const BoxConstraints(maxHeight: 200),
+                            child: SingleChildScrollView(
+                              controller: scrollController,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: filteredItems.entries.map((entry) {
+                                  return MouseRegion(
                                     cursor: SystemMouseCursors.click,
                                     onEnter: (_) =>
-                                        hoveredItemKey.value = entry.key,
-                                    onExit: (_) => hoveredItemKey.value = null,
+                                        highlightedKey.value = entry.key,
+                                    onExit: (_) => highlightedKey.value = '',
                                     child: GestureDetector(
                                       onTap: () {
                                         selectedKey.value = entry.key;
                                         selectedValue.value = entry.value;
+                                        textController.value = '';
                                         isValid.value = true;
                                         hideDropdown();
-                                        if (onChanged != null) {
-                                          onChanged(entry.key, entry.value);
-                                        }
+                                        onChanged?.call(entry.key, entry.value);
                                       },
-                                      // .toString()
-                                      //                   .toLowerCase()
-                                      //                   .startsWith(textController
-                                      //                       .value
-                                      //                       .toLowerCase())
-                                      child: Container(
-                                        color: selectedKey.value == entry.key ||
-                                                (entry.value[showedSelectedName.value]
-                                                        == textController.value &&
-                                                    textController.isNotEmpty)
-                                            ? Colors.lightBlueAccent
-                                            : isHovered
-                                                ? Colors.grey[
-                                                    300] // Highlight when hovered
-                                                : Colors
-                                                    .transparent, // Default background
-                                        child: itemBuilder(
-                                            context, entry.key, entry.value),
-                                      ),
-                                    ));
-                              }).toList(),
+                                      child: Obx(() => Container(
+                                            color: _getItemColor(
+                                              entry.key,
+                                              entry.value,
+                                            ),
+                                            child: itemBuilder(context,
+                                                entry.key, entry.value),
+                                          )),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                             ),
-                          ),
-                        )),
-                ],
+                          )),
+                  ],
+                ),
               ),
             ),
           ),
@@ -156,16 +174,108 @@ class DropdownController extends GetxController {
     );
 
     Overlay.of(Get.overlayContext!).insert(overlayEntry!);
+    searchFocusNode.requestFocus();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      String? initialHighlightKey;
+
+      if (selectedKey.value.isNotEmpty &&
+          filteredItems.containsKey(selectedKey.value)) {
+        initialHighlightKey = selectedKey.value;
+      } else if (textController.value.isNotEmpty) {
+        initialHighlightKey = _findKeyByTextValue();
+      }
+
+      if (initialHighlightKey == null && filteredItems.isNotEmpty) {
+        initialHighlightKey = filteredItems.keys.first;
+      }
+
+      highlightedKey.value = initialHighlightKey ?? '';
+      _scrollToHighlightedItem();
+    });
   }
 
-  /// Hides the dropdown overlay.
+  String? _findKeyByTextValue() {
+    for (var entry in filteredItems.entries) {
+      if (entry.value[showedSelectedName.value] == textController.value) {
+        return entry.key;
+      }
+    }
+    return null;
+  }
+
+  Color _getItemColor(String key, dynamic value) {
+    final isSelected = selectedKey.value == key;
+    final isTextMatch = textController.value.isNotEmpty &&
+        value[showedSelectedName.value] == textController.value;
+    final isHighlighted = highlightedKey.value == key;
+
+    if (isSelected || isTextMatch) {
+      return Colors.grey.shade300;
+    } else if (isHighlighted) {
+      return Colors.blue[100]!;
+    }
+    return Colors.transparent;
+  }
+
+  void _moveHighlight(int direction) {
+    if (filteredItems.isEmpty) return;
+
+    final keys = filteredItems.keys.toList();
+    int currentIndex = keys.indexOf(highlightedKey.value);
+
+    if (currentIndex == -1) {
+      highlightedKey.value = keys.first;
+    } else {
+      int newIndex = currentIndex + direction;
+      if (newIndex >= 0 && newIndex < keys.length) {
+        highlightedKey.value = keys[newIndex];
+      } else if (newIndex < 0) {
+        highlightedKey.value = keys.last;
+      } else {
+        highlightedKey.value = keys.first;
+      }
+    }
+    _scrollToHighlightedItem();
+  }
+
+  void _scrollToHighlightedItem() {
+    final keys = filteredItems.keys.toList();
+    int index = keys.indexOf(highlightedKey.value);
+    if (index != -1 && scrollController.hasClients) {
+      const double itemHeight = 48.0;
+      double scrollOffset = index * itemHeight;
+      double maxScroll = scrollController.position.maxScrollExtent;
+      double targetOffset = scrollOffset.clamp(0.0, maxScroll);
+
+      scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _selectHighlightedItem(void Function(String, dynamic)? onChanged) {
+    if (highlightedKey.value.isNotEmpty &&
+        filteredItems.containsKey(highlightedKey.value)) {
+      selectedKey.value = highlightedKey.value;
+      selectedValue.value = filteredItems[highlightedKey.value];
+      textController.value = '';
+      isValid.value = true;
+      onChanged?.call(
+          highlightedKey.value, filteredItems[highlightedKey.value]);
+      hideDropdown();
+    }
+  }
+
   void hideDropdown() {
     query.value.clear();
     overlayEntry?.remove();
     overlayEntry = null;
+    highlightedKey.value = '';
   }
 
-  /// Filters items based on the text inside itemBuilder.
   void filterItems(Widget Function(BuildContext, String, dynamic) itemBuilder) {
     if (searchQuery.value.isEmpty) {
       filteredItems.assignAll(allItems);
@@ -180,14 +290,25 @@ class DropdownController extends GetxController {
         }),
       ));
     }
+
+    String? newHighlightKey;
+
+    if (selectedKey.value.isNotEmpty &&
+        filteredItems.containsKey(selectedKey.value)) {
+      newHighlightKey = selectedKey.value;
+    } else if (textController.value.isNotEmpty) {
+      newHighlightKey = _findKeyByTextValue();
+    } else if (filteredItems.isNotEmpty) {
+      newHighlightKey = filteredItems.keys.first;
+    }
+
+    highlightedKey.value = newHighlightKey ?? '';
   }
 
-  /// Validates whether a selection has been made.
   void validateSelection() {
     isValid.value = selectedKey.value.isNotEmpty;
   }
 
-  /// Programmatically sets the selected value.
   void setValue(String key) {
     if (allItems.containsKey(key)) {
       selectedKey.value = key;
@@ -205,7 +326,7 @@ class CustomDropdown extends StatelessWidget {
   final void Function(String, dynamic)? onChanged;
   final Widget Function(BuildContext, String, dynamic) itemBuilder;
   final String textcontroller;
-  final bool? enabled; // Marked final
+  final bool? enabled;
   final TextStyle? enabledTextStyle;
   final TextStyle? disabledTextStyle;
   final String showedSelectedName;
@@ -233,7 +354,6 @@ class CustomDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Default decoration for the enabled state.
     BoxDecoration defaultEnabledDecoration = BoxDecoration(
       color: Colors.grey.shade200,
       border: Border.all(
@@ -241,15 +361,11 @@ class CustomDropdown extends StatelessWidget {
       borderRadius: BorderRadius.circular(5),
     );
 
-    // Default decoration for the disabled state (similar to a disabled TextFormField).
     BoxDecoration defaultDisabledDecoration = BoxDecoration(
-      border: Border.all(
-        color: Colors.grey.shade400,
-      ),
+      border: Border.all(color: Colors.grey.shade400),
       borderRadius: BorderRadius.circular(5),
     );
 
-    // Default text styles.
     TextStyle defaultEnabledTextStyle =
         showedSelectedName.isEmpty && textControllerValue.isEmpty
             ? TextStyle(fontSize: 16, color: Colors.grey.shade700)
@@ -258,22 +374,24 @@ class CustomDropdown extends StatelessWidget {
         const TextStyle(color: Colors.grey, fontSize: 16);
 
     textControllerValue.value = textcontroller;
-
-    bool isEnabled = items.isEmpty ? false : enabled ?? true;
     controller.textController.value = textcontroller;
     controller.showedSelectedName.value = showedSelectedName;
+
+    bool isEnabled = items.isEmpty ? false : enabled ?? true;
+
     return FormField<dynamic>(
       validator: (value) {
         if (validator == true) {
           if (value == null || value.isEmpty) {
             return "    Please Select an Option";
           }
-          return null;
-        } else {
-          return null;
         }
+        return null;
       },
       builder: (FormFieldState<dynamic> state) {
+        if (state.hasError) {
+          controller.isValid.value = false;
+        }
         return Column(
           children: [
             GestureDetector(
@@ -291,11 +409,8 @@ class CustomDropdown extends StatelessWidget {
                           controller.selectedValue.value = value;
                           controller.isValid.value = true;
                           controller.hideDropdown();
-                          // Notify the FormField that the value has changed.
                           state.didChange(value);
-                          if (onChanged != null) {
-                            onChanged!(key, value);
-                          }
+                          onChanged?.call(key, value);
                         },
                       );
                     }
@@ -303,9 +418,15 @@ class CustomDropdown extends StatelessWidget {
               child: Obx(() => Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 12),
-                    decoration: isEnabled
-                        ? (dropdownDecoration ?? defaultEnabledDecoration)
-                        : (disabledDecoration ?? defaultDisabledDecoration),
+                    decoration: controller.isValid.isFalse
+                        ? BoxDecoration(
+                            color: Colors.grey.shade200,
+                            border: Border.all(color: Colors.red),
+                            borderRadius: BorderRadius.circular(5),
+                          )
+                        : isEnabled
+                            ? (dropdownDecoration ?? defaultEnabledDecoration)
+                            : (disabledDecoration ?? defaultDisabledDecoration),
                     child: Row(
                       children: [
                         Text(
@@ -326,25 +447,15 @@ class CustomDropdown extends StatelessWidget {
                     ),
                   )),
             ),
-            controller.isValid.value
-                ? const SizedBox()
-                : const SizedBox(height: 5),
-            Obx(() => controller.isValid.value
-                ? const SizedBox.shrink()
-                : const Text("    Please Select an Option",
-                    style: TextStyle(color: Colors.red))),
-            // Display the FormField error message, if any.
-            state.hasError
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Container(
-                      alignment: Alignment.centerLeft,
-                      child: Text(state.errorText ?? "",
-                          style:
-                              TextStyle(color: Colors.red[900], fontSize: 13)),
-                    ),
-                  )
-                : const SizedBox(),
+            if (state.hasError)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Container(
+                  alignment: Alignment.centerLeft,
+                  child: Text(state.errorText ?? "",
+                      style: TextStyle(color: Colors.red[900], fontSize: 13)),
+                ),
+              ),
           ],
         );
       },
