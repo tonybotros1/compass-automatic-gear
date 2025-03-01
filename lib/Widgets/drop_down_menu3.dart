@@ -43,6 +43,7 @@ class DropdownController extends GetxController {
     Map items, {
     required Widget Function(BuildContext, String, dynamic) itemBuilder,
     void Function(String, dynamic)? onChanged,
+    required LayerLink layerLink,
   }) {
     if (overlayEntry != null) return;
 
@@ -50,121 +51,133 @@ class DropdownController extends GetxController {
     filteredItems.assignAll(items);
     query.value.text = searchQuery.value;
 
+    // Obtain the size of the dropdown field.
     RenderBox renderBox =
         buttonKey.currentContext!.findRenderObject() as RenderBox;
-    Offset offset = renderBox.localToGlobal(Offset.zero);
+    double fieldWidth = renderBox.size.width;
 
     overlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
+          // Tapping outside closes the overlay.
           Positioned.fill(
             child: GestureDetector(
               onTap: hideDropdown,
               child: Container(color: Colors.transparent),
             ),
           ),
-          Positioned(
-            left: offset.dx,
-            top: offset.dy + renderBox.size.height,
-            width: renderBox.size.width,
-            child: Focus(
-              focusNode: overlayFocusNode,
-              onKeyEvent: (node, event) {
-                if (event is KeyDownEvent) {
-                  if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                    _moveHighlight(1);
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                    _moveHighlight(-1);
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.enter) {
-                    _selectHighlightedItem(onChanged);
-                    return KeyEventResult.handled;
+          // Use CompositedTransformFollower to attach the overlay to the target.
+          CompositedTransformFollower(
+            link: layerLink,
+            showWhenUnlinked: false,
+            offset: Offset(0, renderBox.size.height),
+            // Wrap with SizedBox to constrain the width.
+            child: SizedBox(
+              width: fieldWidth,
+              child: Focus(
+                focusNode: overlayFocusNode,
+                onKeyEvent: (node, event) {
+                  if (event is KeyDownEvent) {
+                    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                      _moveHighlight(1);
+                      return KeyEventResult.handled;
+                    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                      _moveHighlight(-1);
+                      return KeyEventResult.handled;
+                    } else if (event.logicalKey == LogicalKeyboardKey.enter) {
+                      _selectHighlightedItem(onChanged);
+                      return KeyEventResult.handled;
+                    }
                   }
-                }
-                return KeyEventResult.ignored;
-              },
-              child: Material(
-                elevation: 4.0,
-                borderRadius: BorderRadius.circular(5),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        autofocus: true,
-                        focusNode: searchFocusNode,
-                        controller: query.value,
-                        onChanged: (query) {
-                          searchQuery.value = query;
-                          filterItems(itemBuilder);
-                        },
-                        decoration: InputDecoration(
-                          hintText: "Search...",
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              searchQuery.value = '';
-                              query.value.clear();
-                              filterItems(itemBuilder);
-                            },
+                  return KeyEventResult.ignored;
+                },
+                child: Material(
+                  elevation: 4.0,
+                  borderRadius: BorderRadius.circular(5),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          autofocus: true,
+                          focusNode: searchFocusNode,
+                          controller: query.value,
+                          onChanged: (query) {
+                            searchQuery.value = query;
+                            filterItems(itemBuilder);
+                          },
+                          decoration: InputDecoration(
+                            hintText: "Search...",
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                searchQuery.value = '';
+                                query.value.clear();
+                                filterItems(itemBuilder);
+                              },
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide(
+                                  color: Colors.grey.shade700, width: 2.0),
+                            ),
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5)),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 10),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: BorderSide(
-                                color: Colors.grey.shade700, width: 2.0),
-                          ),
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5)),
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 8, horizontal: 10),
                         ),
                       ),
-                    ),
-                    Obx(() => filteredItems.isEmpty
-                        ? const Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Text("No results found",
-                                style: TextStyle(color: Colors.grey)),
-                          )
-                        : Container(
-                            constraints: const BoxConstraints(maxHeight: 200),
-                            child: SingleChildScrollView(
+                      Obx(() => filteredItems.isEmpty
+                          ? const Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Text("No results found",
+                                  style: TextStyle(color: Colors.grey)),
+                            )
+                          : Container(
+                            constraints: const BoxConstraints(maxHeight: 175),
+                            child: Scrollbar(
                               controller: scrollController,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: filteredItems.entries.map((entry) {
-                                  return MouseRegion(
-                                    cursor: SystemMouseCursors.click,
-                                    onEnter: (_) =>
-                                        highlightedKey.value = entry.key,
-                                    onExit: (_) => highlightedKey.value = '',
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        selectedKey.value = entry.key;
-                                        selectedValue.value = entry.value;
-                                        textController.value = '';
-                                        isValid.value = true;
-                                        hideDropdown();
-                                        onChanged?.call(entry.key, entry.value);
-                                      },
-                                      child: Obx(() => Container(
-                                            color: _getItemColor(
-                                              entry.key,
-                                              entry.value,
-                                            ),
-                                            child: itemBuilder(context,
-                                                entry.key, entry.value),
-                                          )),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
+                              thumbVisibility: true,
+                              trackVisibility: true,
+                              child: SingleChildScrollView(
+                                  controller: scrollController,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: filteredItems.entries.map((entry) {
+                                      return MouseRegion(
+                                        cursor: SystemMouseCursors.click,
+                                        onEnter: (_) =>
+                                            highlightedKey.value = entry.key,
+                                        onExit: (_) => highlightedKey.value = '',
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            selectedKey.value = entry.key;
+                                            selectedValue.value = entry.value;
+                                            textController.value = '';
+                                            isValid.value = true;
+                                            hideDropdown();
+                                            onChanged?.call(entry.key, entry.value);
+                                          },
+                                          child: Obx(() => Container(
+                                                color: _getItemColor(
+                                                  entry.key,
+                                                  entry.value,
+                                                ),
+                                                child: itemBuilder(context,
+                                                    entry.key, entry.value),
+                                              )),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
                             ),
                           )),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -282,7 +295,8 @@ class DropdownController extends GetxController {
     } else {
       filteredItems.assignAll(Map.fromEntries(
         allItems.entries.where((entry) {
-          Widget builtItem = itemBuilder(Get.context!, entry.key, entry.value);
+          Widget builtItem =
+              itemBuilder(Get.context!, entry.key, entry.value);
           String searchText = extractSearchableText(builtItem);
           return searchText
               .toLowerCase()
@@ -351,6 +365,8 @@ class CustomDropdown extends StatelessWidget {
   final GlobalKey buttonKey = GlobalKey();
   final DropdownController controller = DropdownController();
   final RxString textControllerValue = RxString('');
+  // Define a LayerLink to bind the target and follower.
+  final LayerLink _layerLink = LayerLink();
 
   @override
   Widget build(BuildContext context) {
@@ -393,68 +409,71 @@ class CustomDropdown extends StatelessWidget {
           controller.isValid.value = false;
         }
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              key: buttonKey,
-              onTap: isEnabled
-                  ? () {
-                      controller.showDropdown(
-                        context,
-                        buttonKey,
-                        items,
-                        itemBuilder: itemBuilder,
-                        onChanged: (key, value) {
-                          textControllerValue.value = '';
-                          controller.selectedKey.value = key;
-                          controller.selectedValue.value = value;
-                          controller.isValid.value = true;
-                          controller.hideDropdown();
-                          state.didChange(value);
-                          onChanged?.call(key, value);
-                        },
-                      );
-                    }
-                  : null,
-              child: Obx(() => Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
-                    decoration: controller.isValid.isFalse
-                        ? BoxDecoration(
-                            color: Colors.grey.shade200,
-                            border: Border.all(color: Colors.red),
-                            borderRadius: BorderRadius.circular(5),
-                          )
-                        : isEnabled
-                            ? (dropdownDecoration ?? defaultEnabledDecoration)
-                            : (disabledDecoration ?? defaultDisabledDecoration),
-                    child: Row(
-                      children: [
-                        Text(
-                          textControllerValue.isEmpty
-                              ? controller.selectedKey.isEmpty
-                                  ? hintText
-                                  : controller.selectedValue[showedSelectedName]
-                                      .toString()
-                              : textControllerValue.value,
-                          style: isEnabled
-                              ? (enabledTextStyle ?? defaultEnabledTextStyle)
-                              : (disabledTextStyle ?? defaultDisabledTextStyle),
-                        ),
-                        const Spacer(),
-                        Icon(Icons.arrow_drop_down,
-                            color: isEnabled ? Colors.black : Colors.grey),
-                      ],
-                    ),
-                  )),
+            // Wrap the dropdown button with CompositedTransformTarget.
+            CompositedTransformTarget(
+              link: _layerLink,
+              child: GestureDetector(
+                key: buttonKey,
+                onTap: isEnabled
+                    ? () {
+                        controller.showDropdown(
+                          context,
+                          buttonKey,
+                          items,
+                          itemBuilder: itemBuilder,
+                          onChanged: (key, value) {
+                            textControllerValue.value = '';
+                            controller.selectedKey.value = key;
+                            controller.selectedValue.value = value;
+                            controller.isValid.value = true;
+                            controller.hideDropdown();
+                            state.didChange(value);
+                            onChanged?.call(key, value);
+                          },
+                          layerLink: _layerLink,
+                        );
+                      }
+                    : null,
+                child: Obx(() => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      decoration: controller.isValid.isFalse
+                          ? BoxDecoration(
+                              color: Colors.grey.shade200,
+                              border: Border.all(color: Colors.red),
+                              borderRadius: BorderRadius.circular(5),
+                            )
+                          : isEnabled
+                              ? (dropdownDecoration ?? defaultEnabledDecoration)
+                              : (disabledDecoration ?? defaultDisabledDecoration),
+                      child: Row(
+                        children: [
+                          Text(
+                            textControllerValue.isEmpty
+                                ? controller.selectedKey.isEmpty
+                                    ? hintText
+                                    : controller.selectedValue[showedSelectedName]
+                                        .toString()
+                                : textControllerValue.value,
+                            style: isEnabled
+                                ? (enabledTextStyle ?? defaultEnabledTextStyle)
+                                : (disabledTextStyle ?? defaultDisabledTextStyle),
+                          ),
+                          const Spacer(),
+                          Icon(Icons.arrow_drop_down,
+                              color: isEnabled ? Colors.black : Colors.grey),
+                        ],
+                      ),
+                    )),
+              ),
             ),
             if (state.hasError)
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(state.errorText ?? "",
-                      style: TextStyle(color: Colors.red[900], fontSize: 13)),
-                ),
+                child: Text(state.errorText ?? "",
+                    style: TextStyle(color: Colors.red[900], fontSize: 13)),
               ),
           ],
         );
