@@ -147,7 +147,7 @@ class MainScreen extends StatelessWidget {
                                                     width: 5,
                                                   ),
                                                   Text(
-                                                    '${textToDate(mainScreenController.userJoiningDate.value)}',
+                                                    textToDate(mainScreenController.userJoiningDate.value),
                                                     style: TextStyle(
                                                       color:
                                                           Colors.grey.shade800,
@@ -172,7 +172,7 @@ class MainScreen extends StatelessWidget {
                                                     width: 5,
                                                   ),
                                                   Text(
-                                                    '${textToDate(mainScreenController.userExpiryDate.value)}',
+                                                    textToDate(mainScreenController.userExpiryDate.value),
                                                     style: TextStyle(
                                                       color:
                                                           Colors.grey.shade800,
