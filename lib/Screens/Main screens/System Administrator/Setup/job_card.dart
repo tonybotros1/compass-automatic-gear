@@ -900,11 +900,10 @@ ElevatedButton newJobCardButton(BuildContext context,
       controller.invoiceDate.value.text = textToDate(DateTime.now());
       controller.startDate.value.text = textToDate(DateTime.now());
       var entry = controller.allCurrencies.entries.firstWhere(
-        (entry) =>
-            entry.value['country_id'] ==
-            controller.companyDetails['contact_details']['country'],
-      );
-      print(entry);
+          (entry) =>
+              entry.value['country_id'] ==
+              controller.companyDetails['contact_details']['country'],
+          orElse: () => MapEntry('', {}));
       controller.customerCurrencyId.value = entry.key ?? '';
       controller.customerCurrencyRate.text =
           (entry.value['rate'] ?? '1').toString();
