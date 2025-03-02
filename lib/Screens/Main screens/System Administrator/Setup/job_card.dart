@@ -601,276 +601,285 @@ ElevatedButton editSection(context, JobCardController controller,
             controller.allCountries,
             title: 'vat');
         controller.loadValues(jobData);
-        Get.dialog(
-            barrierDismissible: false,
-            Dialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5)),
-                insetPadding: EdgeInsets.all(8),
-                child: LayoutBuilder(builder: (context, constraints) {
-                  return Column(
+        editJobCardDialog(controller, jobData, jobId);
+      },
+      child: const Text('Edit'));
+}
+
+Future<dynamic> editJobCardDialog(
+    JobCardController controller, Map<String, dynamic> jobData, jobId) {
+  return Get.dialog(
+      barrierDismissible: false,
+      Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          insetPadding: EdgeInsets.all(8),
+          child: LayoutBuilder(builder: (context, constraints) {
+            return Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(5),
+                        topRight: Radius.circular(5)),
+                    color: mainColor,
+                  ),
+                  padding: EdgeInsets.all(16),
+                  width: constraints.maxWidth,
+                  child: Row(
+                    spacing: 10,
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(5),
-                              topRight: Radius.circular(5)),
-                          color: mainColor,
-                        ),
-                        padding: EdgeInsets.all(16),
-                        width: constraints.maxWidth,
-                        child: Row(
-                          spacing: 10,
-                          children: [
-                            Text(
-                              '${controller.getScreenName()}',
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.white),
-                            ),
-                            Spacer(),
-                            GetX<JobCardController>(builder: (controller) {
-                              return ElevatedButton(
-                                onPressed: controller.addingNewValue.value
-                                    ? null
-                                    : () async {
-                                        controller.addingNewValue.value = true;
+                      Text(
+                        '${controller.getScreenName()}',
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      ),
+                      Spacer(),
+                      GetX<JobCardController>(builder: (controller) {
+                        return ElevatedButton(
+                          onPressed: controller.addingNewValue.value
+                              ? null
+                              : () async {
+                                  controller.addingNewValue.value = true;
 
-                                        if (jobData['quotation_number'] == '' &&
-                                            controller
-                                                .isQuotationExpanded.isTrue) {
-                                          controller.quotationStatus.value =
-                                              'New';
-                                          await controller
-                                              .getCurrentQuotationCounterNumber();
-                                        }
-                                        if (jobData['job_number'] == '' &&
-                                            controller
-                                                .isJobCardExpanded.isTrue) {
-                                          controller.jobStatus1.value = 'New';
-                                          controller.jobStatus2.value = 'New';
-                                          await controller
-                                              .getCurrentJobCardCounterNumber();
-                                        }
-                                        controller
-                                            .editJobCardAndQuotation(jobId);
-                                      },
-                                style: new2ButtonStyle,
-                                child: controller.addingNewValue.value == false
-                                    ? const Text(
-                                        'Save',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      )
-                                    : SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                              );
-                            }),
-                            ElevatedButton(
-                                style: cancelJobButtonStyle,
-                                onPressed: () {
-                                  if (controller.jobStatus1.value == 'New') {
-                                    alertDialog(
-                                        context: context,
-                                        controller: controller,
-                                        content:
-                                            "Theis will be deleted permanently",
-                                        onPressed: () {
-                                          controller.deleteJobCard(jobId);
-                                        });
-                                  } else {
-                                    showSnackBar('Can Not Delete',
-                                        'Only New Cards Can be Deleted');
+                                  if (jobData['quotation_number'] == '' &&
+                                      controller.isQuotationExpanded.isTrue) {
+                                    controller.quotationStatus.value = 'New';
+                                    await controller
+                                        .getCurrentQuotationCounterNumber();
                                   }
+                                  if (jobData['job_number'] == '' &&
+                                      controller.isJobCardExpanded.isTrue) {
+                                    controller.jobStatus1.value = 'New';
+                                    controller.jobStatus2.value = 'New';
+                                    await controller
+                                        .getCurrentJobCardCounterNumber();
+                                  }
+                                  controller.editJobCardAndQuotation(jobId);
                                 },
-                                child: Text('Delete',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold))),
-                            ElevatedButton(
-                              style: internalNotesButtonStyle,
-                              onPressed: () async {
-                                internalNotesDialog(
-                                    controller, constraints, jobId);
-                              },
-                              child: Text(
-                                'Internal Notes',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            ElevatedButton(
-                              style: innvoiceItemsButtonStyle,
-                              onPressed: () {
-                                controller.getAllInvoiceItems(jobId);
-                                Get.dialog(
-                                    barrierDismissible: true,
-                                    Dialog(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(5)),
-                                      insetPadding: EdgeInsets.all(40),
-                                      child: LayoutBuilder(
-                                          builder: (context, constraints) {
-                                        return Column(
+                          style: new2ButtonStyle,
+                          child: controller.addingNewValue.value == false
+                              ? const Text(
+                                  'Save',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                )
+                              : SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                        );
+                      }),
+                      ElevatedButton(
+                          style: cancelJobButtonStyle,
+                          onPressed: () {
+                            if (controller.jobStatus1.value == 'New') {
+                              alertDialog(
+                                  context: context,
+                                  controller: controller,
+                                  content: "Theis will be deleted permanently",
+                                  onPressed: () {
+                                    controller.deleteJobCard(jobId);
+                                  });
+                            } else {
+                              showSnackBar('Can Not Delete',
+                                  'Only New Cards Can be Deleted');
+                            }
+                          },
+                          child: Text('Delete',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                      GetX<JobCardController>(builder: (controller) {
+                        return ElevatedButton(
+                            style: copyJobButtonStyle,
+                            onPressed: () async {
+                              var newData = await controller.copyJob(jobId);
+                              Get.back();
+                              controller.loadValues(newData['data']);
+                              editJobCardDialog(controller, newData['data'],
+                                  newData['newId']);
+                            },
+                            child: controller.loadingCopyJob.isFalse
+                                ? Text(
+                                    'Copy Job',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                : SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ));
+                      }),
+                      ElevatedButton(
+                        style: internalNotesButtonStyle,
+                        onPressed: () async {
+                          internalNotesDialog(controller, constraints, jobId);
+                        },
+                        child: Text(
+                          'Internal Notes',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: innvoiceItemsButtonStyle,
+                        onPressed: () {
+                          controller.getAllInvoiceItems(jobId);
+                          Get.dialog(
+                              barrierDismissible: true,
+                              Dialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5)),
+                                insetPadding: EdgeInsets.all(40),
+                                child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                  return Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(5),
+                                              topRight: Radius.circular(5)),
+                                          color: mainColor,
+                                        ),
+                                        padding: EdgeInsets.all(16),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.only(
-                                                    topLeft: Radius.circular(5),
-                                                    topRight:
-                                                        Radius.circular(5)),
-                                                color: mainColor,
-                                              ),
-                                              padding: EdgeInsets.all(16),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    'Invoice Items',
-                                                    style: TextStyle(
-                                                        fontSize: 20,
-                                                        color: Colors.white),
-                                                  ),
-                                                  IconButton(
-                                                    onPressed: () {
-                                                      Get.back();
-                                                    },
-                                                    icon: Icon(Icons.close,
-                                                        color: Colors.white),
-                                                  )
-                                                ],
-                                              ),
+                                            Text(
+                                              'Invoice Items',
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.white),
                                             ),
-                                            Expanded(
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: invoiceItemsDialog(
-                                                    constraints: constraints,
-                                                    context: context,
-                                                    jobId: jobId),
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      }),
-                                    ));
-                              },
-                              child: Text('Invoice Items',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            ),
-                            ElevatedButton(
-                                style: new2ButtonStyle,
-                                onPressed: () {
-                                  EntityInformationsController otherController =
-                                      Get.put(EntityInformationsController());
-
-                                  otherController.clearAllVariables();
-                                  Get.dialog(
-                                      barrierDismissible: false,
-                                      Dialog(
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(5)),
-                                        insetPadding: EdgeInsets.all(40),
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              padding: EdgeInsets.all(16),
-                                              width: constraints.maxWidth,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.only(
-                                                    topLeft: Radius.circular(5),
-                                                    topRight:
-                                                        Radius.circular(5)),
-                                                color: mainColor,
-                                              ),
-                                              child: Row(
-                                                spacing: 10,
-                                                children: [
-                                                  Spacer(),
-                                                  Obx(() => ElevatedButton(
-                                                        onPressed: otherController
-                                                                .addingNewEntity
-                                                                .value
-                                                            ? null
-                                                            : () async {
-                                                                await otherController
-                                                                    .addNewEntity();
-                                                              },
-                                                        style: new2ButtonStyle,
-                                                        child: otherController
-                                                                    .addingNewEntity
-                                                                    .value ==
-                                                                false
-                                                            ? const Text(
-                                                                'Save',
-                                                                style: TextStyle(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold),
-                                                              )
-                                                            : SizedBox(
-                                                                height: 20,
-                                                                width: 20,
-                                                                child:
-                                                                    CircularProgressIndicator(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  strokeWidth:
-                                                                      2,
-                                                                ),
-                                                              ),
-                                                      )),
-                                                  closeButton
-                                                ],
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: addNewEntityOrEdit(
-                                                  controller: otherController,
-                                                  constraints: constraints,
-                                                ),
-                                              ),
+                                            IconButton(
+                                              onPressed: () {
+                                                Get.back();
+                                              },
+                                              icon: Icon(Icons.close,
+                                                  color: Colors.white),
                                             )
                                           ],
                                         ),
-                                      ));
-                                },
-                                child: Text(
-                                  'New Customer',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                )),
-                            closeButton
-                          ],
-                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: invoiceItemsDialog(
+                                              constraints: constraints,
+                                              context: context,
+                                              jobId: jobId),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              ));
+                        },
+                        child: Text('Invoice Items',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: addNewJobCardOrEdit(
-                            jobId: jobId,
-                            controller: controller,
-                            constraints: constraints,
-                            context: context,
-                          ),
-                        ),
-                      ),
+                      ElevatedButton(
+                          style: new2ButtonStyle,
+                          onPressed: () {
+                            EntityInformationsController otherController =
+                                Get.put(EntityInformationsController());
+
+                            otherController.clearAllVariables();
+                            Get.dialog(
+                                barrierDismissible: false,
+                                Dialog(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5)),
+                                  insetPadding: EdgeInsets.all(40),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(16),
+                                        width: constraints.maxWidth,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(5),
+                                              topRight: Radius.circular(5)),
+                                          color: mainColor,
+                                        ),
+                                        child: Row(
+                                          spacing: 10,
+                                          children: [
+                                            Spacer(),
+                                            Obx(() => ElevatedButton(
+                                                  onPressed: otherController
+                                                          .addingNewEntity.value
+                                                      ? null
+                                                      : () async {
+                                                          await otherController
+                                                              .addNewEntity();
+                                                        },
+                                                  style: new2ButtonStyle,
+                                                  child: otherController
+                                                              .addingNewEntity
+                                                              .value ==
+                                                          false
+                                                      ? const Text(
+                                                          'Save',
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        )
+                                                      : SizedBox(
+                                                          height: 20,
+                                                          width: 20,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                            color: Colors.white,
+                                                            strokeWidth: 2,
+                                                          ),
+                                                        ),
+                                                )),
+                                            closeButton
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: addNewEntityOrEdit(
+                                            controller: otherController,
+                                            constraints: constraints,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ));
+                          },
+                          child: Text(
+                            'New Customer',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          )),
+                      closeButton
                     ],
-                  );
-                })));
-      },
-      child: const Text('Edit'));
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: addNewJobCardOrEdit(
+                      jobId: jobId,
+                      controller: controller,
+                      constraints: constraints,
+                      context: context,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          })));
 }
 
 ElevatedButton newJobCardButton(BuildContext context,

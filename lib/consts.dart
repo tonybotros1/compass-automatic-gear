@@ -102,6 +102,15 @@ var internalNotesButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var copyJobButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Color(0xff7D1C4A),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var innvoiceItemsButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.teal,
@@ -379,7 +388,7 @@ String textToDate(dynamic inputDate) {
     if (inputDate.isEmpty) {
       return '';
     }
-    
+
     // Check if the input is already in dd-MM-yyyy format
     final RegExp dateFormatRegex = RegExp(r'^\d{2}-\d{2}-\d{4}$');
     if (dateFormatRegex.hasMatch(inputDate)) {
@@ -397,7 +406,6 @@ String textToDate(dynamic inputDate) {
   }
   return ''; // Return empty string for unsupported types
 }
-
 
 Container labelContainer({
   required Widget lable,

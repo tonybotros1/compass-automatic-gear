@@ -98,6 +98,7 @@ class JobCardController extends GetxController {
   RxMap allBranches = RxMap({});
   RxMap allCurrencies = RxMap({});
   RxMap allInvoiceItemsFromCollection = RxMap({});
+  RxBool loadingCopyJob = RxBool(false);
 
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
@@ -797,6 +798,58 @@ class JobCardController extends GetxController {
       addingNewValue.value = false;
     } catch (e) {
       addingNewValue.value = false;
+    }
+  }
+
+  Future<Map<String, dynamic>> copyJob(String jobId) async {
+    try {
+      loadingCopyJob.value = true;
+
+      var mainJob = await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .get();
+
+      Map<String, dynamic>? data = mainJob.data();
+      if (data != null) {
+        data.remove('id');
+        if (isQuotationExpanded.isTrue) {
+          data['quotation_status'] = 'New';
+
+          await getCurrentQuotationCounterNumber();
+          data['quotation_number'] = quotationCounter.value.text;
+        } else {
+          data['quotation_status'] = 'New';
+          data['quotation_number'] = '';
+        }
+        if (isJobCardExpanded.isTrue) {
+          data['job_status_1'] = 'New';
+          data['job_status_2'] = 'New';
+          await getCurrentJobCardCounterNumber();
+          data['job_number'] = jobCardCounter.value.text;
+        } else {
+          data['job_status_1'] = 'New';
+          data['job_status_2'] = 'New';
+          data['job_number'] = '';
+        }
+
+        var newCopiedJob =
+            await FirebaseFirestore.instance.collection('job_cards').add(data);
+
+        loadingCopyJob.value = false;
+        return {
+          'newId': newCopiedJob.id,
+          'data': data,
+        };
+      } else {
+        loadingCopyJob.value = false;
+        throw Exception('Job data is empty');
+      }
+    } catch (e) {
+      showSnackBar('Alert',
+          'Something went wrong while copying the job. Please try again');
+      loadingCopyJob.value = false;
+      rethrow; // Optionally rethrow or return an error message
     }
   }
 
