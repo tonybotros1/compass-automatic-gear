@@ -227,6 +227,7 @@ ElevatedButton editSection(context, CurrencyController controller,
       onPressed: () {
         List<String> data = controller.getdataName(
             currencyData['country_id'], controller.allCountries);
+        controller.countryId.value = currencyData['country_id'];
         controller.code.text = data[0];
         controller.name.text = data[1];
         controller.rate.text = (currencyData['rate'] ?? '').toString();

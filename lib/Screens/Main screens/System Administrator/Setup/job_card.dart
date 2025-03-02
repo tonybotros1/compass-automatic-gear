@@ -877,6 +877,7 @@ ElevatedButton newJobCardButton(BuildContext context,
     BoxConstraints constraints, JobCardController controller) {
   return ElevatedButton(
     onPressed: () {
+      controller.quotationDate.value.text = textToDate(DateTime.now());
       controller.currentCountryVAT.value = controller.getdataName(
           controller.companyDetails['contact_details']['country'],
           controller.allCountries,
@@ -898,6 +899,19 @@ ElevatedButton newJobCardButton(BuildContext context,
       controller.jobCardDate.value.text = textToDate(DateTime.now());
       controller.invoiceDate.value.text = textToDate(DateTime.now());
       controller.startDate.value.text = textToDate(DateTime.now());
+      var entry = controller.allCurrencies.entries.firstWhere(
+        (entry) =>
+            entry.value['country_id'] ==
+            controller.companyDetails['contact_details']['country'],
+      );
+      print(entry);
+      controller.customerCurrencyId.value = entry.key ?? '';
+      controller.customerCurrencyRate.text =
+          (entry.value['rate'] ?? '1').toString();
+      controller.customerCurrency.text = controller.getdataName(
+          controller.companyDetails['contact_details']['country'],
+          controller.allCountries,
+          title: 'currency_code');
       controller.clearValues();
       Get.dialog(
           barrierDismissible: false,

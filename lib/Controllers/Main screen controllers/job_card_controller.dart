@@ -379,9 +379,6 @@ class JobCardController extends GetxController {
     customerSaleMan.clear();
     customerBranchId.value = '';
     customerBranch.clear();
-    customerCurrencyRate.clear();
-    customerCurrencyId.value = '';
-    customerCurrency.clear();
     quotationDays.value.clear();
     validityEndDate.value.clear();
     referenceNumber.value.clear();

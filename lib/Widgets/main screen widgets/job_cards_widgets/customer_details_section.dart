@@ -198,19 +198,21 @@ Container customerDetailsSection() {
                       },
                       onSelected: (suggestion) {
                         controller.customerCurrency.text =
-                            controller.getdataName(suggestion['country_id'],
-                                controller.allCountries,
-                                title: 'currency_code');
-                        controller.allCurrencies.entries.where((entry) {
-                          return entry.value['country_id'] ==
-                              suggestion['country_id'].toString();
-                        }).forEach(
-                          (entry) {
-                            controller.customerCurrencyId.value = entry.key;
-                            controller.customerCurrencyRate.text =
-                                (entry.value['rate'] ?? '1').toString();
-                          },
+                            controller.getdataName(
+                          suggestion['country_id'],
+                          controller.allCountries,
+                          title: 'currency_code',
                         );
+                        final entry =
+                            controller.allCurrencies.entries.firstWhere(
+                          (entry) =>
+                              entry.value['country_id'] ==
+                              suggestion['country_id'].toString(),
+                        );
+
+                        controller.customerCurrencyId.value = entry.key;
+                        controller.customerCurrencyRate.text =
+                            (entry.value['rate'] ?? '1').toString();
                       },
                     ),
                   ),
