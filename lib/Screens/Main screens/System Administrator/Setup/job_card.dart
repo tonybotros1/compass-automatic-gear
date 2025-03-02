@@ -674,7 +674,7 @@ Future<dynamic> editJobCardDialog(
                       ElevatedButton(
                           style: cancelJobButtonStyle,
                           onPressed: () {
-                            if (controller.jobStatus1.value == 'New') {
+                            if (controller.jobStatus1.value == 'New' || controller.jobStatus1.value == '') {
                               alertDialog(
                                   context: context,
                                   controller: controller,
