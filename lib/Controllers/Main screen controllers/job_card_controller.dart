@@ -99,6 +99,7 @@ class JobCardController extends GetxController {
   RxMap allCurrencies = RxMap({});
   RxMap allInvoiceItemsFromCollection = RxMap({});
   RxBool loadingCopyJob = RxBool(false);
+  var selectedRowIndex = Rxn<int>();
 
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
@@ -192,6 +193,7 @@ class JobCardController extends GetxController {
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
+
 
   // Stream<Map<String, double>> calculateGrandSums() {
   //   return FirebaseFirestore.instance
@@ -813,6 +815,33 @@ class JobCardController extends GetxController {
       Map<String, dynamic>? data = mainJob.data();
       if (data != null) {
         data.remove('id');
+        data['quotation_date'] = '';
+        data['validity_days'] = '';
+        data['validity_end_date'] = '';
+        data['reference_number'] = '';
+        data['delivery_time'] = '';
+        data['quotation_warrenty_days'] = '0';
+        data['quotation_warrenty_km'] = '0';
+        data['quotation_notes'] = '';
+        data['invoice_number'] = '';
+        data['lpo_number'] = '';
+        data['job_date'] = textToDate(DateTime.now());
+        data['invoice_date'] = textToDate(DateTime.now());
+        data['job_approval_date'] = '';
+        data['job_start_date'] = '';
+        data['job_approval_date'] = textToDate(DateTime.now());
+        data['job_finish_date'] = '';
+        data['job_delivery_date'] = '';
+        data['job_warrenty_days'] = '0';
+        data['job_warrenty_km'] = '0';
+        data['job_warrenty_end_date'] = '';
+        data['job_min_test_km'] = '0';
+        data['job_reference_1'] = '';
+        data['job_reference_2'] = '';
+        data['job_reference_3'] = '';
+        data['job_cancelation_date'] = '';
+        data['job_notes'] = '';
+        data['job_delivery_notes'] = '';
         if (isQuotationExpanded.isTrue) {
           data['quotation_status'] = 'New';
 

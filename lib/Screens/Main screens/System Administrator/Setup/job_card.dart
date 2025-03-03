@@ -674,7 +674,10 @@ Future<dynamic> editJobCardDialog(
                       ElevatedButton(
                           style: cancelJobButtonStyle,
                           onPressed: () {
-                            if (controller.jobStatus1.value == 'New' || controller.jobStatus1.value == '') {
+                            if (controller.jobStatus1.value == 'New' ||
+                                controller.jobStatus1.value == '' ||
+                                controller.quotationStatus.value == 'New' ||
+                                controller.quotationStatus.value == '') {
                               alertDialog(
                                   context: context,
                                   controller: controller,
@@ -701,7 +704,7 @@ Future<dynamic> editJobCardDialog(
                             },
                             child: controller.loadingCopyJob.isFalse
                                 ? Text(
-                                    'Copy Job',
+                                    'Copy',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   )
