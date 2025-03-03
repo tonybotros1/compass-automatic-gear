@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../Controllers/Main screen controllers/invoice_items_controller.dart';
+import '../../../Controllers/Main screen controllers/car_brands_controller.dart';
 import '../../../consts.dart';
-import 'add_new_invoice_item_or_edit.dart';
+import 'add_new_brand_or_edit.dart';
 
-Future<dynamic> invoiceItemsDialog({
-  required BoxConstraints constraints,
-  required InvoiceItemsController controller,
-  required void Function()? onPressed,
-}) {
+Future<dynamic> carBrandsDialog(
+    {required BoxConstraints constraints,
+    required CarBrandsController controller,
+    required void Function()? onPressed}) {
   return Get.dialog(
       barrierDismissible: false,
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: SizedBox(
-          height: 500,
+          height: 350,
           width: constraints.maxWidth / 2.5,
           child: Column(
             children: [
@@ -35,7 +34,7 @@ Future<dynamic> invoiceItemsDialog({
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
                     Spacer(),
-                    GetX<InvoiceItemsController>(
+                    GetX<CarBrandsController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
                               style: new2ButtonStyle,
@@ -61,7 +60,7 @@ Future<dynamic> invoiceItemsDialog({
               Expanded(
                   child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                child: addNewinvoiceItemsOrEdit(
+                child: addNewBrandOrEdit(
                   controller: controller,
                 ),
               ))

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../consts.dart';
+import 'main_screen_contro.dart';
 
 class CarBrandsController extends GetxController {
   RxString query = RxString('');
@@ -41,6 +42,13 @@ class CarBrandsController extends GetxController {
     });
     super.onInit();
   }
+
+    getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
+  }
+
 
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {

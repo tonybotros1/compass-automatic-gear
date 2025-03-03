@@ -6,45 +6,43 @@ Widget addNewinvoiceItemsOrEdit({
   required InvoiceItemsController controller,
   bool? canEdit,
 }) {
-  return SizedBox(
-    child: Form(
-      key: controller.formKeyForAddingNewvalue,
-      child: ListView(
-        children: [
-          SizedBox(
-            height: 10,
-          ),
-          myTextFormFieldWithBorder(
-            obscureText: false,
-            controller: controller.name,
-            labelText: 'Name',
-            hintText: 'Enter Name',
-            validate: true,
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          myTextFormFieldWithBorder(
-            maxLines: 10,
-            obscureText: false,
-            controller: controller.description,
-            labelText: 'Description',
-            hintText: 'Enter Description',
-            validate: false,
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          myTextFormFieldWithBorder(
-            isDouble: true,
-            obscureText: false,
-            controller: controller.price,
-            labelText: 'Price',
-            hintText: 'Enter Price',
-            validate: false,
-          ),
-        ],
-      ),
+  return Form(
+    key: controller.formKeyForAddingNewvalue,
+    child: ListView(
+      children: [
+        SizedBox(
+          height: 10,
+        ),
+        myTextFormFieldWithBorder(
+          obscureText: false,
+          controller: controller.name,
+          labelText: 'Name',
+          hintText: 'Enter Name',
+          validate: true,
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        myTextFormFieldWithBorder(
+          maxLines: 10,
+          obscureText: false,
+          controller: controller.description,
+          labelText: 'Description',
+          hintText: 'Enter Description',
+          validate: false,
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        myTextFormFieldWithBorder(
+          isDouble: true,
+          obscureText: false,
+          controller: controller.price,
+          labelText: 'Price',
+          hintText: 'Enter Price',
+          validate: false,
+        ),
+      ],
     ),
   );
 }

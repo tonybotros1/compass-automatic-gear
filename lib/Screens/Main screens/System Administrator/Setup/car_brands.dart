@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/car_brands_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/car_brands_widgets/add_new_brand_or_edit.dart';
+import '../../../../Widgets/main screen widgets/car_brands_widgets/cars_brand_dialog.dart';
 import '../../../../Widgets/main screen widgets/car_brands_widgets/values_section_models.dart';
 import '../../../../consts.dart';
 
@@ -116,9 +116,7 @@ Widget tableOfScreens(
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: Text(''
-        
-        ),
+        label: Text(''),
       ),
     ],
     rows: controller.filteredBrands.isEmpty &&
@@ -176,7 +174,7 @@ ElevatedButton valSectionInTheTable(
         controller.getModelsValues(brandId);
         controller.brandIdToWorkWith.value = brandId;
         showDialog(
-          barrierDismissible: true,
+            barrierDismissible: true,
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -245,67 +243,24 @@ ElevatedButton editSection(context, CarBrandsController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        showDialog(
-           barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              controller.brandName.text = brandData['name'];
-              controller.logoUrl.value = brandData['logo'];
-              controller.imageBytes.value = Uint8List(0);
-              controller.logoSelectedError.value = false;
-
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewBrandOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                  canEdit: false,
-                ),
-                actions: [
-                  GetX<CarBrandsController>(builder: (controller) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: ElevatedButton(
-                        onPressed: controller.addingNewValue.value
-                            ? null
-                            : () {
-                                controller.editBrand(brandId);
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        child: controller.addingNewValue.value == false
-                            ? const Text(
-                                'Save',
-                                style: TextStyle(color: Colors.white),
-                              )
-                            : const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                      ),
-                    );
-                  }),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        controller.brandName.text = brandData['name'];
+        controller.logoUrl.value = brandData['logo'];
+        controller.imageBytes.value = Uint8List(0);
+        controller.logoSelectedError.value = false;
+        carBrandsDialog(
+            constraints: constraints,
+            controller: controller,
+            onPressed: controller.addingNewValue.value
+                ? null
+                : () {
+                    if (!controller.formKeyForAddingNewvalue.currentState!
+                        .validate()) {}
+                    if (controller.imageBytes.value.isEmpty && controller.logoUrl.isEmpty) {
+                      controller.logoSelectedError.value = true;
+                    } else {
+                      controller.editBrand(brandId);
+                    }
+                  });
       },
       child: const Text('Edit'));
 }
@@ -318,62 +273,20 @@ ElevatedButton newbrandButton(BuildContext context, BoxConstraints constraints,
       controller.logoUrl.value = '';
       controller.logoSelectedError.value = false;
       controller.brandName.clear();
-      showDialog(
-         barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewBrandOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<CarBrandsController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewValue.value
-                                ? null
-                                : () {
-                                    if (!controller
-                                        .formKeyForAddingNewvalue.currentState!
-                                        .validate()) {}
-                                    if (controller.imageBytes.value.isEmpty) {
-                                      controller.logoSelectedError.value = true;
-                                    } else {
-                                      controller.addNewbrand();
-                                    }
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      carBrandsDialog(
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewValue.value
+              ? null
+              : () {
+                  if (!controller.formKeyForAddingNewvalue.currentState!
+                      .validate()) {}
+                  if (controller.imageBytes.value.isEmpty) {
+                    controller.logoSelectedError.value = true;
+                  } else {
+                    controller.addNewbrand();
+                  }
+                });
     },
     style: newButtonStyle,
     child: const Text('New brand'),
