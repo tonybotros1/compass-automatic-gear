@@ -3,14 +3,10 @@ import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 
 Widget addNewinvoiceItemsOrEdit({
-  required BoxConstraints constraints,
-  required BuildContext context,
   required InvoiceItemsController controller,
   bool? canEdit,
 }) {
   return SizedBox(
-    width: constraints.maxWidth / 2.5,
-    height: 400,
     child: Form(
       key: controller.formKeyForAddingNewvalue,
       child: ListView(

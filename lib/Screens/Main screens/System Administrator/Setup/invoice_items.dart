@@ -1,10 +1,10 @@
+import 'package:datahubai/Widgets/main%20screen%20widgets/invoice_items_widgets/invoice_items_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/invoice_items_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/invoice_items_widgets/add_new_invoice_item_or_edit.dart';
 import '../../../../consts.dart';
 
 class InvoiceItems extends StatelessWidget {
@@ -179,63 +179,22 @@ ElevatedButton editSection(context, InvoiceItemsController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              controller.description.text =
-                  invoiceItemsData['description'] ?? '';
-              controller.name.text = invoiceItemsData['name'] ?? '';
-              controller.price.text =
-                  (invoiceItemsData['price'] ?? '').toString();
-
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewinvoiceItemsOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                      onPressed: controller.addingNewValue.value
-                          ? null
-                          : () {
-                              controller.editInvoiceItem(invoiceItemsId);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: controller.addingNewValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        controller.description.text = invoiceItemsData['description'] ?? '';
+        controller.name.text = invoiceItemsData['name'] ?? '';
+        controller.price.text = (invoiceItemsData['price'] ?? '').toString();
+        invoiceItemsDialog(
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewValue.value
+              ? null
+              : () async {
+                  if (!controller.formKeyForAddingNewvalue.currentState!
+                      .validate()) {
+                  } else {
+                    await controller.editInvoiceItem(invoiceItemsId);
+                  }
+                },
+        );
       },
       child: const Text('Edit'));
 }
@@ -247,60 +206,19 @@ ElevatedButton newInvoiceItemButton(BuildContext context,
       controller.name.clear();
       controller.description.clear();
       controller.price.clear();
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewinvoiceItemsOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<InvoiceItemsController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewValue.value
-                                ? null
-                                : () async {
-                                    if (!controller
-                                        .formKeyForAddingNewvalue.currentState!
-                                        .validate()) {
-                                    } else {
-                                      await controller.addNewInvoiceItem();
-                                    }
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      invoiceItemsDialog(
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                if (!controller.formKeyForAddingNewvalue.currentState!
+                    .validate()) {
+                } else {
+                  await controller.addNewInvoiceItem();
+                }
+              },
+      );
     },
     style: newButtonStyle,
     child: const Text('New Item'),

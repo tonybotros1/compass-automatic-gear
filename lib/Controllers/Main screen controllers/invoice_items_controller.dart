@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../consts.dart';
+import 'main_screen_contro.dart';
 
 class InvoiceItemsController extends GetxController {
   TextEditingController name = TextEditingController();
@@ -44,6 +45,12 @@ class InvoiceItemsController extends GetxController {
   getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
+  }
+
+    getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // this function is to sort data in table

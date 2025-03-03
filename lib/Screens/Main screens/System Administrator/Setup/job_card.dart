@@ -630,7 +630,7 @@ Future<dynamic> editJobCardDialog(
                     children: [
                       Text(
                         '${controller.getScreenName()}',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
+                        style: fontStyleForScreenNameUsedInButtons,
                       ),
                       Spacer(),
                       GetX<JobCardController>(builder: (controller) {
@@ -944,7 +944,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                       child: Row(spacing: 10, children: [
                         Text(
                           '${controller.getScreenName()}',
-                          style: TextStyle(fontSize: 20, color: Colors.white),
+                          style: fontStyleForScreenNameUsedInButtons,
                         ),
                         Spacer(),
                         ElevatedButton(
