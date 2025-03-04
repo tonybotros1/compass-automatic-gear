@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../consts.dart';
+import 'main_screen_contro.dart';
 
 class UsersController extends GetxController {
   late TextEditingController email = TextEditingController();
@@ -159,54 +160,11 @@ class UsersController extends GetxController {
     }
   }
 
-// this function is to add new user
-  // register() async {
-  //   try {
-  //     if (email.text.isEmpty || pass.text.isEmpty) {
-  //       throw Exception('Please fill all fields');
-  //     }
-  //     sigupgInProcess.value = true;
-  //     UserCredential userCredential =
-  //         await FirebaseAuth.instance.createUserWithEmailAndPassword(
-  //       email: email.text,
-  //       password: pass.text,
-  //     );
-  //     User? user = userCredential.user;
-  //     String? token;
-  //     String? uid;
-  //     if (user != null) {
-  //       token = await FirebaseMessaging.instance.getToken();
-  //       uid = user.uid;
-  //     }
-  //     FirebaseFirestore.instance.collection('sys-users').add({
-  //       "user_name": name.text,
-  //       "email": email.text,
-  //       "user_id": uid,
-  //       "users_tokens": [token],
-  //       "expiry_date": '${selectedDate.value}',
-  //       "roles": selectedRoles.entries
-  //           .where((entry) => entry.value[1] == true)
-  //           .map((entry) => entry.value[0])
-  //           .toList(),
-  //       "added_date": DateTime.now().toString(),
-  //       "status": true
-  //     });
-  //     sigupgInProcess.value = false;
-  //     showSnackBar('Done', 'New user added successfully');
-  //   } on FirebaseAuthException catch (e) {
-  //     if (e.code == 'weak-password') {
-  //       sigupgInProcess.value = false;
-  //       showSnackBar('warning', 'The password provided is too weak');
-  //     } else if (e.code == 'email-already-in-use') {
-  //       sigupgInProcess.value = false;
-
-  //       showSnackBar('warning', 'The account already exists for that email');
-  //     }
-  //   } catch (e) {
-  //     sigupgInProcess.value = false;
-  //     showSnackBar('warning', e.toString());
-  //   }
-  // }
+  getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
+  }
 
   register() async {
     try {
@@ -314,6 +272,7 @@ class UsersController extends GetxController {
 
 // this function is to delete user from the DB
   deleteUser(userID) async {
+    Get.back();
     await FirebaseFirestore.instance
         .collection('sys-users')
         .doc(userID)

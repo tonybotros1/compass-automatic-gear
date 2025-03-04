@@ -9,92 +9,85 @@ Widget addNewUserAndView(
     {required BoxConstraints constraints,
     required BuildContext context,
     required controller,
-    TextEditingController? email,
-    TextEditingController? name,
-    bool? canEdit,
+   required bool canEdit,
     userExpiryDate,
-    showActiveStatus}) {
-  return SizedBox(
-    width: constraints.maxWidth / 2.5,
-    height: constraints.maxHeight,
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        myTextFormField(
-          constraints: constraints,
-          obscureText: false,
-          controller: name ?? controller.name,
-          labelText: 'User Name',
-          hintText: 'Enter your name',
-          keyboardType: TextInputType.name,
-          validate: true,
-        ),
-        myTextFormField(
-          constraints: constraints,
-          obscureText: false,
-          controller: email ?? controller.email,
-          labelText: 'Email',
-          hintText: 'Enter your email',
-          keyboardType: TextInputType.emailAddress,
-          validate: true,
-          canEdit: canEdit,
-        ),
-        Obx(() => myTextFormField(
-              constraints: constraints,
-              icon: IconButton(
-                  onPressed: () {
-                    controller.changeObscureTextValue();
-                  },
-                  icon: Icon(controller.obscureText.value
-                      ? Icons.remove_red_eye_outlined
-                      : Icons.visibility_off)),
-              obscureText: controller.obscureText.value,
-              controller: controller.pass,
-              labelText: 'Password',
-              hintText: 'Enter your password',
-              validate: true,
-            )),
-        expiryDateAndActiveStatus(
-            showActiveStatus: showActiveStatus,
-            controller: controller,
-            context: context,
+  }) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      myTextFormField(
+        constraints: constraints,
+        obscureText: false,
+        controller:controller.name,
+        labelText: 'User Name',
+        hintText: 'Enter your name',
+        keyboardType: TextInputType.name,
+        validate: true,
+      ),
+      myTextFormField(
+        constraints: constraints,
+        obscureText: false,
+        controller: controller.email,
+        labelText: 'Email',
+        hintText: 'Enter your email',
+        keyboardType: TextInputType.emailAddress,
+        validate: true,
+        canEdit: canEdit,
+      ),
+      Obx(() => myTextFormField(
             constraints: constraints,
-            date: userExpiryDate),
-        Expanded(
-          child: Container(
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(15)),
-              child: Obx(
-                () => controller.isLoading.value == false
-                    ? ListView.builder(
-                        itemCount: controller.selectedRoles.length,
-                        shrinkWrap: true,
-                        itemBuilder: (context, i) {
-                          return ListTile(
-                              leading: Obx(
-                                () => Checkbox(
-                                    activeColor: Colors.blue,
-                                    value: controller.selectedRoles.values
-                                        .elementAt(i)[1],
-                                    onChanged: (selected) {
-                                      var key = controller.selectedRoles.keys
-                                          .elementAt(i); // Get the key
-                                      controller.selectedRoles[key] = [
-                                        controller.selectedRoles[key]![0],
-                                        selected!,
-                                      ];
-                                    }),
-                              ),
-                              title: Text(
-                                  '${controller.selectedRoles.keys.elementAt(i)}'));
-                        })
-                    : CircularProgressIndicator(
-                        color: mainColor,
-                      ),
-              )),
-        ),
-      ],
-    ),
+            icon: IconButton(
+                onPressed: () {
+                  controller.changeObscureTextValue();
+                },
+                icon: Icon(controller.obscureText.value
+                    ? Icons.remove_red_eye_outlined
+                    : Icons.visibility_off)),
+            obscureText: controller.obscureText.value,
+            controller: controller.pass,
+            labelText: 'Password',
+            hintText: 'Enter your password',
+            validate: true,
+          )),
+      expiryDateAndActiveStatus(
+          controller: controller,
+          context: context,
+          constraints: constraints,
+          date: userExpiryDate),
+      Expanded(
+        child: Container(
+            decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(15)),
+            child: Obx(
+              () => controller.isLoading.value == false
+                  ? ListView.builder(
+                      itemCount: controller.selectedRoles.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, i) {
+                        return ListTile(
+                            leading: Obx(
+                              () => Checkbox(
+                                  activeColor: Colors.blue,
+                                  value: controller.selectedRoles.values
+                                      .elementAt(i)[1],
+                                  onChanged: (selected) {
+                                    var key = controller.selectedRoles.keys
+                                        .elementAt(i); // Get the key
+                                    controller.selectedRoles[key] = [
+                                      controller.selectedRoles[key]![0],
+                                      selected!,
+                                    ];
+                                  }),
+                            ),
+                            title: Text(
+                                '${controller.selectedRoles.keys.elementAt(i)}'));
+                      })
+                  : CircularProgressIndicator(
+                      color: mainColor,
+                    ),
+            )),
+      ),
+    ],
   );
 }

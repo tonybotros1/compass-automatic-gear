@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/users_controller.dart';
-import '../../../../Widgets/Auth screens widgets/register widgets/add_new_user_and_view.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
+import '../../../../Widgets/Auth screens widgets/register widgets/users_dialog.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 
@@ -78,69 +78,20 @@ class Users extends StatelessWidget {
         usersController.name.clear();
         usersController.pass.clear();
         usersController.email.clear();
-        showDialog(
-            barrierDismissible: false,
+        usersController.selectedRoles.updateAll(
+          (key, value) => [value[0], false],
+        );
+        usersDialog(
+            userExpiryDate: '',
+            canEdit: true,
+            controller: usersController,
+            constraints: constraints,
             context: context,
-            builder: (context) {
-              usersController.email.clear();
-              usersController.pass.clear();
-              usersController.selectedRoles.updateAll(
-                (key, value) => [value[0], false],
-              );
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewUserAndView(
-                  controller: usersController,
-                  constraints: constraints,
-                  context: context,
-                  userExpiryDate: '',
-                  showActiveStatus: false,
-                ),
-                actions: [
-                  Obx(() => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: ElevatedButton(
-                          onPressed: usersController.sigupgInProcess.value
-                              ? null
-                              : () {
-                                  usersController.register();
-                                },
-                          style: saveButtonStyle,
-                          child: usersController.sigupgInProcess.value == false
-                              ? const Text(
-                                  'Save',
-                                  style: TextStyle(color: Colors.white),
-                                )
-                              : const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                        ),
-                      )),
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: usersController.sigupgInProcess.value == false
-                        ? const Text(
-                            'Cancel',
-                            style: TextStyle(color: Colors.white),
-                          )
-                        : const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
-                ],
-              );
-            });
+            onPressed: usersController.sigupgInProcess.value
+                ? null
+                : () {
+                    usersController.register();
+                  });
       },
       style: newButtonStyle,
       child: const Text('New User'),
@@ -283,92 +234,38 @@ class Users extends StatelessWidget {
     return ElevatedButton(
         style: editButtonStyle,
         onPressed: () {
-          showDialog(
-              barrierDismissible: false,
-              context: context,
-              builder: (context) {
-                usersController.email.text = userData['email'];
-                usersController.name.text = userData['user_name'];
-                for (var roleId in userData['roles']) {
-                  usersController.selectedRoles.forEach((key, value) {
-                    if (value[0] == roleId) {
-                      usersController.selectedRoles.update(
-                        key,
-                        (value) => [value[0], true],
-                      );
-                    }
-                  });
-                }
-
-                // Reset roles not in userData['roles'] to false
-                usersController.selectedRoles.forEach((key, value) {
-                  if (!userData['roles'].contains(value[0])) {
-                    usersController.selectedRoles.update(
-                      key,
-                      (value) => [value[0], false],
-                    );
-                  }
-                });
-
-                return AlertDialog(
-                  actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                  content: addNewUserAndView(
-                      canEdit: false,
-                      controller: usersController,
-                      constraints: constraints,
-                      context: context,
-                      email: usersController.email,
-                      name: usersController.name,
-                      userExpiryDate: userData['expiry_date'],
-                      showActiveStatus: true),
-                  actions: [
-                    Obx(
-                      () => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: ElevatedButton(
-                          onPressed:
-                              usersController.sigupgInProcess.value == true
-                                  ? null
-                                  : () {
-                                      usersController.updateUserDetails(uid);
-                                    },
-                          style: saveButtonStyle,
-                          child: usersController.sigupgInProcess.value == false
-                              ? const Text(
-                                  'Save',
-                                  style: TextStyle(color: Colors.white),
-                                )
-                              : const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: usersController.sigupgInProcess.value == false
-                          ? const Text(
-                              'Cancel',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ],
+          usersController.email.text = userData['email'];
+          usersController.name.text = userData['user_name'];
+          for (var roleId in userData['roles']) {
+            usersController.selectedRoles.forEach((key, value) {
+              if (value[0] == roleId) {
+                usersController.selectedRoles.update(
+                  key,
+                  (value) => [value[0], true],
                 );
-              });
+              }
+            });
+          }
+          // Reset roles not in userData['roles'] to false
+          usersController.selectedRoles.forEach((key, value) {
+            if (!userData['roles'].contains(value[0])) {
+              usersController.selectedRoles.update(
+                key,
+                (value) => [value[0], false],
+              );
+            }
+          });
+          usersDialog(
+              userExpiryDate: userData['expiry_date'],
+              canEdit: false,
+              controller: usersController,
+              constraints: constraints,
+              context: context,
+              onPressed: usersController.sigupgInProcess.value
+                  ? null
+                  : () {
+                      usersController.updateUserDetails(uid);
+                    });
         },
         child: const Text('Edit'));
   }

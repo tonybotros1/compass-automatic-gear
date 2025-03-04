@@ -8,9 +8,9 @@ Widget expiryDateAndActiveStatus({
   required constraints,
   required date,
   required controller,
-  showActiveStatus,
+ 
 }) {
-  if (date != '') {
+  if (date != '' && date != null) {
     controller.selectedDate.value = DateTime.parse(date);
   } else {
     controller.selectedDate.value = DateTime.now();
