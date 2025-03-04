@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'main_screen_contro.dart';
+
 class BranchesController extends GetxController {
   TextEditingController code = TextEditingController();
   TextEditingController name = TextEditingController();
@@ -35,6 +37,12 @@ class BranchesController extends GetxController {
       filterBranches();
     });
     super.onInit();
+  }
+
+  getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   getCompanyId() async {
