@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 
 import '../../Models/screen_tree_model.dart';
 import '../../consts.dart';
+import 'main_screen_contro.dart';
 
 class MenusController extends GetxController {
   // final RxList<DocumentSnapshot> allMenus = RxList<DocumentSnapshot>([]);
@@ -56,6 +57,12 @@ class MenusController extends GetxController {
       filterMenus();
     });
     super.onInit();
+  }
+
+  getScreenNameForHeader() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // Future<void> updateDescriptions() async {

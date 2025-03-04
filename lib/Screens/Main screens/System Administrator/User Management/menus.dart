@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/menus_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/menus_widgets/add_or_edit_menu.dart';
+import '../../../../Widgets/main screen widgets/menus_widgets/menus_dialog.dart';
 import '../../../../Widgets/main screen widgets/menus_widgets/veiw_menu.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
@@ -128,9 +128,7 @@ Widget tableOfMenus(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        label:Text('')
-      ),
+      DataColumn(label: Text('')),
     ],
     rows:
         controller.filteredMenus.isEmpty && controller.search.value.text.isEmpty
@@ -196,61 +194,26 @@ ElevatedButton deleteSection(
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(controller, menuId, context, constraints, menuData) {
+ElevatedButton editSection(
+    MenusController controller, menuId, context, constraints, menuData) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        showDialog(
-            context: context,
-            builder: (context) {
-              controller.menuName.text = menuData['name'];
-              controller.description.text = menuData['description'];
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addOrEditMenu(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                        onPressed: () async {
-                          await controller.editMenu(menuId);
-                          Get.back();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        child: const Text(
-                          'Save',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        style: cancelButtonStyle,
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                  ),
-                ],
-              );
+        controller.menuName.text = menuData['name'];
+        controller.description.text = menuData['description'];
+        menusDialog(
+            constraints: constraints,
+            controller: controller,
+            onPressed: () async {
+              await controller.editMenu(menuId);
+              Get.back();
             });
       },
       child: const Text("Edit"));
 }
 
-ElevatedButton viewSection(controller, menuId, context, constraints) {
+ElevatedButton viewSection(
+    MenusController controller, menuId, context, BoxConstraints constraints) {
   return ElevatedButton(
     style: viewButtonStyle,
     onPressed: controller.buttonLoadingStates[menuId] == null ||
@@ -261,35 +224,49 @@ ElevatedButton viewSection(controller, menuId, context, constraints) {
             await controller.listOfMenusAndScreen();
             await controller.getMenusScreens(menuId);
             controller.setButtonLoading(menuId, false); // Stop loading
-            showDialog(
-               barrierDismissible: false,
-                context: context,
-                builder: (context) {
-                  controller.selectedMenuID.value = '';
-                  return AlertDialog(
-                    actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    content: viewMenu(
-                      controller: controller,
-                      constraints: constraints,
-                      context: context,
+            Get.dialog(
+                barrierDismissible: false,
+                Dialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  child: SizedBox(
+                    height: constraints.maxHeight,
+                    width: constraints.maxWidth,
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(15),
+                                topRight: Radius.circular(15)),
+                            color: mainColor,
+                          ),
+                          child: Row(
+                            spacing: 10,
+                            children: [
+                              Text(
+                                controller.getScreenNameForHeader(),
+                                style: fontStyleForScreenNameUsedInButtons,
+                              ),
+                              Spacer(),
+                              closeButton
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                            child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: viewMenu(
+                            controller: controller,
+                            constraints: constraints,
+                            context: context,
+                          ),
+                        ))
+                      ],
                     ),
-                    actions: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 23, vertical: 10),
-                        child: ElevatedButton(
-                            onPressed: () {
-                              Get.back();
-                            },
-                            style: cancelButtonStyle,
-                            child: const Text(
-                              'Cancel',
-                              style: TextStyle(color: Colors.white),
-                            )),
-                      ),
-                    ],
-                  );
-                });
+                  ),
+                ));
           }
         : null,
     child: Obx(() {
@@ -312,66 +289,23 @@ ElevatedButton viewSection(controller, menuId, context, constraints) {
   );
 }
 
-ElevatedButton newMenuButton(
-    BuildContext context, BoxConstraints constraints, controller) {
+ElevatedButton newMenuButton(BuildContext context, BoxConstraints constraints,
+    MenusController controller) {
   return ElevatedButton(
     onPressed: () {
       controller.menuName.clear();
       controller.description.clear();
-      showDialog(
-         barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addOrEditMenu(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<MenusController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                              onPressed: controller.addingNewMenuProcess.value
-                                  ? null
-                                  : () async {
-                                      await controller.addNewMenu();
-                                      if (controller
-                                              .addingNewMenuProcess.value ==
-                                          false) {
-                                        Get.back();
-                                      }
-                                    },
-                              style: saveButtonStyle,
-                              child:
-                                  controller.addingNewMenuProcess.value == false
-                                      ? const Text(
-                                          'Save',
-                                          style: TextStyle(color: Colors.white),
-                                        )
-                                      : const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2,
-                                          ),
-                                        )),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      menusDialog(
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewMenuProcess.value
+              ? null
+              : () async {
+                  await controller.addNewMenu();
+                  if (controller.addingNewMenuProcess.value == false) {
+                    Get.back();
+                  }
+                });
     },
     style: newButtonStyle,
     child: const Text('New Menu'),

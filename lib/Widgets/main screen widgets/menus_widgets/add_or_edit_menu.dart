@@ -3,37 +3,31 @@ import 'package:flutter/material.dart';
 import '../../my_text_field.dart';
 
 Widget addOrEditMenu({
-  required BoxConstraints constraints,
-  required BuildContext context,
   required controller,
 }) {
-  return SizedBox(
-    width: constraints.maxWidth / 3,
-    height: 150,
-    child: ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: myTextFormFieldWithBorder(
-            labelText: 'Menu Name',
-            hintText: 'Enter Menu Name',
-            controller: controller.menuName,
-            validate: false,
-            obscureText: false,
-          ),
+  return ListView(
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: myTextFormFieldWithBorder(
+          labelText: 'Menu Name',
+          hintText: 'Enter Menu Name',
+          controller: controller.menuName,
+          validate: false,
+          obscureText: false,
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: myTextFormFieldWithBorder(
-            labelText: 'Code',
-            hintText: 'Enter Code',
-            controller: controller.description,
-            validate: false,
-            obscureText: false,
-          ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: myTextFormFieldWithBorder(
+          labelText: 'Code',
+          hintText: 'Enter Code',
+          controller: controller.description,
+          validate: false,
+          obscureText: false,
         ),
-      ],
-    ),
+      ),
+    ],
   );
 }
 
