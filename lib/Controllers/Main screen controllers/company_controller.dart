@@ -8,6 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../consts.dart';
+import 'main_screen_contro.dart';
 
 class CompanyController extends GetxController {
   RxBool isScreenLoding = RxBool(true);
@@ -53,6 +54,12 @@ class CompanyController extends GetxController {
       filterCompanies();
     });
     super.onInit();
+  }
+
+   getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
 // this function is to get industries
@@ -290,10 +297,6 @@ class CompanyController extends GetxController {
   
   Future<String?> getCityName(countryId, cityId) async {
     try {
-      // final city = allCities.entries.firstWhere(
-      //   (city) => city.key == cityId,
-      // );
-      // return city.value['name'];
       var cities = await FirebaseFirestore.instance
           .collection('all_countries')
           .doc(countryId)
@@ -319,24 +322,21 @@ class CompanyController extends GetxController {
     }
   }
 
-  
+ String? getIndustryName(String industryId) {
+    try {
+      final industry = industryMap.entries.firstWhere(
+        (industry) => industry.key == industryId,
+      );
+      return industry.value['name'];
+    } catch (e) {
+      return '';
+    }
+  }
 
-  // void onSelect(String selectedId) {
-  //   filterdCitiesByCountry.clear();
-  //   filterdCitiesByCountry.addAll(
-  //     Map.fromEntries(
-  //       allCities.entries.where((entry) {
-  //         return entry.value['restricted_by']
-  //             .toString()
-  //             .toLowerCase()
-  //             .contains(selectedId.toLowerCase());
-  //       }),
-  //     ),
-  //   );
-  // }
+
+
 
   // this function is to select an image for logo
-  
 Future<void> pickImage() async {
   try {
     // Create a file input element using web.HTMLInputElement.

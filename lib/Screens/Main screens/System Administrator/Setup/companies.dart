@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/company_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/company_widgets/add_new_company_and_view.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/company_widgets/company_dialog.dart';
 import '../../../../consts.dart';
 
 class Companies extends StatelessWidget {
@@ -230,8 +230,9 @@ ElevatedButton editEction(context, CompanyController controller,
         controller
             .getCitiesByCountryID(companyData['contact_details']['country']);
         controller.companyName.text = companyData['company_name'] ?? '';
-        controller.industry.text = companyData['type_of_business'] ?? '';
-        controller.industryId.value = companyData['type_of_business'] ?? '';
+        controller.industry.text =
+            controller.getIndustryName(companyData['industry']) ?? '';
+        controller.industryId.value = companyData['industry'] ?? '';
         controller.userName.text =
             controller.userDetails[companyData['contact_details']['user_id']]
                     ['user_name'] ??
@@ -258,75 +259,15 @@ ElevatedButton editEction(context, CompanyController controller,
             companyData['contact_details']['country'] ?? '';
         controller.selectedCityId.value =
             companyData['contact_details']['city'] ?? '';
-
-        showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewCompanyOrView(
-                  canEdit: false,
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                  companyName: controller.companyName,
-                  typeOfBusiness: controller.industry,
-                  companyLogo: companyData['company_logo'],
-                  city: controller.city,
-                  country: controller.country,
-                  address: controller.address,
-                  email: controller.email,
-                  phoneNumber: controller.phoneNumber,
-                  userName: controller.userName,
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: GetX<CompanyController>(builder: (controller) {
-                      return ElevatedButton(
-                          onPressed: controller.addingNewCompanyProcess.value
-                              ? null
-                              : () {
-                                  controller.updateCompany(
-                                      companyID,
-                                      companyData['contact_details']
-                                          ['user_id']);
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                          child:
-                              controller.addingNewCompanyProcess.value == false
-                                  ? const Text(
-                                      'Save',
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  : const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    ));
-                    }),
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        companyDialog(
+            constraints: constraints,
+            controller: controller,
+            onPressed: controller.addingNewCompanyProcess.value
+                ? null
+                : () {
+                    controller.updateCompany(
+                        companyID, companyData['contact_details']['user_id']);
+                  });
       },
       child: const Text('Edit'));
 }
@@ -347,74 +288,30 @@ ElevatedButton newCompanyButton(BuildContext context,
       controller.country.clear();
       controller.city.clear();
       controller.roleIDFromList.clear();
+      controller.logoUrl.value = '';
       controller.imageBytes = null;
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewCompanyOrView(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<CompanyController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewCompanyProcess.value
-                                ? null
-                                : () async {
-                                    if (controller.userName.text.isNotEmpty &&
-                                        controller
-                                            .companyName.text.isNotEmpty &&
-                                        controller.industry.text.isNotEmpty &&
-                                        controller.password.text.isNotEmpty &&
-                                        controller
-                                            .phoneNumber.text.isNotEmpty &&
-                                        controller.email.text.isNotEmpty &&
-                                        controller.address.text.isNotEmpty &&
-                                        controller.country.text.isNotEmpty &&
-                                        controller.city.text.isNotEmpty &&
-                                        controller.imageBytes!.isNotEmpty &&
-                                        controller.roleIDFromList.isNotEmpty) {
-                                      controller.addNewCompany();
-                                    } else {
-                                      showSnackBar(
-                                          'Note', 'Please fill all fields');
-                                    }
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewCompanyProcess.value ==
-                                    false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      companyDialog(
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewCompanyProcess.value
+              ? null
+              : () async {
+                  if (controller.userName.text.isNotEmpty &&
+                      controller.companyName.text.isNotEmpty &&
+                      controller.industry.text.isNotEmpty &&
+                      controller.password.text.isNotEmpty &&
+                      controller.phoneNumber.text.isNotEmpty &&
+                      controller.email.text.isNotEmpty &&
+                      controller.address.text.isNotEmpty &&
+                      controller.country.text.isNotEmpty &&
+                      controller.city.text.isNotEmpty &&
+                      controller.imageBytes!.isNotEmpty &&
+                      controller.roleIDFromList.isNotEmpty) {
+                    controller.addNewCompany();
+                  } else {
+                    showSnackBar('Note', 'Please fill all fields');
+                  }
+                });
     },
     style: newButtonStyle,
     child: const Text('New Company'),
