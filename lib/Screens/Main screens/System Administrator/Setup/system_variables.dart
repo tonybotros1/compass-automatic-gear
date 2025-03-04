@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/system_variables_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/system_variables_widgets/add_new_variable_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/system_variables_widgets/system_variables_dialog.dart';
 import '../../../../consts.dart';
 
 class SystemVariables extends StatelessWidget {
@@ -84,55 +84,15 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
     onPressed: () {
       controller.code.clear();
       controller.value.clear();
-      showDialog(
-         barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewVariableOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<SystemVariablesController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewValue.value
-                                ? null
-                                : () async {
-                                    await controller.addNewVariable();
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      systemVariablesDialog(
+          canEdit: true,
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewValue.value
+              ? null
+              : () async {
+                  await controller.addNewVariable();
+                });
     },
     style: newButtonStyle,
     child: const Text('New Variable'),
@@ -176,9 +136,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        label:Text('')
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredVariables.isEmpty &&
             controller.search.value.text.isEmpty
@@ -246,67 +204,21 @@ ElevatedButton deleteSection(
 }
 
 ElevatedButton editSection(context, SystemVariablesController controller,
-    Map<String, dynamic> variableData, constraints, variableId) {
+    Map<String, dynamic> variableData, BoxConstraints constraints, variableId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        showDialog(
-           barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              controller.code.text = variableData['code'] ?? '';
-              controller.value.text = variableData['value'] ?? '';
-
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewVariableOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                  code: controller.code,
-                  value: controller.value,
-                  canEdit: false,
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                      onPressed: controller.addingNewValue.value
-                          ? null
-                          : () {
-                              controller.editVariable(variableId);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: controller.addingNewValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        controller.code.text = variableData['code'] ?? '';
+        controller.value.text = variableData['value'] ?? '';
+        systemVariablesDialog(
+            canEdit: false,
+            constraints: constraints,
+            controller: controller,
+            onPressed: controller.addingNewValue.value
+                ? null
+                : () {
+                    controller.editVariable(variableId);
+                  });
       },
       child: const Text('Edit'));
 }
