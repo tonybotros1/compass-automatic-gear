@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/responsibilities_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/responsibilities_widgets/add_new_responsibilities_or_view.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
+import 'responsibilities_dialog.dart';
 
 class Responsibilities extends StatelessWidget {
   const Responsibilities({super.key});
@@ -84,65 +84,14 @@ ElevatedButton newResponsibilityButton(
       onPressed: () async {
         controller.responsibilityName.clear();
         controller.menuName.clear();
-        showDialog(
-           barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewResponsibilityOrView(
-                    controller: controller,
-                    constraints: constraints,
-                    context: context,
-                    ),
-                actions: [
-                  GetX<ResponsibilitiesController>(
-                      builder: (controller) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ElevatedButton(
-                              onPressed: controller
-                                      .addingNewResponsibilityProcess.value
-                                  ? null
-                                  : () async {
-                                      await controller.addNewResponsibility();
-                                    },
-                              style: saveButtonStyle,
-                              child: controller.addingNewResponsibilityProcess
-                                          .value ==
-                                      false
-                                  ? const Text(
-                                      'Save',
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  : const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
-                          )),
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child:
-                        controller.addingNewResponsibilityProcess.value == false
-                            ? const Text(
-                                'Cancel',
-                                style: TextStyle(color: Colors.white),
-                              )
-                            : const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                              ),
-                  ),
-                ],
-              );
-            });
+        responsibilitiesDialog(
+            constraints: constraints,
+            controller: controller,
+            onPressed: controller.addingNewResponsibilityProcess.value
+                ? null
+                : () async {
+                    await controller.addNewResponsibility();
+                  });
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.green,
@@ -191,9 +140,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        label:Text('')
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredResponsibilities.isEmpty &&
             controller.search.value.text.isEmpty
@@ -299,81 +246,22 @@ Widget editSection(
     {required context,
     required ResponsibilitiesController controller,
     required roleData,
-    required constraints,
+    required BoxConstraints constraints,
     required roleID}) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () async {
-        showDialog(
-           barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              controller.responsibilityName.text = roleData['role_name'] ?? '';
-
-              controller.menuName.text = roleData['menu']['name'] ?? '';
-              controller.menuIDFromList.value = roleData['menu_id'];
-
-              // print(controller.menuName.text);
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewResponsibilityOrView(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                  
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child:
-                        GetX<ResponsibilitiesController>(builder: (controller) {
-                      return ElevatedButton(
-                        onPressed:
-                            controller.addingNewResponsibilityProcess.value
-                                ? null
-                                : () {
-                                    controller.updateResponsibility(roleID);
-                                  },
-                        style: saveButtonStyle,
-                        child:
-                            controller.addingNewResponsibilityProcess.value ==
-                                    false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                      );
-                    }),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child:
-                        controller.addingNewResponsibilityProcess.value == false
-                            ? const Text(
-                                'Cancel',
-                                style: TextStyle(color: Colors.white),
-                              )
-                            : const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                              ),
-                  ),
-                ],
-              );
-            });
+        controller.responsibilityName.text = roleData['role_name'] ?? '';
+        controller.menuName.text = roleData['menu']['name'] ?? '';
+        controller.menuIDFromList.value = roleData['menu_id'];
+        responsibilitiesDialog(
+            constraints: constraints,
+            controller: controller,
+            onPressed: controller.addingNewResponsibilityProcess.value
+                ? null
+                : () {
+                    controller.updateResponsibility(roleID);
+                  });
       },
       child: const Text('Edit'));
 }

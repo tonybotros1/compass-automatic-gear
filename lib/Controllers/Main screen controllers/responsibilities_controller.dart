@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../consts.dart';
+import 'main_screen_contro.dart';
 
 class ResponsibilitiesController extends GetxController {
   final RxMap allResponsibilities = RxMap({});
@@ -29,6 +30,12 @@ class ResponsibilitiesController extends GetxController {
     });
 
     super.onInit();
+  }
+
+   getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // Future<void> updateDescriptions() async {
