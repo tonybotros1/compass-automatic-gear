@@ -194,37 +194,53 @@ DataRow dataRowForTheTable(Map<String, dynamic> countryData, context,
 }
 
 ElevatedButton valSectionInTheTable(CountriesController controller, countryId,
-    context, constraints, countryData) {
+    context, BoxConstraints constraints, countryData) {
   return ElevatedButton(
       style: viewButtonStyle,
       onPressed: () {
         controller.getCitiesValues(countryId);
         controller.countryIdToWorkWith.value = countryId;
-        showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: citiesSection(
-                  constraints: constraints,
-                  context: context,
+        Get.dialog(
+            barrierDismissible: false,
+            Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              child: SizedBox(
+                height: constraints.maxHeight,
+                width: constraints.maxWidth,
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(15),
+                            topRight: Radius.circular(15)),
+                        color: mainColor,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            '🏙️ Cities',
+                            style: fontStyleForScreenNameUsedInButtons,
+                          ),
+                          Spacer(),
+                          closeButton
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                        child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: citiesSection(
+                        constraints: constraints,
+                        context: context,
+                      ),
+                    ))
+                  ],
                 ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        style: cancelButtonStyle,
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                  ),
-                ],
-              );
-            });
+              ),
+            ));
       },
       child: const Text('Cities'));
 }

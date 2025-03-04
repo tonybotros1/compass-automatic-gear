@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../auto_size_box.dart';
-import 'add_new_city_or_edit.dart';
+import 'cities_dialog.dart';
 
 Widget citiesSection({
   required BoxConstraints constraints,
@@ -100,9 +100,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSortForCities,
       ),
-      DataColumn(
-        label: Text('')
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredCities.isEmpty &&
             controller.searchForCities.value.text.isEmpty
@@ -179,65 +177,20 @@ ElevatedButton editSection(CountriesController controller,
       onPressed: () {
         controller.cityName.text = cityData['name'];
         controller.cityCode.text = cityData['code'];
-        showDialog(
-           barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewCityOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                  isEnabled: false,
-                ),
-                actions: [
-                  GetX<CountriesController>(
-                      builder: (controller) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ElevatedButton(
-                              onPressed: controller.addingNewCityValue.value
-                                  ? null
-                                  : () async {
-                                      if (!controller.formKeyForAddingNewvalue
-                                          .currentState!
-                                          .validate()) {
-                                      } else {
-                                        controller.editcity(
-                                            controller
-                                                .countryIdToWorkWith.value,
-                                            cityId);
-                                      }
-                                    },
-                              style: saveButtonStyle,
-                              child:
-                                  controller.addingNewCityValue.value == false
-                                      ? const Text(
-                                          'Save',
-                                          style: TextStyle(color: Colors.white),
-                                        )
-                                      : const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2,
-                                          ),
-                                        ),
-                            ),
-                          )),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        cititesDialog(
+            constraints: constraints,
+            controller: controller,
+            onPressed: controller.addingNewCityValue.value
+                ? null
+                : () async {
+                    if (!controller.formKeyForAddingNewvalue.currentState!
+                        .validate()) {
+                    } else {
+                      controller.editcity(
+                          controller.countryIdToWorkWith.value, cityId);
+                    }
+                  },
+            isEnabled: false);
       },
       child: Text('Edit'));
 }
@@ -269,62 +222,20 @@ ElevatedButton newCityButton(BuildContext context, BoxConstraints constraints,
     onPressed: () {
       controller.cityName.clear();
       controller.cityCode.clear();
-      showDialog(
-         barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewCityOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-                isEnabled: true,
-              ),
-              actions: [
-                GetX<CountriesController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewCityValue.value
-                                ? null
-                                : () async {
-                                    if (!controller
-                                        .formKeyForAddingNewvalue.currentState!
-                                        .validate()) {
-                                    } else {
-                                      await controller.addNewCity(
-                                          controller.countryIdToWorkWith.value);
-                                    }
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewCityValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      cititesDialog(
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewCityValue.value
+              ? null
+              : () async {
+                  if (!controller.formKeyForAddingNewvalue.currentState!
+                      .validate()) {
+                  } else {
+                    await controller
+                        .addNewCity(controller.countryIdToWorkWith.value);
+                  }
+                },
+          isEnabled: true);
     },
     style: newButtonStyle,
     child: const Text('New City'),
