@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/responsibilities_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/responsibilities_widgets/responsibilities_dialog.dart';
 import '../../../../consts.dart';
-import 'responsibilities_dialog.dart';
 
 class Responsibilities extends StatelessWidget {
   const Responsibilities({super.key});

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../consts.dart';
+import 'main_screen_contro.dart';
 
 class FunctionsController extends GetxController {
   late TextEditingController screenName = TextEditingController();
@@ -25,6 +26,12 @@ class FunctionsController extends GetxController {
       filterScreens();
     });
     super.onInit();
+  }
+
+   getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // this function is to sort data in table

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/functions_widgets/add_new_screen_or_view.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/functions_widgets/functions_dialog.dart';
 import '../../../../consts.dart';
 
 class Functions extends StatelessWidget {
@@ -78,62 +78,20 @@ class Functions extends StatelessWidget {
   }
 }
 
-ElevatedButton newScreenButton(
-    BuildContext context, BoxConstraints constraints, controller) {
+ElevatedButton newScreenButton(BuildContext context, BoxConstraints constraints,
+    FunctionsController controller) {
   return ElevatedButton(
     onPressed: () {
       controller.screenName.clear();
       controller.route.clear();
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewScreenOrView(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<FunctionsController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewScreenProcess.value
-                                ? null
-                                : () async {
-                                    await controller.addNewScreen();
-                                  },
-                            style: saveButtonStyle,
-                            child:
-                                controller.addingNewScreenProcess.value == false
-                                    ? const Text(
-                                        'Save',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      functionsDailog(
+          controller: controller,
+          constraints: constraints,
+          onPressed: controller.addingNewScreenProcess.value
+              ? null
+              : () async {
+                  await controller.addNewScreen();
+                });
     },
     style: newButtonStyle,
     child: const Text('New Screen'),
@@ -141,7 +99,9 @@ ElevatedButton newScreenButton(
 }
 
 Widget tableOfScreens(
-    {required constraints, required context, required controller}) {
+    {required constraints,
+    required context,
+    required FunctionsController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -195,7 +155,7 @@ Widget tableOfScreens(
 }
 
 DataRow dataRowForTheTable(Map<String, dynamic> screenData, context,
-    constraints, screenId, controller) {
+    constraints, screenId, FunctionsController controller) {
   return DataRow(cells: [
     DataCell(Text(
       screenData['name'] ?? 'no name',
@@ -242,67 +202,21 @@ ElevatedButton deleteSection(
       child: const Text('Delete'));
 }
 
-ElevatedButton editSection(context, controller, Map<String, dynamic> screenData,
-    constraints, screenId) {
+ElevatedButton editSection(context, FunctionsController controller,
+    Map<String, dynamic> screenData, constraints, screenId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              controller.screenName.text = screenData['name'] ?? '';
-              controller.route.text = screenData['routeName'] ?? '';
-
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewScreenOrView(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                      onPressed: controller.addingNewScreenProcess.value
-                          ? null
-                          : () {
-                              controller.updateScreen(screenId);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: controller.addingNewScreenProcess.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                    ),
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        controller.screenName.text = screenData['name'] ?? '';
+        controller.route.text = screenData['routeName'] ?? '';
+        functionsDailog(
+            controller: controller,
+            constraints: constraints,
+            onPressed: controller.addingNewScreenProcess.value
+                ? null
+                : () {
+                    controller.updateScreen(screenId);
+                  });
       },
       child: const Text('Edit'));
 }
