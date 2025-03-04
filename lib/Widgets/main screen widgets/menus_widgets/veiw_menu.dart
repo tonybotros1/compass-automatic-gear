@@ -170,8 +170,13 @@ Obx screenSection(MenusController controller, BoxConstraints constraints) {
                     onPressed:
                         controller.addingExistingScreenProcess.value == false
                             ? () async {
-                                await controller.addExistingScreenToMenu();
-                                controller.screenIDFromList.clear();
+                                if (controller.screenIDFromList.isNotEmpty) {
+                                  await controller.addExistingScreenToMenu();
+                                  controller.screenIDFromList.clear();
+                                } else {
+                                  showSnackBar(
+                                      'Alert', 'Please select screen first');
+                                }
                               }
                             : null,
                     child: controller.addingExistingScreenProcess.value == false
@@ -311,8 +316,13 @@ Obx menuSection(MenusController controller, BoxConstraints constraints) {
                       onPressed:
                           controller.addingExistingMenuProcess.value == false
                               ? () async {
-                                  await controller.addExistingSubMenuToMenu();
-                                  controller.menuIDFromList.clear();
+                                  if (controller.menuIDFromList.isNotEmpty) {
+                                    await controller.addExistingSubMenuToMenu();
+                                    controller.menuIDFromList.clear();
+                                  } else {
+                                    showSnackBar(
+                                        'Alert', 'Please select menu first');
+                                  }
                                 }
                               : null,
                       child: controller.addingExistingMenuProcess.value == false
