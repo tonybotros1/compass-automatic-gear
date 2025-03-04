@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'main_screen_contro.dart';
+
 class CountersController extends GetxController {
   TextEditingController code = TextEditingController();
   TextEditingController description = TextEditingController();
@@ -28,6 +30,12 @@ class CountersController extends GetxController {
       filterCounters();
     });
     super.onInit();
+  }
+
+   getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // this function is to sort data in table

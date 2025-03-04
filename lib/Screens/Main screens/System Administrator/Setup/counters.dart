@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/counters_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/counters_widgets/add_new_counter_or_edit.dart';
+import '../../../../Widgets/main screen widgets/counters_widgets/counters_dialog.dart';
 import '../../../../consts.dart';
 
 class Counters extends StatelessWidget {
@@ -232,65 +232,21 @@ ElevatedButton editSection(context, CountersController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              controller.code.text = counterData['code'] ?? '';
-              controller.description.text = counterData['description'] ?? '';
-              controller.prefix.text = counterData['prefix'] ?? '';
-              controller.value.text = (counterData['value'] ?? '').toString();
-              controller.length.text =
-                  (counterData['length'] ?? '0').toString();
-              controller.separator.text = counterData['separator'] ?? '';
-
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewConterOrEdit(
-                    controller: controller,
-                    constraints: constraints,
-                    context: context,
-                    canEdit: false),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                      onPressed: controller.addingNewValue.value
-                          ? null
-                          : () {
-                              controller.editCounter(counterId);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: controller.addingNewValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        controller.code.text = counterData['code'] ?? '';
+        controller.description.text = counterData['description'] ?? '';
+        controller.prefix.text = counterData['prefix'] ?? '';
+        controller.value.text = (counterData['value'] ?? '').toString();
+        controller.length.text = (counterData['length'] ?? '0').toString();
+        controller.separator.text = counterData['separator'] ?? '';
+        countersDialog(
+            constraints: constraints,
+            controller: controller,
+            canEdit: false,
+            onPressed: controller.addingNewValue.value
+                ? null
+                : () {
+                    controller.editCounter(counterId);
+                  });
       },
       child: const Text('Edit'));
 }
@@ -304,55 +260,15 @@ ElevatedButton newCounterButton(BuildContext context,
       controller.prefix.clear();
       controller.value.clear();
       controller.length.clear();
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewConterOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<CountersController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewValue.value
-                                ? null
-                                : () async {
-                                    await controller.addNewCounter();
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      countersDialog(
+          constraints: constraints,
+          controller: controller,
+          canEdit: true,
+          onPressed: controller.addingNewValue.value
+              ? null
+              : () async {
+                  await controller.addNewCounter();
+                });
     },
     style: newButtonStyle,
     child: const Text('New Counter'),
