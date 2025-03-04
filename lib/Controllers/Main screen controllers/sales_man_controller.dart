@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'main_screen_contro.dart';
+
 class SalesManController extends GetxController {
   TextEditingController name = TextEditingController();
   TextEditingController target = TextEditingController();
@@ -24,6 +26,12 @@ class SalesManController extends GetxController {
       filterSalesMan();
     });
     super.onInit();
+  }
+
+   getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // this function is to sort data in table
