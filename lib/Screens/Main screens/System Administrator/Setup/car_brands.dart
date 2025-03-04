@@ -166,39 +166,55 @@ DataRow dataRowForTheTable(Map<String, dynamic> brandData, context, constraints,
   ]);
 }
 
-ElevatedButton valSectionInTheTable(
-    CarBrandsController controller, brandId, context, constraints, brandData) {
+ElevatedButton valSectionInTheTable(CarBrandsController controller, brandId,
+    context, BoxConstraints constraints, brandData) {
   return ElevatedButton(
       style: viewButtonStyle,
       onPressed: () {
         controller.getModelsValues(brandId);
         controller.brandIdToWorkWith.value = brandId;
-        showDialog(
-            barrierDismissible: true,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: modelsSection(
-                  constraints: constraints,
-                  context: context,
+        Get.dialog(
+            barrierDismissible: false,
+            Dialog(
+              insetPadding: EdgeInsets.all(25),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              child: SizedBox(
+                height: constraints.maxHeight,
+                width: constraints.maxWidth,
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(15),
+                            topRight: Radius.circular(15)),
+                        color: mainColor,
+                      ),
+                      padding: EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Text(
+                            '🚗 Models',
+                            style: fontStyleForScreenNameUsedInButtons,
+                          ),
+                          Spacer(),
+                          closeButton
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                        child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: modelsSection(
+                        constraints: constraints,
+                        context: context,
+                      ),
+                    ))
+                  ],
                 ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        style: cancelButtonStyle,
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                  ),
-                ],
-              );
-            });
+              ),
+            ));
       },
       child: const Text('Models'));
 }
@@ -255,7 +271,8 @@ ElevatedButton editSection(context, CarBrandsController controller,
                 : () {
                     if (!controller.formKeyForAddingNewvalue.currentState!
                         .validate()) {}
-                    if (controller.imageBytes.value.isEmpty && controller.logoUrl.isEmpty) {
+                    if (controller.imageBytes.value.isEmpty &&
+                        controller.logoUrl.isEmpty) {
                       controller.logoSelectedError.value = true;
                     } else {
                       controller.editBrand(brandId);

@@ -6,6 +6,7 @@ import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../auto_size_box.dart';
 import 'add_new_model_or_edit.dart';
+import 'cars_models_dialog.dart';
 
 Widget modelsSection({
   required BoxConstraints constraints,
@@ -93,9 +94,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSortForModels,
       ),
-      DataColumn(
-        label: Text('')
-      ),
+      DataColumn(label: Text('')),
     ],
     rows: controller.filteredModels.isEmpty &&
             controller.searchForModels.value.text.isEmpty
@@ -166,64 +165,19 @@ ElevatedButton editSection(CarBrandsController controller,
       style: editButtonStyle,
       onPressed: () {
         controller.modelName.text = modelData['name'];
-        showDialog(
-           barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewmodelOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                ),
-                actions: [
-                  GetX<CarBrandsController>(
-                      builder: (controller) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ElevatedButton(
-                              onPressed: controller.addingNewmodelValue.value
-                                  ? null
-                                  : () async {
-                                      if (!controller.formKeyForAddingNewvalue
-                                          .currentState!
-                                          .validate()) {
-                                      } else {
-                                        controller.editmodel(
-                                            controller
-                                                .brandIdToWorkWith.value,
-                                            modelId);
-                                      }
-                                    },
-                              style: saveButtonStyle,
-                              child:
-                                  controller.addingNewmodelValue.value == false
-                                      ? const Text(
-                                          'Save',
-                                          style: TextStyle(color: Colors.white),
-                                        )
-                                      : const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2,
-                                          ),
-                                        ),
-                            ),
-                          )),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        carModelsDialog(
+            constraints: constraints,
+            controller: controller,
+            onPressed: controller.addingNewmodelValue.value
+                ? null
+                : () async {
+                    if (!controller.formKeyForAddingNewvalue.currentState!
+                        .validate()) {
+                    } else {
+                      controller.editmodel(
+                          controller.brandIdToWorkWith.value, modelId);
+                    }
+                  });
       },
       child: Text('Edit'));
 }
@@ -254,61 +208,19 @@ ElevatedButton newModelButton(BuildContext context, BoxConstraints constraints,
   return ElevatedButton(
     onPressed: () {
       controller.modelName.clear();
-      showDialog(
-         barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewmodelOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<CarBrandsController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewmodelValue.value
-                                ? null
-                                : () async {
-                                    if (!controller
-                                        .formKeyForAddingNewvalue.currentState!
-                                        .validate()) {
-                                    } else {
-                                      await controller.addNewModel(
-                                          controller.brandIdToWorkWith.value);
-                                    }
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewmodelValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      carModelsDialog(
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewmodelValue.value
+              ? null
+              : () async {
+                  if (!controller.formKeyForAddingNewvalue.currentState!
+                      .validate()) {
+                  } else {
+                    await controller
+                        .addNewModel(controller.brandIdToWorkWith.value);
+                  }
+                });
     },
     style: newButtonStyle,
     child: const Text('New model'),
