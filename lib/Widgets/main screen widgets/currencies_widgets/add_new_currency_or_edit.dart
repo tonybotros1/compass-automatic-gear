@@ -19,8 +19,6 @@ Widget addNewCurrencyOrEdit({
         GetX<CurrencyController>(builder: (controller) {
           bool isCountryLoading = controller.allCountries.isEmpty;
           return CustomDropdown(
-            
-            // enabled: false,
             textcontroller: controller.code.text,
             validator: true,
             showedSelectedName: 'currency_code',

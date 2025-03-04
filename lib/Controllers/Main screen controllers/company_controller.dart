@@ -13,7 +13,7 @@ import 'main_screen_contro.dart';
 class CompanyController extends GetxController {
   RxBool isScreenLoding = RxBool(true);
   TextEditingController companyName = TextEditingController();
-  TextEditingController industry = TextEditingController();
+  Rx<TextEditingController> industry = TextEditingController().obs;
   RxString industryId = RxString('');
   TextEditingController userName = TextEditingController();
   TextEditingController password = TextEditingController();

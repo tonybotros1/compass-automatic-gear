@@ -137,21 +137,23 @@ class DropdownController extends GetxController {
                                   style: TextStyle(color: Colors.grey)),
                             )
                           : Container(
-                            constraints: const BoxConstraints(maxHeight: 175),
-                            child: Scrollbar(
-                              controller: scrollController,
-                              thumbVisibility: true,
-                              trackVisibility: true,
-                              child: SingleChildScrollView(
+                              constraints: const BoxConstraints(maxHeight: 175),
+                              child: Scrollbar(
+                                controller: scrollController,
+                                thumbVisibility: true,
+                                trackVisibility: true,
+                                child: SingleChildScrollView(
                                   controller: scrollController,
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    children: filteredItems.entries.map((entry) {
+                                    children:
+                                        filteredItems.entries.map((entry) {
                                       return MouseRegion(
                                         cursor: SystemMouseCursors.click,
                                         onEnter: (_) =>
                                             highlightedKey.value = entry.key,
-                                        onExit: (_) => highlightedKey.value = '',
+                                        onExit: (_) =>
+                                            highlightedKey.value = '',
                                         child: GestureDetector(
                                           onTap: () {
                                             selectedKey.value = entry.key;
@@ -159,7 +161,8 @@ class DropdownController extends GetxController {
                                             textController.value = '';
                                             isValid.value = true;
                                             hideDropdown();
-                                            onChanged?.call(entry.key, entry.value);
+                                            onChanged?.call(
+                                                entry.key, entry.value);
                                           },
                                           child: Obx(() => Container(
                                                 color: _getItemColor(
@@ -174,8 +177,8 @@ class DropdownController extends GetxController {
                                     }).toList(),
                                   ),
                                 ),
-                            ),
-                          )),
+                              ),
+                            )),
                     ],
                   ),
                 ),
@@ -295,8 +298,7 @@ class DropdownController extends GetxController {
     } else {
       filteredItems.assignAll(Map.fromEntries(
         allItems.entries.where((entry) {
-          Widget builtItem =
-              itemBuilder(Get.context!, entry.key, entry.value);
+          Widget builtItem = itemBuilder(Get.context!, entry.key, entry.value);
           String searchText = extractSearchableText(builtItem);
           return searchText
               .toLowerCase()
@@ -382,10 +384,6 @@ class CustomDropdown extends StatelessWidget {
       borderRadius: BorderRadius.circular(5),
     );
 
-    TextStyle defaultEnabledTextStyle =
-        showedSelectedName.isEmpty && textControllerValue.isEmpty
-            ? TextStyle(fontSize: 16, color: Colors.grey.shade700)
-            : TextStyle(fontSize: 16, color: Colors.black);
     TextStyle defaultDisabledTextStyle =
         const TextStyle(color: Colors.grey, fontSize: 16);
 
@@ -436,37 +434,46 @@ class CustomDropdown extends StatelessWidget {
                         );
                       }
                     : null,
-                child: Obx(() => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
-                      decoration: controller.isValid.isFalse
-                          ? BoxDecoration(
-                              color: Colors.grey.shade200,
-                              border: Border.all(color: Colors.red),
-                              borderRadius: BorderRadius.circular(5),
-                            )
-                          : isEnabled
-                              ? (dropdownDecoration ?? defaultEnabledDecoration)
-                              : (disabledDecoration ?? defaultDisabledDecoration),
-                      child: Row(
-                        children: [
-                          Text(
-                            textControllerValue.isEmpty
-                                ? controller.selectedKey.isEmpty
-                                    ? hintText
-                                    : controller.selectedValue[showedSelectedName]
-                                        .toString()
-                                : textControllerValue.value,
-                            style: isEnabled
-                                ? (enabledTextStyle ?? defaultEnabledTextStyle)
-                                : (disabledTextStyle ?? defaultDisabledTextStyle),
-                          ),
-                          const Spacer(),
-                          Icon(Icons.arrow_drop_down,
-                              color: isEnabled ? Colors.black : Colors.grey),
-                        ],
-                      ),
-                    )),
+                child: Obx(() {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                    decoration: controller.isValid.isFalse
+                        ? BoxDecoration(
+                            color: Colors.grey.shade200,
+                            border: Border.all(color: Colors.red),
+                            borderRadius: BorderRadius.circular(5),
+                          )
+                        : isEnabled
+                            ? (dropdownDecoration ?? (defaultEnabledDecoration))
+                            : (disabledDecoration ?? defaultDisabledDecoration),
+                    child: Row(
+                      children: [
+                        Text(
+                          textControllerValue.isEmpty
+                              ? controller.selectedKey.isEmpty
+                                  ? hintText
+                                  : controller.selectedValue[showedSelectedName]
+                                      .toString()
+                              : textControllerValue.value,
+                          style: isEnabled
+                              ? (enabledTextStyle ??
+                                  (textControllerValue.value.isEmpty &&
+                                          controller.selectedKey.isEmpty
+                                      ? TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey.shade700)
+                                      : TextStyle(
+                                          fontSize: 16, color: Colors.black)))
+                              : (disabledTextStyle ?? defaultDisabledTextStyle),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.arrow_drop_down,
+                            color: isEnabled ? Colors.black : Colors.grey),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ),
             if (state.hasError)

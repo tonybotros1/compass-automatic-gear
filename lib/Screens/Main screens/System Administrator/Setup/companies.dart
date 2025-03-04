@@ -230,7 +230,7 @@ ElevatedButton editEction(context, CompanyController controller,
         controller
             .getCitiesByCountryID(companyData['contact_details']['country']);
         controller.companyName.text = companyData['company_name'] ?? '';
-        controller.industry.text =
+        controller.industry.value.text =
             controller.getIndustryName(companyData['industry']) ?? '';
         controller.industryId.value = companyData['industry'] ?? '';
         controller.userName.text =
@@ -278,7 +278,7 @@ ElevatedButton newCompanyButton(BuildContext context,
     onPressed: () {
       controller.allCities.clear();
       controller.companyName.clear();
-      controller.industry.clear();
+      controller.industry.value.clear();
       controller.industryId.value = '';
       controller.userName.clear();
       controller.password.clear();
@@ -298,7 +298,7 @@ ElevatedButton newCompanyButton(BuildContext context,
               : () async {
                   if (controller.userName.text.isNotEmpty &&
                       controller.companyName.text.isNotEmpty &&
-                      controller.industry.text.isNotEmpty &&
+                      controller.industry.value.text.isNotEmpty &&
                       controller.password.text.isNotEmpty &&
                       controller.phoneNumber.text.isNotEmpty &&
                       controller.email.text.isNotEmpty &&

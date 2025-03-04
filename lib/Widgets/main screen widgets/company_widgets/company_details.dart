@@ -1,10 +1,10 @@
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/company_controller.dart';
 import '../../../consts.dart';
 import '../../my_text_field.dart';
-import '../drop_down_menu.dart';
 
 Container companyDetails({
   required CompanyController controller,
@@ -31,30 +31,22 @@ Container companyDetails({
                 ),
                 GetX<CompanyController>(builder: (controller) {
                   final isIndustryLoading = controller.industryMap.isEmpty;
-                  return dropDownValues(
-                    listValues: controller.industryMap.values
-                        .map((value) => value['name'].toString())
-                        .toList(),
-                    textController: controller.industry,
-                    labelText: 'Industry',
-                    hintText: 'Enter industry',
-                    validate: true,
-                    menus: isIndustryLoading ? {} : controller.industryMap,
-                    itemBuilder: (context, suggestion) {
+                  return CustomDropdown(
+                    textcontroller: controller.industry.value.text,
+                    hintText: 'Industry',
+                    showedSelectedName: 'name',
+                    items: isIndustryLoading ? {} : controller.industryMap,
+                    itemBuilder: (context, key, value) {
                       return ListTile(
-                        title: Text('${suggestion['name']}'),
+                        title: Text('${value['name']}'),
                       );
                     },
-                    onSelected: (suggestion) {
-                      controller.industry.text = '${suggestion['name']}';
-                      controller.industryMap.entries.where((entry) {
-                        return entry.value['name'] ==
-                            suggestion['name'].toString();
-                      }).forEach((entry) {
-                        controller.industryId.value = entry.key;
-                      });
+                    onChanged: (key, value) {
+                      controller.industry.value.text = value['name'];
+                      controller.industryId.value = key;
                     },
                   );
+                 
                 }),
               ],
             )),
