@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'main_screen_contro.dart';
+
 class SystemVariablesController extends GetxController {
   TextEditingController code = TextEditingController();
   TextEditingController value = TextEditingController();
@@ -22,6 +24,12 @@ class SystemVariablesController extends GetxController {
       filterVariables();
     });
     super.onInit();
+  }
+
+  getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // this function is to sort data in table
@@ -147,6 +155,4 @@ class SystemVariablesController extends GetxController {
       );
     }
   }
-
-  
 }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,7 +8,8 @@ import 'add_new_variable_or_edit.dart';
 Future<dynamic> systemVariablesDialog(
     {required BoxConstraints constraints,
     required SystemVariablesController controller,
-    required void Function()? onPressed,required bool canEdit}) {
+    required void Function()? onPressed,
+    required bool canEdit}) {
   return Get.dialog(
       barrierDismissible: false,
       Dialog(
@@ -30,7 +30,10 @@ Future<dynamic> systemVariablesDialog(
                 child: Row(
                   spacing: 10,
                   children: [
-                    Text('data'),
+                    Text(
+                      controller.getScreenName(),
+                      style: fontStyleForScreenNameUsedInButtons,
+                    ),
                     Spacer(),
                     ElevatedButton(
                       onPressed: onPressed,
