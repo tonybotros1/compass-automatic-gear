@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../auto_size_box.dart';
-import 'add_new_model_or_edit.dart';
 import 'cars_models_dialog.dart';
 
 Widget modelsSection({
