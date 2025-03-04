@@ -1,14 +1,13 @@
 import 'package:datahubai/Models/screen_tree_model.dart';
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/expand_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
-
 import '../../../Controllers/Main screen controllers/menus_controller.dart';
 import '../../../consts.dart';
-import '../drop_down_menu.dart';
 
 Widget viewMenu({
   required BoxConstraints constraints,
@@ -103,34 +102,20 @@ Obx screenSection(MenusController controller, BoxConstraints constraints) {
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Form(
-                            key: controller.formKeyForDropDownListForScreens,
-                            child: dropDownValues(
-                               listValues: controller.selectFromScreens.values
-                    .map((value) => value
-                        .toString()) 
-                    .toList(),
-                              onSelected: (suggestion) {
-                                controller.selectFromScreens.entries
-                                    .where((entry) {
-                                  return entry.value == suggestion.toString();
-                                }).forEach((entry) {
-                                  if (!controller.screenIDFromList
-                                      .contains(entry.key)) {
-                                    controller.screenIDFromList.add(entry.key);
-                                  }
-                                });
-                              },
-                              itemBuilder: (context, suggestion) {
-                                return ListTile(
-                                  title: Text(suggestion.toString()),
-                                );
-                              },
-                              labelText: 'Screens',
-                              hintText: 'Select Screen',
-                              menus: controller.selectFromScreens,
-                              validate: true,
-                            ),
+                          child: CustomDropdown(
+                            validator: true,
+                            hintText: 'Screens',
+                            items: controller.allScreens,
+                            itemBuilder: (context, key, value) {
+                              return ListTile(
+                                title: Text(value['name']),
+                              );
+                            },
+                            onChanged: (key, value) {
+                              if (!controller.screenIDFromList.contains(key)) {
+                                controller.screenIDFromList.add(key);
+                              }
+                            },
                           ),
                         ),
                         Padding(
@@ -185,15 +170,8 @@ Obx screenSection(MenusController controller, BoxConstraints constraints) {
                     onPressed:
                         controller.addingExistingScreenProcess.value == false
                             ? () async {
-                                if (controller.screenIDFromList.isEmpty &&
-                                    !controller.formKeyForDropDownListForScreens
-                                        .currentState!
-                                        .validate()) {
-                                  // Do nothing: this ensures validation is triggered when required
-                                } else {
-                                  await controller.addExistingScreenToMenu();
-                                  controller.screenIDFromList.clear();
-                                }
+                                await controller.addExistingScreenToMenu();
+                                controller.screenIDFromList.clear();
                               }
                             : null,
                     child: controller.addingExistingScreenProcess.value == false
@@ -264,34 +242,21 @@ Obx menuSection(MenusController controller, BoxConstraints constraints) {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Form(
-                              key: controller.formKeyForDropDownListForMenus,
-                              child: dropDownValues(
-                                 listValues: controller.selectFromMenus.values
-                    .map((value) => value
-                        .toString()) 
-                    .toList(),
-                                onSelected: (suggestion) {
-                                  controller.selectFromMenus.entries
-                                      .where((entry) {
-                                    return entry.value == suggestion.toString();
-                                  }).forEach((entry) {
-                                    if (!controller.menuIDFromList
-                                        .contains(entry.key)) {
-                                      controller.menuIDFromList.add(entry.key);
-                                    }
-                                  });
-                                },
-                                itemBuilder: (context, suggestion) {
-                                  return ListTile(
-                                    title: Text(suggestion.toString()),
-                                  );
-                                },
-                                labelText: 'Menus',
-                                hintText: 'Select Menu',
-                                menus: controller.selectFromMenus,
-                                validate: true,
-                              ),
+                            child: CustomDropdown(
+                              hintText: 'Menus',
+                              validator: true,
+                              items: controller.allMenus,
+                              itemBuilder: (context, key, value) {
+                                return ListTile(
+                                  title: Text(
+                                      '${value['name']} (${value['description']})'),
+                                );
+                              },
+                              onChanged: (key, value) {
+                                if (!controller.menuIDFromList.contains(key)) {
+                                  controller.menuIDFromList.add(key);
+                                }
+                              },
                             ),
                           ),
                           Padding(
@@ -346,15 +311,8 @@ Obx menuSection(MenusController controller, BoxConstraints constraints) {
                       onPressed:
                           controller.addingExistingMenuProcess.value == false
                               ? () async {
-                                  if (controller.menuIDFromList.isEmpty &&
-                                      !controller.formKeyForDropDownListForMenus
-                                          .currentState!
-                                          .validate()) {
-                                    // Do nothing: this ensures validation is triggered when required
-                                  } else {
-                                    await controller.addExistingSubMenuToMenu();
-                                    controller.menuIDFromList.clear();
-                                  }
+                                  await controller.addExistingSubMenuToMenu();
+                                  controller.menuIDFromList.clear();
                                 }
                               : null,
                       child: controller.addingExistingMenuProcess.value == false

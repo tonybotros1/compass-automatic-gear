@@ -221,7 +221,7 @@ ElevatedButton viewSection(
         ? () async {
             controller.menuIDFromList.clear();
             controller.setButtonLoading(menuId, true); // Start loading
-            await controller.listOfMenusAndScreen();
+            // await controller.listOfMenusAndScreen();
             await controller.getMenusScreens(menuId);
             controller.setButtonLoading(menuId, false); // Stop loading
             Get.dialog(

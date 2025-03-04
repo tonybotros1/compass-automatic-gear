@@ -380,8 +380,7 @@ class CompanyController extends GetxController {
         .listen((roles) {
       allRoles.value = {
         for (var doc in roles.docs) doc.id: doc.data()
-        // for (var role in roles.docs) {
-        //   allRoles[role.id] = role.data()['role_name'];
+        
       };
     });
   }

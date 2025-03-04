@@ -16,6 +16,7 @@ class MenusController extends GetxController {
   RxList screenIDFromList = RxList([]);
 
   RxMap allMenus = RxMap();
+  RxMap allScreens = RxMap();
   RxList menusSubMenusChildren = RxList([]);
   RxList menusSscreensChildren = RxList([]);
   RxMap<String, Map<String, dynamic>> filteredMenus =
@@ -41,18 +42,12 @@ class MenusController extends GetxController {
   RxBool addingExistingMenuProcess = RxBool(false);
   RxBool addingExistingScreenProcess = RxBool(false);
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> formKeyForDropDownListForMenus =
-      GlobalKey<FormState>();
-  final GlobalKey<FormState> formKeyForDropDownListForScreens =
-      GlobalKey<FormState>();
-  RxMap<String, String> selectFromMenus = RxMap({});
   RxMap<String, String> selectFromScreens = RxMap({});
-  RxMap allMenusDocs = RxMap({});
-  RxMap allScreensDocs = RxMap({});
 
   @override
   void onInit() {
     getMenus();
+    getScreens();
     search.value.addListener(() {
       filterMenus();
     });
@@ -64,32 +59,6 @@ class MenusController extends GetxController {
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
-
-  // Future<void> updateDescriptions() async {
-  //   try {
-  //     // Reference to the 'menus' collection
-  //     CollectionReference menus =
-  //         FirebaseFirestore.instance.collection('menus ');
-
-  //     // Fetch all documents in the collection
-  //     QuerySnapshot snapshot = await menus.get();
-
-  //     // Batch write to avoid multiple writes
-  //     WriteBatch batch = FirebaseFirestore.instance.batch();
-
-  //     // Iterate through documents and update the 'description' field
-  //     for (var doc in snapshot.docs) {
-  //       batch.update(
-  //           doc.reference, {'description': ''});
-  //     }
-
-  //     // Commit the batch
-  //     await batch.commit();
-  //     print("All documents updated with the 'description' field.");
-  //   } catch (e) {
-  //     print("Error updating descriptions: $e");
-  //   }
-  // }
 
   removeNodeFromTheTree(nodeID, parentID) async {
     try {
@@ -119,13 +88,14 @@ class MenusController extends GetxController {
   // this function to get menu name by id and add it to the screen
   String getMenuName(String menuID) {
     // Find the entry with the matching key
-    final matchingEntry = selectFromMenus.entries.firstWhere(
+    final matchingEntry = allMenus.entries.firstWhere(
       (entry) => entry.key == menuID,
       orElse: () =>
           const MapEntry('', 'Unknown'), // Handle cases where no match is found
     );
-    final menuName =
-        matchingEntry.value.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
+    final menuName = matchingEntry.value['name']
+        .replaceAll(RegExp(r'\s*\(.*?\)'), '')
+        .trim();
 
     return menuName;
   }
@@ -133,13 +103,13 @@ class MenusController extends GetxController {
   // this function to get screen name by id and add it to the screen
   String getScreenName(String screenID) {
     // Find the entry with the matching key
-    final matchingEntry = selectFromScreens.entries.firstWhere(
+    final matchingEntry = allScreens.entries.firstWhere(
       (entry) => entry.key == screenID,
       orElse: () =>
           const MapEntry('', 'Unknown'), // Handle cases where no match is found
     );
 
-    return matchingEntry.value;
+    return matchingEntry.value['name'];
   }
 
   // this function is to edit menu details like name and description
@@ -291,29 +261,6 @@ class MenusController extends GetxController {
       addingExistingScreenProcess.value = false;
     } catch (e) {
       addingExistingScreenProcess.value = false;
-    }
-  }
-
-// this function to get list of menus to select of them
-  listOfMenusAndScreen() async {
-    try {
-      var menus = await FirebaseFirestore.instance.collection('menus ').get();
-      var screens =
-          await FirebaseFirestore.instance.collection('screens').get();
-
-      if (menus.docs.isNotEmpty) {
-        for (var menu in menus.docs) {
-          selectFromMenus[menu.id] =
-              '${menu.data()['name']} (${menu.data()['description']})';
-        }
-      }
-      if (screens.docs.isNotEmpty) {
-        for (var screen in screens.docs) {
-          selectFromScreens[screen.id] = screen.data()['name'];
-        }
-      }
-    } catch (e) {
-//
     }
   }
 
@@ -487,21 +434,32 @@ class MenusController extends GetxController {
 
       FirebaseFirestore.instance
           .collection('menus ')
-          // .where(FieldPath.documentId, whereIn: rolesMenus)
           .orderBy('name', descending: false)
           .snapshots()
           .listen((menus) {
-        for (var menu in menus.docs) {
-          allMenus[menu.id] = {
-            'name': menu.data()['name'] ?? 'Unknown',
-            'added_date': menu.data()['added_date'],
-            'description': menu.data()['description'],
-          };
-        }
+        allMenus.value = {for (var doc in menus.docs) doc.id: doc.data()};
+
         isScreenLoading.value = false;
       });
     } catch (e) {
       isScreenLoading.value = false;
+    }
+  }
+
+  // Function to get main screens in the system
+  getScreens() async {
+    try {
+      allScreens.clear();
+
+      FirebaseFirestore.instance
+          .collection('screens')
+          .orderBy('name', descending: false)
+          .snapshots()
+          .listen((screens) {
+        allScreens.value = {for (var doc in screens.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+      //
     }
   }
 
@@ -582,21 +540,4 @@ class MenusController extends GetxController {
     return [...menuNodes, ...screenNodes];
   }
 
-  // // function to convert text to date and make the format dd-mm-yyyy
-  // String textToDate(dynamic inputDate) {
-  //   try {
-  //     if (inputDate is String) {
-  //       // Match the actual date format of the input
-  //       DateTime parsedDate =
-  //           DateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(inputDate);
-  //       return DateFormat("dd-MM-yyyy").format(parsedDate);
-  //     } else if (inputDate is DateTime) {
-  //       return DateFormat("dd-MM-yyyy").format(inputDate);
-  //     } else {
-  //       throw FormatException("Invalid input type for textToDate: $inputDate");
-  //     }
-  //   } catch (e) {
-  //     return "Invalid Date"; // Return a default or placeholder string
-  //   }
-  // }
 }
