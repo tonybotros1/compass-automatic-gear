@@ -51,27 +51,34 @@ class DropdownController extends GetxController {
     filteredItems.assignAll(items);
     query.value.text = searchQuery.value;
 
-    // Obtain the size of the dropdown field.
+    // Obtain the size and position of the dropdown field.
     RenderBox renderBox =
         buttonKey.currentContext!.findRenderObject() as RenderBox;
+    Offset fieldOffset = renderBox.localToGlobal(Offset.zero);
     double fieldWidth = renderBox.size.width;
+    double fieldHeight = renderBox.size.height;
+    double screenHeight = MediaQuery.of(context).size.height;
+    double availableSpaceBelow = screenHeight - fieldOffset.dy - fieldHeight;
+    double availableSpaceAbove = fieldOffset.dy;
+    double dropdownMaxHeight = 175.0;
+
+    bool showAbove = availableSpaceBelow < dropdownMaxHeight &&
+        availableSpaceAbove > availableSpaceBelow;
+    double offsetY = showAbove ? -dropdownMaxHeight : fieldHeight;
 
     overlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
-          // Tapping outside closes the overlay.
           Positioned.fill(
             child: GestureDetector(
               onTap: hideDropdown,
               child: Container(color: Colors.transparent),
             ),
           ),
-          // Use CompositedTransformFollower to attach the overlay to the target.
           CompositedTransformFollower(
             link: layerLink,
             showWhenUnlinked: false,
-            offset: Offset(0, renderBox.size.height),
-            // Wrap with SizedBox to constrain the width.
+            offset: Offset(0, offsetY),
             child: SizedBox(
               width: fieldWidth,
               child: Focus(
@@ -117,14 +124,9 @@ class DropdownController extends GetxController {
                                 filterItems(itemBuilder);
                               },
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: BorderSide(
-                                  color: Colors.grey.shade700, width: 2.0),
-                            ),
-                            prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5)),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 8, horizontal: 10),
                           ),
@@ -137,7 +139,9 @@ class DropdownController extends GetxController {
                                   style: TextStyle(color: Colors.grey)),
                             )
                           : Container(
-                              constraints: const BoxConstraints(maxHeight: 175),
+                              constraints: BoxConstraints(
+                                maxHeight: dropdownMaxHeight,
+                              ),
                               child: Scrollbar(
                                 controller: scrollController,
                                 thumbVisibility: true,
@@ -213,8 +217,12 @@ class DropdownController extends GetxController {
 
   String? _findKeyByTextValue() {
     for (var entry in filteredItems.entries) {
-      if (entry.value[showedSelectedName.value] == textController.value) {
-        return entry.key;
+      if (showedSelectedName.value.isNotEmpty) {
+        if (entry.value[showedSelectedName.value] == textController.value) {
+          return entry.key;
+        }
+      } else {
+        return null;
       }
     }
     return null;
@@ -222,8 +230,10 @@ class DropdownController extends GetxController {
 
   Color _getItemColor(String key, dynamic value) {
     final isSelected = selectedKey.value == key;
-    final isTextMatch = textController.value.isNotEmpty &&
-        value[showedSelectedName.value] == textController.value;
+    final isTextMatch = showedSelectedName.value.isNotEmpty
+        ? textController.value.isNotEmpty &&
+            value[showedSelectedName.value] == textController.value
+        : false;
     final isHighlighted = highlightedKey.value == key;
 
     if (isSelected || isTextMatch) {
@@ -453,8 +463,11 @@ class CustomDropdown extends StatelessWidget {
                           textControllerValue.isEmpty
                               ? controller.selectedKey.isEmpty
                                   ? hintText
-                                  : controller.selectedValue[showedSelectedName]
-                                      .toString()
+                                  : showedSelectedName.isNotEmpty
+                                      ? controller
+                                          .selectedValue[showedSelectedName]
+                                          .toString()
+                                      : hintText
                               : textControllerValue.value,
                           style: isEnabled
                               ? (enabledTextStyle ??

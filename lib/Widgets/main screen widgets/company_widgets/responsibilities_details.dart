@@ -1,9 +1,9 @@
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/company_controller.dart';
-import '../drop_down_menu.dart';
 
 Container responsibilities({
   required CompanyController controller,
@@ -17,30 +17,20 @@ Container responsibilities({
           Row(
             children: [
               Expanded(
-                child: dropDownValues(
-                  listValues: controller.allRoles.values
-                      .map((value) => value.toString())
-                      .toList(),
-                  onSelected: (suggestion) {
-                    controller.allRoles.entries.where((entry) {
-                      return entry.value == suggestion.toString();
-                    }).forEach((entry) {
-                      if (!controller.roleIDFromList.contains(entry.key)) {
-                        controller.roleIDFromList.add(entry.key);
-                      }
-                    });
-                  },
-                  itemBuilder: (context, suggestion) {
-                    return ListTile(
-                      title: Text(suggestion.toString()),
-                    );
-                  },
-                  labelText: 'Responsibilities',
-                  hintText: 'Select responsibility',
-                  menus: controller.allRoles.isEmpty ? {} : controller.allRoles,
-                  validate: true,
-                ),
-              ),
+                  child: CustomDropdown(
+                hintText: 'Responsibilities',
+                items: controller.allRoles.isEmpty ? {} : controller.allRoles,
+                itemBuilder: (context, key, value) {
+                  return ListTile(
+                    title: Text(value['role_name']),
+                  );
+                },
+                onChanged: (key, value) {
+                  if (!controller.roleIDFromList.contains(key)) {
+                    controller.roleIDFromList.add(key);
+                  }
+                },
+              )),
               Expanded(child: SizedBox())
             ],
           ),

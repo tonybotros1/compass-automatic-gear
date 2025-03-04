@@ -56,7 +56,7 @@ class CompanyController extends GetxController {
     super.onInit();
   }
 
-   getScreenName() {
+  getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -294,7 +294,6 @@ class CompanyController extends GetxController {
     }
   }
 
-  
   Future<String?> getCityName(countryId, cityId) async {
     try {
       var cities = await FirebaseFirestore.instance
@@ -322,7 +321,7 @@ class CompanyController extends GetxController {
     }
   }
 
- String? getIndustryName(String industryId) {
+  String? getIndustryName(String industryId) {
     try {
       final industry = industryMap.entries.firstWhere(
         (industry) => industry.key == industryId,
@@ -333,42 +332,39 @@ class CompanyController extends GetxController {
     }
   }
 
-
-
-
   // this function is to select an image for logo
-Future<void> pickImage() async {
-  try {
-    // Create a file input element using web.HTMLInputElement.
-    final uploadInput =
-        web.document.createElement('input') as web.HTMLInputElement;
-    uploadInput.type = 'file';
-    uploadInput.accept = 'image/*';
-    uploadInput.click();
+  Future<void> pickImage() async {
+    try {
+      // Create a file input element using web.HTMLInputElement.
+      final uploadInput =
+          web.document.createElement('input') as web.HTMLInputElement;
+      uploadInput.type = 'file';
+      uploadInput.accept = 'image/*';
+      uploadInput.click();
 
-    // Listen for changes on the file input element.
-    uploadInput.onChange.listen((event) {
-      final files = uploadInput.files;
-      if (files != null && files.length > 0) {
-        final file = files.item(0);
-        if (file != null) {
-          final reader = web.FileReader();
-          // Read the file as an ArrayBuffer.
-          reader.readAsArrayBuffer(file);
-          reader.onLoadEnd.listen((event) {
-            if (reader.result != null) {
-              // Convert the JS ArrayBuffer to a Dart Uint8List.
-              imageBytes = convertJSArrayBufferToUint8List(reader.result!);
-              update();
-            }
-          });
+      // Listen for changes on the file input element.
+      uploadInput.onChange.listen((event) {
+        final files = uploadInput.files;
+        if (files != null && files.length > 0) {
+          final file = files.item(0);
+          if (file != null) {
+            final reader = web.FileReader();
+            // Read the file as an ArrayBuffer.
+            reader.readAsArrayBuffer(file);
+            reader.onLoadEnd.listen((event) {
+              if (reader.result != null) {
+                // Convert the JS ArrayBuffer to a Dart Uint8List.
+                imageBytes = convertJSArrayBufferToUint8List(reader.result!);
+                update();
+              }
+            });
+          }
         }
-      }
-    });
-  } catch (e) {
-    // print('Error picking image: $e');
+      });
+    } catch (e) {
+      // print('Error picking image: $e');
+    }
   }
-}
 
   // this function is to remove a menu from the list
   removeMenuFromList(index) {
@@ -382,9 +378,11 @@ Future<void> pickImage() async {
         .where('is_shown_for_users', isEqualTo: true)
         .snapshots()
         .listen((roles) {
-      for (var role in roles.docs) {
-        allRoles[role.id] = role.data()['role_name'];
-      }
+      allRoles.value = {
+        for (var doc in roles.docs) doc.id: doc.data()
+        // for (var role in roles.docs) {
+        //   allRoles[role.id] = role.data()['role_name'];
+      };
     });
   }
 
@@ -397,7 +395,7 @@ Future<void> pickImage() async {
             '', 'Unknown'), // Handle cases where no match is found
       );
       final menuName =
-          matchingEntry.value.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
+          matchingEntry.value['role_name'].replaceAll(RegExp(r'\s*\(.*?\)'), '').trim();
 
       return menuName;
     } catch (e) {
@@ -463,7 +461,8 @@ Future<void> pickImage() async {
           .snapshots()
           .listen((companySnapshot) {
         // Update allCompanies with the latest data
-        allCompanies.assignAll(List<DocumentSnapshot>.from(companySnapshot.docs));
+        allCompanies
+            .assignAll(List<DocumentSnapshot>.from(companySnapshot.docs));
 
         // Fetch user details for each company contact
         for (var com in companySnapshot.docs) {
