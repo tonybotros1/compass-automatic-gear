@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'main_screen_contro.dart';
+
 class ListOfValuesController extends GetxController {
   late TextEditingController listName = TextEditingController();
   late TextEditingController code = TextEditingController();
@@ -45,6 +47,12 @@ class ListOfValuesController extends GetxController {
       filterValues();
     });
     super.onInit();
+  }
+
+   getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   getUserEmail() async {

@@ -4,56 +4,46 @@ import '../../my_text_field.dart';
 import '../drop_down_menu.dart';
 
 Widget addNewValueOrEdit({
-  required BoxConstraints constraints,
-  required BuildContext context,
   required ListOfValuesController controller,
-  TextEditingController? valueName,
-  TextEditingController? valueCode,
-  TextEditingController? restrictedBy,
-  bool? isEnabled,
 }) {
-  return SizedBox(
-    width: constraints.maxWidth / 2.5,
-    height: 200,
-    child: Form(
-      key: controller.formKeyForAddingNewList,
-      child: ListView(
-        children: [
-          myTextFormFieldWithBorder(
-            obscureText: false,
-            controller: valueName ?? controller.valueName,
-            labelText: 'Value Name',
-            hintText: 'Enter Value name',
-            validate: true,
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          dropDownValues(
-             listValues: controller.valueMap.values
-                    .map((value) => value
-                        .toString()) 
-                    .toList(),
-              onSelected: (suggestion) {
-                controller.restrictedBy.text = suggestion.toString();
-                controller.valueMap.entries.where((entry) {
-                  return entry.value == suggestion.toString();
-                }).forEach((entry) {
-                  controller.masteredByIdForValues.value = entry.key;
-                });
-              },
-              itemBuilder: (context, suggestion) {
-                return ListTile(
-                  title: Text(suggestion.toString()),
-                );
-              },
-              labelText: 'Masterd By',
-              hintText: 'Select the parent Value for this Value (Optional)',
-              menus: controller.valueMap,
-              validate: false,
-              textController: restrictedBy ?? controller.restrictedBy)
-        ],
-      ),
+  return Form(
+    key: controller.formKeyForAddingNewList,
+    child: ListView(
+      children: [
+        myTextFormFieldWithBorder(
+          obscureText: false,
+          controller:  controller.valueName,
+          labelText: 'Value Name',
+          hintText: 'Enter Value name',
+          validate: true,
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        dropDownValues(
+           listValues: controller.valueMap.values
+                  .map((value) => value
+                      .toString()) 
+                  .toList(),
+            onSelected: (suggestion) {
+              controller.restrictedBy.text = suggestion.toString();
+              controller.valueMap.entries.where((entry) {
+                return entry.value == suggestion.toString();
+              }).forEach((entry) {
+                controller.masteredByIdForValues.value = entry.key;
+              });
+            },
+            itemBuilder: (context, suggestion) {
+              return ListTile(
+                title: Text(suggestion.toString()),
+              );
+            },
+            labelText: 'Masterd By',
+            hintText: 'Select the parent Value for this Value (Optional)',
+            menus: controller.valueMap,
+            validate: false,
+            textController: controller.restrictedBy)
+      ],
     ),
   );
 }

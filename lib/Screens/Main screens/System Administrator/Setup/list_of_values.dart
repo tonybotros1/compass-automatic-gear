@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/list_of_values_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/main screen widgets/lists_widgets/add_or_edit_new_list.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/lists_widgets/list_dialog.dart';
 import '../../../../Widgets/main screen widgets/lists_widgets/values_section_in_list_of_values.dart';
 import '../../../../consts.dart';
 
@@ -125,9 +125,7 @@ Widget tableOfScreens(
         onSort: controller.onSortForLists,
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: Text('')
-      ),
+          headingRowAlignment: MainAxisAlignment.center, label: Text('')),
     ],
     rows: controller.filteredLists.isEmpty &&
             controller.searchForLists.value.text.isEmpty
@@ -168,22 +166,16 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
       ),
     ),
     DataCell(Row(
+      spacing: 10,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         valSectionInTheTable(
             controller, listId, context, constraints, listData),
         controller.userEmail.value == 'datahubai@gmail.com'
-            ? Padding(
-                padding: const EdgeInsets.only(left: 5),
-                child: publicPrivateSection(listData, controller, listId),
-              )
+            ? publicPrivateSection(listData, controller, listId)
             : const SizedBox(),
         controller.userEmail.value == 'datahubai@gmail.com'
-            ? Padding(
-                padding: const EdgeInsets.only(left: 5, right: 5),
-                child: editButton(
-                    controller, listData, listId, context, constraints),
-              )
+            ? editButton(controller, listData, listId, context, constraints)
             : const SizedBox(),
         controller.userEmail.value == 'datahubai@gmail.com'
             ? deleteSection(controller, listId, context)
@@ -213,48 +205,55 @@ ElevatedButton publicPrivateSection(
           : const Text('Private'));
 }
 
-ElevatedButton valSectionInTheTable(
-    ListOfValuesController controller, listId, context, constraints, listData) {
+ElevatedButton valSectionInTheTable(ListOfValuesController controller, listId,
+    context, BoxConstraints constraints, listData) {
   return ElevatedButton(
       style: viewButtonStyle,
       onPressed: () {
         controller.valueMap.clear();
         controller.listIDToWorkWithNewValue.value = listId;
         controller.getListValues(listId, listData['mastered_by']);
-        showDialog(
-           barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: valuesSection(
-                  constraints: constraints,
-                  context: context,
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: controller.addingNewListValue.value == false
-                          ? const Text(
-                              'Cancel',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
+        Get.dialog(
+            barrierDismissible: false,
+            Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              child: SizedBox(
+                height: constraints.maxHeight,
+                width: constraints.maxWidth,
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(15),
+                            topRight: Radius.circular(15)),
+                        color: mainColor,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            controller.getScreenName(),
+                            style: fontStyleForScreenNameUsedInButtons,
+                          ),
+                          Spacer(),
+                          closeButton
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              );
-            });
+                    Expanded(
+                        child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: valuesSection(
+                        constraints: constraints,
+                        context: context,
+                      ),
+                    ))
+                  ],
+                ),
+              ),
+            ));
       },
       child: const Text('Values'));
 }
@@ -283,66 +282,18 @@ ElevatedButton editButton(
       controller.masteredByIdForList.value = '';
       controller.masteredByForList.text =
           controller.getListNameById(listData['mastered_by'])!;
-      showDialog(
-         barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewListOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<ListOfValuesController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewListProcess.value
-                                ? null
-                                : () async {
-                                    if (!controller
-                                        .formKeyForAddingNewList.currentState!
-                                        .validate()) {
-                                    } else {
-                                      await controller.editList(listId);
-                                    }
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
-                            child:
-                                controller.addingNewListProcess.value == false
-                                    ? const Text(
-                                        'Save',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      listOfValuesDialog(
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewListProcess.value
+              ? null
+              : () async {
+                  if (!controller.formKeyForAddingNewList.currentState!
+                      .validate()) {
+                  } else {
+                    await controller.editList(listId);
+                  }
+                });
     },
     style: editButtonStyle,
     child: const Text('Edit'),
@@ -357,68 +308,18 @@ ElevatedButton newListButton(BuildContext context, BoxConstraints constraints,
       controller.code.clear();
       controller.masteredByForList.clear();
       controller.masteredByIdForList.value = '';
-
-      showDialog(
-         barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewListOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<ListOfValuesController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewListProcess.value
-                                ? null
-                                : () async {
-                                    if (!controller
-                                        .formKeyForAddingNewList.currentState!
-                                        .validate()) {
-                                    } else {
-                                      await controller.addNewList();
-                                    }
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
-                            child:
-                                controller.addingNewListProcess.value == false
-                                    ? const Text(
-                                        'Save',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                          ),
-                        )),
-                ElevatedButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  style: cancelButtonStyle,
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            );
-          });
+      listOfValuesDialog(
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewListProcess.value
+              ? null
+              : () async {
+                  if (!controller.formKeyForAddingNewList.currentState!
+                      .validate()) {
+                  } else {
+                    await controller.addNewList();
+                  }
+                });
     },
     style: newButtonStyle,
     child: const Text('New List'),

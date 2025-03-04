@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 
 import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
-import 'add_or_edit_new_value_for_lists.dart';
 import '../auto_size_box.dart';
+import 'values_dialog.dart';
 
 Widget valuesSection({
   required BoxConstraints constraints,
@@ -183,65 +183,19 @@ ElevatedButton editSection(ListOfValuesController controller,
         controller.restrictedBy.text =
             controller.getValueNameById(valueData['restricted_by'])!;
         controller.masteredByIdForValues.value = '';
-        showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewValueOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                  isEnabled: false,
-                ),
-                actions: [
-                  GetX<ListOfValuesController>(
-                      builder: (controller) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ElevatedButton(
-                              onPressed: controller.addingNewListValue.value
-                                  ? null
-                                  : () async {
-                                      if (!controller
-                                          .formKeyForAddingNewList.currentState!
-                                          .validate()) {
-                                      } else {
-                                        controller.editValue(
-                                            controller
-                                                .listIDToWorkWithNewValue.value,
-                                            valueId);
-                                      }
-                                    },
-                              style: saveButtonStyle,
-                              child:
-                                  controller.addingNewListValue.value == false
-                                      ? const Text(
-                                          'Save',
-                                          style: TextStyle(color: Colors.white),
-                                        )
-                                      : const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2,
-                                          ),
-                                        ),
-                            ),
-                          )),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        valuesDialog(
+            constraints: constraints,
+            controller: controller,
+            onPressed: controller.addingNewListValue.value
+                ? null
+                : () async {
+                    if (!controller.formKeyForAddingNewList.currentState!
+                        .validate()) {
+                    } else {
+                      controller.editValue(
+                          controller.listIDToWorkWithNewValue.value, valueId);
+                    }
+                  });
       },
       child: Text('Edit'));
 }
@@ -273,62 +227,19 @@ ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
     onPressed: () {
       controller.valueName.clear();
       controller.restrictedBy.clear();
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewValueOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-                isEnabled: true,
-              ),
-              actions: [
-                GetX<ListOfValuesController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewListValue.value
-                                ? null
-                                : () async {
-                                    if (!controller
-                                        .formKeyForAddingNewList.currentState!
-                                        .validate()) {
-                                    } else {
-                                      await controller.addNewValue(controller
-                                          .listIDToWorkWithNewValue.value);
-                                    }
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewListValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      valuesDialog(
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewListValue.value
+              ? null
+              : () async {
+                  if (!controller.formKeyForAddingNewList.currentState!
+                      .validate()) {
+                  } else {
+                    await controller
+                        .addNewValue(controller.listIDToWorkWithNewValue.value);
+                  }
+                });
     },
     style: newButtonStyle,
     child: const Text('New Value'),
