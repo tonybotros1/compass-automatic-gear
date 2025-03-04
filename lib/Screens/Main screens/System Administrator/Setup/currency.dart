@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/currency_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/currencies_widgets/add_new_currency_or_edit.dart';
+import '../../../../Widgets/main screen widgets/currencies_widgets/currency_dialog.dart';
 import '../../../../consts.dart';
 
 class Currency extends StatelessWidget {
@@ -231,57 +231,15 @@ ElevatedButton editSection(context, CurrencyController controller,
         controller.code.text = data[0];
         controller.name.text = data[1];
         controller.rate.text = (currencyData['rate'] ?? '').toString();
-        showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewCurrencyOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: ElevatedButton(
-                      onPressed: controller.addingNewValue.value
-                          ? null
-                          : () {
-                              controller.editCurrency(currencyId);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: controller.addingNewValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        currencyDialog(
+            constraints: constraints,
+            controller: controller,
+            canEdit: true,
+            onPressed: controller.addingNewValue.value
+                ? null
+                : () {
+                    controller.editCurrency(currencyId);
+                  });
       },
       child: const Text('Edit'));
 }
@@ -293,60 +251,19 @@ ElevatedButton newCurrencyButton(BuildContext context,
       controller.code.clear();
       controller.name.clear();
       controller.rate.clear();
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewCurrencyOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<CurrencyController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewValue.value
-                                ? null
-                                : () async {
-                                    if (!controller
-                                        .formKeyForAddingNewvalue.currentState!
-                                        .validate()) {
-                                    } else {
-                                      await controller.addNewCurrency();
-                                    }
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      currencyDialog(
+          constraints: constraints,
+          controller: controller,
+          canEdit: true,
+          onPressed: controller.addingNewValue.value
+              ? null
+              : () async {
+                  if (!controller.formKeyForAddingNewvalue.currentState!
+                      .validate()) {
+                  } else {
+                    await controller.addNewCurrency();
+                  }
+                });
     },
     style: newButtonStyle,
     child: const Text('New Currency'),

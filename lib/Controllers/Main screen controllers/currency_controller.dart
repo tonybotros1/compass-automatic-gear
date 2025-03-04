@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'main_screen_contro.dart';
+
 class CurrencyController extends GetxController {
   TextEditingController code = TextEditingController();
   TextEditingController name = TextEditingController();
@@ -32,6 +34,12 @@ class CurrencyController extends GetxController {
       filterCurrencies();
     });
     super.onInit();
+  }
+
+   getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // this function is to sort data in table
