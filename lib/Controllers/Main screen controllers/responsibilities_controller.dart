@@ -19,7 +19,6 @@ class ResponsibilitiesController extends GetxController {
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxMap menuMap = RxMap({});
-
   RxList selectedRow = RxList([]);
 
   @override
@@ -32,36 +31,11 @@ class ResponsibilitiesController extends GetxController {
     super.onInit();
   }
 
-   getScreenName() {
+  getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
-
-  // Future<void> updateDescriptions() async {
-  //   try {
-  //     // Reference to the 'menus' collection
-  //     CollectionReference menus =
-  //         FirebaseFirestore.instance.collection('sys-roles');
-
-  //     // Fetch all documents in the collection
-  //     QuerySnapshot snapshot = await menus.get();
-
-  //     // Batch write to avoid multiple writes
-  //     WriteBatch batch = FirebaseFirestore.instance.batch();
-
-  //     // Iterate through documents and update the 'description' field
-  //     for (var doc in snapshot.docs) {
-  //       batch.update(doc.reference, {'is_shown_for_users': false});
-  //     }
-
-  //     // Commit the batch
-  //     await batch.commit();
-  //     print("All documents updated with the 'description' field.");
-  //   } catch (e) {
-  //     print("Error updating descriptions: $e");
-  //   }
-  // }
 
 // this function is to choose the roles to be shown for the other users or not
   updateRoleStatus(roleID, status) async {
@@ -185,7 +159,7 @@ class ResponsibilitiesController extends GetxController {
 // this functions is to get the Responsibilities in system and its details
   Future<void> getResponsibilities() async {
     try {
-      // Fetch menus once to avoid redundant calls
+      // // Fetch menus once to avoid redundant calls
       final menuSnapshot =
           await FirebaseFirestore.instance.collection('menus ').get();
 
@@ -198,6 +172,9 @@ class ResponsibilitiesController extends GetxController {
           .snapshots()
           .listen((roles) {
         allResponsibilities.clear();
+        // allResponsibilities.value = {
+        //   for (var doc in roles.docs) doc.id: doc.data()
+        // };
 
         for (var role in roles.docs) {
           allResponsibilities[role.id] = {
@@ -241,22 +218,4 @@ class ResponsibilitiesController extends GetxController {
       );
     }
   }
-
-  // // function to convert text to date and make the format dd-mm-yyyy
-  // String textToDate(dynamic inputDate) {
-  //   try {
-  //     if (inputDate is String) {
-  //       // Match the actual date format of the input
-  //       DateTime parsedDate =
-  //           DateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(inputDate);
-  //       return DateFormat("dd-MM-yyyy").format(parsedDate);
-  //     } else if (inputDate is DateTime) {
-  //       return DateFormat("dd-MM-yyyy").format(inputDate);
-  //     } else {
-  //       throw FormatException("Invalid input type for textToDate: $inputDate");
-  //     }
-  //   } catch (e) {
-  //     return "Invalid Date"; // Return a default or placeholder string
-  //   }
-  // }
 }

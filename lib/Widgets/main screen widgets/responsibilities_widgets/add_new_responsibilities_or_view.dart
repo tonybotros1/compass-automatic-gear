@@ -1,7 +1,7 @@
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import '../../../Controllers/Main screen controllers/responsibilities_controller.dart';
 import '../../my_text_field.dart';
-import '../drop_down_menu.dart';
 
 Widget addNewResponsibilityOrView({
   required ResponsibilitiesController controller,
@@ -19,32 +19,22 @@ Widget addNewResponsibilityOrView({
       SizedBox(
         height: 15,
       ),
-      dropDownValues(
-        listValues: controller.menuMap.values
-            .map((value) =>
-                '${value['name']} (${value['description']})'.toString())
-            .toList(),
-        textController: controller.menuName,
-        onSelected: (suggestion) {
-          controller.menuName.text =
-              '${suggestion['name']} (${suggestion['description']})';
-          controller.menuMap.entries.where((entry) {
-            return entry.value['name'] == suggestion['name'].toString() &&
-                entry.value['description'] == suggestion['description'];
-          }).forEach((entry) {
-            controller.menuIDFromList.value = entry.key;
-          });
-        },
-        itemBuilder: (context, suggestion) {
+      CustomDropdown(
+        textcontroller: controller.menuName.text,
+        hintText: 'Menus',
+        showedSelectedName: 'name',
+        items: controller.menuMap,
+        itemBuilder: (context, key, value) {
           return ListTile(
-            title: Text('${suggestion['name']} (${suggestion['description']})'),
+            title: Text('${value['name']} (${value['description']})'),
           );
         },
-        labelText: 'Menus',
-        hintText: 'Select Menu',
-        menus: controller.menuMap,
-        validate: true,
-      ),
+        onChanged: (key, value) {
+          
+          controller.menuIDFromList.value = key;
+        },
+      )
+      
     ],
   );
 }

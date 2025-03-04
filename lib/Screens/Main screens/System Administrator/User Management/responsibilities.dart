@@ -162,10 +162,6 @@ Widget tableOfScreens(
 DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
     roleId, ResponsibilitiesController controller, role) {
   return DataRow(
-      // selected: roleData['is_shown_for_users'] ?? false,
-      // onSelectChanged: (isSelected) {
-      //   controller.updateRoleStatus(roleId, isSelected);
-      // },
       cells: [
         DataCell(Text(
           roleData['role_name'] ?? 'no name',
