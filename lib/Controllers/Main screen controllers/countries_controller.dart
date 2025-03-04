@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../consts.dart';
+import 'main_screen_contro.dart';
 
 class CountriesController extends GetxController {
   RxString query = RxString('');
@@ -49,6 +50,12 @@ class CountriesController extends GetxController {
       filterCities();
     });
     super.onInit();
+  }
+
+   getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
   }
 
   // this function is to sort data in table

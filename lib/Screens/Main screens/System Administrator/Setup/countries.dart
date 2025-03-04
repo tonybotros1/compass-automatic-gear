@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/countries_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/countries_widgets/add_new_country_or_edit.dart';
+import '../../../../Widgets/main screen widgets/countries_widgets/countries_dialog.dart';
 import '../../../../Widgets/main screen widgets/countries_widgets/values_section_cities.dart';
 import '../../../../consts.dart';
 
@@ -270,72 +270,25 @@ ElevatedButton editSection(context, CountriesController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              controller.countryName.text = countryData['name'];
-              controller.countryCallingCode.text = countryData['calling_code'];
-              controller.countryCode.text = countryData['code'];
-              controller.currencyName.text = countryData['currency_name'];
-              controller.currencyCode.text = countryData['currency_code'];
-              controller.vat.text = countryData['vat'];
+        controller.countryName.text = countryData['name'];
+        controller.countryCallingCode.text = countryData['calling_code'];
+        controller.countryCode.text = countryData['code'];
+        controller.currencyName.text = countryData['currency_name'];
+        controller.currencyCode.text = countryData['currency_code'];
+        controller.vat.text = countryData['vat'];
 
-              controller.flagUrl.value = countryData['flag'] ?? '';
-              controller.imageBytes.value = Uint8List(0);
-              controller.flagSelectedError.value = false;
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewCountryOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                  canEdit: false,
-                ),
-                actions: [
-                  GetX<CountriesController>(builder: (controller) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: ElevatedButton(
-                        onPressed: controller.addingNewValue.value
-                            ? null
-                            : () {
-                                controller.editCountries(countryId);
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        child: controller.addingNewValue.value == false
-                            ? const Text(
-                                'Save',
-                                style: TextStyle(color: Colors.white),
-                              )
-                            : const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                      ),
-                    );
-                  }),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        controller.flagUrl.value = countryData['flag'] ?? '';
+        controller.imageBytes.value = Uint8List(0);
+        controller.flagSelectedError.value = false;
+        countriesDialog(
+            canEdit: false,
+            constraints: constraints,
+            controller: controller,
+            onPressed: controller.addingNewValue.value
+                ? null
+                : () {
+                    controller.editCountries(countryId);
+                  });
       },
       child: const Text('Edit'));
 }
@@ -353,62 +306,21 @@ ElevatedButton newcountryButton(BuildContext context,
       controller.imageBytes.value = Uint8List(0);
       controller.flagUrl.value = '';
       controller.flagSelectedError.value = false;
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewCountryOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                GetX<CountriesController>(
-                    builder: (controller) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: ElevatedButton(
-                            onPressed: controller.addingNewValue.value
-                                ? null
-                                : () async {
-                                    if (!controller
-                                        .formKeyForAddingNewvalue.currentState!
-                                        .validate()) {}
-                                    if (controller.imageBytes.value.isEmpty) {
-                                      controller.flagSelectedError.value = true;
-                                    } else {
-                                      await controller.addNewCountry();
-                                    }
-                                  },
-                            style: saveButtonStyle,
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                : SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        )),
-                ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    style: cancelButtonStyle,
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            );
-          });
+      countriesDialog(
+          canEdit: true,
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewValue.value
+              ? null
+              : () async {
+                  if (!controller.formKeyForAddingNewvalue.currentState!
+                      .validate()) {}
+                  if (controller.imageBytes.value.isEmpty) {
+                    controller.flagSelectedError.value = true;
+                  } else {
+                    await controller.addNewCountry();
+                  }
+                });
     },
     style: newButtonStyle,
     child: const Text('New Country'),
