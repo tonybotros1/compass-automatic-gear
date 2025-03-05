@@ -20,30 +20,20 @@ Container customerDetailsSection() {
               isDropdown: true,
               flex: 3,
               dropdownConfig: DropdownConfig(
-                listValues: controller.allCustomers.values
-                    .map((value) => value['entity_name'].toString())
-                    .toList(),
-                textController: controller.customerName,
-                labelText: isCustomersLoading ? 'Loading...' : 'Customer',
-                hintText: 'Select Customer',
+                showedSelectedName: 'entity_name',
+                textController: controller.customerName.text,
+                hintText: isCustomersLoading ? 'Loading...' : 'Customer',
                 menuValues: isCustomersLoading ? {} : controller.allCustomers,
-                itemBuilder: (context, suggestion) {
+                itemBuilder: (context, key, value) {
                   return ListTile(
-                    title: Text('${suggestion['entity_name']}'),
+                    title: Text('${value['entity_name']}'),
                   );
                 },
-                onSelected: (suggestion) {
-                  controller.customerName.text = suggestion['entity_name'];
-                  controller.allCustomers.entries.where((entry) {
-                    return entry.value['entity_name'] ==
-                        suggestion['entity_name'].toString();
-                  }).forEach(
-                    (entry) {
-                      controller.onSelectForCustomers(entry.key);
+                onSelected: (key, value) {
+                  controller.customerName.text = value['entity_name'];
+                  controller.onSelectForCustomers(key);
 
-                      controller.customerId.value = entry.key;
-                    },
-                  );
+                  controller.customerId.value = key;
                 },
               ),
             ),
@@ -118,29 +108,19 @@ Container customerDetailsSection() {
                     isDropdown: true,
                     flex: 2,
                     dropdownConfig: DropdownConfig(
-                      listValues: controller.salesManMap.values
-                          .map((value) => value['name'].toString())
-                          .toList(),
-                      textController: controller.customerSaleMan,
-                      labelText: isSalesManLoading ? 'Loading...' : 'Sales Man',
-                      hintText: 'Select Sales Man',
+                      showedSelectedName: 'name',
+                      textController: controller.customerSaleMan.text,
+                      hintText: isSalesManLoading ? 'Loading...' : 'Sales Man',
                       menuValues:
                           isSalesManLoading ? {} : controller.salesManMap,
-                      itemBuilder: (context, suggestion) {
+                      itemBuilder: (context, key, value) {
                         return ListTile(
-                          title: Text('${suggestion['name']}'),
+                          title: Text('${value['name']}'),
                         );
                       },
-                      onSelected: (suggestion) {
-                        controller.customerSaleMan.text = suggestion['name'];
-                        controller.salesManMap.entries.where((entry) {
-                          return entry.value['name'] ==
-                              suggestion['name'].toString();
-                        }).forEach(
-                          (entry) {
-                            controller.customerSaleManId.value = entry.key;
-                          },
-                        );
+                      onSelected: (key, value) {
+                        controller.customerSaleMan.text = value['name'];
+                        controller.customerSaleManId.value = key;
                       },
                     ),
                   ),
@@ -148,29 +128,19 @@ Container customerDetailsSection() {
                     isDropdown: true,
                     flex: 1,
                     dropdownConfig: DropdownConfig(
-                      listValues: controller.allBranches.values
-                          .map((value) => value['name'].toString())
-                          .toList(),
-                      textController: controller.customerBranch,
-                      labelText: isBranchesLoading ? 'Loading...' : 'Branch',
-                      hintText: 'Select Branch',
+                      showedSelectedName: 'name',
+                      textController: controller.customerBranch.text,
+                      hintText: isBranchesLoading ? 'Loading...' : 'Branch',
                       menuValues:
                           isBranchesLoading ? {} : controller.allBranches,
-                      itemBuilder: (context, suggestion) {
+                      itemBuilder: (context, key, value) {
                         return ListTile(
-                          title: Text('${suggestion['name']}'),
+                          title: Text('${value['name']}'),
                         );
                       },
-                      onSelected: (suggestion) {
-                        controller.customerBranch.text = suggestion['name'];
-                        controller.allBranches.entries.where((entry) {
-                          return entry.value['name'] ==
-                              suggestion['name'].toString();
-                        }).forEach(
-                          (entry) {
-                            controller.customerBranchId.value = entry.key;
-                          },
-                        );
+                      onSelected: (key, value) {
+                        controller.customerBranch.text = value['name'];
+                        controller.customerBranchId.value = key;
                       },
                     ),
                   ),
@@ -178,41 +148,32 @@ Container customerDetailsSection() {
                     isDropdown: true,
                     flex: 1,
                     dropdownConfig: DropdownConfig(
-                      listValues: controller.allCurrencies.values
-                          .map((value) => controller.getdataName(
-                              value['country_id'], controller.allCountries,
-                              title: 'currency_code'))
-                          .toList(),
-                      textController: controller.customerCurrency,
-                      labelText:
-                          isCurrenciesLoading ? 'Loading...' : 'Currency',
-                      hintText: 'Select Currency',
+                      showedResult: (key, value) {
+                        return Text(controller.getdataName(
+                            value['country_id'], controller.allCountries,
+                            title: 'currency_code'));
+                      },
+                      textController: controller.customerCurrency.value.text,
+                      hintText: isCurrenciesLoading ? 'Loading...' : 'Currency',
                       menuValues:
                           isCurrenciesLoading ? {} : controller.allCurrencies,
-                      itemBuilder: (context, suggestion) {
+                      itemBuilder: (context, key, value) {
                         return ListTile(
                           title: Text(controller.getdataName(
-                              suggestion['country_id'], controller.allCountries,
+                              value['country_id'], controller.allCountries,
                               title: 'currency_code')),
                         );
                       },
-                      onSelected: (suggestion) {
+                      onSelected: (key, value) {
                         controller.customerCurrency.text =
                             controller.getdataName(
-                          suggestion['country_id'],
+                          value['country_id'],
                           controller.allCountries,
                           title: 'currency_code',
                         );
-                        final entry =
-                            controller.allCurrencies.entries.firstWhere(
-                          (entry) =>
-                              entry.value['country_id'] ==
-                              suggestion['country_id'].toString(),
-                        );
-
-                        controller.customerCurrencyId.value = entry.key;
+                        controller.customerCurrencyId.value = key;
                         controller.customerCurrencyRate.text =
-                            (entry.value['rate'] ?? '1').toString();
+                            (value['rate'] ?? '1').toString();
                       },
                     ),
                   ),

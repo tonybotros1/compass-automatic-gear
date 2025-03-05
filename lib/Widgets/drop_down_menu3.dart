@@ -357,6 +357,8 @@ class CustomDropdown extends StatelessWidget {
   final TextStyle? disabledTextStyle;
   final String showedSelectedName;
   final bool? validator;
+    final Widget Function(String, dynamic)? showedResult;
+
 
   CustomDropdown({
     super.key,
@@ -371,7 +373,8 @@ class CustomDropdown extends StatelessWidget {
     this.enabledTextStyle,
     this.disabledTextStyle,
     this.showedSelectedName = '',
-    this.validator,
+    this.validator, this.showedResult,
+    
   });
 
   final GlobalKey buttonKey = GlobalKey();
@@ -459,28 +462,26 @@ class CustomDropdown extends StatelessWidget {
                             : (disabledDecoration ?? defaultDisabledDecoration),
                     child: Row(
                       children: [
-                        Text(
-                          textControllerValue.isEmpty
-                              ? controller.selectedKey.isEmpty
-                                  ? hintText
-                                  : showedSelectedName.isNotEmpty
-                                      ? controller
-                                          .selectedValue[showedSelectedName]
-                                          .toString()
-                                      : hintText
-                              : textControllerValue.value,
-                          style: isEnabled
-                              ? (enabledTextStyle ??
-                                  (textControllerValue.value.isEmpty &&
-                                          controller.selectedKey.isEmpty
-                                      ? TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey.shade700)
-                                      : TextStyle(
-                                          fontSize: 16, color: Colors.black)))
-                              : (disabledTextStyle ?? defaultDisabledTextStyle),
+                          Expanded(
+                          child: showedResult != null && controller.selectedKey.isNotEmpty
+                              ? showedResult!(controller.selectedKey.value, controller.selectedValue)
+                              : Text(
+                                  textControllerValue.isEmpty
+                                      ? controller.selectedKey.isEmpty
+                                          ? hintText
+                                          : showedSelectedName.isNotEmpty
+                                              ? controller.selectedValue[showedSelectedName].toString()
+                                              : hintText
+                                      : textControllerValue.value,
+                                  style: isEnabled
+                                      ? (enabledTextStyle ??
+                                          (textControllerValue.value.isEmpty && controller.selectedKey.isEmpty
+                                              ? TextStyle(fontSize: 16, color: Colors.grey.shade700)
+                                              : TextStyle(fontSize: 16, color: Colors.black)))
+                                      : (disabledTextStyle ?? defaultDisabledTextStyle),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                         ),
-                        const Spacer(),
                         Icon(Icons.arrow_drop_down,
                             color: isEnabled ? Colors.black : Colors.grey),
                       ],

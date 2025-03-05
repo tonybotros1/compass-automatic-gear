@@ -1,10 +1,9 @@
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../consts.dart';
 import '../../my_text_field.dart';
-import '../drop_down_menu.dart';
 import 'image_section.dart';
 
 Container customerSection() {
@@ -52,33 +51,22 @@ Container customerSection() {
                 height: 15,
               ),
               GetX<EntityInformationsController>(builder: (controller) {
-                return dropDownValues(
-                  listValues: controller.salesManMap.values
-                      .map((value) => value['name'].toString())
-                      .toList(),
-                  textController: controller.salesMAn.value,
-                  onSelected: (suggestion) {
-                    controller.salesMAn.value.text = '${suggestion['name']}';
-                    controller.salesManMap.entries.where((entry) {
-                      return entry.value['name'] ==
-                          suggestion['name'].toString();
-                    }).forEach((entry) {
-                      controller.salesManId.value = entry.key;
-                    });
-                  },
-                  itemBuilder: (context, suggestion) {
-                    return ListTile(
-                      title: Text('${suggestion['name']}'),
-                    );
-                  },
-                  labelText: 'Sales Man',
-                  hintText: 'Select Sale Man',
-                  menus: controller.isCustomerSelected.isTrue
+                return CustomDropdown(
+                  hintText: 'Sales Man',
+                  textcontroller: controller.salesMAn.value.text,
+                  showedSelectedName: 'name',
+                  items: controller.isCustomerSelected.isTrue
                       ? controller.salesManMap.isNotEmpty
                           ? controller.salesManMap
                           : {}
                       : {},
-                  validate: false,
+                  itemBuilder: (context, key, value) {
+                    return ListTile(title: Text(value['name']));
+                  },
+                  onChanged: (key, value) {
+                    controller.salesMAn.value.text = '${value['name']}';
+                    controller.salesManId.value = key;
+                  },
                 );
               }),
             ],

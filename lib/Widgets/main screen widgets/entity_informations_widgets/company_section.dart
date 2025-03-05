@@ -8,7 +8,7 @@ import '../dynamic_field.dart';
 Container companySection() {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-    decoration:containerDecor,
+    decoration: containerDecor,
     child: Column(
       children: [
         GetX<EntityInformationsController>(builder: (controller) {
@@ -35,29 +35,22 @@ Container companySection() {
               isDropdown: true,
               flex: 1,
               dropdownConfig: DropdownConfig(
-                listValues: controller.industryMap.values
-                    .map((value) => value['name'].toString())
-                    .toList(),
-                textController: controller.industry.value,
-                labelText: 'Industries',
-                hintText: 'Select Industries',
+                showedSelectedName: 'name',
+                textController: controller.industry.value.text,
+                hintText: 'Industries',
                 menuValues: controller.isCompanySelected.isTrue
                     ? controller.industryMap.isNotEmpty
                         ? controller.industryMap
                         : {}
                     : {},
-                itemBuilder: (context, suggestion) {
+                itemBuilder: (context, key, value) {
                   return ListTile(
-                    title: Text('${suggestion['name']}'),
+                    title: Text('${value['name']}'),
                   );
                 },
-                onSelected: (suggestion) {
-                  controller.industry.value.text = '${suggestion['name']}';
-                  controller.industryMap.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach((entry) {
-                    controller.industryId.value = entry.key;
-                  });
+                onSelected: (key, value) {
+                  controller.industry.value.text = '${value['name']}';
+                  controller.industryId.value = key;
                 },
               ),
             ),
@@ -76,29 +69,22 @@ Container companySection() {
               isDropdown: true,
               flex: 1,
               dropdownConfig: DropdownConfig(
-                listValues: controller.entityTypeMap.values
-                    .map((value) => value['name'].toString())
-                    .toList(),
-                textController: controller.entityType.value,
-                labelText: 'Entity Type',
-                hintText: 'Select Entity Type',
+                showedSelectedName: 'name',
+                textController: controller.entityType.value.text,
+                hintText: 'Entity Type',
                 menuValues: controller.isCompanySelected.isTrue
                     ? controller.entityTypeMap.isNotEmpty
                         ? controller.entityTypeMap
                         : {}
                     : {},
-                itemBuilder: (context, suggestion) {
+                itemBuilder: (context, key, value) {
                   return ListTile(
-                    title: Text('${suggestion['name']}'),
+                    title: Text('${value['name']}'),
                   );
                 },
-                onSelected: (suggestion) {
-                  controller.entityType.value.text = '${suggestion['name']}';
-                  controller.entityTypeMap.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach((entry) {
-                    controller.entityTypeId.value = entry.key;
-                  });
+                onSelected: (key, value) {
+                  controller.entityType.value.text = '${value['name']}';
+                  controller.entityTypeId.value = key;
                 },
               ),
             ),

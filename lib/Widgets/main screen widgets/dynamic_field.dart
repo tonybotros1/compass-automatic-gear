@@ -1,7 +1,7 @@
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import '../../Models/dynamic_field_models.dart';
 import '../my_text_field.dart';
-import 'drop_down_menu.dart';
 
 Widget dynamicFields({
   required List<DynamicConfig> dynamicConfigs,
@@ -15,19 +15,30 @@ Widget dynamicFields({
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: config.isDropdown
-                ? dropDownValues(
-                    listValues: config.dropdownConfig?.listValues ?? [],
-                    suggestionsController:
-                        config.dropdownConfig?.suggestionsController,
-                    textController: config.dropdownConfig?.textController,
-                    labelText: config.dropdownConfig?.labelText ?? '',
-                    hintText: config.dropdownConfig?.hintText ?? '',
-                    menus: config.dropdownConfig?.menuValues ?? {},
-                    validate: config.dropdownConfig?.validate ?? false,
+                ? CustomDropdown(
+                  showedResult: config.dropdownConfig?.showedResult ,
+                  showedSelectedName: config.dropdownConfig!.showedSelectedName,
+                  onChanged: config.dropdownConfig?.onSelected,
+                  textcontroller: config.dropdownConfig!.textController,
+                  validator:config.dropdownConfig?.validate ?? false ,
+                  hintText: config.dropdownConfig?.hintText ?? '',
+                    items: config.dropdownConfig?.menuValues ?? {},
                     itemBuilder: config.dropdownConfig?.itemBuilder ??
-                        (_, __) => const SizedBox(),
-                    onSelected: config.dropdownConfig?.onSelected,
+                        (_,___, __) => const SizedBox(),
                   )
+                // dropDownValues(
+                //     listValues: config.dropdownConfig?.listValues ?? [],
+                //     suggestionsController:
+                //         config.dropdownConfig?.suggestionsController,
+                //     textController: config.dropdownConfig?.textController,
+                //     labelText: config.dropdownConfig?.labelText ?? '',
+                //     hintText: config.dropdownConfig?.hintText ?? '',
+                //     menus: config.dropdownConfig?.menuValues ?? {},
+                //     validate: config.dropdownConfig?.validate ?? false,
+                //     itemBuilder: config.dropdownConfig?.itemBuilder ??
+                //         (_, __) => const SizedBox(),
+                //     onSelected: config.dropdownConfig?.onSelected,
+                //   )
                 : myTextFormFieldWithBorder(
                     maxLines: config.fieldConfig?.maxLines,
                     minLines: config.fieldConfig?.minLines,

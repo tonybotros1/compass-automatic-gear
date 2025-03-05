@@ -99,32 +99,25 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: true,
                         flex: 1,
                         dropdownConfig: DropdownConfig(
-                            listValues: controller.phoneTypesMap.values
-                                .map((value) => value['name'].toString())
-                                .toList(),
+                           showedSelectedName: 'name',
                             textController: controller
-                                .phoneTypesControllers[index].controller,
-                            labelText:
-                                isphoneTypesLoading ? 'Loading...' : 'Type',
-                            hintText: 'Select Phone Type',
+                                .phoneTypesControllers[index].controller!.text,
+                           
+                            hintText: isphoneTypesLoading ? 'Loading...' : 'Type',
                             menuValues: isphoneTypesLoading
                                 ? {}
                                 : controller.phoneTypesMap,
-                            itemBuilder: (context, suggestion) {
+                            itemBuilder: (context,key, value) {
                               return ListTile(
-                                title: Text('${suggestion['name']}'),
+                                title: Text('${value['name']}'),
                               );
                             },
-                            onSelected: (suggestion) {
+                            onSelected: (key,value) {
                               controller.phoneTypesControllers[index]
-                                  .controller!.text = suggestion['name'];
-                              controller.phoneTypesMap.entries.where((entry) {
-                                return entry.value['name'] ==
-                                    suggestion['name'].toString();
-                              }).forEach((entry) {
-                                controller.contactPhone[index].type =
-                                    entry.key;
-                              });
+                                  .controller!.text = value['name'];
+                                   controller.contactPhone[index].type =
+                                    key;
+                            
                             })),
                     DynamicConfig(
                       isDropdown: false,

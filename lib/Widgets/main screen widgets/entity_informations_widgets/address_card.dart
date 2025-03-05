@@ -2,9 +2,7 @@ import 'package:datahubai/Models/entity_model.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/dynamic_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
-
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../Models/dynamic_field_models.dart';
 import '../../../consts.dart';
@@ -114,38 +112,29 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: true,
                         flex: 1,
                         dropdownConfig: DropdownConfig(
-                          listValues: controller.allCountries.values
-                              .map((value) => value['name'].toString())
-                              .toList(),
+                          showedSelectedName: 'name',
                           textController:
-                              controller.countriesControllers[index].controller,
-                          labelText:
-                              isCountriesLoading ? 'Loading...' : 'Country',
-                          hintText: 'Select Your Country',
+                              controller.countriesControllers[index].controller!.text,
+                    
+                             
+                          hintText:  isCountriesLoading ? 'Loading...' : 'Country',
                           menuValues:
                               isCountriesLoading ? {} : controller.allCountries,
-                          itemBuilder: (context, suggestion) {
+                          itemBuilder: (context,key, value) {
                             return ListTile(
-                              title: Text('${suggestion['name']}'),
+                              title: Text('${value['name']}'),
                             );
                           },
-                          onSelected: (suggestion) {
+                          onSelected: (key,value) {
                             controller.countriesControllers[index].controller!
-                                .text = suggestion['name'];
-                            controller.allCountries.entries.where((entry) {
-                              return entry.value['name'] ==
-                                  suggestion['name'].toString();
-                            }).forEach(
-                              (entry) {
+                                .text = value['name'];
                                 controller.citiesControllers[index].controller!
                                     .clear();
-                                // controller.onSelect(entry.key);
-                                controller.getCitiesByCountryID(entry.key,index);
+                                controller.getCitiesByCountryID(key,index);
 
                                 controller.contactAddress[index].country =
-                                    entry.key;
-                              },
-                            );
+                                    key;
+                           
                           },
                         ),
                       ),
@@ -153,33 +142,24 @@ Widget buildSmartField(EntityInformationsController controller,
                         isDropdown: true,
                         flex: 1,
                         dropdownConfig: DropdownConfig(
-                          listValues: controller.allCities[index].values
-                              .map((value) => value['name'].toString())
-                              .toList(),
-                          suggestionsController: SuggestionsController(),
-                          onTap: SuggestionsController().refresh,
+                       showedSelectedName: 'name',
                           textController:
-                              controller.citiesControllers[index].controller,
-                          labelText: 'City',
-                          hintText: 'Select Your City',
+                              controller.citiesControllers[index].controller!.text,
+                          hintText: 'City',
                           menuValues: controller.allCities[index].isEmpty
                               ? {}
                               : controller.allCities[index],
-                          itemBuilder: (context, suggestion) {
+                          itemBuilder: (context,key, value) {
                             return ListTile(
-                              title: Text('${suggestion['name']}'),
+                              title: Text('${value['name']}'),
                             );
                           },
-                          onSelected: (suggestion) {
+                          onSelected: (key,value) {
                             controller.citiesControllers[index].controller!
-                                .text = suggestion['name'];
-                            controller.allCities[index].entries.where((entry) {
-                              return entry.value['name'] ==
-                                  suggestion['name'].toString();
-                            }).forEach((entry) {
-                              controller.contactAddress[index].city =
-                                  entry.key;
-                            });
+                                .text = value['name'];
+                                controller.contactAddress[index].city =
+                                  key;
+                            
                           },
                         ),
                       ),

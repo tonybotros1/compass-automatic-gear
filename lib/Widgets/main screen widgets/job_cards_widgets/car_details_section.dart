@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
 
 import '../../../Controllers/Main screen controllers/job_card_controller.dart';
@@ -38,32 +37,21 @@ Widget carDetailsSection() {
                     isDropdown: true,
                     flex: 1,
                     dropdownConfig: DropdownConfig(
-                      listValues: controller.allBrands.values
-                          .map((value) => value['name'].toString())
-                          .toList(),
-                      textController: controller.carBrand,
-                      labelText: isBrandsLoading ? 'Loading...' : 'Brand',
-                      hintText: 'Select Brand',
+                      showedSelectedName: 'name',
+                      textController: controller.carBrand.text,
+                      hintText: isBrandsLoading ? 'Loading...' : 'Brand',
                       menuValues: isBrandsLoading ? {} : controller.allBrands,
-                      itemBuilder: (context, suggestion) {
+                      itemBuilder: (context, key, value) {
                         return ListTile(
-                          title: Text('${suggestion['name']}'),
+                          title: Text('${value['name']}'),
                         );
                       },
-                      onSelected: (suggestion) {
-                        controller.carBrandLogo.value = suggestion['logo'];
-                        controller.carBrand.text = suggestion['name'];
-                        controller.allBrands.entries.where((entry) {
-                          return entry.value['name'] ==
-                              suggestion['name'].toString();
-                        }).forEach(
-                          (entry) {
-                            controller.carModel.clear();
-                            // controller.onSelectForBrandsAndModels(entry.key);
-                            controller.getModelsByCarBrand(entry.key);
-                            controller.carBrandId.value = entry.key;
-                          },
-                        );
+                      onSelected: (key, value) {
+                        controller.carBrandLogo.value = value['logo'];
+                        controller.carBrand.text = value['name'];
+                        controller.carModel.clear();
+                        controller.getModelsByCarBrand(key);
+                        controller.carBrandId.value = key;
                       },
                     ),
                   ),
@@ -71,32 +59,20 @@ Widget carDetailsSection() {
                     isDropdown: true,
                     flex: 2,
                     dropdownConfig: DropdownConfig(
-                      listValues: controller.allModels.values
-                          .map((value) => value['name'].toString())
-                          .toList(),
-                      suggestionsController: SuggestionsController(),
-                      onTap: SuggestionsController().refresh,
-                      textController: controller.carModel,
-                      labelText: 'Model',
-                      hintText: 'Select Model',
+                      showedSelectedName: 'name',
+                      textController: controller.carModel.text,
+                      hintText: 'Model',
                       menuValues: controller.allModels.isEmpty
                           ? {}
                           : controller.allModels,
-                      itemBuilder: (context, suggestion) {
+                      itemBuilder: (context, key, value) {
                         return ListTile(
-                          title: Text('${suggestion['name']}'),
+                          title: Text('${value['name']}'),
                         );
                       },
-                      onSelected: (suggestion) {
-                        controller.carModel.text = suggestion['name'];
-                        controller.allModels.entries.where((entry) {
-                          return entry.value['name'] ==
-                              suggestion['name'].toString();
-                        }).forEach(
-                          (entry) {
-                            controller.carModelId.value = entry.key;
-                          },
-                        );
+                      onSelected: (key, value) {
+                        controller.carModel.text = value['name'];
+                        controller.carModelId.value = key;
                       },
                     ),
                   ),
@@ -124,32 +100,22 @@ Widget carDetailsSection() {
                     isDropdown: true,
                     flex: 2,
                     dropdownConfig: DropdownConfig(
-                      listValues: controller.allCountries.values
-                          .map((value) => value['name'].toString())
-                          .toList(),
-                      textController: controller.country,
-                      labelText: isCountriesLoading ? 'Loading...' : 'Country',
-                      hintText: 'Select Country',
+                      showedSelectedName: 'name',
+                      textController: controller.country.text,
+                      hintText: isCountriesLoading ? 'Loading...' : 'Country',
                       menuValues:
                           isCountriesLoading ? {} : controller.allCountries,
-                      itemBuilder: (context, suggestion) {
+                      itemBuilder: (context, key, value) {
                         return ListTile(
-                          title: Text('${suggestion['name']}'),
+                          title: Text('${value['name']}'),
                         );
                       },
-                      onSelected: (suggestion) {
-                        controller.country.text = suggestion['name'];
-                        controller.allCountries.entries.where((entry) {
-                          return entry.value['name'] ==
-                              suggestion['name'].toString();
-                        }).forEach(
-                          (entry) {
-                            controller.city.clear();
-                            // controller.onSelectForCountryAndCity(entry.key);
-                            controller.getCitiesByCountryID(entry.key);
-                            controller.countryId.value = entry.key;
-                          },
-                        );
+                      onSelected: (key, value) {
+                        controller.country.text = value['name'];
+                        controller.city.clear();
+                        // controller.onSelectForCountryAndCity(entry.key);
+                        controller.getCitiesByCountryID(key);
+                        controller.countryId.value = key;
                       },
                     ),
                   ),
@@ -157,30 +123,20 @@ Widget carDetailsSection() {
                     isDropdown: true,
                     flex: 1,
                     dropdownConfig: DropdownConfig(
-                      listValues: controller.allCities.values
-                          .map((value) => value['name'].toString())
-                          .toList(),
-                      suggestionsController: SuggestionsController(),
-                      onTap: SuggestionsController().refresh,
-                      textController: controller.city,
-                      labelText: 'City',
-                      hintText: 'Select City',
+                      showedSelectedName: 'name',
+                      textController: controller.city.text,
+                      hintText: 'City',
                       menuValues: controller.allCities.isEmpty
                           ? {}
                           : controller.allCities,
-                      itemBuilder: (context, suggestion) {
+                      itemBuilder: (context, key, value) {
                         return ListTile(
-                          title: Text('${suggestion['name']}'),
+                          title: Text('${value['name']}'),
                         );
                       },
-                      onSelected: (suggestion) {
-                        controller.city.text = suggestion['name'];
-                        controller.allCities.entries.where((entry) {
-                          return entry.value['name'] ==
-                              suggestion['name'].toString();
-                        }).forEach((entry) {
-                          controller.cityId.value = entry.key;
-                        });
+                      onSelected: (key, value) {
+                        controller.city.text = value['name'];
+                        controller.cityId.value = key;
                       },
                     ),
                   ),
@@ -210,27 +166,18 @@ Widget carDetailsSection() {
               isDropdown: true,
               flex: 2,
               dropdownConfig: DropdownConfig(
-                listValues: controller.allColors.values
-                    .map((value) => value['name'].toString())
-                    .toList(),
-                textController: controller.color,
-                labelText: isColorsLoading ? 'Loading...' : 'Color',
-                hintText: 'Select Color',
+                showedSelectedName: 'name',
+                textController: controller.color.text,
+                hintText: isColorsLoading ? 'Loading...' : 'Color',
                 menuValues: isColorsLoading ? {} : controller.allColors,
-                itemBuilder: (context, suggestion) {
+                itemBuilder: (context, key, value) {
                   return ListTile(
-                    title: Text('${suggestion['name']}'),
+                    title: Text('${value['name']}'),
                   );
                 },
-                onSelected: (suggestion) {
-                  controller.color.text = suggestion['name'];
-                  controller.allColors.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach(
-                    (entry) {
-                      controller.colorId.value = entry.key;
-                    },
-                  );
+                onSelected: (key, value) {
+                  controller.color.text = value['name'];
+                  controller.colorId.value = key;
                 },
               ),
             ),
@@ -248,27 +195,18 @@ Widget carDetailsSection() {
               isDropdown: true,
               flex: 2,
               dropdownConfig: DropdownConfig(
-                listValues: controller.allEngineType.values
-                    .map((value) => value['name'].toString())
-                    .toList(),
-                textController: controller.engineType,
-                labelText: isColorsLoading ? 'Loading...' : 'Engine Type',
-                hintText: 'Select Engine Type',
+                showedSelectedName: 'name',
+                textController: controller.engineType.text,
+                hintText: isColorsLoading ? 'Loading...' : 'Engine Type',
                 menuValues: isColorsLoading ? {} : controller.allEngineType,
-                itemBuilder: (context, suggestion) {
+                itemBuilder: (context, key, value) {
                   return ListTile(
-                    title: Text('${suggestion['name']}'),
+                    title: Text('${value['name']}'),
                   );
                 },
-                onSelected: (suggestion) {
-                  controller.engineType.text = suggestion['name'];
-                  controller.allEngineType.entries.where((entry) {
-                    return entry.value['name'] == suggestion['name'].toString();
-                  }).forEach(
-                    (entry) {
-                      controller.engineTypeId.value = entry.key;
-                    },
-                  );
+                onSelected: (key, value) {
+                  controller.engineType.text = value['name'];
+                  controller.engineTypeId.value = key;
                 },
               ),
             ),

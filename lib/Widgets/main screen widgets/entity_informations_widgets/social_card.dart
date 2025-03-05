@@ -57,7 +57,7 @@ Widget socialCardSection(EntityInformationsController controller) {
 }
 
 Widget buildSmartField(EntityInformationsController controller,
-   EntitySocial item, Animation<double> animation, int index,
+    EntitySocial item, Animation<double> animation, int index,
     {bool isRemoving = false}) {
   return SizeTransition(
     sizeFactor: animation,
@@ -78,32 +78,22 @@ Widget buildSmartField(EntityInformationsController controller,
                           isDropdown: true,
                           flex: 1,
                           dropdownConfig: DropdownConfig(
-                            listValues: controller.typeOfSocialsMap.values
-                                .map((value) => value['name'].toString())
-                                .toList(),
+                            showedSelectedName: 'name',
                             textController: controller
-                                .socialTypesControllers[index].controller,
-                            labelText: isSocialTypeLoading ? 'Loading' : 'Type',
-                            hintText: 'Select Social Type',
+                                .socialTypesControllers[index].controller!.text,
+                            hintText: isSocialTypeLoading ? 'Loading' : 'Type',
                             menuValues: isSocialTypeLoading
                                 ? {}
                                 : controller.typeOfSocialsMap,
-                            itemBuilder: (context, suggestion) {
+                            itemBuilder: (context, key, value) {
                               return ListTile(
-                                title: Text('${suggestion['name']}'),
+                                title: Text('${value['name']}'),
                               );
                             },
-                            onSelected: (suggestion) {
+                            onSelected: (key, value) {
                               controller.socialTypesControllers[index]
-                                  .controller!.text = suggestion['name'];
-                              controller.typeOfSocialsMap.entries
-                                  .where((entry) {
-                                return entry.value['name'] ==
-                                    suggestion['name'].toString();
-                              }).forEach((entry) {
-                                controller.contactSocial[index].type =
-                                    entry.key;
-                              });
+                                  .controller!.text = value['name'];
+                              controller.contactSocial[index].type = key;
                             },
                           )),
                       DynamicConfig(
