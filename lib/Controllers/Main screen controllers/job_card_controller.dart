@@ -998,7 +998,7 @@ class JobCardController extends GetxController {
       await FirebaseFirestore.instance
           .collection('job_cards')
           .doc(jobId)
-          .update({'quotation_status': 'Canceled'});
+          .update({'quotation_status': 'Cancelled'});
       quotationStatus.value = 'Cancelled';
     } catch (e) {
       //
