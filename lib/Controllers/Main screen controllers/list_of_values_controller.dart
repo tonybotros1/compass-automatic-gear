@@ -257,6 +257,7 @@ class ListOfValuesController extends GetxController {
   getListValues(listId, masterBtId) {
     try {
       loadingValues.value = true;
+      valueMap.clear();
 
       if (userEmail.value == 'datahubai@gmail.com') {
         FirebaseFirestore.instance
@@ -274,12 +275,9 @@ class ListOfValuesController extends GetxController {
             .collection('values')
             .snapshots()
             .listen((values) {
-          valueMap.clear();
           valueMap.value = {for (var doc in values.docs) doc.id: doc.data()};
           loadingValues.value = false;
-          // for (var value in values.docs) {
-          //   valueMap[value.id] = value.data()['name'];
-          // }
+         
         });
       } else {
         FirebaseFirestore.instance
