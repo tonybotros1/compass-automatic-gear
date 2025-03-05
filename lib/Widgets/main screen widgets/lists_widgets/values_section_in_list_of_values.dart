@@ -130,7 +130,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
     ),
     DataCell(
       Text(
-        controller.getValueNameById(valueData['restricted_by']) ?? '',
+        controller.getValueNameById(valueData['restricted_by']),
       ),
     ),
     DataCell(
@@ -181,7 +181,7 @@ ElevatedButton editSection(ListOfValuesController controller,
       onPressed: () {
         controller.valueName.text = valueData['name'];
         controller.restrictedBy.text =
-            controller.getValueNameById(valueData['restricted_by'])!;
+            controller.getValueNameById(valueData['restricted_by']);
         controller.masteredByIdForValues.value = '';
         valuesDialog(
             constraints: constraints,

@@ -49,7 +49,7 @@ class ListOfValuesController extends GetxController {
     super.onInit();
   }
 
-   getScreenName() {
+  getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -210,18 +210,15 @@ class ListOfValuesController extends GetxController {
       if (userEmail.value == 'datahubai@gmail.com') {
         lists.snapshots().listen((lists) {
           listMap.clear();
-          for (var list in lists.docs) {
-            listMap[list.id] = list.data()['list_name'];
-          }
-          allLists.assignAll(lists.docs);
+          listMap.value = {for (var doc in lists.docs) doc.id: doc.data()};
+
+          allLists.assignAll(List<DocumentSnapshot>.from(lists.docs));
           isScreenLoding.value = false;
         });
       } else {
         lists.where('is_public', isEqualTo: true).snapshots().listen((lists) {
           listMap.clear();
-          for (var list in lists.docs) {
-            listMap[list.id] = list.data()['list_name'];
-          }
+          listMap.value = {for (var doc in lists.docs) doc.id: doc.data()};
           allLists.assignAll(List<DocumentSnapshot>.from(lists.docs));
           isScreenLoding.value = false;
         });
@@ -231,27 +228,31 @@ class ListOfValuesController extends GetxController {
     }
   }
 
-  String? getListNameById(listId) {
+  String getListNameById(String? listId) {
     if (listId == null) return '';
-    return listMap.entries
-        .firstWhere(
-          (entry) => entry.key == listId,
-          orElse: () =>
-              const MapEntry('', ''), // Handle the case where no entry is found
-        )
-        .value;
+
+    final entry = listMap[listId];
+    return entry != null && entry.containsKey('list_name')
+        ? entry['list_name'] as String
+        : '';
   }
 
-  String? getValueNameById(listId) {
+  String getValueNameById(listId) {
     if (listId == null) return '';
-    return valueMap.entries
-        .firstWhere(
-          (entry) => entry.key == listId,
-          orElse: () =>
-              const MapEntry('', ''), // Handle the case where no entry is found
-        )
-        .value;
+    final entry = valueMap[listId];
+    return entry != null && entry.containsKey('name') ? entry['name'] : '';
   }
+
+  // String? getValueNameById(listId) {
+  //   if (listId == null) return '';
+  //   return valueMap.entries
+  //       .firstWhere(
+  //         (entry) => entry.key == listId,
+  //         orElse: () =>
+  //             const MapEntry('', ''), // Handle the case where no entry is found
+  //       )
+  //       .value;
+  // }
 
   getListValues(listId, masterBtId) {
     try {
@@ -274,10 +275,11 @@ class ListOfValuesController extends GetxController {
             .snapshots()
             .listen((values) {
           valueMap.clear();
-          for (var value in values.docs) {
-            valueMap[value.id] = value.data()['name'];
-            loadingValues.value = false;
-          }
+          valueMap.value = {for (var doc in values.docs) doc.id: doc.data()};
+          loadingValues.value = false;
+          // for (var value in values.docs) {
+          //   valueMap[value.id] = value.data()['name'];
+          // }
         });
       } else {
         FirebaseFirestore.instance
@@ -347,7 +349,7 @@ class ListOfValuesController extends GetxController {
 
       Get.back();
     } catch (e) {
-      // print(e);
+      print(e);
     }
   }
 

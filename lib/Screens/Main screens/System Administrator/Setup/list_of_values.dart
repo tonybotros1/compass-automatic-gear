@@ -156,7 +156,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
       ),
     ),
     DataCell(
-      Text(controller.getListNameById(listData['mastered_by']) ?? ''),
+      Text(controller.getListNameById(listData['mastered_by'])),
     ),
     DataCell(
       Text(
@@ -281,7 +281,7 @@ ElevatedButton editButton(
       controller.code.text = listData['code'] ?? '';
       controller.masteredByIdForList.value = '';
       controller.masteredByForList.text =
-          controller.getListNameById(listData['mastered_by'])!;
+          controller.getListNameById(listData['mastered_by']);
       listOfValuesDialog(
           constraints: constraints,
           controller: controller,
