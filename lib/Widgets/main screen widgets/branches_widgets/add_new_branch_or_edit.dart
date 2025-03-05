@@ -1,14 +1,13 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/branches_controller.dart';
-import 'package:datahubai/Widgets/main%20screen%20widgets/drop_down_menu.dart';
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
 
 import '../../my_text_field.dart';
 
 Widget addNewBranchOrEdit({
   required BranchesController controller,
- required bool canEdit,
+  required bool canEdit,
 }) {
   return ListView(
     children: [
@@ -47,66 +46,47 @@ Widget addNewBranchOrEdit({
       ),
       GetX<BranchesController>(builder: (controller) {
         var isCountryLoading = controller.allCountries.isEmpty;
-        return dropDownValues(
-          listValues: controller.allCountries.values
-              .map((value) => value['name'].toString())
-              .toList(),
-          labelText: 'Country',
-          hintText: 'Enter your country',
-          textController: controller.country,
-          validate: true,
-          menus: isCountryLoading ? {} : controller.allCountries,
-          itemBuilder: (context, suggestion) {
+        return CustomDropdown(
+          hintText: 'Country',
+          textcontroller: controller.country.text,
+          showedSelectedName: 'name',
+          items: isCountryLoading ? {} : controller.allCountries,
+          itemBuilder: (context, key, value) {
             return ListTile(
-              title: Text('${suggestion['name']}'),
+              title: Text(value['name']),
             );
           },
-          onSelected: (suggestion) {
-            controller.country.text = suggestion['name'];
-            controller.allCountries.entries.where((entry) {
-              return entry.value['name'] == suggestion['name'].toString();
-            }).forEach(
-              (entry) {
-                // controller.onSelect(entry.key);
-                controller.getCitiesByCountryID(entry.key);
-                controller.city.clear();
-                controller.countryId.value = entry.key;
-              },
-            );
+          onChanged: (key, value) {
+            controller.country.text = value['name'];
+            controller.getCitiesByCountryID(key);
+            controller.city.clear();
+            controller.countryId.value = key;
           },
         );
+      
       }),
       SizedBox(
         height: 10,
       ),
       GetX<BranchesController>(builder: (controller) {
         var isCityLoading = controller.allCities.isEmpty;
-  
-        return dropDownValues(
-          listValues: controller.allCities.values
-              .map((value) => value['name'].toString())
-              .toList(),
-          suggestionsController: SuggestionsController(),
-          onTapForTypeAheadField: SuggestionsController().refresh,
-          labelText: 'City',
-          hintText: 'Enter your city',
-          textController: controller.city,
-          validate: true,
-          menus: isCityLoading ? {} : controller.allCities,
-          itemBuilder: (context, suggestion) {
+
+        return CustomDropdown(
+          hintText: 'City',
+          textcontroller: controller.city.text,
+          showedSelectedName: 'name',
+          items: isCityLoading ? {} : controller.allCities,
+          itemBuilder: (context, key, value) {
             return ListTile(
-              title: Text('${suggestion['name']}'),
+              title: Text(value['name']),
             );
           },
-          onSelected: (suggestion) {
-            controller.city.text = suggestion['name'];
-            controller.allCities.entries.where((entry) {
-              return entry.value['name'] == suggestion['name'].toString();
-            }).forEach((entry) {
-              controller.cityId.value = entry.key;
-            });
+          onChanged: (key, value) {
+            controller.city.text = value['name'];
+            controller.cityId.value = key;
           },
         );
+       
       }),
     ],
   );

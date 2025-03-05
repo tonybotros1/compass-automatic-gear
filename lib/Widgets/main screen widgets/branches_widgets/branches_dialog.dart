@@ -38,11 +38,11 @@ Future<dynamic> branchesDialog(
                     GetX<BranchesController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
-                              style: saveButtonStyle,
+                              style:new2ButtonStyle,
                               child: controller.addingNewValue.value == false
                                   ? const Text(
                                       'Save',
-                                      style: TextStyle(color: Colors.white),
+                                      style: TextStyle(fontWeight: FontWeight.bold),
                                     )
                                   : SizedBox(
                                       height: 20,
