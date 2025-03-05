@@ -104,20 +104,6 @@ class ListOfValuesController extends GetxController {
   }
 
   void onSortForValues(int columnIndex, bool ascending) {
-    // if (columnIndex == 0) {
-    //   allValues.sort((screen1, screen2) {
-    //     final String? value1 = screen1.get('code');
-    //     final String? value2 = screen2.get('code');
-
-    //     // Handle nulls: put nulls at the end
-    //     if (value1 == null && value2 == null) return 0;
-    //     if (value1 == null) return 1;
-    //     if (value2 == null) return -1;
-
-    //     return compareString(ascending, value1, value2);
-    //   });
-    // }
-
     if (columnIndex == 0) {
       allValues.sort((screen1, screen2) {
         final String? value1 = screen1.get('name');
@@ -243,17 +229,6 @@ class ListOfValuesController extends GetxController {
     return entry != null && entry.containsKey('name') ? entry['name'] : '';
   }
 
-  // String? getValueNameById(listId) {
-  //   if (listId == null) return '';
-  //   return valueMap.entries
-  //       .firstWhere(
-  //         (entry) => entry.key == listId,
-  //         orElse: () =>
-  //             const MapEntry('', ''), // Handle the case where no entry is found
-  //       )
-  //       .value;
-  // }
-
   getListValues(listId, masterBtId) {
     try {
       loadingValues.value = true;
@@ -347,7 +322,7 @@ class ListOfValuesController extends GetxController {
 
       Get.back();
     } catch (e) {
-      print(e);
+      //
     }
   }
 
