@@ -17,20 +17,22 @@ Widget carDetailsSection() {
           final isCountriesLoading = controller.allCountries.isEmpty;
 
           return Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              controller.carBrandLogo.value.isNotEmpty
-                  ? SizedBox(
-                      height: 60,
-                      width: 60,
-                      child: Image.network(
+              Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 2),
+                    color: Colors.grey.shade300,
+                    shape: BoxShape.circle),
+                child: controller.carBrandLogo.value.isNotEmpty
+                    ? Image.network(
                         controller.carBrandLogo.value,
-                        width: 60,
-                      ),
-                    )
-                  : SizedBox(
-                      height: 60,
-                      width: 60,
-                    ),
+                        width: 40,
+                      )
+                    : SizedBox(),
+              ),
               Expanded(
                 child: dynamicFields(dynamicConfigs: [
                   DynamicConfig(

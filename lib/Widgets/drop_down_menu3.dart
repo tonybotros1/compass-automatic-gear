@@ -357,8 +357,7 @@ class CustomDropdown extends StatelessWidget {
   final TextStyle? disabledTextStyle;
   final String showedSelectedName;
   final bool? validator;
-    final Widget Function(String, dynamic)? showedResult;
-
+  final Widget Function(String, dynamic)? showedResult;
 
   CustomDropdown({
     super.key,
@@ -373,8 +372,8 @@ class CustomDropdown extends StatelessWidget {
     this.enabledTextStyle,
     this.disabledTextStyle,
     this.showedSelectedName = '',
-    this.validator, this.showedResult,
-    
+    this.validator,
+    this.showedResult,
   });
 
   final GlobalKey buttonKey = GlobalKey();
@@ -448,44 +447,74 @@ class CustomDropdown extends StatelessWidget {
                       }
                     : null,
                 child: Obx(() {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
-                    decoration: controller.isValid.isFalse
-                        ? BoxDecoration(
-                            color: Colors.grey.shade200,
-                            border: Border.all(color: Colors.red),
-                            borderRadius: BorderRadius.circular(5),
-                          )
-                        : isEnabled
-                            ? (dropdownDecoration ?? (defaultEnabledDecoration))
-                            : (disabledDecoration ?? defaultDisabledDecoration),
-                    child: Row(
-                      children: [
-                          Expanded(
-                          child: showedResult != null && controller.selectedKey.isNotEmpty
-                              ? showedResult!(controller.selectedKey.value, controller.selectedValue)
-                              : Text(
-                                  textControllerValue.isEmpty
-                                      ? controller.selectedKey.isEmpty
-                                          ? hintText
-                                          : showedSelectedName.isNotEmpty
-                                              ? controller.selectedValue[showedSelectedName].toString()
-                                              : hintText
-                                      : textControllerValue.value,
-                                  style: isEnabled
-                                      ? (enabledTextStyle ??
-                                          (textControllerValue.value.isEmpty && controller.selectedKey.isEmpty
-                                              ? TextStyle(fontSize: 16, color: Colors.grey.shade700)
-                                              : TextStyle(fontSize: 16, color: Colors.black)))
-                                      : (disabledTextStyle ?? defaultDisabledTextStyle),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 2),
+                        child: Text(
+                          hintText,
+                          style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold),
                         ),
-                        Icon(Icons.arrow_drop_down,
-                            color: isEnabled ? Colors.black : Colors.grey),
-                      ],
-                    ),
+                      ),
+                      Container(
+                        height: 35,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: controller.isValid.isFalse
+                            ? BoxDecoration(
+                                color: Colors.grey.shade200,
+                                border: Border.all(color: Colors.red),
+                                borderRadius: BorderRadius.circular(5),
+                              )
+                            : isEnabled
+                                ? (dropdownDecoration ??
+                                    (defaultEnabledDecoration))
+                                : (disabledDecoration ??
+                                    defaultDisabledDecoration),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: showedResult != null &&
+                                      controller.selectedKey.isNotEmpty
+                                  ? showedResult!(controller.selectedKey.value,
+                                      controller.selectedValue)
+                                  : Text(
+                                      textControllerValue.isEmpty
+                                          ? controller.selectedKey.isEmpty
+                                              ? hintText
+                                              : showedSelectedName.isNotEmpty
+                                                  ? controller.selectedValue[
+                                                          showedSelectedName]
+                                                      .toString()
+                                                  : hintText
+                                          : textControllerValue.value,
+                                      style: isEnabled
+                                          ? (enabledTextStyle ??
+                                              (textControllerValue
+                                                          .value.isEmpty &&
+                                                      controller
+                                                          .selectedKey.isEmpty
+                                                  ? TextStyle(
+                                                      fontSize: 14,
+                                                      color:
+                                                          Colors.grey.shade700)
+                                                  : TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.black)))
+                                          : (disabledTextStyle ??
+                                              defaultDisabledTextStyle),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                            ),
+                            Icon(Icons.arrow_drop_down,
+                                color: isEnabled ? Colors.black : Colors.grey),
+                          ],
+                        ),
+                      ),
+                    ],
                   );
                 }),
               ),

@@ -4,7 +4,7 @@ import '../../../Models/dynamic_field_models.dart';
 import '../../../consts.dart';
 import '../dynamic_field.dart';
 
-Container jobCardSection(context,JobCardController controller) {
+Container jobCardSection(context, JobCardController controller) {
   return Container(
       padding: EdgeInsets.all(20),
       decoration: containerDecor,
@@ -12,7 +12,7 @@ Container jobCardSection(context,JobCardController controller) {
         dynamicFields(dynamicConfigs: [
           DynamicConfig(
             isDropdown: false,
-            flex: 1,
+            flex: 2,
             fieldConfig: FieldConfig(
               isEnabled: false,
               textController: controller.jobCardCounter.value,
@@ -23,7 +23,7 @@ Container jobCardSection(context,JobCardController controller) {
           ),
           DynamicConfig(
             isDropdown: false,
-            flex: 1,
+            flex: 2,
             fieldConfig: FieldConfig(
               isEnabled: false,
               textController: controller.invoiceCounter.value,
@@ -99,7 +99,8 @@ Container jobCardSection(context,JobCardController controller) {
             fieldConfig: FieldConfig(
               suffixIcon: IconButton(
                   onPressed: () {
-                    controller.selectDateContext(context, controller.startDate.value);
+                    controller.selectDateContext(
+                        context, controller.startDate.value);
                   },
                   icon: Icon(Icons.date_range)),
               isDate: true,
@@ -225,7 +226,7 @@ Container jobCardSection(context,JobCardController controller) {
               validate: false,
             ),
           ),
-           DynamicConfig(
+          DynamicConfig(
             isDropdown: false,
             flex: 1,
             fieldConfig: FieldConfig(

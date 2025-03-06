@@ -115,10 +115,11 @@ Widget tableOfScreens({
                 minWidth: constraints.maxWidth - 30,
               ),
               child: DataTable(
+                showCheckboxColumn: false,
                 dataRowMaxHeight: 40,
                 dataRowMinHeight: 30,
                 headingRowHeight: 70,
-                columnSpacing: 5,
+                columnSpacing: 15,
                 showBottomBorder: true,
                 dataTextStyle: regTextStyle,
                 headingTextStyle: fontStyleForTableHeader,
@@ -145,7 +146,8 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
+                        // AutoSizedText(text: '', constraints: constraints),
                         AutoSizedText(text: 'Date', constraints: constraints),
                       ],
                     ),
@@ -157,7 +159,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'Status', constraints: constraints),
                       ],
                     ),
@@ -181,7 +183,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'Date', constraints: constraints),
                       ],
                     ),
@@ -193,7 +195,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'Status', constraints: constraints),
                       ],
                     ),
@@ -205,7 +207,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(
                             text: 'Sub Status', constraints: constraints),
                       ],
@@ -231,7 +233,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'Date', constraints: constraints),
                       ],
                     ),
@@ -243,7 +245,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(
                             text: 'LPO Number', constraints: constraints),
                       ],
@@ -268,7 +270,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'Model', constraints: constraints),
                       ],
                     ),
@@ -281,10 +283,7 @@ Widget tableOfScreens({
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AutoSizedText(text: 'Plate', constraints: constraints),
-                        Text(
-                          'Number',
-                          maxLines: 1,
-                        )
+                        AutoSizedText(text: 'Number', constraints: constraints),
                       ],
                     ),
                     // onSort: controller.onSort,
@@ -295,7 +294,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'Code', constraints: constraints),
                       ],
                     ),
@@ -307,7 +306,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'City', constraints: constraints),
                       ],
                     ),
@@ -319,7 +318,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(
                             text: 'Customer Name', constraints: constraints),
                       ],
@@ -332,7 +331,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'VIN', constraints: constraints),
                       ],
                     ),
@@ -344,7 +343,7 @@ Widget tableOfScreens({
                       spacing: 5,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(
                             text: 'Total Job', constraints: constraints),
                       ],
@@ -358,7 +357,7 @@ Widget tableOfScreens({
                       spacing: 5,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'VAT', constraints: constraints),
                       ],
                     ),
@@ -371,7 +370,7 @@ Widget tableOfScreens({
                       spacing: 5,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        AutoSizedText(text: '', constraints: constraints),
+                        SizedBox(),
                         AutoSizedText(text: 'NET', constraints: constraints),
                       ],
                     ),
@@ -443,6 +442,7 @@ List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
   return jobs.map<DataRow>((job) {
     final jobData = job.data() as Map<String, dynamic>;
     return DataRow(
+      onSelectChanged: (value) {},
       cells: [
         DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
         DataCell(textForDataRowInTable(

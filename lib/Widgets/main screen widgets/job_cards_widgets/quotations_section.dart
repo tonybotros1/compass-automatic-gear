@@ -13,7 +13,7 @@ Container quotationsSection(context, JobCardController controller) {
         dynamicFields(dynamicConfigs: [
           DynamicConfig(
             isDropdown: false,
-            flex: 1,
+            flex: 2,
             fieldConfig: FieldConfig(
               isEnabled: false,
               textController: controller.quotationCounter.value,
@@ -28,8 +28,8 @@ Container quotationsSection(context, JobCardController controller) {
             fieldConfig: FieldConfig(
               isDate: true,
               suffixIcon: IconButton(
-                  onPressed: ()async {
-                   await controller.selectDateContext(
+                  onPressed: () async {
+                    await controller.selectDateContext(
                         context, controller.quotationDate.value);
                     controller.changeQuotationEndDateDependingOnDays();
                   },
