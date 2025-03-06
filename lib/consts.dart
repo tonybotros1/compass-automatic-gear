@@ -67,8 +67,8 @@ var saveButtonStyle = ElevatedButton.styleFrom(
 );
 
 var clearVariablesButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.brown,
-  foregroundColor: Colors.white,
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Colors.brown,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -293,6 +293,11 @@ var fontStyle1 = TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
 var fontStyle2 =
     TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold);
 // var mainColor = const Color.fromARGB(255, 228, 200, 233);
+
+double textFieldHeight = 35;
+TextStyle textFieldFontStyle = TextStyle(fontSize: 14, color: Colors.black);
+TextStyle textFieldLabelStyle = TextStyle(
+    color: Colors.grey.shade700, fontSize: 12, fontWeight: FontWeight.bold);
 
 var mainColor = const Color(0xff005f95);
 // var mainColor = const Color(0xff27374D);

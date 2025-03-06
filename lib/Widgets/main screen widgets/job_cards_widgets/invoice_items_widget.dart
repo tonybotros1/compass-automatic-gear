@@ -5,7 +5,7 @@ import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../auto_size_box.dart';
-import 'add_new_invoice_item_or_edit.dart';
+import 'invoice_items_for_job_dialog.dart';
 
 Widget invoiceItemsDialog(
     {required BuildContext context,
@@ -314,59 +314,15 @@ ElevatedButton editSection(
         controller.total.text = invoiceItemsData['total'];
         controller.vat.text = invoiceItemsData['vat'];
         controller.net.text = invoiceItemsData['net'];
-        showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-                content: addNewinvoiceItemsOrEdit(
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
-                ),
-                actions: [
-                  GetX<JobCardController>(
-                      builder: (controller) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ElevatedButton(
-                              onPressed:
-                                  controller.addingNewinvoiceItemsValue.value
-                                      ? null
-                                      : () {
-                                          controller.editInvoiceItem(
-                                              jobId, invoiceItemsId);
-                                        },
-                              style: saveButtonStyle,
-                              child:
-                                  controller.addingNewinvoiceItemsValue.value ==
-                                          false
-                                      ? const Text(
-                                          'Save',
-                                          style: TextStyle(color: Colors.white),
-                                        )
-                                      : const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2,
-                                          ),
-                                        ),
-                            ),
-                          )),
-                  ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: cancelButtonStyle,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ],
-              );
-            });
+        invoiceItemsForJobDialog(
+            jobId: jobId,
+            controller: controller,
+            constraints: constraints,
+            onPressed: controller.addingNewinvoiceItemsValue.value
+                ? null
+                : () {
+                    controller.editInvoiceItem(jobId, invoiceItemsId);
+                  });
       },
       child: Text('Edit'));
 }
@@ -377,75 +333,19 @@ ElevatedButton newinvoiceItemsButton(BuildContext context,
     onPressed: () {
       controller.clearInvoiceItemsVariables();
 
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
-              content: addNewinvoiceItemsOrEdit(
-                controller: controller,
-                constraints: constraints,
-                context: context,
-              ),
-              actions: [
-                Row(
-                  spacing: 20,
-                  children: [
-                    ElevatedButton(
-                        style: clearVariablesButtonStyle,
-                        onPressed: () {
-                          controller.clearInvoiceItemsVariables();
-                        },
-                        child: Text('Clear All')),
-                    Spacer(),
-                    GetX<JobCardController>(
-                        builder: (controller) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              child: ElevatedButton(
-                                onPressed: controller
-                                        .addingNewinvoiceItemsValue.value
-                                    ? null
-                                    : () async {
-                                        if (!controller.formKeyForInvoiceItems
-                                            .currentState!
-                                            .validate()) {
-                                        } else {
-                                          controller.addNewInvoiceItem(jobId);
-                                        }
-                                      },
-                                style: saveButtonStyle,
-                                child: controller
-                                            .addingNewinvoiceItemsValue.value ==
-                                        false
-                                    ? const Text(
-                                        'Save',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                              ),
-                            )),
-                    ElevatedButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        style: cancelButtonStyle,
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                  ],
-                ),
-              ],
-            );
-          });
+      invoiceItemsForJobDialog(
+          jobId: jobId,
+          controller: controller,
+          constraints: constraints,
+          onPressed: controller.addingNewinvoiceItemsValue.value
+              ? null
+              : () async {
+                  if (!controller.formKeyForInvoiceItems.currentState!
+                      .validate()) {
+                  } else {
+                    controller.addNewInvoiceItem(jobId);
+                  }
+                });
     },
     style: newButtonStyle,
     child: const Text('New item'),

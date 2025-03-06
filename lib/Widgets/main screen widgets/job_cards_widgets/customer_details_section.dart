@@ -194,64 +194,78 @@ Container customerDetailsSection() {
             SizedBox(
               width: 5,
             ),
-            Container(
-              padding: EdgeInsets.all(13),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 2),
+                  child: Text(
+                    'Payment',
+                    style: textFieldLabelStyle,
+                  ),
+                ),
+                Container(
+                  height: textFieldHeight,
+                  padding: EdgeInsets.only(left: 10, right: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      GetX<JobCardController>(builder: (controller) {
-                        return CupertinoRadio<bool>(
-                          value: true,
-                          groupValue: controller.isCashSelected.value,
-                          onChanged: (value) {
-                            if (value != null) {
-                              controller.selectCashOrCredit('cash', value);
-                            }
-                          },
-                        );
-                      }),
-                      SizedBox(
-                        width: 2,
+                      Row(
+                        children: [
+                          GetX<JobCardController>(builder: (controller) {
+                            return CupertinoRadio<bool>(
+                              value: true,
+                              groupValue: controller.isCashSelected.value,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  controller.selectCashOrCredit('cash', value);
+                                }
+                              },
+                            );
+                          }),
+                          SizedBox(
+                            width: 2,
+                          ),
+                          Text(
+                            'Cash',
+                            style: textFieldFontStyle,
+                          )
+                        ],
                       ),
-                      Text(
-                        'Cash',
-                        style: regTextStyle,
-                      )
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Row(
+                        children: [
+                          GetX<JobCardController>(builder: (controller) {
+                            return CupertinoRadio<bool>(
+                              value: true,
+                              groupValue: controller.isCreditSelected.value,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  controller.selectCashOrCredit(
+                                      'credit', value);
+                                }
+                              },
+                            );
+                          }),
+                          SizedBox(
+                            width: 2,
+                          ),
+                          Text(
+                            'Credit',
+                            style: textFieldFontStyle,
+                          )
+                        ],
+                      ),
                     ],
                   ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  Row(
-                    children: [
-                      GetX<JobCardController>(builder: (controller) {
-                        return CupertinoRadio<bool>(
-                          value: true,
-                          groupValue: controller.isCreditSelected.value,
-                          onChanged: (value) {
-                            if (value != null) {
-                              controller.selectCashOrCredit('credit', value);
-                            }
-                          },
-                        );
-                      }),
-                      SizedBox(
-                        width: 2,
-                      ),
-                      Text(
-                        'Credit',
-                        style: regTextStyle,
-                      )
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
             Expanded(child: SizedBox()),
           ],

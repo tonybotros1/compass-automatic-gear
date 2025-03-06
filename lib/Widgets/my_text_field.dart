@@ -2,6 +2,7 @@ import 'package:datahubai/Widgets/decimal_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../consts.dart';
 import 'date_time_field.dart';
 
 Widget myTextFormFieldWithBorder(
@@ -27,16 +28,13 @@ Widget myTextFormFieldWithBorder(
         padding: const EdgeInsets.only(left: 2),
         child: Text(
           '$labelText',
-          style: TextStyle(
-              color: Colors.grey.shade700,
-              fontSize: 12,
-              fontWeight: FontWeight.bold),
+          style: textFieldLabelStyle
         ),
       ),
       SizedBox(
-        height: maxLines == 1 ? 35 : null,
+        height: maxLines == 1 ? textFieldHeight : null,
         child: TextFormField(
-          style: TextStyle(fontSize: 14, color: Colors.black),
+          style:textFieldFontStyle,
           onTap: () {
             controller!.selection = TextSelection(
               baseOffset: 0,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../consts.dart';
+
 class DropdownController extends GetxController {
   OverlayEntry? overlayEntry;
   RxString selectedKey = "".obs;
@@ -452,16 +454,10 @@ class CustomDropdown extends StatelessWidget {
                     children: [
                       Padding(
                         padding: EdgeInsets.only(left: 2),
-                        child: Text(
-                          hintText,
-                          style: TextStyle(
-                              color: Colors.grey.shade700,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold),
-                        ),
+                        child: Text(hintText, style: textFieldLabelStyle),
                       ),
                       Container(
-                        height: 35,
+                        height: textFieldHeight,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         decoration: controller.isValid.isFalse
                             ? BoxDecoration(
@@ -484,12 +480,12 @@ class CustomDropdown extends StatelessWidget {
                                   : Text(
                                       textControllerValue.isEmpty
                                           ? controller.selectedKey.isEmpty
-                                              ? hintText
+                                              ? ''
                                               : showedSelectedName.isNotEmpty
                                                   ? controller.selectedValue[
                                                           showedSelectedName]
                                                       .toString()
-                                                  : hintText
+                                                  : ''
                                           : textControllerValue.value,
                                       style: isEnabled
                                           ? (enabledTextStyle ??
@@ -501,9 +497,7 @@ class CustomDropdown extends StatelessWidget {
                                                       fontSize: 14,
                                                       color:
                                                           Colors.grey.shade700)
-                                                  : TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.black)))
+                                                  : textFieldFontStyle))
                                           : (disabledTextStyle ??
                                               defaultDisabledTextStyle),
                                       overflow: TextOverflow.ellipsis,
