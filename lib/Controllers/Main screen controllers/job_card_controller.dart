@@ -81,6 +81,7 @@ class JobCardController extends GetxController {
   RxBool isScreenLoding = RxBool(true);
   RxBool loadingInvoiceItems = RxBool(false);
   final RxList<DocumentSnapshot> allJobCards = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> historyJobCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allInvoiceItems = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredJobCards =
       RxList<DocumentSnapshot>([]);
@@ -123,7 +124,8 @@ class JobCardController extends GetxController {
   RxString curreentJobCardId = RxString('');
   RxBool canAddInternalNotesAndInvoiceItems = RxBool(false);
   final ScrollController scrollController = ScrollController();
-  final ScrollController scrollControllerFotTable = ScrollController();
+  final ScrollController scrollControllerFotTable1 = ScrollController();
+  final ScrollController scrollControllerFotTable2 = ScrollController();
   Rx<TextEditingController> internalNote = TextEditingController().obs;
   RxString noteMessage = RxString('');
   final ScrollController scrollControllerForNotes = ScrollController();
@@ -194,6 +196,16 @@ class JobCardController extends GetxController {
     return mainScreenController.selectedScreenName.value;
   }
 
+  selectForHistory(String vin) {
+    historyJobCards.assignAll(allJobCards.where((job) {
+      final data = job.data() as Map<String, dynamic>?;
+      if (data?['vehicle_identification_number'] != '') {
+        return data?['vehicle_identification_number'] == vin;
+      } else {
+        return false;
+      }
+    }).toList());
+  }
 
   // Stream<Map<String, double>> calculateGrandSums() {
   //   return FirebaseFirestore.instance

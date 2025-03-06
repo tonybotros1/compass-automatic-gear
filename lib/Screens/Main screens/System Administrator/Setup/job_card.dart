@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -30,6 +31,7 @@ class JobCard extends StatelessWidget {
               child: Column(
                 children: [
                   Expanded(
+                    flex: 2,
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey),
@@ -69,10 +71,17 @@ class JobCard extends StatelessWidget {
                                   child: SizedBox(
                                     width: constraints.maxWidth,
                                     child: tableOfScreens(
-                                      constraints: constraints,
-                                      context: context,
-                                      controller: controller,
-                                    ),
+                                      scrollController: controller.scrollControllerFotTable1,
+                                        canSelect: true,
+                                        constraints: constraints,
+                                        context: context,
+                                        controller: controller,
+                                        data: controller
+                                                    .filteredJobCards.isEmpty &&
+                                                controller
+                                                    .search.value.text.isEmpty
+                                            ? controller.allJobCards
+                                            : controller.filteredJobCards),
                                   ),
                                 );
                               },
@@ -82,6 +91,35 @@ class JobCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Expanded(
+                      child: Container(
+                    width: constraints.maxWidth,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: GetX<JobCardController>(builder: (controller) {
+                      return controller.historyJobCards.isNotEmpty
+                          ? SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+                              child: tableOfScreens(
+                                scrollController: controller.scrollControllerFotTable2,
+                                  canSelect: false,
+                                  constraints: constraints,
+                                  context: context,
+                                  controller: controller,
+                                  data: controller.historyJobCards))
+                          : Center(
+                              child: Text(
+                                'History',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            );
+                    }),
+                  ))
                 ],
               ),
             ),
@@ -96,12 +134,15 @@ Widget tableOfScreens({
   required BoxConstraints constraints,
   required BuildContext context,
   required JobCardController controller,
+  required RxList<DocumentSnapshot> data,
+  required bool canSelect,
+  required ScrollController scrollController,
 }) {
   return Scrollbar(
     trackVisibility: true,
     scrollbarOrientation: ScrollbarOrientation.top,
     interactive: true,
-    controller: controller.scrollControllerFotTable,
+    controller: scrollController,
     thumbVisibility: true,
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +150,7 @@ Widget tableOfScreens({
         Expanded(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            controller: controller.scrollControllerFotTable,
+            controller:scrollController,
             child: Container(
               constraints: BoxConstraints(
                 minWidth: constraints.maxWidth - 30,
@@ -377,7 +418,11 @@ Widget tableOfScreens({
                     // onSort: controller.onSort,
                   ),
                 ],
-                rows: _getOtherRows(controller, context, constraints),
+                rows: _getOtherRows(
+                    canSelect: canSelect,
+                    controller: controller,
+                    constraints: constraints,
+                    data: data),
               ),
             ),
           ),
@@ -399,7 +444,11 @@ Widget tableOfScreens({
                 label: AutoSizedText(constraints: constraints, text: ''),
               ),
             ],
-            rows: _getActionRows(controller, context, constraints),
+            rows: _getActionRows(
+                controller: controller,
+                context: context,
+                constraints: constraints,
+                data: data),
           ),
         ),
       ],
@@ -408,12 +457,12 @@ Widget tableOfScreens({
 }
 
 /// Generates rows for the fixed Action column.
-List<DataRow> _getActionRows(JobCardController controller, BuildContext context,
-    BoxConstraints constraints) {
-  final jobs = controller.filteredJobCards.isEmpty &&
-          controller.search.value.text.isEmpty
-      ? controller.allJobCards
-      : controller.filteredJobCards;
+List<DataRow> _getActionRows(
+    {required JobCardController controller,
+    required BuildContext context,
+    required BoxConstraints constraints,
+    required RxList<DocumentSnapshot> data}) {
+  final jobs = data;
   return jobs.map<DataRow>((job) {
     final jobData = job.data() as Map<String, dynamic>;
     final jobId = job.id;
@@ -433,16 +482,20 @@ List<DataRow> _getActionRows(JobCardController controller, BuildContext context,
 }
 
 /// Generates rows for all columns except the Action column.
-List<DataRow> _getOtherRows(JobCardController controller, BuildContext context,
-    BoxConstraints constraints) {
-  final jobs = controller.filteredJobCards.isEmpty &&
-          controller.search.value.text.isEmpty
-      ? controller.allJobCards
-      : controller.filteredJobCards;
+List<DataRow> _getOtherRows(
+    {required JobCardController controller,
+    required BoxConstraints constraints,
+    required RxList<DocumentSnapshot> data,
+    required bool canSelect}) {
+  final jobs = data;
   return jobs.map<DataRow>((job) {
     final jobData = job.data() as Map<String, dynamic>;
     return DataRow(
-      onSelectChanged: (value) {},
+      onSelectChanged: canSelect
+          ? (value) {
+              controller.selectForHistory(jobData['vehicle_identification_number']);
+            }
+          : null,
       cells: [
         DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
         DataCell(textForDataRowInTable(
@@ -754,7 +807,7 @@ Future<dynamic> editJobCardDialog(
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              'Invoice Items',
+                                              '💵 Invoice Items',
                                               style: TextStyle(
                                                   fontSize: 20,
                                                   color: Colors.white),
