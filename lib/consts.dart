@@ -146,6 +146,14 @@ var editButtonStyle = ElevatedButton.styleFrom(
   ),
   minimumSize: const Size(100, 40),
 );
+var historyButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.blueGrey,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
 var activeButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xff9ACBD0),
   foregroundColor: Colors.white,

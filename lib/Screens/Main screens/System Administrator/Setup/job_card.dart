@@ -29,6 +29,7 @@ class JobCard extends StatelessWidget {
             child: SizedBox(
               width: constraints.maxWidth,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     flex: 2,
@@ -71,8 +72,9 @@ class JobCard extends StatelessWidget {
                                   child: SizedBox(
                                     width: constraints.maxWidth,
                                     child: tableOfScreens(
-                                      scrollController: controller.scrollControllerFotTable1,
-                                        canSelect: true,
+                                        showHistoryButton: true,
+                                        scrollController: controller
+                                            .scrollControllerFotTable1,
                                         constraints: constraints,
                                         context: context,
                                         controller: controller,
@@ -94,6 +96,7 @@ class JobCard extends StatelessWidget {
                   SizedBox(
                     height: 10,
                   ),
+                  Text('💳 History', style: fontStyleForAppBar),
                   Expanded(
                       child: Container(
                     width: constraints.maxWidth,
@@ -106,8 +109,9 @@ class JobCard extends StatelessWidget {
                           ? SingleChildScrollView(
                               scrollDirection: Axis.vertical,
                               child: tableOfScreens(
-                                scrollController: controller.scrollControllerFotTable2,
-                                  canSelect: false,
+                                  showHistoryButton: false,
+                                  scrollController:
+                                      controller.scrollControllerFotTable2,
                                   constraints: constraints,
                                   context: context,
                                   controller: controller,
@@ -135,8 +139,8 @@ Widget tableOfScreens({
   required BuildContext context,
   required JobCardController controller,
   required RxList<DocumentSnapshot> data,
-  required bool canSelect,
   required ScrollController scrollController,
+  required bool showHistoryButton,
 }) {
   return Scrollbar(
     trackVisibility: true,
@@ -150,7 +154,7 @@ Widget tableOfScreens({
         Expanded(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            controller:scrollController,
+            controller: scrollController,
             child: Container(
               constraints: BoxConstraints(
                 minWidth: constraints.maxWidth - 30,
@@ -419,7 +423,7 @@ Widget tableOfScreens({
                   ),
                 ],
                 rows: _getOtherRows(
-                    canSelect: canSelect,
+                 
                     controller: controller,
                     constraints: constraints,
                     data: data),
@@ -428,7 +432,7 @@ Widget tableOfScreens({
           ),
         ),
         SizedBox(
-          width: 120,
+          width: 220,
           child: DataTable(
             headingRowHeight: 70,
             dataRowMaxHeight: 40,
@@ -440,11 +444,11 @@ Widget tableOfScreens({
             headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
             columns: [
               DataColumn(
-                headingRowAlignment: MainAxisAlignment.center,
-                label: AutoSizedText(constraints: constraints, text: ''),
+                label: SizedBox(),
               ),
             ],
             rows: _getActionRows(
+                showHistoryButton: showHistoryButton,
                 controller: controller,
                 context: context,
                 constraints: constraints,
@@ -461,7 +465,8 @@ List<DataRow> _getActionRows(
     {required JobCardController controller,
     required BuildContext context,
     required BoxConstraints constraints,
-    required RxList<DocumentSnapshot> data}) {
+    required RxList<DocumentSnapshot> data,
+    required bool showHistoryButton}) {
   final jobs = data;
   return jobs.map<DataRow>((job) {
     final jobData = job.data() as Map<String, dynamic>;
@@ -469,11 +474,17 @@ List<DataRow> _getActionRows(
     return DataRow(
       cells: [
         DataCell(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              editSection(context, controller, jobData, constraints, jobId),
-            ],
+          SizedBox(
+            child: Row(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                showHistoryButton
+                    ? historySection(controller, jobData)
+                    : SizedBox(),
+                editSection(context, controller, jobData, constraints, jobId),
+              ],
+            ),
           ),
         ),
       ],
@@ -486,16 +497,12 @@ List<DataRow> _getOtherRows(
     {required JobCardController controller,
     required BoxConstraints constraints,
     required RxList<DocumentSnapshot> data,
-    required bool canSelect}) {
+   }) {
   final jobs = data;
   return jobs.map<DataRow>((job) {
     final jobData = job.data() as Map<String, dynamic>;
     return DataRow(
-      onSelectChanged: canSelect
-          ? (value) {
-              controller.selectForHistory(jobData['vehicle_identification_number']);
-            }
-          : null,
+      
       cells: [
         DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
         DataCell(textForDataRowInTable(
@@ -657,6 +664,22 @@ ElevatedButton editSection(context, JobCardController controller,
         editJobCardDialog(controller, jobData, jobId);
       },
       child: const Text('Edit'));
+}
+
+ElevatedButton historySection(
+    JobCardController controller, Map<String, dynamic> jobData) {
+  return ElevatedButton(
+      style: historyButtonStyle,
+      onPressed: () async {
+        controller.selectForHistory(jobData['vehicle_identification_number']);
+        // controller.currentCountryVAT.value = controller.getdataName(
+        //     controller.companyDetails['contact_details']['country'],
+        //     controller.allCountries,
+        //     title: 'vat');
+        // controller.loadValues(jobData);
+        // editJobCardDialog(controller, jobData, jobId);
+      },
+      child: const Text('History'));
 }
 
 Future<dynamic> editJobCardDialog(
