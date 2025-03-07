@@ -10,9 +10,10 @@ import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
 import 'Screens/Auth Screens/register_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
+import 'Screens/mobile Screens/inspection_reports_screen.dart';
 import 'Widgets/main screen widgets/job_cards_widgets/image_gallery_viewer.dart';
 import 'security.dart';
-import 'package:web/web.dart' as web;
+// import 'package:web/web.dart' as web;
 
 SharedPreferences? globalPrefs;
 
@@ -22,10 +23,11 @@ void main() async {
       ? await Firebase.initializeApp(options: options)
       : await Firebase.initializeApp();
   globalPrefs = await SharedPreferences.getInstance();
-  if (web.window.location.pathname != '/') {
-    // Replace the current URL with '/'
-    web.window.history.replaceState(null, 'DataHub AI', '/');
-  }
+
+  // if (web.window.location.pathname != '/') {
+  //   // Replace the current URL with '/'
+  //   web.window.history.replaceState(null, 'DataHub AI', '/');
+  // }
 
   runApp(const MyApp());
 }
@@ -57,6 +59,10 @@ class MyApp extends StatelessWidget {
             name: '/mainScreen',
             page: () => MainScreen(),
             middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
+            GetPage(
+            name: '/inspectionReports',
+            page: () => InspectionReports(),
+            middlewares: [AuthMiddleware()]),
       ],
     );
   }

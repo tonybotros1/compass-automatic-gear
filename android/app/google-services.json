@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "660504023083",
+    "project_id": "compass-automatic-gear",
+    "storage_bucket": "compass-automatic-gear.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:660504023083:android:5c32847de67f66fb0b9a6e",
+        "android_client_info": {
+          "package_name": "com.datahubai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIAHUJhxqILt9Yclsh33flSVJCvf1aMWw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

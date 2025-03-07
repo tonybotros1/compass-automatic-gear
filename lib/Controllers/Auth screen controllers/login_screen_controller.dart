@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -51,54 +52,6 @@ class LoginScreenController extends GetxController {
     return dateTime.isBefore(todayOnly) || dateTime.isAtSameMomentAs(todayOnly);
   }
 
-// this function is to sigin in
-  // void singIn() async {
-  //   try {
-  //     sigingInProcess.value = true;
-
-  //     var userDataSnapshot = await FirebaseFirestore.instance
-  //         .collection('sys-users')
-  //         .where('email', isEqualTo: email.text)
-  //         .get();
-  //     List userData = userDataSnapshot.docs.map((doc) {
-  //       return {...doc.data()};
-  //     }).toList();
-
-  //     var isExpire = userData[0]['expiry_date'];
-  //     var userActiveStatus = userData[0]['status'];
-  //     if (userActiveStatus == false || isDateTodayOrOlder(isExpire)) {
-  //       showSnackBar('Login failed', 'Your session has been expired');
-  //       sigingInProcess.value = false;
-  //     } else {
-  //       UserCredential userCredential =
-  //           await FirebaseAuth.instance.signInWithEmailAndPassword(
-  //         email: email.text,
-  //         password: pass.text,
-  //       );
-  //       User? user = userCredential.user;
-
-  //       // Get the user ID
-  //       userId = user!.uid;
-  //       await saveToken(userId);
-  //       await saveTokenInSharedPref();
-  //       sigingInProcess.value = false;
-  //       showSnackBar('Login Success', 'Welcome');
-  //       Get.offAllNamed('/mainScreen');
-  //       sigingInProcess.value = false;
-  //     }
-  //   } on FirebaseAuthException catch (e) {
-  //     sigingInProcess.value = false;
-
-  //     if (e.code == 'invalid-email') {
-  //       showSnackBar('Wrong Email', 'This Email is not registed');
-  //     } else if (e.code == 'invalid-credential') {
-  //       showSnackBar('Wrong Email or Password',
-  //           'Please recheck your Email and Password then try again');
-  //     } else {
-  //       showSnackBar('Unexpected Error', 'Please try again');
-  //     }
-  //   }
-  // }
   singIn() async {
     try {
       sigingInProcess.value = true;
@@ -165,7 +118,11 @@ class LoginScreenController extends GetxController {
 
         sigingInProcess.value = false;
         showSnackBar('Login Success', 'Welcome');
-        Get.offAllNamed('/mainScreen');
+        if (kIsWeb) {
+          Get.offAllNamed('/mainScreen');
+        } else {
+          Get.offAllNamed('/inspectionReports');
+        }
       } else {
         sigingInProcess.value = false;
         showSnackBar(

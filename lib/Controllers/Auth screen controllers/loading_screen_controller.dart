@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/main.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,12 +51,15 @@ class LoadingScreenController extends GetxController {
 
       String? userId = prefs.getString('userId');
       if (userId == null || userId.isEmpty) {
-        // Navigate to login screen if not logged in.
         Get.offAllNamed('/loginScreen');
       } else {
         checkForExpiryDate(userId).then((value) async {
           if (value) {
-            Get.offAllNamed('/mainScreen');
+            if (kIsWeb) {
+              Get.offAllNamed('/mainScreen');
+            } else {
+              Get.offAllNamed('/inspectionReports');
+            }
           } else {
             await globalPrefs?.remove('userId');
             await globalPrefs?.remove('companyId');

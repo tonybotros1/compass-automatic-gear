@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../Controllers/Main screen controllers/job_card_controller.dart';
+import '../../../web_functions.dart';
 
 Future internalNotesDialog(
     JobCardController controller, BoxConstraints constraints, String jobId) {
@@ -239,7 +240,9 @@ Future internalNotesDialog(
                                               )
                                             : InkWell(
                                                 onTap: () {
-                                                  FilePickerService.openFile(
+                                                  var openFile =
+                                                      FilePickerService();
+                                                      openFile.openFile(
                                                       note['note']);
                                                 },
                                                 child: Row(

@@ -4,12 +4,11 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/main_screen_co
 import 'package:datahubai/Models/primary_model.dart';
 import 'package:datahubai/Models/type_model.dart';
 import 'package:datahubai/consts.dart';
-import 'package:datahubai/j_s_uint8_array_factory.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web/web.dart' as web;
 import '../../Models/entity_model.dart';
 
 class EntityInformationsController extends GetxController {
@@ -585,35 +584,22 @@ class EntityInformationsController extends GetxController {
 
   // this function is to select an image for logo
 
-  Future<void> pickImage() async {
+ // this function is to select an image for logo
+ Future<void> pickImage() async {
     try {
-      // Create a file input element using web.HTMLInputElement.
-      final uploadInput =
-          web.document.createElement('input') as web.HTMLInputElement;
-      uploadInput.type = 'file';
-      uploadInput.accept = 'image/*';
-      uploadInput.click();
+      // Use file_picker to pick an image file
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image, // Filter by image file types
+      );
 
-      // Listen for changes on the file input element.
-      uploadInput.onChange.listen((event) {
-        final files = uploadInput.files;
-        if (files != null && files.length > 0) {
-          final file = files.item(0);
-          if (file != null) {
-            final reader = web.FileReader();
-            // Read the file as an ArrayBuffer.
-            reader.readAsArrayBuffer(file);
-            reader.onLoadEnd.listen((event) {
-              if (reader.result != null) {
-                // Convert the JS ArrayBuffer to a Dart Uint8List.
-                imageBytes = convertJSArrayBufferToUint8List(reader.result!);
-                update();
-              }
-            });
-          }
-        }
-      });
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        // Store the file bytes directly into imageBytes
+        imageBytes = file.bytes;
+        update(); // Trigger any necessary update in your controller
+      }
     } catch (e) {
+      // Handle error
       // print('Error picking image: $e');
     }
   }

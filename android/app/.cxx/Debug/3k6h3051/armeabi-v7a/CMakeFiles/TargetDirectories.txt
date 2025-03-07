@@ -1,0 +1,2 @@
+C:/Flutter Projects/compass_automatic_gear/android/app/.cxx/Debug/3k6h3051/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Flutter Projects/compass_automatic_gear/android/app/.cxx/Debug/3k6h3051/armeabi-v7a/CMakeFiles/rebuild_cache.dir
