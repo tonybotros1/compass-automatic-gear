@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+import '../../../Controllers/Mobile section controllers/cards_screen_controller.dart';
 import '../../../consts.dart';
 
-Widget cardStyle(
-    {required controller,
-    required listName,
-    required Color color,
-    required String status}) {
+Widget cardStyle({
+  required CardsScreenController controller,
+  required RxList listName,
+}) {
   return ListView.builder(
       itemCount: listName.length,
       shrinkWrap: true,
@@ -62,28 +63,54 @@ Widget cardStyle(
                         Text('Customer', style: textStyleForCardsLabels),
                         Container(
                           alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(vertical: 5),
-                          width: 100,
+                          padding:
+                              EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                          width: null,
                           decoration: BoxDecoration(
-                              border: Border.all(color: secColor, width: 2),
+                              border: Border.all(color: secColor, width: 3),
                               borderRadius: BorderRadius.circular(5)),
-                          child:
-                              Text('Draft', style: textStyleForCardsContents),
+                          child: Text(carCard['label'],
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 19,
+                                  color: carCard['label'] == 'Draft'
+                                      ? Colors.blueGrey
+                                      : carCard['label'] == 'New'
+                                          ? Colors.green
+                                          : Colors.red)),
                         )
                       ],
                     ),
-                    Text('${carCard['customer']}',
+                    Text(
+                        controller.getdataName(
+                            carCard['customer'], controller.allCustomers,
+                            title: 'entity_name'),
                         style: textStyleForCardsContents),
                     SizedBox(height: 8),
                     Text('Car', style: textStyleForCardsLabels),
-                    Text('${carCard['car_brand']} | ${carCard['car_model']}',
-                        style: textStyleForCardsContents),
+                    FutureBuilder<String>(
+                      future: controller.getModelName(
+                          carCard['car_brand'], carCard['car_model']),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text('Loading...');
+                        } else if (snapshot.hasError) {
+                          return const Text('Error');
+                        } else {
+                          return Text(
+                            '${controller.getdataName(carCard['car_brand'], controller.allBrands)} | ${snapshot.data}',
+                            style: textStyleForCardsContents,
+                          );
+                        }
+                      },
+                    ),
                     SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Plate Number:', style: textStyleForCardsLabels),
-                        Text('Received On:', style: textStyleForCardsLabels),
+                        Text('Plate Number', style: textStyleForCardsLabels),
+                        Text('Received On', style: textStyleForCardsLabels),
                       ],
                     ),
                     Row(

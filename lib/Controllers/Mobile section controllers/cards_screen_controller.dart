@@ -4,23 +4,28 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CardsScreenController extends GetxController {
-  final RxList<DocumentSnapshot> carCards = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allCarCards = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> newCarCards = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> doneCarCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredCarCards =
       RxList<DocumentSnapshot>([]);
   Rx<TextEditingController> search = TextEditingController().obs;
   RxString query = RxString('');
   final RxBool loading = RxBool(false);
-  final RxInt numberOfCars = RxInt(0);
+  final RxInt numberOfNewCars = RxInt(0);
+  final RxInt numberOfDoneCars = RxInt(0);
   RxString companyId = RxString('');
   RxString userId = RxString('');
-
+  RxMap allCustomers = RxMap({});
+  RxMap allBrands = RxMap({});
+  RxMap allModels = RxMap({});
   @override
   void onInit() async {
     await getUserAndCompanyId();
+    getAllCustomers();
     getAllCards();
-    search.value.addListener(() {
-      filterCards();
-    });
+    getCarBrands();
+
     super.onInit();
   }
 
@@ -31,18 +36,48 @@ class CardsScreenController extends GetxController {
     companyId.value = prefs.getString('companyId')!;
   }
 
-// this function is to get the works from firebase
+// this function is to get the data name from id
+  String getdataName(String id, Map allData, {title = 'name'}) {
+    try {
+      final data = allData.entries.firstWhere(
+        (data) => data.key == id,
+      );
+      return data.value[title];
+    } catch (e) {
+      return '';
+    }
+  }
+
   getAllCards() {
     try {
       loading.value = true;
+
       FirebaseFirestore.instance
           .collection('job_cards')
           .where('company_id', isEqualTo: companyId.value)
           .orderBy('added_date', descending: true)
           .snapshots()
           .listen((event) {
-        carCards.assignAll(event.docs);
-        numberOfCars.value = carCards.length;
+        allCarCards.assignAll(event.docs); // Assign all cards first
+
+        // Clear the lists before refilling
+        newCarCards.clear();
+        doneCarCards.clear();
+
+        for (var element in event.docs) {
+          var data = element.data();
+          if (data['label'] == 'Draft') {
+            newCarCards.add(element);
+          } else {
+            doneCarCards.add(element);
+          }
+        }
+
+        numberOfNewCars.value = newCarCards.length;
+        numberOfDoneCars.value = doneCarCards.length;
+
+        loading.value = false;
+      }, onError: (e) {
         loading.value = false;
       });
     } catch (e) {
@@ -55,7 +90,8 @@ class CardsScreenController extends GetxController {
     query = query.toLowerCase();
 
     // Use where() to filter the list based on multiple fields
-    List<DocumentSnapshot> filteredResults = carCards.where((documentSnapshot) {
+    List<DocumentSnapshot> filteredResults =
+        allCarCards.where((documentSnapshot) {
       final data = documentSnapshot.data() as Map<String, dynamic>?;
 
       final customerName = data?['customer_name'] ?? '';
@@ -76,24 +112,66 @@ class CardsScreenController extends GetxController {
     filteredCarCards.assignAll(filteredResults);
   }
 
-  // this function is to filter the search results for web
-  void filterCards() {
-    query.value = search.value.text.toLowerCase();
-    if (query.value.isEmpty) {
-      filteredCarCards.clear();
-    } else {
-      filteredCarCards.assignAll(
-        carCards.where((car) {
-          return car['customer_name']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
-              car['car_brand'].toString().toLowerCase().contains(query) ||
-              car['car_model'].toString().toLowerCase().contains(query) ||
-              car['plate_number'].toString().toLowerCase().contains(query) ||
-              car['date'].toString().toLowerCase().contains(query);
-        }).toList(),
-      );
+  getAllCustomers() {
+    try {
+      FirebaseFirestore.instance
+          .collection('entity_informations')
+          .where('entity_code', arrayContains: 'Customer')
+          .snapshots()
+          .listen((customers) {
+        allCustomers.value = {
+          for (var doc in customers.docs) doc.id: doc.data()
+        };
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  getCarBrands() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .snapshots()
+          .listen((brands) {
+        allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  getModelsByCarBrand(brandId) {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .snapshots()
+          .listen((models) {
+        allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<String> getModelName(String brandId, String modelId) async {
+    try {
+      var cities = await FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .doc(modelId)
+          .get();
+
+      if (cities.exists) {
+        return cities.data()!['name'];
+      } else {
+        return '';
+      }
+    } catch (e) {
+      return ''; // Return empty string on error
     }
   }
 }
