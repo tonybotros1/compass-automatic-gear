@@ -10,7 +10,7 @@ import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
 import 'Screens/Auth Screens/register_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
-import 'Screens/mobile Screens/inspection_reports_screen.dart';
+ import 'Screens/mobile Screens/main_screen_fro_mobile.dart';
 import 'Widgets/main screen widgets/job_cards_widgets/image_gallery_viewer.dart';
 import 'security.dart';
 // import 'package:web/web.dart' as web;
@@ -60,8 +60,8 @@ class MyApp extends StatelessWidget {
             page: () => MainScreen(),
             middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
             GetPage(
-            name: '/inspectionReports',
-            page: () => InspectionReports(),
+            name: '/mainScreenForMobile',
+            page: () => MainScreenForMobile(),
             middlewares: [AuthMiddleware()]),
       ],
     );

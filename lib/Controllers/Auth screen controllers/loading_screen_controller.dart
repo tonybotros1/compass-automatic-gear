@@ -58,7 +58,7 @@ class LoadingScreenController extends GetxController {
             if (kIsWeb) {
               Get.offAllNamed('/mainScreen');
             } else {
-              Get.offAllNamed('/inspectionReports');
+              Get.offAllNamed('/mainScreenForMobile');
             }
           } else {
             await globalPrefs?.remove('userId');

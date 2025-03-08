@@ -301,6 +301,17 @@ TextStyle textFieldFontStyle = TextStyle(fontSize: 14, color: Colors.black);
 TextStyle textFieldLabelStyle = TextStyle(
     color: Colors.grey.shade700, fontSize: 12, fontWeight: FontWeight.bold);
 
+var textStyleForCardsLabels = TextStyle(
+  fontSize: 19,
+  fontWeight: FontWeight.bold,
+  color: secColor,
+);
+
+var textStyleForCardsContents = TextStyle(
+  fontSize: 19,
+  color: Colors.black54,
+);
+
 var mainColor = const Color(0xff005f95);
 // var mainColor = const Color(0xff27374D);
 var secColor = const Color(0xff7E99A3);
@@ -437,9 +448,6 @@ Decoration containerDecor = BoxDecoration(
     ),
     borderRadius: BorderRadius.only(
         bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5)));
-
-
-
 
 Widget textForDataRowInTable({
   required String text,

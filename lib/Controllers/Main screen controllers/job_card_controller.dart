@@ -511,6 +511,7 @@ class JobCardController extends GetxController {
     try {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
+        'label':'New',
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'quotation_status': quotationStatus.value,
@@ -589,12 +590,14 @@ class JobCardController extends GetxController {
       }
 
       if (jobCardAdded.isFalse) {
+        newData['added_date'] = DateTime.now().toString();
         var newJob = await FirebaseFirestore.instance
             .collection('job_cards')
             .add(newData);
         jobCardAdded.value = true;
         curreentJobCardId.value = newJob.id;
       } else {
+        newData.remove('added_date');
         await FirebaseFirestore.instance
             .collection('job_cards')
             .doc(curreentJobCardId.value)

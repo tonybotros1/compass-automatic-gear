@@ -121,7 +121,7 @@ class LoginScreenController extends GetxController {
         if (kIsWeb) {
           Get.offAllNamed('/mainScreen');
         } else {
-          Get.offAllNamed('/inspectionReports');
+          Get.offAllNamed('/mainScreenForMobile');
         }
       } else {
         sigingInProcess.value = false;
