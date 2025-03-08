@@ -4,6 +4,12 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CardsScreenController extends GetxController {
+  TextEditingController customerName = TextEditingController();
+  TextEditingController brand = TextEditingController();
+  TextEditingController model = TextEditingController();
+  TextEditingController year = TextEditingController();
+  TextEditingController vin = TextEditingController();
+  TextEditingController mileage = TextEditingController();
   final RxList<DocumentSnapshot> allCarCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> newCarCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> doneCarCards = RxList<DocumentSnapshot>([]);
@@ -14,6 +20,9 @@ class CardsScreenController extends GetxController {
   final RxBool loading = RxBool(false);
   final RxInt numberOfNewCars = RxInt(0);
   final RxInt numberOfDoneCars = RxInt(0);
+  RxString customerId = RxString('');
+  RxString brandId = RxString('');
+  RxString modelId = RxString('');
   RxString companyId = RxString('');
   RxString userId = RxString('');
   RxMap allCustomers = RxMap({});

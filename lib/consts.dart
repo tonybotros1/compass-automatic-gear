@@ -312,6 +312,9 @@ var textStyleForCardsContents = TextStyle(
   color: Colors.black54,
 );
 
+var textStyleForInspectionHints = TextStyle(
+    fontSize: 16, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
+
 var mainColor = const Color(0xff005f95);
 // var mainColor = const Color(0xff27374D);
 var secColor = const Color(0xff7E99A3);
@@ -337,6 +340,24 @@ Widget verticalSpace({int space = 20}) {
     height: Get.height / space,
   );
 }
+
+ Row hintSection({required String hint, required Color color}) {
+    return Row(
+      spacing: 10,
+      children: [
+        Container(
+          width: 15,
+          height: 15,
+          color: color,
+        ),
+        Text(
+          hint,
+          style: textStyleForInspectionHints,
+        )
+      ],
+    );
+  }
+
 
 var closeButton = ElevatedButton(
     style: closeButtonStyle,
