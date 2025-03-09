@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CardsScreenController extends GetxController {
   TextEditingController customerName = TextEditingController();
+  TextEditingController technicianName = TextEditingController();
   TextEditingController brand = TextEditingController();
   TextEditingController model = TextEditingController();
   TextEditingController year = TextEditingController();
@@ -21,21 +22,37 @@ class CardsScreenController extends GetxController {
   final RxInt numberOfNewCars = RxInt(0);
   final RxInt numberOfDoneCars = RxInt(0);
   RxString customerId = RxString('');
+  RxString technicianId = RxString('');
   RxString brandId = RxString('');
   RxString modelId = RxString('');
   RxString companyId = RxString('');
   RxString userId = RxString('');
   RxMap allCustomers = RxMap({});
+  RxMap allTechnicians = RxMap({});
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
+  RxMap<String, Map<String, String>> selectedCheckBoxIndices =
+      <String, Map<String, String>>{}.obs;
+
+  // Wheel controllers section
+  TextEditingController leftFrontBrakeLining = TextEditingController();
+  TextEditingController leftFrontTireTread = TextEditingController();
+  TextEditingController leftFrontWearPattern = TextEditingController();
+
   @override
   void onInit() async {
     await getUserAndCompanyId();
     getAllCustomers();
     getAllCards();
     getCarBrands();
-
+    getTechnicians();
     super.onInit();
+  }
+
+  void updateSelectedIndex(String label, String status) {
+    selectedCheckBoxIndices[label]?.addAll({'status': status});
+    update();
+    print(selectedCheckBoxIndices);
   }
 
 // this function is to get user and company id:
@@ -144,6 +161,19 @@ class CardsScreenController extends GetxController {
           .snapshots()
           .listen((brands) {
         allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  getTechnicians() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_technicians')
+          .snapshots()
+          .listen((tech) {
+        allTechnicians.value = {for (var doc in tech.docs) doc.id: doc.data()};
       });
     } catch (e) {
       //

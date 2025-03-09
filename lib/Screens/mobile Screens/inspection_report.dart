@@ -1,5 +1,6 @@
 import 'package:datahubai/Controllers/Mobile%20section%20controllers/cards_screen_controller.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 
@@ -35,6 +36,24 @@ class InspectionReposrt extends StatelessWidget {
               child: Column(
                 spacing: 10,
                 children: [
+                  GetX<CardsScreenController>(builder: (controller) {
+                    bool techniciansLoading = controller.allTechnicians.isEmpty;
+                    return CustomDropdown(
+                      textcontroller: controller.technicianName.text,
+                      showedSelectedName: 'name',
+                      hintText: 'Technician',
+                      items:
+                          techniciansLoading ? {} : controller.allTechnicians,
+                      itemBuilder: (context, key, value) {
+                        return ListTile(
+                          title: Text(value['name']),
+                        );
+                      },
+                      onChanged: (key, value) {
+                        controller.technicianId.value = key;
+                      },
+                    );
+                  }),
                   GetX<CardsScreenController>(builder: (controller) {
                     bool customerLoading = controller.allCustomers.isEmpty;
                     return CustomDropdown(
@@ -149,16 +168,56 @@ class InspectionReposrt extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          Container(
+                          Expanded(
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey)),
+                              child: GetBuilder<CardsScreenController>(
+                                  builder: (controller) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 5,
+                                  children: [
+                                    checkBoxesSection(
+                                        label: 'Brake Lining',
+                                        textcontroller:
+                                            controller.leftFrontBrakeLining),
+                                    checkBoxesSection(
+                                        label: 'Tire Tread',
+                                        textcontroller:
+                                            controller.leftFrontTireTread),
+                                    checkBoxesSection(
+                                        label: 'Wear Pattern',
+                                        textcontroller:
+                                            controller.leftFrontWearPattern),
+                                    Text(
+                                      'Tire Pressure PSI',
+                                      style: textStyleForInspectionHints,
+                                    ),
+                                    Row(
+                                      spacing: 5,
+                                      children: [
+                                        Expanded(
+                                          child: myTextFormFieldWithBorder(
+                                              labelText: 'Before'),
+                                        ),
+                                        Expanded(
+                                          child: myTextFormFieldWithBorder(
+                                              labelText: 'After'),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                );
+                              }),
+                            ),
+                          ),
+                          Expanded(
+                              child: Container(
                             decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey)),
-                            child: Column(
-                              spacing: 5,
-                              children:  List.generate(3, (i) {
-                                  return Row();
-                                })
-                            ),
-                          )
+                          ))
                         ],
                       )
                     ],
@@ -170,5 +229,61 @@ class InspectionReposrt extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget checkBoxesSection(
+      {required String label, required TextEditingController textcontroller}) {
+    return GetBuilder<CardsScreenController>(builder: (controller) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          checkBox(
+              value: controller.selectedCheckBoxIndices[label]?['status'] ==
+                  'Checked And Ok',
+              color: Colors.green,
+              onChanged: (value) =>
+                  controller.updateSelectedIndex(label, 'Checked And Ok')),
+          checkBox(
+              value: controller.selectedCheckBoxIndices[label]?['status'] ==
+                  'May Need Future Attention',
+              color: Colors.yellow,
+              onChanged: (value) => controller.updateSelectedIndex(
+                  label, 'May Need Future Attention')),
+          checkBox(
+              value: controller.selectedCheckBoxIndices[label]?['status'] ==
+                  'Requires Immediate Attention',
+              color: Colors.red,
+              onChanged: (value) => controller.updateSelectedIndex(
+                  label, 'Requires Immediate Attention')),
+          Expanded(
+              child: myTextFormFieldWithBorder(
+                  labelText: label,
+                  controller: textcontroller,
+                  onChanged: (value) {
+                    print(controller.selectedCheckBoxIndices);
+                    controller.selectedCheckBoxIndices[label]?.addAll({'value':value});
+                  }))
+        ],
+      );
+    });
+  }
+
+  Checkbox checkBox(
+      {required bool value,
+      required Color color,
+      required void Function(bool?)? onChanged}) {
+    return Checkbox(
+        checkColor: mainColor,
+        fillColor:
+            WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
+            return color;
+          }
+          return color;
+        }),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        value: value,
+        onChanged: onChanged);
   }
 }

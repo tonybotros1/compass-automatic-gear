@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
-import '../../Screens/mobile Screens/inspection_reposrt.dart';
+import '../../Screens/mobile Screens/inspection_report.dart';
 import '../../Screens/mobile Screens/new_cards_screen.dart';
 import '../../consts.dart';
 
