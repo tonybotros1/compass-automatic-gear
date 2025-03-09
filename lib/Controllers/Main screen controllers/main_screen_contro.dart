@@ -6,6 +6,7 @@ import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/in
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_card.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/list_of_values.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/sales_man.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/technician.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
@@ -103,13 +104,15 @@ class MainScreenController extends GetxController {
       case '/branches':
         return const SizedBox(child: Branches());
       case '/jobCards':
-        return  SizedBox(child: JobCard());
+        return SizedBox(child: JobCard());
       case '/countries':
         return const SizedBox(child: Countries());
       case '/carBrands':
         return const SizedBox(child: CarBrands());
       case '/invoiceItems':
         return const SizedBox(child: InvoiceItems());
+      case '/technicians':
+        return const SizedBox(child: Technician());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }
