@@ -14,8 +14,7 @@ Widget addNewTechnicianOrEdit({
       myTextFormFieldWithBorder(
         obscureText: false,
         controller: controller.name,
-        labelText: 'Code',
-        hintText: 'Enter Code',
+        labelText: 'Name',
         validate: true,
       ),
       SizedBox(
@@ -24,14 +23,9 @@ Widget addNewTechnicianOrEdit({
       myTextFormFieldWithBorder(
         obscureText: false,
         controller: controller.job,
-        labelText: 'Description',
-        hintText: 'Enter Name',
+        labelText: 'Job',
         validate: true,
       ),
-     
-     
-     
-      
     ],
   );
 }

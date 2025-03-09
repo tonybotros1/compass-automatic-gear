@@ -34,9 +34,9 @@ class Technician extends StatelessWidget {
                         constraints: constraints,
                         context: context,
                         controller: controller,
-                        title: 'Search for branches',
-                        button:
-                            newBranchesButton(context, constraints, controller),
+                        title: 'Search for technicianses',
+                        button: newtechniciansesButton(
+                            context, constraints, controller),
                       );
                     },
                   ),
@@ -77,7 +77,6 @@ class Technician extends StatelessWidget {
     );
   }
 }
-
 
 Widget tableOfScreens(
     {required constraints,
@@ -122,72 +121,75 @@ Widget tableOfScreens(
     ],
     rows: controller.filteredTechnicians.isEmpty &&
             controller.search.value.text.isEmpty
-        ? controller.allTechnician.map<DataRow>((branch) {
-            final branchData = branch.data() as Map<String, dynamic>;
-            final branchId = branch.id;
-            return dataRowForTheTable(
-                branchData, context, constraints, branchId, controller);
+        ? controller.allTechnician.map<DataRow>((technicians) {
+            final techniciansData = technicians.data() as Map<String, dynamic>;
+            final techniciansId = technicians.id;
+            return dataRowForTheTable(techniciansData, context, constraints,
+                techniciansId, controller);
           }).toList()
-        : controller.filteredTechnicians.map<DataRow>((branch) {
-            final branchData = branch.data() as Map<String, dynamic>;
-            final branchId = branch.id;
-            return dataRowForTheTable(
-                branchData, context, constraints, branchId, controller);
+        : controller.filteredTechnicians.map<DataRow>((technicians) {
+            final techniciansData = technicians.data() as Map<String, dynamic>;
+            final techniciansId = technicians.id;
+            return dataRowForTheTable(techniciansData, context, constraints,
+                techniciansId, controller);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> branchData, context,
-    constraints, branchId, TechnicianController controller) {
+DataRow dataRowForTheTable(Map<String, dynamic> techniciansData, context,
+    constraints, techniciansId, TechnicianController controller) {
   return DataRow(cells: [
     DataCell(Text(
-      branchData['name'] ?? '',
+      techniciansData['name'] ?? '',
     )),
     DataCell(
       Text(
-        branchData['job'] ?? '',
+        techniciansData['job'] ?? '',
       ),
     ),
     DataCell(
       Text(
-        branchData['added_date'] != null && branchData['added_date'] != ''
-            ? textToDate(branchData['added_date']) //
+        techniciansData['added_date'] != null &&
+                techniciansData['added_date'] != ''
+            ? textToDate(techniciansData['added_date'])
             : 'N/A',
       ),
     ),
-    DataCell(Row(spacing: 5,
+    DataCell(Row(
+      spacing: 5,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         editSection(
-            context, controller, branchData, constraints, branchId),
-        deleteSection(controller, branchId, context),
+            context, controller, techniciansData, constraints, techniciansId),
+        deleteSection(controller, techniciansId, context),
       ],
     )),
   ]);
 }
 
-
-ElevatedButton deleteSection(TechnicianController controller, branchId, context) {
+ElevatedButton deleteSection(
+    TechnicianController controller, techniciansId, context) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
         alertDialog(
             context: context,
             controller: controller,
-            content: "The branch will be deleted permanently",
+            content: "The technicians will be deleted permanently",
             onPressed: () {
-              // controller.deleteBranch(branchId);
+              controller.deleteTechnician(techniciansId);
             });
       },
       child: const Text("Delete"));
 }
 
 ElevatedButton editSection(context, TechnicianController controller,
-    Map<String, dynamic> branchData, constraints, branchId) {
+    Map<String, dynamic> techniciansData, constraints, techniciansId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () async {
-       
+        controller.name.text = techniciansData['name'];
+        controller.job.text = techniciansData['job'];
         technicianDialog(
             constraints: constraints,
             controller: controller,
@@ -195,19 +197,19 @@ ElevatedButton editSection(context, TechnicianController controller,
             onPressed: controller.addingNewValue.value
                 ? null
                 : () {
-                    // controller.editBranch(branchId);
+                    controller.editTechnician(techniciansId);
                   });
       },
       child: const Text('Edit'));
 }
 
-ElevatedButton newBranchesButton(BuildContext context,
+ElevatedButton newtechniciansesButton(BuildContext context,
     BoxConstraints constraints, TechnicianController controller) {
   return ElevatedButton(
     onPressed: () {
       controller.name.clear();
       controller.job.clear();
-      
+
       technicianDialog(
           constraints: constraints,
           controller: controller,
@@ -215,7 +217,8 @@ ElevatedButton newBranchesButton(BuildContext context,
           onPressed: controller.addingNewValue.value
               ? null
               : () async {
-                  // await controller.addNewBranch();
+                  print('ffffffff');
+                  await controller.addNewTechnicians();
                 });
     },
     style: newButtonStyle,

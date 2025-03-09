@@ -1,8 +1,6 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/technician_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../Controllers/Main screen controllers/branches_controller.dart';
 import '../../../consts.dart';
 import 'add_new_technician_or_edit.dart';
 
@@ -16,7 +14,7 @@ Future<dynamic> technicianDialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: SizedBox(
-          height: 300,
+          height: 250,
           width: constraints.maxWidth / 2.5,
           child: Column(
             children: [
@@ -36,14 +34,15 @@ Future<dynamic> technicianDialog(
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
                     Spacer(),
-                    GetX<BranchesController>(
+                    GetX<TechnicianController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
-                              style:new2ButtonStyle,
+                              style: new2ButtonStyle,
                               child: controller.addingNewValue.value == false
                                   ? const Text(
                                       'Save',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     )
                                   : SizedBox(
                                       height: 20,

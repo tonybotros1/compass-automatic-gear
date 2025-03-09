@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../consts.dart';
 import 'main_screen_contro.dart';
 
 class TechnicianController extends GetxController {
@@ -24,6 +26,9 @@ class TechnicianController extends GetxController {
   void onInit() async {
     await getCompanyId();
     getAllTechnicians();
+    search.value.addListener(() {
+      filterTechnicians();
+    });
     super.onInit();
   }
 
@@ -42,8 +47,8 @@ class TechnicianController extends GetxController {
   void onSort(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
       allTechnician.sort((counter1, counter2) {
-        final String? value1 = counter1.get('code');
-        final String? value2 = counter2.get('code');
+        final String? value1 = counter1.get('name');
+        final String? value2 = counter2.get('name');
 
         // Handle nulls: put nulls at the end
         if (value1 == null && value2 == null) return 0;
@@ -54,8 +59,8 @@ class TechnicianController extends GetxController {
       });
     } else if (columnIndex == 1) {
       allTechnician.sort((counter1, counter2) {
-        final String? value1 = counter1.get('name');
-        final String? value2 = counter2.get('name');
+        final String? value1 = counter1.get('job');
+        final String? value2 = counter2.get('job');
 
         // Handle nulls: put nulls at the end
         if (value1 == null && value2 == null) return 0;
@@ -101,18 +106,65 @@ class TechnicianController extends GetxController {
     }
   }
 
-  addNewTechnicians() async* {
+  addNewTechnicians() async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance.collection('all_technicians').add({
-        'name':name.text,
-        'job':job.text,
-        'added_date':DateTime.now().toString(),
-        'company_id':companyId.value,
+        'name': name.text,
+        'job': job.text,
+        'added_date': DateTime.now().toString(),
+        'company_id': companyId.value,
+      });
+      addingNewValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewValue.value = false;
+    }
+  }
+
+  deleteTechnician(techId) async {
+    try {
+      Get.back();
+      await FirebaseFirestore.instance
+          .collection('all_technicians')
+          .doc(techId)
+          .delete();
+    } catch (e) {
+      //
+    }
+  }
+
+  editTechnician(techId) async {
+    try {
+      Get.back();
+      await FirebaseFirestore.instance
+          .collection('all_technicians')
+          .doc(techId)
+          .update({
+        'name': name.text,
+        'job': job.text,
       });
     } catch (e) {
-           addingNewValue.value = false;
+      //
+    }
+  }
 
+  // this function is to filter the search results for web
+  void filterTechnicians() {
+    query.value = search.value.text.toLowerCase();
+    if (query.value.isEmpty) {
+      filteredTechnicians.clear();
+    } else {
+      filteredTechnicians.assignAll(
+        allTechnician.where((saleman) {
+          return saleman['name'].toString().toLowerCase().contains(query) ||
+              saleman['job'].toString().toLowerCase().contains(query) ||
+              textToDate(saleman['added_date'])
+                  .toString()
+                  .toLowerCase()
+                  .contains(query);
+        }).toList(),
+      );
     }
   }
 }
