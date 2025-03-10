@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../consts.dart';
+
 class CardsScreenController extends GetxController {
   TextEditingController customerName = TextEditingController();
   TextEditingController technicianName = TextEditingController();
+  TextEditingController date = TextEditingController();
   TextEditingController brand = TextEditingController();
   TextEditingController model = TextEditingController();
   TextEditingController year = TextEditingController();
@@ -31,13 +34,25 @@ class CardsScreenController extends GetxController {
   RxMap allTechnicians = RxMap({});
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
-  RxMap<String, Map<String, String>> selectedCheckBoxIndices =
+  RxMap<String, Map<String, String>> selectedCheckBoxIndicesForLeftFront =
+      <String, Map<String, String>>{}.obs;
+  RxMap<String, Map<String, String>> selectedCheckBoxIndicesForRightFront =
+      <String, Map<String, String>>{}.obs;
+  RxMap<String, Map<String, String>> selectedCheckBoxIndicesForLeftRear =
+      <String, Map<String, String>>{}.obs;
+  RxMap<String, Map<String, String>> selectedCheckBoxIndicesForRightRear =
       <String, Map<String, String>>{}.obs;
 
   // Wheel controllers section
   TextEditingController leftFrontBrakeLining = TextEditingController();
   TextEditingController leftFrontTireTread = TextEditingController();
   TextEditingController leftFrontWearPattern = TextEditingController();
+  TextEditingController leftFrontTirePressureBefore = TextEditingController();
+  TextEditingController leftFrontTirePressureAfter = TextEditingController();
+
+  // prioi body damage
+  RxList<Offset> damagePoints = <Offset>[].obs;
+  GlobalKey repaintBoundaryKey = GlobalKey();
 
   @override
   void onInit() async {
@@ -49,10 +64,58 @@ class CardsScreenController extends GetxController {
     super.onInit();
   }
 
-  void updateSelectedIndex(String label, String status) {
-    selectedCheckBoxIndices[label]?.addAll({'status': status});
+  addDamagePoint(BuildContext context, TapDownDetails details) {
+    RenderBox box = context.findRenderObject() as RenderBox;
+    Offset localPosition = box.globalToLocal(details.globalPosition);
+
+    // Get image widget position inside the Stack
+    final RenderBox imageBox =
+        Get.find<GlobalKey>().currentContext!.findRenderObject() as RenderBox;
+    final Offset imagePosition = imageBox.localToGlobal(Offset.zero);
+
+    // Adjust tap position relative to image position
+    localPosition = Offset(localPosition.dx - imagePosition.dx,
+        localPosition.dy - imagePosition.dy);
+
+    damagePoints.add(localPosition);
     update();
-    print(selectedCheckBoxIndices);
+  }
+
+// to check a box and save its value in the map
+  void updateSelectedBox(String label, String statusKey, String statusValue,
+      RxMap<String, Map<String, String>> dataMap) {
+    if (!dataMap.containsKey(label)) {
+      dataMap[label] = {};
+    }
+    if (dataMap[label] is Map<String, String>) {
+      dataMap[label]?[statusKey] = statusValue;
+    }
+    update();
+  }
+
+// to upate the text field and save its value in the map
+  void updateEnteredField(String label, String valueKey, String value,
+      RxMap<String, Map<String, String>> dataMap) {
+    if (!dataMap.containsKey(label)) {
+      dataMap[label] = {};
+    }
+    if (dataMap[label] is Map<String, String>) {
+      dataMap[label]?[valueKey] = value;
+    }
+  }
+
+  Future<void> selectDateContext(
+      BuildContext context, TextEditingController date) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null) {
+      date.text = textToDate(picked.toString());
+    }
   }
 
 // this function is to get user and company id:

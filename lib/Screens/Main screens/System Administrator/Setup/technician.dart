@@ -216,7 +216,6 @@ ElevatedButton newtechniciansesButton(BuildContext context,
           onPressed: controller.addingNewValue.value
               ? null
               : () async {
-                  print('ffffffff');
                   await controller.addNewTechnicians();
                 });
     },

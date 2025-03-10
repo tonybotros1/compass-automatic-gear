@@ -1,9 +1,8 @@
 import 'package:datahubai/Controllers/Mobile%20section%20controllers/cards_screen_controller.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
-
+import 'package:get/get.dart';
+import '../../Widgets/Mobile widgets/inspection report widgets/break_and_tire_wheel.dart';
 import '../../Widgets/my_text_field.dart';
 import '../../consts.dart';
 
@@ -13,6 +12,7 @@ class InspectionReposrt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           'Inspection Report',
@@ -31,27 +31,47 @@ class InspectionReposrt extends StatelessWidget {
               style: fontStyle1,
             )),
             Container(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(10),
               decoration: containerDecor,
               child: Column(
                 spacing: 10,
                 children: [
                   GetX<CardsScreenController>(builder: (controller) {
                     bool techniciansLoading = controller.allTechnicians.isEmpty;
-                    return CustomDropdown(
-                      textcontroller: controller.technicianName.text,
-                      showedSelectedName: 'name',
-                      hintText: 'Technician',
-                      items:
-                          techniciansLoading ? {} : controller.allTechnicians,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text(value['name']),
-                        );
-                      },
-                      onChanged: (key, value) {
-                        controller.technicianId.value = key;
-                      },
+                    return Row(
+                      spacing: 10,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: CustomDropdown(
+                            textcontroller: controller.technicianName.text,
+                            showedSelectedName: 'name',
+                            hintText: 'Technician',
+                            items: techniciansLoading
+                                ? {}
+                                : controller.allTechnicians,
+                            itemBuilder: (context, key, value) {
+                              return ListTile(
+                                title: Text(value['name']),
+                              );
+                            },
+                            onChanged: (key, value) {
+                              controller.technicianId.value = key;
+                            },
+                          ),
+                        ),
+                        Expanded(
+                            child: myTextFormFieldWithBorder(
+                                suffixIcon: IconButton(
+                                    onPressed: () {
+                                      controller.selectDateContext(
+                                          context, controller.date);
+                                    },
+                                    icon: Icon(Icons.date_range)),
+                                labelText: 'Date',
+                                isDate: true,
+                                controller: controller.date))
+                      ],
                     );
                   }),
                   GetX<CardsScreenController>(builder: (controller) {
@@ -73,61 +93,76 @@ class InspectionReposrt extends StatelessWidget {
                   }),
                   GetX<CardsScreenController>(builder: (controller) {
                     bool brandsLoading = controller.allBrands.isEmpty;
-
-                    return CustomDropdown(
-                      showedSelectedName: 'name',
-                      hintText: 'Brand',
-                      textcontroller: controller.brand.text,
-                      items: brandsLoading ? {} : controller.allBrands,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text(value['name']),
-                        );
-                      },
-                      onChanged: (key, value) {
-                        controller.getModelsByCarBrand(key);
-                        controller.model.clear();
-
-                        controller.brandId.value = key;
-                      },
-                    );
-                  }),
-                  GetX<CardsScreenController>(builder: (controller) {
                     bool modelLoading = controller.allModels.isEmpty;
 
-                    return CustomDropdown(
-                      showedSelectedName: 'name',
-                      hintText: 'Model',
-                      textcontroller: controller.model.text,
-                      items: modelLoading ? {} : controller.allModels,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text(value['name']),
-                        );
-                      },
-                      onChanged: (key, value) {
-                        controller.modelId.value = key;
-                      },
+                    return Row(
+                      spacing: 10,
+                      children: [
+                        Expanded(
+                          child: CustomDropdown(
+                            showedSelectedName: 'name',
+                            hintText: 'Brand',
+                            textcontroller: controller.brand.text,
+                            items: brandsLoading ? {} : controller.allBrands,
+                            itemBuilder: (context, key, value) {
+                              return ListTile(
+                                title: Text(value['name']),
+                              );
+                            },
+                            onChanged: (key, value) {
+                              controller.getModelsByCarBrand(key);
+                              controller.model.clear();
+
+                              controller.brandId.value = key;
+                            },
+                          ),
+                        ),
+                        Expanded(
+                            flex: 2,
+                            child: CustomDropdown(
+                              showedSelectedName: 'name',
+                              hintText: 'Model',
+                              textcontroller: controller.model.text,
+                              items: modelLoading ? {} : controller.allModels,
+                              itemBuilder: (context, key, value) {
+                                return ListTile(
+                                  title: Text(value['name']),
+                                );
+                              },
+                              onChanged: (key, value) {
+                                controller.modelId.value = key;
+                              },
+                            ))
+                      ],
                     );
                   }),
                   GetBuilder<CardsScreenController>(builder: (controller) {
                     return Column(
                       spacing: 10,
                       children: [
-                        myTextFormFieldWithBorder(
-                            isnumber: true,
-                            labelText: 'Year',
-                            keyboardType: TextInputType.number,
-                            controller: controller.year),
+                        Row(
+                          spacing: 10,
+                          children: [
+                            Expanded(
+                              child: myTextFormFieldWithBorder(
+                                  isnumber: true,
+                                  labelText: 'Year',
+                                  keyboardType: TextInputType.number,
+                                  controller: controller.year),
+                            ),
+                            Expanded(
+                              child: myTextFormFieldWithBorder(
+                                  isDouble: true,
+                                  labelText: 'Mileage',
+                                  keyboardType: TextInputType.number,
+                                  controller: controller.mileage),
+                            )
+                          ],
+                        ),
                         myTextFormFieldWithBorder(
                             labelText: 'VIN Number',
                             keyboardType: TextInputType.number,
                             controller: controller.vin),
-                        myTextFormFieldWithBorder(
-                            isDouble: true,
-                            labelText: 'Mileage',
-                            keyboardType: TextInputType.number,
-                            controller: controller.mileage),
                       ],
                     );
                   })
@@ -141,16 +176,33 @@ class InspectionReposrt extends StatelessWidget {
               style: fontStyle1,
             )),
             Container(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(10),
               decoration: containerDecor,
               child: Column(
                 spacing: 10,
                 children: [
-                  hintSection(hint: 'Checked And Ok', color: Colors.green),
-                  hintSection(
-                      hint: 'May Need Future Attention', color: Colors.yellow),
-                  hintSection(
-                      hint: 'Requires Immediate Attention', color: Colors.red),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          hintSection(
+                              hint: 'Checked And Ok', color: Colors.green),
+                          hintSection(
+                              hint: 'May Need Future Attention',
+                              color: Colors.yellow),
+                          hintSection(
+                              hint: 'Requires Immediate Attention',
+                              color: Colors.red),
+                        ],
+                      ),
+                      Image.asset(
+                        'assets/car_wheel.png',
+                        width: 70,
+                      )
+                    ],
+                  ),
                   Column(
                     children: [
                       Row(
@@ -166,124 +218,120 @@ class InspectionReposrt extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey)),
-                              child: GetBuilder<CardsScreenController>(
-                                  builder: (controller) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 5,
-                                  children: [
-                                    checkBoxesSection(
-                                        label: 'Brake Lining',
-                                        textcontroller:
-                                            controller.leftFrontBrakeLining),
-                                    checkBoxesSection(
-                                        label: 'Tire Tread',
-                                        textcontroller:
-                                            controller.leftFrontTireTread),
-                                    checkBoxesSection(
-                                        label: 'Wear Pattern',
-                                        textcontroller:
-                                            controller.leftFrontWearPattern),
-                                    Text(
-                                      'Tire Pressure PSI',
-                                      style: textStyleForInspectionHints,
-                                    ),
-                                    Row(
-                                      spacing: 5,
-                                      children: [
-                                        Expanded(
-                                          child: myTextFormFieldWithBorder(
-                                              labelText: 'Before'),
-                                        ),
-                                        Expanded(
-                                          child: myTextFormFieldWithBorder(
-                                              labelText: 'After'),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                );
-                              }),
+                      GetBuilder<CardsScreenController>(builder: (controller) {
+                        return Row(
+                          spacing: 4,
+                          children: [
+                            Expanded(
+                              child: breakAndTireWheel(
+                                  dataMap: controller
+                                      .selectedCheckBoxIndicesForLeftFront),
                             ),
+                            Expanded(
+                                child: breakAndTireWheel(
+                                    dataMap: controller
+                                        .selectedCheckBoxIndicesForRightFront))
+                          ],
+                        );
+                      }),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Left Rear',
+                            style: textStyleForInspectionHints,
                           ),
-                          Expanded(
-                              child: Container(
-                            decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey)),
-                          ))
+                          Text(
+                            'Right Rear',
+                            style: textStyleForInspectionHints,
+                          ),
                         ],
-                      )
+                      ),
+                      GetBuilder<CardsScreenController>(builder: (controller) {
+                        return Row(
+                          spacing: 4,
+                          children: [
+                            Expanded(
+                              child: breakAndTireWheel(
+                                  dataMap: controller
+                                      .selectedCheckBoxIndicesForLeftRear),
+                            ),
+                            Expanded(
+                                child: breakAndTireWheel(
+                                    dataMap: controller
+                                        .selectedCheckBoxIndicesForRightRear))
+                          ],
+                        );
+                      }),
                     ],
                   )
                 ],
               ),
-            )
+            ),
+            SizedBox(height: 10),
+            labelContainer(
+                lable: Text(
+              'Prior Body Damage',
+              style: fontStyle1,
+            )),
+            LayoutBuilder(builder: (context, constraints) {
+              return Container(
+                padding: EdgeInsets.all(10),
+                decoration: containerDecor,
+                child: Column(
+                  children: [
+                    GetBuilder<CardsScreenController>(builder: (controller) {
+                      return GestureDetector(
+                        onTapDown: (details) =>
+                            controller.addDamagePoint(context, details),
+                        child: RepaintBoundary(
+                          key: controller.repaintBoundaryKey,
+                          child: Stack(
+                            children: [
+                              Image.asset('assets/vehicle.jpg',
+                                  width: constraints.maxWidth, height: 500),
+                              CustomPaint(
+                                size: Size(constraints.maxWidth, 500),
+                                painter: DamagePainter(controller.damagePoints),
+                                child: SizedBox(
+                                    width: constraints.maxWidth, height: 500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    })
+                  ],
+                ),
+              );
+            })
           ],
         ),
       ),
     );
   }
+}
 
-  Widget checkBoxesSection(
-      {required String label, required TextEditingController textcontroller}) {
-    return GetBuilder<CardsScreenController>(builder: (controller) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          checkBox(
-              value: controller.selectedCheckBoxIndices[label]?['status'] ==
-                  'Checked And Ok',
-              color: Colors.green,
-              onChanged: (value) =>
-                  controller.updateSelectedIndex(label, 'Checked And Ok')),
-          checkBox(
-              value: controller.selectedCheckBoxIndices[label]?['status'] ==
-                  'May Need Future Attention',
-              color: Colors.yellow,
-              onChanged: (value) => controller.updateSelectedIndex(
-                  label, 'May Need Future Attention')),
-          checkBox(
-              value: controller.selectedCheckBoxIndices[label]?['status'] ==
-                  'Requires Immediate Attention',
-              color: Colors.red,
-              onChanged: (value) => controller.updateSelectedIndex(
-                  label, 'Requires Immediate Attention')),
-          Expanded(
-              child: myTextFormFieldWithBorder(
-                  labelText: label,
-                  controller: textcontroller,
-                  onChanged: (value) {
-                    print(controller.selectedCheckBoxIndices);
-                    controller.selectedCheckBoxIndices[label]?.addAll({'value':value});
-                  }))
-        ],
-      );
-    });
+class DamagePainter extends CustomPainter {
+  final List<Offset> points;
+
+  DamagePainter(this.points);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.red
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    for (var point in points) {
+      canvas.drawCircle(point, 10, paint);
+    }
   }
 
-  Checkbox checkBox(
-      {required bool value,
-      required Color color,
-      required void Function(bool?)? onChanged}) {
-    return Checkbox(
-        checkColor: mainColor,
-        fillColor:
-            WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return color;
-          }
-          return color;
-        }),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        value: value,
-        onChanged: onChanged);
-  }
+  @override
+  bool shouldRepaint(DamagePainter oldDelegate) => true;
 }
