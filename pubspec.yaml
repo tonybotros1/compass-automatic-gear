@@ -59,6 +59,7 @@ dependencies:
   persistent_bottom_nav_bar: ^6.2.1
   liquid_pull_to_refresh: ^3.0.1
   signature: ^6.0.0
+  image_picker: ^1.1.2
   
 dev_dependencies:
   flutter_test:

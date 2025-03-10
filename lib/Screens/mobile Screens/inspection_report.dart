@@ -343,41 +343,43 @@ class InspectionReposrt extends StatelessWidget {
                   'CAR IMAGES',
                   style: fontStyle1,
                 ),
-                IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.camera_alt_outlined,
-                      color: Colors.white,
-                    ))
+                GetBuilder<CardsScreenController>(builder: (controller) {
+                  return IconButton(
+                      onPressed: () {
+                        controller.takePhoto();
+                      },
+                      icon: Icon(
+                        Icons.camera_alt_outlined,
+                        color: Colors.white,
+                      ));
+                })
               ],
             )),
             GetBuilder<CardsScreenController>(builder: (controller) {
               return Container(
                 padding: EdgeInsets.all(10),
                 decoration: containerDecor,
-                child: GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: controller.imagesList.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                    ),
-                    itemBuilder: (context, i) {
-                      if (controller.imagesList.isEmpty) {
-                        return SizedBox(
-                          height: 100,
-                          child: Center(
-                            child: Text(
-                              'Images',
-                              style: textStyleForInspectionHints,
-                            ),
+                child: controller.imagesList.isNotEmpty
+                    ? GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: controller.imagesList.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                        ),
+                        itemBuilder: (context, i) {
+                          return SizedBox();
+                        })
+                    : SizedBox(
+                        height: 100,
+                        child: Center(
+                          child: Text(
+                            'Images',
+                            style: textStyleForInspectionHints,
                           ),
-                        );
-                      } else {
-                        return SizedBox();
-                      }
-                    }),
+                        ),
+                      ),
               );
             }),
             SizedBox(height: 10),

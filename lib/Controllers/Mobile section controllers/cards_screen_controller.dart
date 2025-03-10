@@ -1,14 +1,13 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
-
 import '../../consts.dart';
 
 class CardsScreenController extends GetxController {
@@ -75,6 +74,7 @@ RxMap<String, Map<String, String>> selectedCheckBoxIndicesForBatteryPerformance 
   GlobalKey imageKey = GlobalKey();
   GlobalKey repaintBoundaryKey = GlobalKey();
   RxList<File> imagesList = RxList([]);
+final ImagePicker picker = ImagePicker();
 
   // interioir / exterioir
   RxList entrioirExterioirList = RxList([
@@ -130,6 +130,20 @@ RxMap<String, Map<String, String>> selectedCheckBoxIndicesForBatteryPerformance 
     getTechnicians();
     super.onInit();
   }
+
+   // this functions is to take photos
+ void takePhoto() async {
+  try {
+    final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+    
+    if (photo != null) {
+      File imageFile = File(photo.path);
+      imagesList.add(imageFile);
+    }
+  } catch (e) {
+    // print("Error capturing image: $e");
+  }
+}
 
   // for signature:
   SignatureController signatureControllerForAdvisor = SignatureController(
