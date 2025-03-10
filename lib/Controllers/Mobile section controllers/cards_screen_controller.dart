@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:signature/signature.dart';
 
 import '../../consts.dart';
 
@@ -52,10 +53,14 @@ class CardsScreenController extends GetxController {
       selectedCheckBoxIndicesForInteriorExterior =
       <String, Map<String, String>>{}.obs;
 
-       RxMap<String, Map<String, String>>
-      selectedCheckBoxIndicesForUnderVehicle =
+  RxMap<String, Map<String, String>> selectedCheckBoxIndicesForUnderVehicle =
       <String, Map<String, String>>{}.obs;
 
+  RxMap<String, Map<String, String>> selectedCheckBoxIndicesForUnderHood =
+      <String, Map<String, String>>{}.obs;
+
+RxMap<String, Map<String, String>> selectedCheckBoxIndicesForBatteryPerformance =
+      <String, Map<String, String>>{}.obs;
 
   // Wheel controllers section
   TextEditingController leftFrontBrakeLining = TextEditingController();
@@ -69,6 +74,7 @@ class CardsScreenController extends GetxController {
   RxList<Offset> relativePoints = <Offset>[].obs;
   GlobalKey imageKey = GlobalKey();
   GlobalKey repaintBoundaryKey = GlobalKey();
+  RxList<File> imagesList = RxList([]);
 
   // interioir / exterioir
   RxList entrioirExterioirList = RxList([
@@ -99,6 +105,22 @@ class CardsScreenController extends GetxController {
     'Inspect Nuts and Blots on Body and Chassis'
   ]);
 
+  RxList underHoodList = RxList([
+    'Fluid Levels: Oil, Coolant, Battery, Power Steering, Brake Fluid, Washer, Automatic Transmission',
+    'Engine Air Filter',
+    'Drive Belts (condition and adjustment)',
+    'Cooling System Hoses, Heater Hpses, Air Condition, Hoses and Connections',
+    'Radiator Core, Air Conditioner Condenser',
+    'Clutch Reservoir Fluid / Condition (as equipped)'
+  ]);
+
+  RxList batteryPerformanceList = RxList([
+    'Battery Terminal / Cables / Mountings','Condition Of Battery / Cold Cranking Amps'
+  ]);
+  TextEditingController batteryColdCrankingAmpsFactorySpecs = TextEditingController();
+  TextEditingController batteryColdCrankingAmpsActual= TextEditingController();
+
+
   @override
   void onInit() async {
     await getUserAndCompanyId();
@@ -108,6 +130,19 @@ class CardsScreenController extends GetxController {
     getTechnicians();
     super.onInit();
   }
+
+  // for signature:
+  SignatureController signatureControllerForAdvisor = SignatureController(
+    penStrokeWidth: 3,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.white,
+  );
+
+   SignatureController signatureControllerForCustomer = SignatureController(
+    penStrokeWidth: 3,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.white,
+  );
 
   removeLastMark() {
     damagePoints.removeLast();

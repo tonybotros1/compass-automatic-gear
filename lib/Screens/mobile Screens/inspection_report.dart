@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../Widgets/Mobile widgets/inspection report widgets/break_and_tire_wheel.dart';
 import '../../Widgets/my_text_field.dart';
 import '../../consts.dart';
+import 'package:signature/signature.dart';
 
 class InspectionReposrt extends StatelessWidget {
   const InspectionReposrt({super.key});
@@ -335,14 +336,50 @@ class InspectionReposrt extends StatelessWidget {
             ),
             SizedBox(height: 10),
             labelContainer(
-                lable: Text(
-              'SIGNATURES',
-              style: fontStyle1,
+                lable: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'CAR IMAGES',
+                  style: fontStyle1,
+                ),
+                IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.camera_alt_outlined,
+                      color: Colors.white,
+                    ))
+              ],
             )),
-            Container(
-              padding: EdgeInsets.all(10),
-              decoration: containerDecor,
-            ),
+            GetBuilder<CardsScreenController>(builder: (controller) {
+              return Container(
+                padding: EdgeInsets.all(10),
+                decoration: containerDecor,
+                child: GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: controller.imagesList.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                    ),
+                    itemBuilder: (context, i) {
+                      if (controller.imagesList.isEmpty) {
+                        return SizedBox(
+                          height: 100,
+                          child: Center(
+                            child: Text(
+                              'Images',
+                              style: textStyleForInspectionHints,
+                            ),
+                          ),
+                        );
+                      } else {
+                        return SizedBox();
+                      }
+                    }),
+              );
+            }),
             SizedBox(height: 10),
             labelContainer(
                 lable: Text(
@@ -374,6 +411,7 @@ class InspectionReposrt extends StatelessWidget {
               decoration: containerDecor,
               child: GetBuilder<CardsScreenController>(builder: (controller) {
                 return Column(
+                  spacing: 10,
                   children: List.generate(
                       controller.underVehicleList.length,
                       (item) => checkBoxesSection(
@@ -382,7 +420,182 @@ class InspectionReposrt extends StatelessWidget {
                               .selectedCheckBoxIndicesForUnderVehicle)),
                 );
               }),
-            )
+            ),
+            labelContainer(
+                lable: Text(
+              'UNDER HOOD',
+              style: fontStyle1,
+            )),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: containerDecor,
+              child: GetBuilder<CardsScreenController>(builder: (controller) {
+                return Column(
+                  spacing: 10,
+                  children: List.generate(
+                      controller.underHoodList.length,
+                      (item) => checkBoxesSection(
+                          label: controller.underHoodList[item],
+                          dataMap:
+                              controller.selectedCheckBoxIndicesForUnderHood)),
+                );
+              }),
+            ),
+            labelContainer(
+                lable: Text(
+              'BATTERY PERFORMANCE',
+              style: fontStyle1,
+            )),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: containerDecor,
+              child: GetBuilder<CardsScreenController>(builder: (controller) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      spacing: 10,
+                      children: List.generate(
+                          controller.underHoodList.length,
+                          (item) => checkBoxesSection(
+                              label: controller.underHoodList[item],
+                              dataMap: controller
+                                  .selectedCheckBoxIndicesForBatteryPerformance)),
+                    ),
+                    Text('Battery Cold Cranking Amps',
+                        style: textStyleForInspectionHints),
+                    Row(
+                      spacing: 10,
+                      children: [
+                        Expanded(
+                          child: myTextFormFieldWithBorder(
+                            controller:
+                                controller.batteryColdCrankingAmpsFactorySpecs,
+                            onChanged: (value) {
+                              controller.updateEnteredField(
+                                  'Battery Cold Cranking Amps',
+                                  'Factory Specs',
+                                  value,
+                                  controller
+                                      .selectedCheckBoxIndicesForBatteryPerformance);
+                            },
+                            isnumber: true,
+                            labelText: 'Factory Specs',
+                          ),
+                        ),
+                        Expanded(
+                          child: myTextFormFieldWithBorder(
+                            controller:
+                                controller.batteryColdCrankingAmpsActual,
+                            onChanged: (value) {
+                              controller.updateEnteredField(
+                                  'Battery Cold Cranking Amps',
+                                  'Actual',
+                                  value,
+                                  controller
+                                      .selectedCheckBoxIndicesForBatteryPerformance);
+                            },
+                            isnumber: true,
+                            labelText: 'Actual',
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                );
+              }),
+            ),
+            SizedBox(height: 10),
+            labelContainer(
+                lable: Text(
+              'SIGNATURES',
+              style: fontStyle1,
+            )),
+            GetBuilder<CardsScreenController>(builder: (controller) {
+              return LayoutBuilder(builder: (context, constraints) {
+                return Container(
+                  // height: 500,
+                  padding: EdgeInsets.all(10),
+                  decoration: containerDecor,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    spacing: 10,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Advisor',
+                                    style: textStyleForInspectionHints),
+                                IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    onPressed: () {
+                                      controller.signatureControllerForAdvisor
+                                          .clear();
+                                    },
+                                    icon: Icon(
+                                      Icons.clear,
+                                      color: Colors.grey.shade700,
+                                    ))
+                              ],
+                            ),
+                            Container(
+                              // width: constraints.maxWidth / 2.2,
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black)),
+                              child: Signature(
+                                height: 250,
+                                controller:
+                                    controller.signatureControllerForAdvisor,
+                                backgroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Customer',
+                                    style: textStyleForInspectionHints),
+                                IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    onPressed: () {
+                                      controller.signatureControllerForCustomer
+                                          .clear();
+                                    },
+                                    icon: Icon(
+                                      Icons.clear,
+                                      color: Colors.grey.shade700,
+                                    ))
+                              ],
+                            ),
+                            Container(
+                              // width: constraints.maxWidth / 2.2,
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black)),
+                              child: Signature(
+                                height: 250,
+                                controller:
+                                    controller.signatureControllerForCustomer,
+                                backgroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              });
+            }),
           ],
         ),
       ),
