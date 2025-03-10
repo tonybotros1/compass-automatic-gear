@@ -1,5 +1,10 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -43,6 +48,15 @@ class CardsScreenController extends GetxController {
   RxMap<String, Map<String, String>> selectedCheckBoxIndicesForRightRear =
       <String, Map<String, String>>{}.obs;
 
+  RxMap<String, Map<String, String>>
+      selectedCheckBoxIndicesForInteriorExterior =
+      <String, Map<String, String>>{}.obs;
+
+       RxMap<String, Map<String, String>>
+      selectedCheckBoxIndicesForUnderVehicle =
+      <String, Map<String, String>>{}.obs;
+
+
   // Wheel controllers section
   TextEditingController leftFrontBrakeLining = TextEditingController();
   TextEditingController leftFrontTireTread = TextEditingController();
@@ -52,7 +66,38 @@ class CardsScreenController extends GetxController {
 
   // prioi body damage
   RxList<Offset> damagePoints = <Offset>[].obs;
+  RxList<Offset> relativePoints = <Offset>[].obs;
+  GlobalKey imageKey = GlobalKey();
   GlobalKey repaintBoundaryKey = GlobalKey();
+
+  // interioir / exterioir
+  RxList entrioirExterioirList = RxList([
+    'Head Lights, Tail Lights, Turn Signals, Breake Lights, Hazard Lights, Exterioi Lamps, License Plate Lights',
+    'Windshield Washer/Wiper Operation, Wiper Blades',
+    'Windshield Condition: Cracks / Chips / Pitting',
+    'Mirrors / Glass',
+    'Emergency Brake Adjustment',
+    'Horn Operation',
+    'Fuel Tank Cap Gasket',
+    'Air Conditioning Filter (if equipped)',
+    'Clutch Operation (if equipped)',
+    'Back Up Lights Left / Right',
+    'Dash Warning Lights',
+    'Carpet / Upholstery / Floor Mats'
+  ]);
+
+  // under vehicle
+  RxList underVehicleList = RxList([
+    'Shock Absorbers / Suspension / Struts',
+    'Steering Box, Linkage, Ball Joints, Dust Covers',
+    'Muffler, Exhaust Pipes/Mounts. Catalytic Converter',
+    'Engine Oil and Fluid Leaks',
+    'Brakes Lines, Hoses, Parking Brake Cable',
+    'Drive Shaft Boots, Constant Velocity Boots, U-Joints, Transmission Linkage (if equipped)',
+    'Transmission, Differential, Transfer Case, (Check Fluid Level, Fluid Condition and Fluid Leaks)',
+    'Fluid Lines and Connections, Fluid Tank Band, Fuel Tank Vapor Vent Systems Hoses',
+    'Inspect Nuts and Blots on Body and Chassis'
+  ]);
 
   @override
   void onInit() async {
@@ -64,20 +109,63 @@ class CardsScreenController extends GetxController {
     super.onInit();
   }
 
-  addDamagePoint(BuildContext context, TapDownDetails details) {
-    RenderBox box = context.findRenderObject() as RenderBox;
-    Offset localPosition = box.globalToLocal(details.globalPosition);
+  removeLastMark() {
+    damagePoints.removeLast();
+    relativePoints.removeLast();
+  }
 
-    // Get image widget position inside the Stack
+  Future<void> saveImage() async {
+    try {
+      RenderRepaintBoundary boundary = repaintBoundaryKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+      // Save locally (optional)
+      // final directory = await getApplicationDocumentsDirectory();
+      File imgFile = File('damaged_car.png');
+      await imgFile.writeAsBytes(pngBytes);
+
+      // Upload to Firebase Storage
+      // await _uploadToFirebase(imgFile);
+    } catch (e) {
+      // print("Error saving image: $e");
+    }
+  }
+
+  void addDamagePoint(TapDownDetails details) {
+    if (imageKey.currentContext == null) return;
+
     final RenderBox imageBox =
-        Get.find<GlobalKey>().currentContext!.findRenderObject() as RenderBox;
+        imageKey.currentContext!.findRenderObject() as RenderBox;
     final Offset imagePosition = imageBox.localToGlobal(Offset.zero);
+    final Size imageSize = imageBox.size;
 
-    // Adjust tap position relative to image position
-    localPosition = Offset(localPosition.dx - imagePosition.dx,
-        localPosition.dy - imagePosition.dy);
+    // Convert tap position to be relative to the image size (0.0 - 1.0)
+    final Offset localPosition = details.globalPosition - imagePosition;
+    final Offset relativePosition = Offset(
+      localPosition.dx / imageSize.width,
+      localPosition.dy / imageSize.height,
+    );
 
-    damagePoints.add(localPosition);
+    relativePoints.add(relativePosition);
+    updateDamagePoints(); // Convert to absolute positions for rendering
+  }
+
+  void updateDamagePoints() {
+    if (imageKey.currentContext == null) return;
+
+    final RenderBox imageBox =
+        imageKey.currentContext!.findRenderObject() as RenderBox;
+    final Size imageSize = imageBox.size;
+
+    // Convert relative positions back to absolute positions
+    damagePoints.value = relativePoints.map((rel) {
+      return Offset(rel.dx * imageSize.width, rel.dy * imageSize.height);
+    }).toList();
+
     update();
   }
 

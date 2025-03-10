@@ -1,4 +1,5 @@
 import 'package:datahubai/Controllers/Mobile%20section%20controllers/cards_screen_controller.dart';
+import 'package:datahubai/Widgets/Mobile%20widgets/inspection%20report%20widgets/check_box_section.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,7 +28,7 @@ class InspectionReposrt extends StatelessWidget {
           children: [
             labelContainer(
                 lable: Text(
-              'Main Details',
+              'MAIN DETAILS',
               style: fontStyle1,
             )),
             Container(
@@ -172,7 +173,7 @@ class InspectionReposrt extends StatelessWidget {
             SizedBox(height: 10),
             labelContainer(
                 lable: Text(
-              'Break And Tire',
+              'BREAK AND TIRE',
               style: fontStyle1,
             )),
             Container(
@@ -273,26 +274,50 @@ class InspectionReposrt extends StatelessWidget {
             ),
             SizedBox(height: 10),
             labelContainer(
-                lable: Text(
-              'Prior Body Damage',
-              style: fontStyle1,
+                lable: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'PRIOR BODY DAMAGE',
+                  style: fontStyle1,
+                ),
+                GetBuilder<CardsScreenController>(builder: (controller) {
+                  return controller.damagePoints.isNotEmpty
+                      ? IconButton(
+                          onPressed: () {
+                            controller.removeLastMark();
+                          },
+                          icon: Icon(
+                            Icons.repartition_outlined,
+                            color: Colors.white,
+                          ))
+                      : SizedBox();
+                })
+              ],
             )),
-            LayoutBuilder(builder: (context, constraints) {
-              return Container(
-                padding: EdgeInsets.all(10),
-                decoration: containerDecor,
-                child: Column(
-                  children: [
-                    GetBuilder<CardsScreenController>(builder: (controller) {
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: containerDecor,
+              child: Column(
+                children: [
+                  GetBuilder<CardsScreenController>(builder: (controller) {
+                    return LayoutBuilder(builder: (context, constraints) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        controller.updateDamagePoints();
+                      });
                       return GestureDetector(
                         onTapDown: (details) =>
-                            controller.addDamagePoint(context, details),
+                            controller.addDamagePoint(details),
                         child: RepaintBoundary(
                           key: controller.repaintBoundaryKey,
                           child: Stack(
                             children: [
-                              Image.asset('assets/vehicle.jpg',
-                                  width: constraints.maxWidth, height: 500),
+                              Image.asset(
+                                'assets/vehicle.jpg',
+                                width: constraints.maxWidth,
+                                height: 500,
+                                key: controller.imageKey,
+                              ),
                               CustomPaint(
                                 size: Size(constraints.maxWidth, 500),
                                 painter: DamagePainter(controller.damagePoints),
@@ -303,11 +328,61 @@ class InspectionReposrt extends StatelessWidget {
                           ),
                         ),
                       );
-                    })
-                  ],
-                ),
-              );
-            })
+                    });
+                  })
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            labelContainer(
+                lable: Text(
+              'SIGNATURES',
+              style: fontStyle1,
+            )),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: containerDecor,
+            ),
+            SizedBox(height: 10),
+            labelContainer(
+                lable: Text(
+              'INTERIOIR / EXTERIOIR',
+              style: fontStyle1,
+            )),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: containerDecor,
+              child: GetBuilder<CardsScreenController>(builder: (controller) {
+                return Column(
+                    spacing: 10,
+                    children: List.generate(
+                        controller.entrioirExterioirList.length,
+                        (item) => checkBoxesSection(
+                            label: controller.entrioirExterioirList[item],
+                            dataMap: controller
+                                .selectedCheckBoxIndicesForInteriorExterior)));
+              }),
+            ),
+            SizedBox(height: 10),
+            labelContainer(
+                lable: Text(
+              'UNDER VEHICLE',
+              style: fontStyle1,
+            )),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: containerDecor,
+              child: GetBuilder<CardsScreenController>(builder: (controller) {
+                return Column(
+                  children: List.generate(
+                      controller.underVehicleList.length,
+                      (item) => checkBoxesSection(
+                          label: controller.entrioirExterioirList[item],
+                          dataMap: controller
+                              .selectedCheckBoxIndicesForUnderVehicle)),
+                );
+              }),
+            )
           ],
         ),
       ),
