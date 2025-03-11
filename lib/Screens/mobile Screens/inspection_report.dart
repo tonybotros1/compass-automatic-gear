@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:datahubai/Controllers/Mobile%20section%20controllers/cards_screen_controller.dart';
 import 'package:datahubai/Widgets/Mobile%20widgets/inspection%20report%20widgets/check_box_section.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
@@ -366,10 +368,45 @@ class InspectionReposrt extends StatelessWidget {
                         itemCount: controller.imagesList.length,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
+                          crossAxisCount: 5,
                         ),
                         itemBuilder: (context, i) {
-                          return SizedBox();
+                          return InkWell(
+                            onTap: () {
+                              // controller.openImageViewer(
+                              //     controller.imagesList, i);
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.all(3),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(5),
+                                    child: FittedBox(
+                                      fit: BoxFit.cover,
+                                      clipBehavior: Clip.hardEdge,
+                                      child: Image.file(
+                                        File(controller.imagesList[i].path),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: IconButton(
+                                        onPressed: () {
+                                          controller.imagesList.removeAt(i);
+                                        },
+                                        icon: const Icon(
+                                          Icons.remove_circle,
+                                          color: Colors.red,
+                                        )),
+                                  )
+                                ],
+                              ),
+                            ),
+                          );
                         })
                     : SizedBox(
                         height: 100,
@@ -505,6 +542,22 @@ class InspectionReposrt extends StatelessWidget {
                     )
                   ],
                 );
+              }),
+            ),
+            SizedBox(height: 10),
+            labelContainer(
+                lable: Text(
+              'COMMENTS',
+              style: fontStyle1,
+            )),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: containerDecor,
+              child: GetBuilder<CardsScreenController>(builder: (controller) {
+                return myTextFormFieldWithBorder(
+                    labelText: 'Comments',
+                    maxLines: 5,
+                    controller: controller.comments);
               }),
             ),
             SizedBox(height: 10),

@@ -19,6 +19,7 @@ class CardsScreenController extends GetxController {
   TextEditingController year = TextEditingController();
   TextEditingController vin = TextEditingController();
   TextEditingController mileage = TextEditingController();
+  TextEditingController comments = TextEditingController();
   final RxList<DocumentSnapshot> allCarCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> newCarCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> doneCarCards = RxList<DocumentSnapshot>([]);
@@ -129,6 +130,11 @@ final ImagePicker picker = ImagePicker();
     getCarBrands();
     getTechnicians();
     super.onInit();
+  }
+
+   void openImageViewer(List imageUrls, int index) {
+    Get.toNamed('/imageViewer',
+        arguments: {'images': imageUrls, 'index': index});
   }
 
    // this functions is to take photos

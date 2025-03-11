@@ -13,7 +13,7 @@ Widget cardStyle({
       shrinkWrap: true,
       itemBuilder: (context, i) {
         var carCard = listName[i];
-        List<String> carImages = [];
+        // List<String> carImages = [];
 
         // for (var item in carCard['car_images']) {
         //   try {

@@ -21,7 +21,7 @@ class MainCardScreenController extends GetxController {
     return [
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.home),
-        title: ("Home"),
+        title: ("New Cards"),
         activeColorPrimary: mainColor,
         activeColorSecondary: Colors.white,
         inactiveColorPrimary: CupertinoColors.systemGrey,
@@ -35,7 +35,7 @@ class MainCardScreenController extends GetxController {
       ),
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.domain_verification),
-        title: ("Done"),
+        title: ("Job Cards"),
         activeColorPrimary: mainColor,
         activeColorSecondary: Colors.white,
         inactiveColorPrimary: CupertinoColors.systemGrey,
