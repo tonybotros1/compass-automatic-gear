@@ -13,9 +13,12 @@ import '../../consts.dart';
 class CardsScreenController extends GetxController {
   TextEditingController customerName = TextEditingController();
   TextEditingController technicianName = TextEditingController();
-  TextEditingController date = TextEditingController();
+  TextEditingController date =
+      TextEditingController(text: textToDate(DateTime.now()));
   TextEditingController brand = TextEditingController();
   TextEditingController model = TextEditingController();
+  TextEditingController plateNumber = TextEditingController();
+  TextEditingController code = TextEditingController();
   TextEditingController year = TextEditingController();
   TextEditingController vin = TextEditingController();
   TextEditingController mileage = TextEditingController();
@@ -59,7 +62,8 @@ class CardsScreenController extends GetxController {
   RxMap<String, Map<String, String>> selectedCheckBoxIndicesForUnderHood =
       <String, Map<String, String>>{}.obs;
 
-RxMap<String, Map<String, String>> selectedCheckBoxIndicesForBatteryPerformance =
+  RxMap<String, Map<String, String>>
+      selectedCheckBoxIndicesForBatteryPerformance =
       <String, Map<String, String>>{}.obs;
 
   // Wheel controllers section
@@ -75,7 +79,7 @@ RxMap<String, Map<String, String>> selectedCheckBoxIndicesForBatteryPerformance 
   GlobalKey imageKey = GlobalKey();
   GlobalKey repaintBoundaryKey = GlobalKey();
   RxList<File> imagesList = RxList([]);
-final ImagePicker picker = ImagePicker();
+  final ImagePicker picker = ImagePicker();
 
   // interioir / exterioir
   RxList entrioirExterioirList = RxList([
@@ -116,11 +120,12 @@ final ImagePicker picker = ImagePicker();
   ]);
 
   RxList batteryPerformanceList = RxList([
-    'Battery Terminal / Cables / Mountings','Condition Of Battery / Cold Cranking Amps'
+    'Battery Terminal / Cables / Mountings',
+    'Condition Of Battery / Cold Cranking Amps'
   ]);
-  TextEditingController batteryColdCrankingAmpsFactorySpecs = TextEditingController();
-  TextEditingController batteryColdCrankingAmpsActual= TextEditingController();
-
+  TextEditingController batteryColdCrankingAmpsFactorySpecs =
+      TextEditingController();
+  TextEditingController batteryColdCrankingAmpsActual = TextEditingController();
 
   @override
   void onInit() async {
@@ -132,24 +137,33 @@ final ImagePicker picker = ImagePicker();
     super.onInit();
   }
 
-   void openImageViewer(List imageUrls, int index) {
+  void openImageViewer(List imageUrls, int index) {
     Get.toNamed('/imageViewer',
         arguments: {'images': imageUrls, 'index': index});
   }
 
-   // this functions is to take photos
- void takePhoto() async {
-  try {
-    final XFile? photo = await picker.pickImage(source: ImageSource.camera);
-    
-    if (photo != null) {
-      File imageFile = File(photo.path);
-      imagesList.add(imageFile);
+  // this functions is to take photos
+  // Function to take photos
+  void takePhoto(String source) async {
+    try {
+      if (source == 'Camera') {
+        // Capture a single image from the camera
+        final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+        if (photo != null) {
+          imagesList.add(File(photo.path));
+        }
+      } else {
+        // Pick multiple images from the gallery
+        final List<XFile> photos = await picker.pickMultiImage();
+        if (photos.isNotEmpty) {
+          imagesList.addAll(photos.map((photo) => File(photo.path)).toList());
+        }
+      }
+    } catch (e) {
+      // Handle errors if needed
+      // print("Error capturing image: $e");
     }
-  } catch (e) {
-    // print("Error capturing image: $e");
   }
-}
 
   // for signature:
   SignatureController signatureControllerForAdvisor = SignatureController(
@@ -158,7 +172,7 @@ final ImagePicker picker = ImagePicker();
     exportBackgroundColor: Colors.white,
   );
 
-   SignatureController signatureControllerForCustomer = SignatureController(
+  SignatureController signatureControllerForCustomer = SignatureController(
     penStrokeWidth: 3,
     penColor: Colors.black,
     exportBackgroundColor: Colors.white,

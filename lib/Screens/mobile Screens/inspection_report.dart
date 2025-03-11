@@ -141,6 +141,22 @@ class InspectionReposrt extends StatelessWidget {
                     );
                   }),
                   GetBuilder<CardsScreenController>(builder: (controller) {
+                    return Row(
+                      spacing: 10,
+                      children: [
+                        Expanded(
+                          child: myTextFormFieldWithBorder(
+                              labelText: 'Plate Number',
+                              controller: controller.plateNumber),
+                        ),
+                        Expanded(
+                          child: myTextFormFieldWithBorder(
+                              labelText: 'Code', controller: controller.code),
+                        ),
+                      ],
+                    );
+                  }),
+                  GetBuilder<CardsScreenController>(builder: (controller) {
                     return Column(
                       spacing: 10,
                       children: [
@@ -346,14 +362,26 @@ class InspectionReposrt extends StatelessWidget {
                   style: fontStyle1,
                 ),
                 GetBuilder<CardsScreenController>(builder: (controller) {
-                  return IconButton(
-                      onPressed: () {
-                        controller.takePhoto();
-                      },
-                      icon: Icon(
-                        Icons.camera_alt_outlined,
-                        color: Colors.white,
-                      ));
+                  return Row(
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            controller.takePhoto('Gallery');
+                          },
+                          icon: Icon(
+                            Icons.image,
+                            color: Colors.white,
+                          )),
+                      IconButton(
+                          onPressed: () {
+                            controller.takePhoto('Camera');
+                          },
+                          icon: Icon(
+                            Icons.camera_alt_outlined,
+                            color: Colors.white,
+                          )),
+                    ],
+                  );
                 })
               ],
             )),
@@ -373,8 +401,8 @@ class InspectionReposrt extends StatelessWidget {
                         itemBuilder: (context, i) {
                           return InkWell(
                             onTap: () {
-                              // controller.openImageViewer(
-                              //     controller.imagesList, i);
+                              controller.openImageViewer(
+                                  controller.imagesList, i);
                             },
                             child: Container(
                               margin: const EdgeInsets.all(3),

@@ -60,7 +60,26 @@ Widget cardStyle({
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Customer', style: textStyleForCardsLabels),
+                        FutureBuilder<String>(
+                          future: controller.getModelName(
+                              carCard['car_brand'], carCard['car_model']),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Text('Loading...');
+                            } else if (snapshot.hasError) {
+                              return const Text('Error');
+                            } else {
+                              return Flexible(
+                                child: Text(
+                                  '${controller.getdataName(carCard['car_brand'], controller.allBrands)} | ${snapshot.data}',
+                                  style:
+                                      textStyleForCardsLabelsCarBrandAndModel,
+                                ),
+                              );
+                            }
+                          },
+                        ),
                         Container(
                           alignment: Alignment.center,
                           padding:
@@ -69,42 +88,25 @@ Widget cardStyle({
                           decoration: BoxDecoration(
                               border: Border.all(color: secColor, width: 3),
                               borderRadius: BorderRadius.circular(5)),
-                          child: Text(carCard['label'],
+                          child: Text(carCard['job_status_1'],
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 19,
-                                  color: carCard['label'] == 'Draft'
+                                  color: carCard['job_status_1'] == 'Posted'
                                       ? Colors.blueGrey
-                                      : carCard['label'] == 'New'
+                                      : carCard['job_status_1'] == 'New'
                                           ? Colors.green
                                           : Colors.red)),
                         )
                       ],
                     ),
+                    Text('Customer', style: textStyleForCardsLabels),
                     Text(
                         controller.getdataName(
                             carCard['customer'], controller.allCustomers,
                             title: 'entity_name'),
                         style: textStyleForCardsContents),
                     SizedBox(height: 8),
-                    Text('Car', style: textStyleForCardsLabels),
-                    FutureBuilder<String>(
-                      future: controller.getModelName(
-                          carCard['car_brand'], carCard['car_model']),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Text('Loading...');
-                        } else if (snapshot.hasError) {
-                          return const Text('Error');
-                        } else {
-                          return Text(
-                            '${controller.getdataName(carCard['car_brand'], controller.allBrands)} | ${snapshot.data}',
-                            style: textStyleForCardsContents,
-                          );
-                        }
-                      },
-                    ),
                     SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

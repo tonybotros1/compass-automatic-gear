@@ -11,7 +11,7 @@ class ImageViewerController extends GetxController {
   void onInit() {
     if (Get.arguments != null) {
       arguments.value = Get.arguments as Map<String, dynamic>;
-      imagesURLs.value = List<String>.from(arguments['images']);
+      imagesURLs.value = List<dynamic>.from(arguments['images']);
       currentIndex.value = arguments['index'];
       pageController = PageController(initialPage: currentIndex.value);
     }

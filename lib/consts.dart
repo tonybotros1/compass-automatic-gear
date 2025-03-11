@@ -307,6 +307,12 @@ var textStyleForCardsLabels = TextStyle(
   color: secColor,
 );
 
+var textStyleForCardsLabelsCarBrandAndModel = TextStyle(
+  fontSize: 22,
+  fontWeight: FontWeight.bold,
+  color: mainColor,
+);
+
 var textStyleForCardsContents = TextStyle(
   fontSize: 19,
   color: Colors.black54,
