@@ -1266,7 +1266,7 @@ class JobCardController extends GetxController {
             .toString();
   }
 
-// this function is to get industries
+// this function is to get colors
   getColors() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
@@ -1286,7 +1286,7 @@ class JobCardController extends GetxController {
     });
   }
 
-// this function is to get industries
+// this function is to get engine types
   getEngineTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')

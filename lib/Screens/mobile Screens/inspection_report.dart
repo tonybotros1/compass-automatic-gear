@@ -36,14 +36,16 @@ class InspectionReposrt extends StatelessWidget {
         centerTitle: true,
         backgroundColor: mainColor,
         actions: [
-          IconButton(
-              onPressed: () {
-               
-              },
-              icon: Icon(
-                Icons.done_outline_rounded,
-                color: Colors.white,
-              ))
+          GetBuilder<CardsScreenController>(builder: (controller) {
+            return IconButton(
+                onPressed: () {
+                  controller.addInspectionCard(context);
+                },
+                icon: Icon(
+                  Icons.done_outline_rounded,
+                  color: Colors.white,
+                ));
+          })
         ],
       ),
       body: Padding(
@@ -102,7 +104,7 @@ class InspectionReposrt extends StatelessWidget {
                   GetX<CardsScreenController>(builder: (controller) {
                     bool customerLoading = controller.allCustomers.isEmpty;
                     return CustomDropdown(
-                      textcontroller: controller.customerName.text,
+                      textcontroller: controller.customer.text,
                       showedSelectedName: 'entity_name',
                       hintText: 'Customer',
                       items: customerLoading ? {} : controller.allCustomers,
@@ -113,6 +115,8 @@ class InspectionReposrt extends StatelessWidget {
                       },
                       onChanged: (key, value) {
                         controller.customerId.value = key;
+                  controller.onSelectForCustomers(key);
+
                       },
                     );
                   }),
@@ -161,10 +165,26 @@ class InspectionReposrt extends StatelessWidget {
                       ],
                     );
                   }),
-                  GetBuilder<CardsScreenController>(builder: (controller) {
+                  GetX<CardsScreenController>(builder: (controller) {
+                    bool isColorsLoading = controller.allColors.isEmpty;
                     return Row(
                       spacing: 10,
                       children: [
+                        Expanded(
+                            child: CustomDropdown(
+                          hintText: 'Color',
+                          showedSelectedName: 'name',
+                          textcontroller: controller.color.text,
+                          items: isColorsLoading ? {} : controller.allColors,
+                          itemBuilder: (context, key, value) {
+                            return ListTile(
+                              title: Text(value['name']),
+                            );
+                          },
+                          onChanged: (key, value) {
+                            controller.colorId.value = key;
+                          },
+                        )),
                         Expanded(
                           child: myTextFormFieldWithBorder(
                               labelText: 'Plate Number',
@@ -177,13 +197,31 @@ class InspectionReposrt extends StatelessWidget {
                       ],
                     );
                   }),
-                  GetBuilder<CardsScreenController>(builder: (controller) {
+                  GetX<CardsScreenController>(builder: (controller) {
+                    bool isEngineLoading = controller.allEngineTypes.isEmpty;
                     return Column(
                       spacing: 10,
                       children: [
                         Row(
                           spacing: 10,
                           children: [
+                            Expanded(
+                                child: CustomDropdown(
+                              hintText: 'Engine Type',
+                              showedSelectedName: 'name',
+                              textcontroller: controller.engineType.text,
+                              items: isEngineLoading
+                                  ? {}
+                                  : controller.allEngineTypes,
+                              itemBuilder: (context, key, value) {
+                                return ListTile(
+                                  title: Text(value['name']),
+                                );
+                              },
+                              onChanged: (key, value) {
+                                controller.engineTypeId.value = key;
+                              },
+                            )),
                             Expanded(
                               child: myTextFormFieldWithBorder(
                                   isnumber: true,

@@ -2,17 +2,20 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
 import '../../consts.dart';
 
 class CardsScreenController extends GetxController {
-  TextEditingController customerName = TextEditingController();
+  TextEditingController customer = TextEditingController();
+  TextEditingController customerEntityName = TextEditingController();
+  TextEditingController customerEntityEmail = TextEditingController();
+  TextEditingController customerCreditNumber = TextEditingController();
   TextEditingController technicianName = TextEditingController();
   TextEditingController date =
       TextEditingController(text: textToDate(DateTime.now()));
@@ -21,9 +24,12 @@ class CardsScreenController extends GetxController {
   TextEditingController plateNumber = TextEditingController();
   TextEditingController code = TextEditingController();
   TextEditingController year = TextEditingController();
+  TextEditingController color = TextEditingController();
+  TextEditingController engineType = TextEditingController();
   TextEditingController vin = TextEditingController();
   TextEditingController mileage = TextEditingController();
   TextEditingController comments = TextEditingController();
+  TextEditingController customerEntityPhoneNumber = TextEditingController();
   final RxList<DocumentSnapshot> allCarCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> newCarCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> doneCarCards = RxList<DocumentSnapshot>([]);
@@ -38,12 +44,24 @@ class CardsScreenController extends GetxController {
   RxString technicianId = RxString('');
   RxString brandId = RxString('');
   RxString modelId = RxString('');
+  RxString engineTypeId = RxString('');
+  RxString colorId = RxString('');
   RxString companyId = RxString('');
   RxString userId = RxString('');
+  RxString customerSaleManId = RxString('');
   RxMap allCustomers = RxMap({});
   RxMap allTechnicians = RxMap({});
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
+  RxMap allColors = RxMap({});
+  RxMap allEngineTypes = RxMap({});
+  RxList carImagesURLs = RxList([]);
+  RxString carDialogImageURL = RxString('');
+  Uint8List? customerSignatureAsImage;
+  Uint8List? advisorSignatureAsImage;
+  RxString customerSignatureURL = RxString('');
+  RxString advisorSignatureURL = RxString('');
+
   RxMap<String, Map<String, String>> selectedCheckBoxIndicesForLeftFront =
       <String, Map<String, String>>{}.obs;
   RxMap<String, Map<String, String>> selectedCheckBoxIndicesForRightFront =
@@ -135,29 +153,218 @@ class CardsScreenController extends GetxController {
     getAllCards();
     getCarBrands();
     getTechnicians();
+    getColors();
+    getEngineTypes();
     super.onInit();
   }
 
   addInspectionCard(BuildContext context) async {
     try {
-      //  showDialog(context: context, builder: (context){
-      //             return CircularPercentIndicator(
-      //               animation: true,
-      //               animationDuration: 1000,
-      //               radius: 100,
-      //               lineWidth: 25,
-      //               percent: progress,
-      //               progressColor: mainColor,
-      //               backgroundColor: Colors.red.shade100,
-      //               circularStrokeCap: CircularStrokeCap.round,
-      //               center: Text(
-      //                 '${(100 * progress).roundToDouble()} %',
-      //                 style: TextStyle(color: mainColor, fontSize: 30),
-      //               ),
-      //             );
-      //           });
-     await FirebaseFirestore.instance.collection('').add({});
-    } catch (e) {}
+      Map<String, dynamic> newData = {
+        'label': 'Draft',
+        'job_status_1': '',
+        'job_status_2': '',
+        'quotation_status': '',
+        'car_brand_logo': '',
+        'technician': technicianId.value,
+        'company_id': companyId.value,
+        'car_brand': brandId.value,
+        'car_model': modelId.value,
+        'plate_number': plateNumber.text,
+        'plate_code': code.text,
+        'country': '',
+        'city': '',
+        'year': year.text,
+        'color': colorId.value,
+        'engine_type': engineTypeId.value,
+        'vehicle_identification_number': vin.text,
+        'transmission_type': '',
+        'mileage_in': mileage.text,
+        'mileage_out': '',
+        'mileage_in_out_diff': '',
+        'customer': customerId.value,
+        'contact_name': customerEntityName.text,
+        'contact_number': customerEntityPhoneNumber.text,
+        'contact_email': customerEntityEmail.text,
+        'credit_limit': customerCreditNumber.text,
+        'outstanding': '',
+        'saleMan': customerSaleManId.value,
+        'branch': '',
+        'currency': '',
+        'rate': '',
+        'payment_method': 'Cash',
+        'quotation_number': '',
+        'quotation_date': '',
+        'validity_days': '',
+        'validity_end_date': '',
+        'reference_number': '',
+        'delivery_time': '',
+        'quotation_warrenty_days': '',
+        'quotation_warrenty_km': '',
+        'quotation_notes': '',
+        'job_number': '',
+        'invoice_number': '',
+        'lpo_number': '',
+        'job_date': '',
+        'invoice_date': '',
+        'job_approval_date': '',
+        'job_start_date': '',
+        'job_cancelation_date': '',
+        'job_finish_date': '',
+        'job_delivery_date': '',
+        'job_warrenty_days': '',
+        'job_warrenty_km': '',
+        'job_warrenty_end_date': '',
+        'job_min_test_km': '',
+        'job_reference_1': '',
+        'job_reference_2': '',
+        'job_reference_3': '',
+        'job_notes': '',
+        'job_delivery_notes': '',
+      };
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) {
+            return Center(
+                child: Row(
+              spacing: 20,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  color: Colors.white,
+                ),
+                Text(
+                  'Please Wait...',
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                )
+              ],
+            ));
+          });
+      if (imagesList.isNotEmpty) {
+        await saveCarImages();
+      }
+      await saveCarDialogImage();
+
+      customerSignatureAsImage =
+          await signatureControllerForCustomer.toPngBytes();
+      advisorSignatureAsImage =
+          await signatureControllerForAdvisor.toPngBytes();
+
+      if (customerSignatureAsImage != null) {
+        await saveSignatureImage(
+            customerSignatureAsImage, customerSignatureURL.value);
+      }
+
+      if (advisorSignatureAsImage != null) {
+        await saveSignatureImage(
+            advisorSignatureAsImage, advisorSignatureURL.value);
+      }
+
+      var job =
+          await FirebaseFirestore.instance.collection('job_cards').add(newData);
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(job.id)
+          .collection('internal_notes')
+          .add({
+        'type': 'Text',
+        'note': comments.text.trim(),
+        'user_id': userId.value,
+        'time': DateTime.now(),
+      });
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(job.id)
+          .collection('inspection_report')
+          .add({
+        'left_front_wheel': selectedCheckBoxIndicesForLeftFront,
+        'right_front_wheel': selectedCheckBoxIndicesForRightFront,
+        'left_rear_wheel': selectedCheckBoxIndicesForLeftRear,
+        'right_rear_wheel': selectedCheckBoxIndicesForRightRear,
+        'interior_exterior': selectedCheckBoxIndicesForInteriorExterior,
+        'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
+        'under_hood': selectedCheckBoxIndicesForUnderHood,
+        'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
+        'car_images': carImagesURLs,
+        'car_dialog': carDialogImageURL.value,
+        'signatures': [customerSignatureURL.value, advisorSignatureURL.value]
+      });
+      Get.back();
+      showSnackBar('Done', 'Addedd Successfully');
+    } catch (e) {
+      showSnackBar('Failed', 'Please ty again');
+    }
+  }
+
+  Future<void> saveCarImages() async {
+    try {
+      for (var image in imagesList) {
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+            'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
+
+        final Uint8List imageBytes = await image.readAsBytes();
+
+        final UploadTask uploadTask = storageRef.putData(
+          imageBytes,
+          SettableMetadata(contentType: 'image/png'),
+        );
+
+        final TaskSnapshot snapshot = await uploadTask;
+        final String imageUrl = await snapshot.ref.getDownloadURL();
+
+        carImagesURLs.add(imageUrl);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> saveCarDialogImage() async {
+    try {
+      final Reference storageRef = FirebaseStorage.instance.ref().child(
+          'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
+
+      RenderRepaintBoundary boundary = repaintBoundaryKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+
+      if (byteData == null) {
+        throw Exception("Failed to convert image to byte data.");
+      }
+
+      Uint8List pngBytes = byteData.buffer.asUint8List();
+
+      final UploadTask uploadTask = storageRef.putData(
+        pngBytes,
+        SettableMetadata(contentType: 'image/png'),
+      );
+
+      final TaskSnapshot snapshot = await uploadTask;
+      final String imageUrl = await snapshot.ref.getDownloadURL();
+      carDialogImageURL.value = imageUrl;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // for saving signature image in firebase
+  saveSignatureImage(signatureAsImage, url) async {
+    try {
+      // uploading.value = true;
+      final Reference ref = FirebaseStorage.instance
+          .ref()
+          .child('signatures')
+          .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final UploadTask uploadTask = ref.putData(signatureAsImage!);
+      await uploadTask.then((p0) async {
+        url = await ref.getDownloadURL();
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void openImageViewer(List imageUrls, int index) {
@@ -204,27 +411,6 @@ class CardsScreenController extends GetxController {
   removeLastMark() {
     damagePoints.removeLast();
     relativePoints.removeLast();
-  }
-
-  Future<void> saveImage() async {
-    try {
-      RenderRepaintBoundary boundary = repaintBoundaryKey.currentContext!
-          .findRenderObject() as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-      // Save locally (optional)
-      // final directory = await getApplicationDocumentsDirectory();
-      File imgFile = File('damaged_car.png');
-      await imgFile.writeAsBytes(pngBytes);
-
-      // Upload to Firebase Storage
-      // await _uploadToFirebase(imgFile);
-    } catch (e) {
-      // print("Error saving image: $e");
-    }
   }
 
   void addDamagePoint(TapDownDetails details) {
@@ -455,5 +641,68 @@ class CardsScreenController extends GetxController {
     } catch (e) {
       return ''; // Return empty string on error
     }
+  }
+
+// this function is to get colors
+  getColors() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'COLORS')
+        .get();
+
+    var typeId = typeDoc.docs.first.id;
+
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typeId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .snapshots()
+        .listen((colors) {
+      allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
+    });
+  }
+
+  // this function is to get engine types
+  getEngineTypes() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'ENGINE_TYPES')
+        .get();
+
+    var typeId = typeDoc.docs.first.id;
+
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typeId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .orderBy('name')
+        .snapshots()
+        .listen((types) {
+      allEngineTypes.value = {for (var doc in types.docs) doc.id: doc.data()};
+    });
+  }
+
+  void onSelectForCustomers(String selectedId) {
+    var currentUserDetails = allCustomers.entries.firstWhere((entry) {
+      return entry.key
+          .toString()
+          .toLowerCase()
+          .contains(selectedId.toLowerCase());
+    });
+
+    var phoneDetails = currentUserDetails.value['entity_phone'].firstWhere(
+      (value) => value['isPrimary'] == true,
+      orElse: () => {'phone': ''},
+    );
+
+    customerEntityPhoneNumber.text = phoneDetails['number'] ?? '';
+    customerEntityName.text = phoneDetails['name'] ?? '';
+    customerEntityEmail.text = phoneDetails['email'];
+
+    customerCreditNumber.text =
+        (currentUserDetails.value['credit_limit'] ?? '0').toString();
+    customerSaleManId.value = currentUserDetails.value['sales_man'];
   }
 }

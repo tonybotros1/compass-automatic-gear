@@ -289,6 +289,12 @@ var screenPadding = const EdgeInsets.only(
   top: 0,
 );
 
+
+ String formatPhrase(String phrase) {
+    return phrase.replaceAll(' ', '_');
+  }
+
+
 double horizontalMarginForTable = 8;
 
 var fontStyle1 = TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
