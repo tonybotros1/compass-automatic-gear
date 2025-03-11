@@ -173,6 +173,10 @@ Widget tableOfScreens({
                 headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
                 columns: [
                   DataColumn(
+                    label: SizedBox(),
+                    // onSort: controller.onSort,
+                  ),
+                  DataColumn(
                     label: Column(
                       spacing: 5,
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -423,7 +427,6 @@ Widget tableOfScreens({
                   ),
                 ],
                 rows: _getOtherRows(
-                 
                     controller: controller,
                     constraints: constraints,
                     data: data),
@@ -493,17 +496,23 @@ List<DataRow> _getActionRows(
 }
 
 /// Generates rows for all columns except the Action column.
-List<DataRow> _getOtherRows(
-    {required JobCardController controller,
-    required BoxConstraints constraints,
-    required RxList<DocumentSnapshot> data,
-   }) {
+List<DataRow> _getOtherRows({
+  required JobCardController controller,
+  required BoxConstraints constraints,
+  required RxList<DocumentSnapshot> data,
+}) {
   final jobs = data;
   return jobs.map<DataRow>((job) {
     final jobData = job.data() as Map<String, dynamic>;
     return DataRow(
-      
       cells: [
+        DataCell(textForDataRowInTable(
+            text: '${jobData['label']}',
+            color: jobData['label'] == 'New'
+                ? Colors.green
+                : jobData['label'] == 'Draft'
+                    ? Colors.blueGrey
+                    : Colors.red)),
         DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
         DataCell(textForDataRowInTable(
             text: jobData['quotation_number'] != ''
@@ -583,12 +592,10 @@ List<DataRow> _getOtherRows(
                 title: 'entity_name'),
           ),
         ),
-        DataCell(
-          textForDataRowInTable(
-            maxWidth: null,
-            text: jobData['vehicle_identification_number'],
-          ),
-        ),
+        DataCell(SelectableText(
+          jobData['vehicle_identification_number'],
+          maxLines: 1,
+        )),
         DataCell(
           Align(
             alignment: Alignment.centerRight,

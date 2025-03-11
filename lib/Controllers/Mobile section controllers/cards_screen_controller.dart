@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
 import '../../consts.dart';
@@ -135,6 +136,28 @@ class CardsScreenController extends GetxController {
     getCarBrands();
     getTechnicians();
     super.onInit();
+  }
+
+  addInspectionCard(BuildContext context) async {
+    try {
+      //  showDialog(context: context, builder: (context){
+      //             return CircularPercentIndicator(
+      //               animation: true,
+      //               animationDuration: 1000,
+      //               radius: 100,
+      //               lineWidth: 25,
+      //               percent: progress,
+      //               progressColor: mainColor,
+      //               backgroundColor: Colors.red.shade100,
+      //               circularStrokeCap: CircularStrokeCap.round,
+      //               center: Text(
+      //                 '${(100 * progress).roundToDouble()} %',
+      //                 style: TextStyle(color: mainColor, fontSize: 30),
+      //               ),
+      //             );
+      //           });
+     await FirebaseFirestore.instance.collection('').add({});
+    } catch (e) {}
   }
 
   void openImageViewer(List imageUrls, int index) {

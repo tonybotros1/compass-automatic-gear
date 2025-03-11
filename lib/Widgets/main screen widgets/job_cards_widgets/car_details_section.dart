@@ -14,6 +14,7 @@ Widget carDetailsSection() {
       children: [
         GetX<JobCardController>(builder: (controller) {
           var isBrandsLoading = controller.allBrands.isEmpty;
+          var isTechLoading = controller.allTechnicians.isEmpty;
           final isCountriesLoading = controller.allCountries.isEmpty;
 
           return Row(
@@ -35,6 +36,25 @@ Widget carDetailsSection() {
               ),
               Expanded(
                 child: dynamicFields(dynamicConfigs: [
+                  DynamicConfig(
+                    isDropdown: true,
+                    flex: 1,
+                    dropdownConfig: DropdownConfig(
+                      showedSelectedName: 'name',
+                      textController: controller.technician.text,
+                      hintText: isTechLoading ? 'Loading...' : 'Technician',
+                      menuValues:
+                          isTechLoading ? {} : controller.allTechnicians,
+                      itemBuilder: (context, key, value) {
+                        return ListTile(
+                          title: Text('${value['name']}'),
+                        );
+                      },
+                      onSelected: (key, value) {
+                        controller.technicianId.value = key;
+                      },
+                    ),
+                  ),
                   DynamicConfig(
                     isDropdown: true,
                     flex: 1,

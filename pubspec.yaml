@@ -60,6 +60,9 @@ dependencies:
   liquid_pull_to_refresh: ^3.0.1
   signature: ^6.0.0
   image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
+  flutter_cache_manager: ^3.4.1
+  percent_indicator: ^4.2.4
   
 dev_dependencies:
   flutter_test:

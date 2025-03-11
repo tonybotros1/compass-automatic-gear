@@ -18,12 +18,33 @@ class InspectionReposrt extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: FittedBox(
+          child: TextButton(
+              onPressed: () {
+                // jobCardScreenController.clearFields();
+              },
+              child: const Text(
+                'Clear',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              )),
+        ),
         title: Text(
           'Inspection Report',
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
         backgroundColor: mainColor,
+        actions: [
+          IconButton(
+              onPressed: () {
+               
+              },
+              icon: Icon(
+                Icons.done_outline_rounded,
+                color: Colors.white,
+              ))
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(3),

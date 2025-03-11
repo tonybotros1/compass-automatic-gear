@@ -42,6 +42,7 @@ class JobCardController extends GetxController {
   TextEditingController plateNumber = TextEditingController();
   TextEditingController plateCode = TextEditingController();
   TextEditingController carBrand = TextEditingController();
+  TextEditingController technician = TextEditingController();
   TextEditingController carModel = TextEditingController();
   TextEditingController country = TextEditingController();
   TextEditingController city = TextEditingController();
@@ -64,6 +65,7 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> mileageOut = TextEditingController().obs;
   Rx<TextEditingController> inOutDiff = TextEditingController().obs;
   RxString carBrandId = RxString('');
+  RxString technicianId = RxString('');
   RxString carBrandLogo = RxString('');
   RxString carModelId = RxString('');
   RxString countryId = RxString('');
@@ -103,6 +105,7 @@ class JobCardController extends GetxController {
   var selectedRowIndex = Rxn<int>();
 
   RxMap allBrands = RxMap({});
+  RxMap allTechnicians = RxMap({});
   RxMap allModels = RxMap({});
   RxMap allCustomers = RxMap({});
   RxMap salesManMap = RxMap({});
@@ -170,6 +173,7 @@ class JobCardController extends GetxController {
     getColors();
     getEngineTypes();
     getAllJobCards();
+    getTechnicians();
     getInvoiceItemsFromCollection();
     search.value.addListener(() {
       filterJobCards();
@@ -364,6 +368,8 @@ class JobCardController extends GetxController {
     jobStatus2.value = '';
     quotationStatus.value = '';
     carBrandLogo.value = '';
+    technician.clear();
+    technicianId.value = '';
     isQuotationExpanded.value = false;
     allModels.clear();
     jobCardCounter.value.clear();
@@ -423,6 +429,8 @@ class JobCardController extends GetxController {
     quotationStatus.value = data['quotation_status'];
     carBrandLogo.value = data['car_brand_logo'];
     carBrandId.value = data['car_brand'];
+    technician.text = getdataName(data['technician'], allTechnicians);
+    technicianId.value = '${data['technician']}';
     carBrand.text = getdataName(data['car_brand'], allBrands);
     carModelId.value = data['car_model'];
     getCitiesByCountryID(data['country']);
@@ -511,11 +519,12 @@ class JobCardController extends GetxController {
     try {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
-        'label':'New',
+        'label': 'New',
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'quotation_status': quotationStatus.value,
         'car_brand_logo': carBrandLogo.value,
+        'technician': technicianId.value,
         'company_id': companyId.value,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
@@ -759,6 +768,7 @@ class JobCardController extends GetxController {
         'job_status_2': jobStatus2.value,
         'quotation_status': quotationStatus.value,
         'car_brand_logo': carBrandLogo.value,
+        'technician': technicianId.value,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
         'plate_number': plateNumber.text,
@@ -1180,6 +1190,15 @@ class JobCardController extends GetxController {
         .snapshots()
         .listen((branches) {
       salesManMap.value = {for (var doc in branches.docs) doc.id: doc.data()};
+    });
+  }
+
+  getTechnicians() {
+    FirebaseFirestore.instance
+        .collection('all_technicians')
+        .snapshots()
+        .listen((tech) {
+      allTechnicians.value = {for (var doc in tech.docs) doc.id: doc.data()};
     });
   }
 

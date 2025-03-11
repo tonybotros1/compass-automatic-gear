@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../Controllers/Mobile section controllers/cards_screen_controller.dart';
 import '../../../consts.dart';
 
