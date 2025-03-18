@@ -22,6 +22,7 @@ class DropdownController extends GetxController {
 
   @override
   void onClose() {
+    query.value.dispose();
     overlayFocusNode.dispose();
     searchFocusNode.dispose();
     scrollController.dispose();
@@ -231,20 +232,16 @@ class DropdownController extends GetxController {
   }
 
   Color _getItemColor(String key, dynamic value) {
-    final isSelected = selectedKey.value == key;
-    final isTextMatch = showedSelectedName.value.isNotEmpty
-        ? textController.value.isNotEmpty &&
-            value[showedSelectedName.value] == textController.value
-        : false;
-    final isHighlighted = highlightedKey.value == key;
-
-    if (isSelected || isTextMatch) {
-      return Colors.grey.shade300;
-    } else if (isHighlighted) {
-      return Colors.blue[100]!;
-    }
-    return Colors.transparent;
+  if (selectedKey.value == key) return Colors.grey.shade300;
+  if (highlightedKey.value == key) return Colors.blue[100]!;
+  if (showedSelectedName.value.isNotEmpty &&
+      textController.value.isNotEmpty &&
+      value[showedSelectedName.value] == textController.value) {
+    return Colors.grey.shade300;
   }
+  return Colors.transparent;
+}
+
 
   void _moveHighlight(int direction) {
     if (filteredItems.isEmpty) return;
@@ -298,6 +295,7 @@ class DropdownController extends GetxController {
   }
 
   void hideDropdown() {
+    print('tttttttttttttttttttttttttttttttttttttttttttttt');
     query.value.clear();
     overlayEntry?.remove();
     overlayEntry = null;

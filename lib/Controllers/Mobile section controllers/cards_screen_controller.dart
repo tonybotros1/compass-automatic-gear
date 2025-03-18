@@ -92,6 +92,24 @@ class CardsScreenController extends GetxController {
   TextEditingController leftFrontTirePressureBefore = TextEditingController();
   TextEditingController leftFrontTirePressureAfter = TextEditingController();
 
+  TextEditingController rightFrontBrakeLining = TextEditingController();
+  TextEditingController rightFrontTireTread = TextEditingController();
+  TextEditingController rightFrontWearPattern = TextEditingController();
+  TextEditingController rightFrontTirePressureBefore = TextEditingController();
+  TextEditingController rightFrontTirePressureAfter = TextEditingController();
+
+  TextEditingController leftRearBrakeLining = TextEditingController();
+  TextEditingController leftRearTireTread = TextEditingController();
+  TextEditingController leftRearWearPattern = TextEditingController();
+  TextEditingController leftRearTirePressureBefore = TextEditingController();
+  TextEditingController leftRearTirePressureAfter = TextEditingController();
+
+  TextEditingController rightRearBrakeLining = TextEditingController();
+  TextEditingController rightRearTireTread = TextEditingController();
+  TextEditingController rightRearWearPattern = TextEditingController();
+  TextEditingController rightRearTirePressureBefore = TextEditingController();
+  TextEditingController rightRearTirePressureAfter = TextEditingController();
+
   // prioi body damage
   RxList<Offset> damagePoints = <Offset>[].obs;
   RxList<Offset> relativePoints = <Offset>[].obs;
@@ -158,9 +176,116 @@ class CardsScreenController extends GetxController {
     super.onInit();
   }
 
+ void clearAllValues() {
+  // Clear all TextEditingControllers
+  batteryColdCrankingAmpsFactorySpecs.clear();
+  batteryColdCrankingAmpsActual.clear();
+  customer.clear();
+  customerEntityName.clear();
+  customerEntityEmail.clear();
+  customerCreditNumber.clear();
+  technicianName.clear();
+  date.text = textToDate(DateTime.now()); 
+  brand.clear();
+  model.clear();
+  plateNumber.clear();
+  code.clear();
+  year.clear();
+  color.clear();
+  engineType.clear();
+  vin.clear();
+  mileage.clear();
+  comments.clear();
+  customerEntityPhoneNumber.clear();
+
+  leftFrontBrakeLining.clear();
+  leftFrontTireTread.clear();
+  leftFrontWearPattern.clear();
+  leftFrontTirePressureBefore.clear();
+  leftFrontTirePressureAfter.clear();
+
+  rightFrontBrakeLining.clear();
+  rightFrontTireTread.clear();
+  rightFrontWearPattern.clear();
+  rightFrontTirePressureBefore.clear();
+  rightFrontTirePressureAfter.clear();
+
+  leftRearBrakeLining.clear();
+  leftRearTireTread.clear();
+  leftRearWearPattern.clear();
+  leftRearTirePressureBefore.clear();
+  leftRearTirePressureAfter.clear();
+
+  rightRearBrakeLining.clear();
+  rightRearTireTread.clear();
+  rightRearWearPattern.clear();
+  rightRearTirePressureBefore.clear();
+  rightRearTirePressureAfter.clear();
+
+  // Clear RxList<DocumentSnapshot>
+  allCarCards.clear();
+  newCarCards.clear();
+  doneCarCards.clear();
+  filteredCarCards.clear();
+
+  // Clear search field
+  search.value.clear();
+  query.value = '';
+
+  // Reset Booleans and Integers
+  loading.value = false;
+  numberOfNewCars.value = 0;
+  numberOfDoneCars.value = 0;
+
+  // Reset RxString values
+  customerId.value = '';
+  technicianId.value = '';
+  brandId.value = '';
+  modelId.value = '';
+  engineTypeId.value = '';
+  colorId.value = '';
+  companyId.value = '';
+  userId.value = '';
+  customerSaleManId.value = '';
+
+
+  // Clear image lists and URLs
+  carImagesURLs.clear();
+  carDialogImageURL.value = '';
+  customerSignatureURL.value = '';
+  advisorSignatureURL.value = '';
+
+  // Reset signatures
+  customerSignatureAsImage = null;
+  advisorSignatureAsImage = null;
+
+  // Clear selected checkboxes
+  selectedCheckBoxIndicesForLeftFront.clear();
+  selectedCheckBoxIndicesForRightFront.clear();
+  selectedCheckBoxIndicesForLeftRear.clear();
+  selectedCheckBoxIndicesForRightRear.clear();
+  selectedCheckBoxIndicesForInteriorExterior.clear();
+  selectedCheckBoxIndicesForUnderVehicle.clear();
+  selectedCheckBoxIndicesForUnderHood.clear();
+  selectedCheckBoxIndicesForBatteryPerformance.clear();
+
+  signatureControllerForCustomer.clear();
+  signatureControllerForAdvisor.clear();
+
+  // Clear body damage points
+  damagePoints.clear();
+  relativePoints.clear();
+
+  // Clear images list
+  imagesList.clear();
+  update();
+}
+
+
   addInspectionCard(BuildContext context) async {
     try {
       Map<String, dynamic> newData = {
+        'added_date': DateTime.now().toString(),
         'label': 'Draft',
         'job_status_1': '',
         'job_status_2': '',
@@ -221,6 +346,15 @@ class CardsScreenController extends GetxController {
         'job_reference_3': '',
         'job_notes': '',
         'job_delivery_notes': '',
+        'inspection_report_comments': comments.text.trim(),
+        'left_front_wheel': selectedCheckBoxIndicesForLeftFront,
+        'right_front_wheel': selectedCheckBoxIndicesForRightFront,
+        'left_rear_wheel': selectedCheckBoxIndicesForLeftRear,
+        'right_rear_wheel': selectedCheckBoxIndicesForRightRear,
+        'interior_exterior': selectedCheckBoxIndicesForInteriorExterior,
+        'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
+        'under_hood': selectedCheckBoxIndicesForUnderHood,
+        'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
       };
       showDialog(
           barrierDismissible: false,
@@ -243,8 +377,10 @@ class CardsScreenController extends GetxController {
           });
       if (imagesList.isNotEmpty) {
         await saveCarImages();
+        newData['car_images'] = carImagesURLs;
       }
-      await saveCarDialogImage();
+      // await saveCarDialogImage();
+      // newData['car_dialog'] = carDialogImageURL.value;
 
       customerSignatureAsImage =
           await signatureControllerForCustomer.toPngBytes();
@@ -261,38 +397,15 @@ class CardsScreenController extends GetxController {
             advisorSignatureAsImage, advisorSignatureURL.value);
       }
 
-      var job =
-          await FirebaseFirestore.instance.collection('job_cards').add(newData);
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(job.id)
-          .collection('internal_notes')
-          .add({
-        'type': 'Text',
-        'note': comments.text.trim(),
-        'user_id': userId.value,
-        'time': DateTime.now(),
-      });
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(job.id)
-          .collection('inspection_report')
-          .add({
-        'left_front_wheel': selectedCheckBoxIndicesForLeftFront,
-        'right_front_wheel': selectedCheckBoxIndicesForRightFront,
-        'left_rear_wheel': selectedCheckBoxIndicesForLeftRear,
-        'right_rear_wheel': selectedCheckBoxIndicesForRightRear,
-        'interior_exterior': selectedCheckBoxIndicesForInteriorExterior,
-        'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
-        'under_hood': selectedCheckBoxIndicesForUnderHood,
-        'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
-        'car_images': carImagesURLs,
-        'car_dialog': carDialogImageURL.value,
-        'signatures': [customerSignatureURL.value, advisorSignatureURL.value]
-      });
+      newData['customer_signature'] = customerSignatureURL.value;
+      newData['advisor_signature'] = advisorSignatureURL.value;
+    
+      await FirebaseFirestore.instance.collection('job_cards').add(newData);
+
       Get.back();
       showSnackBar('Done', 'Addedd Successfully');
     } catch (e) {
+      Get.back();
       showSnackBar('Failed', 'Please ty again');
     }
   }
@@ -322,30 +435,33 @@ class CardsScreenController extends GetxController {
 
   Future<void> saveCarDialogImage() async {
     try {
-      final Reference storageRef = FirebaseStorage.instance.ref().child(
-          'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
+      final RenderRepaintBoundary? boundary = repaintBoundaryKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary?;
 
-      RenderRepaintBoundary boundary = repaintBoundaryKey.currentContext!
-          .findRenderObject() as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ui.Image image = await boundary!.toImage(pixelRatio: 1.5);
       ByteData? byteData =
           await image.toByteData(format: ui.ImageByteFormat.png);
 
-      if (byteData == null) {
-        throw Exception("Failed to convert image to byte data.");
-      }
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-      Uint8List pngBytes = byteData.buffer.asUint8List();
+      final Reference storageRef = FirebaseStorage.instance.ref().child(
+          'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
 
       final UploadTask uploadTask = storageRef.putData(
         pngBytes,
-        SettableMetadata(contentType: 'image/png'),
+        // SettableMetadata(contentType: 'image/png'),
       );
 
-      final TaskSnapshot snapshot = await uploadTask;
-      final String imageUrl = await snapshot.ref.getDownloadURL();
-      carDialogImageURL.value = imageUrl;
-    } catch (e) {
+      await uploadTask.then((p0) async {
+        carDialogImageURL.value = await storageRef.getDownloadURL();
+      });
+
+      // if (snapshot.state == TaskState.success) {
+      //   final String imageUrl = await snapshot.ref.getDownloadURL();
+      //   carDialogImageURL.value = imageUrl;
+      // }
+    } catch (e, stackTrace) {
+      debugPrint('Error in saveCarDialogImage: $e\n$stackTrace');
       rethrow;
     }
   }

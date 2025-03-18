@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Mobile section controllers/cards_screen_controller.dart';
+import '../../../Models/car_card_model.dart';
+import '../../../Screens/mobile Screens/card_details_screen.dart';
 import '../../../consts.dart';
 
 Widget cardStyle({
@@ -12,15 +14,15 @@ Widget cardStyle({
       shrinkWrap: true,
       itemBuilder: (context, i) {
         var carCard = listName[i];
-        // List<String> carImages = [];
+        List<String> carImages = [];
 
-        // for (var item in carCard['car_images']) {
-        //   try {
-        //     carImages.add(item.toString());
-        //   } catch (e) {
-        //     // Handle the exception, or skip the item if necessary
-        //   }
-        // }
+        for (var item in carCard['car_images']) {
+          try {
+            carImages.add(item.toString());
+          } catch (e) {
+            // Handle the exception, or skip the item if necessary
+          }
+        }
 
         return Card(
           surfaceTintColor: Colors.white,
@@ -29,27 +31,39 @@ Widget cardStyle({
             borderRadius: BorderRadius.circular(12),
           ),
           child: InkWell(
-            onTap: () {
-              // Get.to(() => CarDetailsScreen(),
-              //     arguments: JobCardModel(
-              //         carImages: carImages,
-              //         customerSignature: carCard['customer_signature'],
-              //         carBrand: carCard['car_brand'],
-              //         carMileage: carCard['car_mileage'],
-              //         carModel: carCard['car_model'],
-              //         chassisNumber: carCard['chassis_number'],
-              //         color: carCard['color'],
-              //         customerName: carCard['customer_name'],
-              //         date: carCard['date'],
-              //         emailAddress: carCard['email_address'],
-              //         fuelAmount: carCard['fuel_amount'],
-              //         phoneNumber: carCard['phone_number'],
-              //         plateNumber: carCard['plate_number'],
-              //         comments: carCard['comments'],
-              //         docID: carCard.id,
-              //         carVideo: carCard['car_video'],
-              //         status: carCard['status']),
-              //     transition: Transition.leftToRight);
+            onTap: () async {
+              var carData = carCard.data() as Map<String, dynamic>;
+              String carBrandName = controller.getdataName(
+                  carCard['car_brand'], controller.allBrands);
+              String carModelName = await controller.getModelName(
+                  carCard['car_brand'], carCard['car_model']);
+              String customerName = controller.getdataName(
+                  carCard['customer'], controller.allCustomers,
+                  title: 'entity_name');
+                  String carColor = controller.getdataName(carCard['color'], controller.allColors);
+              Get.to(() => CarDetailsScreen(),
+                  arguments: CarCardModel(
+                    carImages: List<String>.from(carData['car_images'] ?? []),
+                    customerSignature: carData['customer_signature'] ?? '',
+                    advisorSignature: carData['advisor_signature'] ?? '',
+                    carBrand: carBrandName,
+                    carMileage: carData['mileage_in'] ?? '',
+                    carModel: carModelName,
+                    chassisNumber:
+                        carData['vehicle_identification_number'] ?? '',
+                    color: carColor,
+                    customerName: customerName,
+                    date: carData['added_date'] ?? '',
+                    emailAddress: carData['contact_email'] ?? '',
+                    phoneNumber: carData['contact_number'] ?? '',
+                    plateNumber: carData['plate_number'] ?? '',
+                    comments: carData['inspection_report_comments'] ?? '',
+                    docID:
+                        carCard.id, // Document ID is directly from the snapshot
+                    status1: carData['job_status_1'] ?? '',
+                    status2: carData['job_status_2'] ?? '',
+                  ),
+                  transition: Transition.leftToRight);
             },
             child: Padding(
                 padding: const EdgeInsets.all(16.0),

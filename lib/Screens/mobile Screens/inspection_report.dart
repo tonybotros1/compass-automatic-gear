@@ -19,15 +19,19 @@ class InspectionReposrt extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: FittedBox(
-          child: TextButton(
-              onPressed: () {
-                // jobCardScreenController.clearFields();
-              },
-              child: const Text(
-                'Clear',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              )),
+          child: GetBuilder<CardsScreenController>(
+            builder: (controller) {
+              return TextButton(
+                  onPressed: () {
+                    controller.clearAllValues();
+                  },
+                  child: const Text(
+                    'Clear',
+                    style:
+                        TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ));
+            }
+          ),
         ),
         title: Text(
           'Inspection Report',
@@ -115,8 +119,7 @@ class InspectionReposrt extends StatelessWidget {
                       },
                       onChanged: (key, value) {
                         controller.customerId.value = key;
-                  controller.onSelectForCustomers(key);
-
+                        controller.onSelectForCustomers(key);
                       },
                     );
                   }),
@@ -143,6 +146,7 @@ class InspectionReposrt extends StatelessWidget {
                               controller.model.clear();
 
                               controller.brandId.value = key;
+                              controller.brand.text = value['name'];
                             },
                           ),
                         ),
@@ -303,11 +307,31 @@ class InspectionReposrt extends StatelessWidget {
                           children: [
                             Expanded(
                               child: breakAndTireWheel(
+                                  brakeLiningTextcontroller:
+                                      controller.leftFrontBrakeLining,
+                                  tireTreadTextController:
+                                      controller.leftFrontTireTread,
+                                  wearPatternTextController:
+                                      controller.leftFrontWearPattern,
+                                  tirePressureBeforeTextController:
+                                      controller.leftFrontTirePressureBefore,
+                                  tirePressureAfterTextController:
+                                      controller.leftFrontTirePressureAfter,
                                   dataMap: controller
                                       .selectedCheckBoxIndicesForLeftFront),
                             ),
                             Expanded(
                                 child: breakAndTireWheel(
+                                    brakeLiningTextcontroller:
+                                        controller.rightFrontBrakeLining,
+                                    tireTreadTextController:
+                                        controller.rightFrontTireTread,
+                                    wearPatternTextController:
+                                        controller.rightFrontWearPattern,
+                                    tirePressureBeforeTextController:
+                                        controller.rightFrontTirePressureBefore,
+                                    tirePressureAfterTextController:
+                                        controller.rightFrontTirePressureAfter,
                                     dataMap: controller
                                         .selectedCheckBoxIndicesForRightFront))
                           ],
@@ -335,11 +359,31 @@ class InspectionReposrt extends StatelessWidget {
                           children: [
                             Expanded(
                               child: breakAndTireWheel(
+                                  brakeLiningTextcontroller:
+                                        controller.leftRearBrakeLining,
+                                    tireTreadTextController:
+                                        controller.leftRearTireTread,
+                                    wearPatternTextController:
+                                        controller.leftRearWearPattern,
+                                    tirePressureBeforeTextController:
+                                        controller.leftRearTirePressureBefore,
+                                    tirePressureAfterTextController:
+                                        controller.leftRearTirePressureAfter,
                                   dataMap: controller
                                       .selectedCheckBoxIndicesForLeftRear),
                             ),
                             Expanded(
                                 child: breakAndTireWheel(
+                                     brakeLiningTextcontroller:
+                                        controller.rightRearBrakeLining,
+                                    tireTreadTextController:
+                                        controller.rightRearTireTread,
+                                    wearPatternTextController:
+                                        controller.rightRearWearPattern,
+                                    tirePressureBeforeTextController:
+                                        controller.rightRearTirePressureBefore,
+                                    tirePressureAfterTextController:
+                                        controller.rightRearTirePressureAfter,
                                     dataMap: controller
                                         .selectedCheckBoxIndicesForRightRear))
                           ],

@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
+import '../../Models/car_card_model.dart';
 import '../../Models/image_with_data_model.dart';
-
 
 class CardDetailsController extends GetxController {
   Map<String, List<ImageWithDate>> groupedImages = {};
@@ -28,11 +27,12 @@ class CardDetailsController extends GetxController {
   late String date = '';
   late String id = '';
   late String video = '';
-  late bool status = true;
+  late String status = '';
   late String comments =
       'This is a comment ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt';
   double fuelAmount = 50;
   late String customerSignature = '';
+  late String advisorSignature = '';
   List<String> carImages = [];
 
   @override
@@ -42,8 +42,7 @@ class CardDetailsController extends GetxController {
     super.onInit();
   }
 
-
-   void openImageViewer(List imageUrls, int index) {
+  void openImageViewer(List imageUrls, int index) {
     Get.toNamed('/imageViewer',
         arguments: {'images': imageUrls, 'index': index});
   }
@@ -54,25 +53,24 @@ class CardDetailsController extends GetxController {
 
   getDetails() {
     if (Get.arguments != null) {
-      var arguments = Get.arguments;
-      customerSignature = arguments.customerSignature;
-      customerName = arguments.customerName;
-      carImages = arguments.carImages;
-      customerName = arguments.customerName;
-      carBrand = arguments.carBrand;
-      carModel = arguments.carModel;
-      plateNumber = arguments.plateNumber;
-      carMileage = arguments.carMileage;
-      chassisNumber = arguments.chassisNumber;
-      comments = arguments.comments;
-      phoneNumber = arguments.phoneNumber;
-      emailAddress = arguments.emailAddress;
-      color = arguments.color;
-      fuelAmount = arguments.fuelAmount;
-      date = arguments.date;
-      id = arguments.docID;
-      video = arguments.carVideo;
-      status = arguments.status;
+      CarCardModel arguments = Get.arguments;
+      customerSignature = arguments.customerSignature!;
+      advisorSignature = arguments.advisorSignature!;
+      customerName = arguments.customerName!;
+      carImages = arguments.carImages!;
+      carBrand = arguments.carBrand!;
+      carModel = arguments.carModel!;
+      plateNumber = arguments.plateNumber!;
+      carMileage = arguments.carMileage!;
+      chassisNumber = arguments.chassisNumber!;
+      comments = arguments.comments!;
+      phoneNumber = arguments.phoneNumber!;
+      emailAddress = arguments.emailAddress!;
+      color = arguments.color!;
+      // fuelAmount = arguments.fuelAmount;
+      date = arguments.date!;
+      id = arguments.docID!;
+      status = arguments.status1!;
     }
     update();
   }
@@ -149,14 +147,7 @@ class CardDetailsController extends GetxController {
     return groupedImages;
   }
 
-  void changeStatus(stat) {
-    status = stat;
-    FirebaseFirestore.instance
-        .collection('car_card')
-        .doc(id)
-        .update({"status": stat});
-    update();
-  }
+ 
 
   void updateMethod() {
     update();
