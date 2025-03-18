@@ -19,19 +19,17 @@ class InspectionReposrt extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: FittedBox(
-          child: GetBuilder<CardsScreenController>(
-            builder: (controller) {
-              return TextButton(
-                  onPressed: () {
-                    controller.clearAllValues();
-                  },
-                  child: const Text(
-                    'Clear',
-                    style:
-                        TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  ));
-            }
-          ),
+          child: GetBuilder<CardsScreenController>(builder: (controller) {
+            return TextButton(
+                onPressed: () {
+                  controller.clearAllValues();
+                },
+                child: const Text(
+                  'Clear',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ));
+          }),
         ),
         title: Text(
           'Inspection Report',
@@ -360,21 +358,21 @@ class InspectionReposrt extends StatelessWidget {
                             Expanded(
                               child: breakAndTireWheel(
                                   brakeLiningTextcontroller:
-                                        controller.leftRearBrakeLining,
-                                    tireTreadTextController:
-                                        controller.leftRearTireTread,
-                                    wearPatternTextController:
-                                        controller.leftRearWearPattern,
-                                    tirePressureBeforeTextController:
-                                        controller.leftRearTirePressureBefore,
-                                    tirePressureAfterTextController:
-                                        controller.leftRearTirePressureAfter,
+                                      controller.leftRearBrakeLining,
+                                  tireTreadTextController:
+                                      controller.leftRearTireTread,
+                                  wearPatternTextController:
+                                      controller.leftRearWearPattern,
+                                  tirePressureBeforeTextController:
+                                      controller.leftRearTirePressureBefore,
+                                  tirePressureAfterTextController:
+                                      controller.leftRearTirePressureAfter,
                                   dataMap: controller
                                       .selectedCheckBoxIndicesForLeftRear),
                             ),
                             Expanded(
                                 child: breakAndTireWheel(
-                                     brakeLiningTextcontroller:
+                                    brakeLiningTextcontroller:
                                         controller.rightRearBrakeLining,
                                     tireTreadTextController:
                                         controller.rightRearTireTread,
@@ -517,9 +515,13 @@ class InspectionReposrt extends StatelessWidget {
                                     child: FittedBox(
                                       fit: BoxFit.cover,
                                       clipBehavior: Clip.hardEdge,
-                                      child: Image.file(
-                                        File(controller.imagesList[i].path),
-                                      ),
+                                      child: controller.imagesListURLs.isEmpty
+                                          ? Image.file(
+                                              File(controller
+                                                  .imagesList[i].path),
+                                            )
+                                          : Image.network(
+                                              controller.imagesListURLs[i]),
                                     ),
                                   ),
                                   Positioned(
@@ -527,7 +529,11 @@ class InspectionReposrt extends StatelessWidget {
                                     right: 0,
                                     child: IconButton(
                                         onPressed: () {
-                                          controller.imagesList.removeAt(i);
+                                          controller.imagesListURLs.isEmpty
+                                              ? controller.imagesList
+                                                  .removeAt(i)
+                                              : controller.imagesListURLs
+                                                  .removeAt(i);
                                         },
                                         icon: const Icon(
                                           Icons.remove_circle,
@@ -732,12 +738,19 @@ class InspectionReposrt extends StatelessWidget {
                               padding: EdgeInsets.all(2),
                               decoration: BoxDecoration(
                                   border: Border.all(color: Colors.black)),
-                              child: Signature(
-                                height: 250,
-                                controller:
-                                    controller.signatureControllerForAdvisor,
-                                backgroundColor: Colors.white,
-                              ),
+                              child: controller.advisorSignatureURL.isEmpty
+                                  ? Signature(
+                                      height: 250,
+                                      controller: controller
+                                          .signatureControllerForAdvisor,
+                                      backgroundColor: Colors.white,
+                                    )
+                                  : Image.network(errorBuilder:
+                                      (context, error, stackTrace) {
+                                      return Icon(Icons.error,
+                                          color:
+                                              Colors.red); // Show an error icon
+                                    }, controller.advisorSignatureURL.value),
                             ),
                           ],
                         ),
@@ -767,12 +780,19 @@ class InspectionReposrt extends StatelessWidget {
                               padding: EdgeInsets.all(2),
                               decoration: BoxDecoration(
                                   border: Border.all(color: Colors.black)),
-                              child: Signature(
-                                height: 250,
-                                controller:
-                                    controller.signatureControllerForCustomer,
-                                backgroundColor: Colors.white,
-                              ),
+                              child: controller.customerSignatureURL.isEmpty
+                                  ? Signature(
+                                      height: 250,
+                                      controller: controller
+                                          .signatureControllerForCustomer,
+                                      backgroundColor: Colors.white,
+                                    )
+                                  : Image.network(errorBuilder:
+                                      (context, error, stackTrace) {
+                                      return Icon(Icons.error,
+                                          color:
+                                              Colors.red); // Show an error icon
+                                    }, controller.customerSignatureURL.value),
                             ),
                           ],
                         ),

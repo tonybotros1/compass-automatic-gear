@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:readmore/readmore.dart';
 import '../../Controllers/Mobile section controllers/card_details_controller.dart';
 import '../../consts.dart';
+import 'inspection_report.dart';
 
 class CarDetailsScreen extends StatelessWidget {
   CarDetailsScreen({super.key});
@@ -34,27 +35,9 @@ class CarDetailsScreen extends StatelessWidget {
           actions: [
             TextButton(
                 onPressed: () {
-                  // Get.toNamed(
-                  //   '/editCardScreen',
-                  //   arguments: JobCardModel(
-                  //       carImages: cardDetailsController.carImages,
-                  //       customerSignature:
-                  //           cardDetailsController.customerSignature,
-                  //       carBrand: cardDetailsController.carBrand,
-                  //       carMileage: cardDetailsController.carMileage,
-                  //       carModel: cardDetailsController.carModel,
-                  //       chassisNumber: cardDetailsController.chassisNumber,
-                  //       color: cardDetailsController.color,
-                  //       customerName: cardDetailsController.customerName,
-                  //       date: cardDetailsController.date,
-                  //       emailAddress: cardDetailsController.emailAddress,
-                  //       fuelAmount: cardDetailsController.fuelAmount,
-                  //       phoneNumber: cardDetailsController.phoneNumber,
-                  //       plateNumber: cardDetailsController.plateNumber,
-                  //       docID: cardDetailsController.id,
-                  //       comments: cardDetailsController.comments,
-                  //       carVideo: cardDetailsController.video),
-                  // );
+                  cardDetailsController.loadVariables();
+                  Get.to(()=> InspectionReposrt());
+                 
                 },
                 child: const Text(
                   'Edit',

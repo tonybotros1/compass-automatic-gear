@@ -116,6 +116,7 @@ class CardsScreenController extends GetxController {
   GlobalKey imageKey = GlobalKey();
   GlobalKey repaintBoundaryKey = GlobalKey();
   RxList<File> imagesList = RxList([]);
+  RxList<String> imagesListURLs = RxList([]);
   final ImagePicker picker = ImagePicker();
 
   // interioir / exterioir

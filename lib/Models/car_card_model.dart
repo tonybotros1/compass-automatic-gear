@@ -18,6 +18,7 @@ class CarCardModel {
   List<String>? carImages;
   String? status1;
   String? status2;
+  Map? data;
 
  CarCardModel({
     this.customerName,
@@ -39,6 +40,7 @@ class CarCardModel {
     this.status1,
     this.status2,
     this.comments,
+    this.data,
   });
 
   CarCardModel.fromJson(Map<String, dynamic> json) {

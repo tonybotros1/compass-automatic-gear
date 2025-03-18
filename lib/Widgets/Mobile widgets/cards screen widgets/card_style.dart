@@ -43,6 +43,7 @@ Widget cardStyle({
                   String carColor = controller.getdataName(carCard['color'], controller.allColors);
               Get.to(() => CarDetailsScreen(),
                   arguments: CarCardModel(
+                    data: carData,
                     carImages: List<String>.from(carData['car_images'] ?? []),
                     customerSignature: carData['customer_signature'] ?? '',
                     advisorSignature: carData['advisor_signature'] ?? '',

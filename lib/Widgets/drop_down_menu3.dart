@@ -295,7 +295,6 @@ class DropdownController extends GetxController {
   }
 
   void hideDropdown() {
-    print('tttttttttttttttttttttttttttttttttttttttttttttt');
     query.value.clear();
     overlayEntry?.remove();
     overlayEntry = null;

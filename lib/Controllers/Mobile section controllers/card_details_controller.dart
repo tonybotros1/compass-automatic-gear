@@ -7,6 +7,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../../Models/car_card_model.dart';
 import '../../Models/image_with_data_model.dart';
+import 'cards_screen_controller.dart';
 
 class CardDetailsController extends GetxController {
   Map<String, List<ImageWithDate>> groupedImages = {};
@@ -34,12 +35,65 @@ class CardDetailsController extends GetxController {
   late String customerSignature = '';
   late String advisorSignature = '';
   List<String> carImages = [];
+  Map? data = {};
 
   @override
   void onInit() async {
     await getDetails();
     await getImagesGroupedByDate(carImages);
     super.onInit();
+  }
+
+  loadVariables() {
+    CardsScreenController controller = Get.put(CardsScreenController());
+    controller.technicianName.text =
+        controller.getdataName(data?['technician'], controller.allTechnicians);
+    controller.technicianId.value = data?['technician'];
+    controller.date.text = data?['added_date'];
+    controller.customer.text = customerName;
+    controller.customerId.value = data?['customer'];
+    controller.brand.text = carBrand;
+    controller.brandId.value = data?['car_brand'];
+    controller.model.text = carModel;
+    controller.modelId.value = data?['car_model'];
+    controller.color.text = color;
+    controller.colorId.value = data?['color'];
+    controller.plateNumber.text = plateNumber;
+    controller.code.text = data?['plate_code'];
+    controller.engineType.text =
+        controller.getdataName(data?['engine_type'], controller.allEngineTypes);
+    controller.year.text = data?['year'];
+    controller.mileage.text = data?['mileage_in'];
+    controller.vin.text = data?['vehicle_identification_number'];
+    controller.comments.text = data?['inspection_report_comments'] ?? '';
+    controller.selectedCheckBoxIndicesForLeftFront.assignAll(
+        Map<String, Map<String, String>>.from(data?['left_front_wheel'] ?? {}));
+
+    controller.selectedCheckBoxIndicesForRightFront.value =
+        Map<String, Map<String, String>>.from(data?['right_front_wheel'] ?? {});
+
+    controller.selectedCheckBoxIndicesForLeftRear.value =
+        Map<String, Map<String, String>>.from(data?['left_rear_wheel'] ?? {});
+
+    controller.selectedCheckBoxIndicesForRightRear.value =
+        Map<String, Map<String, String>>.from(data?['right_rear_wheel'] ?? {});
+
+    controller.selectedCheckBoxIndicesForInteriorExterior.value =
+        Map<String, Map<String, String>>.from(data?['interior_exterior'] ?? {});
+
+    controller.selectedCheckBoxIndicesForUnderVehicle.value =
+        Map<String, Map<String, String>>.from(data?['under_vehicle'] ?? {});
+
+    controller.selectedCheckBoxIndicesForUnderHood.value =
+        Map<String, Map<String, String>>.from(data?['under_hood'] ?? {});
+
+    controller.selectedCheckBoxIndicesForBatteryPerformance.value =
+        Map<String, Map<String, String>>.from(
+            data?['battery_performance'] ?? {});
+
+    controller.imagesListURLs.assignAll(List<String>.from(data?['car_images']));
+    controller.customerSignatureURL.value = data?['customer_signature'] ?? '';
+    controller.advisorSignatureURL.value = data?['advisor_signature'] ?? '';
   }
 
   void openImageViewer(List imageUrls, int index) {
@@ -54,6 +108,7 @@ class CardDetailsController extends GetxController {
   getDetails() {
     if (Get.arguments != null) {
       CarCardModel arguments = Get.arguments;
+      data = arguments.data;
       customerSignature = arguments.customerSignature!;
       advisorSignature = arguments.advisorSignature!;
       customerName = arguments.customerName!;
@@ -146,8 +201,6 @@ class CardDetailsController extends GetxController {
 
     return groupedImages;
   }
-
- 
 
   void updateMethod() {
     update();
