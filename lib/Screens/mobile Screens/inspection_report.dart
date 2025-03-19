@@ -20,15 +20,25 @@ class InspectionReposrt extends StatelessWidget {
       appBar: AppBar(
         leading: FittedBox(
           child: GetBuilder<CardsScreenController>(builder: (controller) {
-            return TextButton(
-                onPressed: () {
-                  controller.clearAllValues();
-                },
-                child: const Text(
-                  'Clear',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ));
+            return controller.inEditMode.isFalse
+                ? TextButton(
+                    onPressed: () {
+                      controller.clearAllValues();
+                    },
+                    child: const Text(
+                      'Clear',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ))
+                : IconButton(
+                    onPressed: () {
+                      controller.inEditMode.value = false;
+                      Get.back();
+                    },
+                    icon: Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                    ));
           }),
         ),
         title: Text(

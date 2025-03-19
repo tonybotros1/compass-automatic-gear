@@ -61,6 +61,7 @@ class CardsScreenController extends GetxController {
   Uint8List? advisorSignatureAsImage;
   RxString customerSignatureURL = RxString('');
   RxString advisorSignatureURL = RxString('');
+  RxBool inEditMode = RxBool(false);
 
   RxMap<String, Map<String, String>> selectedCheckBoxIndicesForLeftFront =
       <String, Map<String, String>>{}.obs;

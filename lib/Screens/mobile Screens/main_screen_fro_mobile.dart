@@ -17,7 +17,7 @@ class MainScreenForMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PersistentTabView(
-      hideNavigationBarWhenKeyboardAppears: true,
+      hideNavigationBarWhenKeyboardAppears: false,
       popBehaviorOnSelectedNavBarItemPress: PopBehavior.once,
 
       context,

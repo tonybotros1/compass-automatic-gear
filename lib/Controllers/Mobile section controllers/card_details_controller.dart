@@ -46,6 +46,7 @@ class CardDetailsController extends GetxController {
 
   loadVariables() {
     CardsScreenController controller = Get.put(CardsScreenController());
+    controller.inEditMode.value = true;
     controller.technicianName.text =
         controller.getdataName(data?['technician'], controller.allTechnicians);
     controller.technicianId.value = data?['technician'];
