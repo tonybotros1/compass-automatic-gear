@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,7 +17,7 @@ class CardsScreenController extends GetxController {
   TextEditingController customerEntityName = TextEditingController();
   TextEditingController customerEntityEmail = TextEditingController();
   TextEditingController customerCreditNumber = TextEditingController();
-  TextEditingController technicianName = TextEditingController();
+  Rx<TextEditingController> technicianName = TextEditingController().obs;
   TextEditingController date =
       TextEditingController(text: textToDate(DateTime.now()));
   TextEditingController brand = TextEditingController();
@@ -117,7 +118,6 @@ class CardsScreenController extends GetxController {
   GlobalKey imageKey = GlobalKey();
   GlobalKey repaintBoundaryKey = GlobalKey();
   RxList<File> imagesList = RxList([]);
-  RxList<String> imagesListURLs = RxList([]);
   final ImagePicker picker = ImagePicker();
 
   // interioir / exterioir
@@ -178,111 +178,112 @@ class CardsScreenController extends GetxController {
     super.onInit();
   }
 
- void clearAllValues() {
-  // Clear all TextEditingControllers
-  batteryColdCrankingAmpsFactorySpecs.clear();
-  batteryColdCrankingAmpsActual.clear();
-  customer.clear();
-  customerEntityName.clear();
-  customerEntityEmail.clear();
-  customerCreditNumber.clear();
-  technicianName.clear();
-  date.text = textToDate(DateTime.now()); 
-  brand.clear();
-  model.clear();
-  plateNumber.clear();
-  code.clear();
-  year.clear();
-  color.clear();
-  engineType.clear();
-  vin.clear();
-  mileage.clear();
-  comments.clear();
-  customerEntityPhoneNumber.clear();
+  void clearAllValues() {
+    // Clear all TextEditingControllers
+    batteryColdCrankingAmpsFactorySpecs.clear();
+    batteryColdCrankingAmpsActual.clear();
+    customer.clear();
+    customerEntityName.clear();
+    customerEntityEmail.clear();
+    customerCreditNumber.clear();
+    technicianName.value = TextEditingController();
+    date.text = textToDate(DateTime.now());
+    brand.clear();
+    model.clear();
+    plateNumber.clear();
+    code.clear();
+    year.clear();
+    color.clear();
+    engineType.clear();
+    vin.clear();
+    mileage.clear();
+    comments.clear();
+    customerEntityPhoneNumber.clear();
 
-  leftFrontBrakeLining.clear();
-  leftFrontTireTread.clear();
-  leftFrontWearPattern.clear();
-  leftFrontTirePressureBefore.clear();
-  leftFrontTirePressureAfter.clear();
+    leftFrontBrakeLining.clear();
+    leftFrontTireTread.clear();
+    leftFrontWearPattern.clear();
+    leftFrontTirePressureBefore.clear();
+    leftFrontTirePressureAfter.clear();
 
-  rightFrontBrakeLining.clear();
-  rightFrontTireTread.clear();
-  rightFrontWearPattern.clear();
-  rightFrontTirePressureBefore.clear();
-  rightFrontTirePressureAfter.clear();
+    rightFrontBrakeLining.clear();
+    rightFrontTireTread.clear();
+    rightFrontWearPattern.clear();
+    rightFrontTirePressureBefore.clear();
+    rightFrontTirePressureAfter.clear();
 
-  leftRearBrakeLining.clear();
-  leftRearTireTread.clear();
-  leftRearWearPattern.clear();
-  leftRearTirePressureBefore.clear();
-  leftRearTirePressureAfter.clear();
+    leftRearBrakeLining.clear();
+    leftRearTireTread.clear();
+    leftRearWearPattern.clear();
+    leftRearTirePressureBefore.clear();
+    leftRearTirePressureAfter.clear();
 
-  rightRearBrakeLining.clear();
-  rightRearTireTread.clear();
-  rightRearWearPattern.clear();
-  rightRearTirePressureBefore.clear();
-  rightRearTirePressureAfter.clear();
+    rightRearBrakeLining.clear();
+    rightRearTireTread.clear();
+    rightRearWearPattern.clear();
+    rightRearTirePressureBefore.clear();
+    rightRearTirePressureAfter.clear();
 
-  // Clear RxList<DocumentSnapshot>
-  allCarCards.clear();
-  newCarCards.clear();
-  doneCarCards.clear();
-  filteredCarCards.clear();
+    // Clear RxList<DocumentSnapshot>
+    allCarCards.clear();
+    newCarCards.clear();
+    doneCarCards.clear();
+    filteredCarCards.clear();
 
-  // Clear search field
-  search.value.clear();
-  query.value = '';
+    // Clear search field
+    search.value.clear();
+    query.value = '';
 
-  // Reset Booleans and Integers
-  loading.value = false;
-  numberOfNewCars.value = 0;
-  numberOfDoneCars.value = 0;
+    // Reset Booleans and Integers
+    loading.value = false;
+    numberOfNewCars.value = 0;
+    numberOfDoneCars.value = 0;
 
-  // Reset RxString values
-  customerId.value = '';
-  technicianId.value = '';
-  brandId.value = '';
-  modelId.value = '';
-  engineTypeId.value = '';
-  colorId.value = '';
-  companyId.value = '';
-  userId.value = '';
-  customerSaleManId.value = '';
+    // Reset RxString values
+    customerId.value = '';
+    technicianId.value = '';
+    brandId.value = '';
+    modelId.value = '';
+    engineTypeId.value = '';
+    colorId.value = '';
+    companyId.value = '';
+    userId.value = '';
+    customerSaleManId.value = '';
 
+    // Clear image lists and URLs
+    carImagesURLs.clear();
+    carDialogImageURL.value = '';
+    customerSignatureURL.value = '';
+    advisorSignatureURL.value = '';
 
-  // Clear image lists and URLs
-  carImagesURLs.clear();
-  carDialogImageURL.value = '';
-  customerSignatureURL.value = '';
-  advisorSignatureURL.value = '';
+    // Reset signatures
+    customerSignatureAsImage = null;
+    advisorSignatureAsImage = null;
 
-  // Reset signatures
-  customerSignatureAsImage = null;
-  advisorSignatureAsImage = null;
+    // Clear selected checkboxes
+    selectedCheckBoxIndicesForLeftFront.clear();
+    selectedCheckBoxIndicesForRightFront.clear();
+    selectedCheckBoxIndicesForLeftRear.clear();
+    selectedCheckBoxIndicesForRightRear.clear();
+    selectedCheckBoxIndicesForInteriorExterior.clear();
+    selectedCheckBoxIndicesForUnderVehicle.clear();
+    selectedCheckBoxIndicesForUnderHood.clear();
+    selectedCheckBoxIndicesForBatteryPerformance.clear();
 
-  // Clear selected checkboxes
-  selectedCheckBoxIndicesForLeftFront.clear();
-  selectedCheckBoxIndicesForRightFront.clear();
-  selectedCheckBoxIndicesForLeftRear.clear();
-  selectedCheckBoxIndicesForRightRear.clear();
-  selectedCheckBoxIndicesForInteriorExterior.clear();
-  selectedCheckBoxIndicesForUnderVehicle.clear();
-  selectedCheckBoxIndicesForUnderHood.clear();
-  selectedCheckBoxIndicesForBatteryPerformance.clear();
+    signatureControllerForCustomer.clear();
+    signatureControllerForAdvisor.clear();
 
-  signatureControllerForCustomer.clear();
-  signatureControllerForAdvisor.clear();
+    // Clear body damage points
+    damagePoints.clear();
+    relativePoints.clear();
 
-  // Clear body damage points
-  damagePoints.clear();
-  relativePoints.clear();
+    // Clear images list
+    imagesList.clear();
+    update();
+  }
 
-  // Clear images list
-  imagesList.clear();
-  update();
-}
-
+  final customCachedManeger = CacheManager(
+      Config('customCacheKey', stalePeriod: const Duration(days: 3)));
 
   addInspectionCard(BuildContext context) async {
     try {
@@ -380,9 +381,11 @@ class CardsScreenController extends GetxController {
       if (imagesList.isNotEmpty) {
         await saveCarImages();
         newData['car_images'] = carImagesURLs;
+      } else {
+        newData['car_images'] = [];
       }
-      // await saveCarDialogImage();
-      // newData['car_dialog'] = carDialogImageURL.value;
+      await saveCarDialogImage();
+      newData['car_dialog'] = carDialogImageURL.value;
 
       customerSignatureAsImage =
           await signatureControllerForCustomer.toPngBytes();
@@ -390,18 +393,18 @@ class CardsScreenController extends GetxController {
           await signatureControllerForAdvisor.toPngBytes();
 
       if (customerSignatureAsImage != null) {
-        await saveSignatureImage(
-            customerSignatureAsImage, customerSignatureURL.value);
+        customerSignatureURL.value =
+            await saveSignatureImage(customerSignatureAsImage);
       }
 
       if (advisorSignatureAsImage != null) {
-        await saveSignatureImage(
-            advisorSignatureAsImage, advisorSignatureURL.value);
+        advisorSignatureURL.value =
+            await saveSignatureImage(advisorSignatureAsImage);
       }
 
       newData['customer_signature'] = customerSignatureURL.value;
       newData['advisor_signature'] = advisorSignatureURL.value;
-    
+
       await FirebaseFirestore.instance.collection('job_cards').add(newData);
 
       Get.back();
@@ -422,7 +425,7 @@ class CardsScreenController extends GetxController {
 
         final UploadTask uploadTask = storageRef.putData(
           imageBytes,
-          SettableMetadata(contentType: 'image/png'),
+          // SettableMetadata(contentType: 'image/png'),
         );
 
         final TaskSnapshot snapshot = await uploadTask;
@@ -469,9 +472,10 @@ class CardsScreenController extends GetxController {
   }
 
   // for saving signature image in firebase
-  saveSignatureImage(signatureAsImage, url) async {
+  saveSignatureImage(signatureAsImage) async {
     try {
       // uploading.value = true;
+      var url = '';
       final Reference ref = FirebaseStorage.instance
           .ref()
           .child('signatures')
@@ -480,6 +484,7 @@ class CardsScreenController extends GetxController {
       await uploadTask.then((p0) async {
         url = await ref.getDownloadURL();
       });
+      return url;
     } catch (e) {
       rethrow;
     }

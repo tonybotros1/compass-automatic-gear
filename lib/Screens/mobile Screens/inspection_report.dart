@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:datahubai/Controllers/Mobile%20section%20controllers/cards_screen_controller.dart';
 import 'package:datahubai/Widgets/Mobile%20widgets/inspection%20report%20widgets/check_box_section.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
@@ -19,7 +20,7 @@ class InspectionReposrt extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: FittedBox(
-          child: GetBuilder<CardsScreenController>(builder: (controller) {
+          child: GetX<CardsScreenController>(builder: (controller) {
             return controller.inEditMode.isFalse
                 ? TextButton(
                     onPressed: () {
@@ -69,21 +70,23 @@ class InspectionReposrt extends StatelessWidget {
               'MAIN DETAILS',
               style: fontStyle1,
             )),
-            Container(
-              padding: EdgeInsets.all(10),
-              decoration: containerDecor,
-              child: Column(
-                spacing: 10,
-                children: [
-                  GetX<CardsScreenController>(builder: (controller) {
-                    bool techniciansLoading = controller.allTechnicians.isEmpty;
-                    return Row(
+            GetX<CardsScreenController>(builder: (controller) {
+              bool techniciansLoading = controller.allTechnicians.isEmpty;
+
+              return Container(
+                padding: EdgeInsets.all(10),
+                decoration: containerDecor,
+                child: Column(
+                  spacing: 10,
+                  children: [
+                    Row(
                       spacing: 10,
                       children: [
                         Expanded(
                           flex: 2,
                           child: CustomDropdown(
-                            textcontroller: controller.technicianName.text,
+                            textcontroller:
+                                controller.technicianName.value.text,
                             showedSelectedName: 'name',
                             hintText: 'Technician',
                             items: techniciansLoading
@@ -111,155 +114,153 @@ class InspectionReposrt extends StatelessWidget {
                                 isDate: true,
                                 controller: controller.date))
                       ],
-                    );
-                  }),
-                  GetX<CardsScreenController>(builder: (controller) {
-                    bool customerLoading = controller.allCustomers.isEmpty;
-                    return CustomDropdown(
-                      textcontroller: controller.customer.text,
-                      showedSelectedName: 'entity_name',
-                      hintText: 'Customer',
-                      items: customerLoading ? {} : controller.allCustomers,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text(value['entity_name']),
-                        );
-                      },
-                      onChanged: (key, value) {
-                        controller.customerId.value = key;
-                        controller.onSelectForCustomers(key);
-                      },
-                    );
-                  }),
-                  GetX<CardsScreenController>(builder: (controller) {
-                    bool brandsLoading = controller.allBrands.isEmpty;
-                    bool modelLoading = controller.allModels.isEmpty;
+                    ),
+                    GetX<CardsScreenController>(builder: (controller) {
+                      bool customerLoading = controller.allCustomers.isEmpty;
+                      return CustomDropdown(
+                        textcontroller: controller.customer.text,
+                        showedSelectedName: 'entity_name',
+                        hintText: 'Customer',
+                        items: customerLoading ? {} : controller.allCustomers,
+                        itemBuilder: (context, key, value) {
+                          return ListTile(
+                            title: Text(value['entity_name']),
+                          );
+                        },
+                        onChanged: (key, value) {
+                          controller.customerId.value = key;
+                          controller.onSelectForCustomers(key);
+                        },
+                      );
+                    }),
+                    GetX<CardsScreenController>(builder: (controller) {
+                      bool brandsLoading = controller.allBrands.isEmpty;
+                      bool modelLoading = controller.allModels.isEmpty;
 
-                    return Row(
-                      spacing: 10,
-                      children: [
-                        Expanded(
-                          child: CustomDropdown(
+                      return Row(
+                        spacing: 10,
+                        children: [
+                          Expanded(
+                            child: CustomDropdown(
+                              showedSelectedName: 'name',
+                              hintText: 'Brand',
+                              textcontroller: controller.brand.text,
+                              items: brandsLoading ? {} : controller.allBrands,
+                              itemBuilder: (context, key, value) {
+                                return ListTile(
+                                  title: Text(value['name']),
+                                );
+                              },
+                              onChanged: (key, value) {
+                                controller.getModelsByCarBrand(key);
+                                controller.model.clear();
+                                controller.brandId.value = key;
+                                controller.brand.text = value['name'];
+                              },
+                            ),
+                          ),
+                          Expanded(
+                              flex: 2,
+                              child: CustomDropdown(
+                                showedSelectedName: 'name',
+                                hintText: 'Model',
+                                textcontroller: controller.model.text,
+                                items: modelLoading ? {} : controller.allModels,
+                                itemBuilder: (context, key, value) {
+                                  return ListTile(
+                                    title: Text(value['name']),
+                                  );
+                                },
+                                onChanged: (key, value) {
+                                  controller.modelId.value = key;
+                                },
+                              ))
+                        ],
+                      );
+                    }),
+                    GetX<CardsScreenController>(builder: (controller) {
+                      bool isColorsLoading = controller.allColors.isEmpty;
+                      return Row(
+                        spacing: 10,
+                        children: [
+                          Expanded(
+                              child: CustomDropdown(
+                            hintText: 'Color',
                             showedSelectedName: 'name',
-                            hintText: 'Brand',
-                            textcontroller: controller.brand.text,
-                            items: brandsLoading ? {} : controller.allBrands,
+                            textcontroller: controller.color.text,
+                            items: isColorsLoading ? {} : controller.allColors,
                             itemBuilder: (context, key, value) {
                               return ListTile(
                                 title: Text(value['name']),
                               );
                             },
                             onChanged: (key, value) {
-                              controller.getModelsByCarBrand(key);
-                              controller.model.clear();
-
-                              controller.brandId.value = key;
-                              controller.brand.text = value['name'];
+                              controller.colorId.value = key;
                             },
+                          )),
+                          Expanded(
+                            child: myTextFormFieldWithBorder(
+                                labelText: 'Plate Number',
+                                controller: controller.plateNumber),
                           ),
-                        ),
-                        Expanded(
-                            flex: 2,
-                            child: CustomDropdown(
-                              showedSelectedName: 'name',
-                              hintText: 'Model',
-                              textcontroller: controller.model.text,
-                              items: modelLoading ? {} : controller.allModels,
-                              itemBuilder: (context, key, value) {
-                                return ListTile(
-                                  title: Text(value['name']),
-                                );
-                              },
-                              onChanged: (key, value) {
-                                controller.modelId.value = key;
-                              },
-                            ))
-                      ],
-                    );
-                  }),
-                  GetX<CardsScreenController>(builder: (controller) {
-                    bool isColorsLoading = controller.allColors.isEmpty;
-                    return Row(
-                      spacing: 10,
-                      children: [
-                        Expanded(
-                            child: CustomDropdown(
-                          hintText: 'Color',
-                          showedSelectedName: 'name',
-                          textcontroller: controller.color.text,
-                          items: isColorsLoading ? {} : controller.allColors,
-                          itemBuilder: (context, key, value) {
-                            return ListTile(
-                              title: Text(value['name']),
-                            );
-                          },
-                          onChanged: (key, value) {
-                            controller.colorId.value = key;
-                          },
-                        )),
-                        Expanded(
-                          child: myTextFormFieldWithBorder(
-                              labelText: 'Plate Number',
-                              controller: controller.plateNumber),
-                        ),
-                        Expanded(
-                          child: myTextFormFieldWithBorder(
-                              labelText: 'Code', controller: controller.code),
-                        ),
-                      ],
-                    );
-                  }),
-                  GetX<CardsScreenController>(builder: (controller) {
-                    bool isEngineLoading = controller.allEngineTypes.isEmpty;
-                    return Column(
-                      spacing: 10,
-                      children: [
-                        Row(
-                          spacing: 10,
-                          children: [
-                            Expanded(
-                                child: CustomDropdown(
-                              hintText: 'Engine Type',
-                              showedSelectedName: 'name',
-                              textcontroller: controller.engineType.text,
-                              items: isEngineLoading
-                                  ? {}
-                                  : controller.allEngineTypes,
-                              itemBuilder: (context, key, value) {
-                                return ListTile(
-                                  title: Text(value['name']),
-                                );
-                              },
-                              onChanged: (key, value) {
-                                controller.engineTypeId.value = key;
-                              },
-                            )),
-                            Expanded(
-                              child: myTextFormFieldWithBorder(
-                                  isnumber: true,
-                                  labelText: 'Year',
-                                  keyboardType: TextInputType.number,
-                                  controller: controller.year),
-                            ),
-                            Expanded(
-                              child: myTextFormFieldWithBorder(
-                                  isDouble: true,
-                                  labelText: 'Mileage',
-                                  keyboardType: TextInputType.number,
-                                  controller: controller.mileage),
-                            )
-                          ],
-                        ),
-                        myTextFormFieldWithBorder(
-                            labelText: 'VIN Number',
-                            keyboardType: TextInputType.number,
-                            controller: controller.vin),
-                      ],
-                    );
-                  })
-                ],
-              ),
-            ),
+                          Expanded(
+                            child: myTextFormFieldWithBorder(
+                                labelText: 'Code', controller: controller.code),
+                          ),
+                        ],
+                      );
+                    }),
+                    GetX<CardsScreenController>(builder: (controller) {
+                      bool isEngineLoading = controller.allEngineTypes.isEmpty;
+                      return Column(
+                        spacing: 10,
+                        children: [
+                          Row(
+                            spacing: 10,
+                            children: [
+                              Expanded(
+                                  child: CustomDropdown(
+                                hintText: 'Engine Type',
+                                showedSelectedName: 'name',
+                                textcontroller: controller.engineType.text,
+                                items: isEngineLoading
+                                    ? {}
+                                    : controller.allEngineTypes,
+                                itemBuilder: (context, key, value) {
+                                  return ListTile(
+                                    title: Text(value['name']),
+                                  );
+                                },
+                                onChanged: (key, value) {
+                                  controller.engineTypeId.value = key;
+                                },
+                              )),
+                              Expanded(
+                                child: myTextFormFieldWithBorder(
+                                    isnumber: true,
+                                    labelText: 'Year',
+                                    keyboardType: TextInputType.number,
+                                    controller: controller.year),
+                              ),
+                              Expanded(
+                                child: myTextFormFieldWithBorder(
+                                    isDouble: true,
+                                    labelText: 'Mileage',
+                                    keyboardType: TextInputType.number,
+                                    controller: controller.mileage),
+                              )
+                            ],
+                          ),
+                          myTextFormFieldWithBorder(
+                              labelText: 'VIN Number',
+                              controller: controller.vin),
+                        ],
+                      );
+                    })
+                  ],
+                ),
+              );
+            }),
             SizedBox(height: 10),
             labelContainer(
                 lable: Text(
@@ -500,11 +501,14 @@ class InspectionReposrt extends StatelessWidget {
               return Container(
                 padding: EdgeInsets.all(10),
                 decoration: containerDecor,
-                child: controller.imagesList.isNotEmpty
+                child: controller.imagesList.isNotEmpty ||
+                        controller.carImagesURLs.isNotEmpty
                     ? GridView.builder(
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        itemCount: controller.imagesList.length,
+                        itemCount: controller.inEditMode.isFalse
+                            ? controller.imagesList.length
+                            : controller.carImagesURLs.length,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 5,
@@ -513,7 +517,10 @@ class InspectionReposrt extends StatelessWidget {
                           return InkWell(
                             onTap: () {
                               controller.openImageViewer(
-                                  controller.imagesList, i);
+                                  controller.inEditMode.isFalse
+                                      ? controller.imagesList
+                                      : controller.carImagesURLs,
+                                  i);
                             },
                             child: Container(
                               margin: const EdgeInsets.all(3),
@@ -525,13 +532,39 @@ class InspectionReposrt extends StatelessWidget {
                                     child: FittedBox(
                                       fit: BoxFit.cover,
                                       clipBehavior: Clip.hardEdge,
-                                      child: controller.imagesListURLs.isEmpty
+                                      child: controller.inEditMode.isFalse
                                           ? Image.file(
                                               File(controller
                                                   .imagesList[i].path),
                                             )
-                                          : Image.network(
-                                              controller.imagesListURLs[i]),
+                                          : CachedNetworkImage(
+                                              cacheManager: controller
+                                                  .customCachedManeger,
+                                              progressIndicatorBuilder:
+                                                  (context, url, progress) =>
+                                                      Padding(
+                                                padding:
+                                                    const EdgeInsets.all(30.0),
+                                                child: Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    value: progress.progress,
+                                                    color: mainColor,
+                                                    strokeWidth: 3,
+                                                  ),
+                                                ),
+                                              ),
+                                              imageUrl:
+                                                  controller.carImagesURLs[i],
+                                              key: UniqueKey(),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      const Icon(Icons.error),
+                                            ),
+                                      // Image.network(
+                                      //     controller.carImagesURLs[i]
+
+                                      // ),
                                     ),
                                   ),
                                   Positioned(
@@ -539,10 +572,10 @@ class InspectionReposrt extends StatelessWidget {
                                     right: 0,
                                     child: IconButton(
                                         onPressed: () {
-                                          controller.imagesListURLs.isEmpty
+                                          controller.inEditMode.isFalse
                                               ? controller.imagesList
                                                   .removeAt(i)
-                                              : controller.imagesListURLs
+                                              : controller.carImagesURLs
                                                   .removeAt(i);
                                         },
                                         icon: const Icon(
@@ -731,16 +764,19 @@ class InspectionReposrt extends StatelessWidget {
                               children: [
                                 Text('Advisor',
                                     style: textStyleForInspectionHints),
-                                IconButton(
-                                    visualDensity: VisualDensity.compact,
-                                    onPressed: () {
-                                      controller.signatureControllerForAdvisor
-                                          .clear();
-                                    },
-                                    icon: Icon(
-                                      Icons.clear,
-                                      color: Colors.grey.shade700,
-                                    ))
+                                controller.inEditMode.isFalse
+                                    ? IconButton(
+                                        visualDensity: VisualDensity.compact,
+                                        onPressed: () {
+                                          controller
+                                              .signatureControllerForAdvisor
+                                              .clear();
+                                        },
+                                        icon: Icon(
+                                          Icons.clear,
+                                          color: Colors.grey.shade700,
+                                        ))
+                                    : SizedBox()
                               ],
                             ),
                             Container(
@@ -748,15 +784,17 @@ class InspectionReposrt extends StatelessWidget {
                               padding: EdgeInsets.all(2),
                               decoration: BoxDecoration(
                                   border: Border.all(color: Colors.black)),
-                              child: controller.advisorSignatureURL.isEmpty
+                              child: controller.inEditMode.isFalse
                                   ? Signature(
                                       height: 250,
                                       controller: controller
                                           .signatureControllerForAdvisor,
                                       backgroundColor: Colors.white,
                                     )
-                                  : Image.network(errorBuilder:
-                                      (context, error, stackTrace) {
+                                  : Image.network(
+                                      width: double.infinity,
+                                      height: 250, errorBuilder:
+                                          (context, error, stackTrace) {
                                       return Icon(Icons.error,
                                           color:
                                               Colors.red); // Show an error icon
@@ -773,16 +811,19 @@ class InspectionReposrt extends StatelessWidget {
                               children: [
                                 Text('Customer',
                                     style: textStyleForInspectionHints),
-                                IconButton(
-                                    visualDensity: VisualDensity.compact,
-                                    onPressed: () {
-                                      controller.signatureControllerForCustomer
-                                          .clear();
-                                    },
-                                    icon: Icon(
-                                      Icons.clear,
-                                      color: Colors.grey.shade700,
-                                    ))
+                                controller.inEditMode.isFalse
+                                    ? IconButton(
+                                        visualDensity: VisualDensity.compact,
+                                        onPressed: () {
+                                          controller
+                                              .signatureControllerForCustomer
+                                              .clear();
+                                        },
+                                        icon: Icon(
+                                          Icons.clear,
+                                          color: Colors.grey.shade700,
+                                        ))
+                                    : SizedBox()
                               ],
                             ),
                             Container(
@@ -790,15 +831,17 @@ class InspectionReposrt extends StatelessWidget {
                               padding: EdgeInsets.all(2),
                               decoration: BoxDecoration(
                                   border: Border.all(color: Colors.black)),
-                              child: controller.customerSignatureURL.isEmpty
+                              child: controller.inEditMode.isFalse
                                   ? Signature(
                                       height: 250,
                                       controller: controller
                                           .signatureControllerForCustomer,
                                       backgroundColor: Colors.white,
                                     )
-                                  : Image.network(errorBuilder:
-                                      (context, error, stackTrace) {
+                                  : Image.network(
+                                      width: double.infinity,
+                                      height: 250, errorBuilder:
+                                          (context, error, stackTrace) {
                                       return Icon(Icons.error,
                                           color:
                                               Colors.red); // Show an error icon

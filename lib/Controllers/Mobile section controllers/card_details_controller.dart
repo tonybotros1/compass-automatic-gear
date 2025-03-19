@@ -47,7 +47,7 @@ class CardDetailsController extends GetxController {
   loadVariables() {
     CardsScreenController controller = Get.put(CardsScreenController());
     controller.inEditMode.value = true;
-    controller.technicianName.text =
+    controller.technicianName.value.text =
         controller.getdataName(data?['technician'], controller.allTechnicians);
     controller.technicianId.value = data?['technician'];
     controller.date.text = data?['added_date'];
@@ -68,31 +68,154 @@ class CardDetailsController extends GetxController {
     controller.vin.text = data?['vehicle_identification_number'];
     controller.comments.text = data?['inspection_report_comments'] ?? '';
     controller.selectedCheckBoxIndicesForLeftFront.assignAll(
-        Map<String, Map<String, String>>.from(data?['left_front_wheel'] ?? {}));
+      (data?['left_front_wheel'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(
+              key,
+              Map<String, String>.from(value as Map), // Explicit conversion
+            ),
+          ) ??
+          {},
+    );
+    controller.leftFrontBrakeLining.text = controller
+            .selectedCheckBoxIndicesForLeftFront['Brake Lining']?['value'] ??
+        '';
+    controller.leftFrontTireTread.text = controller
+            .selectedCheckBoxIndicesForLeftFront['Tire Tread']?['value'] ??
+        '';
+
+    controller.leftFrontWearPattern.text = controller
+            .selectedCheckBoxIndicesForLeftFront['Wear Pattern']?['value'] ??
+        '';
+    controller.leftFrontTirePressureBefore.text =
+        controller.selectedCheckBoxIndicesForLeftFront['Tire Pressure PSI']
+                ?['before'] ??
+            '';
+    controller.leftFrontTirePressureAfter.text =
+        controller.selectedCheckBoxIndicesForLeftFront['Tire Pressure PSI']
+                ?['after'] ??
+            '';
 
     controller.selectedCheckBoxIndicesForRightFront.value =
-        Map<String, Map<String, String>>.from(data?['right_front_wheel'] ?? {});
+        (data?['right_front_wheel'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(
+                key,
+                Map<String, String>.from(value as Map),
+              ),
+            ) ??
+            {};
+
+    controller.rightFrontBrakeLining.text = controller
+            .selectedCheckBoxIndicesForRightFront['Brake Lining']?['value'] ??
+        '';
+    controller.rightFrontTireTread.text = controller
+            .selectedCheckBoxIndicesForRightFront['Tire Tread']?['value'] ??
+        '';
+
+    controller.rightFrontWearPattern.text = controller
+            .selectedCheckBoxIndicesForRightFront['Wear Pattern']?['value'] ??
+        '';
+    controller.rightFrontTirePressureBefore.text =
+        controller.selectedCheckBoxIndicesForRightFront['Tire Pressure PSI']
+                ?['before'] ??
+            '';
+    controller.rightFrontTirePressureAfter.text =
+        controller.selectedCheckBoxIndicesForRightFront['Tire Pressure PSI']
+                ?['after'] ??
+            '';
 
     controller.selectedCheckBoxIndicesForLeftRear.value =
-        Map<String, Map<String, String>>.from(data?['left_rear_wheel'] ?? {});
+        (data?['left_rear_wheel'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(
+                key,
+                Map<String, String>.from(value as Map),
+              ),
+            ) ??
+            {};
+
+    controller.leftRearBrakeLining.text = controller
+            .selectedCheckBoxIndicesForLeftRear['Brake Lining']?['value'] ??
+        '';
+    controller.leftRearTireTread.text =
+        controller.selectedCheckBoxIndicesForLeftRear['Tire Tread']?['value'] ??
+            '';
+
+    controller.leftRearWearPattern.text = controller
+            .selectedCheckBoxIndicesForLeftRear['Wear Pattern']?['value'] ??
+        '';
+    controller.leftRearTirePressureBefore.text =
+        controller.selectedCheckBoxIndicesForLeftRear['Tire Pressure PSI']
+                ?['before'] ??
+            '';
+    controller.leftRearTirePressureAfter.text =
+        controller.selectedCheckBoxIndicesForLeftRear['Tire Pressure PSI']
+                ?['after'] ??
+            '';
 
     controller.selectedCheckBoxIndicesForRightRear.value =
-        Map<String, Map<String, String>>.from(data?['right_rear_wheel'] ?? {});
+        (data?['right_rear_wheel'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(
+                key,
+                Map<String, String>.from(value as Map),
+              ),
+            ) ??
+            {};
+
+    controller.rightRearBrakeLining.text = controller
+            .selectedCheckBoxIndicesForRightRear['Brake Lining']?['value'] ??
+        '';
+    controller.rightRearTireTread.text = controller
+            .selectedCheckBoxIndicesForRightRear['Tire Tread']?['value'] ??
+        '';
+
+    controller.rightRearWearPattern.text = controller
+            .selectedCheckBoxIndicesForRightRear['Wear Pattern']?['value'] ??
+        '';
+    controller.rightRearTirePressureBefore.text =
+        controller.selectedCheckBoxIndicesForRightRear['Tire Pressure PSI']
+                ?['before'] ??
+            '';
+    controller.rightRearTirePressureAfter.text =
+        controller.selectedCheckBoxIndicesForRightRear['Tire Pressure PSI']
+                ?['after'] ??
+            '';
 
     controller.selectedCheckBoxIndicesForInteriorExterior.value =
-        Map<String, Map<String, String>>.from(data?['interior_exterior'] ?? {});
+        (data?['interior_exterior'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(
+                key,
+                Map<String, String>.from(value as Map),
+              ),
+            ) ??
+            {};
 
     controller.selectedCheckBoxIndicesForUnderVehicle.value =
-        Map<String, Map<String, String>>.from(data?['under_vehicle'] ?? {});
+        (data?['under_vehicle'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(
+                key,
+                Map<String, String>.from(value as Map),
+              ),
+            ) ??
+            {};
 
     controller.selectedCheckBoxIndicesForUnderHood.value =
-        Map<String, Map<String, String>>.from(data?['under_hood'] ?? {});
+        (data?['under_hood'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(
+                key,
+                Map<String, String>.from(value as Map),
+              ),
+            ) ??
+            {};
 
     controller.selectedCheckBoxIndicesForBatteryPerformance.value =
-        Map<String, Map<String, String>>.from(
-            data?['battery_performance'] ?? {});
+        (data?['battery_performance'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(
+                key,
+                Map<String, String>.from(value as Map),
+              ),
+            ) ??
+            {};
 
-    controller.imagesListURLs.assignAll(List<String>.from(data?['car_images']));
+    controller.carImagesURLs.assignAll(List<String>.from(data?['car_images']));
     controller.customerSignatureURL.value = data?['customer_signature'] ?? '';
     controller.advisorSignatureURL.value = data?['advisor_signature'] ?? '';
   }
