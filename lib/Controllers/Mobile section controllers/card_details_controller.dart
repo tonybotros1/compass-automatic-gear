@@ -36,6 +36,7 @@ class CardDetailsController extends GetxController {
   late String advisorSignature = '';
   List<String> carImages = [];
   Map? data = {};
+    CardsScreenController controller = Get.put(CardsScreenController());
 
   @override
   void onInit() async {
@@ -44,8 +45,12 @@ class CardDetailsController extends GetxController {
     super.onInit();
   }
 
+  clearVariables(){
+    controller.clearAllValues();
+  }
+
   loadVariables() {
-    CardsScreenController controller = Get.put(CardsScreenController());
+    controller.currenyJobId.value = id;
     controller.inEditMode.value = true;
     controller.technicianName.value.text =
         controller.getdataName(data?['technician'], controller.allTechnicians);
@@ -218,6 +223,7 @@ class CardDetailsController extends GetxController {
     controller.carImagesURLs.assignAll(List<String>.from(data?['car_images']));
     controller.customerSignatureURL.value = data?['customer_signature'] ?? '';
     controller.advisorSignatureURL.value = data?['advisor_signature'] ?? '';
+    controller.carDialogImageURL.value = data?['car_dialog'] ?? '';
   }
 
   void openImageViewer(List imageUrls, int index) {

@@ -1,0 +1,2 @@
+C:/Flutter Projects/compass_automatic_gear/android/app/.cxx/RelWithDebInfo/6x6j1b55/x86_64/CMakeFiles/edit_cache.dir
+C:/Flutter Projects/compass_automatic_gear/android/app/.cxx/RelWithDebInfo/6x6j1b55/x86_64/CMakeFiles/rebuild_cache.dir

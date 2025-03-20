@@ -25,6 +25,7 @@ class CarDetailsScreen extends StatelessWidget {
           ),
           leading: IconButton(
               onPressed: () {
+                cardDetailsController.clearVariables();
                 Get.back();
               },
               icon: const Icon(
@@ -36,8 +37,7 @@ class CarDetailsScreen extends StatelessWidget {
             TextButton(
                 onPressed: () {
                   cardDetailsController.loadVariables();
-                  Get.to(()=> InspectionReposrt());
-                 
+                  Get.to(() => InspectionReposrt());
                 },
                 child: const Text(
                   'Edit',

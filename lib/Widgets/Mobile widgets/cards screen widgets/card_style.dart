@@ -40,7 +40,8 @@ Widget cardStyle({
               String customerName = controller.getdataName(
                   carCard['customer'], controller.allCustomers,
                   title: 'entity_name');
-                  String carColor = controller.getdataName(carCard['color'], controller.allColors);
+              String carColor = controller.getdataName(
+                  carCard['color'], controller.allColors);
               Get.to(() => CarDetailsScreen(),
                   arguments: CarCardModel(
                     data: carData,
@@ -94,24 +95,28 @@ Widget cardStyle({
                             }
                           },
                         ),
-                        Container(
-                          alignment: Alignment.center,
-                          padding:
-                              EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                          width: null,
-                          decoration: BoxDecoration(
-                              border: Border.all(color: secColor, width: 3),
-                              borderRadius: BorderRadius.circular(5)),
-                          child: Text(carCard['job_status_1'],
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 19,
-                                  color: carCard['job_status_1'] == 'Posted'
-                                      ? Colors.blueGrey
-                                      : carCard['job_status_1'] == 'New'
-                                          ? Colors.green
-                                          : Colors.red)),
-                        )
+                        carCard['job_status_1'] != ''
+                            ? Container(
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 2, horizontal: 4),
+                                width: null,
+                                decoration: BoxDecoration(
+                                    border:
+                                        Border.all(color: secColor, width: 3),
+                                    borderRadius: BorderRadius.circular(5)),
+                                child: Text(carCard['job_status_1'],
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 19,
+                                        color: carCard['job_status_1'] ==
+                                                'Posted'
+                                            ? Colors.blueGrey
+                                            : carCard['job_status_1'] == 'New'
+                                                ? Colors.green
+                                                : Colors.red)),
+                              )
+                            : SizedBox()
                       ],
                     ),
                     Text('Customer', style: textStyleForCardsLabels),

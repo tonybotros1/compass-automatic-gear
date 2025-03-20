@@ -52,7 +52,10 @@ class InspectionReposrt extends StatelessWidget {
           GetBuilder<CardsScreenController>(builder: (controller) {
             return IconButton(
                 onPressed: () {
-                  controller.addInspectionCard(context);
+                  controller.inEditMode.isFalse
+                      ? controller.addInspectionCard(context)
+                      : controller.editInspectionCard(
+                          context, controller.currenyJobId.value);
                 },
                 icon: Icon(
                   Icons.done_outline_rounded,
@@ -152,6 +155,7 @@ class InspectionReposrt extends StatelessWidget {
                                 );
                               },
                               onChanged: (key, value) {
+                                controller.carBrandLogo.value = value['logo'];
                                 controller.getModelsByCarBrand(key);
                                 controller.model.clear();
                                 controller.brandId.value = key;
@@ -413,7 +417,8 @@ class InspectionReposrt extends StatelessWidget {
                   style: fontStyle1,
                 ),
                 GetBuilder<CardsScreenController>(builder: (controller) {
-                  return controller.damagePoints.isNotEmpty
+                  return controller.damagePoints.isNotEmpty &&
+                          controller.inEditMode.isFalse
                       ? IconButton(
                           onPressed: () {
                             controller.removeLastMark();
@@ -432,34 +437,60 @@ class InspectionReposrt extends StatelessWidget {
               child: Column(
                 children: [
                   GetBuilder<CardsScreenController>(builder: (controller) {
-                    return LayoutBuilder(builder: (context, constraints) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        controller.updateDamagePoints();
-                      });
-                      return GestureDetector(
-                        onTapDown: (details) =>
-                            controller.addDamagePoint(details),
-                        child: RepaintBoundary(
-                          key: controller.repaintBoundaryKey,
-                          child: Stack(
-                            children: [
-                              Image.asset(
-                                'assets/vehicle.jpg',
-                                width: constraints.maxWidth,
-                                height: 500,
-                                key: controller.imageKey,
+                    return controller.inEditMode.isFalse
+                        ? LayoutBuilder(builder: (context, constraints) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              controller.updateDamagePoints();
+                            });
+                            return GestureDetector(
+                              onTapDown: (details) =>
+                                  controller.addDamagePoint(details),
+                              child: RepaintBoundary(
+                                key: controller.repaintBoundaryKey,
+                                child: Stack(
+                                  children: [
+                                    Image.asset(
+                                      'assets/vehicle.jpg',
+                                      width: constraints.maxWidth,
+                                      height: 500,
+                                      key: controller.imageKey,
+                                    ),
+                                    CustomPaint(
+                                      size: Size(constraints.maxWidth, 500),
+                                      painter: DamagePainter(
+                                          controller.damagePoints),
+                                      child: SizedBox(
+                                          width: constraints.maxWidth,
+                                          height: 500),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              CustomPaint(
-                                size: Size(constraints.maxWidth, 500),
-                                painter: DamagePainter(controller.damagePoints),
-                                child: SizedBox(
-                                    width: constraints.maxWidth, height: 500),
+                            );
+                          })
+                        : CachedNetworkImage(
+                            cacheManager: controller.customCachedManeger,
+                            progressIndicatorBuilder:
+                                (context, url, progress) => Padding(
+                              padding: const EdgeInsets.all(30.0),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  value: progress.progress,
+                                  color: mainColor,
+                                  strokeWidth: 3,
+                                ),
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    });
+                            ),
+                            imageUrl: controller.carDialogImageURL.value,
+                            key: UniqueKey(),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
+                          );
+                    //  Image.network(
+                    //     controller.carDialogImageURL.value,
+                    //     height: 500,
+                    //     width: double.infinity,
+                    //   );
                   })
                 ],
               ),
@@ -561,10 +592,6 @@ class InspectionReposrt extends StatelessWidget {
                                                   (context, url, error) =>
                                                       const Icon(Icons.error),
                                             ),
-                                      // Image.network(
-                                      //     controller.carImagesURLs[i]
-
-                                      // ),
                                     ),
                                   ),
                                   Positioned(
@@ -598,6 +625,82 @@ class InspectionReposrt extends StatelessWidget {
                         ),
                       ),
               );
+            }),
+            SizedBox(height: 10),
+            GetBuilder<CardsScreenController>(builder: (controller) {
+              return controller.inEditMode.isTrue && controller.imagesList.isNotEmpty
+                  ? labelContainer(
+                      lable: Text(
+                      'NEW IMAGES',
+                      style: fontStyle1,
+                    ))
+                  : SizedBox();
+            }),
+            GetX<CardsScreenController>(builder: (controller) {
+              return controller.inEditMode.isTrue && controller.imagesList.isNotEmpty
+                  ? Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: containerDecor,
+                      child: controller.imagesList.isNotEmpty
+                          ? GridView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: controller.imagesList.length,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 5,
+                              ),
+                              itemBuilder: (context, i) {
+                                return InkWell(
+                                  onTap: () {
+                                    controller.openImageViewer(
+                                        controller.imagesList, i);
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.all(3),
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          child: FittedBox(
+                                              fit: BoxFit.cover,
+                                              clipBehavior: Clip.hardEdge,
+                                              child: Image.file(
+                                                File(controller
+                                                    .imagesList[i].path),
+                                              )),
+                                        ),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: IconButton(
+                                              onPressed: () {
+                                                controller.imagesList
+                                                    .removeAt(i);
+                                              },
+                                              icon: const Icon(
+                                                Icons.remove_circle,
+                                                color: Colors.red,
+                                              )),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              })
+                          : SizedBox(
+                              height: 100,
+                              child: Center(
+                                child: Text(
+                                  'Images',
+                                  style: textStyleForInspectionHints,
+                                ),
+                              ),
+                            ),
+                    )
+                  : SizedBox();
             }),
             SizedBox(height: 10),
             labelContainer(

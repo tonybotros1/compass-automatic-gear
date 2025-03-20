@@ -50,10 +50,11 @@ class ImageGalleryViewer extends StatelessWidget {
                   imageViewerController.setCurrentIndex(index),
               builder: (context, index) {
                 return PhotoViewGalleryPageOptions(
-                  imageProvider: imageViewerController.imagesURLs.first is String ?
+                  imageProvider: imageViewerController.imagesURLs[index] is String ?
                       NetworkImage(imageViewerController.imagesURLs[index]) : FileImage(imageViewerController.imagesURLs[index]),
                   minScale: PhotoViewComputedScale.contained,
                   maxScale: PhotoViewComputedScale.covered * 2,
+
                 );
               },
               scrollPhysics: BouncingScrollPhysics(),

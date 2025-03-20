@@ -42,6 +42,7 @@ class CardsScreenController extends GetxController {
   final RxInt numberOfNewCars = RxInt(0);
   final RxInt numberOfDoneCars = RxInt(0);
   RxString customerId = RxString('');
+  RxString carBrandLogo = RxString('');
   RxString technicianId = RxString('');
   RxString brandId = RxString('');
   RxString modelId = RxString('');
@@ -63,6 +64,7 @@ class CardsScreenController extends GetxController {
   RxString customerSignatureURL = RxString('');
   RxString advisorSignatureURL = RxString('');
   RxBool inEditMode = RxBool(false);
+  RxString currenyJobId = RxString('');
 
   RxMap<String, Map<String, String>> selectedCheckBoxIndicesForLeftFront =
       <String, Map<String, String>>{}.obs;
@@ -224,10 +226,6 @@ class CardsScreenController extends GetxController {
     rightRearTirePressureBefore.clear();
     rightRearTirePressureAfter.clear();
 
-    // Clear RxList<DocumentSnapshot>
-    allCarCards.clear();
-    newCarCards.clear();
-    doneCarCards.clear();
     filteredCarCards.clear();
 
     // Clear search field
@@ -285,6 +283,72 @@ class CardsScreenController extends GetxController {
   final customCachedManeger = CacheManager(
       Config('customCacheKey', stalePeriod: const Duration(days: 3)));
 
+  editInspectionCard(BuildContext context, String jobId) async {
+    try {
+      var myData = {
+        'technician': technicianId.value,
+        'company_id': companyId.value,
+        'car_brand': brandId.value,
+        'car_model': modelId.value,
+        'plate_number': plateNumber.text,
+        'plate_code': code.text,
+        'year': year.text,
+        'color': colorId.value,
+        'engine_type': engineTypeId.value,
+        'vehicle_identification_number': vin.text,
+        'mileage_in': mileage.text,
+        'customer': customerId.value,
+        'contact_name': customerEntityName.text,
+        'contact_number': customerEntityPhoneNumber.text,
+        'contact_email': customerEntityEmail.text,
+        'credit_limit': customerCreditNumber.text,
+        'saleMan': customerSaleManId.value,
+        'inspection_report_comments': comments.text.trim(),
+        'left_front_wheel': selectedCheckBoxIndicesForLeftFront,
+        'right_front_wheel': selectedCheckBoxIndicesForRightFront,
+        'left_rear_wheel': selectedCheckBoxIndicesForLeftRear,
+        'right_rear_wheel': selectedCheckBoxIndicesForRightRear,
+        'interior_exterior': selectedCheckBoxIndicesForInteriorExterior,
+        'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
+        'under_hood': selectedCheckBoxIndicesForUnderHood,
+        'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
+      };
+
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) {
+            return Center(
+                child: Row(
+              spacing: 20,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  color: Colors.white,
+                ),
+                Text(
+                  'Please Wait...',
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                )
+              ],
+            ));
+          });
+      if (imagesList.isNotEmpty) {
+        await saveCarImages();
+        myData['car_images'] = carImagesURLs;
+      }
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update(myData);
+      Get.back();
+      showSnackBar('Done', 'Addedd Successfully');
+    } catch (e) {
+      Get.back();
+      showSnackBar('Failed', 'Please ty again');
+    }
+  }
+
   addInspectionCard(BuildContext context) async {
     try {
       Map<String, dynamic> newData = {
@@ -293,7 +357,7 @@ class CardsScreenController extends GetxController {
         'job_status_1': '',
         'job_status_2': '',
         'quotation_status': '',
-        'car_brand_logo': '',
+        'car_brand_logo': 'carBrandLogo.value',
         'technician': technicianId.value,
         'company_id': companyId.value,
         'car_brand': brandId.value,
@@ -438,36 +502,75 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  Future<void> saveCarDialogImage() async {
-    try {
-      final RenderRepaintBoundary? boundary = repaintBoundaryKey.currentContext!
-          .findRenderObject() as RenderRepaintBoundary?;
+  // Future<void> saveCarDialogImage() async {
+  //   try {
+  //     final RenderRepaintBoundary? boundary = repaintBoundaryKey.currentContext!
+  //         .findRenderObject() as RenderRepaintBoundary?;
 
-      ui.Image image = await boundary!.toImage(pixelRatio: 1.5);
+  //     ui.Image image = await boundary!.toImage(pixelRatio: 1.5);
+  //     ByteData? byteData =
+  //         await image.toByteData(format: ui.ImageByteFormat.png);
+
+  //     Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+  //     final Reference storageRef = FirebaseStorage.instance.ref().child(
+  //         'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
+
+  //     final UploadTask uploadTask = storageRef.putData(
+  //       pngBytes,
+  //       // SettableMetadata(contentType: 'image/png'),
+  //     );
+
+  //     await uploadTask.then((p0) async {
+  //       carDialogImageURL.value = await storageRef.getDownloadURL();
+  //     });
+
+  //     // if (snapshot.state == TaskState.success) {
+  //     //   final String imageUrl = await snapshot.ref.getDownloadURL();
+  //     //   carDialogImageURL.value = imageUrl;
+  //     // }
+  //   } catch (e, stackTrace) {
+  //     debugPrint('Error in saveCarDialogImage: $e\n$stackTrace');
+  //     rethrow;
+  //   }
+  // }
+
+  Future<String?> saveCarDialogImage() async {
+    try {
+      final BuildContext? context = repaintBoundaryKey.currentContext;
+      if (context == null) {
+        throw Exception('Error: repaintBoundaryKey.currentContext is null');
+      }
+
+      final RenderRepaintBoundary? boundary =
+          context.findRenderObject() as RenderRepaintBoundary?;
+
+      if (boundary == null) {
+        throw Exception('Error: RenderRepaintBoundary is null');
+      }
+
+      ui.Image image = await boundary.toImage(pixelRatio: 2.0);
       ByteData? byteData =
           await image.toByteData(format: ui.ImageByteFormat.png);
 
-      Uint8List pngBytes = byteData!.buffer.asUint8List();
+      if (byteData == null) {
+        throw Exception('Error: Failed to convert image to byte data');
+      }
+
+      Uint8List pngBytes = byteData.buffer.asUint8List();
 
       final Reference storageRef = FirebaseStorage.instance.ref().child(
           'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
 
-      final UploadTask uploadTask = storageRef.putData(
-        pngBytes,
-        // SettableMetadata(contentType: 'image/png'),
-      );
+      final UploadTask uploadTask = storageRef.putData(pngBytes);
+      final TaskSnapshot snapshot = await uploadTask;
 
-      await uploadTask.then((p0) async {
-        carDialogImageURL.value = await storageRef.getDownloadURL();
-      });
+      final String imageUrl = await snapshot.ref.getDownloadURL();
+      carDialogImageURL.value = imageUrl;
 
-      // if (snapshot.state == TaskState.success) {
-      //   final String imageUrl = await snapshot.ref.getDownloadURL();
-      //   carDialogImageURL.value = imageUrl;
-      // }
-    } catch (e, stackTrace) {
-      debugPrint('Error in saveCarDialogImage: $e\n$stackTrace');
-      rethrow;
+      return imageUrl;
+    } catch (e) {
+      return e.toString(); // Return the exception message
     }
   }
 
