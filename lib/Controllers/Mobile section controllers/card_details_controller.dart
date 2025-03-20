@@ -50,6 +50,7 @@ class CardDetailsController extends GetxController {
   }
 
   loadVariables() {
+    controller.imagesList.clear();
     controller.currenyJobId.value = id;
     controller.inEditMode.value = true;
     controller.technicianName.value.text =

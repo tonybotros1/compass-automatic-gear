@@ -486,11 +486,7 @@ class InspectionReposrt extends StatelessWidget {
                             errorWidget: (context, url, error) =>
                                 const Icon(Icons.error),
                           );
-                    //  Image.network(
-                    //     controller.carDialogImageURL.value,
-                    //     height: 500,
-                    //     width: double.infinity,
-                    //   );
+                   
                   })
                 ],
               ),
@@ -528,7 +524,7 @@ class InspectionReposrt extends StatelessWidget {
                 })
               ],
             )),
-            GetBuilder<CardsScreenController>(builder: (controller) {
+            GetX<CardsScreenController>(builder: (controller) {
               return Container(
                 padding: EdgeInsets.all(10),
                 decoration: containerDecor,
@@ -627,7 +623,7 @@ class InspectionReposrt extends StatelessWidget {
               );
             }),
             SizedBox(height: 10),
-            GetBuilder<CardsScreenController>(builder: (controller) {
+            GetX<CardsScreenController>(builder: (controller) {
               return controller.inEditMode.isTrue && controller.imagesList.isNotEmpty
                   ? labelContainer(
                       lable: Text(

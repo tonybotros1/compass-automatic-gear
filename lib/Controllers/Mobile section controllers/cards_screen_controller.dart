@@ -244,8 +244,7 @@ class CardsScreenController extends GetxController {
     modelId.value = '';
     engineTypeId.value = '';
     colorId.value = '';
-    companyId.value = '';
-    userId.value = '';
+
     customerSaleManId.value = '';
 
     // Clear image lists and URLs
@@ -729,7 +728,7 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  getAllCards() {
+ Future<void> getAllCards() async {
     try {
       loading.value = true;
 
