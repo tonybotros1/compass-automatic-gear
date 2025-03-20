@@ -1,4 +1,5 @@
 import 'package:datahubai/Middleware/route_middleware.dart';
+import 'package:datahubai/Screens/mobile%20Screens/card_images_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,7 +11,7 @@ import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
 import 'Screens/Auth Screens/register_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
- import 'Screens/mobile Screens/main_screen_fro_mobile.dart';
+import 'Screens/mobile Screens/main_screen_fro_mobile.dart';
 import 'Widgets/main screen widgets/job_cards_widgets/image_gallery_viewer.dart';
 import 'security.dart';
 // import 'package:web/web.dart' as web;
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
+        GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),
         GetPage(
             name: '/',
             page: () => const LoadingScreen(),
@@ -59,7 +61,7 @@ class MyApp extends StatelessWidget {
             name: '/mainScreen',
             page: () => MainScreen(),
             middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
-            GetPage(
+        GetPage(
             name: '/mainScreenForMobile',
             page: () => MainScreenForMobile(),
             middlewares: [AuthMiddleware()]),

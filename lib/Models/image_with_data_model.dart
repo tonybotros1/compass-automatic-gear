@@ -1,6 +1,6 @@
 class ImageWithDate {
   final String imageUrl;
-  final DateTime dateAdded;
+  final DateTime? dateAdded;
 
-  ImageWithDate({required this.imageUrl, required this.dateAdded});
+  ImageWithDate({required this.imageUrl,  this.dateAdded});
 }

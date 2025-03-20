@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 
 class ImageViewerController extends GetxController {
@@ -30,4 +31,8 @@ class ImageViewerController extends GetxController {
   void setCurrentIndex(int index) {
     currentIndex.value = index;
   }
+
+   final customCachedManeger = CacheManager(
+      Config('customCacheKey', stalePeriod: const Duration(days: 3)));
+
 }

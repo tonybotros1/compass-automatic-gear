@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:datahubai/Models/car_card_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -103,15 +104,16 @@ class CarDetailsScreen extends StatelessWidget {
                                 ),
                                 GestureDetector(
                                   onTap: () {
-                                    // Get.toNamed('/cardImagesScreen',
-                                    //     arguments: JobCardModel(
-                                    //         customerName: cardDetailsController
-                                    //             .customerName,
-                                    //         carImages:
-                                    //             cardDetailsController.carImages,
-                                    //             ),
-                                    //     // transition: Transition.leftToRight,
-                                    //     );
+                                    Get.toNamed(
+                                      '/cardImagesScreen',
+                                      arguments: CarCardModel(
+                                        customerName:
+                                            cardDetailsController.customerName,
+                                        carImages:
+                                            cardDetailsController.carImages,
+                                      ),
+                                      // transition: Transition.leftToRight,
+                                    );
                                   },
                                   child: SizedBox(
                                     child: Row(
@@ -156,17 +158,18 @@ class CarDetailsScreen extends StatelessWidget {
                                           padding: const EdgeInsets.all(16.0),
                                           child: IconButton.filledTonal(
                                               onPressed: () {
-                                                // Get.toNamed('/cardImagesScreen',
-                                                //     arguments: JobCardModel(
-                                                //         customerName:
-                                                //             cardDetailsController
-                                                //                 .customerName,
-                                                //         carImages:
-                                                //             cardDetailsController
-                                                //                 .carImages),
-                                                //     // transition:
-                                                //     //     Transition.leftToRight
-                                                //         );
+                                                Get.toNamed(
+                                                  '/cardImagesScreen',
+                                                  arguments: CarCardModel(
+                                                      customerName:
+                                                          cardDetailsController
+                                                              .customerName,
+                                                      carImages:
+                                                          cardDetailsController
+                                                              .carImages),
+                                                  // transition:
+                                                  //     Transition.leftToRight
+                                                );
                                               },
                                               icon: const Icon(Icons
                                                   .arrow_forward_ios_rounded)),
@@ -185,13 +188,11 @@ class CarDetailsScreen extends StatelessWidget {
                                               clipBehavior: Clip.hardEdge,
                                               child: InkWell(
                                                 onTap: () {
-                                                  // Get.toNamed(
-                                                  //     '/singleImageViewer',
-                                                  //     arguments: ImageModel(
-                                                  //         url:
-                                                  //             cardDetailsController
-                                                  //                     .carImages[
-                                                  //                 index]));
+                                                  cardDetailsController
+                                                      .openImageViewer(
+                                                          cardDetailsController
+                                                              .carImages,
+                                                          index);
                                                 },
                                                 child: CachedNetworkImage(
                                                   cacheManager:
@@ -222,42 +223,6 @@ class CarDetailsScreen extends StatelessWidget {
                                                           error) =>
                                                       const Icon(Icons.error),
                                                 ),
-
-                                                // child: Image.network(
-                                                //   cardDetailsController
-                                                //       .carImages[index],
-                                                //   loadingBuilder:
-                                                //       (BuildContext context,
-                                                //           Widget child,
-                                                //           ImageChunkEvent?
-                                                //               loadingProgress) {
-                                                //     if (loadingProgress == null) {
-                                                //       return child; // Return the actual image if it's already loaded.
-                                                //     } else {
-                                                //       // Show a loading indicator while the image is loading.
-                                                //       return Center(
-                                                //         child: Padding(
-                                                //           padding:
-                                                //               const EdgeInsets
-                                                //                   .all(30.0),
-                                                //           child:
-                                                //               CircularProgressIndicator(
-                                                //             color: secColor,
-                                                //             value: loadingProgress
-                                                //                         .expectedTotalBytes !=
-                                                //                     null
-                                                //                 ? loadingProgress
-                                                //                         .cumulativeBytesLoaded /
-                                                //                     (loadingProgress
-                                                //                             .expectedTotalBytes ??
-                                                //                         1)
-                                                //                 : null,
-                                                //           ),
-                                                //         ),
-                                                //       );
-                                                //     }
-                                                //   },
-                                                // ),
                                               ),
                                             ),
                                           ),
