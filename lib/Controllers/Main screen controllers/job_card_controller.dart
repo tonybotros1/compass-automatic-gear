@@ -57,7 +57,8 @@ class JobCardController extends GetxController {
   TextEditingController customerEntityPhoneNumber = TextEditingController();
   TextEditingController customerCreditNumber = TextEditingController();
   TextEditingController customerOutstanding = TextEditingController();
-  TextEditingController customerSaleMan = TextEditingController();
+  // TextEditingController customerSaleMan = TextEditingController();
+  RxString customerSaleMan = RxString('');
   TextEditingController customerBranch = TextEditingController();
   TextEditingController customerCurrency = TextEditingController();
   TextEditingController customerCurrencyRate = TextEditingController();
@@ -398,7 +399,7 @@ class JobCardController extends GetxController {
     customerEntityPhoneNumber.clear();
     customerEntityEmail.clear();
     customerSaleManId.value = '';
-    customerSaleMan.clear();
+    customerSaleMan.value = '';
     customerBranchId.value = '';
     customerBranch.clear();
     quotationDays.value.clear();
@@ -467,7 +468,7 @@ class JobCardController extends GetxController {
     customerCreditNumber.text = data['credit_limit'];
     customerOutstanding.text = data['outstanding'];
     customerSaleManId.value = data['saleMan'];
-    customerSaleMan.text = getdataName(data['saleMan'], salesManMap);
+    customerSaleMan.value = getdataName(data['saleMan'], salesManMap);
     customerBranchId.value = data['branch'];
     customerBranch.text = getdataName(data['branch'], allBranches);
     customerCurrencyId.value = data['currency'];
@@ -1676,7 +1677,7 @@ class JobCardController extends GetxController {
     customerCreditNumber.text =
         (currentUserDetails.value['credit_limit'] ?? '0').toString();
     customerSaleManId.value = currentUserDetails.value['sales_man'];
-    customerSaleMan.text =
+    customerSaleMan.value =
         getdataName(currentUserDetails.value['sales_man'], salesManMap);
   }
 

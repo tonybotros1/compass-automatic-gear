@@ -6,16 +6,18 @@ import '../../../Models/dynamic_field_models.dart';
 import '../../../consts.dart';
 import '../dynamic_field.dart';
 
-Container customerDetailsSection() {
-  return Container(
-    padding: EdgeInsets.all(20),
-    decoration: containerDecor,
-    child: Column(
-      children: [
-        GetX<JobCardController>(builder: (controller) {
-          var isCustomersLoading = controller.allCustomers.isEmpty;
-
-          return dynamicFields(dynamicConfigs: [
+Widget customerDetailsSection() {
+  return GetX<JobCardController>(builder: (controller) {
+    var isCustomersLoading = controller.allCustomers.isEmpty;
+    final isBranchesLoading = controller.allBranches.isEmpty;
+    final isCurrenciesLoading = controller.allCurrencies.isEmpty;
+    final isSalesManLoading = controller.salesManMap.isEmpty;
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: containerDecor,
+      child: Column(
+        children: [
+          dynamicFields(dynamicConfigs: [
             DynamicConfig(
               isDropdown: true,
               flex: 3,
@@ -89,27 +91,21 @@ Container customerDetailsSection() {
                 validate: false,
               ),
             ),
-          ]);
-        }),
-        SizedBox(
-          height: 20,
-        ),
-        Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: GetX<JobCardController>(builder: (controller) {
-                final isBranchesLoading = controller.allBranches.isEmpty;
-                final isCurrenciesLoading = controller.allCurrencies.isEmpty;
-                final isSalesManLoading = controller.salesManMap.isEmpty;
-
-                return dynamicFields(dynamicConfigs: [
+          ]),
+          SizedBox(
+            height: 20,
+          ),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: dynamicFields(dynamicConfigs: [
                   DynamicConfig(
                     isDropdown: true,
                     flex: 2,
                     dropdownConfig: DropdownConfig(
                       showedSelectedName: 'name',
-                      textController: controller.customerSaleMan.text,
+                      textController: controller.customerSaleMan.value,
                       hintText: isSalesManLoading ? 'Loading...' : 'Sales Man',
                       menuValues:
                           isSalesManLoading ? {} : controller.salesManMap,
@@ -119,7 +115,7 @@ Container customerDetailsSection() {
                         );
                       },
                       onSelected: (key, value) {
-                        controller.customerSaleMan.text = value['name'];
+                        controller.customerSaleMan.value = value['name'];
                         controller.customerSaleManId.value = key;
                       },
                     ),
@@ -188,36 +184,34 @@ Container customerDetailsSection() {
                       validate: false,
                     ),
                   ),
-                ]);
-              }),
-            ),
-            SizedBox(
-              width: 5,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 2),
-                  child: Text(
-                    'Payment',
-                    style: textFieldLabelStyle,
+                ]),
+              ),
+              SizedBox(
+                width: 5,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 2),
+                    child: Text(
+                      'Payment',
+                      style: textFieldLabelStyle,
+                    ),
                   ),
-                ),
-                Container(
-                  height: textFieldHeight,
-                  padding: EdgeInsets.only(left: 10, right: 10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          GetX<JobCardController>(builder: (controller) {
-                            return CupertinoRadio<bool>(
+                  Container(
+                    height: textFieldHeight,
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CupertinoRadio<bool>(
                               value: true,
                               groupValue: controller.isCashSelected.value,
                               onChanged: (value) {
@@ -225,24 +219,22 @@ Container customerDetailsSection() {
                                   controller.selectCashOrCredit('cash', value);
                                 }
                               },
-                            );
-                          }),
-                          SizedBox(
-                            width: 2,
-                          ),
-                          Text(
-                            'Cash',
-                            style: textFieldFontStyle,
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Row(
-                        children: [
-                          GetX<JobCardController>(builder: (controller) {
-                            return CupertinoRadio<bool>(
+                            ),
+                            SizedBox(
+                              width: 2,
+                            ),
+                            Text(
+                              'Cash',
+                              style: textFieldFontStyle,
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Row(
+                          children: [
+                            CupertinoRadio<bool>(
                               value: true,
                               groupValue: controller.isCreditSelected.value,
                               onChanged: (value) {
@@ -251,26 +243,26 @@ Container customerDetailsSection() {
                                       'credit', value);
                                 }
                               },
-                            );
-                          }),
-                          SizedBox(
-                            width: 2,
-                          ),
-                          Text(
-                            'Credit',
-                            style: textFieldFontStyle,
-                          )
-                        ],
-                      ),
-                    ],
+                            ),
+                            SizedBox(
+                              width: 2,
+                            ),
+                            Text(
+                              'Credit',
+                              style: textFieldFontStyle,
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            Expanded(child: SizedBox()),
-          ],
-        ),
-      ],
-    ),
-  );
+                ],
+              ),
+              Expanded(child: SizedBox()),
+            ],
+          ),
+        ],
+      ),
+    );
+  });
 }
