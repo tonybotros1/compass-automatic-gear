@@ -36,7 +36,7 @@ class CardDetailsController extends GetxController {
   late String advisorSignature = '';
   List<String> carImages = [];
   Map? data = {};
-    CardsScreenController controller = Get.put(CardsScreenController());
+  CardsScreenController controller = Get.put(CardsScreenController());
 
   @override
   void onInit() async {
@@ -45,7 +45,7 @@ class CardDetailsController extends GetxController {
     super.onInit();
   }
 
-  clearVariables(){
+  clearVariables() {
     controller.clearAllValues();
   }
 
@@ -225,6 +225,7 @@ class CardDetailsController extends GetxController {
     controller.customerSignatureURL.value = data?['customer_signature'] ?? '';
     controller.advisorSignatureURL.value = data?['advisor_signature'] ?? '';
     controller.carDialogImageURL.value = data?['car_dialog'] ?? '';
+    controller.carBrandLogo.value = data?['car_brand_logo'] ?? '';
   }
 
   void openImageViewer(List imageUrls, int index) {
@@ -239,6 +240,7 @@ class CardDetailsController extends GetxController {
   getDetails() {
     if (Get.arguments != null) {
       CarCardModel arguments = Get.arguments;
+      fuelAmount = arguments.fuelAmount!;
       data = arguments.data;
       customerSignature = arguments.customerSignature!;
       advisorSignature = arguments.advisorSignature!;
@@ -253,7 +255,6 @@ class CardDetailsController extends GetxController {
       phoneNumber = arguments.phoneNumber!;
       emailAddress = arguments.emailAddress!;
       color = arguments.color!;
-      // fuelAmount = arguments.fuelAmount;
       date = arguments.date!;
       id = arguments.docID!;
       status = arguments.status1!;

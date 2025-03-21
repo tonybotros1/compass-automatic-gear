@@ -183,6 +183,7 @@ class CardsScreenController extends GetxController {
   void clearAllValues() {
     // Clear all TextEditingControllers
     batteryColdCrankingAmpsFactorySpecs.clear();
+    currenyJobId.value = '';
     batteryColdCrankingAmpsActual.clear();
     customer.clear();
     customerEntityName.clear();
@@ -285,6 +286,7 @@ class CardsScreenController extends GetxController {
   editInspectionCard(BuildContext context, String jobId) async {
     try {
       var myData = {
+        'car_brand_logo': carBrandLogo.value,
         'technician': technicianId.value,
         'company_id': companyId.value,
         'car_brand': brandId.value,
@@ -311,27 +313,11 @@ class CardsScreenController extends GetxController {
         'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
         'under_hood': selectedCheckBoxIndicesForUnderHood,
         'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
+        'car_images' : carImagesURLs,
       };
 
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return Center(
-                child: Row(
-              spacing: 20,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  color: Colors.white,
-                ),
-                Text(
-                  'Please Wait...',
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                )
-              ],
-            ));
-          });
+      loadingScreen(context);
+
       if (imagesList.isNotEmpty) {
         await saveCarImages();
         myData['car_images'] = carImagesURLs;
@@ -351,12 +337,13 @@ class CardsScreenController extends GetxController {
   addInspectionCard(BuildContext context) async {
     try {
       Map<String, dynamic> newData = {
+        'fuel_amount':'',
         'added_date': DateTime.now().toString(),
         'label': 'Draft',
         'job_status_1': '',
         'job_status_2': '',
         'quotation_status': '',
-        'car_brand_logo': 'carBrandLogo.value',
+        'car_brand_logo': carBrandLogo.value,
         'technician': technicianId.value,
         'company_id': companyId.value,
         'car_brand': brandId.value,
@@ -422,25 +409,7 @@ class CardsScreenController extends GetxController {
         'under_hood': selectedCheckBoxIndicesForUnderHood,
         'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
       };
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return Center(
-                child: Row(
-              spacing: 20,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  color: Colors.white,
-                ),
-                Text(
-                  'Please Wait...',
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                )
-              ],
-            ));
-          });
+      loadingScreen(context);
       if (imagesList.isNotEmpty) {
         await saveCarImages();
         newData['car_images'] = carImagesURLs;
@@ -476,6 +445,28 @@ class CardsScreenController extends GetxController {
       Get.back();
       showSnackBar('Failed', 'Please ty again');
     }
+  }
+
+  Future<dynamic> loadingScreen(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return Center(
+              child: Row(
+            spacing: 20,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: Colors.white,
+              ),
+              Text(
+                'Please Wait...',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              )
+            ],
+          ));
+        });
   }
 
   Future<void> saveCarImages() async {
@@ -728,7 +719,7 @@ class CardsScreenController extends GetxController {
     }
   }
 
- Future<void> getAllCards() async {
+  Future<void> getAllCards() async {
     try {
       loading.value = true;
 

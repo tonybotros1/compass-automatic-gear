@@ -44,6 +44,7 @@ Widget cardStyle({
                   carCard['color'], controller.allColors);
               Get.to(() => CarDetailsScreen(),
                   arguments: CarCardModel(
+                    fuelAmount: double.tryParse(carData['fuel_amount']) ?? 0,
                     data: carData,
                     carImages: List<String>.from(carData['car_images'] ?? []),
                     customerSignature: carData['customer_signature'] ?? '',
@@ -95,7 +96,7 @@ Widget cardStyle({
                             }
                           },
                         ),
-                        carCard['job_status_1'] != ''
+                        carCard['job_status_2'] != ''
                             ? Container(
                                 alignment: Alignment.center,
                                 padding: EdgeInsets.symmetric(
@@ -105,16 +106,27 @@ Widget cardStyle({
                                     border:
                                         Border.all(color: secColor, width: 3),
                                     borderRadius: BorderRadius.circular(5)),
-                                child: Text(carCard['job_status_1'],
+                                child: Text(carCard['job_status_2'],
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 19,
-                                        color: carCard['job_status_1'] ==
+                                        color: carCard['job_status_2'] ==
                                                 'Posted'
                                             ? Colors.blueGrey
-                                            : carCard['job_status_1'] == 'New'
+                                            : carCard['job_status_2'] == 'New'
                                                 ? Colors.green
-                                                : Colors.red)),
+                                                : carCard['job_status_2'] ==
+                                                            'Warranty' ||
+                                                        carCard['job_status_2'] ==
+                                                            'Closed'
+                                                    ? Colors.black
+                                                    : carCard['job_status_2'] ==
+                                                            'Approved'
+                                                        ? Color(0xffD2665A)
+                                                        : carCard['job_status_2'] ==
+                                                                'Ready'
+                                                            ? Color(0xff7886C7)
+                                                            : Colors.red)),
                               )
                             : SizedBox()
                       ],

@@ -62,6 +62,7 @@ class JobCardController extends GetxController {
   TextEditingController customerCurrency = TextEditingController();
   TextEditingController customerCurrencyRate = TextEditingController();
   Rx<TextEditingController> mileageIn = TextEditingController().obs;
+  Rx<TextEditingController> fuelAmount = TextEditingController().obs;
   Rx<TextEditingController> mileageOut = TextEditingController().obs;
   Rx<TextEditingController> inOutDiff = TextEditingController().obs;
   RxString carBrandId = RxString('');
@@ -454,6 +455,7 @@ class JobCardController extends GetxController {
     vin.text = data['vehicle_identification_number'];
     transmissionType.text = data['transmission_type'];
     mileageIn.value.text = data['mileage_in'];
+    fuelAmount.value.text = data['fuel_amount'] ?? '';
     mileageOut.value.text = data['mileage_out'];
     inOutDiff.value.text = data['mileage_in_out_diff'];
     customerId.value = data['customer'];
@@ -538,6 +540,7 @@ class JobCardController extends GetxController {
         'vehicle_identification_number': vin.text,
         'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
+        'fuel_amount':fuelAmount.value.text,
         'mileage_out': mileageOut.value.text,
         'mileage_in_out_diff': inOutDiff.value.text,
         'customer': customerId.value,
@@ -584,6 +587,7 @@ class JobCardController extends GetxController {
       if (isQuotationExpanded.isTrue && quotationCounter.value.text.isEmpty) {
         quotationStatus.value = 'New';
         newData['quotation_status'] = 'New';
+        newData['label'] = 'New';
 
         await getCurrentQuotationCounterNumber();
         newData['quotation_number'] = quotationCounter.value.text;
@@ -591,6 +595,7 @@ class JobCardController extends GetxController {
       if (isJobCardExpanded.isTrue && jobCardCounter.value.text.isEmpty) {
         jobStatus1.value = 'New';
         jobStatus2.value = 'New';
+        newData['label'] = 'New';
 
         newData['job_status_1'] = 'New';
         newData['job_status_2'] = 'New';
@@ -781,6 +786,7 @@ class JobCardController extends GetxController {
         'vehicle_identification_number': vin.text,
         'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
+        'fuel_amount':fuelAmount.value.text,
         'mileage_out': mileageOut.value.text,
         'mileage_in_out_diff': inOutDiff.value.text,
         'customer': customerId.value,

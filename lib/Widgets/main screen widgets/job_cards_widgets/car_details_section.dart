@@ -31,30 +31,13 @@ Widget carDetailsSection() {
                     ? Image.network(
                         controller.carBrandLogo.value,
                         width: 40,
+                        errorBuilder: (context, url, error) =>
+                            const Icon(Icons.error),
                       )
                     : SizedBox(),
               ),
               Expanded(
                 child: dynamicFields(dynamicConfigs: [
-                  DynamicConfig(
-                    isDropdown: true,
-                    flex: 1,
-                    dropdownConfig: DropdownConfig(
-                      showedSelectedName: 'name',
-                      textController: controller.technician.text,
-                      hintText: isTechLoading ? 'Loading...' : 'Technician',
-                      menuValues:
-                          isTechLoading ? {} : controller.allTechnicians,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text('${value['name']}'),
-                        );
-                      },
-                      onSelected: (key, value) {
-                        controller.technicianId.value = key;
-                      },
-                    ),
-                  ),
                   DynamicConfig(
                     isDropdown: true,
                     flex: 1,
@@ -95,6 +78,25 @@ Widget carDetailsSection() {
                       onSelected: (key, value) {
                         controller.carModel.text = value['name'];
                         controller.carModelId.value = key;
+                      },
+                    ),
+                  ),
+                  DynamicConfig(
+                    isDropdown: true,
+                    flex: 1,
+                    dropdownConfig: DropdownConfig(
+                      showedSelectedName: 'name',
+                      textController: controller.technician.text,
+                      hintText: isTechLoading ? 'Loading...' : 'Technician',
+                      menuValues:
+                          isTechLoading ? {} : controller.allTechnicians,
+                      itemBuilder: (context, key, value) {
+                        return ListTile(
+                          title: Text('${value['name']}'),
+                        );
+                      },
+                      onSelected: (key, value) {
+                        controller.technicianId.value = key;
                       },
                     ),
                   ),
@@ -241,6 +243,17 @@ Widget carDetailsSection() {
                 hintText: 'Enter VIN',
                 validate: false,
               ),
+            ),
+             DynamicConfig(
+              isDropdown: false,
+              flex: 1,
+              fieldConfig: FieldConfig(
+                  isDouble: true,
+                  textController: controller.fuelAmount.value,
+                  labelText: 'Fuel Amount',
+                  // hintText: 'Enter Mileage In',
+                  validate: false,
+                 ),
             ),
             DynamicConfig(
               isDropdown: false,

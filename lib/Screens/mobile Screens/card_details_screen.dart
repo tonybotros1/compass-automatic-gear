@@ -1,12 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:datahubai/Models/car_card_model.dart';
+import 'package:datahubai/Screens/mobile%20Screens/edit_inspection_report.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:readmore/readmore.dart';
 import '../../Controllers/Mobile section controllers/card_details_controller.dart';
 import '../../consts.dart';
-import 'inspection_report.dart';
 
 class CarDetailsScreen extends StatelessWidget {
   CarDetailsScreen({super.key});
@@ -38,7 +38,7 @@ class CarDetailsScreen extends StatelessWidget {
             TextButton(
                 onPressed: () {
                   cardDetailsController.loadVariables();
-                  Get.to(() => InspectionReposrt());
+                  Get.to(() => EditInspectionReport());
                 },
                 child: const Text(
                   'Edit',

@@ -1,11 +1,12 @@
-import 'package:datahubai/Controllers/Mobile%20section%20controllers/cards_screen_controller.dart';
+import 'package:datahubai/Widgets/Mobile%20widgets/inspection%20report%20widgets/inspection_report_body.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../Widgets/Mobile widgets/inspection report widgets/inspection_report_body.dart';
+
+import '../../Controllers/Mobile section controllers/cards_screen_controller.dart';
 import '../../consts.dart';
 
-class InspectionReposrt extends StatelessWidget {
-  const InspectionReposrt({super.key});
+class EditInspectionReport extends StatelessWidget {
+  const EditInspectionReport({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,19 +15,19 @@ class InspectionReposrt extends StatelessWidget {
       appBar: AppBar(
         leading: FittedBox(
           child: GetBuilder<CardsScreenController>(builder: (controller) {
-            return TextButton(
+            return IconButton(
                 onPressed: () {
-                  controller.clearAllValues();
+                  controller.inEditMode.value = false;
+                  Get.back();
                 },
-                child: const Text(
-                  'Clear',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
                 ));
           }),
         ),
         title: Text(
-          'Inspection Report',
+          'Edit Details',
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
@@ -35,7 +36,8 @@ class InspectionReposrt extends StatelessWidget {
           GetBuilder<CardsScreenController>(builder: (controller) {
             return IconButton(
                 onPressed: () {
-                  controller.addInspectionCard(context);
+                  controller.editInspectionCard(
+                      context, controller.currenyJobId.value);
                 },
                 icon: Icon(
                   Icons.done_outline_rounded,
