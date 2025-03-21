@@ -238,18 +238,18 @@ Widget tableOfScreens({
                     ),
                     // onSort: controller.onSort,
                   ),
-                  DataColumn(
-                    label: Column(
-                      spacing: 5,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(),
-                        AutoSizedText(text: 'Status', constraints: constraints),
-                      ],
-                    ),
-                    // onSort: controller.onSort,
-                  ),
+                  // DataColumn(
+                  //   label: Column(
+                  //     spacing: 5,
+                  //     mainAxisAlignment: MainAxisAlignment.end,
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: [
+                  //       SizedBox(),
+                  //       AutoSizedText(text: 'Status', constraints: constraints),
+                  //     ],
+                  //   ),
+                  //   // onSort: controller.onSort,
+                  // ),
                   DataColumn(
                     label: Column(
                       spacing: 5,
@@ -525,9 +525,9 @@ List<DataRow> _getOtherRows({
         DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
         DataCell(textForDataRowInTable(
             text: jobData['job_number'] != '' ? '${jobData['job_date']}' : '')),
-        DataCell(jobData['job_status_1'] != ''
-            ? statusBox('${jobData['job_status_1']}', hieght: 35, width: 100)
-            : SizedBox()),
+        // DataCell(jobData['job_status_1'] != ''
+        //     ? statusBox('${jobData['job_status_1']}', hieght: 35, width: 100)
+        //     : SizedBox()),
         DataCell(jobData['job_status_2'] != ''
             ? statusBox('${jobData['job_status_2']}', hieght: 35, width: 100)
             : SizedBox()),

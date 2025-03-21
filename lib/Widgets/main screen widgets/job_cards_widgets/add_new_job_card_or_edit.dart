@@ -169,15 +169,15 @@ Widget addNewJobCardOrEdit(
               style: fontStyle1,
             ),
             SizedBox(width: 10),
-            GetX<JobCardController>(builder: (controller) {
-              if (controller.jobStatus1.value.isNotEmpty &&
-                  controller.isJobCardExpanded.isTrue) {
-                return statusBox(controller.jobStatus1.value);
-              } else {
-                return SizedBox();
-              }
-            }),
-            SizedBox(width: 10),
+            // GetX<JobCardController>(builder: (controller) {
+            //   if (controller.jobStatus1.value.isNotEmpty &&
+            //       controller.isJobCardExpanded.isTrue) {
+            //     return statusBox(controller.jobStatus1.value);
+            //   } else {
+            //     return SizedBox();
+            //   }
+            // }),
+            // SizedBox(width: 10),
             GetX<JobCardController>(builder: (controller) {
               if (controller.jobStatus2.value.isNotEmpty &&
                   controller.isJobCardExpanded.isTrue) {
