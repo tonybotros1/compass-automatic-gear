@@ -33,6 +33,8 @@ Widget checkBoxesSection(
         textcontroller != null
             ? Expanded(
                 child: myTextFormFieldWithBorder(
+                  keyboardType: TextInputType.numberWithOptions(),
+                    isDouble: true,
                     labelText: label,
                     controller: textcontroller,
                     onChanged: (value) {

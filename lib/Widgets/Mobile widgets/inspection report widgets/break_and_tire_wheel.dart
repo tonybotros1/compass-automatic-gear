@@ -48,6 +48,8 @@ Widget breakAndTireWheel({
                 children: [
                   Expanded(
                     child: myTextFormFieldWithBorder(
+                        keyboardType: TextInputType.numberWithOptions(),
+                        isDouble: true,
                         onChanged: (value) {
                           controller.updateEnteredField(
                               'Tire Pressure PSI', 'before', value, dataMap);
@@ -57,6 +59,8 @@ Widget breakAndTireWheel({
                   ),
                   Expanded(
                     child: myTextFormFieldWithBorder(
+                        keyboardType: TextInputType.numberWithOptions(),
+                        isDouble: true,
                         onChanged: (value) {
                           controller.updateEnteredField(
                               'Tire Pressure PSI', 'after', value, dataMap);

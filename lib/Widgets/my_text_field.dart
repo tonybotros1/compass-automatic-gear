@@ -18,7 +18,7 @@ Widget myTextFormFieldWithBorder(
     bool? isDate,
     maxLines = 1,
     int? minLines,
-    keyboardType,
+    TextInputType? keyboardType,
     void Function(String)? onChanged,
     bool? isEnabled = true}) {
   return Column(

@@ -44,27 +44,33 @@ Widget cardStyle({
                   carCard['color'], controller.allColors);
               Get.to(() => CarDetailsScreen(),
                   arguments: CarCardModel(
-                    fuelAmount: double.tryParse(carData['fuel_amount']) ?? 0,
+                    fuelAmount: double.tryParse(
+                            carData['fuel_amount']?.toString() ?? '') ??
+                        0,
                     data: carData,
                     carImages: List<String>.from(carData['car_images'] ?? []),
-                    customerSignature: carData['customer_signature'] ?? '',
-                    advisorSignature: carData['advisor_signature'] ?? '',
+                    customerSignature:
+                        carData['customer_signature']?.toString() ?? '',
+                    advisorSignature:
+                        carData['advisor_signature']?.toString() ?? '',
                     carBrand: carBrandName,
-                    carMileage: carData['mileage_in'] ?? '',
+                    carMileage: carData['mileage_in']?.toString() ?? '',
                     carModel: carModelName,
                     chassisNumber:
-                        carData['vehicle_identification_number'] ?? '',
+                        carData['vehicle_identification_number']?.toString() ??
+                            '',
                     color: carColor,
                     customerName: customerName,
-                    date: carData['added_date'] ?? '',
-                    emailAddress: carData['contact_email'] ?? '',
-                    phoneNumber: carData['contact_number'] ?? '',
-                    plateNumber: carData['plate_number'] ?? '',
-                    comments: carData['inspection_report_comments'] ?? '',
+                    date: carData['added_date']?.toString() ?? '',
+                    emailAddress: carData['contact_email']?.toString() ?? '',
+                    phoneNumber: carData['contact_number']?.toString() ?? '',
+                    plateNumber: carData['plate_number']?.toString() ?? '',
+                    comments:
+                        carData['inspection_report_comments']?.toString() ?? '',
                     docID:
                         carCard.id, // Document ID is directly from the snapshot
-                    status1: carData['job_status_1'] ?? '',
-                    status2: carData['job_status_2'] ?? '',
+                    status1: carData['job_status_1']?.toString() ?? '',
+                    status2: carData['job_status_2']?.toString() ?? '',
                   ),
                   transition: Transition.leftToRight);
             },
