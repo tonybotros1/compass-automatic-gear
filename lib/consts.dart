@@ -96,6 +96,15 @@ var internalNotesButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var inspectionFormButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: Color(0xff034C53),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var copyJobButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Color(0xff7D1C4A),

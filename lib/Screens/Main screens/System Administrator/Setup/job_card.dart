@@ -802,6 +802,57 @@ Future<dynamic> editJobCardDialog(
                                   ));
                       }),
                       ElevatedButton(
+                          style: inspectionFormButtonStyle,
+                          onPressed: () {
+                            controller.loadInspectionFormValues(jobId, jobData);
+                            Get.dialog(
+                                barrierDismissible: false,
+                                Dialog(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5)),
+                                  insetPadding: EdgeInsets.all(40),
+                                  child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                    return Column(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.only(
+                                                topLeft: Radius.circular(5),
+                                                topRight: Radius.circular(5)),
+                                            color: mainColor,
+                                          ),
+                                          padding: EdgeInsets.all(16),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                '💵 Inspection Form',
+                                                style: TextStyle(
+                                                    fontSize: 20,
+                                                    color: Colors.white),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
+                                                  Get.back();
+                                                },
+                                                icon: Icon(Icons.close,
+                                                    color: Colors.white),
+                                              )
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    );
+                                  }),
+                                ));
+                          },
+                          child: Text(
+                            'Inspection From',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          )),
+                      ElevatedButton(
                         style: internalNotesButtonStyle,
                         onPressed: () async {
                           internalNotesDialog(controller, constraints, jobId);
