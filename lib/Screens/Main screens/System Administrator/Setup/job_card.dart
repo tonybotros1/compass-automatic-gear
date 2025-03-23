@@ -258,7 +258,7 @@ Widget tableOfScreens({
                       children: [
                         SizedBox(),
                         AutoSizedText(
-                            text: 'Sub Status', constraints: constraints),
+                            text: 'Status', constraints: constraints),
                       ],
                     ),
                     // onSort: controller.onSort,

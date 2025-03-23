@@ -313,7 +313,7 @@ class CardsScreenController extends GetxController {
         'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
         'under_hood': selectedCheckBoxIndicesForUnderHood,
         'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
-        'car_images' : carImagesURLs,
+        'car_images': carImagesURLs,
       };
 
       loadingScreen(context);
@@ -334,10 +334,126 @@ class CardsScreenController extends GetxController {
     }
   }
 
+  // addInspectionCard(BuildContext context) async {
+  //   try {
+  //     Map<String, dynamic> newData = {
+  //       'fuel_amount':'',
+  //       'added_date': DateTime.now().toString(),
+  //       'label': 'Draft',
+  //       'job_status_1': '',
+  //       'job_status_2': '',
+  //       'quotation_status': '',
+  //       'car_brand_logo': carBrandLogo.value,
+  //       'technician': technicianId.value,
+  //       'company_id': companyId.value,
+  //       'car_brand': brandId.value,
+  //       'car_model': modelId.value,
+  //       'plate_number': plateNumber.text,
+  //       'plate_code': code.text,
+  //       'country': '',
+  //       'city': '',
+  //       'year': year.text,
+  //       'color': colorId.value,
+  //       'engine_type': engineTypeId.value,
+  //       'vehicle_identification_number': vin.text,
+  //       'transmission_type': '',
+  //       'mileage_in': mileage.text,
+  //       'mileage_out': '',
+  //       'mileage_in_out_diff': '',
+  //       'customer': customerId.value,
+  //       'contact_name': customerEntityName.text,
+  //       'contact_number': customerEntityPhoneNumber.text,
+  //       'contact_email': customerEntityEmail.text,
+  //       'credit_limit': customerCreditNumber.text,
+  //       'outstanding': '',
+  //       'saleMan': customerSaleManId.value,
+  //       'branch': '',
+  //       'currency': '',
+  //       'rate': '',
+  //       'payment_method': 'Cash',
+  //       'quotation_number': '',
+  //       'quotation_date': '',
+  //       'validity_days': '',
+  //       'validity_end_date': '',
+  //       'reference_number': '',
+  //       'delivery_time': '',
+  //       'quotation_warrenty_days': '',
+  //       'quotation_warrenty_km': '',
+  //       'quotation_notes': '',
+  //       'job_number': '',
+  //       'invoice_number': '',
+  //       'lpo_number': '',
+  //       'job_date': '',
+  //       'invoice_date': '',
+  //       'job_approval_date': '',
+  //       'job_start_date': '',
+  //       'job_cancelation_date': '',
+  //       'job_finish_date': '',
+  //       'job_delivery_date': '',
+  //       'job_warrenty_days': '',
+  //       'job_warrenty_km': '',
+  //       'job_warrenty_end_date': '',
+  //       'job_min_test_km': '',
+  //       'job_reference_1': '',
+  //       'job_reference_2': '',
+  //       'job_reference_3': '',
+  //       'job_notes': '',
+  //       'job_delivery_notes': '',
+  //       'inspection_report_comments': comments.text.trim(),
+  //       'left_front_wheel': selectedCheckBoxIndicesForLeftFront,
+  //       'right_front_wheel': selectedCheckBoxIndicesForRightFront,
+  //       'left_rear_wheel': selectedCheckBoxIndicesForLeftRear,
+  //       'right_rear_wheel': selectedCheckBoxIndicesForRightRear,
+  //       'interior_exterior': selectedCheckBoxIndicesForInteriorExterior,
+  //       'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
+  //       'under_hood': selectedCheckBoxIndicesForUnderHood,
+  //       'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
+  //     };
+  //     loadingScreen(context);
+  //     if (imagesList.isNotEmpty) {
+  //       await saveCarImages();
+  //       newData['car_images'] = carImagesURLs;
+  //     } else {
+  //       newData['car_images'] = [];
+  //     }
+  //     await saveCarDialogImage();
+  //     newData['car_dialog'] = carDialogImageURL.value;
+
+  //     customerSignatureAsImage =
+  //         await signatureControllerForCustomer.toPngBytes();
+  //     advisorSignatureAsImage =
+  //         await signatureControllerForAdvisor.toPngBytes();
+
+  //     if (customerSignatureAsImage != null) {
+  //       customerSignatureURL.value =
+  //           await saveSignatureImage(customerSignatureAsImage);
+  //     }
+
+  //     if (advisorSignatureAsImage != null) {
+  //       advisorSignatureURL.value =
+  //           await saveSignatureImage(advisorSignatureAsImage);
+  //     }
+
+  //     newData['customer_signature'] = customerSignatureURL.value;
+  //     newData['advisor_signature'] = advisorSignatureURL.value;
+
+  //     await FirebaseFirestore.instance.collection('job_cards').add(newData);
+
+  //     Get.back();
+  //     showSnackBar('Done', 'Addedd Successfully');
+  //   } catch (e) {
+  //     Get.back();
+  //     showSnackBar('Failed', 'Please ty again');
+  //   }
+  // }
+
   addInspectionCard(BuildContext context) async {
+    // List to track all successfully uploaded storage references.
+    List<Reference> uploadedStorageRefs = [];
+
     try {
       Map<String, dynamic> newData = {
-        'fuel_amount':'',
+        'fuel_amount': '',
         'added_date': DateTime.now().toString(),
         'label': 'Draft',
         'job_status_1': '',
@@ -409,41 +525,65 @@ class CardsScreenController extends GetxController {
         'under_hood': selectedCheckBoxIndicesForUnderHood,
         'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
       };
+
       loadingScreen(context);
+
+      // Save car images if available.
       if (imagesList.isNotEmpty) {
-        await saveCarImages();
-        newData['car_images'] = carImagesURLs;
+        List<Map<String, dynamic>> uploadedImages = await saveCarImages();
+        // Add URLs to the data.
+        newData['car_images'] =
+            uploadedImages.map((item) => item['url']).toList();
+        // Track each uploaded image reference.
+        for (var item in uploadedImages) {
+          uploadedStorageRefs.add(item['ref']);
+        }
       } else {
         newData['car_images'] = [];
       }
-      await saveCarDialogImage();
-      newData['car_dialog'] = carDialogImageURL.value;
 
+      // Save car dialog image.
+      Map<String, dynamic> dialogResult = await saveCarDialogImageModified();
+      newData['car_dialog'] = dialogResult['url'];
+      uploadedStorageRefs.add(dialogResult['ref']);
+
+      // Save signature images.
       customerSignatureAsImage =
           await signatureControllerForCustomer.toPngBytes();
       advisorSignatureAsImage =
           await signatureControllerForAdvisor.toPngBytes();
 
       if (customerSignatureAsImage != null) {
-        customerSignatureURL.value =
+        Map<String, dynamic> custResult =
             await saveSignatureImage(customerSignatureAsImage);
+        newData['customer_signature'] = custResult['url'];
+        uploadedStorageRefs.add(custResult['ref']);
       }
 
       if (advisorSignatureAsImage != null) {
-        advisorSignatureURL.value =
+        Map<String, dynamic> advResult =
             await saveSignatureImage(advisorSignatureAsImage);
+        newData['advisor_signature'] = advResult['url'];
+        uploadedStorageRefs.add(advResult['ref']);
       }
 
-      newData['customer_signature'] = customerSignatureURL.value;
-      newData['advisor_signature'] = advisorSignatureURL.value;
-
+      // Save data to Firestore.
       await FirebaseFirestore.instance.collection('job_cards').add(newData);
 
       Get.back();
-      showSnackBar('Done', 'Addedd Successfully');
+      showSnackBar('Done', 'Added Successfully');
     } catch (e) {
+      // Rollback: delete all uploaded files in case of any error.
+      for (Reference ref in uploadedStorageRefs) {
+        try {
+          await ref.delete();
+        } catch (deleteError) {
+          // Optionally log the deletion error.
+        }
+      }
       Get.back();
-      showSnackBar('Failed', 'Please ty again');
+      print('eroooooooooooooooooooooooooooooor: $e');
+      showSnackBar('Failed', 'Please try again');
     }
   }
 
@@ -469,24 +609,42 @@ class CardsScreenController extends GetxController {
         });
   }
 
-  Future<void> saveCarImages() async {
+  // Future<void> saveCarImages() async {
+  //   try {
+  //     for (var image in imagesList) {
+  //       final Reference storageRef = FirebaseStorage.instance.ref().child(
+  //           'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
+
+  //       final Uint8List imageBytes = await image.readAsBytes();
+
+  //       final UploadTask uploadTask = storageRef.putData(
+  //         imageBytes,
+  //         // SettableMetadata(contentType: 'image/png'),
+  //       );
+
+  //       final TaskSnapshot snapshot = await uploadTask;
+  //       final String imageUrl = await snapshot.ref.getDownloadURL();
+
+  //       carImagesURLs.add(imageUrl);
+  //     }
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+
+  Future<List<Map<String, dynamic>>> saveCarImages() async {
+    List<Map<String, dynamic>> uploadedImages = [];
     try {
       for (var image in imagesList) {
         final Reference storageRef = FirebaseStorage.instance.ref().child(
             'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
-
         final Uint8List imageBytes = await image.readAsBytes();
-
-        final UploadTask uploadTask = storageRef.putData(
-          imageBytes,
-          // SettableMetadata(contentType: 'image/png'),
-        );
-
-        final TaskSnapshot snapshot = await uploadTask;
-        final String imageUrl = await snapshot.ref.getDownloadURL();
-
-        carImagesURLs.add(imageUrl);
+        final UploadTask uploadTask = storageRef.putData(imageBytes);
+        await uploadTask;
+        final String imageUrl = await storageRef.getDownloadURL();
+        uploadedImages.add({'url': imageUrl, 'ref': storageRef});
       }
+      return uploadedImages;
     } catch (e) {
       rethrow;
     }
@@ -525,59 +683,105 @@ class CardsScreenController extends GetxController {
   //   }
   // }
 
-  Future<String?> saveCarDialogImage() async {
+  // Future<String?> saveCarDialogImage() async {
+  //   try {
+  //     final BuildContext? context = repaintBoundaryKey.currentContext;
+  //     if (context == null) {
+  //       throw Exception('Error: repaintBoundaryKey.currentContext is null');
+  //     }
+
+  //     final RenderRepaintBoundary? boundary =
+  //         context.findRenderObject() as RenderRepaintBoundary?;
+
+  //     if (boundary == null) {
+  //       throw Exception('Error: RenderRepaintBoundary is null');
+  //     }
+
+  //     ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+  //     ByteData? byteData =
+  //         await image.toByteData(format: ui.ImageByteFormat.png);
+
+  //     if (byteData == null) {
+  //       throw Exception('Error: Failed to convert image to byte data');
+  //     }
+
+  //     Uint8List pngBytes = byteData.buffer.asUint8List();
+
+  //     final Reference storageRef = FirebaseStorage.instance.ref().child(
+  //         'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
+
+  //     final UploadTask uploadTask = storageRef.putData(pngBytes);
+  //     final TaskSnapshot snapshot = await uploadTask;
+
+  //     final String imageUrl = await snapshot.ref.getDownloadURL();
+  //     carDialogImageURL.value = imageUrl;
+
+  //     return imageUrl;
+  //   } catch (e) {
+  //     return e.toString(); // Return the exception message
+  //   }
+  // }
+
+  Future<Map<String, dynamic>> saveCarDialogImageModified() async {
     try {
       final BuildContext? context = repaintBoundaryKey.currentContext;
       if (context == null) {
         throw Exception('Error: repaintBoundaryKey.currentContext is null');
       }
-
       final RenderRepaintBoundary? boundary =
           context.findRenderObject() as RenderRepaintBoundary?;
-
       if (boundary == null) {
         throw Exception('Error: RenderRepaintBoundary is null');
       }
-
       ui.Image image = await boundary.toImage(pixelRatio: 2.0);
       ByteData? byteData =
           await image.toByteData(format: ui.ImageByteFormat.png);
-
       if (byteData == null) {
         throw Exception('Error: Failed to convert image to byte data');
       }
-
       Uint8List pngBytes = byteData.buffer.asUint8List();
-
       final Reference storageRef = FirebaseStorage.instance.ref().child(
           'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
-
       final UploadTask uploadTask = storageRef.putData(pngBytes);
-      final TaskSnapshot snapshot = await uploadTask;
-
-      final String imageUrl = await snapshot.ref.getDownloadURL();
+      await uploadTask;
+      final String imageUrl = await storageRef.getDownloadURL();
       carDialogImageURL.value = imageUrl;
-
-      return imageUrl;
+      return {'url': imageUrl, 'ref': storageRef};
     } catch (e) {
-      return e.toString(); // Return the exception message
+      rethrow;
     }
   }
 
   // for saving signature image in firebase
-  saveSignatureImage(signatureAsImage) async {
+  // saveSignatureImage(signatureAsImage) async {
+  //   try {
+  //     // uploading.value = true;
+  //     var url = '';
+  //     final Reference ref = FirebaseStorage.instance
+  //         .ref()
+  //         .child('signatures')
+  //         .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+  //     final UploadTask uploadTask = ref.putData(signatureAsImage!);
+  //     await uploadTask.then((p0) async {
+  //       url = await ref.getDownloadURL();
+  //     });
+  //     return url;
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+
+  Future<Map<String, dynamic>> saveSignatureImage(
+      dynamic signatureAsImage) async {
     try {
-      // uploading.value = true;
-      var url = '';
       final Reference ref = FirebaseStorage.instance
           .ref()
           .child('signatures')
           .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-      final UploadTask uploadTask = ref.putData(signatureAsImage!);
-      await uploadTask.then((p0) async {
-        url = await ref.getDownloadURL();
-      });
-      return url;
+      final UploadTask uploadTask = ref.putData(signatureAsImage);
+      await uploadTask;
+      final String url = await ref.getDownloadURL();
+      return {'url': url, 'ref': ref};
     } catch (e) {
       rethrow;
     }
