@@ -80,6 +80,7 @@ class JobCardController extends GetxController {
   RxString customerCurrencyId = RxString('');
   RxString query = RxString('');
   RxString queryForInvoiceItems = RxString('');
+  RxString label = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   Rx<TextEditingController> searchForInvoiceItems = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -522,7 +523,7 @@ class JobCardController extends GetxController {
     try {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
-        'label': 'New',
+        'label': '',
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'quotation_status': quotationStatus.value,
@@ -541,7 +542,7 @@ class JobCardController extends GetxController {
         'vehicle_identification_number': vin.text,
         'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
-        'fuel_amount':fuelAmount.value.text,
+        'fuel_amount': fuelAmount.value.text,
         'mileage_out': mileageOut.value.text,
         'mileage_in_out_diff': inOutDiff.value.text,
         'customer': customerId.value,
@@ -588,7 +589,7 @@ class JobCardController extends GetxController {
       if (isQuotationExpanded.isTrue && quotationCounter.value.text.isEmpty) {
         quotationStatus.value = 'New';
         newData['quotation_status'] = 'New';
-        newData['label'] = 'New';
+        newData['label'] = '';
 
         await getCurrentQuotationCounterNumber();
         newData['quotation_number'] = quotationCounter.value.text;
@@ -596,7 +597,7 @@ class JobCardController extends GetxController {
       if (isJobCardExpanded.isTrue && jobCardCounter.value.text.isEmpty) {
         jobStatus1.value = 'New';
         jobStatus2.value = 'New';
-        newData['label'] = 'New';
+        newData['label'] = '';
 
         newData['job_status_1'] = 'New';
         newData['job_status_2'] = 'New';
@@ -770,6 +771,7 @@ class JobCardController extends GetxController {
   void editJobCardAndQuotation(jobId) {
     try {
       FirebaseFirestore.instance.collection('job_cards').doc(jobId).update({
+        'label': label.value,
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'quotation_status': quotationStatus.value,
@@ -787,7 +789,7 @@ class JobCardController extends GetxController {
         'vehicle_identification_number': vin.text,
         'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
-        'fuel_amount':fuelAmount.value.text,
+        'fuel_amount': fuelAmount.value.text,
         'mileage_out': mileageOut.value.text,
         'mileage_in_out_diff': inOutDiff.value.text,
         'customer': customerId.value,
@@ -845,6 +847,7 @@ class JobCardController extends GetxController {
           .get();
 
       Map<String, dynamic>? data = mainJob.data();
+      print('TTTTTTTTTTTTTTTTTTTT ${data?['job_warrenty_end_date']}');
       if (data != null) {
         data.remove('id');
         data['quotation_date'] = '';
@@ -866,7 +869,6 @@ class JobCardController extends GetxController {
         data['job_delivery_date'] = '';
         data['job_warrenty_days'] = '0';
         data['job_warrenty_km'] = '0';
-        data['job_warrenty_end_date'] = '';
         data['job_min_test_km'] = '0';
         data['job_reference_1'] = '';
         data['job_reference_2'] = '';
@@ -874,6 +876,11 @@ class JobCardController extends GetxController {
         data['job_cancelation_date'] = '';
         data['job_notes'] = '';
         data['job_delivery_notes'] = '';
+        if (isBeforeToday(data['job_warrenty_end_date'])) {
+          data['label'] = '';
+        } else {
+          data['label'] = 'Returned';
+        }
         if (isQuotationExpanded.isTrue) {
           data['quotation_status'] = 'New';
 
@@ -893,6 +900,7 @@ class JobCardController extends GetxController {
           data['job_status_2'] = 'New';
           data['job_number'] = '';
         }
+        data['job_warrenty_end_date'] = '';
 
         var newCopiedJob =
             await FirebaseFirestore.instance.collection('job_cards').add(data);
@@ -907,10 +915,11 @@ class JobCardController extends GetxController {
         throw Exception('Job data is empty');
       }
     } catch (e) {
+      print(e);
       showSnackBar('Alert',
           'Something went wrong while copying the job. Please try again');
       loadingCopyJob.value = false;
-      rethrow; // Optionally rethrow or return an error message
+      rethrow;
     }
   }
 
@@ -1039,6 +1048,10 @@ class JobCardController extends GetxController {
 
 // this function is to see if the warrant date is end or not
   bool isBeforeToday(String dateStr) {
+    if (dateStr.isEmpty) {
+      throw FormatException("The date string is empty or null.");
+    }
+
     DateFormat format = DateFormat("dd-MM-yyyy");
 
     DateTime inputDate = format.parse(dateStr);

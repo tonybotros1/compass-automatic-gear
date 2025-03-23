@@ -257,8 +257,7 @@ Widget tableOfScreens({
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(),
-                        AutoSizedText(
-                            text: 'Status', constraints: constraints),
+                        AutoSizedText(text: 'Status', constraints: constraints),
                       ],
                     ),
                     // onSort: controller.onSort,
@@ -726,6 +725,7 @@ Future<dynamic> editJobCardDialog(
                                   if (jobData['quotation_number'] == '' &&
                                       controller.isQuotationExpanded.isTrue) {
                                     controller.quotationStatus.value = 'New';
+                                    controller.label.value = '';
                                     await controller
                                         .getCurrentQuotationCounterNumber();
                                   }
@@ -733,6 +733,7 @@ Future<dynamic> editJobCardDialog(
                                       controller.isJobCardExpanded.isTrue) {
                                     controller.jobStatus1.value = 'New';
                                     controller.jobStatus2.value = 'New';
+                                    controller.label.value = '';
                                     await controller
                                         .getCurrentJobCardCounterNumber();
                                   }
