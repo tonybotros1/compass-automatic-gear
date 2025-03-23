@@ -847,7 +847,6 @@ class JobCardController extends GetxController {
           .get();
 
       Map<String, dynamic>? data = mainJob.data();
-      print('TTTTTTTTTTTTTTTTTTTT ${data?['job_warrenty_end_date']}');
       if (data != null) {
         data.remove('id');
         data['quotation_date'] = '';
@@ -915,7 +914,6 @@ class JobCardController extends GetxController {
         throw Exception('Job data is empty');
       }
     } catch (e) {
-      print(e);
       showSnackBar('Alert',
           'Something went wrong while copying the job. Please try again');
       loadingCopyJob.value = false;
