@@ -254,15 +254,13 @@ class CarDetailsScreen extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
                             child: Column(
+                              spacing: 10,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'Comments',
                                   style: GoogleFonts.mooli(
                                       fontSize: 14, color: Colors.grey[900]),
-                                ),
-                                const SizedBox(
-                                  height: 10,
                                 ),
                                 SizedBox(
                                   width: constraints.maxWidth,
