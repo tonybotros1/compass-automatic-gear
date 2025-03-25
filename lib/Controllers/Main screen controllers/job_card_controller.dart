@@ -1228,7 +1228,7 @@ class JobCardController extends GetxController {
 // this function is to see if the warrant date is end or not
   bool isBeforeToday(String dateStr) {
     if (dateStr.isEmpty) {
-      throw FormatException("The date string is empty or null.");
+      throw const FormatException("The date string is empty or null.");
     }
 
     DateFormat format = DateFormat("dd-MM-yyyy");
@@ -1306,11 +1306,11 @@ class JobCardController extends GetxController {
   }
 
   void scrollToBottom() {
-    Future.delayed(Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (scrollController.hasClients) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent * 5,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
       }

@@ -46,11 +46,11 @@ Widget dropDownValues({
         icon: icon,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
-          borderSide: BorderSide(color: Colors.grey, width: 2.0),
+          borderSide: const BorderSide(color: Colors.grey, width: 2.0),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
-          borderSide: BorderSide(color: Colors.grey, width: 1.0),
+          borderSide: const BorderSide(color: Colors.grey, width: 1.0),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
@@ -58,11 +58,11 @@ Widget dropDownValues({
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
-          borderSide: BorderSide(color: Colors.red, width: 1.0),
+          borderSide: const BorderSide(color: Colors.red, width: 1.0),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
-          borderSide: BorderSide(color: Colors.red, width: 2.0),
+          borderSide: const BorderSide(color: Colors.red, width: 2.0),
         ),
         iconColor: Colors.grey.shade700,
         suffixIcon: Icon(

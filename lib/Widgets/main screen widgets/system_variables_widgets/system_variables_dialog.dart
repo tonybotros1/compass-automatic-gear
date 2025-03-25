@@ -20,9 +20,9 @@ Future<dynamic> systemVariablesDialog(
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
@@ -34,7 +34,7 @@ Future<dynamic> systemVariablesDialog(
                       controller.getScreenName(),
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     ElevatedButton(
                       onPressed: onPressed,
                       style: new2ButtonStyle,
@@ -56,7 +56,7 @@ Future<dynamic> systemVariablesDialog(
               ),
               Expanded(
                   child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: addNewVariableOrEdit(
                   controller: controller,
                   canEdit: canEdit,

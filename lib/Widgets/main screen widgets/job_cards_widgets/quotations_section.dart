@@ -7,7 +7,7 @@ import '../../../consts.dart';
 
 Container quotationsSection(context, JobCardController controller) {
   return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: containerDecor,
       child: Column(spacing: 20, children: [
         dynamicFields(dynamicConfigs: [
@@ -33,7 +33,7 @@ Container quotationsSection(context, JobCardController controller) {
                         context, controller.quotationDate.value);
                     controller.changeQuotationEndDateDependingOnDays();
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               textController: controller.quotationDate.value,
               labelText: 'Quotation Date',
               hintText: 'Enter Quotation Date',
@@ -71,7 +71,7 @@ Container quotationsSection(context, JobCardController controller) {
                         context, controller.validityEndDate.value);
                     controller.changingDaysDependingOnQuotationEndDate();
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               textController: controller.validityEndDate.value,
               labelText: 'Expiry Date',
               hintText: 'Enter Expiry Date',

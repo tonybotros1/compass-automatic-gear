@@ -7,7 +7,7 @@ import '../dynamic_field.dart';
 
 Container companySection() {
   return Container(
-    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
     decoration: containerDecor,
     child: Column(
       children: [
@@ -26,7 +26,7 @@ Container companySection() {
             ),
           ]);
         }),
-        SizedBox(
+        const SizedBox(
           height: 15,
         ),
         GetX<EntityInformationsController>(builder: (controller) {

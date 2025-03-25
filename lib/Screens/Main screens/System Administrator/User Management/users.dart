@@ -139,7 +139,7 @@ class Users extends StatelessWidget {
           ),
           onSort: usersController.onSort,
         ),
-        DataColumn(label: Text('')),
+        const DataColumn(label: Text('')),
       ],
       rows: usersController.filteredUsers.isEmpty &&
               usersController.search.value.text.isEmpty

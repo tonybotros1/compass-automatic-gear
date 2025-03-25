@@ -20,9 +20,9 @@ Future<dynamic> valuesDialog(
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
@@ -34,7 +34,7 @@ Future<dynamic> valuesDialog(
                       '📃 Values',
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     GetX<ListOfValuesController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
@@ -61,7 +61,7 @@ Future<dynamic> valuesDialog(
               ),
               Expanded(
                   child: Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: addNewValueOrEdit(
                         controller: controller,
                       )))

@@ -19,9 +19,9 @@ Future<dynamic> listOfValuesDialog(
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
@@ -33,7 +33,7 @@ Future<dynamic> listOfValuesDialog(
                       '📃 Lists',
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     GetX<ListOfValuesController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
@@ -60,7 +60,7 @@ Future<dynamic> listOfValuesDialog(
               ),
               Expanded(
                   child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: addNewListOrEdit(
                   controller: controller,
                 ),

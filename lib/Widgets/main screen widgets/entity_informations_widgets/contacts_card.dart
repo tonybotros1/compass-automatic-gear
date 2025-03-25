@@ -18,7 +18,7 @@ Widget contactsCardSection(EntityInformationsController controller) {
         ),
       ),
       Container(
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         decoration: containerDecor,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,11 +43,11 @@ Widget contactsCardSection(EntityInformationsController controller) {
                   onPressed: () {
                     controller.addPhoneLine();
                   },
-                  label: Text(
+                  label: const Text(
                     'More...',
                     style: TextStyle(color: Colors.blue),
                   ),
-                  icon: Icon(
+                  icon: const Icon(
                     size: 25,
                     Icons.add_circle_outline,
                     color: Colors.blue,
@@ -189,7 +189,7 @@ Widget buildSmartField(EntityInformationsController controller,
                       onPressed: () {
                         removePhoneFieldWithAnimation(index, controller);
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.remove_circle_outline,
                         color: Colors.red,
                       ),

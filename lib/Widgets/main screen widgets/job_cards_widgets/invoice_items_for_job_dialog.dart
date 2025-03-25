@@ -21,12 +21,12 @@ Future<dynamic> invoiceItemsForJobDialog(
             children: [
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
                 ),
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   spacing: 10,
                   children: [
@@ -34,7 +34,7 @@ Future<dynamic> invoiceItemsForJobDialog(
                       '💵 Invoice Items',
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     GetX<JobCardController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
@@ -62,7 +62,7 @@ Future<dynamic> invoiceItemsForJobDialog(
               ),
               Expanded(
                   child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: addNewinvoiceItemsOrEdit(
                   controller: controller,
                 ),

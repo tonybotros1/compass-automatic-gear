@@ -16,7 +16,7 @@ Widget addNewResponsibilityOrView({
         keyboardType: TextInputType.name,
         validate: true,
       ),
-      SizedBox(
+      const SizedBox(
         height: 15,
       ),
       CustomDropdown(

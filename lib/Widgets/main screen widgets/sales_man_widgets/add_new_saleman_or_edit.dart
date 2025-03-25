@@ -7,7 +7,7 @@ Widget addNewSaleManOrEdit({
 }) {
   return ListView(
     children: [
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(
@@ -16,7 +16,7 @@ Widget addNewSaleManOrEdit({
         hintText: 'Enter Sale Man Name',
         validate: true,
       ),
-      SizedBox(
+      const SizedBox(
         height: 15,
       ),
       myTextFormFieldWithBorder(

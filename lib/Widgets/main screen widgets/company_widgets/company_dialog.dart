@@ -20,12 +20,12 @@ Future<dynamic> companyDialog(
             children: [
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
                 ),
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   spacing: 10,
                   children: [
@@ -33,7 +33,7 @@ Future<dynamic> companyDialog(
                       controller.getScreenName(),
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     GetX<CompanyController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
@@ -60,7 +60,7 @@ Future<dynamic> companyDialog(
               ),
               Expanded(
                   child: Padding(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 child: addNewCompanyOrView(
                   controller: controller,
                 ),

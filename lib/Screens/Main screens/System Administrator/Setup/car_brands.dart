@@ -115,7 +115,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
+      const DataColumn(
         label: Text(''),
       ),
     ],
@@ -176,7 +176,7 @@ ElevatedButton valSectionInTheTable(CarBrandsController controller, brandId,
         Get.dialog(
             barrierDismissible: false,
             Dialog(
-              insetPadding: EdgeInsets.all(25),
+              insetPadding: const EdgeInsets.all(25),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15)),
               child: SizedBox(
@@ -186,26 +186,26 @@ ElevatedButton valSectionInTheTable(CarBrandsController controller, brandId,
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(15),
                             topRight: Radius.circular(15)),
                         color: mainColor,
                       ),
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
                           Text(
                             '🚗 Models',
                             style: fontStyleForScreenNameUsedInButtons,
                           ),
-                          Spacer(),
+                          const Spacer(),
                           closeButton
                         ],
                       ),
                     ),
                     Expanded(
                         child: Padding(
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       child: modelsSection(
                         constraints: constraints,
                         context: context,

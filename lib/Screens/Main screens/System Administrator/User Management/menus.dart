@@ -128,7 +128,7 @@ Widget tableOfMenus(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(label: Text('')),
+      const DataColumn(label: Text('')),
     ],
     rows:
         controller.filteredMenus.isEmpty && controller.search.value.text.isEmpty
@@ -235,9 +235,9 @@ ElevatedButton viewSection(
                     child: Column(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.only(
+                            borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(15),
                                 topRight: Radius.circular(15)),
                             color: mainColor,
@@ -249,14 +249,14 @@ ElevatedButton viewSection(
                                 controller.getScreenNameForHeader(),
                                 style: fontStyleForScreenNameUsedInButtons,
                               ),
-                              Spacer(),
+                              const Spacer(),
                               closeButton
                             ],
                           ),
                         ),
                         Expanded(
                             child: Padding(
-                          padding: EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
                           child: viewMenu(
                             controller: controller,
                             constraints: constraints,

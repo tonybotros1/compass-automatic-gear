@@ -8,7 +8,7 @@ import '../dynamic_field.dart';
 
 Widget carDetailsSection() {
   return Container(
-    padding: EdgeInsets.all(20),
+    padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     child: Column(
       children: [
@@ -34,7 +34,7 @@ Widget carDetailsSection() {
                         errorBuilder: (context, url, error) =>
                             const Icon(Icons.error),
                       )
-                    : SizedBox(),
+                    : const SizedBox(),
               ),
               Expanded(
                 child: dynamicFields(dynamicConfigs: [
@@ -169,7 +169,7 @@ Widget carDetailsSection() {
             ],
           );
         }),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         GetX<JobCardController>(builder: (controller) {

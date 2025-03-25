@@ -11,7 +11,7 @@ Widget addNewBrandOrEdit({
     key: controller.formKeyForAddingNewvalue,
     child: ListView(
       children: [
-        SizedBox(
+        const SizedBox(
           height: 5,
         ),
         myTextFormFieldWithBorder(
@@ -21,7 +21,7 @@ Widget addNewBrandOrEdit({
           hintText: 'Enter Name',
           validate: true,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         GetX<CarBrandsController>(builder: (controller) {

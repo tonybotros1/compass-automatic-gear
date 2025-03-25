@@ -8,7 +8,7 @@ import 'image_section.dart';
 
 Container customerSection() {
   return Container(
-    padding: EdgeInsets.all(20),
+    padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     child: Row(
       children: [
@@ -24,7 +24,7 @@ Container customerSection() {
                   validate: true,
                 );
               }),
-              SizedBox(
+              const SizedBox(
                 height: 15,
               ),
               Row(
@@ -44,10 +44,10 @@ Container customerSection() {
                       );
                     }),
                   ),
-                  Expanded(flex: 3, child: SizedBox())
+                  const Expanded(flex: 3, child: SizedBox())
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 15,
               ),
               GetX<EntityInformationsController>(builder: (controller) {
@@ -72,7 +72,7 @@ Container customerSection() {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           width: 50,
         ),
         GetBuilder<EntityInformationsController>(builder: (controller) {

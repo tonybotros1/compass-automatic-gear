@@ -124,7 +124,7 @@ class LoginScreen extends StatelessWidget {
                                   onPressed: () {
                                     Get.toNamed('/registerScreen');
                                   },
-                                  child: const Text('Are you a new company?')) : SizedBox()
+                                  child: const Text('Are you a new company?')) : const SizedBox()
                             ],
                           )) ,
                     ],

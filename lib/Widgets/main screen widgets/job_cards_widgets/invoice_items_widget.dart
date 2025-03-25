@@ -155,7 +155,7 @@ Widget tableOfScreens(
               text: 'NET',
             ),
           ),
-          DataColumn(
+          const DataColumn(
               headingRowAlignment: MainAxisAlignment.center, label: SizedBox()),
         ],
         rows: controller.filteredInvoiceItems.isEmpty &&
@@ -169,12 +169,12 @@ Widget tableOfScreens(
                       constraints, invoiceItemsId, controller, jobId);
                 }),
                 DataRow(selected: true, cells: [
-                  DataCell(Text('')),
-                  DataCell(Text('')),
-                  DataCell(Text('')),
-                  DataCell(Text('')),
-                  DataCell(Text('')),
-                  DataCell(Align(
+                  const DataCell(Text('')),
+                  const DataCell(Text('')),
+                  const DataCell(Text('')),
+                  const DataCell(Text('')),
+                  const DataCell(Text('')),
+                  const DataCell(Align(
                       alignment: Alignment.centerRight, child: Text('Totals'))),
                   DataCell(Align(
                     alignment: Alignment.centerRight,
@@ -189,7 +189,7 @@ Widget tableOfScreens(
                       alignment: Alignment.centerRight,
                       child: textForDataRowInTable(
                           text: '${data[2]}', color: Colors.red))),
-                  DataCell(Text('')),
+                  const DataCell(Text('')),
                 ])
               ]
             : [
@@ -201,12 +201,12 @@ Widget tableOfScreens(
                       constraints, invoiceItemsId, controller, jobId);
                 }),
                 DataRow(selected: true, cells: [
-                  DataCell(Text('')),
-                  DataCell(Text('')),
-                  DataCell(Text('')),
-                  DataCell(Text('')),
-                  DataCell(Text('')),
-                  DataCell(Align(
+                  const DataCell(Text('')),
+                  const DataCell(Text('')),
+                  const DataCell(Text('')),
+                  const DataCell(Text('')),
+                  const DataCell(Text('')),
+                  const DataCell(Align(
                       alignment: Alignment.centerRight, child: Text('Totals'))),
                   DataCell(Align(
                     alignment: Alignment.centerRight,
@@ -221,7 +221,7 @@ Widget tableOfScreens(
                       alignment: Alignment.centerRight,
                       child: textForDataRowInTable(
                           text: '${data[2]}', color: Colors.red))),
-                  DataCell(Text('')),
+                  const DataCell(Text('')),
                 ])
               ],
       ),
@@ -324,7 +324,7 @@ ElevatedButton editSection(
                     controller.editInvoiceItem(jobId, invoiceItemsId);
                   });
       },
-      child: Text('Edit'));
+      child: const Text('Edit'));
 }
 
 ElevatedButton newinvoiceItemsButton(BuildContext context,

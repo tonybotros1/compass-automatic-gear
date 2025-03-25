@@ -18,7 +18,7 @@ Widget addNewEntityOrEdit({
     child: SingleChildScrollView(
       child: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
           labelContainer(
@@ -63,7 +63,7 @@ Widget addNewEntityOrEdit({
             ),
           ),
           customerSection(),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           labelContainer(
@@ -71,7 +71,7 @@ Widget addNewEntityOrEdit({
               spacing: 10,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 4,
                 ),
                 Row(
@@ -124,15 +124,15 @@ Widget addNewEntityOrEdit({
             ),
           ),
           companySection(),
-          SizedBox(
+          const SizedBox(
             height: 15,
           ),
           addressCardSection(controller),
-          SizedBox(
+          const SizedBox(
             height: 15,
           ),
           contactsCardSection(controller),
-          SizedBox(
+          const SizedBox(
             height: 15,
           ),
           socialCardSection(controller),

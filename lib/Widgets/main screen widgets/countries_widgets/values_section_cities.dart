@@ -100,7 +100,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSortForCities,
       ),
-      DataColumn(label: Text('')),
+      const DataColumn(label: Text('')),
     ],
     rows: controller.filteredCities.isEmpty &&
             controller.searchForCities.value.text.isEmpty
@@ -192,7 +192,7 @@ ElevatedButton editSection(CountriesController controller,
                   },
             isEnabled: false);
       },
-      child: Text('Edit'));
+      child: const Text('Edit'));
 }
 
 ElevatedButton activeInActiveSection(Map<String, dynamic> cityData,

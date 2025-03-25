@@ -94,7 +94,7 @@ class JobCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   Text('💳 History', style: fontStyleForAppBar),
@@ -117,7 +117,7 @@ class JobCard extends StatelessWidget {
                                   context: context,
                                   controller: controller,
                                   data: controller.historyJobCards))
-                          : Center(
+                          : const Center(
                               child: Text(
                                 'History',
                                 style: TextStyle(color: Colors.grey),
@@ -173,7 +173,7 @@ Widget tableOfScreens({
                 sortAscending: controller.isAscending.value,
                 headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
                 columns: [
-                  DataColumn(
+                  const DataColumn(
                     label: SizedBox(),
                     // onSort: controller.onSort,
                   ),
@@ -196,7 +196,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         // AutoSizedText(text: '', constraints: constraints),
                         AutoSizedText(text: 'Date', constraints: constraints),
                       ],
@@ -209,7 +209,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'Status', constraints: constraints),
                       ],
                     ),
@@ -233,7 +233,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'Date', constraints: constraints),
                       ],
                     ),
@@ -257,7 +257,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'Status', constraints: constraints),
                       ],
                     ),
@@ -282,7 +282,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'Date', constraints: constraints),
                       ],
                     ),
@@ -294,7 +294,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(
                             text: 'LPO Number', constraints: constraints),
                       ],
@@ -319,7 +319,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'Model', constraints: constraints),
                       ],
                     ),
@@ -343,7 +343,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'Code', constraints: constraints),
                       ],
                     ),
@@ -355,7 +355,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'City', constraints: constraints),
                       ],
                     ),
@@ -367,7 +367,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(
                             text: 'Customer Name', constraints: constraints),
                       ],
@@ -380,7 +380,7 @@ Widget tableOfScreens({
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'VIN', constraints: constraints),
                       ],
                     ),
@@ -392,7 +392,7 @@ Widget tableOfScreens({
                       spacing: 5,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(
                             text: 'Total Job', constraints: constraints),
                       ],
@@ -406,7 +406,7 @@ Widget tableOfScreens({
                       spacing: 5,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'VAT', constraints: constraints),
                       ],
                     ),
@@ -419,7 +419,7 @@ Widget tableOfScreens({
                       spacing: 5,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        SizedBox(),
+                        const SizedBox(),
                         AutoSizedText(text: 'NET', constraints: constraints),
                       ],
                     ),
@@ -445,7 +445,7 @@ Widget tableOfScreens({
             dataTextStyle: regTextStyle,
             headingTextStyle: fontStyleForTableHeader,
             headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-            columns: [
+            columns: const [
               DataColumn(
                 label: SizedBox(),
               ),
@@ -484,7 +484,7 @@ List<DataRow> _getActionRows(
               children: [
                 showHistoryButton
                     ? historySection(controller, jobData)
-                    : SizedBox(),
+                    : const SizedBox(),
                 editSection(context, controller, jobData, constraints, jobId),
               ],
             ),
@@ -521,7 +521,7 @@ List<DataRow> _getOtherRows({
         DataCell(jobData['quotation_status'] != ''
             ? statusBox('${jobData['quotation_status']}',
                 hieght: 35, width: 100)
-            : SizedBox()),
+            : const SizedBox()),
         DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
         DataCell(textForDataRowInTable(
             text: jobData['job_number'] != '' ? '${jobData['job_date']}' : '')),
@@ -530,7 +530,7 @@ List<DataRow> _getOtherRows({
         //     : SizedBox()),
         DataCell(jobData['job_status_2'] != ''
             ? statusBox('${jobData['job_status_2']}', hieght: 35, width: 100)
-            : SizedBox()),
+            : const SizedBox()),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
         DataCell(textForDataRowInTable(
             text: jobData['invoice_number'] != ''
@@ -695,18 +695,18 @@ Future<dynamic> editJobCardDialog(
       barrierDismissible: false,
       Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          insetPadding: EdgeInsets.all(8),
+          insetPadding: const EdgeInsets.all(8),
           child: LayoutBuilder(builder: (context, constraints) {
             return Column(
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(5),
                         topRight: Radius.circular(5)),
                     color: mainColor,
                   ),
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   width: constraints.maxWidth,
                   child: Row(
                     spacing: 10,
@@ -715,7 +715,7 @@ Future<dynamic> editJobCardDialog(
                         '${controller.getScreenName()}',
                         style: fontStyleForScreenNameUsedInButtons,
                       ),
-                      Spacer(),
+                      const Spacer(),
                       GetX<JobCardController>(builder: (controller) {
                         return ElevatedButton(
                           onPressed: controller.addingNewValue.value
@@ -746,7 +746,7 @@ Future<dynamic> editJobCardDialog(
                                   'Save',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 )
-                              : SizedBox(
+                              : const SizedBox(
                                   width: 20,
                                   height: 20,
                                   child: CircularProgressIndicator(
@@ -775,7 +775,7 @@ Future<dynamic> editJobCardDialog(
                                   'Only New Cards Can be Deleted');
                             }
                           },
-                          child: Text('Delete',
+                          child: const Text('Delete',
                               style: TextStyle(fontWeight: FontWeight.bold))),
                       GetX<JobCardController>(builder: (controller) {
                         return ElevatedButton(
@@ -788,12 +788,12 @@ Future<dynamic> editJobCardDialog(
                                   newData['newId']);
                             },
                             child: controller.loadingCopyJob.isFalse
-                                ? Text(
+                                ? const Text(
                                     'Copy',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   )
-                                : SizedBox(
+                                : const SizedBox(
                                     height: 20,
                                     width: 20,
                                     child: CircularProgressIndicator(
@@ -811,25 +811,25 @@ Future<dynamic> editJobCardDialog(
                                 Dialog(
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(5)),
-                                    insetPadding: EdgeInsets.all(20),
+                                    insetPadding: const EdgeInsets.all(20),
                                     child: SizedBox(
                                       width: 600,
                                       child: Column(
                                         children: [
                                           Container(
                                             decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.only(
+                                              borderRadius: const BorderRadius.only(
                                                   topLeft: Radius.circular(5),
                                                   topRight: Radius.circular(5)),
                                               color: mainColor,
                                             ),
-                                            padding: EdgeInsets.all(16),
+                                            padding: const EdgeInsets.all(16),
                                             child: Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment
                                                       .spaceBetween,
                                               children: [
-                                                Text(
+                                                const Text(
                                                   '🚘 Inspection Form',
                                                   style: TextStyle(
                                                       fontSize: 20,
@@ -839,7 +839,7 @@ Future<dynamic> editJobCardDialog(
                                                   onPressed: () {
                                                     Get.back();
                                                   },
-                                                  icon: Icon(Icons.close,
+                                                  icon: const Icon(Icons.close,
                                                       color: Colors.white),
                                                 )
                                               ],
@@ -857,7 +857,7 @@ Future<dynamic> editJobCardDialog(
                                       ),
                                     )));
                           },
-                          child: Text(
+                          child: const Text(
                             'Inspection From',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           )),
@@ -866,7 +866,7 @@ Future<dynamic> editJobCardDialog(
                         onPressed: () async {
                           internalNotesDialog(controller, constraints, jobId);
                         },
-                        child: Text(
+                        child: const Text(
                           'Internal Notes',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
@@ -880,24 +880,24 @@ Future<dynamic> editJobCardDialog(
                               Dialog(
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5)),
-                                insetPadding: EdgeInsets.all(40),
+                                insetPadding: const EdgeInsets.all(40),
                                 child: LayoutBuilder(
                                     builder: (context, constraints) {
                                   return Column(
                                     children: [
                                       Container(
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(
+                                          borderRadius: const BorderRadius.only(
                                               topLeft: Radius.circular(5),
                                               topRight: Radius.circular(5)),
                                           color: mainColor,
                                         ),
-                                        padding: EdgeInsets.all(16),
+                                        padding: const EdgeInsets.all(16),
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
+                                            const Text(
                                               '💵 Invoice Items',
                                               style: TextStyle(
                                                   fontSize: 20,
@@ -907,7 +907,7 @@ Future<dynamic> editJobCardDialog(
                                               onPressed: () {
                                                 Get.back();
                                               },
-                                              icon: Icon(Icons.close,
+                                              icon: const Icon(Icons.close,
                                                   color: Colors.white),
                                             )
                                           ],
@@ -927,7 +927,7 @@ Future<dynamic> editJobCardDialog(
                                 }),
                               ));
                         },
-                        child: Text('Invoice Items',
+                        child: const Text('Invoice Items',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                       ElevatedButton(
@@ -942,14 +942,14 @@ Future<dynamic> editJobCardDialog(
                                 Dialog(
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5)),
-                                  insetPadding: EdgeInsets.all(40),
+                                  insetPadding: const EdgeInsets.all(40),
                                   child: Column(
                                     children: [
                                       Container(
-                                        padding: EdgeInsets.all(16),
+                                        padding: const EdgeInsets.all(16),
                                         width: constraints.maxWidth,
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(
+                                          borderRadius: const BorderRadius.only(
                                               topLeft: Radius.circular(5),
                                               topRight: Radius.circular(5)),
                                           color: mainColor,
@@ -957,7 +957,7 @@ Future<dynamic> editJobCardDialog(
                                         child: Row(
                                           spacing: 10,
                                           children: [
-                                            Spacer(),
+                                            const Spacer(),
                                             Obx(() => ElevatedButton(
                                                   onPressed: otherController
                                                           .addingNewEntity.value
@@ -978,7 +978,7 @@ Future<dynamic> editJobCardDialog(
                                                                   FontWeight
                                                                       .bold),
                                                         )
-                                                      : SizedBox(
+                                                      : const SizedBox(
                                                           height: 20,
                                                           width: 20,
                                                           child:
@@ -1005,7 +1005,7 @@ Future<dynamic> editJobCardDialog(
                                   ),
                                 ));
                           },
-                          child: Text(
+                          child: const Text(
                             'New Customer',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           )),
@@ -1059,7 +1059,7 @@ ElevatedButton newJobCardButton(BuildContext context,
           (entry) =>
               entry.value['country_id'] ==
               controller.companyDetails['contact_details']['country'],
-          orElse: () => MapEntry('', {}));
+          orElse: () => const MapEntry('', {}));
       controller.customerCurrencyId.value = entry.key ?? '';
       controller.customerCurrencyRate.text =
           (entry.value['rate'] ?? '1').toString();
@@ -1073,24 +1073,24 @@ ElevatedButton newJobCardButton(BuildContext context,
           Dialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5)),
-              insetPadding: EdgeInsets.all(8),
+              insetPadding: const EdgeInsets.all(8),
               child: LayoutBuilder(builder: (context, constraints) {
                 return Column(children: [
                   Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(5),
                             topRight: Radius.circular(5)),
                         color: mainColor,
                       ),
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       width: constraints.maxWidth,
                       child: Row(spacing: 10, children: [
                         Text(
                           '${controller.getScreenName()}',
                           style: fontStyleForScreenNameUsedInButtons,
                         ),
-                        Spacer(),
+                        const Spacer(),
                         ElevatedButton(
                           style: innvoiceItemsButtonStyle,
                           onPressed: () {
@@ -1099,24 +1099,24 @@ ElevatedButton newJobCardButton(BuildContext context,
                               Dialog(
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5)),
-                                insetPadding: EdgeInsets.all(40),
+                                insetPadding: const EdgeInsets.all(40),
                                 child: LayoutBuilder(
                                     builder: (context, constraints) {
                                   return Column(
                                     children: [
                                       Container(
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(
+                                          borderRadius: const BorderRadius.only(
                                               topLeft: Radius.circular(5),
                                               topRight: Radius.circular(5)),
                                           color: mainColor,
                                         ),
-                                        padding: EdgeInsets.all(8),
+                                        padding: const EdgeInsets.all(8),
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
+                                            const Text(
                                               'Invoice Items',
                                               style: TextStyle(
                                                   fontSize: 20,
@@ -1126,7 +1126,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                                               onPressed: () {
                                                 Get.back();
                                               },
-                                              icon: Icon(Icons.close,
+                                              icon: const Icon(Icons.close,
                                                   color: Colors.white),
                                             )
                                           ],
@@ -1150,7 +1150,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                               showSnackBar('Alert', 'Please Save Job First');
                             }
                           },
-                          child: Text(
+                          child: const Text(
                             'Invoice Items',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -1166,7 +1166,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                               showSnackBar('Alert', 'Please Save Job First');
                             }
                           },
-                          child: Text(
+                          child: const Text(
                             'Internal Notes',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -1183,7 +1183,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   )
-                                : SizedBox(
+                                : const SizedBox(
                                     height: 20,
                                     width: 20,
                                     child: CircularProgressIndicator(
@@ -1197,7 +1197,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                       ])),
                   Expanded(
                       child: Padding(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     child: addNewJobCardOrEdit(
                       jobId: null,
                       controller: controller,

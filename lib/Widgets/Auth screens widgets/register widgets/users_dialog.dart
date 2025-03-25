@@ -22,9 +22,9 @@ Future<dynamic> usersDialog(
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
@@ -36,7 +36,7 @@ Future<dynamic> usersDialog(
                       controller.getScreenName(),
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Obx(() => ElevatedButton(
                           onPressed: onPressed,
                           style: new2ButtonStyle,
@@ -60,7 +60,7 @@ Future<dynamic> usersDialog(
               ),
               Expanded(
                   child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: addNewUserAndView(
                   canEdit: canEdit,
                   controller: controller,

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 var fontStyleForAppBar = TextStyle(
     fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
 var fontStyleForScreenNameUsedInButtons =
-    TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
+    const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
 var fontStyleForTableHeader = TextStyle(
     color: Colors.grey[700], fontWeight: FontWeight.bold, fontSize: 12);
 var iconStyleForTableHeaderDown =
@@ -89,7 +89,7 @@ var cancelJobButtonStyle = ElevatedButton.styleFrom(
 
 var internalNotesButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
-  foregroundColor: Color(0xffFA812F),
+  foregroundColor: const Color(0xffFA812F),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -98,7 +98,7 @@ var internalNotesButtonStyle = ElevatedButton.styleFrom(
 
 var inspectionFormButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
-  foregroundColor: Color(0xff034C53),
+  foregroundColor: const Color(0xff034C53),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -107,7 +107,7 @@ var inspectionFormButtonStyle = ElevatedButton.styleFrom(
 
 var copyJobButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
-  foregroundColor: Color(0xff7D1C4A),
+  foregroundColor: const Color(0xff7D1C4A),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -213,7 +213,7 @@ var closeButtonStyle = ElevatedButton.styleFrom(
 
 var approveButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
-  foregroundColor: Color(0xffD2665A),
+  foregroundColor: const Color(0xffD2665A),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -222,7 +222,7 @@ var approveButtonStyle = ElevatedButton.styleFrom(
 
 var readyButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
-  foregroundColor: Color(0xff7886C7),
+  foregroundColor: const Color(0xff7886C7),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -238,7 +238,7 @@ var welcomButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 var logoutButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xff3A6D8C),
+  backgroundColor: const Color(0xff3A6D8C),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
@@ -306,13 +306,13 @@ var screenPadding = const EdgeInsets.only(
 
 double horizontalMarginForTable = 8;
 
-var fontStyle1 = TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
+var fontStyle1 = const TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
 var fontStyle2 =
     TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold);
 // var mainColor = const Color.fromARGB(255, 228, 200, 233);
 
 double textFieldHeight = 35;
-TextStyle textFieldFontStyle = TextStyle(fontSize: 14, color: Colors.black);
+TextStyle textFieldFontStyle = const TextStyle(fontSize: 14, color: Colors.black);
 TextStyle textFieldLabelStyle = TextStyle(
     color: Colors.grey.shade700, fontSize: 12, fontWeight: FontWeight.bold);
 
@@ -328,7 +328,7 @@ var textStyleForCardsLabelsCarBrandAndModel = TextStyle(
   color: mainColor,
 );
 
-var textStyleForCardsContents = TextStyle(
+var textStyleForCardsContents = const TextStyle(
   fontSize: 19,
   color: Colors.black54,
 );
@@ -385,7 +385,7 @@ var closeButton = ElevatedButton(
     onPressed: () {
       Get.back();
     },
-    child: Text(
+    child: const Text(
       'Close',
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
@@ -471,12 +471,12 @@ Container labelContainer({
   required Widget lable,
 }) {
   return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       alignment: Alignment.centerLeft,
       height: 50,
       width: double.infinity,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
               topRight: Radius.circular(5), topLeft: Radius.circular(5)),
           color: secColor),
       child: lable);
@@ -488,7 +488,7 @@ Decoration containerDecor = BoxDecoration(
       right: BorderSide(color: secColor),
       bottom: BorderSide(color: secColor),
     ),
-    borderRadius: BorderRadius.only(
+    borderRadius: const BorderRadius.only(
         bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5)));
 
 Widget textForDataRowInTable({

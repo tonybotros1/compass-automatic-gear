@@ -136,7 +136,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(label: Text('')),
+      const DataColumn(label: Text('')),
     ],
     rows: controller.filteredVariables.isEmpty &&
             controller.search.value.text.isEmpty

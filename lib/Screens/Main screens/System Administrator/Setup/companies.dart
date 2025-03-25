@@ -127,7 +127,7 @@ Widget tableOfCompanies(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(label: Text('')),
+      const DataColumn(label:  Text('')),
     ],
     rows: controller.filteredCompanies.isEmpty &&
             controller.search.value.text.isEmpty

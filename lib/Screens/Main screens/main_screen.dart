@@ -67,7 +67,7 @@ class MainScreen extends StatelessWidget {
                                               .getFirstCharacter(
                                                   mainScreenController
                                                       .userName.value),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                               fontSize: 20,
                                               color: Colors.white),
                                         ),
@@ -81,8 +81,8 @@ class MainScreen extends StatelessWidget {
                                     children: [
                                       Text(mainScreenController.userEmail.value,
                                           style:
-                                              TextStyle(color: Colors.white)),
-                                      SizedBox(
+                                              const TextStyle(color: Colors.white)),
+                                      const SizedBox(
                                         height: 25,
                                       ),
                                       CircleAvatar(
@@ -93,7 +93,7 @@ class MainScreen extends StatelessWidget {
                                               .getFirstCharacter(
                                                   mainScreenController
                                                       .userName.value),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                               fontSize: 30,
                                               color: Colors.white),
                                         ),
@@ -101,17 +101,17 @@ class MainScreen extends StatelessWidget {
                                       FittedBox(
                                         child: Text(
                                           'Hi, ${mainScreenController.userName.value}!',
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 30),
                                         ),
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 30,
                                       ),
                                       Container(
-                                        padding: EdgeInsets.all(16),
+                                        padding: const EdgeInsets.all(16),
                                         width: double.infinity,
                                         decoration: BoxDecoration(
                                             color: Colors.blue.shade400,
@@ -125,7 +125,7 @@ class MainScreen extends StatelessWidget {
                                               child: Text(
                                                 mainScreenController
                                                     .companyName.value,
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                     color: Colors.white,
                                                     fontWeight:
                                                         FontWeight.bold),
@@ -137,13 +137,13 @@ class MainScreen extends StatelessWidget {
                                                       vertical: 16),
                                               child: Row(
                                                 children: [
-                                                  Text(
+                                                  const Text(
                                                     'Joining Date:',
                                                     style: TextStyle(
                                                       color: Colors.white,
                                                     ),
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                   Text(
@@ -162,13 +162,13 @@ class MainScreen extends StatelessWidget {
                                                       vertical: 16),
                                               child: Row(
                                                 children: [
-                                                  Text(
+                                                  const Text(
                                                     'Expiry Date:',
                                                     style: TextStyle(
                                                       color: Colors.white,
                                                     ),
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                   Text(
@@ -207,7 +207,7 @@ class MainScreen extends StatelessWidget {
                                                                 '/');
                                                           });
                                                     },
-                                                    child: Text('Logout')),
+                                                    child: const Text('Logout')),
                                               ],
                                             )
                                           ],
@@ -219,7 +219,7 @@ class MainScreen extends StatelessWidget {
                                   horizontalEdgeMargin: 12,
                                   verticalOffset: 8,
                                 )
-                              : SizedBox())),
+                              : const SizedBox())),
                     ],
                   ),
                 ),

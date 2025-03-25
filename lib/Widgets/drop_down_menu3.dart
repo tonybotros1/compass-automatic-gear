@@ -450,7 +450,7 @@ class CustomDropdown extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(left: 2),
+                        padding: const EdgeInsets.only(left: 2),
                         child: Text(hintText, style: textFieldLabelStyle),
                       ),
                       Container(

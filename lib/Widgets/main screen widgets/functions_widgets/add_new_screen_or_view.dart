@@ -7,7 +7,7 @@ Widget addNewScreenOrView({
 }) {
   return ListView(
     children: [
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(
@@ -18,7 +18,7 @@ Widget addNewScreenOrView({
         keyboardType: TextInputType.name,
         validate: true,
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(

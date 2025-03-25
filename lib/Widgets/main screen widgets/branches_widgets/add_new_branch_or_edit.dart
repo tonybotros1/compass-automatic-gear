@@ -11,7 +11,7 @@ Widget addNewBranchOrEdit({
 }) {
   return ListView(
     children: [
-      SizedBox(
+      const SizedBox(
         height: 5,
       ),
       myTextFormFieldWithBorder(
@@ -21,7 +21,7 @@ Widget addNewBranchOrEdit({
         hintText: 'Enter Code',
         validate: true,
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(
@@ -31,7 +31,7 @@ Widget addNewBranchOrEdit({
         hintText: 'Enter Name',
         validate: true,
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(
@@ -41,7 +41,7 @@ Widget addNewBranchOrEdit({
         hintText: 'Enter Line',
         validate: true,
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       GetX<BranchesController>(builder: (controller) {
@@ -65,7 +65,7 @@ Widget addNewBranchOrEdit({
         );
       
       }),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       GetX<BranchesController>(builder: (controller) {

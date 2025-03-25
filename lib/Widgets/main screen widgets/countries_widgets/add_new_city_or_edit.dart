@@ -18,7 +18,7 @@ Widget addNewCityOrEdit({
           validate: true,
           isEnabled: isEnabled
         ),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         myTextFormFieldWithBorder(

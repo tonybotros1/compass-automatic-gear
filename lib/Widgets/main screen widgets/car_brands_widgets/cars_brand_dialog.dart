@@ -20,12 +20,12 @@ Future<dynamic> carBrandsDialog(
             children: [
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
                 ),
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   spacing: 10,
                   children: [
@@ -33,7 +33,7 @@ Future<dynamic> carBrandsDialog(
                       controller.getScreenName(),
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     GetX<CarBrandsController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
@@ -44,7 +44,7 @@ Future<dynamic> carBrandsDialog(
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     )
-                                  : SizedBox(
+                                  : const SizedBox(
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
@@ -59,7 +59,7 @@ Future<dynamic> carBrandsDialog(
               ),
               Expanded(
                   child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                 child: addNewBrandOrEdit(
                   controller: controller,
                 ),

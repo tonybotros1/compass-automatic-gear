@@ -17,7 +17,7 @@ Widget addNewValueOrEdit({
           hintText: 'Enter Value name',
           validate: true,
         ),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         CustomDropdown(

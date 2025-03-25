@@ -25,7 +25,7 @@ class InspectionReposrt extends StatelessWidget {
                 ));
           }),
         ),
-        title: Text(
+        title: const Text(
           'Inspection Report',
           style: TextStyle(color: Colors.white),
         ),
@@ -37,7 +37,7 @@ class InspectionReposrt extends StatelessWidget {
                 onPressed: () {
                   controller.addInspectionCard(context);
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.done_outline_rounded,
                   color: Colors.white,
                 ));

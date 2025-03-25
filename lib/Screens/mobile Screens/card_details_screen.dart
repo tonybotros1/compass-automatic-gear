@@ -38,7 +38,7 @@ class CarDetailsScreen extends StatelessWidget {
             TextButton(
                 onPressed: () {
                   cardDetailsController.loadVariables();
-                  Get.to(() => EditInspectionReport());
+                  Get.to(() => const EditInspectionReport());
                 },
                 child: const Text(
                   'Edit',

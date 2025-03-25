@@ -20,13 +20,13 @@ class EditInspectionReport extends StatelessWidget {
                   controller.inEditMode.value = false;
                   Get.back();
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back,
                   color: Colors.white,
                 ));
           }),
         ),
-        title: Text(
+        title: const Text(
           'Edit Details',
           style: TextStyle(color: Colors.white),
         ),
@@ -39,7 +39,7 @@ class EditInspectionReport extends StatelessWidget {
                   controller.editInspectionCard(
                       context, controller.currenyJobId.value);
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.done_outline_rounded,
                   color: Colors.white,
                 ));

@@ -61,7 +61,7 @@ Scaffold cardsScreen(
         automaticallyImplyLeading: false,
         title: Text(
           pageName,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         centerTitle: true,
         backgroundColor: mainColor,
@@ -69,7 +69,7 @@ Scaffold cardsScreen(
           Obx(() => AutoSizedText(
                 text: 'No. Cards: $numberOfCars',
                 style: const TextStyle(color: Colors.white),
-                constraints: BoxConstraints(),
+                constraints: const BoxConstraints(),
               )),
           const SizedBox(
             width: 10,

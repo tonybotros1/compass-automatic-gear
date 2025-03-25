@@ -20,9 +20,9 @@ Future<dynamic> branchesDialog(
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
@@ -34,7 +34,7 @@ Future<dynamic> branchesDialog(
                       controller.getScreenName(),
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     GetX<BranchesController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
@@ -44,7 +44,7 @@ Future<dynamic> branchesDialog(
                                       'Save',
                                       style: TextStyle(fontWeight: FontWeight.bold),
                                     )
-                                  : SizedBox(
+                                  : const SizedBox(
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
@@ -59,7 +59,7 @@ Future<dynamic> branchesDialog(
               ),
               Expanded(
                   child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: addNewBranchOrEdit(
                     controller: controller, canEdit: canEdit),
               ))

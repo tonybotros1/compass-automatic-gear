@@ -13,7 +13,7 @@ Widget addNewCurrencyOrEdit({
     key: controller.formKeyForAddingNewvalue,
     child: ListView(
       children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         GetX<CurrencyController>(builder: (controller) {
@@ -34,7 +34,7 @@ Widget addNewCurrencyOrEdit({
             },
           );
         }),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         myTextFormFieldWithBorder(
@@ -45,7 +45,7 @@ Widget addNewCurrencyOrEdit({
           hintText: 'Enter Name',
           validate: false,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         myTextFormFieldWithBorder(

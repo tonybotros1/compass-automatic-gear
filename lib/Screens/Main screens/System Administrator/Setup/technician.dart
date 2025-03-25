@@ -114,7 +114,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
+      const DataColumn(
         label: Text(''),
       ),
     ],

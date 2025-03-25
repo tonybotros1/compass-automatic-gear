@@ -27,7 +27,7 @@ Padding buildInspectionReportBody(BuildContext context) {
           bool techniciansLoading = controller.allTechnicians.isEmpty;
 
           return Container(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             decoration: containerDecor,
             child: Column(
               spacing: 10,
@@ -60,7 +60,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                                   controller.selectDateContext(
                                       context, controller.date);
                                 },
-                                icon: Icon(Icons.date_range)),
+                                icon: const Icon(Icons.date_range)),
                             labelText: 'Date',
                             isDate: true,
                             controller: controller.date))
@@ -212,14 +212,14 @@ Padding buildInspectionReportBody(BuildContext context) {
             ),
           );
         }),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         labelContainer(
             lable: Text(
           'BREAK AND TIRE',
           style: fontStyle1,
         )),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: containerDecor,
           child: Column(
             spacing: 10,
@@ -296,7 +296,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                       ],
                     );
                   }),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   Row(
@@ -353,7 +353,7 @@ Padding buildInspectionReportBody(BuildContext context) {
             ],
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         labelContainer(
             lable: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -369,16 +369,16 @@ Padding buildInspectionReportBody(BuildContext context) {
                       onPressed: () {
                         controller.removeLastMark();
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.repartition_outlined,
                         color: Colors.white,
                       ))
-                  : SizedBox();
+                  : const SizedBox();
             })
           ],
         )),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: containerDecor,
           child: Column(
             children: [
@@ -439,7 +439,7 @@ Padding buildInspectionReportBody(BuildContext context) {
             ],
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         labelContainer(
             lable: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -449,7 +449,7 @@ Padding buildInspectionReportBody(BuildContext context) {
               style: fontStyle1,
             ),
             kIsWeb
-                ? SizedBox()
+                ? const SizedBox()
                 : GetBuilder<CardsScreenController>(builder: (controller) {
                     return Row(
                       children: [
@@ -457,7 +457,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                             onPressed: () {
                               controller.takePhoto('Gallery');
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.image,
                               color: Colors.white,
                             )),
@@ -465,7 +465,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                             onPressed: () {
                               controller.takePhoto('Camera');
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.camera_alt_outlined,
                               color: Colors.white,
                             )),
@@ -476,7 +476,7 @@ Padding buildInspectionReportBody(BuildContext context) {
         )),
         GetX<CardsScreenController>(builder: (controller) {
           return Container(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             decoration: containerDecor,
             child: controller.imagesList.isNotEmpty ||
                     controller.carImagesURLs.isNotEmpty
@@ -566,7 +566,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                   ),
           );
         }),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         GetX<CardsScreenController>(builder: (controller) {
           return controller.inEditMode.isTrue &&
                   controller.imagesList.isNotEmpty
@@ -575,13 +575,13 @@ Padding buildInspectionReportBody(BuildContext context) {
                   'NEW IMAGES',
                   style: fontStyle1,
                 ))
-              : SizedBox();
+              : const SizedBox();
         }),
         GetX<CardsScreenController>(builder: (controller) {
           return controller.inEditMode.isTrue &&
                   controller.imagesList.isNotEmpty
               ? Container(
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   decoration: containerDecor,
                   child: controller.imagesList.isNotEmpty
                       ? GridView.builder(
@@ -639,16 +639,16 @@ Padding buildInspectionReportBody(BuildContext context) {
                           ),
                         ),
                 )
-              : SizedBox();
+              : const SizedBox();
         }),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         labelContainer(
             lable: Text(
           'INTERIOIR / EXTERIOIR',
           style: fontStyle1,
         )),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: containerDecor,
           child: GetBuilder<CardsScreenController>(builder: (controller) {
             return Column(
@@ -661,14 +661,14 @@ Padding buildInspectionReportBody(BuildContext context) {
                             .selectedCheckBoxIndicesForInteriorExterior)));
           }),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         labelContainer(
             lable: Text(
           'UNDER VEHICLE',
           style: fontStyle1,
         )),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: containerDecor,
           child: GetBuilder<CardsScreenController>(builder: (controller) {
             return Column(
@@ -688,7 +688,7 @@ Padding buildInspectionReportBody(BuildContext context) {
           style: fontStyle1,
         )),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: containerDecor,
           child: GetBuilder<CardsScreenController>(builder: (controller) {
             return Column(
@@ -707,7 +707,7 @@ Padding buildInspectionReportBody(BuildContext context) {
           style: fontStyle1,
         )),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: containerDecor,
           child: GetBuilder<CardsScreenController>(builder: (controller) {
             return Column(
@@ -764,14 +764,14 @@ Padding buildInspectionReportBody(BuildContext context) {
             );
           }),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         labelContainer(
             lable: Text(
           'COMMENTS',
           style: fontStyle1,
         )),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: containerDecor,
           child: GetBuilder<CardsScreenController>(builder: (controller) {
             return myTextFormFieldWithBorder(
@@ -780,7 +780,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                 controller: controller.comments);
           }),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         labelContainer(
             lable: Text(
           'SIGNATURES',
@@ -790,7 +790,7 @@ Padding buildInspectionReportBody(BuildContext context) {
           return LayoutBuilder(builder: (context, constraints) {
             return Container(
               // height: 500,
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: containerDecor,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -814,12 +814,12 @@ Padding buildInspectionReportBody(BuildContext context) {
                                       Icons.clear,
                                       color: Colors.grey.shade700,
                                     ))
-                                : SizedBox()
+                                : const SizedBox()
                           ],
                         ),
                         Container(
                           // width: constraints.maxWidth / 2.2,
-                          padding: EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                               border: Border.all(color: Colors.black)),
                           child: controller.inEditMode.isFalse
@@ -832,7 +832,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                               : Image.network(
                                   width: double.infinity, height: 250,
                                   errorBuilder: (context, error, stackTrace) {
-                                  return Icon(Icons.error,
+                                  return const Icon(Icons.error,
                                       color: Colors.red); // Show an error icon
                                 }, controller.advisorSignatureURL.value),
                         ),
@@ -858,12 +858,12 @@ Padding buildInspectionReportBody(BuildContext context) {
                                       Icons.clear,
                                       color: Colors.grey.shade700,
                                     ))
-                                : SizedBox()
+                                : const SizedBox()
                           ],
                         ),
                         Container(
                           // width: constraints.maxWidth / 2.2,
-                          padding: EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                               border: Border.all(color: Colors.black)),
                           child: controller.inEditMode.isFalse
@@ -876,7 +876,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                               : Image.network(
                                   width: double.infinity, height: 250,
                                   errorBuilder: (context, error, stackTrace) {
-                                  return Icon(Icons.error,
+                                  return const Icon(Icons.error,
                                       color: Colors.red); // Show an error icon
                                 }, controller.customerSignatureURL.value),
                         ),

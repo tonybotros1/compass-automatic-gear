@@ -18,7 +18,7 @@ Widget breakAndTireWheel({
     mainAxisAlignment: MainAxisAlignment.start,
     children: [
       Container(
-        padding: EdgeInsets.all(2),
+        padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(5),
             border: Border.all(color: Colors.grey)),
@@ -48,7 +48,7 @@ Widget breakAndTireWheel({
                 children: [
                   Expanded(
                     child: myTextFormFieldWithBorder(
-                        keyboardType: TextInputType.numberWithOptions(),
+                        keyboardType: const TextInputType.numberWithOptions(),
                         isDouble: true,
                         onChanged: (value) {
                           controller.updateEnteredField(
@@ -59,7 +59,7 @@ Widget breakAndTireWheel({
                   ),
                   Expanded(
                     child: myTextFormFieldWithBorder(
-                        keyboardType: TextInputType.numberWithOptions(),
+                        keyboardType: const TextInputType.numberWithOptions(),
                         isDouble: true,
                         onChanged: (value) {
                           controller.updateEnteredField(

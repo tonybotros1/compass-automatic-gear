@@ -12,7 +12,7 @@ class MainCardScreenController extends GetxController {
   List<Widget> buildScreens() {
     return [
       NewCardsScreen(),
-      InspectionReposrt(),
+      const InspectionReposrt(),
       DoneCardsScreen(),
     ];
   }

@@ -101,7 +101,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSortForValues,
       ),
-      DataColumn(label: Text('')),
+      const DataColumn(label: Text('')),
     ],
     rows: controller.filteredValues.isEmpty &&
             controller.searchForValues.value.text.isEmpty
@@ -145,7 +145,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> valueData, context, constraints,
       children: [
         controller.userEmail.value == 'datahubai@gmail.com'
             ? activeInActiveSection(valueData, controller, valueId)
-            : SizedBox(),
+            : const SizedBox(),
         Padding(
           padding: const EdgeInsets.only(left: 5, right: 5),
           child:
@@ -197,7 +197,7 @@ ElevatedButton editSection(ListOfValuesController controller,
                     }
                   });
       },
-      child: Text('Edit'));
+      child: const Text('Edit'));
 }
 
 ElevatedButton activeInActiveSection(Map<String, dynamic> valueData,

@@ -596,7 +596,7 @@ class CardsScreenController extends GetxController {
         barrierDismissible: false,
         context: context,
         builder: (context) {
-          return Center(
+          return const Center(
               child: Row(
             spacing: 20,
             mainAxisAlignment: MainAxisAlignment.center,

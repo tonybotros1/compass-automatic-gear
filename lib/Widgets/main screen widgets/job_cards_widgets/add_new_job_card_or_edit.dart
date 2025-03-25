@@ -25,7 +25,7 @@ Widget addNewJobCardOrEdit(
           style: fontStyle1,
         )),
         carDetailsSection(),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         labelContainer(
@@ -34,7 +34,7 @@ Widget addNewJobCardOrEdit(
           style: fontStyle1,
         )),
         customerDetailsSection(),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         labelContainer(
@@ -58,16 +58,16 @@ Widget addNewJobCardOrEdit(
               'Quotation',
               style: fontStyle1,
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             GetX<JobCardController>(builder: (controller) {
               if (controller.quotationStatus.value.isNotEmpty &&
                   controller.isQuotationExpanded.isTrue) {
                 return statusBox(controller.quotationStatus.value);
               } else {
-                return SizedBox();
+                return const SizedBox();
               }
             }),
-            Spacer(),
+            const Spacer(),
             jobId != null
                 ? Row(
                     spacing: 10,
@@ -98,10 +98,10 @@ Widget addNewJobCardOrEdit(
                                         'Please Save The Quotation First');
                                   }
                                 },
-                                child: Text('Post',
+                                child: const Text('Post',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
-                            : SizedBox();
+                            : const SizedBox();
                       }),
                       GetX<JobCardController>(builder: (controller) {
                         return controller.isQuotationExpanded.isTrue
@@ -123,19 +123,19 @@ Widget addNewJobCardOrEdit(
                                         'Please Save The Quotation First');
                                   }
                                 },
-                                child: Text('Cancel',
+                                child: const Text('Cancel',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
-                            : SizedBox();
+                            : const SizedBox();
                       }),
                     ],
                   )
-                : SizedBox(),
+                : const SizedBox(),
           ],
         )),
         GetX<JobCardController>(builder: (controller) {
           return AnimatedCrossFade(
-            duration: Duration(milliseconds: 300), // Set your desired duration
+            duration: const Duration(milliseconds: 300), // Set your desired duration
             firstChild: Container(), // Empty container when collapsed
             secondChild: quotationsSection(
                 context, controller), // Your quotation section widget
@@ -144,7 +144,7 @@ Widget addNewJobCardOrEdit(
                 : CrossFadeState.showFirst,
           );
         }),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         labelContainer(
@@ -168,7 +168,7 @@ Widget addNewJobCardOrEdit(
               'Job Card',
               style: fontStyle1,
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             // GetX<JobCardController>(builder: (controller) {
             //   if (controller.jobStatus1.value.isNotEmpty &&
             //       controller.isJobCardExpanded.isTrue) {
@@ -183,10 +183,10 @@ Widget addNewJobCardOrEdit(
                   controller.isJobCardExpanded.isTrue) {
                 return statusBox(controller.jobStatus2.value);
               } else {
-                return SizedBox();
+                return const SizedBox();
               }
             }),
-            Spacer(),
+            const Spacer(),
             jobId != null
                 ? Row(
                     spacing: 10,
@@ -214,10 +214,10 @@ Widget addNewJobCardOrEdit(
                                         'Alert', 'Please Save The Job First');
                                   }
                                 },
-                                child: Text('New',
+                                child: const Text('New',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
-                            : SizedBox();
+                            : const SizedBox();
                       }),
                       GetX<JobCardController>(builder: (controller) {
                         return controller.isJobCardExpanded.isTrue
@@ -245,10 +245,10 @@ Widget addNewJobCardOrEdit(
                                         'Alert', 'Please Save The Job First');
                                   }
                                 },
-                                child: Text('Approve',
+                                child: const Text('Approve',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
-                            : SizedBox();
+                            : const SizedBox();
                       }),
                       GetX<JobCardController>(builder: (controller) {
                         return controller.isJobCardExpanded.isTrue
@@ -275,10 +275,10 @@ Widget addNewJobCardOrEdit(
                                         'Alert', 'Please Save The Job First');
                                   }
                                 },
-                                child: Text('Ready',
+                                child: const Text('Ready',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
-                            : SizedBox();
+                            : const SizedBox();
                       }),
                       GetX<JobCardController>(builder: (controllerr) {
                         return controller.isJobCardExpanded.isTrue
@@ -307,17 +307,17 @@ Widget addNewJobCardOrEdit(
                                   }
                                 },
                                 child: controllerr.postingJob.isFalse
-                                    ? Text('Post',
+                                    ? const Text('Post',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold))
-                                    : SizedBox(
+                                    : const SizedBox(
                                         height: 20,
                                         width: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
                                         ),
                                       ))
-                            : SizedBox();
+                            : const SizedBox();
                       }),
                       GetX<JobCardController>(builder: (controller) {
                         return controller.isJobCardExpanded.isTrue
@@ -344,19 +344,19 @@ Widget addNewJobCardOrEdit(
                                         'Alert', 'Please Save The Job First');
                                   }
                                 },
-                                child: Text('Cancel',
+                                child: const Text('Cancel',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
-                            : SizedBox();
+                            : const SizedBox();
                       }),
                     ],
                   )
-                : SizedBox(),
+                : const SizedBox(),
           ],
         )),
         GetX<JobCardController>(builder: (controller) {
           return AnimatedCrossFade(
-            duration: Duration(milliseconds: 300), // Set your desired duration
+            duration: const Duration(milliseconds: 300), // Set your desired duration
             firstChild: Container(), // Empty container when collapsed
             secondChild: jobCardSection(
                 context, controller), // Your quotation section widget
@@ -383,18 +383,18 @@ Container statusBox(String status, {hieght = 30, width}) {
                 : status == 'Cancelled'
                     ? Colors.red
                     : status == 'Approved'
-                        ? Color(0xffD2665A)
+                        ? const Color(0xffD2665A)
                         : status == 'Ready'
-                            ? Color(0xff7886C7)
+                            ? const Color(0xff7886C7)
                             : status == 'Closed' || status == 'Warranty'
                                 ? Colors.black
                                 : Colors.brown),
     height: hieght,
     width: width,
-    padding: EdgeInsets.symmetric(horizontal: 16),
+    padding: const EdgeInsets.symmetric(horizontal: 16),
     child: Text(
       status,
-      style: TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white),
     ),
   );
 }

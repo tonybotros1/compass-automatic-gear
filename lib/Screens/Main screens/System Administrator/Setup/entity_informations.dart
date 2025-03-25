@@ -107,7 +107,7 @@ Widget tableOfScreens(
           constraints: constraints,
         ),
       ),
-      DataColumn(label: Text('')),
+      const DataColumn(label: Text('')),
     ],
     rows: controller.filteredEntities.isEmpty &&
             controller.search.value.text.isEmpty
@@ -195,15 +195,15 @@ ElevatedButton editSection(context, EntityInformationsController controller,
             Dialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5)),
-              insetPadding: EdgeInsets.all(8),
+              insetPadding: const EdgeInsets.all(8),
               child: LayoutBuilder(builder: (context, constraints) {
                 return Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       width: constraints.maxWidth,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(5),
                             topRight: Radius.circular(5)),
                         color: mainColor,
@@ -215,7 +215,7 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                             controller.getScreenName(),
                             style: fontStyleForScreenNameUsedInButtons,
                           ),
-                          Spacer(),
+                          const Spacer(),
                           GetX<EntityInformationsController>(
                               builder: (controller) {
                             return ElevatedButton(
@@ -245,7 +245,7 @@ ElevatedButton editSection(context, EntityInformationsController controller,
                     ),
                     Expanded(
                         child: Padding(
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8),
                       child: addNewEntityOrEdit(
                         controller: controller,
                         constraints: constraints,
@@ -269,15 +269,15 @@ ElevatedButton newContactButton(BuildContext context,
           Dialog(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            insetPadding: EdgeInsets.all(8),
+            insetPadding: const EdgeInsets.all(8),
             child: LayoutBuilder(builder: (context, constraints) {
               return Column(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     width: constraints.maxWidth,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(5),
                           topRight: Radius.circular(5)),
                       color: mainColor,
@@ -289,7 +289,7 @@ ElevatedButton newContactButton(BuildContext context,
                           controller.getScreenName(),
                           style: fontStyleForScreenNameUsedInButtons,
                         ),
-                        Spacer(),
+                        const Spacer(),
                         GetX<EntityInformationsController>(
                             builder: (controller) => ElevatedButton(
                                   onPressed: controller.addingNewEntity.value
@@ -304,7 +304,7 @@ ElevatedButton newContactButton(BuildContext context,
                                           'Save',
                                           style: TextStyle(fontWeight: FontWeight.bold),
                                         )
-                                      : SizedBox(
+                                      : const SizedBox(
                                           height: 20,
                                           width: 20,
                                           child: CircularProgressIndicator(
@@ -319,7 +319,7 @@ ElevatedButton newContactButton(BuildContext context,
                   ),
                   Expanded(
                       child: Padding(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     child: addNewEntityOrEdit(
                       controller: controller,
                       constraints: constraints,

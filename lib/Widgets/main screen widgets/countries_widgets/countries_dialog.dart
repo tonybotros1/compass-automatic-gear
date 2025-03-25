@@ -20,9 +20,9 @@ Future<dynamic> countriesDialog(
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
@@ -34,7 +34,7 @@ Future<dynamic> countriesDialog(
                       controller.getScreenName(),
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     GetX<CountriesController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
@@ -45,7 +45,7 @@ Future<dynamic> countriesDialog(
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     )
-                                  : SizedBox(
+                                  : const SizedBox(
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(

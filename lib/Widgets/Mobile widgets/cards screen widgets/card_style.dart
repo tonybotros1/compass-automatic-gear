@@ -127,7 +127,7 @@ Widget cardStyle({
                         carCard['job_status_2'] != ''
                             ? Container(
                                 alignment: Alignment.center,
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                     vertical: 2, horizontal: 4),
                                 width: null,
                                 decoration: BoxDecoration(
@@ -150,13 +150,13 @@ Widget cardStyle({
                                                     ? Colors.black
                                                     : carCard['job_status_2'] ==
                                                             'Approved'
-                                                        ? Color(0xffD2665A)
+                                                        ? const Color(0xffD2665A)
                                                         : carCard['job_status_2'] ==
                                                                 'Ready'
-                                                            ? Color(0xff7886C7)
+                                                            ? const Color(0xff7886C7)
                                                             : Colors.red)),
                               )
-                            : SizedBox()
+                            : const SizedBox()
                       ],
                     ),
                     Text('Customer', style: textStyleForCardsLabels),
@@ -165,8 +165,8 @@ Widget cardStyle({
                             carCard['customer'], controller.allCustomers,
                             title: 'entity_name'),
                         style: textStyleForCardsContents),
-                    SizedBox(height: 8),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

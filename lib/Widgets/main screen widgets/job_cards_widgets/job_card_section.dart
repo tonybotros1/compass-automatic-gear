@@ -6,7 +6,7 @@ import '../dynamic_field.dart';
 
 Container jobCardSection(context, JobCardController controller) {
   return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: containerDecor,
       child: Column(spacing: 20, children: [
         dynamicFields(dynamicConfigs: [
@@ -51,7 +51,7 @@ Container jobCardSection(context, JobCardController controller) {
                     controller.selectDateContext(
                         context, controller.jobCardDate.value);
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               isDate: true,
               textController: controller.jobCardDate.value,
               labelText: 'Job Date',
@@ -68,7 +68,7 @@ Container jobCardSection(context, JobCardController controller) {
                     controller.selectDateContext(
                         context, controller.invoiceDate.value);
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               isDate: true,
               textController: controller.invoiceDate.value,
               labelText: 'Invoice Date',
@@ -85,7 +85,7 @@ Container jobCardSection(context, JobCardController controller) {
                     controller.selectDateContext(
                         context, controller.approvalDate.value);
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               isDate: true,
               textController: controller.approvalDate.value,
               labelText: 'Approval Date',
@@ -102,7 +102,7 @@ Container jobCardSection(context, JobCardController controller) {
                     controller.selectDateContext(
                         context, controller.startDate.value);
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               isDate: true,
               textController: controller.startDate.value,
               labelText: 'Start Date',
@@ -119,7 +119,7 @@ Container jobCardSection(context, JobCardController controller) {
                     controller.selectDateContext(
                         context, controller.finishDate.value);
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               isDate: true,
               textController: controller.finishDate.value,
               labelText: 'Finish Date',
@@ -138,7 +138,7 @@ Container jobCardSection(context, JobCardController controller) {
                     controller.selectDateContext(
                         context, controller.deliveryDate.value);
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               isDate: true,
               textController: controller.deliveryDate.value,
               labelText: 'Delivery Date',
@@ -177,7 +177,7 @@ Container jobCardSection(context, JobCardController controller) {
                     controller.selectDateContext(
                         context, controller.jobWarrentyEndDate.value);
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               isDate: true,
               textController: controller.jobWarrentyEndDate.value,
               labelText: 'Warrenty End Date',
@@ -235,7 +235,7 @@ Container jobCardSection(context, JobCardController controller) {
                     controller.selectDateContext(
                         context, controller.jobCancelationDate.value);
                   },
-                  icon: Icon(Icons.date_range)),
+                  icon: const Icon(Icons.date_range)),
               isDate: true,
               textController: controller.jobCancelationDate.value,
               labelText: 'Cancelation Date',

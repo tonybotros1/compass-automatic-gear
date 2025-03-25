@@ -9,7 +9,7 @@ Container responsibilities({
   required CompanyController controller,
 }) {
   return Container(
-    padding: EdgeInsets.all(20),
+    padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     child: GetX<CompanyController>(builder: (context) {
       return Column(
@@ -31,10 +31,10 @@ Container responsibilities({
                   }
                 },
               )),
-              Expanded(child: SizedBox())
+              const Expanded(child: SizedBox())
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
           if (controller.roleIDFromList.isNotEmpty)

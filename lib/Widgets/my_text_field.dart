@@ -57,7 +57,7 @@ Widget myTextFormFieldWithBorder(
           controller: controller,
           decoration: InputDecoration(
             contentPadding:
-                maxLines == 1 ? EdgeInsets.only(left: 10) : EdgeInsets.all(10),
+                maxLines == 1 ? const EdgeInsets.only(left: 10) : const EdgeInsets.all(10),
             icon: icon,
             suffixIcon: suffixIcon,
             hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
@@ -72,11 +72,11 @@ Widget myTextFormFieldWithBorder(
             ),
             filled: isEnabled == true,
             fillColor: Colors.grey.shade200,
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: const OutlineInputBorder(
               // borderRadius: BorderRadius.circular(5),
               borderSide: BorderSide(color: Colors.grey, width: 2.0),
             ),
-            enabledBorder: OutlineInputBorder(
+            enabledBorder: const OutlineInputBorder(
               // borderRadius: BorderRadius.circular(5),
               borderSide: BorderSide(color: Colors.grey, width: 1.0),
             ),
@@ -84,11 +84,11 @@ Widget myTextFormFieldWithBorder(
               // borderRadius: BorderRadius.circular(5),
               borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
             ),
-            errorBorder: OutlineInputBorder(
+            errorBorder: const OutlineInputBorder(
               // borderRadius: BorderRadius.circular(5),
               borderSide: BorderSide(color: Colors.red, width: 1.0),
             ),
-            focusedErrorBorder: OutlineInputBorder(
+            focusedErrorBorder: const OutlineInputBorder(
               // borderRadius: BorderRadius.circular(5),
               borderSide: BorderSide(color: Colors.red, width: 2.0),
             ),

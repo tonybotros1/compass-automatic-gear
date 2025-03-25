@@ -8,7 +8,7 @@ Widget addNewTechnicianOrEdit({
 }) {
   return ListView(
     children: [
-      SizedBox(
+      const SizedBox(
         height: 5,
       ),
       myTextFormFieldWithBorder(
@@ -17,7 +17,7 @@ Widget addNewTechnicianOrEdit({
         labelText: 'Name',
         validate: true,
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(

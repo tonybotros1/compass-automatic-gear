@@ -17,7 +17,7 @@ Widget addNewCompanyOrView({
         style: fontStyle1,
       )),
       companyDetails(controller: controller),
-      SizedBox(
+      const SizedBox(
         height: 5,
       ),
       labelContainer(
@@ -26,7 +26,7 @@ Widget addNewCompanyOrView({
         style: fontStyle1,
       )),
       contactDetails(controller: controller),
-      SizedBox(
+      const SizedBox(
         height: 5,
       ),
       labelContainer(

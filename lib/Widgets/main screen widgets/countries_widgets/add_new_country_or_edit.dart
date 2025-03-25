@@ -12,7 +12,7 @@ Widget addNewCountryOrEdit({
     key: controller.formKeyForAddingNewvalue,
     child: ListView(
       children: [
-        SizedBox(
+        const SizedBox(
           height: 5,
         ),
         myTextFormFieldWithBorder(
@@ -22,7 +22,7 @@ Widget addNewCountryOrEdit({
           hintText: 'Enter Name',
           validate: true,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Row(
@@ -48,7 +48,7 @@ Widget addNewCountryOrEdit({
             ),
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Row(
@@ -84,7 +84,7 @@ Widget addNewCountryOrEdit({
             ),
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         GetX<CountriesController>(builder: (controller) {

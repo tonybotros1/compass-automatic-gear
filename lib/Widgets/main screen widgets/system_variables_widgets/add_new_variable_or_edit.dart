@@ -17,7 +17,7 @@ Widget addNewVariableOrEdit({
         validate: true,
         isEnabled: canEdit,
       ),
-      SizedBox(
+      const SizedBox(
         height: 20,
       ),
       myTextFormFieldWithBorder(

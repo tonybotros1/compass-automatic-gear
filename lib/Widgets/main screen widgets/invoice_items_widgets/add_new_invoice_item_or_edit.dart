@@ -10,7 +10,7 @@ Widget addNewinvoiceItemsOrEdit({
     key: controller.formKeyForAddingNewvalue,
     child: ListView(
       children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         myTextFormFieldWithBorder(
@@ -20,7 +20,7 @@ Widget addNewinvoiceItemsOrEdit({
           hintText: 'Enter Name',
           validate: true,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         myTextFormFieldWithBorder(
@@ -31,7 +31,7 @@ Widget addNewinvoiceItemsOrEdit({
           hintText: 'Enter Description',
           validate: false,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         myTextFormFieldWithBorder(

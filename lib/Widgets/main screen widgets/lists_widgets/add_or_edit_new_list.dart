@@ -17,7 +17,7 @@ Widget addNewListOrEdit({
           hintText: 'Enter List name',
           validate: true,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         myTextFormFieldWithBorder(
@@ -27,7 +27,7 @@ Widget addNewListOrEdit({
           hintText: 'Enter code',
           validate: true,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         CustomDropdown(

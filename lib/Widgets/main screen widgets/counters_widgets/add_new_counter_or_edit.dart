@@ -9,7 +9,7 @@ Widget addNewConterOrEdit({
 }) {
   return ListView(
     children: [
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(
@@ -20,7 +20,7 @@ Widget addNewConterOrEdit({
         validate: true,
         isEnabled: canEdit,
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(
@@ -30,7 +30,7 @@ Widget addNewConterOrEdit({
         hintText: 'Enter counter Description',
         validate: true,
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(
@@ -40,7 +40,7 @@ Widget addNewConterOrEdit({
         hintText: 'Enter counter Prefix',
         validate: true,
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       Row(
@@ -67,7 +67,7 @@ Widget addNewConterOrEdit({
           ),
         ],
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(

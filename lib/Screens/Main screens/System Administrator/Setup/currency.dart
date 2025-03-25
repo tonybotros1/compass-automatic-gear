@@ -122,7 +122,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(label: Text('')),
+      const DataColumn(label: Text('')),
     ],
     rows: controller.filteredCurrencies.isEmpty &&
             controller.search.value.text.isEmpty
@@ -151,12 +151,12 @@ DataRow dataRowForTheTable(Map<String, dynamic> currencyData, context,
         ? Text(
             '${data[0]}',
           )
-        : SizedBox()),
+        : const SizedBox()),
     DataCell(data.isNotEmpty
         ? Text(
             '${data[1]}',
           )
-        : SizedBox()),
+        : const SizedBox()),
     DataCell(
       Text(
         '${currencyData['rate']}',

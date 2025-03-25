@@ -124,7 +124,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSortForLists,
       ),
-      DataColumn(
+      const DataColumn(
           headingRowAlignment: MainAxisAlignment.center, label: Text('')),
     ],
     rows: controller.filteredLists.isEmpty &&
@@ -224,9 +224,9 @@ ElevatedButton valSectionInTheTable(ListOfValuesController controller, listId,
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(15),
                             topRight: Radius.circular(15)),
                         color: mainColor,
@@ -237,14 +237,14 @@ ElevatedButton valSectionInTheTable(ListOfValuesController controller, listId,
                             controller.getScreenName(),
                             style: fontStyleForScreenNameUsedInButtons,
                           ),
-                          Spacer(),
+                          const Spacer(),
                           closeButton
                         ],
                       ),
                     ),
                     Expanded(
                         child: Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: valuesSection(
                         constraints: constraints,
                         context: context,

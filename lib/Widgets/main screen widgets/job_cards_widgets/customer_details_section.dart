@@ -13,7 +13,7 @@ Widget customerDetailsSection() {
     final isCurrenciesLoading = controller.allCurrencies.isEmpty;
     final isSalesManLoading = controller.salesManMap.isEmpty;
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: containerDecor,
       child: Column(
         children: [
@@ -92,7 +92,7 @@ Widget customerDetailsSection() {
               ),
             ),
           ]),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           Row(
@@ -186,7 +186,7 @@ Widget customerDetailsSection() {
                   ),
                 ]),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 5,
               ),
               Column(
@@ -201,7 +201,7 @@ Widget customerDetailsSection() {
                   ),
                   Container(
                     height: textFieldHeight,
-                    padding: EdgeInsets.only(left: 10, right: 10),
+                    padding: const EdgeInsets.only(left: 10, right: 10),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(5),
@@ -220,7 +220,7 @@ Widget customerDetailsSection() {
                                 }
                               },
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 2,
                             ),
                             Text(
@@ -229,7 +229,7 @@ Widget customerDetailsSection() {
                             )
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 20,
                         ),
                         Row(
@@ -244,7 +244,7 @@ Widget customerDetailsSection() {
                                 }
                               },
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 2,
                             ),
                             Text(
@@ -258,7 +258,7 @@ Widget customerDetailsSection() {
                   ),
                 ],
               ),
-              Expanded(child: SizedBox()),
+              const Expanded(child: SizedBox()),
             ],
           ),
         ],

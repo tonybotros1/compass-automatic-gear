@@ -130,7 +130,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSort,
       ),
-      DataColumn(
+      const DataColumn(
           headingRowAlignment: MainAxisAlignment.center, label: Text('')),
     ],
     rows: controller.filteredCountries.isEmpty &&
@@ -161,7 +161,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> countryData, context,
             countryData['flag'],
             width: 40,
           )
-        : Text('no flag')),
+        : const Text('no flag')),
     DataCell(
       Text(
         countryData['name'] ?? 'no name',
@@ -211,9 +211,9 @@ ElevatedButton valSectionInTheTable(CountriesController controller, countryId,
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(15),
                             topRight: Radius.circular(15)),
                         color: mainColor,
@@ -224,14 +224,14 @@ ElevatedButton valSectionInTheTable(CountriesController controller, countryId,
                             '🏙️ Cities',
                             style: fontStyleForScreenNameUsedInButtons,
                           ),
-                          Spacer(),
+                          const Spacer(),
                           closeButton
                         ],
                       ),
                     ),
                     Expanded(
                         child: Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: citiesSection(
                         constraints: constraints,
                         context: context,

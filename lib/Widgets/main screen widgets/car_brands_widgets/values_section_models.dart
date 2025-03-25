@@ -93,7 +93,7 @@ Widget tableOfScreens(
         ),
         onSort: controller.onSortForModels,
       ),
-      DataColumn(label: Text('')),
+      const DataColumn(label: Text('')),
     ],
     rows: controller.filteredModels.isEmpty &&
             controller.searchForModels.value.text.isEmpty
@@ -178,7 +178,7 @@ ElevatedButton editSection(CarBrandsController controller,
                     }
                   });
       },
-      child: Text('Edit'));
+      child: const Text('Edit'));
 }
 
 ElevatedButton activeInActiveSection(Map<String, dynamic> modelData,

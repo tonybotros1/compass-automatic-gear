@@ -10,7 +10,7 @@ Container companyDetails({
   required CompanyController controller,
 }) {
   return Container(
-    padding: EdgeInsets.all(20),
+    padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     child: Row(
       spacing: 10,

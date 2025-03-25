@@ -22,7 +22,7 @@ Future internalNotesDialog(
           Container(
             decoration: BoxDecoration(
                 color: mainColor,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(10),
                   topRight: Radius.circular(10),
                 )),
@@ -31,8 +31,8 @@ Future internalNotesDialog(
             child: Row(
               spacing: 20,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 20),
+                const Padding(
+                  padding: EdgeInsets.only(left: 20),
                   child: Icon(
                     Icons.message_outlined,
                     color: Colors.white,
@@ -40,21 +40,21 @@ Future internalNotesDialog(
                     weight: 2,
                   ),
                 ),
-                Text(
+                const Text(
                   'Internal Notes',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 25,
                       fontWeight: FontWeight.bold),
                 ),
-                Spacer(),
+                const Spacer(),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: IconButton(
                       onPressed: () {
                         Get.back();
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.close,
                         color: Colors.white,
                       )),
@@ -69,13 +69,13 @@ Future internalNotesDialog(
                 stream: controller.getJobCardInternalNotes(jobId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
                     return Center(child: Text("Error: ${snapshot.error}"));
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(
+                    return const Center(
                       child: Text(
                         "Empty",
                         style: TextStyle(color: Colors.grey),
@@ -89,7 +89,7 @@ Future internalNotesDialog(
                       controller.scrollControllerForNotes.animateTo(
                         controller
                             .scrollControllerForNotes.position.maxScrollExtent,
-                        duration: Duration(milliseconds: 300),
+                        duration: const Duration(milliseconds: 300),
                         curve: Curves.easeOut,
                       );
                     }
@@ -175,7 +175,7 @@ Future internalNotesDialog(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.all(8),
+                                    padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[350],
                                       borderRadius: BorderRadius.circular(5),
@@ -332,9 +332,9 @@ Future internalNotesDialog(
             ),
           ),
           Container(
-              constraints: BoxConstraints(minHeight: 70, maxHeight: 140),
+              constraints: const BoxConstraints(minHeight: 70, maxHeight: 140),
               width: double.infinity,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(10),
@@ -350,7 +350,7 @@ Future internalNotesDialog(
                             FilePickerService.pickFile(controller.fileBytes,
                                 controller.fileType, controller.fileName);
                           },
-                          child: Icon(
+                          child: const Icon(
                             Icons.attach_file_rounded,
                             color: Colors.grey,
                           )),
@@ -367,7 +367,7 @@ Future internalNotesDialog(
                                             onPressed: () {
                                               controller.fileBytes.value = null;
                                             },
-                                            icon: Icon(Icons.clear)),
+                                            icon: const Icon(Icons.clear)),
                                         Image.memory(
                                             controller.fileBytes.value!,
                                             height: 200),
@@ -383,8 +383,8 @@ Future internalNotesDialog(
                                                   controller.fileBytes.value =
                                                       null;
                                                 },
-                                                icon: Icon(Icons.clear)),
-                                            Text("PDF Selected: Cannot preview",
+                                                icon: const Icon(Icons.clear)),
+                                            const Text("PDF Selected: Cannot preview",
                                                 style: TextStyle(fontSize: 16)),
                                           ],
                                         )
@@ -396,15 +396,15 @@ Future internalNotesDialog(
                                                   controller.fileBytes.value =
                                                       null;
                                                 },
-                                                icon: Icon(Icons.clear)),
-                                            Text(
+                                                icon: const Icon(Icons.clear)),
+                                            const Text(
                                                 'File selected:  Cannot preview'),
                                           ],
                                         )
                               : TextFormField(
                                   textInputAction: TextInputAction.newline,
                                   onFieldSubmitted: (value) {
-                                    Future.delayed(Duration(milliseconds: 100),
+                                    Future.delayed(const Duration(milliseconds: 100),
                                         () {
                                       controller.textFieldFocusNode
                                           .requestFocus();
@@ -459,7 +459,7 @@ Future internalNotesDialog(
                                     controller.fileType.value = '';
                                     controller.fileName.value = '';
                                   }
-                                  Future.delayed(Duration(milliseconds: 100),
+                                  Future.delayed(const Duration(milliseconds: 100),
                                       () {
                                     controller.textFieldFocusNode
                                         .requestFocus();

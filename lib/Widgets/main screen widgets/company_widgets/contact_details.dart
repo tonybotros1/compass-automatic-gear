@@ -9,7 +9,7 @@ Container contactDetails({
   required CompanyController controller,
 }) {
   return Container(
-    padding: EdgeInsets.all(20),
+    padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     child: Column(
       spacing: 10,
