@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,7 +27,7 @@ class FunctionsController extends GetxController {
     super.onInit();
   }
 
-   getScreenName() {
+  getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -154,10 +153,8 @@ class FunctionsController extends GetxController {
       addingNewScreenProcess.value = false;
       Get.back();
       showSnackBar('Done', 'New Screen added successfully');
-    } on FirebaseAuthException catch (e) {
-      addingNewScreenProcess.value = false;
-      showSnackBar('warning', e);
     } catch (e) {
+      showSnackBar('Warning', 'Please try Again');
       addingNewScreenProcess.value = false;
       //
     }
