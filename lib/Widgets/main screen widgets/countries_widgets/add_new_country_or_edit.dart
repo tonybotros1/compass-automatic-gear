@@ -121,6 +121,8 @@ Widget addNewCountryOrEdit({
                       : Image.network(
                           controller.flagUrl.value,
                           fit: BoxFit.contain,
+                          errorBuilder: (context, url, error) =>
+                              const Icon(Icons.error),
                         ),
             ),
           );

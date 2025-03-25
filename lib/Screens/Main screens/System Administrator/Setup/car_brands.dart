@@ -144,7 +144,11 @@ DataRow dataRowForTheTable(Map<String, dynamic> brandData, context, constraints,
         brandData['name'] ?? 'no name',
       ),
     ),
-    DataCell(Image.network('${brandData['logo']}', width: 40)),
+    DataCell(Image.network(
+      '${brandData['logo']}',
+      width: 40,
+      errorBuilder: (context, url, error) => const Icon(Icons.error),
+    )),
     DataCell(
       Text(
         brandData['added_date'] != null && brandData['added_date'] != ''

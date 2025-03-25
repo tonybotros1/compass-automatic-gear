@@ -59,7 +59,7 @@ class LoginScreenController extends GetxController {
       // Fetch user data from Firestore by email
       var userDataSnapshot = await FirebaseFirestore.instance
           .collection('sys-users')
-          .where('email', isEqualTo: email.text) // Search by email
+          .where('email', isEqualTo: email.text.toLowerCase()) // Search by email
           .get();
 
       // Check if the email exists

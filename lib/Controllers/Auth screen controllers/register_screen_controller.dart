@@ -174,7 +174,7 @@ class RegisterScreenController extends GetxController {
 
       var userDataSnapshot = await FirebaseFirestore.instance
           .collection('sys-users')
-          .where('email', isEqualTo: email.text) // Check for existing email
+          .where('email', isEqualTo: email.text.toLowerCase()) // Check for existing email
           .get();
 
       if (userDataSnapshot.docs.isNotEmpty) {
@@ -223,7 +223,7 @@ class RegisterScreenController extends GetxController {
       var newUser =
           await FirebaseFirestore.instance.collection('sys-users').add({
         "user_name": userName.text,
-        "email": email.text,
+        "email": email.text.toLowerCase(),
         "password": hashedPassword, // Store hashed password
         "roles": roleIDFromList,
         "expiry_date": expiryDate.toString(),

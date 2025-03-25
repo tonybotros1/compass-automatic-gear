@@ -46,7 +46,6 @@ Container companyDetails({
                       controller.industryId.value = key;
                     },
                   );
-                 
                 }),
               ],
             )),
@@ -88,6 +87,8 @@ Container companyDetails({
                           : Image.network(
                               controller.logoUrl.value,
                               fit: BoxFit.contain,
+                              errorBuilder: (context, url, error) =>
+                                  const Icon(Icons.error),
                             ),
                 ),
               );

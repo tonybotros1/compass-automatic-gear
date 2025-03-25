@@ -202,7 +202,7 @@ class UsersController extends GetxController {
       // Save the user details in Firestore with an auto-generated document ID
       await FirebaseFirestore.instance.collection('sys-users').add({
         "user_name": name.text,
-        "email": email.text,
+        "email": email.text.toLowerCase(),
         "password": hashedPassword, // Store hashed password
         "roles": selectedRoles.entries
             .where((entry) => entry.value[1] == true)
@@ -237,7 +237,7 @@ class UsersController extends GetxController {
             .toList(),
         'expiry_date': '${selectedDate.value}',
         'user_name': name.text,
-        'email': email.text,
+        'email': email.text.toLowerCase(),
       };
 
       // Add the hashed password only if pass.text is not empty
