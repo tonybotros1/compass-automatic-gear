@@ -319,7 +319,11 @@ class CardsScreenController extends GetxController {
       loadingScreen(context);
 
       if (imagesList.isNotEmpty) {
-        await saveCarImages();
+        List<Map<String, dynamic>> uploadedImages = await saveCarImages();
+        // Add URLs to the data.
+        carImagesURLs
+            .addAll(uploadedImages.map((item) => item['url']).toList());
+
         myData['car_images'] = carImagesURLs;
       }
       await FirebaseFirestore.instance
@@ -327,6 +331,7 @@ class CardsScreenController extends GetxController {
           .doc(jobId)
           .update(myData);
       Get.back();
+      imagesList.clear();
       showSnackBar('Done', 'Addedd Successfully');
     } catch (e) {
       Get.back();

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:signature/signature.dart';
@@ -447,28 +448,30 @@ Padding buildInspectionReportBody(BuildContext context) {
               'CAR IMAGES',
               style: fontStyle1,
             ),
-            GetBuilder<CardsScreenController>(builder: (controller) {
-              return Row(
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        controller.takePhoto('Gallery');
-                      },
-                      icon: Icon(
-                        Icons.image,
-                        color: Colors.white,
-                      )),
-                  IconButton(
-                      onPressed: () {
-                        controller.takePhoto('Camera');
-                      },
-                      icon: Icon(
-                        Icons.camera_alt_outlined,
-                        color: Colors.white,
-                      )),
-                ],
-              );
-            })
+            kIsWeb
+                ? SizedBox()
+                : GetBuilder<CardsScreenController>(builder: (controller) {
+                    return Row(
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              controller.takePhoto('Gallery');
+                            },
+                            icon: Icon(
+                              Icons.image,
+                              color: Colors.white,
+                            )),
+                        IconButton(
+                            onPressed: () {
+                              controller.takePhoto('Camera');
+                            },
+                            icon: Icon(
+                              Icons.camera_alt_outlined,
+                              color: Colors.white,
+                            )),
+                      ],
+                    );
+                  })
           ],
         )),
         GetX<CardsScreenController>(builder: (controller) {
