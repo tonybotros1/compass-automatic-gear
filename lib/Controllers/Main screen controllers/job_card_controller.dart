@@ -432,9 +432,9 @@ class JobCardController extends GetxController {
     controller.currenyJobId.value = id;
     controller.inEditMode.value = true;
     controller.technicianName.value.text = technician.text;
-
+    controller.inEditMode.value = true;
     controller.technicianId.value = data?['technician'];
-    controller.date.text = data?['added_date'];
+    controller.date.text = textToDate(data?['added_date']);
     controller.customer.text = customerName.text;
     controller.customerId.value = data?['customer'];
     controller.brand.text = carBrand.text;

@@ -6,6 +6,7 @@ import '../../../../Controllers/Main screen controllers/entity_informations_cont
     show EntityInformationsController;
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
+import '../../../../Widgets/Mobile widgets/inspection report widgets/inspection_report_body.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart'
     show addNewEntityOrEdit;
@@ -808,45 +809,53 @@ Future<dynamic> editJobCardDialog(
                             Get.dialog(
                                 barrierDismissible: false,
                                 Dialog(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5)),
-                                  insetPadding: EdgeInsets.all(40),
-                                  child: LayoutBuilder(
-                                      builder: (context, constraints) {
-                                    return Column(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(5),
-                                                topRight: Radius.circular(5)),
-                                            color: mainColor,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5)),
+                                    insetPadding: EdgeInsets.all(20),
+                                    child: SizedBox(
+                                      width: 600,
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(5),
+                                                  topRight: Radius.circular(5)),
+                                              color: mainColor,
+                                            ),
+                                            padding: EdgeInsets.all(16),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  '🚘 Inspection Form',
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      color: Colors.white),
+                                                ),
+                                                IconButton(
+                                                  onPressed: () {
+                                                    Get.back();
+                                                  },
+                                                  icon: Icon(Icons.close,
+                                                      color: Colors.white),
+                                                )
+                                              ],
+                                            ),
                                           ),
-                                          padding: EdgeInsets.all(16),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                '💵 Inspection Form',
-                                                style: TextStyle(
-                                                    fontSize: 20,
-                                                    color: Colors.white),
-                                              ),
-                                              IconButton(
-                                                onPressed: () {
-                                                  Get.back();
-                                                },
-                                                icon: Icon(Icons.close,
-                                                    color: Colors.white),
-                                              )
-                                            ],
+                                          Expanded(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: buildInspectionReportBody(
+                                                  context),
+                                            ),
                                           ),
-                                        )
-                                      ],
-                                    );
-                                  }),
-                                ));
+                                        ],
+                                      ),
+                                    )));
                           },
                           child: Text(
                             'Inspection From',
