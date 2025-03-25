@@ -33,17 +33,39 @@ Widget cardStyle({
           child: InkWell(
             onTap: () async {
               var carData = carCard.data() as Map<String, dynamic>;
-              String carBrandName = controller.getdataName(
-                  carCard['car_brand'], controller.allBrands);
-              String carModelName = await controller.getModelName(
-                  carCard['car_brand'], carCard['car_model']);
-              String customerName = controller.getdataName(
-                  carCard['customer'], controller.allCustomers,
-                  title: 'entity_name');
-              String carColor = controller.getdataName(
-                  carCard['color'], controller.allColors);
+              String carBrandName = carCard['car_brand'] != ''
+                  ? controller.getdataName(
+                      carCard['car_brand'], controller.allBrands)
+                  : '';
+              String carModelName = carCard['car_brand'] != ''
+                  ? await controller.getModelName(
+                      carCard['car_brand'], carCard['car_model'])
+                  : '';
+              String customerName = carCard['customer'] != ''
+                  ? controller.getdataName(
+                      carCard['customer'], controller.allCustomers,
+                      title: 'entity_name')
+                  : '';
+              String carColor = carCard['color'] != ''
+                  ? controller.getdataName(
+                      carCard['color'], controller.allColors)
+                  : '';
+              String technician = carCard['technician'] != ''
+                  ? controller.getdataName(
+                      carCard['technician'], controller.allTechnicians)
+                  : '';
+              String engineType = carCard['engine_type'] != ''
+                  ? controller.getdataName(
+                      carCard['engine_type'], controller.allEngineTypes)
+                  : '';
               Get.to(() => CarDetailsScreen(),
                   arguments: CarCardModel(
+                    vin: carCard['vehicle_identification_number']?.toString() ??
+                        '',
+                    engineType: engineType,
+                    technician: technician,
+                    year: carData['year']?.toString() ?? '',
+                    code: carData['plate_code']?.toString() ?? '',
                     fuelAmount: double.tryParse(
                             carData['fuel_amount']?.toString() ?? '') ??
                         0,

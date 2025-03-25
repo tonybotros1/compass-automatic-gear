@@ -61,20 +61,28 @@ class CarDetailsScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: Column(
+                        spacing: 10,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             cardDetailsController.carBrand,
-                            // cardDetailsController.customerName,
                             style: GoogleFonts.mooli(fontSize: 30),
                           ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            cardDetailsController.carModel,
-                            style: GoogleFonts.mooli(
-                                fontSize: 20, color: Colors.grey[600]),
+                          Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                cardDetailsController.carModel,
+                                style: GoogleFonts.mooli(
+                                    fontSize: 20, color: Colors.grey[600]),
+                              ),
+                              Text(
+                                cardDetailsController.year,
+                                style: GoogleFonts.mooli(
+                                    fontSize: 20, color: Colors.grey[600]),
+                              ),
+                            ],
                           )
                         ],
                       ),
@@ -289,24 +297,23 @@ class CarDetailsScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(20),
                       child: Column(
+                        spacing: 35,
                         children: [
                           cardDetails(
                               title: 'Customer | Number',
                               icon: Icons.person,
                               controller:
                                   '${cardDetailsController.customerName} | ${cardDetailsController.phoneNumber}'),
-                          const SizedBox(
-                            height: 35,
-                          ),
                           cardDetails(
                               title: 'Car Color',
                               icon: Icons.color_lens,
                               controller: cardDetailsController.color.isNotEmpty
                                   ? cardDetailsController.color
                                   : ''),
-                          const SizedBox(
-                            height: 35,
-                          ),
+                          cardDetails(
+                              title: 'Technician',
+                              icon: Icons.manage_accounts,
+                              controller: cardDetailsController.technician),
                           cardDetails(
                               title: 'Chassis Number',
                               icon: Icons.tag,
@@ -314,19 +321,15 @@ class CarDetailsScreen extends StatelessWidget {
                                   cardDetailsController.chassisNumber.isNotEmpty
                                       ? cardDetailsController.chassisNumber
                                       : ''),
-                          const SizedBox(
-                            height: 35,
-                          ),
                           cardDetails(
-                              title: 'Plate Number',
+                              title: 'Engine Type',
+                              icon: Icons.settings,
+                              controller: cardDetailsController.engineType),
+                          cardDetails(
+                              title: 'Plate Number | Code',
                               icon: Icons.pin,
                               controller:
-                                  cardDetailsController.plateNumber.isNotEmpty
-                                      ? cardDetailsController.plateNumber
-                                      : ''),
-                          const SizedBox(
-                            height: 35,
-                          ),
+                                  '${cardDetailsController.plateNumber} | ${cardDetailsController.code}'),
                           cardDetails(
                               title: 'Car Mileage',
                               icon: Icons.add_road,
@@ -334,17 +337,11 @@ class CarDetailsScreen extends StatelessWidget {
                                   cardDetailsController.carMileage.isNotEmpty
                                       ? '${cardDetailsController.carMileage} KM'
                                       : ''),
-                          const SizedBox(
-                            height: 35,
-                          ),
                           cardDetails(
                               title: 'Fuel Amount',
                               icon: Icons.local_gas_station_outlined,
                               controller:
                                   '${cardDetailsController.fuelAmount} %'),
-                          const SizedBox(
-                            height: 35,
-                          ),
                           cardDetails(
                               title: 'Email',
                               icon: Icons.email,
@@ -352,9 +349,6 @@ class CarDetailsScreen extends StatelessWidget {
                                   cardDetailsController.emailAddress.isNotEmpty
                                       ? cardDetailsController.emailAddress
                                       : ''),
-                          const SizedBox(
-                            height: 35,
-                          ),
                           cardDetails(
                               title: 'Received On',
                               icon: Icons.date_range,

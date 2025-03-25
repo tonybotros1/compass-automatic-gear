@@ -14,23 +14,24 @@ class CardDetailsController extends GetxController {
   OverlayEntry? overlayEntry;
   Timer? hoverTimer;
   bool isOverlayVisible = false;
-
-  late String customerName = 'Tony Botros';
-
-  late String carBrand = 'BMW';
-  late String carModel = '2025';
-  late String plateNumber = '131511/1fgvfvgggggggggggggggg';
-  late String carMileage = '5000000';
+  late String customerName = '';
+  late String carBrand = '';
+  late String carModel = '';
+  late String plateNumber = '';
+  late String carMileage = '';
   late String chassisNumber = '';
-  late String phoneNumber = '0934914410';
+  late String engineType = '';
+  late String phoneNumber = '';
   late String emailAddress = '';
   late String color = '';
+  late String technician = '';
   late String date = '';
   late String id = '';
   late String video = '';
   late String status = '';
-  late String comments =
-      'This is a comment ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt';
+  late String comments = '';
+  late String code = '';
+  late String year = '';
   double fuelAmount = 50;
   late String customerSignature = '';
   late String advisorSignature = '';
@@ -240,7 +241,9 @@ class CardDetailsController extends GetxController {
   getDetails() {
     if (Get.arguments != null) {
       CarCardModel arguments = Get.arguments;
+      engineType = arguments.engineType!;
       fuelAmount = arguments.fuelAmount!;
+      technician = arguments.technician!;
       data = arguments.data;
       customerSignature = arguments.customerSignature!;
       advisorSignature = arguments.advisorSignature!;
@@ -258,6 +261,8 @@ class CardDetailsController extends GetxController {
       date = arguments.date!;
       id = arguments.docID!;
       status = arguments.status1!;
+      code = arguments.code!;
+      year = arguments.year!;
     }
     update();
   }

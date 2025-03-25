@@ -587,7 +587,6 @@ class CardsScreenController extends GetxController {
         }
       }
       Get.back();
-      print('eroooooooooooooooooooooooooooooor: $e');
       showSnackBar('Failed', 'Please try again');
     }
   }

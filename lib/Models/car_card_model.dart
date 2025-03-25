@@ -11,6 +11,7 @@ class CarCardModel {
   String? date;
   double? fuelAmount;
   String? docID;
+  String? vin;
   String? carVideo;
   String? comments;
   String? customerSignature;
@@ -18,11 +19,17 @@ class CarCardModel {
   List<String>? carImages;
   String? status1;
   String? status2;
+  String? year;
+  String? code;
+  String? engineType;
+  String? technician;
   Map? data;
 
  CarCardModel({
     this.customerName,
     this.carBrand,
+    this.code,
+    this.vin,
     this.carModel,
     this.plateNumber,
     this.carMileage,
@@ -34,6 +41,7 @@ class CarCardModel {
     this.fuelAmount,
     this.docID,
     this.carVideo,
+    this.engineType,
     this.customerSignature,
     this.advisorSignature,
     this.carImages,
@@ -41,6 +49,8 @@ class CarCardModel {
     this.status2,
     this.comments,
     this.data,
+    this.year,
+    this.technician,
   });
 
   CarCardModel.fromJson(Map<String, dynamic> json) {
