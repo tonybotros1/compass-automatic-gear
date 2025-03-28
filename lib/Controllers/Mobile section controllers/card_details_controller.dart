@@ -54,9 +54,14 @@ class CardDetailsController extends GetxController {
     controller.imagesList.clear();
     controller.currenyJobId.value = id;
     controller.inEditMode.value = true;
-    controller.technicianName.value.text =
-        controller.getdataName(data?['technician'], controller.allTechnicians);
-    controller.technicianId.value = data?['technician'];
+    data?['technician'] != '' && data?['technician'] != null
+        ? controller.technicianName.value.text = controller.getdataName(
+            data?['technician'], controller.allTechnicians)
+        : '';
+    controller.technicianId.value =
+        data?['technician'] != '' && data?['technician'] != null
+            ? data!['technician']
+            : '';
     controller.date.text = data?['added_date'];
     controller.customer.text = customerName;
     controller.customerId.value = data?['customer'];

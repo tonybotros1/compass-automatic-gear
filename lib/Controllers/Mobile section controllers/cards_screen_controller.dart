@@ -10,6 +10,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
+import '../../Models/car_card_model.dart';
+import '../../Screens/mobile Screens/card_details_screen.dart';
 import '../../consts.dart';
 
 class CardsScreenController extends GetxController {
@@ -178,6 +180,57 @@ class CardsScreenController extends GetxController {
     getColors();
     getEngineTypes();
     super.onInit();
+  }
+
+  loadingDetailsVariables(carCard) async {
+    var carData = carCard.data() as Map<String, dynamic>;
+    String carBrandName = carCard['car_brand'] != ''
+        ? getdataName(carCard['car_brand'], allBrands)
+        : '';
+    String carModelName = carCard['car_brand'] != ''
+        ? await getModelName(carCard['car_brand'], carCard['car_model'])
+        : '';
+    String customerName = carCard['customer'] != ''
+        ? getdataName(carCard['customer'], allCustomers, title: 'entity_name')
+        : '';
+    String carColor =
+        carCard['color'] != '' ? getdataName(carCard['color'], allColors) : '';
+    String technician = carCard['technician'] != ''
+        ? getdataName(carCard['technician'], allTechnicians)
+        : '';
+    String engineType = carCard['engine_type'] != ''
+        ? getdataName(carCard['engine_type'], allEngineTypes)
+        : '';
+    Get.to(() => CarDetailsScreen(),
+        arguments: CarCardModel(
+          vin: carCard['vehicle_identification_number']?.toString() ?? '',
+          engineType: engineType,
+          technician: technician,
+          year: carData['year']?.toString() ?? '',
+          code: carData['plate_code']?.toString() ?? '',
+          fuelAmount:
+              double.tryParse(carData['fuel_amount']?.toString() ?? '') ?? 0,
+          data: carData,
+          carImages: List<String>.from(carData['car_images'] ?? []),
+          customerSignature: carData['customer_signature']?.toString() ?? '',
+          advisorSignature: carData['advisor_signature']?.toString() ?? '',
+          carBrand: carBrandName,
+          carMileage: carData['mileage_in']?.toString() ?? '',
+          carModel: carModelName,
+          chassisNumber:
+              carData['vehicle_identification_number']?.toString() ?? '',
+          color: carColor,
+          customerName: customerName,
+          date: carData['added_date']?.toString() ?? '',
+          emailAddress: carData['contact_email']?.toString() ?? '',
+          phoneNumber: carData['contact_number']?.toString() ?? '',
+          plateNumber: carData['plate_number']?.toString() ?? '',
+          comments: carData['inspection_report_comments']?.toString() ?? '',
+          docID: carCard.id, // Document ID is directly from the snapshot
+          status1: carData['job_status_1']?.toString() ?? '',
+          status2: carData['job_status_2']?.toString() ?? '',
+        ),
+        transition: Transition.leftToRight);
   }
 
   void clearAllValues() {

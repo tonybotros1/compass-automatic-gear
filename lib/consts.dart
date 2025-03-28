@@ -341,6 +341,8 @@ var mainColor = const Color(0xff005f95);
 var secColor = const Color(0xff7E99A3);
 // var secColor = const Color(0xff526D82);
 var containerColor = const Color(0xffF5F5F5);
+var textStyleForCardBottomBar = TextStyle(color: Colors.blueGrey);
+var iconColorForCardBottomBar = Colors.blueGrey;
 
 // Color headerColor = Colors.blue.shade900;
 

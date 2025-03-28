@@ -716,9 +716,9 @@ Padding buildInspectionReportBody(BuildContext context) {
                 Column(
                   spacing: 10,
                   children: List.generate(
-                      controller.underHoodList.length,
+                      controller.batteryPerformanceList.length,
                       (item) => checkBoxesSection(
-                          label: controller.underHoodList[item],
+                          label: controller.batteryPerformanceList[item],
                           dataMap: controller
                               .selectedCheckBoxIndicesForBatteryPerformance)),
                 ),
