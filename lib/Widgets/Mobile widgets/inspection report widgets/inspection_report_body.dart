@@ -518,7 +518,6 @@ Padding buildInspectionReportBody(BuildContext context) {
           decoration: containerDecor,
           child: GetBuilder<CardsScreenController>(builder: (controller) {
             return Column(
-              spacing: 10,
               children: List.generate(
                 controller.entrioirExterioirList.length * 2 - 1,
                 (index) {
@@ -548,22 +547,17 @@ Padding buildInspectionReportBody(BuildContext context) {
           decoration: containerDecor,
           child: GetBuilder<CardsScreenController>(builder: (controller) {
             return Column(
-              spacing: 10,
               children: List.generate(
-                controller.underVehicleList.length * 2 -
-                    1, // Increased length for dividers
+                controller.underVehicleList.length * 2 - 1,
                 (index) {
                   if (index.isEven) {
-                    // Generate the checkbox section for even indices
                     int itemIndex = index ~/ 2;
                     return checkBoxesSection(
-                      label: controller
-                          .underVehicleList[itemIndex], // Corrected label
+                      label: controller.underVehicleList[itemIndex],
                       dataMap:
                           controller.selectedCheckBoxIndicesForUnderVehicle,
                     );
                   } else {
-                    // Add a divider between items for odd indices
                     return Divider();
                   }
                 },
@@ -582,21 +576,16 @@ Padding buildInspectionReportBody(BuildContext context) {
           decoration: containerDecor,
           child: GetBuilder<CardsScreenController>(builder: (controller) {
             return Column(
-              spacing: 10,
               children: List.generate(
-                controller.underHoodList.length * 2 -
-                    1, // Increased length for dividers
+                controller.underHoodList.length * 2 - 1,
                 (index) {
                   if (index.isEven) {
-                    // Generate the checkbox section for even indices
                     int itemIndex = index ~/ 2;
                     return checkBoxesSection(
-                      label: controller
-                          .underHoodList[itemIndex], // Corrected label
+                      label: controller.underHoodList[itemIndex],
                       dataMap: controller.selectedCheckBoxIndicesForUnderHood,
                     );
                   } else {
-                    // Add a divider between items for odd indices
                     return Divider();
                   }
                 },
@@ -618,13 +607,10 @@ Padding buildInspectionReportBody(BuildContext context) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Column(
-                  spacing: 10,
                   children: List.generate(
-                    controller.batteryPerformanceList.length * 2 -
-                        1, // Increased length for dividers
+                    controller.batteryPerformanceList.length * 2 - 1,
                     (index) {
                       if (index.isEven) {
-                        // Generate the checkbox section for even indices
                         int itemIndex = index ~/ 2;
                         return checkBoxesSection(
                           label: controller.batteryPerformanceList[
@@ -633,7 +619,6 @@ Padding buildInspectionReportBody(BuildContext context) {
                               .selectedCheckBoxIndicesForBatteryPerformance,
                         );
                       } else {
-                        // Add a divider between items for odd indices
                         return Divider();
                       }
                     },
@@ -917,7 +902,27 @@ Padding buildInspectionReportBody(BuildContext context) {
                     ],
                   );
                 },
-              )
+              ),
+              GetX<CardsScreenController>(builder: (controller) {
+                return Column(
+                  children: List.generate(
+                    controller.singleCheckBoxForBrakeAndTireList.length * 2 - 1,
+                    (index) {
+                      if (index.isEven) {
+                        int itemIndex = index ~/ 2;
+                        return singleCheckBoxesSection(
+                          label: controller
+                              .singleCheckBoxForBrakeAndTireList[itemIndex],
+                          dataMap: controller
+                              .selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
+                        );
+                      } else {
+                        return Divider();
+                      }
+                    },
+                  ),
+                );
+              })
             ],
           ),
         ),

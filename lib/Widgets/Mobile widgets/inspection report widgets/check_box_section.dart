@@ -33,7 +33,44 @@ Widget checkBoxesSection(
         textcontroller != null
             ? Expanded(
                 child: myTextFormFieldWithBorder(
-                  keyboardType: const TextInputType.numberWithOptions(),
+                    keyboardType: const TextInputType.numberWithOptions(),
+                    isDouble: true,
+                    labelText: label,
+                    controller: textcontroller,
+                    onChanged: (value) {
+                      controller.updateEnteredField(
+                          label, 'value', value, dataMap);
+                    }))
+            : Flexible(
+                child: Text(
+                  label,
+                  style: textStyleForInspectionHints,
+                ),
+              )
+      ],
+    );
+  });
+}
+
+Widget singleCheckBoxesSection(
+    {required String label,
+    TextEditingController? textcontroller,
+    required RxMap<String, Map<String, String>> dataMap}) {
+  return GetBuilder<CardsScreenController>(builder: (controller) {
+    return Row(
+      crossAxisAlignment: textcontroller != null
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.center,
+      children: [
+        checkBox(
+            value: dataMap[label]?['status'] == label,
+            color: Colors.grey,
+            onChanged: (value) =>
+                controller.updateSelectedBox(label, 'status', label, dataMap)),
+        textcontroller != null
+            ? Expanded(
+                child: myTextFormFieldWithBorder(
+                    keyboardType: const TextInputType.numberWithOptions(),
                     isDouble: true,
                     labelText: label,
                     controller: textcontroller,

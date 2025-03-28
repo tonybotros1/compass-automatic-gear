@@ -91,6 +91,10 @@ class CardsScreenController extends GetxController {
       selectedCheckBoxIndicesForBatteryPerformance =
       <String, Map<String, String>>{}.obs;
 
+  RxMap<String, Map<String, String>>
+      selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire =
+      <String, Map<String, String>>{}.obs;
+
   // Wheel controllers section
   TextEditingController leftFrontBrakeLining = TextEditingController();
   TextEditingController leftFrontTireTread = TextEditingController();
@@ -166,6 +170,13 @@ class CardsScreenController extends GetxController {
     'Battery Terminal / Cables / Mountings',
     'Condition Of Battery / Cold Cranking Amps'
   ]);
+
+  RxList singleCheckBoxForBrakeAndTireList = RxList([
+    'Alignment Check Needed',
+    'Wheel Ballance Needed',
+    'Brake Inspection Not Performed This Visit'
+  ]);
+
   TextEditingController batteryColdCrankingAmpsFactorySpecs =
       TextEditingController();
   TextEditingController batteryColdCrankingAmpsActual = TextEditingController();
