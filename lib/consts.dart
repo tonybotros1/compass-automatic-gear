@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 
 var fontStyleForAppBar = TextStyle(
     fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
-var fontStyleForScreenNameUsedInButtons =
-    const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
+var fontStyleForScreenNameUsedInButtons = const TextStyle(
+    color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
 var fontStyleForTableHeader = TextStyle(
     color: Colors.grey[700], fontWeight: FontWeight.bold, fontSize: 12);
 var iconStyleForTableHeaderDown =
@@ -298,21 +298,21 @@ var screenPadding = const EdgeInsets.only(
   top: 0,
 );
 
-
- String formatPhrase(String phrase) {
-    return phrase.replaceAll(' ', '_');
-  }
-
+String formatPhrase(String phrase) {
+  return phrase.replaceAll(' ', '_');
+}
 
 double horizontalMarginForTable = 8;
 
-var fontStyle1 = const TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
+var fontStyle1 =
+    const TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
 var fontStyle2 =
     TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold);
 // var mainColor = const Color.fromARGB(255, 228, 200, 233);
 
 double textFieldHeight = 35;
-TextStyle textFieldFontStyle = const TextStyle(fontSize: 14, color: Colors.black);
+TextStyle textFieldFontStyle =
+    const TextStyle(fontSize: 14, color: Colors.black);
 TextStyle textFieldLabelStyle = TextStyle(
     color: Colors.grey.shade700, fontSize: 12, fontWeight: FontWeight.bold);
 
@@ -334,7 +334,7 @@ var textStyleForCardsContents = const TextStyle(
 );
 
 var textStyleForInspectionHints = TextStyle(
-    fontSize: 16, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
+    fontSize: 14, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
 
 var mainColor = const Color(0xff005f95);
 // var mainColor = const Color(0xff27374D);
@@ -364,23 +364,22 @@ Widget verticalSpace({int space = 20}) {
   );
 }
 
- Row hintSection({required String hint, required Color color}) {
-    return Row(
-      spacing: 10,
-      children: [
-        Container(
-          width: 15,
-          height: 15,
-          color: color,
-        ),
-        Text(
-          hint,
-          style: textStyleForInspectionHints,
-        )
-      ],
-    );
-  }
-
+Row hintSection({required String hint, required Color color}) {
+  return Row(
+    spacing: 10,
+    children: [
+      Container(
+        width: 15,
+        height: 15,
+        color: color,
+      ),
+      Text(
+        hint,
+        style: textStyleForInspectionHints,
+      )
+    ],
+  );
+}
 
 var closeButton = ElevatedButton(
     style: closeButtonStyle,
@@ -518,6 +517,35 @@ Widget textForDataRowInTable({
         color: color,
         fontWeight: isBold ? FontWeight.bold : null,
       ),
+    ),
+  );
+}
+
+Container statusBox(String status, {hieght = 30.0, width}) {
+  return Container(
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+        border: Border.all(color: Colors.white, width: 2),
+        borderRadius:  BorderRadius.circular(5) ,
+        color: status == 'New'
+            ? Colors.green
+            : status == 'Posted'
+                ? Colors.teal
+                : status == 'Cancelled'
+                    ? Colors.red
+                    : status == 'Approved'
+                        ? const Color(0xffD2665A)
+                        : status == 'Ready'
+                            ? const Color(0xff7886C7)
+                            : status == 'Closed' || status == 'Warranty'
+                                ? Colors.black
+                                : Colors.brown),
+    height: hieght,
+    width: width,
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Text(
+      status,
+      style: const TextStyle(color: Colors.white),
     ),
   );
 }

@@ -67,7 +67,7 @@ Scaffold cardsScreen(
         backgroundColor: mainColor,
         actions: [
           Obx(() => AutoSizedText(
-                text: 'No. Cards: $numberOfCars',
+                text: 'Cards: $numberOfCars',
                 style: const TextStyle(color: Colors.white),
                 constraints: const BoxConstraints(),
               )),

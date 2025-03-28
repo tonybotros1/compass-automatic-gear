@@ -34,14 +34,14 @@ Widget cardStyle({
                   onTap: () {
                     controller.loadingDetailsVariables(carCard);
                   },
-                  child: Column(
-                    spacing: 10,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 5),
-                        child: Row(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                    child: Column(
+                      spacing: 10,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           spacing: 10,
                           children: [
                             CircleAvatar(
@@ -53,101 +53,76 @@ Widget cardStyle({
                                     const Icon(Icons.error),
                               ),
                             ),
-                            SizedBox(
-                              height: 50,
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  FutureBuilder<String>(
-                                    future: controller.getModelName(
-                                        carCard['car_brand'],
-                                        carCard['car_model']),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const Text('Loading...');
-                                      } else if (snapshot.hasError) {
-                                        return const Text('Error');
-                                      } else {
-                                        return Flexible(
-                                          child: Text(
-                                            '${controller.getdataName(carCard['car_brand'], controller.allBrands)} ${snapshot.data}',
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                  Row(
-                                    spacing: 10,
-                                    children: [
-                                      if (carCard['plate_number'] != '')
-                                        Text(
-                                          carCard['plate_number'],
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14),
-                                        ),
-                                      Text(
-                                        textToDate(carCard['added_date']),
-                                        style: TextStyle(
-                                            color: Colors.grey.shade700,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14),
-                                      ),
-                                      carCard['job_status_2'] != ''
-                                          ? Text(carCard['job_status_2'],
+                            Expanded(
+                              child: SizedBox(
+                                height: 60,
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    FutureBuilder<String>(
+                                      future: controller.getModelName(
+                                          carCard['car_brand'],
+                                          carCard['car_model']),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return const Text('Loading...');
+                                        } else if (snapshot.hasError) {
+                                          return const Text('Error');
+                                        } else {
+                                          return Flexible(
+                                            child: Text(
+                                              '${controller.getdataName(carCard['car_brand'], controller.allBrands)} ${snapshot.data}',
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
                                                   fontSize: 14,
-                                                  color: carCard[
-                                                              'job_status_2'] ==
-                                                          'Posted'
-                                                      ? Colors.blueGrey
-                                                      : carCard['job_status_2'] ==
-                                                              'New'
-                                                          ? Colors.green
-                                                          : carCard['job_status_2'] ==
-                                                                      'Warranty' ||
-                                                                  carCard['job_status_2'] ==
-                                                                      'Closed'
-                                                              ? Colors.black
-                                                              : carCard['job_status_2'] ==
-                                                                      'Approved'
-                                                                  ? const Color(
-                                                                      0xffD2665A)
-                                                                  : carCard['job_status_2'] ==
-                                                                          'Ready'
-                                                                      ? const Color(
-                                                                          0xff7886C7)
-                                                                      : Colors
-                                                                          .red))
-                                          : SizedBox(),
-                                    ],
-                                  )
-                                ],
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                    Row(
+                                      spacing: 10,
+                                      children: [
+                                        if (carCard['plate_number'] != '')
+                                          Text(
+                                            carCard['plate_number'],
+                                            style: TextStyle(
+                                                color: Colors.grey,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12),
+                                          ),
+                                        Text(
+                                          textToDate(carCard['added_date']),
+                                          style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 5),
-                        child: Text(
+                        if (carCard['job_status_2'] != null &&
+                            carCard['job_status_2'] != '')
+                          statusBox(carCard['job_status_2'], width: 100.0),
+                     if(carCard['customer'] != null && carCard['customer'] != '')
+                        Text(
                           controller.getdataName(
                               carCard['customer'], controller.allCustomers,
                               title: 'entity_name'),
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 carImages.isNotEmpty
@@ -155,23 +130,36 @@ Widget cardStyle({
                         onTap: () {
                           controller.openImageViewer(carImages, 0);
                         },
-                        child: CachedNetworkImage(
-                          cacheManager: controller.customCachedManeger,
-                          progressIndicatorBuilder: (context, url, progress) =>
-                              Padding(
-                            padding: const EdgeInsets.all(30.0),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                value: progress.progress,
-                                color: mainColor,
-                                strokeWidth: 3,
+                        child: Container(
+                          height: 270,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(0),
+                            child: CachedNetworkImage(
+                              cacheManager: controller.customCachedManeger,
+                              imageUrl: carImages[0],
+                              key: UniqueKey(),
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 270,
+                              progressIndicatorBuilder:
+                                  (context, url, progress) => Padding(
+                                padding: const EdgeInsets.all(30.0),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    value: progress.progress,
+                                    color: mainColor,
+                                    strokeWidth: 3,
+                                  ),
+                                ),
                               ),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
                             ),
                           ),
-                          imageUrl: carImages[0],
-                          key: UniqueKey(),
-                          errorWidget: (context, url, error) =>
-                              const Icon(Icons.error),
                         ),
                       )
                     : SizedBox(),

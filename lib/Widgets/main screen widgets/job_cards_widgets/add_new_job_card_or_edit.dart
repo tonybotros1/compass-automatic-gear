@@ -369,32 +369,3 @@ Widget addNewJobCardOrEdit(
     ),
   );
 }
-
-Container statusBox(String status, {hieght = 30, width}) {
-  return Container(
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 2),
-        borderRadius: BorderRadius.circular(5),
-        color: status == 'New'
-            ? Colors.green
-            : status == 'Posted'
-                ? Colors.teal
-                : status == 'Cancelled'
-                    ? Colors.red
-                    : status == 'Approved'
-                        ? const Color(0xffD2665A)
-                        : status == 'Ready'
-                            ? const Color(0xff7886C7)
-                            : status == 'Closed' || status == 'Warranty'
-                                ? Colors.black
-                                : Colors.brown),
-    height: hieght,
-    width: width,
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Text(
-      status,
-      style: const TextStyle(color: Colors.white),
-    ),
-  );
-}

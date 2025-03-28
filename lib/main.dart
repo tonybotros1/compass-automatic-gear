@@ -41,6 +41,12 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'DataHub AI',
       debugShowCheckedModeBanner: false,
+      // builder: (context, child) {
+      //   return MediaQuery(
+      //     data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(0.8)), // Fix font size
+      //     child: child!,
+      //   );
+      // },
       initialRoute: '/',
       getPages: [
         GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),
