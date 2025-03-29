@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:datahubai/consts.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -62,7 +63,9 @@ class CardDetailsController extends GetxController {
         data?['technician'] != '' && data?['technician'] != null
             ? data!['technician']
             : '';
-    controller.date.text = data?['added_date'];
+    controller.date.text = textToDate(data?['added_date']);
+    controller.transmissionType.text = data?['transmission_type'];
+    controller.fuelAmount.text = data?['fuel_amount'] ?? 0;
     controller.customer.text = customerName;
     controller.customerId.value = data?['customer'];
     controller.brand.text = carBrand;
@@ -73,6 +76,7 @@ class CardDetailsController extends GetxController {
     controller.colorId.value = data?['color'];
     controller.plateNumber.text = plateNumber;
     controller.code.text = data?['plate_code'];
+    controller.engineTypeId.value = data?['engine_type'] ?? '';
     controller.engineType.text =
         controller.getdataName(data?['engine_type'], controller.allEngineTypes);
     controller.year.text = data?['year'];

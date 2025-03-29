@@ -210,6 +210,27 @@ Padding buildInspectionReportBody(BuildContext context) {
                           ),
                         ],
                       ),
+                      Row(
+                        spacing: 10,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: myTextFormFieldWithBorder(
+                                labelText: 'Transmission Type',
+                                controller: controller.transmissionType),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: myTextFormFieldWithBorder(
+                                suffixIcon: IconButton(
+                                    onPressed: null, icon: Icon(Icons.percent_rounded,size: 15,)),
+                                keyboardType: TextInputType.number,
+                                isnumber: true,
+                                labelText: 'Fuel Amount',
+                                controller: controller.fuelAmount),
+                          ),
+                        ],
+                      ),
                       myTextFormFieldWithBorder(
                           labelText: 'VIN Number', controller: controller.vin),
                     ],
