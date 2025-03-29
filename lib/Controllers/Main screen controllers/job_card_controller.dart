@@ -599,6 +599,15 @@ class JobCardController extends GetxController {
             ) ??
             {};
 
+    controller.selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire.value =
+        (data?['extra_checks'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(
+                key,
+                Map<String, String>.from(value as Map),
+              ),
+            ) ??
+            {};
+
     controller.carImagesURLs.assignAll(List<String>.from(data?['car_images']));
     controller.customerSignatureURL.value = data?['customer_signature'] ?? '';
     controller.advisorSignatureURL.value = data?['advisor_signature'] ?? '';
