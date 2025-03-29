@@ -818,27 +818,37 @@ class CardsScreenController extends GetxController {
   }
 
   // Function to filter the list based on search criteria
-  void filterResults(String query) {
+  Future<void> filterResults(String query) async {
     query = query.toLowerCase();
 
-    // Use where() to filter the list based on multiple fields
-    List<DocumentSnapshot> filteredResults =
-        allCarCards.where((documentSnapshot) {
+    List<DocumentSnapshot> filteredResults = [];
+
+    for (var documentSnapshot in allCarCards) {
       final data = documentSnapshot.data() as Map<String, dynamic>?;
 
-      final customerName = data?['customer_name'] ?? '';
-      final carBrand = data?['car_brand'] ?? '';
-      final carModel = data?['car_model'] ?? '';
-      final platNumber = data?['plate_number'] ?? '';
-      final date = data?['date'] ?? '';
+      // Fetch the model name asynchronously
+      final modelName =
+          await getModelName(data?['car_brand'], data?['car_model']);
 
-      // Check if any of the fields start with the query
-      return customerName.toString().toLowerCase().contains(query) ||
-          carBrand.toString().toLowerCase().contains(query) ||
-          carModel.toString().toLowerCase().contains(query) ||
+      final customerName =
+          getdataName(data?['customer'], allCustomers, title: 'entity_name');
+      final brandName = getdataName(data?['car_brand'], allBrands);
+      final platNumber = data?['plate_number'] ?? '';
+      final date = textToDate(data?['added_date']);
+      print(date);
+
+      // Check if any of the fields contain the query
+      if (customerName.toString().toLowerCase().contains(query) ||
+          brandName.toString().toLowerCase().contains(query) ||
+          modelName
+              .toString()
+              .toLowerCase()
+              .contains(query) || // Now modelName is included
           platNumber.toString().toLowerCase().contains(query) ||
-          date.toString().toLowerCase().contains(query);
-    }).toList();
+          date.toString().toLowerCase().contains(query)) {
+        filteredResults.add(documentSnapshot);
+      }
+    }
 
     // Update the list with the filtered results
     filteredCarCards.assignAll(filteredResults);

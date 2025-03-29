@@ -142,7 +142,10 @@ class DataSearch extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    return Container();
+    return GetBuilder<CardsScreenController>(builder: (controller) {
+      return cardStyle(
+          controller: controller, listName: controller.filteredCarCards);
+    });
   }
 
   @override
@@ -162,7 +165,7 @@ class DataSearch extends SearchDelegate {
         ));
       } else {
         return cardStyle(
-            controller: controller, listName: controller.allCarCards);
+            controller: controller, listName: controller.filteredCarCards);
       }
     });
   }
