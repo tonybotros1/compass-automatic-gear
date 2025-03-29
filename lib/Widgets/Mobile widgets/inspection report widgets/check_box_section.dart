@@ -65,8 +65,10 @@ Widget singleCheckBoxesSection(
         checkBox(
             value: dataMap[label]?['status'] == label,
             color: Colors.grey,
-            onChanged: (value) =>
-                controller.updateSelectedBox(label, 'status', label, dataMap)),
+            onChanged: (value) {
+              controller.updateSelectedBox(label, 'status', label, dataMap);
+              print(dataMap);
+            }),
         textcontroller != null
             ? Expanded(
                 child: myTextFormFieldWithBorder(

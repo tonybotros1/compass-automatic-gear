@@ -331,6 +331,7 @@ class CardsScreenController extends GetxController {
     selectedCheckBoxIndicesForUnderVehicle.clear();
     selectedCheckBoxIndicesForUnderHood.clear();
     selectedCheckBoxIndicesForBatteryPerformance.clear();
+    selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire.clear();
 
     signatureControllerForCustomer.clear();
     signatureControllerForAdvisor.clear();
@@ -377,6 +378,7 @@ class CardsScreenController extends GetxController {
         'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
         'under_hood': selectedCheckBoxIndicesForUnderHood,
         'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
+        'extra_checks': selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
         'car_images': carImagesURLs,
       };
 
@@ -593,6 +595,7 @@ class CardsScreenController extends GetxController {
         'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
         'under_hood': selectedCheckBoxIndicesForUnderHood,
         'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
+        'extra_checks': selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
       };
 
       loadingScreen(context);
@@ -941,7 +944,14 @@ class CardsScreenController extends GetxController {
     if (!dataMap.containsKey(label)) {
       dataMap[label] = {};
     }
-    if (dataMap[label] is Map<String, String>) {
+    if (dataMap[label]?[statusKey] == statusValue) {
+      // If the checkbox is already selected, remove it
+      dataMap[label]?.remove(statusKey);
+      if (dataMap[label]?.isEmpty ?? false) {
+        dataMap.remove(label); // Remove the label if it's empty
+      }
+    } else {
+      // Otherwise, select it
       dataMap[label]?[statusKey] = statusValue;
     }
     update();
