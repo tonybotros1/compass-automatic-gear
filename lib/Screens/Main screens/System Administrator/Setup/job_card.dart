@@ -506,13 +506,19 @@ List<DataRow> _getOtherRows({
     final jobData = job.data() as Map<String, dynamic>;
     return DataRow(
       cells: [
-        DataCell(textForDataRowInTable(
-            text: '${jobData['label']}',
-            color: jobData['label'] == 'New'
-                ? Colors.green
-                : jobData['label'] == 'Draft'
-                    ? Colors.blueGrey
-                    : Colors.red)),
+        DataCell(jobData['label'] == 'Draft'
+                ? statusBox('D')
+                : jobData['label'] == 'Returned'
+                    ? statusBox('R')
+                    : SizedBox()
+            // textForDataRowInTable(
+            //   text: '${jobData['label']}',
+            //   color: jobData['label'] == 'New'
+            //       ? Colors.green
+            //       : jobData['label'] == 'Draft'
+            //           ? Colors.blueGrey
+            //           : Colors.red)
+            ),
         DataCell(textForDataRowInTable(text: '${jobData['quotation_number']}')),
         DataCell(textForDataRowInTable(
             text: jobData['quotation_number'] != ''
@@ -818,9 +824,12 @@ Future<dynamic> editJobCardDialog(
                                         children: [
                                           Container(
                                             decoration: BoxDecoration(
-                                              borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(5),
-                                                  topRight: Radius.circular(5)),
+                                              borderRadius:
+                                                  const BorderRadius.only(
+                                                      topLeft:
+                                                          Radius.circular(5),
+                                                      topRight:
+                                                          Radius.circular(5)),
                                               color: mainColor,
                                             ),
                                             padding: const EdgeInsets.all(16),

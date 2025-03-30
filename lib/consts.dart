@@ -531,11 +531,11 @@ Container statusBox(String status, {hieght = 30.0, width}) {
             ? Colors.green
             : status == 'Posted'
                 ? Colors.teal
-                : status == 'Cancelled'
+                : status == 'Cancelled' || status == 'R'
                     ? Colors.red
                     : status == 'Approved'
                         ? const Color(0xffD2665A)
-                        : status == 'Ready'
+                        : status == 'Ready' || status == 'D'
                             ? const Color(0xff7886C7)
                             : status == 'Closed' || status == 'Warranty'
                                 ? Colors.black
