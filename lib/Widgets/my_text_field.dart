@@ -17,6 +17,7 @@ Widget myTextFormFieldWithBorder(
     bool? isDouble,
     bool? isDate,
     maxLines = 1,
+    String? initialValue,
     int? minLines,
     TextInputType? keyboardType,
     void Function(String)? onChanged,
@@ -24,22 +25,26 @@ Widget myTextFormFieldWithBorder(
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Padding(
-        padding: const EdgeInsets.only(left: 2),
-        child: Text(
-          '$labelText',
-          style: textFieldLabelStyle
-        ),
-      ),
+      labelText != null
+          ? Padding(
+              padding: const EdgeInsets.only(left: 2),
+              child: Text(
+                  overflow: TextOverflow.ellipsis,
+                  '$labelText',
+                  style: textFieldLabelStyle),
+            )
+          : SizedBox(),
       SizedBox(
         height: maxLines == 1 ? textFieldHeight : null,
         child: TextFormField(
-          style:textFieldFontStyle,
+          initialValue: initialValue,
+          style: textFieldFontStyle,
           onTap: () {
-            controller!.selection = TextSelection(
-              baseOffset: 0,
-              extentOffset: controller.text.length,
-            );
+            if (controller != null)
+              controller.selection = TextSelection(
+                baseOffset: 0,
+                extentOffset: controller.text.length,
+              );
           },
           minLines: minLines,
           maxLines: maxLines,
@@ -56,8 +61,9 @@ Widget myTextFormFieldWithBorder(
           keyboardType: keyboardType,
           controller: controller,
           decoration: InputDecoration(
-            contentPadding:
-                maxLines == 1 ? const EdgeInsets.only(left: 10) : const EdgeInsets.all(10),
+            contentPadding: maxLines == 1
+                ? const EdgeInsets.only(left: 10)
+                : const EdgeInsets.all(10),
             icon: icon,
             suffixIcon: suffixIcon,
             hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),

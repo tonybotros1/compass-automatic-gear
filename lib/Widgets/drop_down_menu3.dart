@@ -232,16 +232,15 @@ class DropdownController extends GetxController {
   }
 
   Color _getItemColor(String key, dynamic value) {
-  if (selectedKey.value == key) return Colors.grey.shade300;
-  if (highlightedKey.value == key) return Colors.blue[100]!;
-  if (showedSelectedName.value.isNotEmpty &&
-      textController.value.isNotEmpty &&
-      value[showedSelectedName.value] == textController.value) {
-    return Colors.grey.shade300;
+    if (selectedKey.value == key) return Colors.grey.shade300;
+    if (highlightedKey.value == key) return Colors.blue[100]!;
+    if (showedSelectedName.value.isNotEmpty &&
+        textController.value.isNotEmpty &&
+        value[showedSelectedName.value] == textController.value) {
+      return Colors.grey.shade300;
+    }
+    return Colors.transparent;
   }
-  return Colors.transparent;
-}
-
 
   void _moveHighlight(int direction) {
     if (filteredItems.isEmpty) return;
@@ -451,7 +450,11 @@ class CustomDropdown extends StatelessWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
-                        child: Text(hintText, style: textFieldLabelStyle),
+                        child: Text(
+                          hintText,
+                          style: textFieldLabelStyle,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       Container(
                         height: textFieldHeight,
