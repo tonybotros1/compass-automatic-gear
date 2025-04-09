@@ -304,6 +304,7 @@ ElevatedButton newReceiptButton(BuildContext context,
       // controller.flagUrl.value = '';
       // controller.flagSelectedError.value = false;
       receiptDialog(
+        context: context,
         canEdit: true,
         constraints: constraints,
         controller: controller,

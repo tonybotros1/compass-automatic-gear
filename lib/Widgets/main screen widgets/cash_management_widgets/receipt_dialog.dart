@@ -7,6 +7,7 @@ import 'add_new_receipt_or_edit.dart';
 
 Future<dynamic> receiptDialog(
     {required BoxConstraints constraints,
+    required BuildContext context,
     required CashManagementController controller,
     required void Function()? onPressed,
     required bool canEdit}) {
@@ -34,6 +35,7 @@ Future<dynamic> receiptDialog(
                       '💸 Receipt',
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
+                   const Text('Status'),
                     const Spacer(),
                     GetX<CashManagementController>(
                         builder: (controller) => ElevatedButton(
@@ -62,6 +64,7 @@ Future<dynamic> receiptDialog(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: addNewReceiptOrEdit(
+                    context:context,
                     controller: controller,
                     canEdit: canEdit,
                   ),
