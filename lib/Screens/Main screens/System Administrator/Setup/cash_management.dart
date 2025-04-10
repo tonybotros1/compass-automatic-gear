@@ -96,7 +96,7 @@ Widget tableOfScreens(
     columns: [
       DataColumn(
         label: AutoSizedText(
-          text: 'Code',
+          text: 'Receipt Number',
           constraints: constraints,
         ),
         // onSort: controller.onSort,
@@ -104,7 +104,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Flag',
+          text: 'Receipt Date',
         ),
       ),
       DataColumn(
@@ -153,15 +153,9 @@ DataRow dataRowForTheTable(Map<String, dynamic> cashManagementData, context,
     constraints, cashManagementId, CashManagementController controller) {
   return DataRow(cells: [
     DataCell(Text(
-      cashManagementData['code'] ?? 'no code',
+      cashManagementData['receipt_number'] ?? '',
     )),
-    DataCell(
-        cashManagementData['flag'] != '' || cashManagementData['flag'] != null
-            ? Image.network(
-                cashManagementData['flag'],
-                width: 40,
-              )
-            : const Text('no flag')),
+    DataCell(Text(textToDate(cashManagementData['receipt_date']))),
     DataCell(
       Text(
         cashManagementData['name'] ?? 'no name',
