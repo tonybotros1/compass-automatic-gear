@@ -835,7 +835,6 @@ class CardsScreenController extends GetxController {
       final brandName = getdataName(data?['car_brand'], allBrands);
       final platNumber = data?['plate_number'] ?? '';
       final date = textToDate(data?['added_date']);
-      print(date);
 
       // Check if any of the fields contain the query
       if (customerName.toString().toLowerCase().contains(query) ||

@@ -8,14 +8,6 @@ app = initialize_app()
 
 
 @https_fn.on_call()
-def echo_test(request: https_fn.CallableRequest) -> dict:
-    # Extract only the payload data from the request.
-    payload = request.data
-    # Return a simple dictionary with just the payload.
-    return {"echo": payload}
-
-
-@https_fn.on_call()
 def get_customer_invoices(data: https_fn.CallableRequest) -> dict:
     try:
         customer_id = data.data

@@ -44,6 +44,8 @@ Widget addNewReceiptOrEdit({
                                 children: [
                                   Expanded(
                                     child: myTextFormFieldWithBorder(
+                                      controller:
+                                          controller.receiptCounter.value,
                                       labelText: 'Receipt Number',
                                     ),
                                   ),
@@ -92,12 +94,7 @@ Widget addNewReceiptOrEdit({
                                       },
                                     ),
                                   ),
-                                  Expanded(
-                                    child: myTextFormFieldWithBorder(
-                                      isEnabled: false,
-                                      labelText: 'Outstanding',
-                                    ),
-                                  ),
+                                  Expanded(child: SizedBox()),
                                 ],
                               ),
                               Row(
@@ -151,6 +148,9 @@ Widget addNewReceiptOrEdit({
                                         if (value['name'] == 'Cheque') {
                                           controller.isChequeSelected.value =
                                               true;
+                                          controller.chequeDate.text =
+                                              textToDate(
+                                                  DateTime.now().toString());
                                         } else {
                                           controller.isChequeSelected.value =
                                               false;
@@ -170,6 +170,7 @@ Widget addNewReceiptOrEdit({
                                 children: [
                                   Expanded(
                                     child: myTextFormFieldWithBorder(
+                                      controller: controller.chequeNumber,
                                       isEnabled:
                                           controller.isChequeSelected.isTrue,
                                       labelText: 'Cheque Number',
@@ -178,6 +179,7 @@ Widget addNewReceiptOrEdit({
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: myTextFormFieldWithBorder(
+                                      controller: controller.bankName,
                                       isEnabled:
                                           controller.isChequeSelected.isTrue,
                                       labelText: 'Bank Name',
@@ -186,6 +188,13 @@ Widget addNewReceiptOrEdit({
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: myTextFormFieldWithBorder(
+                                      suffixIcon: IconButton(
+                                          onPressed: () {
+                                            controller.selectDateContext(
+                                                context, controller.chequeDate);
+                                          },
+                                          icon: const Icon(Icons.date_range)),
+                                      controller: controller.chequeDate,
                                       isEnabled:
                                           controller.isChequeSelected.isTrue,
                                       labelText: 'Cheque Date',
@@ -234,12 +243,13 @@ Widget addNewReceiptOrEdit({
                                               : () {
                                                   if (controller
                                                       .availableReceipts
-                                                      .isEmpty)
+                                                      .isEmpty) {
                                                     controller
                                                         .getCustomerInvoices(
                                                             controller
                                                                 .customerNameId
                                                                 .value);
+                                                  }
                                                   Get.dialog(
                                                       barrierDismissible: false,
                                                       Dialog(
@@ -299,8 +309,7 @@ Widget addNewReceiptOrEdit({
                                                                 ),
                                                               ),
                                                               Expanded(
-                                                                child:
-                                                                    Container(
+                                                                child: SizedBox(
                                                                   width: constraints
                                                                           .maxWidth /
                                                                       1.1,
@@ -329,37 +338,68 @@ Widget addNewReceiptOrEdit({
                                                                                     ),
                                                                                   ),
                                                                                   Container(
-                                                                                    width: double.infinity,
-                                                                                    height: controller.availableReceipts.isEmpty ? 100 : null,
-                                                                                    padding: EdgeInsets.all(8),
-                                                                                    decoration: BoxDecoration(
-                                                                                      border: Border.all(color: secColor, width: 2),
-                                                                                      // color: Color.fromARGB(255, 202, 204, 202),
-                                                                                      borderRadius: BorderRadius.circular(5),
-                                                                                    ),
-                                                                                    child: SingleChildScrollView(
+                                                                                      width: double.infinity,
+                                                                                      height: null,
+                                                                                      padding: EdgeInsets.all(8),
+                                                                                      constraints: BoxConstraints(
+                                                                                        minHeight: 100,
+                                                                                      ),
+                                                                                      decoration: BoxDecoration(
+                                                                                        border: Border.all(color: secColor, width: 2),
+                                                                                        // color: Color.fromARGB(255, 202, 204, 202),
+                                                                                        borderRadius: BorderRadius.circular(5),
+                                                                                      ),
+                                                                                      child: SingleChildScrollView(
                                                                                         child: Column(
-                                                                                      children: List.generate(
-                                                                                          controller.availableReceipts.length,
-                                                                                          (i) => buildCustomRow(
-                                                                                                prefix: GetBuilder<CashManagementController>(builder: (controller) {
-                                                                                                  return CupertinoCheckbox(
-                                                                                                      value: controller.availableReceipts[i]['is_selected'],
-                                                                                                      onChanged: (value) {
-                                                                                                        controller.selectJobReceipt(i, value!);
-                                                                                                      });
-                                                                                                }),
-                                                                                                cellConfigs: [
-                                                                                                  RowCellConfig(initialValue: controller.availableReceipts[i]['invoice_number'], flex: 1, isEnabled: false),
-                                                                                                  RowCellConfig(initialValue: textToDate(controller.availableReceipts[i]['invoice_date']), flex: 1, isEnabled: false),
-                                                                                                  RowCellConfig(initialValue: controller.availableReceipts[i]['invoice_amount'].toString(), flex: 1, isEnabled: false),
-                                                                                                  RowCellConfig(initialValue: controller.availableReceipts[i]['receipt_amount'].toString(), flex: 1, isEnabled: false),
-                                                                                                  RowCellConfig(initialValue: controller.availableReceipts[i]['outstanding_amount'].toString(), flex: 1, isEnabled: false),
-                                                                                                  RowCellConfig(initialValue: controller.availableReceipts[i]['notes'], flex: 5, isEnabled: false),
-                                                                                                ],
-                                                                                              )),
-                                                                                    )),
-                                                                                  )
+                                                                                          children: controller.availableReceipts.where((availableReceipt) => !controller.selectedAvailableReceipts.any((selected) => selected['invoice_number'] == availableReceipt['invoice_number'])).toList().asMap().entries.map((entry) {
+                                                                                            final receipt = entry.value;
+                                                                                            // find the original index in availableReceipts
+                                                                                            final originalIndex = controller.availableReceipts.indexWhere((r) => r['invoice_number'] == receipt['invoice_number']);
+                                                                                            return buildCustomRow(
+                                                                                              prefix: GetBuilder<CashManagementController>(builder: (controller) {
+                                                                                                return CupertinoCheckbox(
+                                                                                                  value: receipt['is_selected'],
+                                                                                                  onChanged: (value) {
+                                                                                                    controller.selectJobReceipt(originalIndex, value!);
+                                                                                                  },
+                                                                                                );
+                                                                                              }),
+                                                                                              cellConfigs: [
+                                                                                                RowCellConfig(
+                                                                                                  initialValue: receipt['invoice_number'],
+                                                                                                  flex: 1,
+                                                                                                  isEnabled: false,
+                                                                                                ),
+                                                                                                RowCellConfig(
+                                                                                                  initialValue: textToDate(receipt['invoice_date']),
+                                                                                                  flex: 1,
+                                                                                                  isEnabled: false,
+                                                                                                ),
+                                                                                                RowCellConfig(
+                                                                                                  initialValue: receipt['invoice_amount'].toString(),
+                                                                                                  flex: 1,
+                                                                                                  isEnabled: false,
+                                                                                                ),
+                                                                                                RowCellConfig(
+                                                                                                  initialValue: receipt['receipt_amount'].toString(),
+                                                                                                  flex: 1,
+                                                                                                  isEnabled: false,
+                                                                                                ),
+                                                                                                RowCellConfig(
+                                                                                                  initialValue: receipt['outstanding_amount'].toString(),
+                                                                                                  flex: 1,
+                                                                                                  isEnabled: false,
+                                                                                                ),
+                                                                                                RowCellConfig(
+                                                                                                  initialValue: receipt['notes'],
+                                                                                                  flex: 5,
+                                                                                                  isEnabled: false,
+                                                                                                ),
+                                                                                              ],
+                                                                                            );
+                                                                                          }).toList(),
+                                                                                        ),
+                                                                                      ))
                                                                                 ],
                                                                               )
                                                                             : Center(
@@ -390,6 +430,7 @@ Widget addNewReceiptOrEdit({
                 // Container that fills the remaining space
                 SliverToBoxAdapter(
                   child: buildCustomTableHeader(
+                    suffix: TextButton(onPressed: null, child: SizedBox()),
                     cellConfigs: [
                       TableCellConfig(label: 'Invoice Number'),
                       TableCellConfig(label: 'Invoice Date'),
@@ -410,7 +451,7 @@ Widget addNewReceiptOrEdit({
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: SingleChildScrollView(
-                        child: GetX<CashManagementController>(
+                        child: GetBuilder<CashManagementController>(
                           builder: (controller) {
                             return controller
                                     .selectedAvailableReceipts.isNotEmpty
@@ -419,58 +460,73 @@ Widget addNewReceiptOrEdit({
                                     children: List.generate(
                                       controller
                                           .selectedAvailableReceipts.length,
-                                      (i) => buildCustomRow(
-                                        cellConfigs: [
-                                          RowCellConfig(
-                                            initialValue:
-                                                controller.selectedAvailableReceipts[i]
-                                                    ['invoice_number'],
-                                            flex: 1,
-                                            isEnabled: false,
+                                      (i) {
+                                        final receipt = controller
+                                            .selectedAvailableReceipts[i];
+                                        return KeyedSubtree(
+                                          key: ValueKey(receipt[
+                                              'invoice_number']), // Use a unique identifier
+                                          child: buildCustomRow(
+                                            suffix: TextButton(
+                                              onPressed: () {
+                                                controller
+                                                    .removeSelectedReceipt(i);
+                                              },
+                                              child: Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                    color: mainColor,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ),
+                                            cellConfigs: [
+                                              RowCellConfig(
+                                                initialValue:
+                                                    receipt['invoice_number'],
+                                                flex: 1,
+                                                isEnabled: false,
+                                              ),
+                                              RowCellConfig(
+                                                initialValue: textToDate(
+                                                    receipt['invoice_date']),
+                                                flex: 1,
+                                                isEnabled: false,
+                                              ),
+                                              RowCellConfig(
+                                                initialValue:
+                                                    receipt['invoice_amount'],
+                                                flex: 1,
+                                                isEnabled: false,
+                                              ),
+                                              RowCellConfig(
+                                                initialValue:
+                                                    receipt['receipt_amount']
+                                                        .toString(),
+                                                flex: 1,
+                                                isEnabled: true,
+                                                onChanged: (value) {
+                                                  receipt['receipt_amount'] =
+                                                      value;
+                                                },
+                                              ),
+                                              RowCellConfig(
+                                                initialValue: receipt[
+                                                        'outstanding_amount']
+                                                    .toString(),
+                                                flex: 1,
+                                                isEnabled: false,
+                                              ),
+                                              RowCellConfig(
+                                                initialValue: receipt['notes'],
+                                                flex: 5,
+                                                isEnabled: false,
+                                              ),
+                                            ],
                                           ),
-                                          RowCellConfig(
-                                              initialValue: textToDate(
-                                                  controller
-                                                          .selectedAvailableReceipts[i]
-                                                      ['invoice_date']),
-                                              flex: 1,
-                                              isEnabled: false),
-                                          RowCellConfig(
-                                            initialValue:
-                                                controller.selectedAvailableReceipts[i]
-                                                    ['invoice_amount'],
-                                            flex: 1,
-                                            isEnabled: false,
-                                          ),
-                                          RowCellConfig(
-                                              initialValue: controller
-                                                  .selectedAvailableReceipts[i]
-                                                      ['receipt_amount']
-                                                  .toString(),
-                                              flex: 1,
-                                              isEnabled: true,
-                                              onChanged: (value) {
-                                                controller.selectedAvailableReceipts[i]
-                                                    ['receipt_amount'] = value;
-                                              }),
-                                          RowCellConfig(
-                                            initialValue: controller
-                                                .selectedAvailableReceipts[i]
-                                                    ['outstanding_amount']
-                                                .toString(),
-                                            flex: 1,
-                                            isEnabled: false,
-                                          ),
-                                          RowCellConfig(
-                                            initialValue: controller
-                                                .selectedAvailableReceipts[i]['notes'],
-                                            flex: 5,
-                                            isEnabled: false,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  )
+                                        );
+                                      },
+                                    ))
                                 : SizedBox();
                           },
                         ),
@@ -482,15 +538,19 @@ Widget addNewReceiptOrEdit({
           SizedBox(height: 2),
           GetX<CashManagementController>(builder: (controller) {
             return buildCustomTableFooter(
+              suffix: TextButton(onPressed: null, child: SizedBox()),
               cellConfigs: [
                 TableCellConfig(label: ''),
                 TableCellConfig(label: ''),
-                TableCellConfig(label: 'Total'),
+                TableCellConfig(label: 'Totals'),
                 TableCellConfig(
                     label:
                         '${controller.calculatedAmountForAllSelectedReceipts.value}',
                     hasBorder: true),
-                TableCellConfig(label: ''),
+                TableCellConfig(
+                    label:
+                        '${controller.calculatedOutstandingForAllSelectedReceipts.value}',
+                    hasBorder: true),
                 TableCellConfig(label: '', flex: 5),
               ],
             );
@@ -575,41 +635,29 @@ Row receiptTableRowLine() {
               isEnabled: false,
               controller: null,
               initialValue: 'Tony',
-              onChanged: (value) {
-                print(value);
-              })),
+              onChanged: (value) {})),
       Expanded(
           child: myTextFormFieldWithBorder(
               isEnabled: false,
               controller: null,
               initialValue: 'Tony',
-              onChanged: (value) {
-                print(value);
-              })),
+              onChanged: (value) {})),
       Expanded(
           child: myTextFormFieldWithBorder(
               isEnabled: false,
               controller: null,
               initialValue: 'Tony',
-              onChanged: (value) {
-                print(value);
-              })),
+              onChanged: (value) {})),
       Expanded(
           child: myTextFormFieldWithBorder(
-              controller: null,
-              initialValue: 'Tony',
-              onChanged: (value) {
-                print(value);
-              })),
+              controller: null, initialValue: 'Tony', onChanged: (value) {})),
       Expanded(
           flex: 5,
           child: myTextFormFieldWithBorder(
               isEnabled: false,
               controller: null,
               initialValue: 'Tony',
-              onChanged: (value) {
-                print(value);
-              })),
+              onChanged: (value) {})),
       TextButton(onPressed: () {}, child: Text('Delete'))
     ],
   );

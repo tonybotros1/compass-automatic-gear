@@ -30,7 +30,7 @@ Widget myTextFormFieldWithBorder(
               padding: const EdgeInsets.only(left: 2),
               child: Text(
                   overflow: TextOverflow.ellipsis,
-                  '$labelText',
+                  labelText,
                   style: textFieldLabelStyle),
             )
           : SizedBox(),
@@ -40,11 +40,12 @@ Widget myTextFormFieldWithBorder(
           initialValue: initialValue,
           style: textFieldFontStyle,
           onTap: () {
-            if (controller != null)
+            if (controller != null) {
               controller.selection = TextSelection(
                 baseOffset: 0,
                 extentOffset: controller.text.length,
               );
+            }
           },
           minLines: minLines,
           maxLines: maxLines,

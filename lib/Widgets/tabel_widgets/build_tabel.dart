@@ -27,7 +27,9 @@ Widget buildCustomRow({
           isEnabled: cell.isEnabled,
           controller: cell.controller,
           initialValue: cell.initialValue,
-          onChanged: cell.onChanged ?? (value) => print(value),
+          onChanged: cell.onChanged ?? (value) {
+            
+          },
         ),
       ),
     );

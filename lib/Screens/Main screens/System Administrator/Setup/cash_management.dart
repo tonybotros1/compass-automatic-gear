@@ -294,33 +294,29 @@ ElevatedButton newReceiptButton(BuildContext context,
     BoxConstraints constraints, CashManagementController controller) {
   return ElevatedButton(
     onPressed: () {
-      // controller.cashManagementCode.clear();
-      // controller.cashManagementName.clear();
-      // controller.cashManagementCallingCode.clear();
-      // controller.currencyName.clear();
-      // controller.currencyCode.clear();
-      // controller.vat.clear();
-      // controller.imageBytes.value = Uint8List(0);
-      // controller.flagUrl.value = '';
-      // controller.flagSelectedError.value = false;
+      controller.clearValues();
       receiptDialog(
-        context: context,
-        canEdit: true,
-        constraints: constraints,
-        controller: controller,
-        onPressed: null,
-        //  controller.addingNewValue.value
-        //     ? null
-        //     : () async {
-        //         if (!controller.formKeyForAddingNewvalue.currentState!
-        //             .validate()) {}
-        //         if (controller.imageBytes.value.isEmpty) {
-        //           controller.flagSelectedError.value = true;
-        //         } else {
-        //           await controller.addNewcashManagement();
-        //         }
-        //       }
-      );
+          context: context,
+          canEdit: true,
+          constraints: constraints,
+          controller: controller,
+          onPressed: controller.addingNewValue.value
+              ? null
+              : () {
+                  controller.addNewReceipts();
+                }
+          //  controller.addingNewValue.value
+          //     ? null
+          //     : () async {
+          //         if (!controller.formKeyForAddingNewvalue.currentState!
+          //             .validate()) {}
+          //         if (controller.imageBytes.value.isEmpty) {
+          //           controller.flagSelectedError.value = true;
+          //         } else {
+          //           await controller.addNewcashManagement();
+          //         }
+          //       }
+          );
     },
     style: newButtonStyle,
     child: const Text('New Receipt'),

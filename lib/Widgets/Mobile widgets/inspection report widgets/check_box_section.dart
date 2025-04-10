@@ -67,7 +67,6 @@ Widget singleCheckBoxesSection(
             color: Colors.grey,
             onChanged: (value) {
               controller.updateSelectedBox(label, 'status', label, dataMap);
-              print(dataMap);
             }),
         textcontroller != null
             ? Expanded(
