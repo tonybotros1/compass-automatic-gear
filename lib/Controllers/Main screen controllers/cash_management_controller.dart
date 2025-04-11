@@ -285,6 +285,7 @@ class CashManagementController extends GetxController {
       showSnackBar('Alert', 'Error: ${e.message}');
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try again');
+      print(e);
     } finally {
       loadingInvoices.value = false;
     }

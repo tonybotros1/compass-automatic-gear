@@ -51,6 +51,7 @@
     import { getAuth } from "firebase/auth";
     import { getFirestore } from "firebase/firestore";
     import { getStorage } from "firebase/storage";
+    import { getFunctions } from 'firebase/functions';
     import { getMessaging, getToken } from "firebase/messaging";
 
     
@@ -76,6 +77,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
+    const functions = getFunctions(app);
 
     // subsequent calls to getToken will return from cache.
     const messaging = getMessaging();
