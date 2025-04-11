@@ -16,6 +16,9 @@ class CashManagementController extends GetxController {
   TextEditingController chequeNumber = TextEditingController();
   TextEditingController bankName = TextEditingController();
   TextEditingController chequeDate = TextEditingController();
+  TextEditingController account = TextEditingController();
+  TextEditingController currency = TextEditingController();
+  TextEditingController rate = TextEditingController();
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
@@ -31,6 +34,7 @@ class CashManagementController extends GetxController {
   RxBool isChequeSelected = RxBool(false);
   RxString receiptTypeId = RxString('');
   RxString customerNameId = RxString('');
+  RxString accountId = RxString('');
   RxList availableReceipts = RxList([]);
   RxList selectedAvailableReceipts = RxList([]);
   RxBool isAllJobReceiptsSelected = RxBool(false);
@@ -40,11 +44,13 @@ class CashManagementController extends GetxController {
   RxString companyId = RxString('');
   RxMap allReceiptTypes = RxMap({});
   RxMap allCustomers = RxMap({});
+  RxMap allAccounts = RxMap({});
   @override
   void onInit() async {
     await getCompanyId();
     getAllCashes();
     getAllCustomers();
+    getAllAccounts();
     getColors();
     // callEchoTestFunction();
     search.value.addListener(() {
@@ -262,6 +268,20 @@ class CashManagementController extends GetxController {
     }
   }
 
+  getAllAccounts() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_banks')
+          .where('company_id', isEqualTo: companyId.value)
+          .snapshots()
+          .listen((banks) {
+        allAccounts.value = {for (var doc in banks.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+      //
+    }
+  }
+
   Future<void> getCustomerInvoices(String customerId) async {
     loadingInvoices.value = true;
     availableReceipts.clear();
@@ -319,7 +339,7 @@ class CashManagementController extends GetxController {
         'cheque_date': chequeDate.text,
         'jobs': jobsMap,
         'job_ids': jobIds,
-        'account': '',
+        'account': accountId,
         'currency': '',
         'rate': ''
       });
@@ -328,6 +348,24 @@ class CashManagementController extends GetxController {
       addingNewValue.value = false;
       showSnackBar('Failed', 'Please try again');
       // Handle any errors here
+    }
+  }
+
+  getCurrencyName(countryId) async {
+    try {
+      final HttpsCallable callable =
+          FirebaseFunctions.instance.httpsCallable('get_currency_name');
+
+      // Call the function with the required parameter.
+      final HttpsCallableResult result = await callable.call(countryId);
+      final data = result.data;
+      if (data != null) {
+        return data;
+      } else {
+        return '';
+      }
+    } catch (e) {
+      return '';
     }
   }
 }
