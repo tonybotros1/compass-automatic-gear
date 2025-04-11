@@ -1,4 +1,3 @@
-from handlers.get_customer_invoices import get_customer_invoices
 from firebase_admin import initialize_app, firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
 
@@ -6,7 +5,8 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 # # Initialize the Firebase Admin SDK
 app = initialize_app()
 
-from handlers.get_customer_invoices import get_customer_invoices
+from receipts_functions.get_customer_invoices import get_customer_invoices
+from currency_functions.get_currency_name import get_currency_name
 
 # @https_fn.on_call()
 # def get_customer_invoices(data: https_fn.CallableRequest) -> dict:

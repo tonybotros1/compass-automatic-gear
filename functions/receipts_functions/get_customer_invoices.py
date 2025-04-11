@@ -1,8 +1,8 @@
 from firebase_functions import https_fn
 from firebase_admin import firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
-from utils.calculate_net import calculate_all_nets
-from utils.get_receipt_total import get_total_amount_for_job
+from receipts_functions.calculate_net import calculate_all_nets
+from receipts_functions.get_receipt_total import get_total_amount_for_job
 
 
 @https_fn.on_call()
