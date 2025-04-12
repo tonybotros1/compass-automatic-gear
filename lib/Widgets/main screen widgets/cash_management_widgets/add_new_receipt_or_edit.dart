@@ -1,12 +1,10 @@
 import 'package:datahubai/consts.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
 import '../../../Models/tabel_cell_model.dart';
 import '../../../Models/tabel_row_model.dart';
-import '../../my_text_field.dart';
 import '../../tabel_widgets/build_tabel.dart';
 import 'account_informations_section.dart';
 import 'receipt_headers_sectiob.dart';
@@ -194,107 +192,5 @@ Widget addNewReceiptOrEdit({
         ],
       ),
     ),
-  );
-}
-
-Widget tableFooter() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 8),
-    child: Row(
-      spacing: 2,
-      children: [
-        SizedBox(width: 15, height: 30),
-        tabelCell(label: ''),
-        tabelCell(label: ''),
-        tabelCell(label: 'Total', hasBorder: true),
-        tabelCell(label: '5000', hasBorder: true),
-        tabelCell(label: '', flex: 5),
-        TextButton(onPressed: null, child: SizedBox())
-      ],
-    ),
-  );
-}
-
-Widget tableHeader() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 8),
-    child: Row(
-      spacing: 2,
-      children: [
-        SizedBox(width: 15, height: 30),
-        tabelCell(label: 'Invoice Number'),
-        tabelCell(label: 'Total'),
-        tabelCell(label: 'Outstanding'),
-        tabelCell(label: 'Amount'),
-        tabelCell(label: 'Notes', flex: 5),
-        TextButton(onPressed: null, child: SizedBox())
-      ],
-    ),
-  );
-}
-
-Expanded tabelCell({
-  int flex = 1,
-  required String label,
-  bool hasBorder = false,
-}) {
-  return Expanded(
-      flex: flex,
-      child: Container(
-        decoration: hasBorder
-            ? BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(color: Colors.grey))
-            : null,
-        padding: EdgeInsets.symmetric(horizontal: 10),
-        alignment: Alignment.bottomLeft,
-        height: textFieldHeight,
-        child: Text(
-          overflow: TextOverflow.ellipsis,
-          label,
-          style: textFieldLabelStyle,
-        ),
-      ));
-}
-
-Row receiptTableRowLine() {
-  return Row(
-    spacing: 2,
-    children: [
-      Container(
-        height: 30,
-        width: 15,
-        color: Colors.yellow,
-      ),
-      Expanded(
-          child: myTextFormFieldWithBorder(
-              isEnabled: false,
-              controller: null,
-              initialValue: 'Tony',
-              onChanged: (value) {})),
-      Expanded(
-          child: myTextFormFieldWithBorder(
-              isEnabled: false,
-              controller: null,
-              initialValue: 'Tony',
-              onChanged: (value) {})),
-      Expanded(
-          child: myTextFormFieldWithBorder(
-              isEnabled: false,
-              controller: null,
-              initialValue: 'Tony',
-              onChanged: (value) {})),
-      Expanded(
-          child: myTextFormFieldWithBorder(
-              controller: null, initialValue: 'Tony', onChanged: (value) {})),
-      Expanded(
-          flex: 5,
-          child: myTextFormFieldWithBorder(
-              isEnabled: false,
-              controller: null,
-              initialValue: 'Tony',
-              onChanged: (value) {})),
-      TextButton(onPressed: () {}, child: Text('Delete'))
-    ],
   );
 }

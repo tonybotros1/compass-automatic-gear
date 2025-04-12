@@ -6,7 +6,8 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 app = initialize_app()
 
 from receipts_functions.get_customer_invoices import get_customer_invoices
-from currency_functions.get_currency_name import get_currency_name
+from currency_functions.get_currency_data import get_currency_name
+from currency_functions.get_currency_data import get_currency_rate
 
 # @https_fn.on_call()
 # def get_customer_invoices(data: https_fn.CallableRequest) -> dict:

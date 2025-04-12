@@ -13,6 +13,7 @@ Widget accountInformations(BuildContext context) {
     child: GetX<CashManagementController>(builder: (controller) {
       bool isReceiptTypesLoading = controller.allReceiptTypes.isEmpty;
       bool isAccountsLoading = controller.allAccounts.isEmpty;
+      bool isBanksLoading = controller.allBanks.isEmpty;
       return Column(
         spacing: 10,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -63,12 +64,22 @@ Widget accountInformations(BuildContext context) {
                 ),
               ),
               Expanded(
-                child: myTextFormFieldWithBorder(
-                  controller: controller.bankName,
-                  isEnabled: controller.isChequeSelected.isTrue,
-                  labelText: 'Bank Name',
-                ),
-              ),
+                  child: CustomDropdown(
+                hintText: 'Bank Name',
+                enabled: controller.isChequeSelected.isTrue,
+                textcontroller: controller.bankName.text,
+                showedSelectedName: 'name',
+                items: isBanksLoading ? {} : controller.allBanks,
+                itemBuilder: (context, key, value) {
+                  return ListTile(
+                    title: Text(value['name']),
+                  );
+                },
+                onChanged: (key, value) {
+                  controller.bankId.value = key;
+                  controller.bankName.text = value['name'];
+                },
+              )),
               Expanded(
                 child: myTextFormFieldWithBorder(
                   suffixIcon: IconButton(
@@ -93,22 +104,24 @@ Widget accountInformations(BuildContext context) {
                 child: CustomDropdown(
                   textcontroller: controller.account.text,
                   hintText: 'Account',
-                  showedSelectedName: 'account_name',
+                  showedSelectedName: 'account_number',
                   items: isAccountsLoading ? {} : controller.allAccounts,
                   itemBuilder: (context, key, value) {
                     return ListTile(
-                      title: Text(value['account_name']),
+                      title: Text(value['account_number']),
                     );
                   },
                   onChanged: (key, value) async {
-                    controller.account.text = value['account_name'];
+                    controller.account.text = value['account_number'];
                     controller.accountId.value = key;
                     controller.currency.text =
                         await controller.getCurrencyName(value['country_id']);
+                    controller.rate.text =
+                        await controller.getCurrencyRate(value['currency']);
                   },
                 ),
               ),
-              Expanded(flex: 2, child: SizedBox())
+              Expanded(flex: 1, child: SizedBox())
             ],
           ),
           Row(
@@ -116,12 +129,14 @@ Widget accountInformations(BuildContext context) {
             children: [
               Expanded(
                 child: myTextFormFieldWithBorder(
+                  isEnabled: false,
                   controller: controller.currency,
                   labelText: 'Currency',
                 ),
               ),
               Expanded(
                 child: myTextFormFieldWithBorder(
+                  isDouble: true,
                   controller: controller.rate,
                   labelText: 'Rate',
                 ),

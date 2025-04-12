@@ -35,6 +35,7 @@ class CashManagementController extends GetxController {
   RxString receiptTypeId = RxString('');
   RxString customerNameId = RxString('');
   RxString accountId = RxString('');
+  RxString bankId = RxString('');
   RxList availableReceipts = RxList([]);
   RxList selectedAvailableReceipts = RxList([]);
   RxBool isAllJobReceiptsSelected = RxBool(false);
@@ -45,13 +46,15 @@ class CashManagementController extends GetxController {
   RxMap allReceiptTypes = RxMap({});
   RxMap allCustomers = RxMap({});
   RxMap allAccounts = RxMap({});
+  RxMap allBanks = RxMap({});
   @override
   void onInit() async {
     await getCompanyId();
     getAllCashes();
     getAllCustomers();
     getAllAccounts();
-    getColors();
+    getReceiptsTypes();
+    getBanks();
     // callEchoTestFunction();
     search.value.addListener(() {
       // filterCities();
@@ -233,7 +236,7 @@ class CashManagementController extends GetxController {
   }
 
   // this function is to get colors
-  getColors() async {
+  getReceiptsTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'RECEIPT_TYPES')
@@ -367,5 +370,42 @@ class CashManagementController extends GetxController {
     } catch (e) {
       return '';
     }
+  }
+
+  getCurrencyRate(currencyId) async {
+    try {
+      final HttpsCallable callable =
+          FirebaseFunctions.instance.httpsCallable('get_currency_rate');
+
+      final HttpsCallableResult result = await callable.call(currencyId);
+      final data = result.data;
+      if (data != null) {
+        return data.toString();
+      } else {
+        return '';
+      }
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // this function is to get nabks
+  getBanks() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'BANKS')
+        .get();
+
+    var typeId = typeDoc.docs.first.id;
+
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typeId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .snapshots()
+        .listen((colors) {
+      allBanks.value = {for (var doc in colors.docs) doc.id: doc.data()};
+    });
   }
 }

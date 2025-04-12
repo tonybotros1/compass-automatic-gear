@@ -109,29 +109,34 @@ class DropdownController extends GetxController {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          autofocus: true,
-                          focusNode: searchFocusNode,
-                          controller: query.value,
-                          onChanged: (query) {
-                            searchQuery.value = query;
-                            filterItems(itemBuilder);
-                          },
-                          decoration: InputDecoration(
-                            hintText: "Search...",
-                            suffixIcon: IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () {
-                                searchQuery.value = '';
-                                query.value.clear();
-                                filterItems(itemBuilder);
-                              },
+                        child: SizedBox(
+                          height: textFieldHeight,
+                          child: TextField(
+                            autofocus: true,
+                            focusNode: searchFocusNode,
+                            controller: query.value,
+                            onChanged: (query) {
+                              searchQuery.value = query;
+                              filterItems(itemBuilder);
+                            },
+                            decoration: InputDecoration(
+                              hintStyle: textFieldFontStyle,
+                              hintText: "Search...",
+                              suffixIcon: IconButton(
+                                iconSize: 20,
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  searchQuery.value = '';
+                                  query.value.clear();
+                                  filterItems(itemBuilder);
+                                },
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 10),
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 10),
                           ),
                         ),
                       ),
