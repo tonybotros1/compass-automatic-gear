@@ -9,7 +9,8 @@ Future<dynamic> receiptDialog(
     {required BoxConstraints constraints,
     required BuildContext context,
     required CashManagementController controller,
-    required void Function()? onPressed,
+    required void Function()? onPressedForSave,
+    required void Function()? onPressedForPost,
     required bool canEdit}) {
   return Get.dialog(
       barrierDismissible: false,
@@ -35,11 +36,36 @@ Future<dynamic> receiptDialog(
                       '💸 Receipt',
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                   const Text('Status'),
+                    GetX<CashManagementController>(builder: (controller) {
+                      return controller.status.value != ''
+                          ? statusBox(controller.status.value)
+                          : SizedBox();
+                    }),
                     const Spacer(),
+                    GetX<CashManagementController>(builder: (controller) {
+                      return controller.isReceiptAdded.isTrue
+                          ? ElevatedButton(
+                              style: postButtonStyle,
+                              onPressed: onPressedForPost,
+                              child: controller.postingReceipts.isFalse
+                                  ? Text(
+                                      'Post',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  : const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    ))
+                          : const SizedBox();
+                    }),
                     GetX<CashManagementController>(
                         builder: (controller) => ElevatedButton(
-                              onPressed: onPressed,
+                              onPressed: onPressedForSave,
                               style: new2ButtonStyle,
                               child: controller.addingNewValue.value == false
                                   ? const Text(
@@ -64,7 +90,7 @@ Future<dynamic> receiptDialog(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: addNewReceiptOrEdit(
-                    context:context,
+                    context: context,
                     controller: controller,
                     canEdit: canEdit,
                   ),

@@ -67,7 +67,6 @@ Widget addNewReceiptOrEdit({
                     suffix: TextButton(onPressed: null, child: SizedBox()),
                     cellConfigs: [
                       TableCellConfig(label: 'Invoice Number'),
-                      TableCellConfig(label: 'Invoice Date'),
                       TableCellConfig(label: 'Invoice NET'),
                       TableCellConfig(label: 'Invoice Amount'),
                       TableCellConfig(label: 'Outsanding Amount'),
@@ -122,12 +121,6 @@ Widget addNewReceiptOrEdit({
                                                 isEnabled: false,
                                               ),
                                               RowCellConfig(
-                                                initialValue: textToDate(
-                                                    receipt['invoice_date']),
-                                                flex: 1,
-                                                isEnabled: false,
-                                              ),
-                                              RowCellConfig(
                                                 initialValue:
                                                     receipt['invoice_amount'],
                                                 flex: 1,
@@ -175,16 +168,12 @@ Widget addNewReceiptOrEdit({
               suffix: TextButton(onPressed: null, child: SizedBox()),
               cellConfigs: [
                 TableCellConfig(label: ''),
-                TableCellConfig(label: ''),
                 TableCellConfig(label: 'Totals'),
                 TableCellConfig(
                     label:
                         '${controller.calculatedAmountForAllSelectedReceipts.value}',
                     hasBorder: true),
-                TableCellConfig(
-                    label:
-                        '${controller.calculatedOutstandingForAllSelectedReceipts.value}',
-                    hasBorder: true),
+                TableCellConfig(label: ''),
                 TableCellConfig(label: '', flex: 5),
               ],
             );

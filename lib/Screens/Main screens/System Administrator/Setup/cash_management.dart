@@ -294,7 +294,12 @@ ElevatedButton newReceiptButton(BuildContext context,
           canEdit: true,
           constraints: constraints,
           controller: controller,
-          onPressed: controller.addingNewValue.value
+          onPressedForPost: controller.postingReceipts.isTrue
+              ? null
+              : () {
+                  controller.postReceipt(controller.currentReceiptID.value);
+                },
+          onPressedForSave: controller.addingNewValue.value
               ? null
               : () {
                   controller.addNewReceipts();
