@@ -8,6 +8,7 @@ import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/li
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/sales_man.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/technician.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
+import 'package:datahubai/Screens/Main%20screens/Trading/car_trading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
@@ -119,6 +120,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: CashManagement());
       case '/banks':
         return const SizedBox(child: BanksAndOthers());
+      case '/carTrading':
+        return const SizedBox(child: CarTrading());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

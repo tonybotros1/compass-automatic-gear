@@ -1,0 +1,74 @@
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
+import 'package:datahubai/Widgets/my_text_field.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../Controllers/Trading Controllers/car_trading_controller.dart';
+
+Widget addNewItemOrEdit({
+  required BuildContext context,
+  required CarTradingController controller,
+  required bool canEdit,
+}) {
+  return GetX<CarTradingController>(builder: (controller) {
+    bool isItemsLoading = controller.allItems.isEmpty;
+    return Form(
+      key: controller.formKeyForAddingNewItemvalue,
+      child: ListView(
+        children: [
+          CustomDropdown(
+            validator: true,
+            textcontroller: controller.item.text,
+            showedSelectedName: 'name',
+            hintText: 'Item',
+            items: isItemsLoading ? {} : controller.allItems,
+            itemBuilder: (context, key, value) {
+              return ListTile(
+                title: Text(value['name']),
+              );
+            },
+            onChanged: (key, value) {
+              controller.item.text = value['name'];
+              controller.itemId.value = key;
+            },
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              Expanded(
+                  child: myTextFormFieldWithBorder(
+                      validate: true,
+                      controller: controller.pay.value,
+                      labelText: 'Pay',
+                      isDouble: true)),
+              Expanded(flex: 3, child: SizedBox())
+            ],
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              Expanded(
+                  child: myTextFormFieldWithBorder(
+                      validate: true,
+                      controller: controller.receive.value,
+                      labelText: 'Receive',
+                      isDouble: true)),
+              Expanded(flex: 3, child: SizedBox())
+            ],
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          myTextFormFieldWithBorder(
+              controller: controller.comments.value,
+              labelText: 'Comments',
+              maxLines: 7),
+        ],
+      ),
+    );
+  });
+}

@@ -63,7 +63,7 @@ Widget myTextFormFieldWithBorder(
           controller: controller,
           decoration: InputDecoration(
             contentPadding: maxLines == 1
-                ? const EdgeInsets.only(left: 10)
+                ? const EdgeInsets.only(left: 10,right: 10)
                 : const EdgeInsets.all(10),
             icon: icon,
             suffixIcon: suffixIcon,
@@ -110,6 +110,7 @@ Widget myTextFormFieldWithBorder(
               : null,
         ),
       ),
+      
     ],
   );
 }

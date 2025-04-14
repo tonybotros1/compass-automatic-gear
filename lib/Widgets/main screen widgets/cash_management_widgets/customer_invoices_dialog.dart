@@ -41,7 +41,6 @@ Widget customerInvoicesDialog(BoxConstraints constraints) {
                     SliverFillRemaining(
                       child: Container(
                           width: double.infinity,
-                          height: null,
                           padding: EdgeInsets.all(8),
                           constraints: BoxConstraints(
                             minHeight: 100,
@@ -95,7 +94,7 @@ Widget customerInvoicesDialog(BoxConstraints constraints) {
                                     ),
                                     RowCellConfig(
                                       initialValue:
-                                          receipt['receipt_amount'].toString(),
+                                          receipt['invoice_amount'].toString(),
                                       flex: 1,
                                       isEnabled: false,
                                     ),
