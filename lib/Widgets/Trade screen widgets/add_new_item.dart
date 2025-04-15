@@ -12,63 +12,60 @@ Widget addNewItemOrEdit({
 }) {
   return GetX<CarTradingController>(builder: (controller) {
     bool isItemsLoading = controller.allItems.isEmpty;
-    return Form(
-      key: controller.formKeyForAddingNewItemvalue,
-      child: ListView(
-        children: [
-          CustomDropdown(
-            validator: true,
-            textcontroller: controller.item.text,
-            showedSelectedName: 'name',
-            hintText: 'Item',
-            items: isItemsLoading ? {} : controller.allItems,
-            itemBuilder: (context, key, value) {
-              return ListTile(
-                title: Text(value['name']),
-              );
-            },
-            onChanged: (key, value) {
-              controller.item.text = value['name'];
-              controller.itemId.value = key;
-            },
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Row(
-            children: [
-              Expanded(
-                  child: myTextFormFieldWithBorder(
-                      validate: true,
-                      controller: controller.pay.value,
-                      labelText: 'Pay',
-                      isDouble: true)),
-              Expanded(flex: 3, child: SizedBox())
-            ],
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Row(
-            children: [
-              Expanded(
-                  child: myTextFormFieldWithBorder(
-                      validate: true,
-                      controller: controller.receive.value,
-                      labelText: 'Receive',
-                      isDouble: true)),
-              Expanded(flex: 3, child: SizedBox())
-            ],
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          myTextFormFieldWithBorder(
-              controller: controller.comments.value,
-              labelText: 'Comments',
-              maxLines: 7),
-        ],
-      ),
+    return ListView(
+      children: [
+        CustomDropdown(
+          validator: true,
+          textcontroller: controller.item.text,
+          showedSelectedName: 'name',
+          hintText: 'Item',
+          items: isItemsLoading ? {} : controller.allItems,
+          itemBuilder: (context, key, value) {
+            return ListTile(
+              title: Text(value['name']),
+            );
+          },
+          onChanged: (key, value) {
+            controller.item.text = value['name'];
+            controller.itemId.value = key;
+          },
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          children: [
+            Expanded(
+                child: myTextFormFieldWithBorder(
+                    validate: true,
+                    controller: controller.pay,
+                    labelText: 'Pay',
+                    isDouble: true)),
+            Expanded(flex: 3, child: SizedBox())
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          children: [
+            Expanded(
+                child: myTextFormFieldWithBorder(
+                    validate: true,
+                    controller: controller.receive,
+                    labelText: 'Receive',
+                    isDouble: true)),
+            Expanded(flex: 3, child: SizedBox())
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        myTextFormFieldWithBorder(
+            controller: controller.comments.value,
+            labelText: 'Comments',
+            maxLines: 7),
+      ],
     );
   });
 }

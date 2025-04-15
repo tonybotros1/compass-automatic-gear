@@ -6,6 +6,8 @@ class RowCellConfig {
   final bool isEnabled;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
+  final TextAlign tabelCellAlign;
+
   // You can extend this class with more properties (e.g., decoration, keyboard type)
 
   RowCellConfig({
@@ -14,5 +16,6 @@ class RowCellConfig {
     this.isEnabled = false,
     this.controller,
     this.onChanged,
+    this.tabelCellAlign = TextAlign.start,
   });
 }

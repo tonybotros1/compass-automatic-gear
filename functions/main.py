@@ -9,6 +9,10 @@ from receipts_functions.get_customer_invoices import get_customer_invoices
 from receipts_functions.get_customer_outstanding import calculate_customer_outstanding
 from currency_functions.get_currency_data import get_currency_name
 from currency_functions.get_currency_data import get_currency_rate
+from brand_and_models.get_model_data import get_model_name
+from car_trading.get_trade_totals import get_trade_total_payed
+from car_trading.get_trade_totals import get_trade_total_received
+from car_trading.get_trade_totals import get_trade_total_NETs
 
 # @https_fn.on_call()
 # def get_customer_invoices(data: https_fn.CallableRequest) -> dict:

@@ -17,6 +17,7 @@ Widget myTextFormFieldWithBorder(
     bool? isDouble,
     bool? isDate,
     maxLines = 1,
+    TextAlign? textAlign = TextAlign.start,
     String? initialValue,
     int? minLines,
     TextInputType? keyboardType,
@@ -37,6 +38,7 @@ Widget myTextFormFieldWithBorder(
       SizedBox(
         height: maxLines == 1 ? textFieldHeight : null,
         child: TextFormField(
+          textAlign: textAlign!,
           initialValue: initialValue,
           style: textFieldFontStyle,
           onTap: () {
@@ -63,7 +65,7 @@ Widget myTextFormFieldWithBorder(
           controller: controller,
           decoration: InputDecoration(
             contentPadding: maxLines == 1
-                ? const EdgeInsets.only(left: 10,right: 10)
+                ? const EdgeInsets.only(left: 10, right: 10)
                 : const EdgeInsets.all(10),
             icon: icon,
             suffixIcon: suffixIcon,
@@ -110,7 +112,6 @@ Widget myTextFormFieldWithBorder(
               : null,
         ),
       ),
-      
     ],
   );
 }

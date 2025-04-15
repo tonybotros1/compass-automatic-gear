@@ -24,6 +24,7 @@ Widget buildCustomRow({
       Expanded(
         flex: cell.flex,
         child: myTextFormFieldWithBorder(
+          textAlign: cell.tabelCellAlign,
           isEnabled: cell.isEnabled,
           controller: cell.controller,
           initialValue: cell.initialValue,
@@ -118,7 +119,7 @@ Widget buildCustomTableFooter({
                   )
                 : null,
             padding: EdgeInsets.symmetric(horizontal: 10),
-            alignment: Alignment.centerLeft,
+            alignment: cell.textAlignment,
             height: textFieldHeight,
             child: RichText(
               text: TextSpan(text: cell.label, style: textFieldLabelStyle),

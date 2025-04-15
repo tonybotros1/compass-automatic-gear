@@ -94,7 +94,7 @@ Widget tableOfScreens(
     columns: [
       DataColumn(
         label: AutoSizedText(
-          text: 'Code',
+          text: 'Car',
           constraints: constraints,
         ),
         // onSort: controller.onSort,
@@ -102,17 +102,73 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Name',
+          text: 'Year',
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Creation Date',
+          text: 'Status',
         ),
         // onSort: controller.onSort,
       ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Specification',
+        ),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Color (OUT)',
+        ),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Color (IN)',
+        ),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Engine Size',
+        ),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Mileage',
+        ),
+        // onSort: controller.onSort,
+      ),
+      // DataColumn(
+      //   label: AutoSizedText(
+      //     constraints: constraints,
+      //     text: 'Paid',
+      //   ),
+      //   // onSort: controller.onSort,
+      // ),
+      // DataColumn(
+      //   label: AutoSizedText(
+      //     constraints: constraints,
+      //     text: 'Received',
+      //   ),
+      //   // onSort: controller.onSort,
+      // ),
+      // DataColumn(
+      //   label: AutoSizedText(
+      //     constraints: constraints,
+      //     text: 'NET',
+      //   ),
+      //   // onSort: controller.onSort,
+      // ),
       const DataColumn(
         label: Text(''),
       ),
@@ -137,21 +193,73 @@ Widget tableOfScreens(
 DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
     tradeId, CarTradingController controller) {
   return DataRow(cells: [
+    DataCell(
+      FutureBuilder<String>(
+        future: controller.getCarModelName(
+            tradeData['car_brand'], tradeData['car_model']),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text('Loading...');
+          } else if (snapshot.hasError) {
+            return const Text('Error');
+          } else {
+            return textForDataRowInTable(
+              text:
+                  '${controller.getdataName(tradeData['car_brand'], controller.allBrands)} ${snapshot.data}',
+            );
+          }
+        },
+      ),
+    ),
+    DataCell(
+        Text(controller.getdataName(tradeData['year'], controller.allYears))),
+    DataCell(tradeData['status'] != ''
+        ? statusBox('${tradeData['status']}', hieght: 35, width: 100)
+        : const SizedBox()),
+    DataCell(Text(controller.getdataName(
+        tradeData['specification'], controller.allCarSpecifications))),
     DataCell(Text(
-      tradeData['code'] ?? 'no code',
-    )),
+        controller.getdataName(tradeData['color_out'], controller.allColors))),
+    DataCell(Text(
+        controller.getdataName(tradeData['color_in'], controller.allColors))),
+    DataCell(Text(controller.getdataName(
+        tradeData['engine_size'], controller.allEngineSizes))),
     DataCell(
-      Text(
-        tradeData['name'] ?? 'no name',
-      ),
+      Text(tradeData['mileage']),
     ),
-    DataCell(
-      Text(
-        tradeData['added_date'] != null && tradeData['added_date'] != ''
-            ? textToDate(tradeData['added_date']) //
-            : 'N/A',
-      ),
-    ),
+    // DataCell(
+    //   FutureBuilder<String>(
+    //     future: controller.gettradePaid(tradeId),
+    //     builder: (context, snapshot) {
+    //       if (snapshot.connectionState == ConnectionState.waiting) {
+    //         return const Text('Loading...');
+    //       } else if (snapshot.hasError) {
+    //         return const Text('Error');
+    //       } else {
+    //         return textForDataRowInTable(
+    //           text: '${snapshot.data}',
+    //         );
+    //       }
+    //     },
+    //   ),
+    // ),
+    // DataCell(
+    //   FutureBuilder<String>(
+    //     future: controller.gettradeReceived(tradeId),
+    //     builder: (context, snapshot) {
+    //       if (snapshot.connectionState == ConnectionState.waiting) {
+    //         return const Text('Loading...');
+    //       } else if (snapshot.hasError) {
+    //         return const Text('Error');
+    //       } else {
+    //         return textForDataRowInTable(
+    //           text: '${snapshot.data}',
+    //         );
+    //       }
+    //     },
+    //   ),
+    // ),
+    // DataCell(SizedBox()),
     DataCell(Row(
       spacing: 5,
       mainAxisAlignment: MainAxisAlignment.end,
@@ -173,7 +281,7 @@ ElevatedButton deleteSection(
             controller: controller,
             content: "The trade will be deleted permanently",
             onPressed: () {
-              // controller.deletetrade(tradeId);
+              controller.deleteTrade(tradeId);
             });
       },
       child: const Text("Delete"));
@@ -184,26 +292,16 @@ ElevatedButton editSection(context, CarTradingController controller,
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () async {
-        // controller.city.text = (await controller.getCityName(
-        //     tradeData['country_id'], tradeData['city_id']))!;
-        // controller.getCitiesByCountryID(tradeData['country_id']);
-        // controller.code.text = tradeData['code'] ?? '';
-        // controller.name.text = tradeData['name'] ?? '';
-        // controller.line.text = tradeData['line'] ?? '';
-        // controller.country.text =
-        //     controller.getCountryName(tradeData['country_id'])!;
-
-        // controller.countryId.value = tradeData['country_id'];
-        // controller.cityId.value = tradeData['city_id'];
-        // tradeesDialog(
-        //     constraints: constraints,
-        //     controller: controller,
-        //     canEdit: true,
-        //     onPressed: controller.addingNewValue.value
-        //         ? null
-        //         : () {
-        //             controller.edittrade(tradeId);
-        //           });
+        controller.currentTradId.value = tradeId;
+        await controller.loadValues(tradeData);
+        tradesDialog(
+            controller: controller,
+            canEdit: true,
+            onPressed: controller.addingNewValue.value
+                ? null
+                : () {
+                    controller.editTrade(tradeId);
+                  });
       },
       child: const Text('Edit'));
 }
@@ -212,21 +310,14 @@ ElevatedButton newtradeesButton(
     BuildContext context, CarTradingController controller) {
   return ElevatedButton(
     onPressed: () {
-      // controller.allCities.clear();
-      // controller.code.clear();
-      // controller.name.clear();
-      // controller.line.clear();
-      // controller.country.clear();
-      // controller.countryId.value = '';
-      // controller.city.clear();
-      // controller.cityId.value = '';
+      controller.clearValues();
       tradesDialog(
           controller: controller,
           canEdit: true,
           onPressed: controller.addingNewValue.value
               ? null
               : () async {
-                  // await controller.addNewtrade();
+                  controller.addNewTrade();
                 });
     },
     style: newButtonStyle,

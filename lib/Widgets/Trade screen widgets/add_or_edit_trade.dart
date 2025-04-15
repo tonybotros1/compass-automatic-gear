@@ -12,6 +12,7 @@ Widget addNewTradeOrEdit({
   required BuildContext context,
   required CarTradingController controller,
   required bool canEdit,
+  required BoxConstraints constraints,
 }) {
   return Column(
     children: [
@@ -27,7 +28,7 @@ Widget addNewTradeOrEdit({
                     'Car Information',
                     style: fontStyle1,
                   )),
-                  carInformation(context: context),
+                  carInformation(context: context, constraints: constraints),
                   const SizedBox(
                     height: 10,
                   ),
@@ -42,13 +43,21 @@ Widget addNewTradeOrEdit({
                       ElevatedButton(
                           style: new2ButtonStyle,
                           onPressed: () {
+                            controller.item.clear();
+                            controller.itemId.value = '';
+                            controller.pay.text = '';
+                            controller.receive.text = '';
+                            controller.comments.value.text = '';
                             itemDialog(
                                 controller: controller,
                                 canEdit: true,
                                 onPressed: () {
-                                  if (!controller.formKeyForAddingNewItemvalue
-                                      .currentState!
-                                      .validate()) {
+                                  if (controller.item.value.text.isEmpty ||
+                                      controller.pay.value.text.isEmpty ||
+                                      controller.receive.value.text.isEmpty ||
+                                      controller.comments.value.text.isEmpty) {
+                                    showSnackBar(
+                                        'Alert', 'Please fill all fields');
                                   } else {
                                     controller.addNewItem();
                                   }
@@ -64,13 +73,15 @@ Widget addNewTradeOrEdit({
               ),
             ),
             SliverFillRemaining(
-              hasScrollBody: false,
+              // Tell the sliver that its child DOES provide its own scrolling.
+              hasScrollBody: true,
               child: Container(
-                // padding: const EdgeInsets.all(5),
                 decoration: containerDecor,
                 child: Column(
+                  spacing: 10,
                   children: [
                     buildCustomTableHeader(
+                      suffix: TextButton(onPressed: null, child: Text('')),
                       cellConfigs: [
                         TableCellConfig(label: 'Date'),
                         TableCellConfig(label: 'Item'),
@@ -79,39 +90,105 @@ Widget addNewTradeOrEdit({
                         TableCellConfig(label: 'Comments', flex: 5),
                       ],
                     ),
-                    GetX<CarTradingController>(builder: (controller) {
-                      return SingleChildScrollView(
-                        child: Column(
-                          children: List.generate(
-                              controller.addedItems.length,
-                              (i) => buildCustomRow(cellConfigs: [
-                                    RowCellConfig(
-                                        initialValue: controller.addedItems[i]
-                                            ['date']),
-                                    RowCellConfig(
-                                        initialValue: controller.addedItems[i]
-                                            ['item_name']),
-                                    RowCellConfig(
-                                        initialValue: controller.addedItems[i]
-                                            ['pay']),
-                                    RowCellConfig(
-                                        initialValue: controller.addedItems[i]
-                                            ['receive']),
-                                    RowCellConfig(
-                                        initialValue: controller.addedItems[i]
-                                            ['comment'],
-                                        flex: 5),
-                                  ])),
-                        ),
-                      );
-                    })
+                    Expanded(
+                      child: GetX<CarTradingController>(
+                        builder: (controller) {
+                          return Scrollbar(
+                            thumbVisibility: true,
+                            controller: controller.scrollController,
+                            child: SingleChildScrollView(
+                              controller: controller.scrollController,
+                              child: Column(
+                                children: List.generate(
+                                  controller.addedItems.length,
+                                  (i) => KeyedSubtree(
+                                    key: ValueKey(controller.addedItems[i]),
+                                    child: buildCustomRow(
+                                      suffix: TextButton(
+                                          onPressed: () {
+                                            controller.addedItems.removeAt(i);
+                                            controller.calculateTotals();
+                                          },
+                                          child: Text('Clear')),
+                                      cellConfigs: [
+                                        RowCellConfig(
+                                            initialValue: controller
+                                                .addedItems[i]['date']),
+                                        RowCellConfig(
+                                          initialValue: controller.getdataName(
+                                            controller.addedItems[i]['item'],
+                                            controller.allItems,
+                                          ),
+                                        ),
+                                        RowCellConfig(
+                                            initialValue:
+                                                controller.addedItems[i]['pay'],
+                                            tabelCellAlign: TextAlign.end),
+                                        RowCellConfig(
+                                            initialValue: controller
+                                                .addedItems[i]['receive'],
+                                            tabelCellAlign: TextAlign.end),
+                                        RowCellConfig(
+                                          initialValue: controller.addedItems[i]
+                                              ['comment'],
+                                          flex: 5,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
             )
           ],
         ),
-      )
+      ),
+      Padding(
+        padding: const EdgeInsets.only(top: 2, bottom: 2),
+        child: GetX<CarTradingController>(builder: (controller) {
+          return buildCustomTableFooter(
+            suffix: TextButton(onPressed: null, child: Text('')),
+            cellConfigs: [
+              TableCellConfig(label: ''),
+              TableCellConfig(
+                  label: 'Totals', textAlignment: Alignment.centerRight),
+              TableCellConfig(
+                  label: '${controller.totalPays.value}',
+                  hasBorder: true,
+                  textAlignment: Alignment.centerRight),
+              TableCellConfig(
+                  label: '${controller.totalReceives}',
+                  hasBorder: true,
+                  textAlignment: Alignment.centerRight),
+              TableCellConfig(label: '', flex: 5),
+            ],
+          );
+        }),
+      ),
+      GetX<CarTradingController>(builder: (controller) {
+        return buildCustomTableFooter(
+          suffix: TextButton(onPressed: null, child: Text('')),
+          cellConfigs: [
+            TableCellConfig(label: ''),
+            TableCellConfig(label: 'NET', textAlignment: Alignment.centerRight),
+            TableCellConfig(
+                label: '${controller.totalNETs.value}',
+                hasBorder: true,
+                textAlignment: Alignment.centerRight),
+            TableCellConfig(
+              label: '',
+            ),
+            TableCellConfig(label: '', flex: 5),
+          ],
+        );
+      }),
     ],
   );
 }

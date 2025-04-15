@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/car_brands_controller.dart';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,8 +19,8 @@ class CarTradingController extends GetxController {
   Rx<TextEditingController> carModel = TextEditingController().obs;
   Rx<TextEditingController> engineSize = TextEditingController().obs;
   Rx<TextEditingController> year = TextEditingController().obs;
-  Rx<TextEditingController> pay = TextEditingController().obs;
-  Rx<TextEditingController> receive = TextEditingController().obs;
+  TextEditingController pay = TextEditingController();
+  TextEditingController receive = TextEditingController();
   Rx<TextEditingController> comments = TextEditingController().obs;
   TextEditingController note = TextEditingController();
   TextEditingController item = TextEditingController();
@@ -26,7 +29,6 @@ class CarTradingController extends GetxController {
   RxBool isScreenLoding = RxBool(true);
   final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
-  final GlobalKey<FormState> formKeyForAddingNewItemvalue = GlobalKey<FormState>();
 
   RxString colorInId = RxString('');
   RxString colorOutId = RxString('');
@@ -36,6 +38,7 @@ class CarTradingController extends GetxController {
   RxString engineSizeId = RxString('');
   RxString yearId = RxString('');
   RxString itemId = RxString('');
+  RxString status = RxString('');
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
@@ -48,7 +51,22 @@ class CarTradingController extends GetxController {
   RxMap allYears = RxMap({});
   RxMap allItems = RxMap({});
   RxList<Map> addedItems = RxList([]);
-
+  ListOfValuesController listOfValuesController =
+      Get.put(ListOfValuesController());
+  RxString carSpecificationsListId = RxString('');
+  RxString carSpecificationsListMasteredById = RxString('');
+  RxString colorsListId = RxString('');
+  RxString colorsListMasterdById = RxString('');
+  RxString yearListId = RxString('');
+  RxString yearListMasterdById = RxString('');
+  RxString engineSizeListId = RxString('');
+  RxString engineSizeListMasterdById = RxString('');
+  CarBrandsController carBrandsController = Get.put(CarBrandsController());
+  RxString currentTradId = RxString('');
+  RxDouble totalPays = RxDouble(0.0);
+  RxDouble totalReceives = RxDouble(0.0);
+  RxDouble totalNETs = RxDouble(0.0);
+  final ScrollController scrollController = ScrollController();
   @override
   void onInit() async {
     await getCompanyId();
@@ -59,6 +77,7 @@ class CarTradingController extends GetxController {
     getEngineSizes();
     getYears();
     getItems();
+    getCarModelName('6aKdhpAzeCRVpF0SVwQo', 'QQCz2PEeBhBunyFBVGYq');
     super.onInit();
   }
 
@@ -88,6 +107,68 @@ class CarTradingController extends GetxController {
     update();
   }
 
+  calculateTotals() {
+    totalNETs.value = 0.0;
+    totalPays.value = 0.0;
+    totalReceives.value = 0.0;
+    for (var item in addedItems) {
+      totalPays.value += double.tryParse(item['pay'])!;
+      totalReceives.value += double.tryParse(item['receive'])!;
+    }
+    totalNETs.value = totalReceives.value - totalPays.value;
+  }
+
+  clearValues() {
+    date.value.text = textToDate(DateTime.now());
+    mileage.value.text = '0';
+    colorIn.value.clear();
+    colorInId.value = '';
+    colorOut.value.clear();
+    colorOutId.value = '';
+    carBrand.value.clear();
+    carBrandId.value = '';
+    carModel.value.clear();
+    carModelId.value = '';
+    carSpecification.value.clear();
+    carSpecificationId.value = '';
+    engineSize.value.clear();
+    engineSizeId.value = '';
+    year.value.clear();
+    yearId.value = '';
+    note.clear();
+    addedItems.clear();
+    status.value = '';
+    currentTradId.value = '';
+  }
+
+  loadValues(Map data) async {
+    date.value.text = data['date'];
+    mileage.value.text = data['mileage'];
+    colorIn.value.text = getdataName(data['color_in'], allColors);
+    colorInId.value = data['color_in'];
+    colorOut.value.text = getdataName(data['color_out'], allColors);
+    colorOutId.value = data['color_out'];
+    carBrand.value.text = getdataName(data['car_brand'], allBrands);
+    carBrandId.value = data['car_brand'];
+    carSpecification.value.text =
+        getdataName(data['specification'], allCarSpecifications);
+    carSpecificationId.value = data['specification'];
+    engineSize.value.text = getdataName(data['engine_size'], allEngineSizes);
+    engineSizeId.value = data['engine_size'];
+    year.value.text = getdataName(data['year'], allYears);
+    yearId.value = data['year'];
+    note.text = data['note'];
+    addedItems.assignAll((data['items'] as List)
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList());
+
+    status.value = data['status'];
+    carModel.value.text =
+        await getCarModelName(data['car_brand'], data['car_model']);
+    carModelId.value = data['car_model'];
+    calculateTotals();
+  }
+
   addNewItem() {
     addedItems.add({
       'date': textToDate(DateTime.now()),
@@ -97,6 +178,74 @@ class CarTradingController extends GetxController {
       'receive': receive.value.text,
       'comment': comments.value.text
     });
+    calculateTotals();
+  }
+
+  addNewTrade() async {
+    try {
+      addingNewValue.value = true;
+      var currentTrade =
+          await FirebaseFirestore.instance.collection('all_trades').add({
+        'date': date.value.text,
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'mileage': mileage.value.text,
+        'specification': carSpecificationId.value,
+        'engine_size': engineSizeId.value,
+        'color_in': colorInId.value,
+        'color_out': colorOutId.value,
+        'year': yearId.value,
+        'note': note.text,
+        'items': addedItems,
+        'company_id': companyId.value,
+        'status': 'New'
+      });
+      status.value = 'New';
+      currentTradId.value = currentTrade.id;
+      addingNewValue.value = false;
+    } catch (e) {
+      addingNewValue.value = false;
+    }
+  }
+
+  editTrade(tradeId) {
+    try {
+      FirebaseFirestore.instance.collection('all_trades').doc(tradeId).update({
+        'date': date.value.text,
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'mileage': mileage.value.text,
+        'specification': carSpecificationId.value,
+        'engine_size': engineSizeId.value,
+        'color_in': colorInId.value,
+        'color_out': colorOutId.value,
+        'year': yearId.value,
+        'note': note.text,
+        'items': addedItems,
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  deleteTrade(tradeId) {
+    try {
+      Get.back();
+      FirebaseFirestore.instance.collection('all_trades').doc(tradeId).delete();
+    } catch (e) {
+      //
+    }
+  }
+
+  changeStatus(String tradeId, String status) {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_trades')
+          .doc(tradeId)
+          .update({'status': status});
+    } catch (e) {
+      showSnackBar('Something went wrong', 'Please try again');
+    }
   }
 
   getAllTrades() {
@@ -122,7 +271,8 @@ class CarTradingController extends GetxController {
         .get();
 
     var typeId = typeDoc.docs.first.id;
-
+    colorsListId.value = typeId;
+    colorsListMasterdById.value = typeDoc.docs.first.data()['mastered_by'];
     FirebaseFirestore.instance
         .collection('all_lists')
         .doc(typeId)
@@ -142,7 +292,9 @@ class CarTradingController extends GetxController {
         .get();
 
     var typeId = typeDoc.docs.first.id;
-
+    carSpecificationsListId.value = typeId;
+    carSpecificationsListMasteredById.value =
+        typeDoc.docs.first.data()['mastered_by'];
     FirebaseFirestore.instance
         .collection('all_lists')
         .doc(typeId)
@@ -164,7 +316,8 @@ class CarTradingController extends GetxController {
         .get();
 
     var typeId = typeDoc.docs.first.id;
-
+    engineSizeListId.value = typeId;
+    engineSizeListMasterdById.value = typeDoc.docs.first.data()['mastered_by'];
     FirebaseFirestore.instance
         .collection('all_lists')
         .doc(typeId)
@@ -184,7 +337,8 @@ class CarTradingController extends GetxController {
         .get();
 
     var typeId = typeDoc.docs.first.id;
-
+    yearListId.value = typeId;
+    yearListMasterdById.value = typeDoc.docs.first.data()['mastered_by'];
     FirebaseFirestore.instance
         .collection('all_lists')
         .doc(typeId)
@@ -243,6 +397,50 @@ class CarTradingController extends GetxController {
       });
     } catch (e) {
       //
+    }
+  }
+
+  String getdataName(String id, Map allData, {title = 'name'}) {
+    try {
+      final data = allData.entries.firstWhere(
+        (data) => data.key == id,
+      );
+      return data.value[title];
+    } catch (e) {
+      return '';
+    }
+  }
+
+  Future<String> getCarModelName(brandId, modelId) async {
+    try {
+      var name = await FirebaseFunctions.instance
+          .httpsCallable('get_model_name')
+          .call({"brandId": brandId, "modelId": modelId});
+      return name.data;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  Future<String> gettradePaid(tradeId) async {
+    try {
+      var paid = await FirebaseFunctions.instance
+          .httpsCallable('get_trade_total_paid')
+          .call(tradeId);
+      return paid.data.toString();
+    } catch (e) {
+      return '';
+    }
+  }
+
+  Future<String> gettradeReceived(tradeId) async {
+    try {
+      var paid = await FirebaseFunctions.instance
+          .httpsCallable('get_trade_total_received')
+          .call(tradeId);
+      return paid.data.toString();
+    } catch (e) {
+      return '';
     }
   }
 }
