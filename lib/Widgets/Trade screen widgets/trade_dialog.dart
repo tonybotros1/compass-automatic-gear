@@ -41,23 +41,7 @@ Future<dynamic> tradesDialog(
                             : SizedBox();
                       }),
                       const Spacer(),
-                      // GetX<CarTradingController>(builder: (controller) {
-                      //   return controller.currentTradId.value != ''
-                      //       ? ElevatedButton(
-                      //           style: new2ButtonStyle,
-                      //           onPressed: controller.status.value != 'New'
-                      //               ? () {
-                      //                   controller.changeStatus(
-                      //                       controller.currentTradId.value,
-                      //                       'New');
-                      //                   controller.status.value = 'New';
-                      //                 }
-                      //               : null,
-                      //           child: Text('New',
-                      //               style:
-                      //                   TextStyle(fontWeight: FontWeight.bold)))
-                      //       : SizedBox();
-                      // }),
+                    
                       GetX<CarTradingController>(builder: (controller) {
                         return controller.currentTradId.value != ''
                             ? ElevatedButton(

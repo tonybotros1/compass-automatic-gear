@@ -19,8 +19,14 @@ Widget addNewItemOrEdit({
             Expanded(
               flex: 1,
               child: myTextFormFieldWithBorder(
+                  suffixIcon: IconButton(
+                      onPressed: () {
+                        controller.selectDateContext(
+                            context, controller.itemDate);
+                      },
+                      icon: const Icon(Icons.date_range)),
                   validate: true,
-                  // controller: controller.pay,
+                  controller: controller.itemDate,
                   labelText: 'Date',
                   isDate: true),
             ),

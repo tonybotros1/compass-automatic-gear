@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../consts.dart';
 import '../Main screen controllers/main_screen_contro.dart';
+import 'package:uuid/uuid.dart';
 
 class CarTradingController extends GetxController {
   Rx<TextEditingController> date = TextEditingController().obs;
@@ -23,8 +24,11 @@ class CarTradingController extends GetxController {
   Rx<TextEditingController> comments = TextEditingController().obs;
   TextEditingController note = TextEditingController();
   TextEditingController item = TextEditingController();
+  TextEditingController itemDate = TextEditingController();
   RxString query = RxString('');
+  RxString queryForItems = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
+  Rx<TextEditingController> searchForItems = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
   final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
@@ -49,7 +53,8 @@ class CarTradingController extends GetxController {
   RxMap allEngineSizes = RxMap({});
   RxMap allYears = RxMap({});
   RxMap allItems = RxMap({});
-  RxList<Map> addedItems = RxList([]);
+  RxList<Map<String, dynamic>> addedItems = RxList([]);
+  RxList<Map> filteredAddedItems = RxList([]);
   ListOfValuesController listOfValuesController =
       Get.put(ListOfValuesController());
   RxString carSpecificationsListId = RxString('');
@@ -65,7 +70,9 @@ class CarTradingController extends GetxController {
   RxDouble totalPays = RxDouble(0.0);
   RxDouble totalReceives = RxDouble(0.0);
   RxDouble totalNETs = RxDouble(0.0);
-  final ScrollController scrollController = ScrollController();
+  // final ScrollController scrollController = ScrollController();
+  final Uuid _uuid = Uuid();
+
   @override
   void onInit() async {
     await getCompanyId();
@@ -76,7 +83,9 @@ class CarTradingController extends GetxController {
     getEngineSizes();
     getYears();
     getItems();
-    getCarModelName('6aKdhpAzeCRVpF0SVwQo', 'QQCz2PEeBhBunyFBVGYq');
+    searchForItems.value.addListener(() {
+      filterItems();
+    });
     super.onInit();
   }
 
@@ -269,15 +278,19 @@ class CarTradingController extends GetxController {
     calculateTotals();
   }
 
-  addNewItem() {
+  void addNewItem() {
+    final String uniqueId = _uuid.v4();
+
     addedItems.add({
+      'id': uniqueId,
       'date': textToDate(DateTime.now()),
       'item': itemId.value,
       'item_name': item.text,
       'pay': pay.value.text,
       'receive': receive.value.text,
-      'comment': comments.value.text
+      'comment': comments.value.text,
     });
+
     calculateTotals();
     Get.back();
   }
@@ -545,7 +558,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-   Future<String> gettradeNETs(tradeId) async {
+  Future<String> gettradeNETs(tradeId) async {
     try {
       var net = await FirebaseFunctions.instance
           .httpsCallable('get_trade_total_NETs')
@@ -554,5 +567,28 @@ class CarTradingController extends GetxController {
     } catch (e) {
       return '';
     }
+  }
+
+  // this function is to filter the search results for web
+  void filterItems() {
+    queryForItems.value = searchForItems.value.text.toLowerCase();
+    if (queryForItems.value.isEmpty) {
+      filteredAddedItems.clear();
+    } else {
+      filteredAddedItems.assignAll(
+        addedItems.where((item) {
+          return item['date'].toString().toLowerCase().contains(query) ||
+              getdataName(item['item'], allItems)
+                  .toString()
+                  .toLowerCase()
+                  .contains(query) ||
+              item['pay'].toString().toLowerCase().contains(query) ||
+              item['comment'].toString().toLowerCase().contains(query) ||
+              item['receive'].toString().toLowerCase().contains(query);
+        }).toList(),
+      );
+    }
+
+    print(filteredAddedItems);
   }
 }
