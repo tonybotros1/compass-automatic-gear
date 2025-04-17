@@ -10,7 +10,7 @@ from receipts_functions.get_customer_outstanding import calculate_customer_outst
 from currency_functions.get_currency_data import get_currency_name
 from currency_functions.get_currency_data import get_currency_rate
 from brand_and_models.get_model_data import get_model_name
-from car_trading.get_trade_totals import get_trade_total_payed
+from car_trading.get_trade_totals import get_trade_total_paid
 from car_trading.get_trade_totals import get_trade_total_received
 from car_trading.get_trade_totals import get_trade_total_NETs
 

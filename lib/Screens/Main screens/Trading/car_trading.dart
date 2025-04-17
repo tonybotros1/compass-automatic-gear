@@ -148,27 +148,27 @@ Widget tableOfScreens(
         ),
         // onSort: controller.onSort,
       ),
-      // DataColumn(
-      //   label: AutoSizedText(
-      //     constraints: constraints,
-      //     text: 'Paid',
-      //   ),
-      //   // onSort: controller.onSort,
-      // ),
-      // DataColumn(
-      //   label: AutoSizedText(
-      //     constraints: constraints,
-      //     text: 'Received',
-      //   ),
-      //   // onSort: controller.onSort,
-      // ),
-      // DataColumn(
-      //   label: AutoSizedText(
-      //     constraints: constraints,
-      //     text: 'NET',
-      //   ),
-      //   // onSort: controller.onSort,
-      // ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Paid',
+        ),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Received',
+        ),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'NET',
+        ),
+        // onSort: controller.onSort,
+      ),
       const DataColumn(
         label: Text(''),
       ),
@@ -227,39 +227,54 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
     DataCell(
       Text(tradeData['mileage']),
     ),
-    // DataCell(
-    //   FutureBuilder<String>(
-    //     future: controller.gettradePaid(tradeId),
-    //     builder: (context, snapshot) {
-    //       if (snapshot.connectionState == ConnectionState.waiting) {
-    //         return const Text('Loading...');
-    //       } else if (snapshot.hasError) {
-    //         return const Text('Error');
-    //       } else {
-    //         return textForDataRowInTable(
-    //           text: '${snapshot.data}',
-    //         );
-    //       }
-    //     },
-    //   ),
-    // ),
-    // DataCell(
-    //   FutureBuilder<String>(
-    //     future: controller.gettradeReceived(tradeId),
-    //     builder: (context, snapshot) {
-    //       if (snapshot.connectionState == ConnectionState.waiting) {
-    //         return const Text('Loading...');
-    //       } else if (snapshot.hasError) {
-    //         return const Text('Error');
-    //       } else {
-    //         return textForDataRowInTable(
-    //           text: '${snapshot.data}',
-    //         );
-    //       }
-    //     },
-    //   ),
-    // ),
-    // DataCell(SizedBox()),
+    DataCell(
+      FutureBuilder<String>(
+        future: controller.gettradePaid(tradeId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text('Loading...');
+          } else if (snapshot.hasError) {
+            return const Text('Error');
+          } else {
+            return textForDataRowInTable(
+              text: '${snapshot.data}',
+            );
+          }
+        },
+      ),
+    ),
+    DataCell(
+      FutureBuilder<String>(
+        future: controller.gettradeReceived(tradeId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text('Loading...');
+          } else if (snapshot.hasError) {
+            return const Text('Error');
+          } else {
+            return textForDataRowInTable(
+              text: '${snapshot.data}',
+            );
+          }
+        },
+      ),
+    ),
+    DataCell(
+      FutureBuilder<String>(
+        future: controller.gettradeNETs(tradeId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text('Loading...');
+          } else if (snapshot.hasError) {
+            return const Text('Error');
+          } else {
+            return textForDataRowInTable(
+              text: '${snapshot.data}',
+            );
+          }
+        },
+      ),
+    ),
     DataCell(Row(
       spacing: 5,
       mainAxisAlignment: MainAxisAlignment.end,

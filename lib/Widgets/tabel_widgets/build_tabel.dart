@@ -24,13 +24,12 @@ Widget buildCustomRow({
       Expanded(
         flex: cell.flex,
         child: myTextFormFieldWithBorder(
+          borderRadius: 0,
           textAlign: cell.tabelCellAlign,
           isEnabled: cell.isEnabled,
           controller: cell.controller,
           initialValue: cell.initialValue,
-          onChanged: cell.onChanged ?? (value) {
-            
-          },
+          onChanged: cell.onChanged ?? (value) {},
         ),
       ),
     );
@@ -42,7 +41,7 @@ Widget buildCustomRow({
   );
 
   return Row(
-    spacing: 2,
+    // spacing: 2,
     children: children,
   );
 }
@@ -66,7 +65,7 @@ Widget buildCustomTableHeader({
         child: Container(
             decoration: cell.hasBorder
                 ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(0),
                     border: Border.all(color: Colors.grey),
                   )
                 : null,
@@ -92,7 +91,11 @@ Widget buildCustomTableHeader({
   // Add the suffix widget (or a default placeholder)
   children.add(suffix ?? SizedBox());
 
-  return Row(spacing: 2, children: children);
+  return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade400,
+      ),
+      child: Row(children: children));
 }
 
 /// Builds a dynamic table footer row using [TableCellConfig].
@@ -114,7 +117,7 @@ Widget buildCustomTableFooter({
         child: Container(
             decoration: cell.hasBorder
                 ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(0),
                     border: Border.all(color: Colors.grey),
                   )
                 : null,
@@ -134,5 +137,5 @@ Widget buildCustomTableFooter({
   // Add the suffix widget (or a default placeholder)
   children.add(suffix ?? SizedBox());
 
-  return Row(spacing: 2, children: children);
+  return Row(children: children);
 }

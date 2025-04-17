@@ -14,6 +14,19 @@ Widget addNewItemOrEdit({
     bool isItemsLoading = controller.allItems.isEmpty;
     return ListView(
       children: [
+        Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: myTextFormFieldWithBorder(
+                  validate: true,
+                  // controller: controller.pay,
+                  labelText: 'Date',
+                  isDate: true),
+            ),
+            Expanded(flex: 3, child: SizedBox())
+          ],
+        ),
         CustomDropdown(
           validator: true,
           textcontroller: controller.item.text,
@@ -39,7 +52,7 @@ Widget addNewItemOrEdit({
                 child: myTextFormFieldWithBorder(
                     validate: true,
                     controller: controller.pay,
-                    labelText: 'Pay',
+                    labelText: 'Paid',
                     isDouble: true)),
             Expanded(flex: 3, child: SizedBox())
           ],
@@ -53,7 +66,7 @@ Widget addNewItemOrEdit({
                 child: myTextFormFieldWithBorder(
                     validate: true,
                     controller: controller.receive,
-                    labelText: 'Receive',
+                    labelText: 'Received',
                     isDouble: true)),
             Expanded(flex: 3, child: SizedBox())
           ],

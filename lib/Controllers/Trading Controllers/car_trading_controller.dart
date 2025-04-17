@@ -5,7 +5,6 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../consts.dart';
 import '../Main screen controllers/main_screen_contro.dart';
 
@@ -80,6 +79,106 @@ class CarTradingController extends GetxController {
     getCarModelName('6aKdhpAzeCRVpF0SVwQo', 'QQCz2PEeBhBunyFBVGYq');
     super.onInit();
   }
+
+  // Future<List<Map<String, String>>> parseExcelFromPicker() async {
+  //   try {
+  //     final result = await FilePicker.platform.pickFiles(
+  //       type: FileType.custom,
+  //       allowedExtensions: ['xls', 'xlsx'],
+  //       withData: true,
+  //     );
+
+  //     if (result == null || result.files.single.bytes == null) {
+  //       throw Exception('No file selected or file data is null');
+  //     }
+
+  //     final Uint8List bytes = result.files.single.bytes!;
+  //     final excel = Excel.decodeBytes(bytes);
+
+  //     final List<Map<String, String>> data = [];
+
+  //     for (final table in excel.tables.keys) {
+  //       final sheet = excel.tables[table];
+
+  //       for (var row in sheet!.rows.skip(1)) {
+  //         final brand = row[0]?.value?.toString();
+  //         final model = row[1]?.value?.toString();
+
+  //         if (brand != null && model != null) {
+  //           data.add({'brand': brand, 'model': model});
+  //         }
+  //       }
+  //     }
+  //     return data;
+  //   } catch (e) {
+  //     print(e);
+  //     return [];
+  //   }
+  // }
+
+  // Future<void> uploadCarBrandsAndModels(
+  //     List<Map<String, dynamic>> carData) async {
+  //   final carBrandsCollection =
+  //       FirebaseFirestore.instance.collection('all_brands');
+
+  //   // Fetch existing brands from Firestore and map them by name
+  //   final existingBrandsSnapshot = await carBrandsCollection.get();
+  //   final Map<String, String> existingBrandIds = {
+  //     for (var doc in existingBrandsSnapshot.docs) doc.data()['name']: doc.id
+  //   };
+
+  //   // Group models under each brand
+  //   final Map<String, Set<String>> brandModelsMap = {};
+  //   for (var item in carData) {
+  //     final brand = item['brand'];
+  //     final model = item['model'];
+  //     if (brand == null || model == null) continue;
+
+  //     brandModelsMap.putIfAbsent(brand, () => {}).add(model);
+  //   }
+
+  //   // Upload brands and models
+  //   for (var entry in brandModelsMap.entries) {
+  //     final brand = entry.key;
+  //     final models = entry.value;
+
+  //     String brandId;
+
+  //     // Use existing brand or create a new one
+  //     if (existingBrandIds.containsKey(brand)) {
+  //       brandId = existingBrandIds[brand]!;
+  //     } else {
+  //       final newBrandDoc = await carBrandsCollection.add({
+  //         'added_date': DateTime.now().toIso8601String(),
+  //         'logo': '',
+  //         'name': brand,
+  //         'status': true,
+  //       });
+  //       brandId = newBrandDoc.id;
+  //       print('Added new brand: $brand');
+  //     }
+
+  //     // Fetch existing models for this brand to avoid duplicates
+  //     final existingModelsSnapshot =
+  //         await carBrandsCollection.doc(brandId).collection('values').get();
+
+  //     final existingModelNames = existingModelsSnapshot.docs
+  //         .map((doc) => doc.data()['name'] as String)
+  //         .toSet();
+
+  //     // Add new models only
+  //     for (var model in models) {
+  //       if (!existingModelNames.contains(model)) {
+  //         await carBrandsCollection.doc(brandId).collection('values').add({
+  //           'added_date': DateTime.now().toIso8601String(),
+  //           'name': model,
+  //           'status': true,
+  //         });
+  //         print('Added model: $model to brand: $brand');
+  //       }
+  //     }
+  //   }
+  // }
 
   getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -166,6 +265,7 @@ class CarTradingController extends GetxController {
     carModel.value.text =
         await getCarModelName(data['car_brand'], data['car_model']);
     carModelId.value = data['car_model'];
+    getModelsByCarBrand(data['car_brand']);
     calculateTotals();
   }
 
@@ -179,6 +279,7 @@ class CarTradingController extends GetxController {
       'comment': comments.value.text
     });
     calculateTotals();
+    Get.back();
   }
 
   addNewTrade() async {
@@ -435,10 +536,21 @@ class CarTradingController extends GetxController {
 
   Future<String> gettradeReceived(tradeId) async {
     try {
-      var paid = await FirebaseFunctions.instance
+      var rec = await FirebaseFunctions.instance
           .httpsCallable('get_trade_total_received')
           .call(tradeId);
-      return paid.data.toString();
+      return rec.data.toString();
+    } catch (e) {
+      return '';
+    }
+  }
+
+   Future<String> gettradeNETs(tradeId) async {
+    try {
+      var net = await FirebaseFunctions.instance
+          .httpsCallable('get_trade_total_NETs')
+          .call(tradeId);
+      return net.data.toString();
     } catch (e) {
       return '';
     }

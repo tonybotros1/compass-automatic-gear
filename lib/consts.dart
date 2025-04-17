@@ -526,10 +526,10 @@ Container statusBox(String status, {hieght = 30.0, width}) {
     alignment: Alignment.center,
     decoration: BoxDecoration(
         border: Border.all(color: Colors.white, width: 2),
-        borderRadius:  BorderRadius.circular(5) ,
+        borderRadius: BorderRadius.circular(5),
         color: status == 'New'
             ? Colors.green
-            : status == 'Posted'
+            : status == 'Posted' || status == 'Sold'
                 ? Colors.teal
                 : status == 'Cancelled' || status == 'R'
                     ? Colors.red
@@ -549,3 +549,26 @@ Container statusBox(String status, {hieght = 30.0, width}) {
     ),
   );
 }
+
+
+// final NumberFormat _formatter = NumberFormat("#,##0.00", "en_US");
+
+// void _formatInput(dynamic value) {
+//   if (value == null) return;
+
+//   double? parsed;
+
+//   if (value is num) {
+//     parsed = value.toDouble();
+//   } else if (value is String && value.trim().isNotEmpty) {
+//     parsed = double.tryParse(value.replaceAll(',', ''));
+//   }
+
+//   if (parsed != null) {
+//     final String formatted = _formatter.format(parsed);
+//     _controller.value = TextEditingValue(
+//       text: formatted,
+//       selection: TextSelection.collapsed(offset: formatted.length),
+//     );
+//   }
+// }

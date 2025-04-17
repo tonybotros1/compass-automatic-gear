@@ -24,9 +24,26 @@ Widget addNewTradeOrEdit({
               child: Column(
                 children: [
                   labelContainer(
-                      lable: Text(
-                    'Car Information',
-                    style: fontStyle1,
+                      lable: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Car Information',
+                        style: fontStyle1,
+                      ),
+                      ElevatedButton(
+                          style: new2ButtonStyle,
+                          onPressed: () {
+                            controller.changeStatus(
+                                controller.currentTradId.value, 'New');
+                            controller.status.value = 'New';
+                          },
+                          child: Text(
+                            'Change Status To New',
+                            style: TextStyle(
+                                color: Colors.red, fontWeight: FontWeight.bold),
+                          ))
+                    ],
                   )),
                   carInformation(context: context, constraints: constraints),
                   const SizedBox(
@@ -45,8 +62,8 @@ Widget addNewTradeOrEdit({
                           onPressed: () {
                             controller.item.clear();
                             controller.itemId.value = '';
-                            controller.pay.text = '';
-                            controller.receive.text = '';
+                            controller.pay.text = '0';
+                            controller.receive.text = '0';
                             controller.comments.value.text = '';
                             itemDialog(
                                 controller: controller,
@@ -78,15 +95,18 @@ Widget addNewTradeOrEdit({
               child: Container(
                 decoration: containerDecor,
                 child: Column(
-                  spacing: 10,
+                  // spacing: 10,
                   children: [
+                    SizedBox(
+                      height: 1,
+                    ),
                     buildCustomTableHeader(
-                      suffix: TextButton(onPressed: null, child: Text('')),
+                      suffix: TextButton(onPressed: () {}, child: SizedBox()),
                       cellConfigs: [
                         TableCellConfig(label: 'Date'),
                         TableCellConfig(label: 'Item'),
-                        TableCellConfig(label: 'Pay'),
-                        TableCellConfig(label: 'Receive'),
+                        TableCellConfig(label: 'Paid'),
+                        TableCellConfig(label: 'Received'),
                         TableCellConfig(label: 'Comments', flex: 5),
                       ],
                     ),
@@ -101,40 +121,51 @@ Widget addNewTradeOrEdit({
                               child: Column(
                                 children: List.generate(
                                   controller.addedItems.length,
-                                  (i) => KeyedSubtree(
-                                    key: ValueKey(controller.addedItems[i]),
-                                    child: buildCustomRow(
-                                      suffix: TextButton(
-                                          onPressed: () {
-                                            controller.addedItems.removeAt(i);
-                                            controller.calculateTotals();
-                                          },
-                                          child: Text('Clear')),
-                                      cellConfigs: [
-                                        RowCellConfig(
-                                            initialValue: controller
-                                                .addedItems[i]['date']),
-                                        RowCellConfig(
-                                          initialValue: controller.getdataName(
-                                            controller.addedItems[i]['item'],
-                                            controller.allItems,
-                                          ),
+                                  (i) => Column(
+                                    children: [
+                                      KeyedSubtree(
+                                        key: ValueKey(controller.addedItems[i]),
+                                        child: buildCustomRow(
+                                          suffix: TextButton(
+                                              onPressed: () {
+                                                controller.addedItems
+                                                    .removeAt(i);
+                                                controller.calculateTotals();
+                                              },
+                                              child: Text('Delete')),
+                                          cellConfigs: [
+                                            RowCellConfig(
+                                                initialValue: controller
+                                                    .addedItems[i]['date']),
+                                            RowCellConfig(
+                                              initialValue:
+                                                  controller.getdataName(
+                                                controller.addedItems[i]
+                                                    ['item'],
+                                                controller.allItems,
+                                              ),
+                                            ),
+                                            RowCellConfig(
+                                                initialValue: controller
+                                                    .addedItems[i]['pay'],
+                                                tabelCellAlign: TextAlign.end),
+                                            RowCellConfig(
+                                                initialValue: controller
+                                                    .addedItems[i]['receive'],
+                                                tabelCellAlign: TextAlign.end),
+                                            RowCellConfig(
+                                              initialValue: controller
+                                                  .addedItems[i]['comment'],
+                                              flex: 5,
+                                            ),
+                                          ],
                                         ),
-                                        RowCellConfig(
-                                            initialValue:
-                                                controller.addedItems[i]['pay'],
-                                            tabelCellAlign: TextAlign.end),
-                                        RowCellConfig(
-                                            initialValue: controller
-                                                .addedItems[i]['receive'],
-                                            tabelCellAlign: TextAlign.end),
-                                        RowCellConfig(
-                                          initialValue: controller.addedItems[i]
-                                              ['comment'],
-                                          flex: 5,
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                      Divider(
+                                        color: Colors.black,
+                                        thickness: 0.5,
+                                      )
+                                    ],
                                   ),
                                 ),
                               ),
@@ -151,10 +182,10 @@ Widget addNewTradeOrEdit({
         ),
       ),
       Padding(
-        padding: const EdgeInsets.only(top: 2, bottom: 2),
+        padding: const EdgeInsets.symmetric(vertical: 1),
         child: GetX<CarTradingController>(builder: (controller) {
           return buildCustomTableFooter(
-            suffix: TextButton(onPressed: null, child: Text('')),
+            suffix: TextButton(onPressed: () {}, child: SizedBox()),
             cellConfigs: [
               TableCellConfig(label: ''),
               TableCellConfig(
@@ -174,7 +205,7 @@ Widget addNewTradeOrEdit({
       ),
       GetX<CarTradingController>(builder: (controller) {
         return buildCustomTableFooter(
-          suffix: TextButton(onPressed: null, child: Text('')),
+          suffix: TextButton(onPressed: () {}, child: SizedBox()),
           cellConfigs: [
             TableCellConfig(label: ''),
             TableCellConfig(label: 'NET', textAlignment: Alignment.centerRight),

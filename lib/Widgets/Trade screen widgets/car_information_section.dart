@@ -49,11 +49,6 @@ Container carInformation({
                     hintText: 'Color (OUT)',
                     showedSelectedName: 'name',
                     items: isColorsLoading ? {} : controller.allColors,
-                    itemBuilder: (context, key, value) {
-                      return ListTile(
-                        title: Text(value['name']),
-                      );
-                    },
                     onChanged: (key, value) {
                       controller.colorOut.value.text = value['name'];
                       controller.colorOutId.value = key;
@@ -82,11 +77,6 @@ Container carInformation({
                           textcontroller: controller.carBrand.value.text,
                           hintText: 'Car Brand',
                           items: isBrandsLoading ? {} : controller.allBrands,
-                          itemBuilder: (context, key, value) {
-                            return ListTile(
-                              title: Text(value['name']),
-                            );
-                          },
                           onChanged: (key, value) {
                             controller.carModel.value.clear();
                             controller.getModelsByCarBrand(key);
@@ -110,11 +100,6 @@ Container carInformation({
                           items: isCarSpecificationsLoading
                               ? {}
                               : controller.allCarSpecifications,
-                          itemBuilder: (context, key, value) {
-                            return ListTile(
-                              title: Text(value['name']),
-                            );
-                          },
                           onChanged: (key, value) {
                             controller.carSpecification.value.text =
                                 value['name'];
@@ -146,11 +131,6 @@ Container carInformation({
                           showedSelectedName: 'name',
                           hintText: 'Color (IN)',
                           items: isColorsLoading ? {} : controller.allColors,
-                          itemBuilder: (context, key, value) {
-                            return ListTile(
-                              title: Text(value['name']),
-                            );
-                          },
                           onChanged: (key, value) {
                             controller.colorIn.value.text = value['name'];
                             controller.colorInId.value = key;
@@ -194,11 +174,6 @@ Container carInformation({
                           textcontroller: controller.carModel.value.text,
                           hintText: 'Car Model',
                           items: isModelLoading ? {} : controller.allModels,
-                          itemBuilder: (context, key, value) {
-                            return ListTile(
-                              title: Text(value['name']),
-                            );
-                          },
                           onChanged: (key, value) {
                             controller.carModel.value.text = value['name'];
                             controller.carModelId.value = key;
@@ -224,11 +199,6 @@ Container carInformation({
                           items: isEngineSizeLoading
                               ? {}
                               : controller.allEngineSizes,
-                          itemBuilder: (context, key, value) {
-                            return ListTile(
-                              title: Text(value['name']),
-                            );
-                          },
                           onChanged: (key, value) {
                             controller.engineSize.value.text = value['name'];
                             controller.engineSizeId.value = key;
@@ -259,11 +229,6 @@ Container carInformation({
                           textcontroller: controller.year.value.text,
                           hintText: 'Year',
                           items: isYearsLoading ? {} : controller.allYears,
-                          itemBuilder: (context, key, value) {
-                            return ListTile(
-                              title: Text(value['name']),
-                            );
-                          },
                           onChanged: (key, value) {
                             controller.year.value.text = value['name'];
                             controller.yearId.value = key;

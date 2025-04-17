@@ -42,7 +42,7 @@ Future<dynamic> itemDialog(
                                 style: new2ButtonStyle,
                                 child: controller.addingNewValue.value == false
                                     ? const Text(
-                                        'Save',
+                                        'Ok',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       )

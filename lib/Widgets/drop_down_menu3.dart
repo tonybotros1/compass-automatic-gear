@@ -36,6 +36,8 @@ class DropdownController extends GetxController {
       }
     } else if (widget is Text) {
       return widget.data ?? "";
+    } else if (widget is Container) {
+      return (widget.child as Text).data ?? '';
     }
     return "";
   }
@@ -353,7 +355,7 @@ class CustomDropdown extends StatelessWidget {
   final BoxDecoration? dropdownDecoration;
   final BoxDecoration? disabledDecoration;
   final void Function(String, dynamic)? onChanged;
-  final Widget Function(BuildContext, String, dynamic) itemBuilder;
+  final Widget Function(BuildContext, String, dynamic)? itemBuilder;
   final String textcontroller;
   final bool? enabled;
   final TextStyle? enabledTextStyle;
@@ -365,7 +367,7 @@ class CustomDropdown extends StatelessWidget {
   CustomDropdown({
     super.key,
     required this.items,
-    required this.itemBuilder,
+     this.itemBuilder,
     this.textcontroller = '',
     this.onChanged,
     this.hintText = "Select an option",
@@ -435,7 +437,15 @@ class CustomDropdown extends StatelessWidget {
                           context,
                           buttonKey,
                           items,
-                          itemBuilder: itemBuilder,
+                          itemBuilder: itemBuilder == null
+                              ? (context, key, value) {
+                                  return Container(
+                                      alignment: Alignment.centerLeft,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 4),
+                                      child: Text(value[showedSelectedName]));
+                                }
+                              : itemBuilder!,
                           onChanged: (key, value) {
                             textControllerValue.value = '';
                             controller.selectedKey.value = key;
