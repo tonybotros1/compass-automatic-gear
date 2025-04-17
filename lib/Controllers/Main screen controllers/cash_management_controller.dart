@@ -312,7 +312,6 @@ class CashManagementController extends GetxController {
         final List<dynamic> invoices = data['invoices'];
         availableReceipts.assignAll(invoices);
       }
-      print(availableReceipts);
     } on FirebaseFunctionsException catch (e) {
       // Catch and log errors from the Firebase function.
       showSnackBar('Alert', 'Error: ${e.message}');

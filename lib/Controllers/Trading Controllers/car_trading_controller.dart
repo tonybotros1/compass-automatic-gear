@@ -589,6 +589,5 @@ class CarTradingController extends GetxController {
       );
     }
 
-    print(filteredAddedItems);
   }
 }
