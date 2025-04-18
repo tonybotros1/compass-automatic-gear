@@ -19,7 +19,7 @@ class DropdownController extends GetxController {
   FocusNode searchFocusNode = FocusNode();
   ScrollController scrollController = ScrollController();
   RxString highlightedKey = RxString('');
-
+  final Map<String, GlobalKey> _itemKeys = {};
   @override
   void onClose() {
     query.value.dispose();
@@ -52,63 +52,74 @@ class DropdownController extends GetxController {
   }) {
     if (overlayEntry != null) return;
 
+    // Initialize items and query
     allItems = items;
     filteredItems.assignAll(items);
     query.value.text = searchQuery.value;
 
-    // Obtain the size and position of the dropdown field.
-    RenderBox renderBox =
-        buttonKey.currentContext!.findRenderObject() as RenderBox;
-    Offset fieldOffset = renderBox.localToGlobal(Offset.zero);
-    double fieldWidth = renderBox.size.width;
-    double fieldHeight = renderBox.size.height;
-    double screenHeight = MediaQuery.of(context).size.height;
-    double availableSpaceBelow = screenHeight - fieldOffset.dy - fieldHeight;
-    double availableSpaceAbove = fieldOffset.dy;
-    double dropdownMaxHeight = 175.0;
-
-    bool showAbove = availableSpaceBelow < dropdownMaxHeight &&
-        availableSpaceAbove > availableSpaceBelow;
-    double offsetY = showAbove ? -dropdownMaxHeight : fieldHeight;
+    // Measure button and screen
+    final renderBox = buttonKey.currentContext!.findRenderObject() as RenderBox;
+    final fieldOffset = renderBox.localToGlobal(Offset.zero);
+    final fieldSize = renderBox.size;
+    final screenSize = MediaQuery.of(context).size;
+    const double margin = 8.0;
+    final spaceBelow =
+        screenSize.height - fieldOffset.dy - fieldSize.height - margin;
+        double dropdownMaxHeight = 175;
+    final spaceAbove = fieldOffset.dy - margin;
+    final showAbove = spaceBelow < dropdownMaxHeight && spaceAbove > spaceBelow;
+    final maxHeight =
+        (showAbove ? spaceAbove : spaceBelow).clamp(0.0, dropdownMaxHeight);
 
     overlayEntry = OverlayEntry(
-      builder: (context) => Stack(
+      builder: (ctx) => Stack(
         children: [
+          // Dismiss on outside tap
           Positioned.fill(
             child: GestureDetector(
               onTap: hideDropdown,
               child: Container(color: Colors.transparent),
             ),
           ),
+
+          // Positioning anchor
           CompositedTransformFollower(
             link: layerLink,
             showWhenUnlinked: false,
-            offset: Offset(0, offsetY),
-            child: SizedBox(
-              width: fieldWidth,
-              child: Focus(
-                focusNode: overlayFocusNode,
-                onKeyEvent: (node, event) {
-                  if (event is KeyDownEvent) {
-                    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                      _moveHighlight(1);
-                      return KeyEventResult.handled;
-                    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                      _moveHighlight(-1);
-                      return KeyEventResult.handled;
-                    } else if (event.logicalKey == LogicalKeyboardKey.enter) {
-                      _selectHighlightedItem(onChanged);
-                      return KeyEventResult.handled;
-                    }
+            targetAnchor: showAbove ? Alignment.topLeft : Alignment.bottomLeft,
+            followerAnchor:
+                showAbove ? Alignment.bottomLeft : Alignment.topLeft,
+
+            // Keyboard listener wraps the dropdown
+            child: Focus(
+              focusNode: overlayFocusNode,
+              onKeyEvent: (node, event) {
+                if (event is KeyDownEvent) {
+                  if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                    _moveHighlight(1);
+                    return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                    _moveHighlight(-1);
+                    return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.enter) {
+                    _selectHighlightedItem(onChanged);
+                    return KeyEventResult.handled;
                   }
-                  return KeyEventResult.ignored;
-                },
-                child: Material(
-                  elevation: 4.0,
-                  borderRadius: BorderRadius.circular(5),
+                }
+                return KeyEventResult.ignored;
+              },
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(5),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: fieldSize.width,
+                    maxHeight: maxHeight,
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Search field
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: SizedBox(
@@ -117,16 +128,15 @@ class DropdownController extends GetxController {
                             autofocus: true,
                             focusNode: searchFocusNode,
                             controller: query.value,
-                            onChanged: (query) {
-                              searchQuery.value = query;
+                            onChanged: (q) {
+                              searchQuery.value = q;
                               filterItems(itemBuilder);
                             },
                             decoration: InputDecoration(
+                              hintText: 'Search…',
                               hintStyle: textFieldFontStyle,
-                              hintText: "Search...",
                               suffixIcon: IconButton(
-                                iconSize: 20,
-                                icon: const Icon(Icons.close),
+                                icon: const Icon(Icons.close, size: 20),
                                 onPressed: () {
                                   searchQuery.value = '';
                                   query.value.clear();
@@ -142,57 +152,58 @@ class DropdownController extends GetxController {
                           ),
                         ),
                       ),
-                      Obx(() => filteredItems.isEmpty
-                          ? const Padding(
-                              padding: EdgeInsets.all(8),
-                              child: Text("No results found",
-                                  style: TextStyle(color: Colors.grey)),
-                            )
-                          : Container(
-                              constraints: BoxConstraints(
-                                maxHeight: dropdownMaxHeight,
-                              ),
-                              child: Scrollbar(
-                                controller: scrollController,
-                                thumbVisibility: true,
-                                trackVisibility: true,
-                                child: SingleChildScrollView(
-                                  controller: scrollController,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children:
-                                        filteredItems.entries.map((entry) {
-                                      return MouseRegion(
-                                        cursor: SystemMouseCursors.click,
-                                        onEnter: (_) =>
-                                            highlightedKey.value = entry.key,
-                                        onExit: (_) =>
-                                            highlightedKey.value = '',
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            selectedKey.value = entry.key;
-                                            selectedValue.value = entry.value;
-                                            textController.value = '';
-                                            isValid.value = true;
-                                            hideDropdown();
-                                            onChanged?.call(
-                                                entry.key, entry.value);
-                                          },
-                                          child: Obx(() => Container(
-                                                color: _getItemColor(
-                                                  entry.key,
-                                                  entry.value,
-                                                ),
-                                                child: itemBuilder(context,
-                                                    entry.key, entry.value),
-                                              )),
-                                        ),
-                                      );
-                                    }).toList(),
+
+                      // Results list
+                      Obx(() {
+                        if (filteredItems.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Text(
+                              "No results found",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          );
+                        }
+                        return Expanded(
+                          child: Scrollbar(
+                            controller: scrollController,
+                            thumbVisibility: true,
+                            trackVisibility: true,
+                            child: ListView.builder(
+                              controller: scrollController,
+                              itemCount: filteredItems.length,
+                              itemBuilder: (ctx, i) {
+                                final key = filteredItems.keys.elementAt(i);
+                                final val = filteredItems[key]!;
+                                final itemKey = _itemKeys.putIfAbsent(
+                                  key,
+                                  () => GlobalKey(),
+                                );
+                                return MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  onEnter: (_) => highlightedKey.value = key,
+                                  onExit: (_) => highlightedKey.value = '',
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      selectedKey.value = key;
+                                      selectedValue.value = val;
+                                      textController.value = '';
+                                      isValid.value = true;
+                                      hideDropdown();
+                                      onChanged?.call(key, val);
+                                    },
+                                    child: Obx(() => Container(
+                                          key: itemKey,
+                                          color: _getItemColor(key, val),
+                                          child: itemBuilder(ctx, key, val),
+                                        )),
                                   ),
-                                ),
-                              ),
-                            )),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -270,19 +281,30 @@ class DropdownController extends GetxController {
     _scrollToHighlightedItem();
   }
 
-  void _scrollToHighlightedItem() {
-    final keys = filteredItems.keys.toList();
-    int index = keys.indexOf(highlightedKey.value);
-    if (index != -1 && scrollController.hasClients) {
-      const double itemHeight = 48.0;
-      double scrollOffset = index * itemHeight;
-      double maxScroll = scrollController.position.maxScrollExtent;
-      double targetOffset = scrollOffset.clamp(0.0, maxScroll);
+  // void _scrollToHighlightedItem() {
+  //   final keys = filteredItems.keys.toList();
+  //   int index = keys.indexOf(highlightedKey.value);
+  //   if (index != -1 && scrollController.hasClients) {
+  //     const double itemHeight = 48.0;
+  //     double scrollOffset = index * itemHeight;
+  //     double maxScroll = scrollController.position.maxScrollExtent;
+  //     double targetOffset = scrollOffset.clamp(0.0, maxScroll);
 
-      scrollController.animateTo(
-        targetOffset,
+  //     scrollController.animateTo(
+  //       targetOffset,
+  //       duration: const Duration(milliseconds: 200),
+  //       curve: Curves.easeInOut,
+  //     );
+  //   }
+  // }
+  void _scrollToHighlightedItem() {
+    final key = _itemKeys[highlightedKey.value];
+    if (key?.currentContext != null) {
+      Scrollable.ensureVisible(
+        key!.currentContext!,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
+        alignment: 0.5, // centers it; tweak 0.0→top, 1.0→bottom
       );
     }
   }
@@ -367,7 +389,7 @@ class CustomDropdown extends StatelessWidget {
   CustomDropdown({
     super.key,
     required this.items,
-     this.itemBuilder,
+    this.itemBuilder,
     this.textcontroller = '',
     this.onChanged,
     this.hintText = "Select an option",

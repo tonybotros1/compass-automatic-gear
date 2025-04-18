@@ -45,11 +45,11 @@ Widget addNewItemOrEdit({
                 showedSelectedName: 'name',
                 hintText: 'Item',
                 items: isItemsLoading ? {} : controller.allItems,
-                itemBuilder: (context, key, value) {
-                  return ListTile(
-                    title: Text(value['name']),
-                  );
-                },
+                // itemBuilder: (context, key, value) {
+                //   return ListTile(
+                //     title: Text(value['name']),
+                //   );
+                // },
                 onChanged: (key, value) {
                   controller.item.text = value['name'];
                   controller.itemId.value = key;

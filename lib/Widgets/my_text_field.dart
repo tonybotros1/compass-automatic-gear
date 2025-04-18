@@ -17,7 +17,7 @@ Widget myTextFormFieldWithBorder(
     bool? isDouble,
     bool? isDate,
     maxLines = 1,
-    double? borderRadius = 4,
+    // double? borderRadius = 4,
     TextAlign? textAlign = TextAlign.start,
     String? initialValue,
     int? minLines,
@@ -83,19 +83,17 @@ Widget myTextFormFieldWithBorder(
             filled: isEnabled == true,
             fillColor: Colors.grey.shade200,
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(borderRadius!),
+              // borderRadius: BorderRadius.circular(borderRadius!),
               borderSide: BorderSide(color: Colors.grey, width: 2.0),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
+              // borderRadius: BorderRadius.circular(borderRadius),
               borderSide: BorderSide(color: Colors.grey, width: 1.0),
             ),
-            disabledBorder: InputBorder.none,
-            //  OutlineInputBorder(
-
-            //   borderRadius: BorderRadius.circular(borderRadius),
-            //   borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
-            // ),
+            disabledBorder: OutlineInputBorder(
+              // borderRadius: BorderRadius.circular(borderRadius),
+              borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+            ),
             errorBorder: const OutlineInputBorder(
               // borderRadius: BorderRadius.circular(5),
               borderSide: BorderSide(color: Colors.red, width: 1.0),

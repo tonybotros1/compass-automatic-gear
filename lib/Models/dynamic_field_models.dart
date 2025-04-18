@@ -19,28 +19,25 @@ class DropdownConfig {
   final Map menuValues;
   final bool validate;
   final int flex;
-  final Widget Function(BuildContext, String, dynamic) itemBuilder;
+  final Widget Function(BuildContext, String, dynamic)? itemBuilder;
   final void Function(String, dynamic)? onSelected;
   final Widget Function(String, dynamic)? showedResult;
   final String textController;
   final bool? isEnabled;
-  
+
   final String showedSelectedName;
 
   DropdownConfig(
-      {
-      required this.hintText,
+      {required this.hintText,
       required this.menuValues,
       this.validate = false,
       this.flex = 1,
-      required this.itemBuilder,
+      this.itemBuilder,
       this.onSelected,
       this.textController = '',
-      this.showedSelectedName  ='',
+      this.showedSelectedName = '',
       this.isEnabled,
-      this.showedResult
-     
-      });
+      this.showedResult});
 }
 
 class FieldConfig {

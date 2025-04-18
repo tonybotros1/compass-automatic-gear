@@ -353,7 +353,7 @@ Widget editSection(context, CarTradingController controller,
                 controller.setButtonLoading(tradeId, true);
                 controller.currentTradId.value = tradeId;
                 await controller.loadValues(tradeData);
-                controller.setButtonLoading(tradeId, false); // Stop loading
+                controller.setButtonLoading(tradeId, false);
 
                 tradesDialog(
                     controller: controller,

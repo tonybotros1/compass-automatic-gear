@@ -24,7 +24,6 @@ Widget buildCustomRow({
       Expanded(
         flex: cell.flex,
         child: myTextFormFieldWithBorder(
-          borderRadius: 0,
           textAlign: cell.tabelCellAlign,
           isEnabled: cell.isEnabled,
           controller: cell.controller,

@@ -14,7 +14,7 @@ Widget carDetailsSection() {
       children: [
         GetX<JobCardController>(builder: (controller) {
           var isBrandsLoading = controller.allBrands.isEmpty;
-          var isTechLoading = controller.allTechnicians.isEmpty;
+          // var isTechLoading = controller.allTechnicians.isEmpty;
           final isCountriesLoading = controller.allCountries.isEmpty;
 
           return Row(
@@ -46,11 +46,11 @@ Widget carDetailsSection() {
                       textController: controller.carBrand.text,
                       hintText: isBrandsLoading ? 'Loading...' : 'Brand',
                       menuValues: isBrandsLoading ? {} : controller.allBrands,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text('${value['name']}'),
-                        );
-                      },
+                      // itemBuilder: (context, key, value) {
+                      //   return ListTile(
+                      //     title: Text('${value['name']}'),
+                      //   );
+                      // },
                       onSelected: (key, value) {
                         controller.carBrandLogo.value = value['logo'];
                         controller.carBrand.text = value['name'];
@@ -70,36 +70,36 @@ Widget carDetailsSection() {
                       menuValues: controller.allModels.isEmpty
                           ? {}
                           : controller.allModels,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text('${value['name']}'),
-                        );
-                      },
+                      // itemBuilder: (context, key, value) {
+                      //   return ListTile(
+                      //     title: Text('${value['name']}'),
+                      //   );
+                      // },
                       onSelected: (key, value) {
                         controller.carModel.text = value['name'];
                         controller.carModelId.value = key;
                       },
                     ),
                   ),
-                  DynamicConfig(
-                    isDropdown: true,
-                    flex: 1,
-                    dropdownConfig: DropdownConfig(
-                      showedSelectedName: 'name',
-                      textController: controller.technician.text,
-                      hintText: isTechLoading ? 'Loading...' : 'Technician',
-                      menuValues:
-                          isTechLoading ? {} : controller.allTechnicians,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text('${value['name']}'),
-                        );
-                      },
-                      onSelected: (key, value) {
-                        controller.technicianId.value = key;
-                      },
-                    ),
-                  ),
+                  // DynamicConfig(
+                  //   isDropdown: true,
+                  //   flex: 1,
+                  //   dropdownConfig: DropdownConfig(
+                  //     showedSelectedName: 'name',
+                  //     textController: controller.technician.text,
+                  //     hintText: isTechLoading ? 'Loading...' : 'Technician',
+                  //     menuValues:
+                  //         isTechLoading ? {} : controller.allTechnicians,
+                  //     itemBuilder: (context, key, value) {
+                  //       return ListTile(
+                  //         title: Text('${value['name']}'),
+                  //       );
+                  //     },
+                  //     onSelected: (key, value) {
+                  //       controller.technicianId.value = key;
+                  //     },
+                  //   ),
+                  // ),
                   DynamicConfig(
                     isDropdown: false,
                     flex: 1,
@@ -129,11 +129,11 @@ Widget carDetailsSection() {
                       hintText: isCountriesLoading ? 'Loading...' : 'Country',
                       menuValues:
                           isCountriesLoading ? {} : controller.allCountries,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text('${value['name']}'),
-                        );
-                      },
+                      // itemBuilder: (context, key, value) {
+                      //   return ListTile(
+                      //     title: Text('${value['name']}'),
+                      //   );
+                      // },
                       onSelected: (key, value) {
                         controller.country.text = value['name'];
                         controller.city.clear();
@@ -153,11 +153,11 @@ Widget carDetailsSection() {
                       menuValues: controller.allCities.isEmpty
                           ? {}
                           : controller.allCities,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text('${value['name']}'),
-                        );
-                      },
+                      // itemBuilder: (context, key, value) {
+                      //   return ListTile(
+                      //     title: Text('${value['name']}'),
+                      //   );
+                      // },
                       onSelected: (key, value) {
                         controller.city.text = value['name'];
                         controller.cityId.value = key;
@@ -194,11 +194,11 @@ Widget carDetailsSection() {
                 textController: controller.color.text,
                 hintText: isColorsLoading ? 'Loading...' : 'Color',
                 menuValues: isColorsLoading ? {} : controller.allColors,
-                itemBuilder: (context, key, value) {
-                  return ListTile(
-                    title: Text('${value['name']}'),
-                  );
-                },
+                // itemBuilder: (context, key, value) {
+                //   return ListTile(
+                //     title: Text('${value['name']}'),
+                //   );
+                // },
                 onSelected: (key, value) {
                   controller.color.text = value['name'];
                   controller.colorId.value = key;
@@ -223,11 +223,11 @@ Widget carDetailsSection() {
                 textController: controller.engineType.text,
                 hintText: isColorsLoading ? 'Loading...' : 'Engine Type',
                 menuValues: isColorsLoading ? {} : controller.allEngineType,
-                itemBuilder: (context, key, value) {
-                  return ListTile(
-                    title: Text('${value['name']}'),
-                  );
-                },
+                // itemBuilder: (context, key, value) {
+                //   return ListTile(
+                //     title: Text('${value['name']}'),
+                //   );
+                // },
                 onSelected: (key, value) {
                   controller.engineType.text = value['name'];
                   controller.engineTypeId.value = key;
@@ -244,17 +244,17 @@ Widget carDetailsSection() {
                 validate: false,
               ),
             ),
-             DynamicConfig(
-              isDropdown: false,
-              flex: 1,
-              fieldConfig: FieldConfig(
-                  isDouble: true,
-                  textController: controller.fuelAmount.value,
-                  labelText: 'Fuel Amount',
-                  // hintText: 'Enter Mileage In',
-                  validate: false,
-                 ),
-            ),
+            //  DynamicConfig(
+            //   isDropdown: false,
+            //   flex: 1,
+            //   fieldConfig: FieldConfig(
+            //       isDouble: true,
+            //       textController: controller.fuelAmount.value,
+            //       labelText: 'Fuel Amount',
+            //       // hintText: 'Enter Mileage In',
+            //       validate: false,
+            //      ),
+            // ),
             DynamicConfig(
               isDropdown: false,
               flex: 1,

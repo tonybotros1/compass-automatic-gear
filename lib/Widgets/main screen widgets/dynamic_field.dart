@@ -16,15 +16,15 @@ Widget dynamicFields({
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: config.isDropdown
                 ? CustomDropdown(
-                  showedResult: config.dropdownConfig?.showedResult ,
-                  showedSelectedName: config.dropdownConfig!.showedSelectedName,
-                  onChanged: config.dropdownConfig?.onSelected,
-                  textcontroller: config.dropdownConfig!.textController,
-                  validator:config.dropdownConfig?.validate ?? false ,
-                  hintText: config.dropdownConfig?.hintText ?? '',
+                    showedResult: config.dropdownConfig?.showedResult,
+                    showedSelectedName:
+                        config.dropdownConfig!.showedSelectedName,
+                    onChanged: config.dropdownConfig?.onSelected,
+                    textcontroller: config.dropdownConfig!.textController,
+                    validator: config.dropdownConfig?.validate ?? false,
+                    hintText: config.dropdownConfig?.hintText ?? '',
                     items: config.dropdownConfig?.menuValues ?? {},
-                    itemBuilder: config.dropdownConfig?.itemBuilder ??
-                        (_,___, __) => const SizedBox(),
+                    itemBuilder: config.dropdownConfig?.itemBuilder,
                   )
                 // dropDownValues(
                 //     listValues: config.dropdownConfig?.listValues ?? [],

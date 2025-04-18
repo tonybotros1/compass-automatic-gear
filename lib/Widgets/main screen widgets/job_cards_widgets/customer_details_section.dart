@@ -26,11 +26,11 @@ Widget customerDetailsSection() {
                 textController: controller.customerName.text,
                 hintText: isCustomersLoading ? 'Loading...' : 'Customer',
                 menuValues: isCustomersLoading ? {} : controller.allCustomers,
-                itemBuilder: (context, key, value) {
-                  return ListTile(
-                    title: Text('${value['entity_name']}'),
-                  );
-                },
+                // itemBuilder: (context, key, value) {
+                //   return ListTile(
+                //     title: Text('${value['entity_name']}'),
+                //   );
+                // },
                 onSelected: (key, value) {
                   controller.customerName.text = value['entity_name'];
                   controller.onSelectForCustomers(key);
@@ -109,11 +109,11 @@ Widget customerDetailsSection() {
                       hintText: isSalesManLoading ? 'Loading...' : 'Sales Man',
                       menuValues:
                           isSalesManLoading ? {} : controller.salesManMap,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text('${value['name']}'),
-                        );
-                      },
+                      // itemBuilder: (context, key, value) {
+                      //   return ListTile(
+                      //     title: Text('${value['name']}'),
+                      //   );
+                      // },
                       onSelected: (key, value) {
                         controller.customerSaleMan.value = value['name'];
                         controller.customerSaleManId.value = key;
@@ -129,11 +129,11 @@ Widget customerDetailsSection() {
                       hintText: isBranchesLoading ? 'Loading...' : 'Branch',
                       menuValues:
                           isBranchesLoading ? {} : controller.allBranches,
-                      itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text('${value['name']}'),
-                        );
-                      },
+                      // itemBuilder: (context, key, value) {
+                      //   return ListTile(
+                      //     title: Text('${value['name']}'),
+                      //   );
+                      // },
                       onSelected: (key, value) {
                         controller.customerBranch.text = value['name'];
                         controller.customerBranchId.value = key;
@@ -154,11 +154,19 @@ Widget customerDetailsSection() {
                       menuValues:
                           isCurrenciesLoading ? {} : controller.allCurrencies,
                       itemBuilder: (context, key, value) {
-                        return ListTile(
-                          title: Text(controller.getdataName(
-                              value['country_id'], controller.allCountries,
-                              title: 'currency_code')),
-                        );
+                        return Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
+                            child: Text(controller.getdataName(
+                                value['country_id'], controller.allCountries,
+                                title: 'currency_code')));
+
+                        //  ListTile(
+                        //   title: Text(controller.getdataName(
+                        //       value['country_id'], controller.allCountries,
+                        //       title: 'currency_code')),
+                        // );
                       },
                       onSelected: (key, value) {
                         controller.customerCurrency.text =

@@ -276,6 +276,7 @@ Widget valSectionInTheTable(
   return IconButton(
       tooltip: tooltip,
       onPressed: () {
+        controller.searchForValues.value.clear();
         controller.valueMap.clear();
         controller.listIDToWorkWithNewValue.value = listId;
         controller.getListValues(listId, masteredBy);
@@ -330,6 +331,7 @@ Widget valSectionInTheTableForBrands(
       tooltip: tooltip,
       onPressed: () {
         if (brandId != '') {
+          controller.searchForModels.value.clear();
           controller.getModelsValues(brandId);
           controller.brandIdToWorkWith.value = brandId;
           Get.dialog(

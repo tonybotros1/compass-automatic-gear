@@ -210,6 +210,7 @@ ElevatedButton valSectionInTheTable(ListOfValuesController controller, listId,
   return ElevatedButton(
       style: viewButtonStyle,
       onPressed: () {
+        controller.searchForValues.value.clear();
         controller.valueMap.clear();
         controller.listIDToWorkWithNewValue.value = listId;
         controller.getListValues(listId, listData['mastered_by']);
@@ -304,6 +305,7 @@ ElevatedButton newListButton(BuildContext context, BoxConstraints constraints,
     ListOfValuesController controller) {
   return ElevatedButton(
     onPressed: () {
+      controller.searchForLists.value.clear();
       controller.listName.clear();
       controller.code.clear();
       controller.masteredByForList.clear();

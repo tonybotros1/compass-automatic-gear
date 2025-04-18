@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
 import '../../Controllers/Trading Controllers/car_trading_controller.dart';
 import '../../consts.dart';
 import '../Auth screens widgets/register widgets/search_bar.dart';
