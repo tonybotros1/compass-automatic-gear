@@ -17,57 +17,99 @@ class CarTrading extends StatelessWidget {
         builder: (context, constraints) {
           return Padding(
             padding: screenPadding,
-            child: Container(
-              width: constraints.maxWidth,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  GetX<CarTradingController>(
-                    init: CarTradingController(),
-                    builder: (controller) {
-                      return searchBar(
-                        search: controller.search,
-                        constraints: constraints,
-                        context: context,
-                        controller: controller,
-                        title: 'Search for Trades',
-                        button: newtradeesButton(context, controller),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: GetX<CarTradingController>(
-                      builder: (controller) {
-                        if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        if (controller.allTrades.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
-                        }
-                        return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    width: constraints.maxWidth,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        GetX<CarTradingController>(
+                          init: CarTradingController(),
+                          builder: (controller) {
+                            return searchBar(
+                              search: controller.search,
                               constraints: constraints,
                               context: context,
                               controller: controller,
-                            ),
+                              title: 'Search for Trades',
+                              button: newtradeesButton(context, controller),
+                            );
+                          },
+                        ),
+                        Expanded(
+                          child: GetX<CarTradingController>(
+                            builder: (controller) {
+                              if (controller.isScreenLoding.value) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (controller.allTrades.isEmpty) {
+                                return const Center(
+                                  child: Text('No Element'),
+                                );
+                              }
+                              return SingleChildScrollView(
+                                scrollDirection: Axis
+                                    .vertical, // Horizontal scrolling for the table
+                                child: SizedBox(
+                                  width: constraints.maxWidth,
+                                  child: tableOfScreens(
+                                    constraints: constraints,
+                                    context: context,
+                                    controller: controller,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, right: 4),
+                  child: GetX<CarTradingController>(builder: (controller) {
+                    return Row(
+                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Total Paid:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        textForDataRowInTable(
+                            text: '${controller.totalPaysForAllTrades.value}',
+                            color: Colors.red,
+                            isBold: true),
+                        Text(
+                          'Total Received:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        textForDataRowInTable(
+                            text:
+                                '${controller.totalReceivesForAllTrades.value}',
+                            color: Colors.green,
+                            isBold: true),
+                        Text(
+                          'Net:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        textForDataRowInTable(
+                            text: '${controller.totalNETsForAllTrades.value}',
+                            color: Colors.blueGrey,
+                            isBold: true)
+                      ],
+                    );
+                  }),
+                )
+              ],
             ),
           );
         },
@@ -165,7 +207,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'NET',
+          text: 'Net',
         ),
         // onSort: controller.onSort,
       ),
@@ -194,22 +236,18 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
     tradeId, CarTradingController controller) {
   return DataRow(cells: [
     DataCell(
-      FutureBuilder<String>(
-        future: controller.getCarModelName(
-            tradeData['car_brand'], tradeData['car_model']),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text('Loading...');
-          } else if (snapshot.hasError) {
-            return const Text('Error');
-          } else {
-            return textForDataRowInTable(
-              text:
-                  '${controller.getdataName(tradeData['car_brand'], controller.allBrands)} ${snapshot.data}',
-            );
-          }
-        },
-      ),
+      Builder(builder: (_) {
+        final data = tradeData;
+        final brand =
+            controller.getdataName(data['car_brand'], controller.allBrands);
+        final model = controller.getCachedCarModelName(
+          data['car_brand'],
+          data['car_model'],
+        );
+        final display = model.isNotEmpty ? '$brand $model' : 'Loading...';
+
+        return textForDataRowInTable(text: display, maxWidth: null);
+      }),
     ),
     DataCell(
         Text(controller.getdataName(tradeData['year'], controller.allYears))),
@@ -229,7 +267,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
     ),
     DataCell(
       FutureBuilder<String>(
-        future: controller.gettradePaid(tradeId),
+        future: controller.gettradePaidCached(tradeId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Text('Loading...');
@@ -245,7 +283,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
     ),
     DataCell(
       FutureBuilder<String>(
-        future: controller.gettradeReceived(tradeId),
+        future: controller.gettradeReceivedCached(tradeId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Text('Loading...');
@@ -261,7 +299,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
     ),
     DataCell(
       FutureBuilder<String>(
-        future: controller.gettradeNETs(tradeId),
+        future: controller.gettradeNETsCached(tradeId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Text('Loading...');
@@ -302,23 +340,46 @@ ElevatedButton deleteSection(
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, CarTradingController controller,
+Widget editSection(context, CarTradingController controller,
     Map<String, dynamic> tradeData, constraints, tradeId) {
-  return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () async {
-        controller.currentTradId.value = tradeId;
-        await controller.loadValues(tradeData);
-        tradesDialog(
-            controller: controller,
-            canEdit: true,
-            onPressed: controller.addingNewValue.value
-                ? null
-                : () {
-                    controller.editTrade(tradeId);
-                  });
-      },
-      child: const Text('Edit'));
+  return GetX<CarTradingController>(builder: (controller) {
+    bool isLoading = controller.buttonLoadingStates[tradeId] ?? false;
+
+    return ElevatedButton(
+        style: editButtonStyle,
+        onPressed: controller.buttonLoadingStates[tradeId] == null ||
+                controller.buttonLoadingStates[tradeId] == false
+            ? () async {
+                controller.setButtonLoading(tradeId, true);
+                controller.currentTradId.value = tradeId;
+                await controller.loadValues(tradeData);
+                controller.setButtonLoading(tradeId, false); // Stop loading
+
+                tradesDialog(
+                    controller: controller,
+                    canEdit: true,
+                    onPressed: controller.addingNewValue.value
+                        ? null
+                        : () {
+                            controller.editTrade(tradeId);
+                          });
+              }
+            : null,
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : const Text('Edit')
+
+        //  const Text('Edit')
+
+        );
+  });
 }
 
 ElevatedButton newtradeesButton(

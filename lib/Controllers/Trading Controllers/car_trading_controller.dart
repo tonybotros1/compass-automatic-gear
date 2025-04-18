@@ -24,7 +24,7 @@ class CarTradingController extends GetxController {
   Rx<TextEditingController> comments = TextEditingController().obs;
   TextEditingController note = TextEditingController();
   TextEditingController item = TextEditingController();
-  TextEditingController itemDate = TextEditingController();
+  Rx<TextEditingController> itemDate = TextEditingController().obs;
   RxString query = RxString('');
   RxString queryForItems = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
@@ -32,7 +32,7 @@ class CarTradingController extends GetxController {
   RxBool isScreenLoding = RxBool(true);
   final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
-
+  RxBool isValuesLoading = RxBool(false);
   RxString colorInId = RxString('');
   RxString colorOutId = RxString('');
   RxString carSpecificationId = RxString('');
@@ -65,13 +65,22 @@ class CarTradingController extends GetxController {
   RxString yearListMasterdById = RxString('');
   RxString engineSizeListId = RxString('');
   RxString engineSizeListMasterdById = RxString('');
+  RxString newItemListMasteredByID = RxString('');
+  RxString newItemListID = RxString('');
   CarBrandsController carBrandsController = Get.put(CarBrandsController());
   RxString currentTradId = RxString('');
   RxDouble totalPays = RxDouble(0.0);
   RxDouble totalReceives = RxDouble(0.0);
   RxDouble totalNETs = RxDouble(0.0);
+  RxDouble totalPaysForAllTrades = RxDouble(0.0);
+  RxDouble totalReceivesForAllTrades = RxDouble(0.0);
+  RxDouble totalNETsForAllTrades = RxDouble(0.0);
   // final ScrollController scrollController = ScrollController();
   final Uuid _uuid = Uuid();
+  final Map<String, Future<String>> _paidFutureCache = {};
+  final Map<String, Future<String>> _receivedFutureCache = {};
+  final Map<String, Future<String>> _netsFutureCache = {};
+  var buttonLoadingStates = <String, bool>{}.obs;
 
   @override
   void onInit() async {
@@ -83,111 +92,73 @@ class CarTradingController extends GetxController {
     getEngineSizes();
     getYears();
     getItems();
-    // searchForItems.value.addListener(() {
-    //   filterItems();
-    // });
+    search.value.addListener(() {
+      filterTrades();
+    });
+    searchForItems.value.addListener(() {
+      filterItems();
+    });
     super.onInit();
   }
 
-  // Future<List<Map<String, String>>> parseExcelFromPicker() async {
-  //   try {
-  //     final result = await FilePicker.platform.pickFiles(
-  //       type: FileType.custom,
-  //       allowedExtensions: ['xls', 'xlsx'],
-  //       withData: true,
-  //     );
+  // function to manage loading button
+  void setButtonLoading(String menuId, bool isLoading) {
+    buttonLoadingStates[menuId] = isLoading;
+    buttonLoadingStates.refresh(); // Notify listeners
+  }
 
-  //     if (result == null || result.files.single.bytes == null) {
-  //       throw Exception('No file selected or file data is null');
-  //     }
+  Future<String> gettradePaidCached(String tradeId,
+      {bool forceRefresh = false}) {
+    if (forceRefresh) {
+      _paidFutureCache.remove(tradeId);
+    }
+    return _paidFutureCache.putIfAbsent(
+      tradeId,
+      () => gettradePaid(tradeId),
+    );
+  }
 
-  //     final Uint8List bytes = result.files.single.bytes!;
-  //     final excel = Excel.decodeBytes(bytes);
+  Future<String> gettradeReceivedCached(String tradeId,
+      {bool forceRefresh = false}) {
+    if (forceRefresh) {
+      _receivedFutureCache.remove(tradeId);
+    }
+    return _receivedFutureCache.putIfAbsent(
+      tradeId,
+      () => gettradeReceived(tradeId),
+    );
+  }
 
-  //     final List<Map<String, String>> data = [];
+  Future<String> gettradeNETsCached(String tradeId,
+      {bool forceRefresh = false}) {
+    if (forceRefresh) {
+      _netsFutureCache.remove(tradeId);
+    }
+    return _netsFutureCache.putIfAbsent(
+      tradeId,
+      () => gettradeNETs(tradeId),
+    );
+  }
 
-  //     for (final table in excel.tables.keys) {
-  //       final sheet = excel.tables[table];
+  Future<void> initTotalsCache() async {
+    for (final doc in allTrades) {
+      gettradePaidCached(doc.id);
+      gettradeReceivedCached(doc.id);
+      gettradeNETsCached(doc.id);
+    }
+  }
 
-  //       for (var row in sheet!.rows.skip(1)) {
-  //         final brand = row[0]?.value?.toString();
-  //         final model = row[1]?.value?.toString();
+  void refreshTradePaid(String tradeId) {
+    gettradePaidCached(tradeId, forceRefresh: true);
+    gettradeReceivedCached(tradeId, forceRefresh: true);
+    gettradeNETsCached(tradeId, forceRefresh: true);
+    allTrades.refresh();
+    filteredTrades.refresh();
+  }
 
-  //         if (brand != null && model != null) {
-  //           data.add({'brand': brand, 'model': model});
-  //         }
-  //       }
-  //     }
-  //     return data;
-  //   } catch (e) {
-  //     print(e);
-  //     return [];
-  //   }
-  // }
-
-  // Future<void> uploadCarBrandsAndModels(
-  //     List<Map<String, dynamic>> carData) async {
-  //   final carBrandsCollection =
-  //       FirebaseFirestore.instance.collection('all_brands');
-
-  //   // Fetch existing brands from Firestore and map them by name
-  //   final existingBrandsSnapshot = await carBrandsCollection.get();
-  //   final Map<String, String> existingBrandIds = {
-  //     for (var doc in existingBrandsSnapshot.docs) doc.data()['name']: doc.id
-  //   };
-
-  //   // Group models under each brand
-  //   final Map<String, Set<String>> brandModelsMap = {};
-  //   for (var item in carData) {
-  //     final brand = item['brand'];
-  //     final model = item['model'];
-  //     if (brand == null || model == null) continue;
-
-  //     brandModelsMap.putIfAbsent(brand, () => {}).add(model);
-  //   }
-
-  //   // Upload brands and models
-  //   for (var entry in brandModelsMap.entries) {
-  //     final brand = entry.key;
-  //     final models = entry.value;
-
-  //     String brandId;
-
-  //     // Use existing brand or create a new one
-  //     if (existingBrandIds.containsKey(brand)) {
-  //       brandId = existingBrandIds[brand]!;
-  //     } else {
-  //       final newBrandDoc = await carBrandsCollection.add({
-  //         'added_date': DateTime.now().toIso8601String(),
-  //         'logo': '',
-  //         'name': brand,
-  //         'status': true,
-  //       });
-  //       brandId = newBrandDoc.id;
-  //       print('Added new brand: $brand');
-  //     }
-
-  //     // Fetch existing models for this brand to avoid duplicates
-  //     final existingModelsSnapshot =
-  //         await carBrandsCollection.doc(brandId).collection('values').get();
-
-  //     final existingModelNames = existingModelsSnapshot.docs
-  //         .map((doc) => doc.data()['name'] as String)
-  //         .toSet();
-
-  //     // Add new models only
-  //     for (var model in models) {
-  //       if (!existingModelNames.contains(model)) {
-  //         await carBrandsCollection.doc(brandId).collection('values').add({
-  //           'added_date': DateTime.now().toIso8601String(),
-  //           'name': model,
-  //           'status': true,
-  //         });
-  //         print('Added model: $model to brand: $brand');
-  //       }
-  //     }
-  //   }
-  // }
+  String getCachedCarModelName(String brandId, String modelId) {
+    return _modelCache[modelId] ?? '';
+  }
 
   getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -226,7 +197,38 @@ class CarTradingController extends GetxController {
     totalNETs.value = totalReceives.value - totalPays.value;
   }
 
+  void calculateTotalsForAllTrades() {
+    totalNETsForAllTrades.value = 0.0;
+    totalPaysForAllTrades.value = 0.0;
+    totalReceivesForAllTrades.value = 0.0;
+
+    var newList = filteredTrades.isEmpty ? allTrades : filteredTrades;
+
+    for (var trade in newList) {
+      final data = trade.data() as Map<String, dynamic>;
+      final itemsList = data['items'] as List<dynamic>?;
+
+      if (itemsList != null) {
+        for (var item in itemsList) {
+          final pay = double.tryParse(item['pay'] ?? 0);
+          final receive = double.tryParse(item['receive'] ?? 0);
+
+          totalPaysForAllTrades.value += pay!;
+          totalReceivesForAllTrades.value += receive!;
+          totalNETsForAllTrades.value += (receive - pay);
+        }
+      }
+    }
+  }
+
   clearValues() {
+    totalPays.value = 0.0;
+    totalNETs.value = 0.0;
+    totalReceives.value = 0.0;
+    query.value = '';
+    queryForItems.value = '';
+    search.value.clear();
+    searchForItems.value.clear();
     allModels.clear();
     date.value.text = textToDate(DateTime.now());
     mileage.value.text = '0';
@@ -251,6 +253,7 @@ class CarTradingController extends GetxController {
   }
 
   loadValues(Map data) async {
+    isValuesLoading.value = true;
     date.value.text = data['date'];
     mileage.value.text = data['mileage'];
     colorIn.value.text = getdataName(data['color_in'], allColors);
@@ -277,6 +280,7 @@ class CarTradingController extends GetxController {
     carModelId.value = data['car_model'];
     getModelsByCarBrand(data['car_brand']);
     calculateTotals();
+    isValuesLoading.value = false;
   }
 
   void addNewItem() {
@@ -284,9 +288,8 @@ class CarTradingController extends GetxController {
 
     addedItems.add({
       'id': uniqueId,
-      'date': textToDate(DateTime.now()),
+      'date': itemDate.value.text,
       'item': itemId.value,
-      'item_name': item.text,
       'pay': pay.value.text,
       'receive': receive.value.text,
       'comment': comments.value.text,
@@ -299,33 +302,59 @@ class CarTradingController extends GetxController {
   addNewTrade() async {
     try {
       addingNewValue.value = true;
-      var currentTrade =
-          await FirebaseFirestore.instance.collection('all_trades').add({
-        'date': date.value.text,
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'mileage': mileage.value.text,
-        'specification': carSpecificationId.value,
-        'engine_size': engineSizeId.value,
-        'color_in': colorInId.value,
-        'color_out': colorOutId.value,
-        'year': yearId.value,
-        'note': note.text,
-        'items': addedItems,
-        'company_id': companyId.value,
-        'status': 'New'
-      });
-      status.value = 'New';
-      currentTradId.value = currentTrade.id;
-      addingNewValue.value = false;
+      var currentTrade = FirebaseFirestore.instance.collection('all_trades');
+
+      if (currentTradId.value == '') {
+        var addedTrade = await currentTrade.add({
+          'date': date.value.text,
+          'car_brand': carBrandId.value,
+          'car_model': carModelId.value,
+          'mileage': mileage.value.text,
+          'specification': carSpecificationId.value,
+          'engine_size': engineSizeId.value,
+          'color_in': colorInId.value,
+          'color_out': colorOutId.value,
+          'year': yearId.value,
+          'note': note.text,
+          'items': addedItems,
+          'company_id': companyId.value,
+          'status': 'New'
+        });
+        status.value = 'New';
+        currentTradId.value = addedTrade.id;
+        addingNewValue.value = false;
+        showSnackBar('Success', 'Addedd Successfully');
+      } else {
+        await currentTrade.doc(currentTradId.value).update({
+          'date': date.value.text,
+          'car_brand': carBrandId.value,
+          'car_model': carModelId.value,
+          'mileage': mileage.value.text,
+          'specification': carSpecificationId.value,
+          'engine_size': engineSizeId.value,
+          'color_in': colorInId.value,
+          'color_out': colorOutId.value,
+          'year': yearId.value,
+          'note': note.text,
+          'items': addedItems,
+        });
+        addingNewValue.value = false;
+        refreshTradePaid(currentTradId.value);
+        showSnackBar('Success', 'Updated Successfully');
+      }
     } catch (e) {
       addingNewValue.value = false;
     }
   }
 
-  editTrade(tradeId) {
+  editTrade(tradeId) async {
+    addingNewValue.value = true;
+
     try {
-      FirebaseFirestore.instance.collection('all_trades').doc(tradeId).update({
+      await FirebaseFirestore.instance
+          .collection('all_trades')
+          .doc(tradeId)
+          .update({
         'date': date.value.text,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
@@ -338,8 +367,11 @@ class CarTradingController extends GetxController {
         'note': note.text,
         'items': addedItems,
       });
+      refreshTradePaid(tradeId);
+      showSnackBar('Success', 'Updated Successfully');
+      addingNewValue.value = false;
     } catch (e) {
-      //
+      addingNewValue.value = false;
     }
   }
 
@@ -372,6 +404,9 @@ class CarTradingController extends GetxController {
           .listen((trade) {
         allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
         isScreenLoding.value = false;
+        initTradeSearchIndex();
+        initTotalsCache();
+        calculateTotalsForAllTrades();
       });
     } catch (e) {
       isScreenLoding.value = false;
@@ -474,7 +509,8 @@ class CarTradingController extends GetxController {
         .get();
 
     var typeId = typeDoc.docs.first.id;
-
+    newItemListID.value = typeId;
+    newItemListMasteredByID.value = typeDoc.docs.first.data()['mastered_by'];
     FirebaseFirestore.instance
         .collection('all_lists')
         .doc(typeId)
@@ -572,8 +608,6 @@ class CarTradingController extends GetxController {
 
   void filterItems() {
     final query = searchForItems.value.text.trim().toLowerCase();
-    // 2. Update the observable, in case you display the query elsewhere
-
     if (query.isEmpty) {
       filteredAddedItems.clear();
     } else {
@@ -594,7 +628,92 @@ class CarTradingController extends GetxController {
         }).toList(),
       );
     }
-
-    print("Filtered Items: $filteredAddedItems");
   }
+
+  final Map<String, String> _modelCache = {};
+  final Map<String, String> _searchStrings = {};
+
+  Future<void> initTradeSearchIndex() async {
+    for (var doc in allTrades) {
+      final brandId = doc.get('car_brand');
+      final modelId = doc.get('car_model');
+      if (!_modelCache.containsKey(modelId)) {
+        _modelCache[modelId] = await getCarModelName(brandId, modelId);
+      }
+    }
+
+    for (var doc in allTrades) {
+      final data = doc.data()! as Map<String, dynamic>;
+      final parts = <String>[
+        getdataName(data['year'], allYears),
+        getdataName(data['color_in'], allColors),
+        getdataName(data['color_out'], allColors),
+        getdataName(data['engine_size'], allEngineSizes),
+        getdataName(data['specification'], allCarSpecifications),
+        data['status']?.toString() ?? '',
+        data['mileage']?.toString() ?? '',
+        getdataName(data['car_brand'], allBrands),
+        _modelCache[data['car_model']] ?? '',
+      ];
+      _searchStrings[doc.id] = parts.join(' ').toLowerCase();
+    }
+
+    filteredTrades.assignAll(allTrades);
+  }
+
+  void filterTrades() {
+    final q = search.value.text.trim().toLowerCase();
+
+    if (q.isEmpty) {
+      filteredTrades.assignAll(allTrades);
+      calculateTotalsForAllTrades();
+    } else {
+      filteredTrades.assignAll(
+        allTrades.where((doc) {
+          final s = _searchStrings[doc.id] ?? '';
+          return s.contains(q);
+        }).toList(),
+      );
+      calculateTotalsForAllTrades();
+    }
+  }
+
+  // void filterTrades() {
+  //   final query = search.value.text.trim().toLowerCase();
+  //   if (query.isEmpty) {
+  //     filteredTrades.clear();
+  //   } else {
+  //     filteredTrades.assignAll(
+  //       allTrades.where((trade) {
+  //         final year = getdataName(trade['year'], allYears).toLowerCase();
+  //         final colorIN =
+  //             getdataName(trade['color_in'], allColors).toLowerCase();
+  //         final colorOUT =
+  //             getdataName(trade['color_out'], allColors).toLowerCase();
+  //         final engineSize =
+  //             getdataName(trade['engine_size'], allEngineSizes).toLowerCase();
+  //         final specification =
+  //             getdataName(trade['specification'], allCarSpecifications)
+  //                 .toLowerCase();
+  //         final status = trade['status']?.toString().toLowerCase() ?? '';
+  //         final mileage = trade['mileage']?.toString().toLowerCase() ?? '';
+  //         final brand =
+  //             getdataName(trade['car_brand'], allBrands).toLowerCase();
+  //         final model = getCarModelName(trade['car_brand'], trade['car_model'])
+  //             .toString()
+  //             .toLowerCase();
+
+  //         return year.contains(query) ||
+  //             specification.contains(query) ||
+  //             status.contains(query) ||
+  //             engineSize.contains(query) ||
+  //             mileage.contains(query) ||
+  //             brand.contains(query) ||
+  //             model.contains(query) ||
+  //             colorIN.contains(query) ||
+  //             colorOUT.contains(query);
+  //       }).toList(),
+  //     );
+  //   }
+  // }
 }

@@ -78,7 +78,6 @@ Widget addNewTradeOrEdit({
                       child: Column(
                         children: [
                           searchBar(
-                            onChanged: (_) => controller.filterItems(),
                             search: controller.searchForItems,
                             constraints: constraints,
                             context: context,
@@ -137,7 +136,7 @@ Widget addNewTradeOrEdit({
                   color: Colors.green,
                   isBold: true),
               Text(
-                'Total NETs:',
+                'Net:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               textForDataRowInTable(
@@ -235,7 +234,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> itemData, context, constraints,
       spacing: 5,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        // editSection(context, controller, itemData, constraints),
+        editSection(context, controller, itemData, constraints),
         deleteSection(controller, context, itemData),
       ],
     )),
@@ -255,20 +254,41 @@ ElevatedButton deleteSection(
 }
 
 ElevatedButton editSection(context, CarTradingController controller,
-    Map<String, dynamic> tradeData, constraints) {
+    Map<String, dynamic> itemData, constraints) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () async {
-        // controller.currentTradId.value = tradeId;
-        // await controller.loadValues(tradeData);
-        // tradesDialog(
-        //     controller: controller,
-        //     canEdit: true,
-        //     onPressed: controller.addingNewValue.value
-        //         ? null
-        //         : () {
-        //             controller.editTrade(tradeId);
-        //           });
+        controller.item.text =
+            controller.getdataName(itemData['item'], controller.allItems);
+        controller.itemId.value = itemData['item'];
+        controller.pay.text = itemData['pay'];
+        controller.receive.text = itemData['receive'];
+        controller.comments.value.text = itemData['comment'];
+        controller.itemDate.value.text = itemData['date'];
+        itemDialog(
+            controller: controller,
+            canEdit: true,
+            onPressed: () {
+              if (controller.item.value.text.isEmpty ||
+                  controller.pay.value.text.isEmpty ||
+                  controller.receive.value.text.isEmpty) {
+                showSnackBar('Alert', 'Please fill all fields');
+              } else {
+                int index = controller.addedItems
+                    .indexWhere((item) => item['id'] == itemData['id']);
+                if (index != -1) {
+                  controller.addedItems[index] = {
+                    'id': itemData['id'],
+                    'comment': controller.comments.value.text,
+                    'date': controller.itemDate.value.text,
+                    'item': controller.itemId.value,
+                    'pay': controller.pay.value.text,
+                    'receive': controller.receive.value.text,
+                  };
+                }
+                Get.back();
+              }
+            });
       },
       child: const Text('Edit'));
 }
@@ -282,15 +302,14 @@ ElevatedButton newItemButton(
       controller.pay.text = '0';
       controller.receive.text = '0';
       controller.comments.value.text = '';
-      controller.itemDate.text = textToDate(DateTime.now());
+      controller.itemDate.value.text = textToDate(DateTime.now());
       itemDialog(
           controller: controller,
           canEdit: true,
           onPressed: () {
             if (controller.item.value.text.isEmpty ||
                 controller.pay.value.text.isEmpty ||
-                controller.receive.value.text.isEmpty ||
-                controller.comments.value.text.isEmpty) {
+                controller.receive.value.text.isEmpty) {
               showSnackBar('Alert', 'Please fill all fields');
             } else {
               controller.addNewItem();
@@ -298,6 +317,6 @@ ElevatedButton newItemButton(
           });
     },
     style: newButtonStyle,
-    child: const Text('New Trade'),
+    child: const Text('New Line'),
   );
 }

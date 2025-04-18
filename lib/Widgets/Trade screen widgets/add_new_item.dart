@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../Controllers/Trading Controllers/car_trading_controller.dart';
+import '../main screen widgets/lists_widgets/values_section_in_list_of_values.dart';
+import 'car_information_section.dart';
 
 Widget addNewItemOrEdit({
+  required BoxConstraints constraints,
   required BuildContext context,
   required CarTradingController controller,
   required bool canEdit,
@@ -22,32 +25,51 @@ Widget addNewItemOrEdit({
                   suffixIcon: IconButton(
                       onPressed: () {
                         controller.selectDateContext(
-                            context, controller.itemDate);
+                            context, controller.itemDate.value);
                       },
                       icon: const Icon(Icons.date_range)),
                   validate: true,
-                  controller: controller.itemDate,
+                  controller: controller.itemDate.value,
                   labelText: 'Date',
                   isDate: true),
             ),
             Expanded(flex: 3, child: SizedBox())
           ],
         ),
-        CustomDropdown(
-          validator: true,
-          textcontroller: controller.item.text,
-          showedSelectedName: 'name',
-          hintText: 'Item',
-          items: isItemsLoading ? {} : controller.allItems,
-          itemBuilder: (context, key, value) {
-            return ListTile(
-              title: Text(value['name']),
-            );
-          },
-          onChanged: (key, value) {
-            controller.item.text = value['name'];
-            controller.itemId.value = key;
-          },
+        Row(crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: CustomDropdown(
+                validator: true,
+                textcontroller: controller.item.text,
+                showedSelectedName: 'name',
+                hintText: 'Item',
+                items: isItemsLoading ? {} : controller.allItems,
+                itemBuilder: (context, key, value) {
+                  return ListTile(
+                    title: Text(value['name']),
+                  );
+                },
+                onChanged: (key, value) {
+                  controller.item.text = value['name'];
+                  controller.itemId.value = key;
+                },
+              ),
+            ),
+            valSectionInTheTable(
+              controller.listOfValuesController,
+              controller.newItemListID.value,
+              context,
+              constraints,
+              controller.newItemListMasteredByID.value,
+              'New Item',
+              'Items',
+              valuesSection(
+                constraints: constraints,
+                context: context,
+              ),
+            ),
+          ],
         ),
         SizedBox(
           height: 10,

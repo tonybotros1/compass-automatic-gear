@@ -16,7 +16,7 @@ Future<dynamic> itemDialog(
         insetPadding: EdgeInsets.all(8),
         child: LayoutBuilder(builder: (context, constraints) {
           return SizedBox(
-            height: 500,
+            height: 550,
             width: constraints.maxWidth / 2.5,
             child: Column(
               children: [
@@ -63,6 +63,7 @@ Future<dynamic> itemDialog(
                     child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: addNewItemOrEdit(
+                    constraints: constraints,
                       context: context,
                       controller: controller,
                       canEdit: canEdit),

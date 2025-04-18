@@ -71,7 +71,6 @@ Container carInformation({
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(
-                        flex: 4,
                         child: CustomDropdown(
                           showedSelectedName: 'name',
                           textcontroller: controller.carBrand.value.text,
