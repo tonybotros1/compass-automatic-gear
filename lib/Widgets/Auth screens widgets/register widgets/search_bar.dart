@@ -8,6 +8,7 @@ Row searchBar({
   required controller,
   required title,
   Widget? button,
+  void Function(String)? onChanged,
   required search,
 }) {
   return Row(
@@ -38,6 +39,7 @@ Row searchBar({
                 child: SizedBox(
                   width: constraints.maxWidth / 2,
                   child: TextFormField(
+                    onChanged: onChanged,
                     controller: search.value,
                     decoration: InputDecoration(
                       border: InputBorder.none,

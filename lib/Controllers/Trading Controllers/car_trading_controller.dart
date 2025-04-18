@@ -83,9 +83,9 @@ class CarTradingController extends GetxController {
     getEngineSizes();
     getYears();
     getItems();
-    searchForItems.value.addListener(() {
-      filterItems();
-    });
+    // searchForItems.value.addListener(() {
+    //   filterItems();
+    // });
     super.onInit();
   }
 
@@ -227,6 +227,7 @@ class CarTradingController extends GetxController {
   }
 
   clearValues() {
+    allModels.clear();
     date.value.text = textToDate(DateTime.now());
     mileage.value.text = '0';
     colorIn.value.clear();
@@ -569,25 +570,31 @@ class CarTradingController extends GetxController {
     }
   }
 
-  // this function is to filter the search results for web
   void filterItems() {
-    queryForItems.value = searchForItems.value.text.toLowerCase();
-    if (queryForItems.value.isEmpty) {
+    final query = searchForItems.value.text.trim().toLowerCase();
+    // 2. Update the observable, in case you display the query elsewhere
+
+    if (query.isEmpty) {
       filteredAddedItems.clear();
     } else {
       filteredAddedItems.assignAll(
         addedItems.where((item) {
-          return item['date'].toString().toLowerCase().contains(query) ||
-              getdataName(item['item'], allItems)
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
-              item['pay'].toString().toLowerCase().contains(query) ||
-              item['comment'].toString().toLowerCase().contains(query) ||
-              item['receive'].toString().toLowerCase().contains(query);
+          final dateStr = item['date']?.toString().toLowerCase() ?? '';
+          final itemName =
+              getdataName(item['item'], allItems).toString().toLowerCase();
+          final payStr = item['pay']?.toString().toLowerCase() ?? '';
+          final receiveStr = item['receive']?.toString().toLowerCase() ?? '';
+          final commentStr = item['comment']?.toString().toLowerCase() ?? '';
+
+          return dateStr.contains(query) ||
+              itemName.contains(query) ||
+              payStr.contains(query) ||
+              commentStr.contains(query) ||
+              receiveStr.contains(query);
         }).toList(),
       );
     }
 
+    print("Filtered Items: $filteredAddedItems");
   }
 }

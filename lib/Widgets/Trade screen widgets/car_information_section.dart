@@ -85,7 +85,7 @@ Container carInformation({
                           },
                         ),
                       ),
-                      Expanded(child: SizedBox())
+                      IconButton(onPressed: null, icon: SizedBox())
                     ],
                   ),
                   Row(
