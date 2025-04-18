@@ -20,6 +20,7 @@ class DropdownController extends GetxController {
   ScrollController scrollController = ScrollController();
   RxString highlightedKey = RxString('');
   final Map<String, GlobalKey> _itemKeys = {};
+  bool _arrowNavStarted = false;
   @override
   void onClose() {
     query.value.dispose();
@@ -56,7 +57,7 @@ class DropdownController extends GetxController {
     allItems = items;
     filteredItems.assignAll(items);
     query.value.text = searchQuery.value;
-
+    _arrowNavStarted = false;
     // Measure button and screen
     final renderBox = buttonKey.currentContext!.findRenderObject() as RenderBox;
     final fieldOffset = renderBox.localToGlobal(Offset.zero);
@@ -65,7 +66,7 @@ class DropdownController extends GetxController {
     const double margin = 8.0;
     final spaceBelow =
         screenSize.height - fieldOffset.dy - fieldSize.height - margin;
-        double dropdownMaxHeight = 175;
+    double dropdownMaxHeight = 175;
     final spaceAbove = fieldOffset.dy - margin;
     final showAbove = spaceBelow < dropdownMaxHeight && spaceAbove > spaceBelow;
     final maxHeight =
@@ -217,22 +218,17 @@ class DropdownController extends GetxController {
     Overlay.of(Get.overlayContext!).insert(overlayEntry!);
     searchFocusNode.requestFocus();
 
+    // initial highlight & reset arrow flag
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      String? initialHighlightKey;
-
+      _arrowNavStarted = false;
+      String? initialKey;
       if (selectedKey.value.isNotEmpty &&
           filteredItems.containsKey(selectedKey.value)) {
-        initialHighlightKey = selectedKey.value;
+        initialKey = selectedKey.value;
       } else if (textController.value.isNotEmpty) {
-        initialHighlightKey = _findKeyByTextValue();
+        initialKey = _findKeyByTextValue();
       }
-
-      if (initialHighlightKey == null && filteredItems.isNotEmpty) {
-        initialHighlightKey = filteredItems.keys.first;
-      }
-
-      highlightedKey.value = initialHighlightKey ?? '';
-      _scrollToHighlightedItem();
+      highlightedKey.value = initialKey ?? filteredItems.keys.first;
     });
   }
 
@@ -262,22 +258,23 @@ class DropdownController extends GetxController {
 
   void _moveHighlight(int direction) {
     if (filteredItems.isEmpty) return;
-
     final keys = filteredItems.keys.toList();
-    int currentIndex = keys.indexOf(highlightedKey.value);
+
+    int currentIndex;
+    if (!_arrowNavStarted) {
+      currentIndex = -1;
+      _arrowNavStarted = true;
+    } else {
+      currentIndex = keys.indexOf(highlightedKey.value);
+    }
 
     if (currentIndex == -1) {
       highlightedKey.value = keys.first;
     } else {
-      int newIndex = currentIndex + direction;
-      if (newIndex >= 0 && newIndex < keys.length) {
-        highlightedKey.value = keys[newIndex];
-      } else if (newIndex < 0) {
-        highlightedKey.value = keys.last;
-      } else {
-        highlightedKey.value = keys.first;
-      }
+      int newIndex = (currentIndex + direction).clamp(0, keys.length - 1);
+      highlightedKey.value = keys[newIndex];
     }
+
     _scrollToHighlightedItem();
   }
 
