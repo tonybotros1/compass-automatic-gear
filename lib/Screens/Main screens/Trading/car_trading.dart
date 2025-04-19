@@ -135,79 +135,185 @@ Widget tableOfScreens(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          text: 'Car',
-          constraints: constraints,
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              text: 'Car',
+              constraints: constraints,
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Year',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Year',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Status',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Status',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Specification',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Specification',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Color (OUT)',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Color',
+            ),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Outside',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Color (IN)',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Inside',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Engine Size',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Engine Size',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Mileage',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Mileage',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Paid',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Date',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Received',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Paid',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Net',
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Received',
+            ),
+          ],
+        ),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: Column(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(),
+            AutoSizedText(
+              constraints: constraints,
+              text: 'Net',
+            ),
+          ],
         ),
         // onSort: controller.onSort,
       ),
@@ -266,51 +372,74 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
       Text(tradeData['mileage']),
     ),
     DataCell(
-      FutureBuilder<String>(
-        future: controller.gettradePaidCached(tradeId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text('Loading...');
-          } else if (snapshot.hasError) {
-            return const Text('Error');
-          } else {
-            return textForDataRowInTable(
-              text: '${snapshot.data}',
-            );
-          }
-        },
+      Text(
+        style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold),
+        tradeData['date'] != null && tradeData['date'] != ''
+            ? textToDate(tradeData['date'])
+            : 'N/A',
       ),
     ),
     DataCell(
-      FutureBuilder<String>(
-        future: controller.gettradeReceivedCached(tradeId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text('Loading...');
-          } else if (snapshot.hasError) {
-            return const Text('Error');
-          } else {
-            return textForDataRowInTable(
-              text: '${snapshot.data}',
-            );
-          }
-        },
+      Align(
+        alignment: Alignment.centerRight,
+        child: FutureBuilder<String>(
+          future: controller.gettradePaidCached(tradeId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(
+                color: Colors.red,
+                isBold: true,
+                text: '${snapshot.data}',
+              );
+            }
+          },
+        ),
       ),
     ),
     DataCell(
-      FutureBuilder<String>(
-        future: controller.gettradeNETsCached(tradeId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text('Loading...');
-          } else if (snapshot.hasError) {
-            return const Text('Error');
-          } else {
-            return textForDataRowInTable(
-              text: '${snapshot.data}',
-            );
-          }
-        },
+      Align(
+        alignment: Alignment.centerRight,
+        child: FutureBuilder<String>(
+          future: controller.gettradeReceivedCached(tradeId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(
+                color: Colors.green,
+                isBold: true,
+                text: '${snapshot.data}',
+              );
+            }
+          },
+        ),
+      ),
+    ),
+    DataCell(
+      Align(
+        alignment: Alignment.centerRight,
+        child: FutureBuilder<String>(
+          future: controller.gettradeNETsCached(tradeId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(
+                color: Colors.blueGrey,
+                isBold: true,
+                text: '${snapshot.data}',
+              );
+            }
+          },
+        ),
       ),
     ),
     DataCell(Row(

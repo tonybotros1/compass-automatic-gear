@@ -226,8 +226,12 @@ DataRow dataRowForTheTable(Map<String, dynamic> itemData, context, constraints,
     DataCell(Text(itemData['date'])),
     DataCell(
         Text(controller.getdataName(itemData['item'], controller.allItems))),
-    DataCell(textForDataRowInTable(text: itemData['pay'])),
-    DataCell(textForDataRowInTable(text: itemData['receive'])),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: itemData['pay']))),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: itemData['receive']))),
     DataCell(Text(itemData['comment'])),
     DataCell(Row(
       spacing: 5,

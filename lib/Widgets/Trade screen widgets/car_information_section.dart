@@ -46,7 +46,7 @@ Container carInformation({
                       controller: controller.mileage.value),
                   CustomDropdown(
                     textcontroller: controller.colorOut.value.text,
-                    hintText: 'Color (OUT)',
+                    hintText: 'Outside Color',
                     showedSelectedName: 'name',
                     items: isColorsLoading ? {} : controller.allColors,
                     onChanged: (key, value) {
@@ -128,7 +128,7 @@ Container carInformation({
                         child: CustomDropdown(
                           textcontroller: controller.colorIn.value.text,
                           showedSelectedName: 'name',
-                          hintText: 'Color (IN)',
+                          hintText: 'Inside Color',
                           items: isColorsLoading ? {} : controller.allColors,
                           onChanged: (key, value) {
                             controller.colorIn.value.text = value['name'];

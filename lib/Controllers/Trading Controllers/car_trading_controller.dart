@@ -318,7 +318,8 @@ class CarTradingController extends GetxController {
           'note': note.text,
           'items': addedItems,
           'company_id': companyId.value,
-          'status': 'New'
+          'status': 'New',
+          'added_date': DateTime.now()
         });
         status.value = 'New';
         currentTradId.value = addedTrade.id;
@@ -400,6 +401,7 @@ class CarTradingController extends GetxController {
       FirebaseFirestore.instance
           .collection('all_trades')
           .where('company_id', isEqualTo: companyId.value)
+          .orderBy('added_date', descending: true)
           .snapshots()
           .listen((trade) {
         allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
