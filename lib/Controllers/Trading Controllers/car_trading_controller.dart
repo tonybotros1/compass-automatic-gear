@@ -81,6 +81,7 @@ class CarTradingController extends GetxController {
   final Map<String, Future<String>> _receivedFutureCache = {};
   final Map<String, Future<String>> _netsFutureCache = {};
   var buttonLoadingStates = <String, bool>{}.obs;
+final RxnString selectedTradeId = RxnString();
 
   @override
   void onInit() async {
