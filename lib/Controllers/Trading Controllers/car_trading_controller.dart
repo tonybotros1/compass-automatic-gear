@@ -81,7 +81,8 @@ class CarTradingController extends GetxController {
   final Map<String, Future<String>> _receivedFutureCache = {};
   final Map<String, Future<String>> _netsFutureCache = {};
   var buttonLoadingStates = <String, bool>{}.obs;
-final RxnString selectedTradeId = RxnString();
+  final RxnString selectedTradeId = RxnString();
+  RxInt pagesPerPage = RxInt(5);
 
   @override
   void onInit() async {
@@ -100,6 +101,10 @@ final RxnString selectedTradeId = RxnString();
       filterItems();
     });
     super.onInit();
+  }
+
+  changeRowsPerPage(int rows) {
+    pagesPerPage.value = rows;
   }
 
   // function to manage loading button
