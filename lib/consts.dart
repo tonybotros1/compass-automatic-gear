@@ -291,6 +291,31 @@ var newCompannyButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var todayButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Color(0xff94B4C1),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+var thisMonthButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Color(0xff547792),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+var thisYearButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Color(0xff213448),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var screenPadding = const EdgeInsets.only(
   left: 14,
   right: 14,
@@ -497,6 +522,7 @@ Widget textForDataRowInTable({
   double? maxWidth = 150,
   Color? color,
   bool isBold = false,
+  double? fontSize,
 }) {
   // Try parsing the text as a double
   String formattedText = text;
@@ -513,6 +539,7 @@ Widget textForDataRowInTable({
       formattedText,
       maxLines: 1,
       style: TextStyle(
+        fontSize: fontSize,
         overflow: TextOverflow.ellipsis,
         color: color,
         fontWeight: isBold ? FontWeight.bold : null,

@@ -15,6 +15,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/screen_tree_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../Screens/Dashboard/trading_dashboard.dart';
 import '../../Screens/Main screens/System Administrator/Setup/banks_and_others.dart';
 import '../../Screens/Main screens/System Administrator/Setup/branches.dart';
 import '../../Screens/Main screens/System Administrator/Setup/cash_management.dart';
@@ -122,6 +123,10 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: BanksAndOthers());
       case '/carTrading':
         return const SizedBox(child: CarTrading());
+      case '/trading':
+        return const SizedBox(
+          child: TradingDashboard(),
+        );
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

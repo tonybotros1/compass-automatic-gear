@@ -426,25 +426,28 @@ class MainScreen extends StatelessWidget {
                 ),
               ),
 
-              child: entry.node.isMenu == true
-                  ? InkWell(
-                      onTap: () {
-                        if (entry.node.routeName != null) {
-                          print(entry.node.routeName);
-                        }
-                      },
-                      child: TreeIndentation(
-                        entry: entry,
-                        child: myTreeNodeTile,
-                      ),
-                    )
-                  : Container(
-                      width: null,
-                      color: entry.node.isPressed == true
-                          ? Colors.grey.withValues(alpha: (0.5))
-                          : null,
-                      child: InkWell(
-                        onTap: () {
+              child:
+                  //  entry.node.isMenu == true
+                  //     ? InkWell(
+                  //         onTap: () {
+                  //           if (entry.node.routeName != null) {
+                  //             print(entry.node.routeName);
+                  //           }
+                  //         },
+                  //         child: TreeIndentation(
+                  //           entry: entry,
+                  //           child: myTreeNodeTile,
+                  //         ),
+                  //       )
+                  //     :
+                  Container(
+                width: null,
+                color: entry.node.isPressed == true
+                    ? Colors.grey.withValues(alpha: (0.5))
+                    : null,
+                child: InkWell(
+                  onTap: entry.node.routeName != null
+                      ? () {
                           if (mainScreenController.previouslySelectedNode !=
                               null) {
                             mainScreenController
@@ -460,13 +463,14 @@ class MainScreen extends StatelessWidget {
                                   .getScreenFromRoute(entry.node.routeName);
                           mainScreenController.selectedScreenName.value =
                               entry.node.title;
-                        },
-                        child: TreeIndentation(
-                          entry: entry,
-                          child: myTreeNodeTile,
-                        ),
-                      ),
-                    ),
+                        }
+                      : null,
+                  child: TreeIndentation(
+                    entry: entry,
+                    child: myTreeNodeTile,
+                  ),
+                ),
+              ),
             );
           },
         );

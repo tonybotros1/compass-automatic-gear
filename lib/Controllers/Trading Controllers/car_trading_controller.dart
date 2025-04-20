@@ -103,7 +103,7 @@ class CarTradingController extends GetxController {
     super.onInit();
   }
 
-  changeRowsPerPage(int rows) {
+  changeRowsPerPage(rows) {
     pagesPerPage.value = rows;
   }
 
