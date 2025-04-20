@@ -14,7 +14,7 @@ Future<dynamic> menusDialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: SizedBox(
-          height: 250,
+          height: 300,
           width: constraints.maxWidth / 2.5,
           child: Column(
             children: [

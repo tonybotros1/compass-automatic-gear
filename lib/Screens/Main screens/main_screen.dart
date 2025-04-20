@@ -80,8 +80,8 @@ class MainScreen extends StatelessWidget {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Text(mainScreenController.userEmail.value,
-                                          style:
-                                              const TextStyle(color: Colors.white)),
+                                          style: const TextStyle(
+                                              color: Colors.white)),
                                       const SizedBox(
                                         height: 25,
                                       ),
@@ -147,7 +147,10 @@ class MainScreen extends StatelessWidget {
                                                     width: 5,
                                                   ),
                                                   Text(
-                                                    textToDate(mainScreenController.userJoiningDate.value),
+                                                    textToDate(
+                                                        mainScreenController
+                                                            .userJoiningDate
+                                                            .value),
                                                     style: TextStyle(
                                                       color:
                                                           Colors.grey.shade800,
@@ -172,7 +175,10 @@ class MainScreen extends StatelessWidget {
                                                     width: 5,
                                                   ),
                                                   Text(
-                                                    textToDate(mainScreenController.userExpiryDate.value),
+                                                    textToDate(
+                                                        mainScreenController
+                                                            .userExpiryDate
+                                                            .value),
                                                     style: TextStyle(
                                                       color:
                                                           Colors.grey.shade800,
@@ -207,7 +213,8 @@ class MainScreen extends StatelessWidget {
                                                                 '/');
                                                           });
                                                     },
-                                                    child: const Text('Logout')),
+                                                    child:
+                                                        const Text('Logout')),
                                               ],
                                             )
                                           ],
@@ -420,9 +427,16 @@ class MainScreen extends StatelessWidget {
               ),
 
               child: entry.node.isMenu == true
-                  ? TreeIndentation(
-                      entry: entry,
-                      child: myTreeNodeTile,
+                  ? InkWell(
+                      onTap: () {
+                        if (entry.node.routeName != null) {
+                          print(entry.node.routeName);
+                        }
+                      },
+                      child: TreeIndentation(
+                        entry: entry,
+                        child: myTreeNodeTile,
+                      ),
                     )
                   : Container(
                       width: null,

@@ -12,6 +12,7 @@ class MenusController extends GetxController {
   late TextEditingController menuName =
       TextEditingController(); // new menu name
   late TextEditingController description = TextEditingController();
+  late TextEditingController menuRoute = TextEditingController();
   RxList menuIDFromList = RxList([]);
   RxList screenIDFromList = RxList([]);
 
@@ -114,9 +115,11 @@ class MenusController extends GetxController {
 
   // this function is to edit menu details like name and description
   editMenu(menuID) async {
+    Get.back();
     await FirebaseFirestore.instance.collection('menus ').doc(menuID).update({
       'name': menuName.text,
       'description': description.text,
+      'routeName': menuRoute.text
     });
   }
 
@@ -301,6 +304,7 @@ class MenusController extends GetxController {
         'description': description.text,
         'added_date': DateTime.now().toString(),
         'children': [],
+        'routeName': menuRoute.text
       });
 
       addingNewMenuProcess.value = false;
@@ -539,5 +543,4 @@ class MenusController extends GetxController {
 
     return [...menuNodes, ...screenNodes];
   }
-
 }

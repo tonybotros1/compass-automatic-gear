@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../Controllers/Main screen controllers/menus_controller.dart';
 import '../../my_text_field.dart';
 
 Widget addOrEditMenu({
-  required controller,
+  required MenusController controller,
 }) {
   return ListView(
     children: [
@@ -23,6 +24,15 @@ Widget addOrEditMenu({
           labelText: 'Code',
           hintText: 'Enter Code',
           controller: controller.description,
+          validate: false,
+          obscureText: false,
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: myTextFormFieldWithBorder(
+          labelText: 'Menu Route',
+          controller: controller.menuRoute,
           validate: false,
           obscureText: false,
         ),

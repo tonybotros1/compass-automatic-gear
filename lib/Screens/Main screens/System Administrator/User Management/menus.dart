@@ -201,12 +201,12 @@ ElevatedButton editSection(
       onPressed: () {
         controller.menuName.text = menuData['name'];
         controller.description.text = menuData['description'];
+        controller.menuRoute.text = menuData['routeName'] ?? '';
         menusDialog(
             constraints: constraints,
             controller: controller,
             onPressed: () async {
               await controller.editMenu(menuId);
-              Get.back();
             });
       },
       child: const Text("Edit"));
@@ -295,6 +295,7 @@ ElevatedButton newMenuButton(BuildContext context, BoxConstraints constraints,
     onPressed: () {
       controller.menuName.clear();
       controller.description.clear();
+      controller.menuRoute.clear();
       menusDialog(
           constraints: constraints,
           controller: controller,
