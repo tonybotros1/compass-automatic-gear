@@ -426,51 +426,43 @@ class MainScreen extends StatelessWidget {
                 ),
               ),
 
-              child:
-                  //  entry.node.isMenu == true
-                  //     ? InkWell(
-                  //         onTap: () {
-                  //           if (entry.node.routeName != null) {
-                  //             print(entry.node.routeName);
-                  //           }
-                  //         },
-                  //         child: TreeIndentation(
-                  //           entry: entry,
-                  //           child: myTreeNodeTile,
-                  //         ),
-                  //       )
-                  //     :
-                  Container(
-                width: null,
-                color: entry.node.isPressed == true
-                    ? Colors.grey.withValues(alpha: (0.5))
-                    : null,
-                child: InkWell(
-                  onTap: entry.node.routeName != null
-                      ? () {
-                          if (mainScreenController.previouslySelectedNode !=
-                              null) {
-                            mainScreenController
-                                .previouslySelectedNode!.isPressed = false;
-                          }
+              child: entry.node.isMenu == true
+                  ? TreeIndentation(
+                      entry: entry,
+                      child: myTreeNodeTile,
+                    )
+                  : Container(
+                      width: null,
+                      color: entry.node.isPressed == true
+                          ? Colors.grey.withValues(alpha: (0.5))
+                          : null,
+                      child: InkWell(
+                        onTap: entry.node.routeName != null
+                            ? () {
+                                if (mainScreenController
+                                        .previouslySelectedNode !=
+                                    null) {
+                                  mainScreenController.previouslySelectedNode!
+                                      .isPressed = false;
+                                }
 
-                          entry.node.isPressed = true;
-                          mainScreenController.previouslySelectedNode =
-                              entry.node;
-                          mainScreenController.treeController.rebuild();
-                          mainScreenController.selectedScreen.value =
-                              mainScreenController
-                                  .getScreenFromRoute(entry.node.routeName);
-                          mainScreenController.selectedScreenName.value =
-                              entry.node.title;
-                        }
-                      : null,
-                  child: TreeIndentation(
-                    entry: entry,
-                    child: myTreeNodeTile,
-                  ),
-                ),
-              ),
+                                entry.node.isPressed = true;
+                                mainScreenController.previouslySelectedNode =
+                                    entry.node;
+                                mainScreenController.treeController.rebuild();
+                                mainScreenController.selectedScreen.value =
+                                    mainScreenController.getScreenFromRoute(
+                                        entry.node.routeName);
+                                mainScreenController.selectedScreenName.value =
+                                    entry.node.title;
+                              }
+                            : null,
+                        child: TreeIndentation(
+                          entry: entry,
+                          child: myTreeNodeTile,
+                        ),
+                      ),
+                    ),
             );
           },
         );

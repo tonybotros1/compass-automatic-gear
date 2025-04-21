@@ -569,31 +569,36 @@ Widget tableOfScreens(
       ],
       rows: controller.filteredTrades.isEmpty &&
               controller.search.value.text.isEmpty
-          ? controller.allTrades.map<DataRow>((trade) {
+          ? controller.allTrades.asMap().entries.map<DataRow>((entry) {
+              final index = entry.key;
+              final trade = entry.value;
               final tradeData = trade.data() as Map<String, dynamic>;
               final tradeId = trade.id;
               return dataRowForTheTable(
-                  tradeData, context, constraints, tradeId, controller);
+                  tradeData, context, constraints, tradeId, controller, index);
             }).toList()
-          : controller.filteredTrades.map<DataRow>((trade) {
+          : controller.filteredTrades.asMap().entries.map<DataRow>((entry) {
+              final index = entry.key;
+              final trade = entry.value;
               final tradeData = trade.data() as Map<String, dynamic>;
               final tradeId = trade.id;
               return dataRowForTheTable(
-                  tradeData, context, constraints, tradeId, controller);
+                  tradeData, context, constraints, tradeId, controller, index);
             }).toList(),
     ),
   );
 }
 
 DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
-    tradeId, CarTradingController controller) {
+    tradeId, CarTradingController controller, int index) {
   final isSelected = controller.selectedTradeId.value == tradeId;
+  final isEvenRow = index % 2 == 0;
   return DataRow(
       color: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
-          return Colors.grey.shade300;
+          return Colors.grey.shade400;
         }
-        return Colors.white;
+        return isEvenRow ? Colors.grey.shade200 : Colors.white;
       }),
       selected: isSelected,
       onSelectChanged: (selected) {
@@ -816,7 +821,7 @@ class TradeDataSource extends DataTableSource {
     final tradeId = trade.id;
 
     return dataRowForTheTable(
-        tradeData, context, constraints, tradeId, controller);
+        tradeData, context, constraints, tradeId, controller, index);
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/car_brands_con
 import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../consts.dart';
 import '../Main screen controllers/main_screen_contro.dart';
@@ -260,7 +261,7 @@ class CarTradingController extends GetxController {
 
   loadValues(Map data) async {
     isValuesLoading.value = true;
-    date.value.text = data['date'];
+    date.value.text = textToDate(data['date']);
     mileage.value.text = data['mileage'];
     colorIn.value.text = getdataName(data['color_in'], allColors);
     colorInId.value = data['color_in'];
@@ -308,11 +309,13 @@ class CarTradingController extends GetxController {
   addNewTrade() async {
     try {
       addingNewValue.value = true;
+      DateFormat format = DateFormat('dd-MM-yyyy');
+      DateTime parsedDate = format.parse(date.value.text);
       var currentTrade = FirebaseFirestore.instance.collection('all_trades');
 
       if (currentTradId.value == '') {
         var addedTrade = await currentTrade.add({
-          'date': date.value.text,
+          'date': parsedDate.toString(),
           'car_brand': carBrandId.value,
           'car_model': carModelId.value,
           'mileage': mileage.value.text,
@@ -333,7 +336,7 @@ class CarTradingController extends GetxController {
         showSnackBar('Success', 'Addedd Successfully');
       } else {
         await currentTrade.doc(currentTradId.value).update({
-          'date': date.value.text,
+          'date': parsedDate.toString(),
           'car_brand': carBrandId.value,
           'car_model': carModelId.value,
           'mileage': mileage.value.text,
@@ -356,13 +359,14 @@ class CarTradingController extends GetxController {
 
   editTrade(tradeId) async {
     addingNewValue.value = true;
-
     try {
+      DateFormat format = DateFormat('dd-MM-yyyy');
+      DateTime parsedDate = format.parse(date.value.text);
       await FirebaseFirestore.instance
           .collection('all_trades')
           .doc(tradeId)
           .update({
-        'date': date.value.text,
+        'date': parsedDate.toString(),
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
         'mileage': mileage.value.text,
@@ -407,7 +411,7 @@ class CarTradingController extends GetxController {
       FirebaseFirestore.instance
           .collection('all_trades')
           .where('company_id', isEqualTo: companyId.value)
-          .orderBy('added_date', descending: true)
+          .orderBy('date', descending: true)
           .snapshots()
           .listen((trade) {
         allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
