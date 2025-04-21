@@ -181,6 +181,7 @@ Widget tableOfScreens(
         // onSort: controller.onSort,
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
           text: 'Paid',
@@ -188,6 +189,8 @@ Widget tableOfScreens(
         // onSort: controller.onSort,
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
+
         label: AutoSizedText(
           constraints: constraints,
           text: 'Received',
@@ -195,6 +198,8 @@ Widget tableOfScreens(
         // onSort: controller.onSort,
       ),
       DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+
         label: AutoSizedText(
           constraints: constraints,
           text: 'Comments',

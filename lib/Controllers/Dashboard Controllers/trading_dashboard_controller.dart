@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TradingDashboardController extends GetxController {
@@ -20,6 +21,8 @@ class TradingDashboardController extends GetxController {
   RxDouble totalReceivesForAllTrades = RxDouble(0.0);
   RxDouble totalNETsForAllTrades = RxDouble(0.0);
   RxInt pagesPerPage = RxInt(7);
+  DateFormat format = DateFormat('yyyy-dd-MM');
+
   @override
   void onInit() async {
     await getCompanyId();
@@ -46,10 +49,15 @@ class TradingDashboardController extends GetxController {
       month.text = _monthNumberToName(currentDate.month);
       year.value.text = currentDate.year.toString();
       allDays.assignAll(getDaysInMonth(month.text));
-    } else {
+    } else if (dateType == 'year') {
       day.clear();
       month.clear();
       year.value.text = currentDate.year.toString();
+      allDays.clear();
+    } else {
+      day.clear();
+      month.clear();
+      year.value.clear();
       allDays.clear();
     }
     filterTradesByDate();
@@ -138,6 +146,7 @@ class TradingDashboardController extends GetxController {
           .snapshots()
           .listen((trade) {
         allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
+        filteredTrades.assignAll(allTrades);
         calculateTotalsForAllTrades();
         numberOfCars.value = allTrades.length;
         isScreenLoding.value = false;
@@ -273,19 +282,41 @@ class TradingDashboardController extends GetxController {
         day.text.isNotEmpty ? int.tryParse(day.text) : null;
 
     filteredTrades.assignAll(allTrades.where((doc) {
-      final Timestamp? timestamp = doc['added_date'];
-      if (timestamp == null) return false;
+      final String? tradeDate = doc['date'];
+      if (tradeDate == null || tradeDate.trim().isEmpty) return false;
 
-      final DateTime date = timestamp.toDate();
+      try {
+        final DateTime date = format.parse(tradeDate);
+        final bool matchesYear =
+            selectedYear == null || date.year == selectedYear;
+        final bool matchesMonth =
+            selectedMonth == null || date.month == selectedMonth;
+        final bool matchesDay = selectedDay == null || date.day == selectedDay;
 
-      final bool matchesYear =
-          selectedYear == null || date.year == selectedYear;
-      final bool matchesMonth =
-          selectedMonth == null || date.month == selectedMonth;
-      final bool matchesDay = selectedDay == null || date.day == selectedDay;
-
-      return matchesYear && matchesMonth && matchesDay;
+        return matchesYear && matchesMonth && matchesDay;
+      } catch (e) {
+        return false;
+      }
     }).toList());
+
+    calculateTotalsForAllTrades();
+    numberOfCars.value = filteredTrades.length;
+  }
+
+  filterTradesByStatus(String status) {
+    filteredTrades.assignAll(allTrades.where((doc) {
+      final String? tradeStatus = doc['status'];
+      if (tradeStatus == null || tradeStatus.trim().isEmpty) return false;
+
+      try {
+        final bool matchesStatus = tradeStatus == '' || status == tradeStatus;
+
+        return matchesStatus;
+      } catch (e) {
+        return false;
+      }
+    }).toList());
+
     calculateTotalsForAllTrades();
     numberOfCars.value = filteredTrades.length;
   }

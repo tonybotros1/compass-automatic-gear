@@ -33,6 +33,15 @@ var newButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var soldButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.blueGrey,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var new2ButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.green,
@@ -284,6 +293,15 @@ var loginButtonStyle = ElevatedButton.styleFrom(
 
 var newCompannyButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: secColor,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var allButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Color(0xff328E6E),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
@@ -576,7 +594,6 @@ Container statusBox(String status, {hieght = 30.0, width}) {
     ),
   );
 }
-
 
 // final NumberFormat _formatter = NumberFormat("#,##0.00", "en_US");
 

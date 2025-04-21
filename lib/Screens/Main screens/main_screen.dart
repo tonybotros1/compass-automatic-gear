@@ -1,4 +1,3 @@
-import 'package:datahubai/Responsive/responsive.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,7 +22,7 @@ class MainScreen extends StatelessWidget {
       drawer: sideMenuWidget(),
       body: Row(
         children: [
-          if (ScreenSize.isWeb(context)) sideMenuWidget(),
+          // if (ScreenSize.isWeb(context)) sideMenuWidget(),
           Expanded(
             flex: 5,
             child: Column(
@@ -35,14 +34,14 @@ class MainScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (!ScreenSize.isWeb(context))
-                        Builder(
-                          builder: (context) => IconButton(
-                              onPressed: () {
-                                Scaffold.of(context).openDrawer();
-                              },
-                              icon: const Icon(Icons.menu)),
-                        ),
+                      // if (!ScreenSize.isWeb(context))
+                      Builder(
+                        builder: (context) => IconButton(
+                            onPressed: () {
+                              Scaffold.of(context).openDrawer();
+                            },
+                            icon: const Icon(Icons.menu)),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
                         child: Obx(() => Text(
@@ -426,12 +425,14 @@ class MainScreen extends StatelessWidget {
                 ),
               ),
 
-              child: entry.node.isMenu == true
-                  ? TreeIndentation(
-                      entry: entry,
-                      child: myTreeNodeTile,
-                    )
-                  : Container(
+              child:
+              //  entry.node.isMenu == true
+              //     ? TreeIndentation(
+              //         entry: entry,
+              //         child: myTreeNodeTile,
+              //       )
+              //     :
+                   Container(
                       width: null,
                       color: entry.node.isPressed == true
                           ? Colors.grey.withValues(alpha: (0.5))

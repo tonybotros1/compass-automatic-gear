@@ -70,6 +70,12 @@ class TradingDashboard extends StatelessWidget {
                               },
                             )),
                             ElevatedButton(
+                                style: allButtonStyle,
+                                onPressed: () {
+                                  controller.filterByCurrentDate('all');
+                                },
+                                child: Text('All')),
+                            ElevatedButton(
                                 style: todayButtonStyle,
                                 onPressed: () {
                                   controller.filterByCurrentDate('today');
@@ -87,6 +93,18 @@ class TradingDashboard extends StatelessWidget {
                                   controller.filterByCurrentDate('year');
                                 },
                                 child: Text('This Year')),
+                            ElevatedButton(
+                                style: newButtonStyle,
+                                onPressed: () {
+                                  controller.filterTradesByStatus('New');
+                                },
+                                child: Text('New')),
+                            ElevatedButton(
+                                style: soldButtonStyle,
+                                onPressed: () {
+                                  controller.filterTradesByStatus('Sold');
+                                },
+                                child: Text('Sold')),
                             Expanded(flex: 2, child: SizedBox()),
                           ],
                         );
@@ -140,19 +158,52 @@ class TradingDashboard extends StatelessWidget {
                     );
                   }),
                 ),
-                SliverFillRemaining(
-                  // hasScrollBody: false,
-                  child:
-                      GetX<TradingDashboardController>(builder: (controller) {
-                    return controller.allTrades.isNotEmpty
-                        ? tableOfScreens(
-                            constraints: constraints,
-                            context: context,
-                            controller: controller,
-                          )
-                        : SizedBox();
-                  }),
-                )
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 10,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    constraints: BoxConstraints(minHeight: 300),
+                    padding: EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(15),
+                          bottomRight: Radius.circular(15)),
+                    ),
+                    child:
+                        GetX<TradingDashboardController>(builder: (controller) {
+                      return controller.filteredTrades.isNotEmpty
+                          ? tableOfScreens(
+                              constraints: constraints,
+                              context: context,
+                              controller: controller,
+                            )
+                          : controller.filteredTrades.isEmpty &&
+                                  controller.isScreenLoding.isTrue
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: mainColor,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text('No Data'),
+                                  ),
+                                );
+                    }),
+                  ),
+                ),
               ],
             ),
           );
@@ -165,12 +216,12 @@ Widget tableOfScreens({
   required BuildContext context,
   required TradingDashboardController controller,
 }) {
-  final trades = controller.filteredTrades.isEmpty
-      ? controller.allTrades
-      : controller.filteredTrades;
+  // final trades = controller.filteredTrades.isEmpty
+  //     ? controller.allTrades
+  //     : controller.filteredTrades;
 
   final dataSource = TradeDataSource(
-    trades: trades,
+    trades: controller.filteredTrades,
     context: context,
     constraints: constraints,
     controller: controller,
@@ -180,12 +231,6 @@ Widget tableOfScreens({
     data: DataTableThemeData(
       headingTextStyle: fontStyleForTableHeader,
       dataTextStyle: regTextStyle,
-      dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(WidgetState.selected)) {
-          return Colors.grey.shade300;
-        }
-        return null;
-      }),
     ),
     child: PaginatedDataTable(
       headingRowHeight: 45,
@@ -233,6 +278,8 @@ Widget tableOfScreens({
           // onSort: controller.onSort,
         ),
         DataColumn(
+          headingRowAlignment: MainAxisAlignment.end,
+
           label: AutoSizedText(
             constraints: constraints,
             text: 'Paid',
@@ -240,6 +287,8 @@ Widget tableOfScreens({
           // onSort: controller.onSort,
         ),
         DataColumn(
+          headingRowAlignment: MainAxisAlignment.end,
+
           label: AutoSizedText(
             constraints: constraints,
             text: 'Received',
@@ -247,6 +296,8 @@ Widget tableOfScreens({
           // onSort: controller.onSort,
         ),
         DataColumn(
+          headingRowAlignment: MainAxisAlignment.end,
+
           label: AutoSizedText(
             constraints: constraints,
             text: 'Net',
@@ -260,13 +311,14 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
-    tradeId, TradingDashboardController controller) {
+    tradeId, TradingDashboardController controller, index) {
+  final isEvenRow = index % 2 == 0;
   return DataRow(
       color: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
-          return Colors.grey.shade300;
+          return Colors.grey.shade400;
         }
-        return Colors.white;
+        return isEvenRow ? Colors.grey.shade200 : Colors.white;
       }),
       cells: [
         DataCell(
@@ -428,7 +480,7 @@ class TradeDataSource extends DataTableSource {
     final tradeId = trade.id;
 
     return dataRowForTheTable(
-        tradeData, context, constraints, tradeId, controller);
+        tradeData, context, constraints, tradeId, controller, index);
   }
 
   @override
