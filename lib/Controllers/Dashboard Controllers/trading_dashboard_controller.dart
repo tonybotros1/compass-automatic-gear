@@ -249,14 +249,14 @@ class TradingDashboardController extends GetxController {
     totalPaysForAllTrades.value = 0.0;
     totalReceivesForAllTrades.value = 0.0;
 
-    // Use filteredTrades only if any filter is applied
-    final bool isFiltering = year.value.text.isNotEmpty ||
-        month.text.isNotEmpty ||
-        day.text.isNotEmpty;
-    final List<DocumentSnapshot> sourceList =
-        isFiltering ? filteredTrades : allTrades;
+    // // Use filteredTrades only if any filter is applied
+    // final bool isFiltering = year.value.text.isNotEmpty ||
+    //     month.text.isNotEmpty ||
+    //     day.text.isNotEmpty;
+    // final List<DocumentSnapshot> sourceList =
+    //     isFiltering ? filteredTrades : allTrades;
 
-    for (var trade in sourceList) {
+    for (var trade in filteredTrades) {
       final data = trade.data() as Map<String, dynamic>;
       final itemsList = data['items'] as List<dynamic>?;
 
