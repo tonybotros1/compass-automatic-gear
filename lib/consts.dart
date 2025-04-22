@@ -24,6 +24,9 @@ var userNameStyle = const TextStyle(
 var footerTextStylr = TextStyle(
     color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 12);
 
+var hintMarkTestStyle =
+    TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.bold);
+
 var newButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
   foregroundColor: Colors.white,

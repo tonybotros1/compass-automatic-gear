@@ -21,8 +21,14 @@ class TradingDashboardController extends GetxController {
   RxDouble totalReceivesForAllTrades = RxDouble(0.0);
   RxDouble totalNETsForAllTrades = RxDouble(0.0);
   RxInt pagesPerPage = RxInt(7);
-  DateFormat format = DateFormat('yyyy-dd-MM');
-
+  DateFormat format = DateFormat('yyyy-MM-dd');
+  RxInt touchedIndex = 0.obs;
+  RxInt newPercentage = RxInt(0);
+  RxInt soldPercentage = RxInt(0);
+  RxString filterType = RxString('All');
+  final RxList<double> revenue = RxList<double>.filled(12, 0.0);
+  final RxList<double> expenses = RxList<double>.filled(12, 0.0);
+  final RxList<double> net = RxList<double>.filled(12, 0.0);
   @override
   void onInit() async {
     await getCompanyId();
@@ -271,6 +277,47 @@ class TradingDashboardController extends GetxController {
         }
       }
     }
+    calculateNewSoldPercentage();
+  }
+
+  void calculateMonthlyTotals(int year) {
+    // Reset all months to zero
+    for (int i = 0; i < 12; i++) {
+      revenue[i] = 0.0;
+      expenses[i] = 0.0;
+      net[i] = 0.0;
+    }
+
+    for (var trade in allTrades) {
+      final data = trade.data() as Map<String, dynamic>;
+      final String dateStr = data['date']?.toString() ?? '';
+      DateTime? date;
+      try {
+        date = DateTime.parse(dateStr);
+      } catch (_) {
+        continue;
+      }
+
+      if (date.year != year) continue;
+      final int idx = date.month - 1;
+
+      final itemsList = data['items'] as List<dynamic>?;
+      if (itemsList == null) continue;
+
+      double monthReceives = 0.0;
+      double monthPays = 0.0;
+      for (var item in itemsList) {
+        monthPays += double.tryParse(item['pay']?.toString() ?? '0') ?? 0.0;
+        monthReceives +=
+            double.tryParse(item['receive']?.toString() ?? '0') ?? 0.0;
+      }
+
+      revenue[idx] += monthReceives;
+      expenses[idx] += monthPays;
+      net[idx] += (monthReceives - monthPays);
+    }
+
+    update();
   }
 
   void filterTradesByDate() async {
@@ -298,7 +345,6 @@ class TradingDashboardController extends GetxController {
         return false;
       }
     }).toList());
-
     calculateTotalsForAllTrades();
     numberOfCars.value = filteredTrades.length;
   }
@@ -319,6 +365,25 @@ class TradingDashboardController extends GetxController {
 
     calculateTotalsForAllTrades();
     numberOfCars.value = filteredTrades.length;
+  }
+
+  calculateNewSoldPercentage() {
+    int newTrades = 0;
+    int soldTrades = 0;
+    for (var element in filteredTrades) {
+      Map data = element.data() as Map<String, dynamic>;
+      String status = data['status'];
+      if (status == 'New') {
+        newTrades += 1;
+      } else {
+        soldTrades += 1;
+      }
+    }
+    int numberOfTrades = filteredTrades.length;
+    newPercentage.value =
+        numberOfTrades != 0 ? ((newTrades * 100) / numberOfTrades).round() : 0;
+    soldPercentage.value =
+        numberOfTrades != 0 ? ((soldTrades * 100) / numberOfTrades).round() : 0;
   }
 
   int? _monthNameToNumber(String monthName) {

@@ -22,21 +22,23 @@ Widget addNewItemOrEdit({
             Expanded(
               flex: 1,
               child: myTextFormFieldWithBorder(
-                  suffixIcon: IconButton(
-                      onPressed: () {
-                        controller.selectDateContext(
-                            context, controller.itemDate.value);
-                      },
-                      icon: const Icon(Icons.date_range)),
-                  validate: true,
-                  controller: controller.itemDate.value,
-                  labelText: 'Date',
-                  isDate: true),
+                suffixIcon: IconButton(
+                    onPressed: () {
+                      controller.selectDateContext(
+                          context, controller.itemDate.value);
+                    },
+                    icon: const Icon(Icons.date_range)),
+                validate: true,
+                controller: controller.itemDate.value,
+                labelText: 'Date',
+                // isDate: true
+              ),
             ),
             Expanded(flex: 3, child: SizedBox())
           ],
         ),
-        Row(crossAxisAlignment: CrossAxisAlignment.end,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               child: CustomDropdown(

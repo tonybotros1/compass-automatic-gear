@@ -32,7 +32,7 @@ Container carInformation({
                   myTextFormFieldWithBorder(
                     controller: controller.date.value,
                     labelText: 'Date',
-                    isDate: true,
+                    // isDate: true,
                     suffixIcon: IconButton(
                         onPressed: () {
                           controller.selectDateContext(
