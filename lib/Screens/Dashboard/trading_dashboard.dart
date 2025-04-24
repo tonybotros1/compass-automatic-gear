@@ -27,6 +27,8 @@ class TradingDashboard extends StatelessWidget {
                         bool isYearsLoading = controller.allYears.isEmpty;
                         bool isMonthsLoading = controller.allMonths.isEmpty;
                         bool isDaysLoading = controller.allDays.isEmpty;
+                        bool isBrandLoading = controller.allBrands.isEmpty;
+                        bool isModelLoading = controller.allModels.isEmpty;
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           spacing: 10,
@@ -77,44 +79,130 @@ class TradingDashboard extends StatelessWidget {
                                 onPressed: () {
                                   controller.filterByCurrentDate('all');
                                   controller.filterType.value = 'All';
+                                  // controller.isAllSelected.value = true;
+                                  controller.isTodaySelected.value = false;
+                                  controller.isThisMonthSelected.value = false;
+                                  controller.isThisYearSelected.value = false;
+                                  controller.carBrand.value.clear();
+                                  controller.carModel.value.clear();
+                                  controller.carBrandId.value = '';
+                                  controller.carModelId.value = '';
+                                  controller.allModels.clear();
                                 },
                                 child: Text('All')),
                             ElevatedButton(
                                 style: todayButtonStyle,
-                                onPressed: () {
-                                  controller.filterByCurrentDate('today');
-                                  controller.filterType.value = 'Today';
-                                },
+                                onPressed: controller.isTodaySelected.isFalse
+                                    ? () {
+                                        controller.filterByCurrentDate('today');
+                                        controller.filterType.value = 'Today';
+                                        // controller.isAllSelected.value = false;
+                                        controller.isTodaySelected.value = true;
+                                        controller.isThisMonthSelected.value =
+                                            false;
+                                        controller.isThisYearSelected.value =
+                                            false;
+                                      }
+                                    : null,
                                 child: Text('Today')),
                             ElevatedButton(
                                 style: thisMonthButtonStyle,
-                                onPressed: () {
-                                  controller.filterByCurrentDate('month');
-                                  controller.filterType.value = 'This Month';
-                                },
+                                onPressed: controller
+                                        .isThisMonthSelected.isFalse
+                                    ? () {
+                                        controller.filterByCurrentDate('month');
+                                        controller.filterType.value =
+                                            'This Month';
+                                        // controller.isAllSelected.value = false;
+                                        controller.isTodaySelected.value =
+                                            false;
+                                        controller.isThisMonthSelected.value =
+                                            true;
+                                        controller.isThisYearSelected.value =
+                                            false;
+                                      }
+                                    : null,
                                 child: Text('This Month')),
                             ElevatedButton(
                                 style: thisYearButtonStyle,
-                                onPressed: () {
-                                  controller.filterByCurrentDate('year');
-                                  controller.filterType.value = 'This Year';
-                                },
+                                onPressed: controller.isThisYearSelected.isFalse
+                                    ? () {
+                                        controller.filterByCurrentDate('year');
+                                        controller.filterType.value =
+                                            'This Year';
+                                        // controller.isAllSelected.value = false;
+                                        controller.isTodaySelected.value =
+                                            false;
+                                        controller.isThisMonthSelected.value =
+                                            false;
+                                        controller.isThisYearSelected.value =
+                                            true;
+                                      }
+                                    : null,
                                 child: Text('This Year')),
                             ElevatedButton(
                                 style: newButtonStyle,
-                                onPressed: () {
-                                  controller.filterTradesByStatus('New');
-                                  controller.filterType.value = 'New';
-                                },
-                                child: Text('New')),
+                                onPressed: controller
+                                        .isNewStatusSelected.isFalse
+                                    ? () {
+                                        controller.filterType.value =
+                                            'Buy Date';
+                                        controller.isNewStatusSelected.value =
+                                            true;
+                                        controller.isSoldStatusSelected.value =
+                                            false;
+                                        controller.filterTradesByDate();
+                                      }
+                                    : null,
+                                child: Text('Buy Date')),
                             ElevatedButton(
                                 style: soldButtonStyle,
-                                onPressed: () {
-                                  controller.filterTradesByStatus('Sold');
-                                  controller.filterType.value = 'Sold';
+                                onPressed: controller
+                                        .isSoldStatusSelected.isFalse
+                                    ? () {
+                                        controller.filterType.value =
+                                            'Sell Date';
+                                        controller.isSoldStatusSelected.value =
+                                            true;
+                                        controller.isNewStatusSelected.value =
+                                            false;
+                                        controller.filterTradesByDate();
+                                      }
+                                    : null,
+                                child: Text('Sell Date')),
+                            Expanded(
+                              child: CustomDropdown(
+                                showedSelectedName: 'name',
+                                textcontroller: controller.carBrand.value.text,
+                                hintText: 'Car Brand',
+                                items:
+                                    isBrandLoading ? {} : controller.allBrands,
+                                onChanged: (key, value) {
+                                  controller.carModel.value.clear();
+                                  controller.getModelsByCarBrand(key);
+                                  controller.carBrand.value.text =
+                                      value['name'];
+                                  controller.carBrandId.value = key;
+                                  controller.carModelId.value = '';
+                                  controller.filterTradesByDate();
                                 },
-                                child: Text('Sold')),
-                            Expanded(flex: 2, child: SizedBox()),
+                              ),
+                            ),
+                            Expanded(
+                              child: CustomDropdown(
+                                showedSelectedName: 'name',
+                                textcontroller: controller.carModel.value.text,
+                                hintText: 'Car Model',
+                                items:
+                                    isModelLoading ? {} : controller.allModels,
+                                onChanged: (key, value) {
+                                  controller.carModel.value.text =
+                                      value['name'];
+                                  controller.carModelId.value = key;
+                                  controller.filterTradesByDate();
+                                },
+                              ),
+                            ),
                           ],
                         );
                       }),

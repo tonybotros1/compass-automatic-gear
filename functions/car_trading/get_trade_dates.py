@@ -21,7 +21,7 @@ def get_sell_date(data: https_fn.CallableRequest) -> str:
 
         for item in items:
             my_item = item.get('item', '')
-            my_item_name = get_item_name(my_item)
+            my_item_name = get_item_name_internal(my_item)
             if my_item_name == 'SELL':
                 sell_date = item.get('date', '')
                 continue
@@ -30,7 +30,7 @@ def get_sell_date(data: https_fn.CallableRequest) -> str:
 
     except Exception as e:
         raise https_fn.HttpsError("internal", f"Error: {str(e)}")
-    
+
 
 @https_fn.on_call()
 def get_buy_date(data: https_fn.CallableRequest) -> str:
@@ -50,7 +50,7 @@ def get_buy_date(data: https_fn.CallableRequest) -> str:
 
         for item in items:
             my_item = item.get('item', '')
-            my_item_name = get_item_name(my_item)
+            my_item_name = get_item_name_internal(my_item)
             if my_item_name == 'BUY':
                 sell_date = item.get('date', '')
                 continue
@@ -59,10 +59,9 @@ def get_buy_date(data: https_fn.CallableRequest) -> str:
 
     except Exception as e:
         raise https_fn.HttpsError("internal", f"Error: {str(e)}")
-    
 
 
-def get_item_name(id: str):
+def get_item_name_internal(id: str):
     try:
         db = firestore.client()
 
@@ -90,3 +89,9 @@ def get_item_name(id: str):
 
     except Exception as e:
         raise https_fn.HttpsError("internal", f"Error: {str(e)}")
+
+
+@https_fn.on_call()
+def get_item_name(data: https_fn.CallableRequest) -> str:
+    item_id = data.data
+    return get_item_name_internal(item_id)

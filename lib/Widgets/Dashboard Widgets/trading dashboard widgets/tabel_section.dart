@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -116,24 +115,26 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
         return isEvenRow ? Colors.grey.shade200 : Colors.white;
       }),
       cells: [
-        DataCell(
-          FutureBuilder<String>(
-            future: controller.getCarBrandName(
-              tradeData['car_brand'],
+        DataCell(textForDataRowInTable(
+                text: controller.getdataName(
+                    tradeData['car_brand'], controller.allBrands))
+            // FutureBuilder<String>(
+            //   future: controller.getCarBrandName(
+            //     tradeData['car_brand'],
+            //   ),
+            //   builder: (context, snapshot) {
+            //     if (snapshot.connectionState == ConnectionState.waiting) {
+            //       return const Text('Loading...');
+            //     } else if (snapshot.hasError) {
+            //       return const Text('Error');
+            //     } else {
+            //       return textForDataRowInTable(
+            //         text: '${snapshot.data}',
+            //       );
+            //     }
+            //   },
+            // ),
             ),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
-        ),
         DataCell(
           FutureBuilder<String>(
             future: controller.getCarModelName(

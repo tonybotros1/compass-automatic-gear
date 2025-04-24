@@ -9,6 +9,10 @@ class TradingDashboardController extends GetxController {
   Rx<TextEditingController> year = TextEditingController().obs;
   TextEditingController month = TextEditingController();
   TextEditingController day = TextEditingController();
+  Rx<TextEditingController> carModel = TextEditingController().obs;
+  Rx<TextEditingController> carBrand = TextEditingController().obs;
+  RxString carBrandId = RxString('');
+  RxString carModelId = RxString('');
   final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
   RxMap allYears = RxMap({});
@@ -22,6 +26,7 @@ class TradingDashboardController extends GetxController {
   RxDouble totalNETsForAllTrades = RxDouble(0.0);
   RxInt pagesPerPage = RxInt(7);
   DateFormat format = DateFormat('yyyy-MM-dd');
+  DateFormat itemformat = DateFormat('dd-MM-yyyy');
   RxInt touchedIndex = 0.obs;
   RxInt newPercentage = RxInt(0);
   RxInt soldPercentage = RxInt(0);
@@ -29,12 +34,24 @@ class TradingDashboardController extends GetxController {
   final RxList<double> revenue = RxList<double>.filled(12, 0.0);
   final RxList<double> expenses = RxList<double>.filled(12, 0.0);
   final RxList<double> net = RxList<double>.filled(12, 0.0);
+  RxBool isNewStatusSelected = RxBool(false);
+  RxBool isSoldStatusSelected = RxBool(false);
+  // RxBool isAllSelected = RxBool(true);
+  RxBool isTodaySelected = RxBool(false);
+  RxBool isThisMonthSelected = RxBool(false);
+  RxBool isThisYearSelected = RxBool(false);
+  RxMap allItems = RxMap({});
+  RxMap allBrands = RxMap({});
+  RxMap allModels = RxMap({});
+
   @override
   void onInit() async {
     await getCompanyId();
+    await getCarBrands();
     getAllTrades();
     getYears();
     getMonths();
+    getItems();
     super.onInit();
   }
 
@@ -61,6 +78,8 @@ class TradingDashboardController extends GetxController {
       year.value.text = currentDate.year.toString();
       allDays.clear();
     } else {
+      isNewStatusSelected.value = false;
+      isSoldStatusSelected.value = false;
       day.clear();
       month.clear();
       year.value.clear();
@@ -86,6 +105,54 @@ class TradingDashboardController extends GetxController {
         .snapshots()
         .listen((year) {
       allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
+    });
+  }
+
+  getCarBrands() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .snapshots()
+          .listen((brands) {
+        allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  getModelsByCarBrand(brandId) {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .snapshots()
+          .listen((models) {
+        allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  // this function is to get items
+  getItems() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'ITEMS')
+        .get();
+
+    var typeId = typeDoc.docs.first.id;
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typeId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .orderBy('added_date')
+        .snapshots()
+        .listen((item) {
+      allItems.value = {for (var doc in item.docs) doc.id: doc.data()};
     });
   }
 
@@ -250,6 +317,17 @@ class TradingDashboardController extends GetxController {
     }
   }
 
+  Future<String> getItemName(titemId) async {
+    try {
+      var net = await FirebaseFunctions.instance
+          .httpsCallable('get_item_name')
+          .call(titemId);
+      return net.data.toString();
+    } catch (e) {
+      return '';
+    }
+  }
+
   void calculateTotalsForAllTrades() {
     totalNETsForAllTrades.value = 0.0;
     totalPaysForAllTrades.value = 0.0;
@@ -320,48 +398,154 @@ class TradingDashboardController extends GetxController {
     update();
   }
 
-  void filterTradesByDate() async {
+  // void filterTradesByDate() async {
+  //   final int? selectedYear =
+  //       year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
+  //   final int? selectedMonth =
+  //       month.text.isNotEmpty ? _monthNameToNumber(month.text) : null;
+  //   final int? selectedDay =
+  //       day.text.isNotEmpty ? int.tryParse(day.text) : null;
+
+  //   filteredTrades.assignAll(allTrades.where((doc) {
+  //     final String? tradeDate = doc['date'];
+  //     if (tradeDate == null || tradeDate.trim().isEmpty) return false;
+
+  //     try {
+  //       final DateTime date = format.parse(tradeDate);
+  //       final bool matchesYear =
+  //           selectedYear == null || date.year == selectedYear;
+  //       final bool matchesMonth =
+  //           selectedMonth == null || date.month == selectedMonth;
+  //       final bool matchesDay = selectedDay == null || date.day == selectedDay;
+
+  //       return matchesYear && matchesMonth && matchesDay;
+  //     } catch (e) {
+  //       return false;
+  //     }
+  //   }).toList());
+  //   calculateTotalsForAllTrades();
+  //   numberOfCars.value = filteredTrades.length;
+  // }
+
+  // void filterTradesByDate() async {
+  //   filteredTrades.clear();
+  //   final int? selectedYear =
+  //       year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
+  //   final int? selectedMonth =
+  //       month.text.isNotEmpty ? _monthNameToNumber(month.text) : null;
+  //   final int? selectedDay =
+  //       day.text.isNotEmpty ? int.tryParse(day.text) : null;
+
+  //   var dateType = isSoldStatusSelected.value == true ? 'SELL' : 'BUY';
+  //   print(dateType);
+
+  //   for (var trade in allTrades) {
+  //     final List? tradeItems = trade['items'];
+  //     if (tradeItems == null || tradeItems.isEmpty) continue;
+
+  //     if (selectedYear != null ||
+  //         selectedMonth != null ||
+  //         selectedDay != null) {
+  //       for (var item in tradeItems) {
+  //         print(1);
+  //         if (getdataName(item['item'], allItems) == dateType) {
+  //           try {
+  //             final itemDate = item['date'];
+  //             final DateTime date = itemformat.parse(itemDate);
+  //             final bool matchesYear =
+  //                 selectedYear == null || date.year == selectedYear;
+  //             final bool matchesMonth =
+  //                 selectedMonth == null || date.month == selectedMonth;
+  //             final bool matchesDay =
+  //                 selectedDay == null || date.day == selectedDay;
+
+  //             if (matchesYear && matchesMonth && matchesDay) {
+  //               filteredTrades.add(trade);
+  //             }
+  //           } catch (e) {
+  //             // print(e);
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       for (var item in tradeItems) {
+  //         var itemName = getdataName(item['item'], allItems);
+  //         if (itemName == dateType) {
+  //           // print(2);
+  //           // print(itemName);
+  //           filteredTrades.add(trade);
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   calculateTotalsForAllTrades();
+  //   numberOfCars.value = filteredTrades.length;
+  // }
+
+  void filterTradesByDate() {
     final int? selectedYear =
         year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
-    final int? selectedMonth =
-        month.text.isNotEmpty ? _monthNameToNumber(month.text) : null;
+    final int? selectedMonth = month.value.text.isNotEmpty
+        ? _monthNameToNumber(month.value.text)
+        : null;
     final int? selectedDay =
-        day.text.isNotEmpty ? int.tryParse(day.text) : null;
+        day.value.text.isNotEmpty ? int.tryParse(day.value.text) : null;
 
-    filteredTrades.assignAll(allTrades.where((doc) {
-      final String? tradeDate = doc['date'];
-      if (tradeDate == null || tradeDate.trim().isEmpty) return false;
+    final String? selectedBrand =
+        carBrandId.value != '' ? carBrandId.value : null;
+    final String? selectedModel =
+        carModelId.value != '' ? carModelId.value : null;
 
-      try {
-        final DateTime date = format.parse(tradeDate);
-        final bool matchesYear =
-            selectedYear == null || date.year == selectedYear;
-        final bool matchesMonth =
-            selectedMonth == null || date.month == selectedMonth;
-        final bool matchesDay = selectedDay == null || date.day == selectedDay;
+    final String dateType = isSoldStatusSelected.value ? 'SELL' : 'BUY';
 
-        return matchesYear && matchesMonth && matchesDay;
-      } catch (e) {
-        return false;
+    final List<Map<String, dynamic>> temp = [];
+
+    for (var trade in allTrades) {
+      final String? tradeBrand = trade['car_brand'] as String?;
+      final String? tradeModel = trade['car_model'] as String?;
+      if (selectedBrand != null && tradeBrand != selectedBrand) continue;
+      if (selectedModel != null && tradeModel != selectedModel) continue;
+      final items = trade['items'] as List<dynamic>?;
+      if (items == null || items.isEmpty) continue;
+
+      DateTime? latestForThisTrade;
+
+      for (var item in items) {
+        if (getdataName(item['item'], allItems) != dateType) continue;
+
+        DateTime parsed;
+        try {
+          parsed = itemformat.parse(item['date']);
+        } catch (_) {
+          continue;
+        }
+
+        if (selectedYear != null && parsed.year != selectedYear) continue;
+        if (selectedMonth != null && parsed.month != selectedMonth) continue;
+        if (selectedDay != null && parsed.day != selectedDay) continue;
+
+        if (latestForThisTrade == null || parsed.isAfter(latestForThisTrade)) {
+          latestForThisTrade = parsed;
+        }
       }
-    }).toList());
-    calculateTotalsForAllTrades();
-    numberOfCars.value = filteredTrades.length;
-  }
 
-  filterTradesByStatus(String status) {
-    filteredTrades.assignAll(allTrades.where((doc) {
-      final String? tradeStatus = doc['status'];
-      if (tradeStatus == null || tradeStatus.trim().isEmpty) return false;
-
-      try {
-        final bool matchesStatus = tradeStatus == '' || status == tradeStatus;
-
-        return matchesStatus;
-      } catch (e) {
-        return false;
+      if (latestForThisTrade != null) {
+        temp.add({
+          'trade': trade,
+          'date': latestForThisTrade,
+        });
       }
-    }).toList());
+    }
+
+    if (selectedYear == null && selectedMonth == null && selectedDay == null) {
+      temp.sort(
+        (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
+      );
+    }
+
+    filteredTrades.value =
+        temp.map((e) => e['trade'] as DocumentSnapshot<Object?>).toList();
 
     calculateTotalsForAllTrades();
     numberOfCars.value = filteredTrades.length;
