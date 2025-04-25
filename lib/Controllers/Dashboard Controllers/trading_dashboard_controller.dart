@@ -34,6 +34,7 @@ class TradingDashboardController extends GetxController {
   RxList<double> revenue = RxList<double>.filled(12, 0.0);
   RxList<double> expenses = RxList<double>.filled(12, 0.0);
   RxList<double> net = RxList<double>.filled(12, 0.0);
+  RxList<double> carsNumber = RxList<double>.filled(12, 0.0);
   // List<double> revenue = List<double>.filled(12, 0.0);
   // List<double> expenses = List<double>.filled(12, 0.0);
   // List<double> net = List<double>.filled(12, 0.0);
@@ -111,6 +112,7 @@ class TradingDashboardController extends GetxController {
       revenue.assignAll(List.filled(12, 0.0));
       expenses.assignAll(List.filled(12, 0.0));
       net.assignAll(List.filled(12, 0.0));
+      carsNumber.assignAll(List.filled(12, 0.0));
     }
     filterTradesByDate();
   }
@@ -385,7 +387,6 @@ class TradingDashboardController extends GetxController {
     calculateNewSoldPercentage();
   }
 
-
   filterTradesForChart() {
     try {
       final DateTime now = DateTime.now();
@@ -419,6 +420,7 @@ class TradingDashboardController extends GetxController {
           revenue.assignAll(List.filled(12, 0.0));
           expenses.assignAll(List.filled(12, 0.0));
           net.assignAll(List.filled(12, 0.0));
+          carsNumber.assignAll(List.filled(12, 0.0));
           break;
         case 'month':
           final daysInMonth =
@@ -426,16 +428,19 @@ class TradingDashboardController extends GetxController {
           revenue.assignAll(List.filled(daysInMonth, 0.0));
           expenses.assignAll(List.filled(daysInMonth, 0.0));
           net.assignAll(List.filled(daysInMonth, 0.0));
+          carsNumber.assignAll(List.filled(daysInMonth, 0.0));
           break;
         case 'day':
           revenue.assignAll(List.filled(1, 0.0));
           expenses.assignAll(List.filled(1, 0.0));
           net.assignAll(List.filled(1, 0.0));
+          carsNumber.assignAll(List.filled(1, 0.0));
           break;
         default:
           revenue.assignAll(List.filled(12, 0.0));
           expenses.assignAll(List.filled(12, 0.0));
           net.assignAll(List.filled(12, 0.0));
+          carsNumber.assignAll(List.filled(12, 0.0));
       }
       final String dateType = isSoldStatusSelected.value ? 'SELL' : 'BUY';
 
@@ -474,6 +479,7 @@ class TradingDashboardController extends GetxController {
         revenue[idx] += receive; // sum of all receives
         expenses[idx] += pay; // sum of all pays
         net[idx] += (receive - pay); // net = receive minus pay
+        carsNumber[idx] += 1;
         // if (idx >= 0 && idx < revenue.length) {
         //   revenue[idx] += receive; // sum of all receives
         //   expenses[idx] += pay; // sum of all pays

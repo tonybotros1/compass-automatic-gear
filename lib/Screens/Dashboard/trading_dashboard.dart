@@ -338,6 +338,7 @@ class TradingDashboard extends StatelessWidget {
                       expenses: controller.expenses,
                       net: controller.net,
                       revenue: controller.revenue,
+                      carsNumber: controller.carsNumber,
                     );
                   }),
                 ),

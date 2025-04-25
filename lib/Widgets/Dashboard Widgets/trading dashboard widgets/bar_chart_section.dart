@@ -290,6 +290,7 @@ class SyncfusionMultiBarChart extends StatelessWidget {
   final List<double> revenue;
   final List<double> expenses;
   final List<double> net;
+  final List<double> carsNumber;
 
   const SyncfusionMultiBarChart({
     super.key,
@@ -297,9 +298,10 @@ class SyncfusionMultiBarChart extends StatelessWidget {
     required this.revenue,
     required this.expenses,
     required this.net,
+    required this.carsNumber,
   }) : assert(labels.length == revenue.length &&
             revenue.length == expenses.length &&
-            expenses.length == net.length);
+            expenses.length == net.length && net.length == carsNumber.length);
 
   @override
   Widget build(BuildContext context) {
@@ -317,10 +319,12 @@ class SyncfusionMultiBarChart extends StatelessWidget {
     final revenueData = <_ChartData>[];
     final expensesData = <_ChartData>[];
     final netData = <_ChartData>[];
+    final carsNumberData = <_ChartData>[];
     for (var i = 0; i < labels.length; i++) {
       revenueData.add(_ChartData(labels[i], revenue[i]));
       expensesData.add(_ChartData(labels[i], expenses[i]));
       netData.add(_ChartData(labels[i], net[i]));
+      carsNumberData.add(_ChartData(labels[i], carsNumber[i]));
     }
 
     // Determine Y-axis bounds
@@ -353,6 +357,20 @@ class SyncfusionMultiBarChart extends StatelessWidget {
       ),
       legend: Legend(isVisible: true, position: LegendPosition.bottom),
       series: <CartesianSeries<_ChartData, String>>[
+        ColumnSeries<_ChartData, String>(
+          name: 'Count',
+          dataSource: carsNumberData,
+          xValueMapper: (_ChartData data, _) => data.category,
+          yValueMapper: (_ChartData data, _) => data.value,
+          color: Colors.pink,
+          width: 0.6,
+          dataLabelSettings: DataLabelSettings(
+              showZeroValue: false,
+              isVisible: true,
+              labelAlignment: ChartDataLabelAlignment.auto,
+              color: Colors.black,
+              useSeriesColor: true),
+        ),
         ColumnSeries<_ChartData, String>(
           name: 'Revenue',
           dataSource: revenueData,
