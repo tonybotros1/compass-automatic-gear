@@ -31,9 +31,12 @@ class TradingDashboardController extends GetxController {
   RxInt newPercentage = RxInt(0);
   RxInt soldPercentage = RxInt(0);
   RxString filterType = RxString('All');
-  final RxList<double> revenue = RxList<double>.filled(12, 0.0);
-  final RxList<double> expenses = RxList<double>.filled(12, 0.0);
-  final RxList<double> net = RxList<double>.filled(12, 0.0);
+  RxList<double> revenue = RxList<double>.filled(12, 0.0);
+  RxList<double> expenses = RxList<double>.filled(12, 0.0);
+  RxList<double> net = RxList<double>.filled(12, 0.0);
+  // List<double> revenue = List<double>.filled(12, 0.0);
+  // List<double> expenses = List<double>.filled(12, 0.0);
+  // List<double> net = List<double>.filled(12, 0.0);
   RxBool isNewStatusSelected = RxBool(false);
   RxBool isSoldStatusSelected = RxBool(false);
   // RxBool isAllSelected = RxBool(true);
@@ -43,6 +46,23 @@ class TradingDashboardController extends GetxController {
   RxMap allItems = RxMap({});
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
+  RxBool isYearSelected = RxBool(false);
+  RxBool isMonthSelected = RxBool(false);
+  RxBool isDaySelected = RxBool(false);
+  List<String> months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
 
   @override
   void onInit() async {
@@ -76,6 +96,7 @@ class TradingDashboardController extends GetxController {
       day.clear();
       month.clear();
       year.value.text = currentDate.year.toString();
+      // calculateMonthlyTotals(int.parse(year.value.text));
       allDays.clear();
     } else {
       isNewStatusSelected.value = false;
@@ -84,6 +105,12 @@ class TradingDashboardController extends GetxController {
       month.clear();
       year.value.clear();
       allDays.clear();
+      isYearSelected.value = true;
+      isMonthSelected.value = false;
+      isDaySelected.value = false;
+      revenue.assignAll(List.filled(12, 0.0));
+      expenses.assignAll(List.filled(12, 0.0));
+      net.assignAll(List.filled(12, 0.0));
     }
     filterTradesByDate();
   }
@@ -358,130 +385,105 @@ class TradingDashboardController extends GetxController {
     calculateNewSoldPercentage();
   }
 
-  void calculateMonthlyTotals(int year) {
-    // Reset all months to zero
-    for (int i = 0; i < 12; i++) {
-      revenue[i] = 0.0;
-      expenses[i] = 0.0;
-      net[i] = 0.0;
-    }
 
-    for (var trade in allTrades) {
-      final data = trade.data() as Map<String, dynamic>;
-      final String dateStr = data['date']?.toString() ?? '';
-      DateTime? date;
-      try {
-        date = DateTime.parse(dateStr);
-      } catch (_) {
-        continue;
+  filterTradesForChart() {
+    try {
+      final DateTime now = DateTime.now();
+
+      int? selectedYear =
+          year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
+      int? selectedMonth = month.value.text.isNotEmpty
+          ? _monthNameToNumber(month.value.text)
+          : null;
+      int? selectedDay =
+          day.value.text.isNotEmpty ? int.tryParse(day.value.text) : null;
+
+      // 2. If partial date provided, default missing parts to 'now'
+      if (selectedDay != null) {
+        selectedMonth ??= now.month;
+        selectedYear ??= now.year;
+      } else if (selectedMonth != null) {
+        selectedYear ??= now.year;
       }
+      final String mode =
+          (selectedYear != null && selectedMonth != null && selectedDay != null)
+              ? 'day'
+              : (selectedYear != null && selectedMonth != null)
+                  ? 'month'
+                  : (selectedYear != null)
+                      ? 'year'
+                      : 'all';
 
-      if (date.year != year) continue;
-      final int idx = date.month - 1;
-
-      final itemsList = data['items'] as List<dynamic>?;
-      if (itemsList == null) continue;
-
-      double monthReceives = 0.0;
-      double monthPays = 0.0;
-      for (var item in itemsList) {
-        monthPays += double.tryParse(item['pay']?.toString() ?? '0') ?? 0.0;
-        monthReceives +=
-            double.tryParse(item['receive']?.toString() ?? '0') ?? 0.0;
+      switch (mode) {
+        case 'year':
+          revenue.assignAll(List.filled(12, 0.0));
+          expenses.assignAll(List.filled(12, 0.0));
+          net.assignAll(List.filled(12, 0.0));
+          break;
+        case 'month':
+          final daysInMonth =
+              DateTime(selectedYear!, selectedMonth! + 1, 0).day;
+          revenue.assignAll(List.filled(daysInMonth, 0.0));
+          expenses.assignAll(List.filled(daysInMonth, 0.0));
+          net.assignAll(List.filled(daysInMonth, 0.0));
+          break;
+        case 'day':
+          revenue.assignAll(List.filled(1, 0.0));
+          expenses.assignAll(List.filled(1, 0.0));
+          net.assignAll(List.filled(1, 0.0));
+          break;
+        default:
+          revenue.assignAll(List.filled(12, 0.0));
+          expenses.assignAll(List.filled(12, 0.0));
+          net.assignAll(List.filled(12, 0.0));
       }
+      final String dateType = isSoldStatusSelected.value ? 'SELL' : 'BUY';
 
-      revenue[idx] += monthReceives;
-      expenses[idx] += monthPays;
-      net[idx] += (monthReceives - monthPays);
+      for (var trade in filteredTrades) {
+        DateTime? parsed;
+
+        var pay = 0.0;
+        var receive = 0.0;
+        final items = trade['items'] as List<dynamic>?;
+        if (items == null || items.isEmpty) continue;
+        for (var item in items) {
+          try {
+            if (getdataName(item['item'], allItems) == dateType) {
+              parsed = itemformat.parse(item['date']);
+            }
+          } catch (_) {
+            continue;
+          }
+          pay += double.tryParse(item['pay']) ?? 0;
+          receive += double.tryParse(item['receive']) ?? 0;
+        }
+        int idx;
+        switch (mode) {
+          case 'year':
+            idx = parsed!.month - 1;
+            break;
+          case 'month':
+            idx = parsed!.day - 1;
+            break;
+          case 'day':
+            idx = 0;
+            break;
+          default:
+            idx = -1;
+        }
+        revenue[idx] += receive; // sum of all receives
+        expenses[idx] += pay; // sum of all pays
+        net[idx] += (receive - pay); // net = receive minus pay
+        // if (idx >= 0 && idx < revenue.length) {
+        //   revenue[idx] += receive; // sum of all receives
+        //   expenses[idx] += pay; // sum of all pays
+        //   net[idx] += (receive - pay); // net = receive minus pay
+        // }
+      }
+    } catch (e) {
+      // print(e);
     }
-
-    update();
   }
-
-  // void filterTradesByDate() async {
-  //   final int? selectedYear =
-  //       year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
-  //   final int? selectedMonth =
-  //       month.text.isNotEmpty ? _monthNameToNumber(month.text) : null;
-  //   final int? selectedDay =
-  //       day.text.isNotEmpty ? int.tryParse(day.text) : null;
-
-  //   filteredTrades.assignAll(allTrades.where((doc) {
-  //     final String? tradeDate = doc['date'];
-  //     if (tradeDate == null || tradeDate.trim().isEmpty) return false;
-
-  //     try {
-  //       final DateTime date = format.parse(tradeDate);
-  //       final bool matchesYear =
-  //           selectedYear == null || date.year == selectedYear;
-  //       final bool matchesMonth =
-  //           selectedMonth == null || date.month == selectedMonth;
-  //       final bool matchesDay = selectedDay == null || date.day == selectedDay;
-
-  //       return matchesYear && matchesMonth && matchesDay;
-  //     } catch (e) {
-  //       return false;
-  //     }
-  //   }).toList());
-  //   calculateTotalsForAllTrades();
-  //   numberOfCars.value = filteredTrades.length;
-  // }
-
-  // void filterTradesByDate() async {
-  //   filteredTrades.clear();
-  //   final int? selectedYear =
-  //       year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
-  //   final int? selectedMonth =
-  //       month.text.isNotEmpty ? _monthNameToNumber(month.text) : null;
-  //   final int? selectedDay =
-  //       day.text.isNotEmpty ? int.tryParse(day.text) : null;
-
-  //   var dateType = isSoldStatusSelected.value == true ? 'SELL' : 'BUY';
-  //   print(dateType);
-
-  //   for (var trade in allTrades) {
-  //     final List? tradeItems = trade['items'];
-  //     if (tradeItems == null || tradeItems.isEmpty) continue;
-
-  //     if (selectedYear != null ||
-  //         selectedMonth != null ||
-  //         selectedDay != null) {
-  //       for (var item in tradeItems) {
-  //         print(1);
-  //         if (getdataName(item['item'], allItems) == dateType) {
-  //           try {
-  //             final itemDate = item['date'];
-  //             final DateTime date = itemformat.parse(itemDate);
-  //             final bool matchesYear =
-  //                 selectedYear == null || date.year == selectedYear;
-  //             final bool matchesMonth =
-  //                 selectedMonth == null || date.month == selectedMonth;
-  //             final bool matchesDay =
-  //                 selectedDay == null || date.day == selectedDay;
-
-  //             if (matchesYear && matchesMonth && matchesDay) {
-  //               filteredTrades.add(trade);
-  //             }
-  //           } catch (e) {
-  //             // print(e);
-  //           }
-  //         }
-  //       }
-  //     } else {
-  //       for (var item in tradeItems) {
-  //         var itemName = getdataName(item['item'], allItems);
-  //         if (itemName == dateType) {
-  //           // print(2);
-  //           // print(itemName);
-  //           filteredTrades.add(trade);
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   calculateTotalsForAllTrades();
-  //   numberOfCars.value = filteredTrades.length;
-  // }
 
   void filterTradesByDate() {
     final int? selectedYear =
@@ -548,6 +550,7 @@ class TradingDashboardController extends GetxController {
         temp.map((e) => e['trade'] as DocumentSnapshot<Object?>).toList();
 
     calculateTotalsForAllTrades();
+    filterTradesForChart();
     numberOfCars.value = filteredTrades.length;
   }
 

@@ -1,10 +1,9 @@
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Dashboard Controllers/trading_dashboard_controller.dart';
+import '../../Widgets/Dashboard Widgets/trading dashboard widgets/bar_chart_section.dart';
 import '../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
-import '../../Widgets/Dashboard Widgets/trading dashboard widgets/pie_chart.dart';
 import '../../Widgets/Dashboard Widgets/trading dashboard widgets/tabel_section.dart';
 import '../../consts.dart';
 
@@ -41,10 +40,17 @@ class TradingDashboard extends StatelessWidget {
                               items: isYearsLoading ? {} : controller.allYears,
                               onChanged: (key, value) {
                                 controller.year.value.text = value['name'];
-                                controller.filterTradesByDate();
+                                controller.month.clear();
+                                controller.day.clear();
+                                controller.allDays.clear();
                                 controller.filterType.value = '';
-                                controller.calculateMonthlyTotals(
-                                    int.parse(value['name']));
+                                // controller.calculateMonthlyTotals(
+                                //     int.parse(value['name']));
+                                controller.isYearSelected.value = true;
+                                controller.isMonthSelected.value = false;
+                                controller.isDaySelected.value = false;
+                                // controller.calculateTotals('year');
+                                controller.filterTradesByDate();
                               },
                             )),
                             Expanded(
@@ -58,8 +64,13 @@ class TradingDashboard extends StatelessWidget {
                                 controller.allDays.assignAll(
                                     controller.getDaysInMonth(value['name']));
                                 controller.month.text = value['name'];
-                                controller.filterTradesByDate();
+                                controller.day.clear();
                                 controller.filterType.value = '';
+                                controller.isMonthSelected.value = true;
+                                controller.isYearSelected.value = false;
+                                controller.isDaySelected.value = false;
+                                // controller.calculateTotals('month');
+                                controller.filterTradesByDate();
                               },
                             )),
                             Expanded(
@@ -72,11 +83,16 @@ class TradingDashboard extends StatelessWidget {
                                 controller.day.text = value['name'];
                                 controller.filterTradesByDate();
                                 controller.filterType.value = '';
+                                controller.isMonthSelected.value = false;
+                                controller.isYearSelected.value = false;
+                                controller.isDaySelected.value = true;
+                                // controller.calculateTotals('day');
                               },
                             )),
                             ElevatedButton(
                                 style: allButtonStyle,
                                 onPressed: () {
+                                
                                   controller.filterByCurrentDate('all');
                                   controller.filterType.value = 'All';
                                   // controller.isAllSelected.value = true;
@@ -161,7 +177,7 @@ class TradingDashboard extends StatelessWidget {
                                         .isSoldStatusSelected.isFalse
                                     ? () {
                                         controller.filterType.value =
-                                            'Sell Date';
+                                            'Sold';
                                         controller.isSoldStatusSelected.value =
                                             true;
                                         controller.isNewStatusSelected.value =
@@ -169,7 +185,7 @@ class TradingDashboard extends StatelessWidget {
                                         controller.filterTradesByDate();
                                       }
                                     : null,
-                                child: Text('Sell Date')),
+                                child: Text('Sold')),
                             Expanded(
                               child: CustomDropdown(
                                 showedSelectedName: 'name',
@@ -307,164 +323,24 @@ class TradingDashboard extends StatelessWidget {
                   ),
                 ),
                 SliverToBoxAdapter(
-                    child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    double chartWidth = constraints.maxWidth / 4;
-                    // double lineChartWidth = constraints.maxWidth * (3 / 4);
-                    double chartHeight = 300; // chartWidth * (11 / 16);
-                    double lineChartHeight = 300;
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  color: Colors.grey.shade300,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        spacing: 10,
-                                        children: [
-                                          hintMark(color: Colors.green),
-                                          Text(
-                                            'New',
-                                            style: hintMarkTestStyle,
-                                          ),
-                                          hintMark(color: Colors.blueGrey),
-                                          Text(
-                                            'Sold',
-                                            style: hintMarkTestStyle,
-                                          ),
-                                        ],
-                                      ),
-                                      GetX<TradingDashboardController>(
-                                          builder: (controller) {
-                                        return Text(controller.filterType.value,
-                                            style: TextStyle(
-                                                color: Colors.grey.shade700,
-                                                fontWeight: FontWeight.bold));
-                                      })
-                                    ],
-                                  ),
-                                ),
-                                GetX<TradingDashboardController>(
-                                    builder: (controller) {
-                                  return SizedBox(
-                                    width: chartWidth,
-                                    height: chartHeight,
-                                    child: PieChart(
-                                      PieChartData(
-                                        pieTouchData: PieTouchData(
-                                          touchCallback: (FlTouchEvent event,
-                                              pieTouchResponse) {
-                                            if (!event
-                                                    .isInterestedForInteractions ||
-                                                pieTouchResponse == null ||
-                                                pieTouchResponse
-                                                        .touchedSection ==
-                                                    null) {
-                                              controller.touchedIndex.value =
-                                                  -1;
-                                              return;
-                                            }
-                                            controller.touchedIndex.value =
-                                                pieTouchResponse.touchedSection!
-                                                    .touchedSectionIndex;
-                                          },
-                                        ),
-                                        borderData: FlBorderData(
-                                          border: Border.all(),
-                                          show: true,
-                                        ),
-                                        sectionsSpace: 0,
-                                        centerSpaceRadius: 0,
-                                        sections: showingSections(
-                                            controller.touchedIndex.value,
-                                            controller.newPercentage.value,
-                                            controller.soldPercentage.value,
-                                            chartWidth,
-                                            chartWidth),
-                                      ),
-                                    ),
-                                  );
-                                })
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                            flex: 3,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    color: Colors.grey.shade300,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          spacing: 10,
-                                          children: [
-                                            hintMark(color: Colors.green),
-                                            Text(
-                                              'Revenue',
-                                              style: hintMarkTestStyle,
-                                            ),
-                                            hintMark(color: Colors.red),
-                                            Text(
-                                              'Expenses',
-                                              style: hintMarkTestStyle,
-                                            ),
-                                            hintMark(color: Colors.blueGrey),
-                                            Text(
-                                              'Net',
-                                              style: hintMarkTestStyle,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  GetX<TradingDashboardController>(
-                                      builder: (controller) {
-                                    return Container(
-                                      padding: EdgeInsets.all(10),
-                                      width: double.infinity,
-                                      height: lineChartHeight,
-                                      child: LineChart(
-                                        _buildMonthlyLineData(
-                                            controller.revenue,
-                                            controller.expenses,
-                                            controller.net),
-                                        duration:
-                                            const Duration(milliseconds: 250),
-                                      ),
-                                    );
-                                  })
-                                ],
-                              ),
-                            )),
-                      ],
+                  child:
+                      GetX<TradingDashboardController>(builder: (controller) {
+                    return SyncfusionMultiBarChart(
+                      labels: controller.isYearSelected.isTrue
+                          ? controller.months
+                          : controller.isMonthSelected.isTrue
+                              ? controller.allDays.values
+                                  .map((e) => e['name'].toString())
+                                  .toList()
+                              : controller.isDaySelected.isTrue
+                                  ? ['Today']
+                                  : controller.months,
+                      expenses: controller.expenses,
+                      net: controller.net,
+                      revenue: controller.revenue,
                     );
                   }),
-                )),
+                ),
               ],
             ),
           );
@@ -479,332 +355,3 @@ class TradingDashboard extends StatelessWidget {
     );
   }
 }
-
-LineChartData _buildMonthlyLineData(
-  List<double> revenue,
-  List<double> expenses,
-  List<double> net,
-) {
-  final spotsRevenue =
-      revenue.asMap().entries.map((e) => FlSpot(e.key + 1, e.value)).toList();
-  final spotsExpenses =
-      expenses.asMap().entries.map((e) => FlSpot(e.key + 1, e.value)).toList();
-  final spotsNet =
-      net.asMap().entries.map((e) => FlSpot(e.key + 1, e.value)).toList();
-
-  // Compute bounds
-  final maxY = [...revenue, ...expenses]
-      .fold<double>(0.0, (prev, e) => e > prev ? e : prev);
-  final minY = net.fold<double>(0.0, (prev, e) => e < prev ? e : prev);
-
-  // Determine a non-zero interval for left titles
-  final diff = maxY - minY;
-  double interval;
-  if (diff > 0) {
-    interval = diff / 5;
-  } else if (maxY > 0) {
-    interval = maxY / 5;
-  } else {
-    interval = 1.0;
-  }
-  if (interval <= 0) interval = 1.0;
-
-  return LineChartData(
-    minX: 1,
-    maxX: 12,
-    minY: minY * 1.1 < 0 ? minY * 1.1 : 0,
-    maxY: maxY * 1.1,
-    lineTouchData: LineTouchData(
-      handleBuiltInTouches: true,
-      touchTooltipData:
-          LineTouchTooltipData(getTooltipColor: (spot) => Colors.black54),
-    ),
-    gridData: FlGridData(show: false),
-    borderData: FlBorderData(
-      show: true,
-      border: Border(
-        bottom: BorderSide(color: Colors.grey.shade300, width: 2),
-        left: BorderSide(color: Colors.grey.shade300, width: 2),
-        right: BorderSide.none,
-        top: BorderSide.none,
-      ),
-    ),
-    titlesData: FlTitlesData(
-      bottomTitles: AxisTitles(
-        sideTitles: SideTitles(
-          showTitles: true,
-          interval: 1,
-          reservedSize: 32,
-          getTitlesWidget: _bottomTitleWidgets,
-        ),
-      ),
-      leftTitles: AxisTitles(
-        sideTitles: SideTitles(
-          showTitles: true,
-          interval: interval,
-          reservedSize: 40,
-          getTitlesWidget: _leftTitleWidgets,
-        ),
-      ),
-      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-    ),
-    lineBarsData: [
-      _lineChartBarData(spotsRevenue, Colors.green),
-      _lineChartBarData(spotsExpenses, Colors.red),
-      _lineChartBarData(spotsNet, Colors.blueGrey),
-    ],
-  );
-}
-
-SideTitleWidget _bottomTitleWidgets(double value, TitleMeta meta) {
-  const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 12);
-  const monthLabels = [
-    '',
-    'JAN',
-    'FEB',
-    'MAR',
-    'APR',
-    'MAY',
-    'JUN',
-    'JUL',
-    'AUG',
-    'SEP',
-    'OCT',
-    'NOV',
-    'DEC'
-  ];
-  final text = (value.toInt() >= 1 && value.toInt() <= 12)
-      ? monthLabels[value.toInt()]
-      : '';
-  return SideTitleWidget(meta: meta, space: 8, child: Text(text, style: style));
-}
-
-SideTitleWidget _leftTitleWidgets(double value, TitleMeta meta) {
-  const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 12);
-  return SideTitleWidget(
-      meta: meta, child: Text(value.toStringAsFixed(0), style: style));
-}
-
-LineChartBarData _lineChartBarData(List<FlSpot> spots, Color color) {
-  return LineChartBarData(
-    spots: spots,
-    isCurved: true,
-    color: color,
-    barWidth: 3,
-    isStrokeCapRound: true,
-    dotData: FlDotData(show: false),
-    belowBarData: BarAreaData(show: false),
-  );
-}
-
-// LineChartData get sampleData1 => LineChartData(
-//       lineTouchData: lineTouchData1,
-//       gridData: gridData,
-//       titlesData: titlesData1,
-//       borderData: borderData,
-//       lineBarsData: lineBarsData1,
-//       minX: 0,
-//       maxX: 14,
-//       maxY: 4,
-//       minY: 0,
-//     );
-
-// FlGridData get gridData => const FlGridData(show: false);
-// FlBorderData get borderData => FlBorderData(
-//       show: true,
-//       border: Border(
-//         bottom: BorderSide(color: Colors.green, width: 4),
-//         left: const BorderSide(color: Colors.transparent),
-//         right: const BorderSide(color: Colors.transparent),
-//         top: const BorderSide(color: Colors.transparent),
-//       ),
-//     );
-
-// LineTouchData get lineTouchData1 => LineTouchData(
-//       handleBuiltInTouches: true,
-//       touchTooltipData: LineTouchTooltipData(
-//         getTooltipColor: (touchedSpot) =>
-//             Colors.blueGrey.withValues(alpha: 0.8),
-//       ),
-//     );
-
-// FlTitlesData get titlesData1 => FlTitlesData(
-//       bottomTitles: AxisTitles(
-//         sideTitles: bottomTitles,
-//       ),
-//       rightTitles: const AxisTitles(
-//         sideTitles: SideTitles(showTitles: false),
-//       ),
-//       topTitles: const AxisTitles(
-//         sideTitles: SideTitles(showTitles: false),
-//       ),
-//       leftTitles: AxisTitles(
-//         sideTitles: leftTitles(),
-//       ),
-//     );
-
-// List<LineChartBarData> get lineBarsData1 => [
-//       lineChartBarData1_1,
-//       lineChartBarData1_2,
-//       lineChartBarData1_3,
-//     ];
-
-// SideTitles leftTitles() => SideTitles(
-//       getTitlesWidget: leftTitleWidgets,
-//       showTitles: true,
-//       interval: 1,
-//       reservedSize: 40,
-//     );
-
-// Widget leftTitleWidgets(double value, TitleMeta meta) {
-//   const style = TextStyle(
-//     fontWeight: FontWeight.bold,
-//     fontSize: 14,
-//   );
-//   String text;
-//   switch (value.toInt()) {
-//     case 1:
-//       text = '1m';
-//       break;
-//     case 2:
-//       text = '2m';
-//       break;
-//     case 3:
-//       text = '3m';
-//       break;
-//     case 4:
-//       text = '5m';
-//       break;
-//     case 5:
-//       text = '6m';
-//       break;
-//     default:
-//       return Container();
-//   }
-
-//   return SideTitleWidget(
-//     meta: meta,
-//     child: Text(
-//       text,
-//       style: style,
-//       textAlign: TextAlign.center,
-//     ),
-//   );
-// }
-
-// Widget bottomTitleWidgets(double value, TitleMeta meta) {
-//   const style = TextStyle(
-//     fontWeight: FontWeight.bold,
-//     fontSize: 16,
-//   );
-//   Widget text;
-//   switch (value.toInt()) {
-//     case 1:
-//       text = const Text('JAN', style: style);
-//       break;
-//     case 2:
-//       text = const Text('FEB', style: style);
-//       break;
-//     case 3:
-//       text = const Text('MAR', style: style);
-//       break;
-//     case 4:
-//       text = const Text('APR', style: style);
-//       break;
-//     case 5:
-//       text = const Text('MAY', style: style);
-//       break;
-//     case 6:
-//       text = const Text('JUN', style: style);
-//       break;
-//     case 7:
-//       text = const Text('JUL', style: style);
-//       break;
-//     case 8:
-//       text = const Text('AUG', style: style);
-//       break;
-//     case 9:
-//       text = const Text('SEP', style: style);
-//       break;
-//     case 10:
-//       text = const Text('OCT', style: style);
-//       break;
-//     case 11:
-//       text = const Text('NOV', style: style);
-//       break;
-//     case 12:
-//       text = const Text('DEC', style: style);
-//       break;
-//     default:
-//       text = const Text('', style: style);
-//       break;
-//   }
-
-//   return SideTitleWidget(
-//     meta: meta,
-//     space: 10,
-//     child: text,
-//   );
-// }
-
-// SideTitles get bottomTitles => SideTitles(
-//       showTitles: true,
-//       reservedSize: 32,
-//       interval: 1,
-//       getTitlesWidget: bottomTitleWidgets,
-//     );
-
-// LineChartBarData get lineChartBarData1_1 => LineChartBarData(
-//       isCurved: true,
-//       color: Colors.green,
-//       barWidth: 8,
-//       isStrokeCapRound: true,
-//       dotData: const FlDotData(show: false),
-//       belowBarData: BarAreaData(show: false),
-//       spots: const [
-//         FlSpot(1, 1),
-//         FlSpot(3, 1.5),
-//         FlSpot(5, 1.4),
-//         FlSpot(7, 3.4),
-//         FlSpot(10, 2),
-//         FlSpot(12, 2.2),
-//         FlSpot(13, 1.8),
-//       ],
-//     );
-
-// LineChartBarData get lineChartBarData1_2 => LineChartBarData(
-//       isCurved: true,
-//       color: Colors.pink,
-//       barWidth: 8,
-//       isStrokeCapRound: true,
-//       dotData: const FlDotData(show: false),
-//       belowBarData: BarAreaData(
-//         show: false,
-//         color: Colors.pinkAccent,
-//       ),
-//       spots: const [
-//         FlSpot(1, 1),
-//         FlSpot(3, 2.8),
-//         FlSpot(7, 1.2),
-//         FlSpot(10, 2.8),
-//         FlSpot(12, 2.6),
-//         FlSpot(13, 3.9),
-//       ],
-//     );
-
-// LineChartBarData get lineChartBarData1_3 => LineChartBarData(
-//       isCurved: true,
-//       color: Colors.cyan,
-//       barWidth: 8,
-//       isStrokeCapRound: true,
-//       dotData: const FlDotData(show: false),
-//       belowBarData: BarAreaData(show: false),
-//       spots: const [
-//         FlSpot(1, 2.8),
-//         FlSpot(3, 1.9),
-//         FlSpot(6, 3),
-//         FlSpot(10, 1.3),
-//         FlSpot(13, 2.5),
-//       ],
-//     );
