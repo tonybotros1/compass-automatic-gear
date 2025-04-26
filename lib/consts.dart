@@ -36,8 +36,19 @@ var newButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+
+
 var soldButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blueGrey,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var isPressedButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.grey,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),

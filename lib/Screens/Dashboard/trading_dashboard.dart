@@ -43,7 +43,6 @@ class TradingDashboard extends StatelessWidget {
                                 controller.month.clear();
                                 controller.day.clear();
                                 controller.allDays.clear();
-                                controller.filterType.value = '';
                                 // controller.calculateMonthlyTotals(
                                 //     int.parse(value['name']));
                                 controller.isYearSelected.value = true;
@@ -65,7 +64,6 @@ class TradingDashboard extends StatelessWidget {
                                     controller.getDaysInMonth(value['name']));
                                 controller.month.text = value['name'];
                                 controller.day.clear();
-                                controller.filterType.value = '';
                                 controller.isMonthSelected.value = true;
                                 controller.isYearSelected.value = false;
                                 controller.isDaySelected.value = false;
@@ -82,7 +80,6 @@ class TradingDashboard extends StatelessWidget {
                               onChanged: (key, value) {
                                 controller.day.text = value['name'];
                                 controller.filterTradesByDate();
-                                controller.filterType.value = '';
                                 controller.isMonthSelected.value = false;
                                 controller.isYearSelected.value = false;
                                 controller.isDaySelected.value = true;
@@ -92,9 +89,7 @@ class TradingDashboard extends StatelessWidget {
                             ElevatedButton(
                                 style: allButtonStyle,
                                 onPressed: () {
-                                
                                   controller.filterByCurrentDate('all');
-                                  controller.filterType.value = 'All';
                                   // controller.isAllSelected.value = true;
                                   controller.isTodaySelected.value = false;
                                   controller.isThisMonthSelected.value = false;
@@ -111,13 +106,16 @@ class TradingDashboard extends StatelessWidget {
                                 onPressed: controller.isTodaySelected.isFalse
                                     ? () {
                                         controller.filterByCurrentDate('today');
-                                        controller.filterType.value = 'Today';
                                         // controller.isAllSelected.value = false;
                                         controller.isTodaySelected.value = true;
                                         controller.isThisMonthSelected.value =
                                             false;
                                         controller.isThisYearSelected.value =
                                             false;
+                                        controller.isYearSelected.value = false;
+                                        controller.isMonthSelected.value =
+                                            false;
+                                        controller.isDaySelected.value = true;
                                       }
                                     : null,
                                 child: Text('Today')),
@@ -127,8 +125,7 @@ class TradingDashboard extends StatelessWidget {
                                         .isThisMonthSelected.isFalse
                                     ? () {
                                         controller.filterByCurrentDate('month');
-                                        controller.filterType.value =
-                                            'This Month';
+
                                         // controller.isAllSelected.value = false;
                                         controller.isTodaySelected.value =
                                             false;
@@ -136,6 +133,9 @@ class TradingDashboard extends StatelessWidget {
                                             true;
                                         controller.isThisYearSelected.value =
                                             false;
+                                        controller.isYearSelected.value = false;
+                                        controller.isMonthSelected.value = true;
+                                        controller.isDaySelected.value = false;
                                       }
                                     : null,
                                 child: Text('This Month')),
@@ -144,8 +144,7 @@ class TradingDashboard extends StatelessWidget {
                                 onPressed: controller.isThisYearSelected.isFalse
                                     ? () {
                                         controller.filterByCurrentDate('year');
-                                        controller.filterType.value =
-                                            'This Year';
+
                                         // controller.isAllSelected.value = false;
                                         controller.isTodaySelected.value =
                                             false;
@@ -153,38 +152,45 @@ class TradingDashboard extends StatelessWidget {
                                             false;
                                         controller.isThisYearSelected.value =
                                             true;
+                                        controller.isYearSelected.value = true;
+                                        controller.isMonthSelected.value =
+                                            false;
+                                        controller.isDaySelected.value = false;
                                       }
                                     : null,
                                 child: Text('This Year')),
                             ElevatedButton(
-                                style: newButtonStyle,
-                                onPressed: controller
-                                        .isNewStatusSelected.isFalse
-                                    ? () {
-                                        controller.filterType.value =
-                                            'Buy Date';
-                                        controller.isNewStatusSelected.value =
-                                            true;
-                                        controller.isSoldStatusSelected.value =
-                                            false;
-                                        controller.filterTradesByDate();
-                                      }
-                                    : null,
-                                child: Text('Buy Date')),
+                                style: controller.isNewStatusSelected.isTrue
+                                    ? isPressedButtonStyle
+                                    : newButtonStyle,
+                                onPressed: () {
+                                  if (controller.isNewStatusSelected.isFalse) {
+                                    controller.isNewStatusSelected.value = true;
+                                    controller.isSoldStatusSelected.value =
+                                        false;
+                                  } else {
+                                    controller.isNewStatusSelected.value =
+                                        false;
+                                  }
+                                  controller.filterTradesByDate();
+                                },
+                                child: Text('New')),
                             ElevatedButton(
-                                style: soldButtonStyle,
-                                onPressed: controller
-                                        .isSoldStatusSelected.isFalse
-                                    ? () {
-                                        controller.filterType.value =
-                                            'Sold';
-                                        controller.isSoldStatusSelected.value =
-                                            true;
-                                        controller.isNewStatusSelected.value =
-                                            false;
-                                        controller.filterTradesByDate();
-                                      }
-                                    : null,
+                                style: controller.isSoldStatusSelected.isTrue
+                                    ? isPressedButtonStyle
+                                    : soldButtonStyle,
+                                onPressed: () {
+                                  if (controller.isSoldStatusSelected.isFalse) {
+                                    controller.isSoldStatusSelected.value =
+                                        true;
+                                    controller.isNewStatusSelected.value =
+                                        false;
+                                  } else {
+                                    controller.isSoldStatusSelected.value =
+                                        false;
+                                  }
+                                  controller.filterTradesByDate();
+                                },
                                 child: Text('Sold')),
                             Expanded(
                               child: CustomDropdown(

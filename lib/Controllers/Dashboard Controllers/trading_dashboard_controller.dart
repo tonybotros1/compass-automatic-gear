@@ -30,7 +30,6 @@ class TradingDashboardController extends GetxController {
   RxInt touchedIndex = 0.obs;
   RxInt newPercentage = RxInt(0);
   RxInt soldPercentage = RxInt(0);
-  RxString filterType = RxString('All');
   RxList<double> revenue = RxList<double>.filled(12, 0.0);
   RxList<double> expenses = RxList<double>.filled(12, 0.0);
   RxList<double> net = RxList<double>.filled(12, 0.0);
@@ -505,11 +504,20 @@ class TradingDashboardController extends GetxController {
     final String? selectedModel =
         carModelId.value != '' ? carModelId.value : null;
 
+    // 1️⃣ New: read “new status” toggle
+    final bool isNewSelected = isNewStatusSelected.value;
+
     final String dateType = isSoldStatusSelected.value ? 'SELL' : 'BUY';
 
     final List<Map<String, dynamic>> temp = [];
 
     for (var trade in allTrades) {
+      // 2️⃣ New: if we only want “new” trades, skip all others
+      if (isNewSelected) {
+        final String? status = trade['status'] as String?;
+        if (status?.toLowerCase() != 'new') continue;
+      }
+
       final String? tradeBrand = trade['car_brand'] as String?;
       final String? tradeModel = trade['car_model'] as String?;
       if (selectedBrand != null && tradeBrand != selectedBrand) continue;
@@ -559,6 +567,75 @@ class TradingDashboardController extends GetxController {
     filterTradesForChart();
     numberOfCars.value = filteredTrades.length;
   }
+
+  // void filterTradesByDate() {
+  //   final int? selectedYear =
+  //       year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
+  //   final int? selectedMonth = month.value.text.isNotEmpty
+  //       ? _monthNameToNumber(month.value.text)
+  //       : null;
+  //   final int? selectedDay =
+  //       day.value.text.isNotEmpty ? int.tryParse(day.value.text) : null;
+
+  //   final String? selectedBrand =
+  //       carBrandId.value != '' ? carBrandId.value : null;
+  //   final String? selectedModel =
+  //       carModelId.value != '' ? carModelId.value : null;
+
+  //   final String dateType = isSoldStatusSelected.value ? 'SELL' : 'BUY';
+
+  //   final List<Map<String, dynamic>> temp = [];
+
+  //   for (var trade in allTrades) {
+  //     final String? tradeBrand = trade['car_brand'] as String?;
+  //     final String? tradeModel = trade['car_model'] as String?;
+  //     if (selectedBrand != null && tradeBrand != selectedBrand) continue;
+  //     if (selectedModel != null && tradeModel != selectedModel) continue;
+  //     final items = trade['items'] as List<dynamic>?;
+  //     if (items == null || items.isEmpty) continue;
+
+  //     DateTime? latestForThisTrade;
+
+  //     for (var item in items) {
+  //       if (getdataName(item['item'], allItems) != dateType) continue;
+
+  //       DateTime parsed;
+  //       try {
+  //         parsed = itemformat.parse(item['date']);
+  //       } catch (_) {
+  //         continue;
+  //       }
+
+  //       if (selectedYear != null && parsed.year != selectedYear) continue;
+  //       if (selectedMonth != null && parsed.month != selectedMonth) continue;
+  //       if (selectedDay != null && parsed.day != selectedDay) continue;
+
+  //       if (latestForThisTrade == null || parsed.isAfter(latestForThisTrade)) {
+  //         latestForThisTrade = parsed;
+  //       }
+  //     }
+
+  //     if (latestForThisTrade != null) {
+  //       temp.add({
+  //         'trade': trade,
+  //         'date': latestForThisTrade,
+  //       });
+  //     }
+  //   }
+
+  //   if (selectedYear == null && selectedMonth == null && selectedDay == null) {
+  //     temp.sort(
+  //       (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
+  //     );
+  //   }
+
+  //   filteredTrades.value =
+  //       temp.map((e) => e['trade'] as DocumentSnapshot<Object?>).toList();
+
+  //   calculateTotalsForAllTrades();
+  //   filterTradesForChart();
+  //   numberOfCars.value = filteredTrades.length;
+  // }
 
   calculateNewSoldPercentage() {
     int newTrades = 0;

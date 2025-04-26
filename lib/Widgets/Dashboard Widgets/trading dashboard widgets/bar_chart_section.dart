@@ -301,7 +301,8 @@ class SyncfusionMultiBarChart extends StatelessWidget {
     required this.carsNumber,
   }) : assert(labels.length == revenue.length &&
             revenue.length == expenses.length &&
-            expenses.length == net.length && net.length == carsNumber.length);
+            expenses.length == net.length &&
+            net.length == carsNumber.length);
 
   @override
   Widget build(BuildContext context) {
