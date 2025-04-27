@@ -70,9 +70,9 @@ var soldButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
-var isPressedButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.grey,
-  foregroundColor: Colors.white,
+var isNotPressedButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.white,
+  foregroundColor: Colors.black,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),

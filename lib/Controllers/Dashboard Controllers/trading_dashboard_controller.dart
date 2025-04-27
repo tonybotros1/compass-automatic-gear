@@ -14,16 +14,38 @@ class TradingDashboardController extends GetxController {
   RxString carBrandId = RxString('');
   RxString carModelId = RxString('');
   final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allCapitals = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allOutstanding = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allGeneralExpenses =
+      RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredCapitals =
+      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredOutstanding =
+      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredGeneralExpenses =
+      RxList<DocumentSnapshot>([]);
   RxMap allYears = RxMap({});
   RxMap allMonths = RxMap({});
   RxMap allDays = RxMap({});
   RxBool isScreenLoding = RxBool(true);
   RxString companyId = RxString('');
   RxInt numberOfCars = RxInt(0);
+  RxInt numberOfCapitalsDocs = RxInt(0);
+  RxInt numberOfOutstandingDocs = RxInt(0);
+  RxInt numberOfGeneralExpensesDocs = RxInt(0);
   RxDouble totalPaysForAllTrades = RxDouble(0.0);
   RxDouble totalReceivesForAllTrades = RxDouble(0.0);
   RxDouble totalNETsForAllTrades = RxDouble(0.0);
+  RxDouble totalPaysForAllCapitals = RxDouble(0.0);
+  RxDouble totalReceivesForAllCapitals = RxDouble(0.0);
+  RxDouble totalNETsForAllCapitals = RxDouble(0.0);
+  RxDouble totalPaysForAllOutstanding = RxDouble(0.0);
+  RxDouble totalReceivesForAllOutstanding = RxDouble(0.0);
+  RxDouble totalNETsForAllOutstanding = RxDouble(0.0);
+  RxDouble totalPaysForAllGeneralExpenses = RxDouble(0.0);
+  RxDouble totalReceivesForAllGeneralExpenses = RxDouble(0.0);
+  RxDouble totalNETsForAllGeneralExpenses = RxDouble(0.0);
   RxInt pagesPerPage = RxInt(7);
   DateFormat format = DateFormat('yyyy-MM-dd');
   DateFormat itemformat = DateFormat('dd-MM-yyyy');
@@ -69,6 +91,9 @@ class TradingDashboardController extends GetxController {
     await getCompanyId();
     await getCarBrands();
     getAllTrades();
+    getAllCapitals();
+    getAllOutstanding();
+    getAllGeneralExpenses();
     getYears();
     getMonths();
     getItems();
@@ -243,7 +268,7 @@ class TradingDashboardController extends GetxController {
       FirebaseFirestore.instance
           .collection('all_trades')
           .where('company_id', isEqualTo: companyId.value)
-          .orderBy('added_date', descending: true)
+          .orderBy('date', descending: true)
           .snapshots()
           .listen((trade) {
         allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
@@ -254,6 +279,60 @@ class TradingDashboardController extends GetxController {
       });
     } catch (e) {
       isScreenLoding.value = false;
+    }
+  }
+
+  getAllCapitals() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_capitals')
+          .where('company_id', isEqualTo: companyId.value)
+          .orderBy('date', descending: true)
+          .snapshots()
+          .listen((trade) {
+        allCapitals.assignAll(List<DocumentSnapshot>.from(trade.docs));
+        filteredCapitals.assignAll(allCapitals);
+        numberOfCapitalsDocs.value = allCapitals.length;
+        calculateTotalsForCapitals();
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  getAllOutstanding() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_outstanding')
+          .where('company_id', isEqualTo: companyId.value)
+          .orderBy('date', descending: true)
+          .snapshots()
+          .listen((trade) {
+        allOutstanding.assignAll(List<DocumentSnapshot>.from(trade.docs));
+        filteredOutstanding.assignAll(allOutstanding);
+        numberOfOutstandingDocs.value = allOutstanding.length;
+        calculateTotalsForOutstanding();
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  getAllGeneralExpenses() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_general_expenses')
+          .where('company_id', isEqualTo: companyId.value)
+          .orderBy('date', descending: true)
+          .snapshots()
+          .listen((trade) {
+        allGeneralExpenses.assignAll(List<DocumentSnapshot>.from(trade.docs));
+        filteredGeneralExpenses.assignAll(allGeneralExpenses);
+        numberOfGeneralExpensesDocs.value = allGeneralExpenses.length;
+        calculateTotalsForGeneralExpenses();
+      });
+    } catch (e) {
+      //
     }
   }
 
@@ -361,13 +440,6 @@ class TradingDashboardController extends GetxController {
     totalPaysForAllTrades.value = 0.0;
     totalReceivesForAllTrades.value = 0.0;
 
-    // // Use filteredTrades only if any filter is applied
-    // final bool isFiltering = year.value.text.isNotEmpty ||
-    //     month.text.isNotEmpty ||
-    //     day.text.isNotEmpty;
-    // final List<DocumentSnapshot> sourceList =
-    //     isFiltering ? filteredTrades : allTrades;
-
     for (var trade in filteredTrades) {
       final data = trade.data() as Map<String, dynamic>;
       final itemsList = data['items'] as List<dynamic>?;
@@ -383,7 +455,57 @@ class TradingDashboardController extends GetxController {
         }
       }
     }
-    calculateNewSoldPercentage();
+  }
+
+  void calculateTotalsForCapitals() {
+    totalNETsForAllCapitals.value = 0.0;
+    totalPaysForAllCapitals.value = 0.0;
+    totalReceivesForAllCapitals.value = 0.0;
+
+    for (var trade in filteredCapitals) {
+      final data = trade.data() as Map<String, dynamic>;
+
+      final pay = double.tryParse(data['pay'] ?? 0);
+      final receive = double.tryParse(data['receive'] ?? 0);
+
+      totalPaysForAllCapitals.value += pay!;
+      totalReceivesForAllCapitals.value += receive!;
+      totalNETsForAllCapitals.value += (receive - pay);
+    }
+  }
+
+  void calculateTotalsForOutstanding() {
+    totalNETsForAllOutstanding.value = 0.0;
+    totalPaysForAllOutstanding.value = 0.0;
+    totalReceivesForAllOutstanding.value = 0.0;
+
+    for (var trade in filteredOutstanding) {
+      final data = trade.data() as Map<String, dynamic>;
+
+      final pay = double.tryParse(data['pay'] ?? 0);
+      final receive = double.tryParse(data['receive'] ?? 0);
+
+      totalPaysForAllOutstanding.value += pay!;
+      totalReceivesForAllOutstanding.value += receive!;
+      totalNETsForAllOutstanding.value += (receive - pay);
+    }
+  }
+
+  void calculateTotalsForGeneralExpenses() {
+    totalNETsForAllGeneralExpenses.value = 0.0;
+    totalPaysForAllGeneralExpenses.value = 0.0;
+    totalReceivesForAllGeneralExpenses.value = 0.0;
+
+    for (var trade in filteredGeneralExpenses) {
+      final data = trade.data() as Map<String, dynamic>;
+
+      final pay = double.tryParse(data['pay'] ?? 0);
+      final receive = double.tryParse(data['receive'] ?? 0);
+
+      totalPaysForAllGeneralExpenses.value += pay!;
+      totalReceivesForAllGeneralExpenses.value += receive!;
+      totalNETsForAllGeneralExpenses.value += (receive - pay);
+    }
   }
 
   filterTradesForChart() {
@@ -636,25 +758,6 @@ class TradingDashboardController extends GetxController {
   //   filterTradesForChart();
   //   numberOfCars.value = filteredTrades.length;
   // }
-
-  calculateNewSoldPercentage() {
-    int newTrades = 0;
-    int soldTrades = 0;
-    for (var element in filteredTrades) {
-      Map data = element.data() as Map<String, dynamic>;
-      String status = data['status'];
-      if (status == 'New') {
-        newTrades += 1;
-      } else {
-        soldTrades += 1;
-      }
-    }
-    int numberOfTrades = filteredTrades.length;
-    newPercentage.value =
-        numberOfTrades != 0 ? ((newTrades * 100) / numberOfTrades).round() : 0;
-    soldPercentage.value =
-        numberOfTrades != 0 ? ((soldTrades * 100) / numberOfTrades).round() : 0;
-  }
 
   int? _monthNameToNumber(String monthName) {
     const monthMap = {

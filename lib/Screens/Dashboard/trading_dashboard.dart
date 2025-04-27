@@ -160,8 +160,8 @@ class TradingDashboard extends StatelessWidget {
                                     : null,
                                 child: Text('This Year')),
                             ElevatedButton(
-                                style: controller.isNewStatusSelected.isTrue
-                                    ? isPressedButtonStyle
+                                style: controller.isNewStatusSelected.isFalse
+                                    ? isNotPressedButtonStyle
                                     : newButtonStyle,
                                 onPressed: () {
                                   if (controller.isNewStatusSelected.isFalse) {
@@ -176,8 +176,8 @@ class TradingDashboard extends StatelessWidget {
                                 },
                                 child: Text('New')),
                             ElevatedButton(
-                                style: controller.isSoldStatusSelected.isTrue
-                                    ? isPressedButtonStyle
+                                style: controller.isSoldStatusSelected.isFalse
+                                    ? isNotPressedButtonStyle
                                     : soldButtonStyle,
                                 onPressed: () {
                                   if (controller.isSoldStatusSelected.isFalse) {
@@ -238,7 +238,7 @@ class TradingDashboard extends StatelessWidget {
                   child:
                       GetX<TradingDashboardController>(builder: (controller) {
                     return Row(
-                      spacing: 5,
+                      spacing: 2,
                       children: [
                         customBox(
                             title: 'NUMBER OF CARS',
@@ -250,14 +250,6 @@ class TradingDashboard extends StatelessWidget {
                                   fontSize: 16),
                             )),
                         customBox(
-                            title: 'REVENUE',
-                            value: textForDataRowInTable(
-                                text:
-                                    '${controller.totalReceivesForAllTrades.value}',
-                                color: Colors.green,
-                                fontSize: 16,
-                                isBold: true)),
-                        customBox(
                             title: 'EXPENSES',
                             value: textForDataRowInTable(
                                 text:
@@ -266,11 +258,163 @@ class TradingDashboard extends StatelessWidget {
                                 fontSize: 16,
                                 isBold: true)),
                         customBox(
+                            title: 'REVENUE',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalReceivesForAllTrades.value}',
+                                color: Colors.green,
+                                fontSize: 16,
+                                isBold: true)),
+                        customBox(
                             title: 'NET',
                             value: textForDataRowInTable(
                                 text:
                                     '${controller.totalNETsForAllTrades.value}',
                                 color: Colors.blueGrey,
+                                fontSize: 16,
+                                isBold: true)),
+                      ],
+                    );
+                  }),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 2,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child:
+                      GetX<TradingDashboardController>(builder: (controller) {
+                    return Row(
+                      spacing: 2,
+                      children: [
+                        customBox(
+                            title: 'NUMBER OF CAPITAL\'S DOCS',
+                            value: Text(
+                              '${controller.numberOfCapitalsDocs.value}',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: mainColor,
+                                  fontSize: 16),
+                            )),
+                        customBox(
+                            title: 'EXPENSES',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalPaysForAllCapitals.value}',
+                                color: Color(0xff3D365C),
+                                fontSize: 16,
+                                isBold: true)),
+                        customBox(
+                            title: 'REVENUE',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalReceivesForAllCapitals.value}',
+                                color: Color(0xff7C4585),
+                                fontSize: 16,
+                                isBold: true)),
+                        customBox(
+                            title: 'NET',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalNETsForAllCapitals.value}',
+                                color: Color(0xffC95792),
+                                fontSize: 16,
+                                isBold: true)),
+                      ],
+                    );
+                  }),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 2,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child:
+                      GetX<TradingDashboardController>(builder: (controller) {
+                    return Row(
+                      spacing: 2,
+                      children: [
+                        customBox(
+                            title: 'NUMBER OF OUTSTANDING\'S DOCS',
+                            value: Text(
+                              '${controller.numberOfOutstandingDocs.value}',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: mainColor,
+                                  fontSize: 16),
+                            )),
+                        customBox(
+                            title: 'EXPENSES',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalPaysForAllOutstanding.value}',
+                                color: Color(0xff4A102A),
+                                fontSize: 16,
+                                isBold: true)),
+                        customBox(
+                            title: 'REVENUE',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalReceivesForAllOutstanding.value}',
+                                color: Color(0xff85193C),
+                                fontSize: 16,
+                                isBold: true)),
+                        customBox(
+                            title: 'NET',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalNETsForAllOutstanding.value}',
+                                color: Color(0xffC5172E),
+                                fontSize: 16,
+                                isBold: true)),
+                      ],
+                    );
+                  }),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 2,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child:
+                      GetX<TradingDashboardController>(builder: (controller) {
+                    return Row(
+                      spacing: 2,
+                      children: [
+                        customBox(
+                            title: 'NUMBER OF GENERAL EXPENSES\'S DOCS',
+                            value: Text(
+                              '${controller.numberOfGeneralExpensesDocs.value}',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: mainColor,
+                                  fontSize: 16),
+                            )),
+                        customBox(
+                            title: 'EXPENSES',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalPaysForAllGeneralExpenses.value}',
+                                color: Color(0xffBF9264),
+                                fontSize: 16,
+                                isBold: true)),
+                        customBox(
+                            title: 'REVENUE',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalReceivesForAllGeneralExpenses.value}',
+                                color: Color(0xff6F826A),
+                                fontSize: 16,
+                                isBold: true)),
+                        customBox(
+                            title: 'NET',
+                            value: textForDataRowInTable(
+                                text:
+                                    '${controller.totalNETsForAllGeneralExpenses.value}',
+                                color: Color(0xff328E6E),
                                 fontSize: 16,
                                 isBold: true)),
                       ],
