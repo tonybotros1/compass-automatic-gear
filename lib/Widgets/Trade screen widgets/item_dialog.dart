@@ -8,6 +8,7 @@ import 'add_new_item.dart';
 Future<dynamic> itemDialog(
     {required CarTradingController controller,
     required bool canEdit,
+    required bool isTrade,
     required void Function()? onPressed}) {
   return Get.dialog(
       barrierDismissible: false,
@@ -38,11 +39,14 @@ Future<dynamic> itemDialog(
                       const Spacer(),
                       GetX<CarTradingController>(
                           builder: (controller) => ElevatedButton(
-                                onPressed: onPressed,
+                                onPressed:
+                                    isTrade && controller.addingNewValue.isTrue
+                                        ? null
+                                        : onPressed,
                                 style: new2ButtonStyle,
                                 child: controller.addingNewValue.value == false
-                                    ? const Text(
-                                        'Ok',
+                                    ? Text(
+                                        isTrade == true ? 'Ok' : 'Save',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       )
@@ -63,7 +67,8 @@ Future<dynamic> itemDialog(
                     child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: addNewItemOrEdit(
-                    constraints: constraints,
+                      isTrade: isTrade,
+                      constraints: constraints,
                       context: context,
                       controller: controller,
                       canEdit: canEdit),

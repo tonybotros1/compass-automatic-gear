@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Trading Controllers/car_trading_controller.dart';
 import '../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
+import '../../../Widgets/Trade screen widgets/capital_dialog.dart';
 import '../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../consts.dart';
 
@@ -38,7 +39,18 @@ class CarTrading extends StatelessWidget {
                               context: context,
                               controller: controller,
                               title: 'Search for Trades',
-                              button: newtradeesButton(context, controller),
+                              button: Row(
+                                spacing: 10,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  capitalButton(context, controller),
+                                  outstandingButton(context, controller),
+                                  generalExpensesButton(context, controller),
+                                  // Spacer(),
+                                  newtradeesButton(context, controller),
+                                ],
+                              ),
                             );
                           },
                         ),
@@ -796,6 +808,110 @@ ElevatedButton newtradeesButton(
     },
     style: newButtonStyle,
     child: const Text('New Trade'),
+  );
+}
+
+ElevatedButton capitalButton(
+    BuildContext context, CarTradingController controller) {
+  return ElevatedButton(
+    onPressed: controller.isCapitalLoading.isFalse
+        ? () async {
+            controller.searchForCapitals.value.clear();
+
+            await controller.getAllCapitals();
+            capitalOrOutstandingOrGeneralExpensesDialog(
+              search: controller.searchForCapitals,
+              collection: 'all_capitals',
+              filteredMap: controller.filteredCapitals,
+              map: controller.allCapitals,
+              screenName: 'Capital',
+              controller: controller,
+              canEdit: true,
+            );
+          }
+        : null,
+    style: capitalButtonStyle,
+    child: GetX<CarTradingController>(builder: (controller) {
+      return controller.isCapitalLoading.isFalse
+          ? const Text('Capital')
+          : SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            );
+    }),
+  );
+}
+
+ElevatedButton outstandingButton(
+    BuildContext context, CarTradingController controller) {
+  return ElevatedButton(
+    onPressed: controller.isOutstandinglLoading.isFalse
+        ? () async {
+            controller.searchForOutstanding.value.clear();
+
+            await controller.getAllOutstanding();
+            capitalOrOutstandingOrGeneralExpensesDialog(
+              search: controller.searchForOutstanding,
+              collection: 'all_outstanding',
+              filteredMap: controller.filteredOutstanding,
+              map: controller.allOutstanding,
+              screenName: 'Outstanding',
+              controller: controller,
+              canEdit: true,
+            );
+          }
+        : null,
+    style: coutstandingButtonStyle,
+    child: GetX<CarTradingController>(builder: (controller) {
+      return controller.isOutstandinglLoading.isFalse
+          ? const Text('Outstanding')
+          : SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            );
+    }),
+  );
+}
+
+ElevatedButton generalExpensesButton(
+    BuildContext context, CarTradingController controller) {
+  return ElevatedButton(
+    onPressed: controller.isgeneralExpenseslLoading.isFalse
+        ? () async {
+            controller.searchForGeneralexpenses.value.clear();
+            await controller.getAllGeneralExpenses();
+            capitalOrOutstandingOrGeneralExpensesDialog(
+              search: controller.searchForGeneralexpenses,
+              collection: 'all_general_expenses',
+              filteredMap: controller.filteredGeneralExpenses,
+              map: controller.allGeneralExpenses,
+              screenName: 'General Expenses',
+              controller: controller,
+              canEdit: true,
+            );
+          }
+        : null,
+    style: cgeneralExpensesButtonStyle,
+    child: GetX<CarTradingController>(builder: (controller) {
+      return controller.isgeneralExpenseslLoading.isFalse
+          ? const Text('General Expenses')
+          : SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            );
+    }),
   );
 }
 

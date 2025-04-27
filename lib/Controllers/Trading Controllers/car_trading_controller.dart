@@ -25,14 +25,32 @@ class CarTradingController extends GetxController {
   Rx<TextEditingController> comments = TextEditingController().obs;
   TextEditingController note = TextEditingController();
   TextEditingController item = TextEditingController();
+  TextEditingController name = TextEditingController();
   Rx<TextEditingController> itemDate = TextEditingController().obs;
   RxString query = RxString('');
   RxString queryForItems = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
   Rx<TextEditingController> searchForItems = TextEditingController().obs;
+  Rx<TextEditingController> searchForCapitals = TextEditingController().obs;
+  Rx<TextEditingController> searchForOutstanding = TextEditingController().obs;
+  Rx<TextEditingController> searchForGeneralexpenses =
+      TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
+  RxBool isCapitalLoading = RxBool(false);
+  RxBool isOutstandinglLoading = RxBool(false);
+  RxBool isgeneralExpenseslLoading = RxBool(false);
   final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allCapitals = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allOutstanding = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allGeneralExpenses =
+      RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredGeneralExpenses =
+      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredOutstanding =
+      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredCapitals =
+      RxList<DocumentSnapshot>([]);
   RxBool isValuesLoading = RxBool(false);
   RxString colorInId = RxString('');
   RxString colorOutId = RxString('');
@@ -42,10 +60,12 @@ class CarTradingController extends GetxController {
   RxString engineSizeId = RxString('');
   RxString yearId = RxString('');
   RxString itemId = RxString('');
+  RxString nameId = RxString('');
   RxString status = RxString('');
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
+  RxBool addingCapitalNewValue = RxBool(false);
   RxString companyId = RxString('');
   RxMap allColors = RxMap({});
   RxMap allCarSpecifications = RxMap({});
@@ -53,6 +73,7 @@ class CarTradingController extends GetxController {
   RxMap allModels = RxMap({});
   RxMap allEngineSizes = RxMap({});
   RxMap allYears = RxMap({});
+  RxMap allNames = RxMap({});
   RxMap allItems = RxMap({});
   RxList<Map<String, dynamic>> addedItems = RxList([]);
   RxList<Map> filteredAddedItems = RxList([]);
@@ -63,7 +84,9 @@ class CarTradingController extends GetxController {
   RxString colorsListId = RxString('');
   RxString colorsListMasterdById = RxString('');
   RxString yearListId = RxString('');
+  RxString namesListId = RxString('');
   RxString yearListMasterdById = RxString('');
+  RxString namesListMasterdById = RxString('');
   RxString engineSizeListId = RxString('');
   RxString engineSizeListMasterdById = RxString('');
   RxString newItemListMasteredByID = RxString('');
@@ -95,11 +118,24 @@ class CarTradingController extends GetxController {
     getEngineSizes();
     getYears();
     getItems();
+    getNamesOfPeople();
     search.value.addListener(() {
       filterTrades();
     });
     searchForItems.value.addListener(() {
       filterItems();
+    });
+    searchForCapitals.value.addListener(() {
+      filterCapitalsOrOutstandingOrGeneralExpenses(
+          searchForCapitals, allCapitals, filteredCapitals);
+    });
+    searchForOutstanding.value.addListener(() {
+      filterCapitalsOrOutstandingOrGeneralExpenses(
+          searchForOutstanding, allOutstanding, filteredOutstanding);
+    });
+    searchForGeneralexpenses.value.addListener(() {
+      filterCapitalsOrOutstandingOrGeneralExpenses(searchForGeneralexpenses,
+          allGeneralExpenses, filteredGeneralExpenses);
     });
     super.onInit();
   }
@@ -200,6 +236,18 @@ class CarTradingController extends GetxController {
     for (var item in addedItems) {
       totalPays.value += double.tryParse(item['pay'])!;
       totalReceives.value += double.tryParse(item['receive'])!;
+    }
+    totalNETs.value = totalReceives.value - totalPays.value;
+  }
+
+  calculateTotalsForCapitals(RxList<DocumentSnapshot<Object?>> map) {
+    totalNETs.value = 0.0;
+    totalPays.value = 0.0;
+    totalReceives.value = 0.0;
+    for (var element in map) {
+      var data = element.data() as Map;
+      totalPays.value += double.tryParse(data['pay'] ?? 0)!;
+      totalReceives.value += double.tryParse(data['receive'])!;
     }
     totalNETs.value = totalReceives.value - totalPays.value;
   }
@@ -425,6 +473,112 @@ class CarTradingController extends GetxController {
     }
   }
 
+  getAllCapitals() {
+    try {
+      isCapitalLoading.value = true;
+      FirebaseFirestore.instance
+          .collection('all_capitals')
+          .where('company_id', isEqualTo: companyId.value)
+          .orderBy('date', descending: true)
+          .snapshots()
+          .listen((capitals) {
+        allCapitals.assignAll(List<DocumentSnapshot>.from(capitals.docs));
+
+        calculateTotalsForCapitals(allCapitals);
+        isCapitalLoading.value = false;
+      });
+    } catch (e) {
+      isCapitalLoading.value = false;
+    }
+  }
+
+  getAllOutstanding() {
+    try {
+      isOutstandinglLoading.value = true;
+      FirebaseFirestore.instance
+          .collection('all_outstanding')
+          .where('company_id', isEqualTo: companyId.value)
+          .orderBy('date', descending: true)
+          .snapshots()
+          .listen((outstanding) {
+        allOutstanding.assignAll(List<DocumentSnapshot>.from(outstanding.docs));
+
+        calculateTotalsForCapitals(allOutstanding);
+        isOutstandinglLoading.value = false;
+      });
+    } catch (e) {
+      isOutstandinglLoading.value = false;
+    }
+  }
+
+  getAllGeneralExpenses() {
+    try {
+      isgeneralExpenseslLoading.value = true;
+      FirebaseFirestore.instance
+          .collection('all_general_expenses')
+          .where('company_id', isEqualTo: companyId.value)
+          .orderBy('date', descending: true)
+          .snapshots()
+          .listen((outstanding) {
+        allGeneralExpenses
+            .assignAll(List<DocumentSnapshot>.from(outstanding.docs));
+
+        calculateTotalsForCapitals(allGeneralExpenses);
+        isgeneralExpenseslLoading.value = false;
+      });
+    } catch (e) {
+      isgeneralExpenseslLoading.value = false;
+    }
+  }
+
+  addNewCapitalsOrOutstandingOrGeneralExpenses(String collection) async {
+    try {
+      addingNewValue.value = true;
+      await FirebaseFirestore.instance.collection(collection).add({
+        'company_id': companyId.value,
+        'date': itemDate.value.text,
+        'name': nameId.value,
+        'pay': pay.text,
+        'receive': receive.text,
+        'comment': comments.value.text,
+      });
+      addingNewValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewValue.value = false;
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  updateCapitalsOrOutstandingOrGeneralExpenses(
+      String collection, String id) async {
+    try {
+      Get.back();
+
+      addingNewValue.value = true;
+      await FirebaseFirestore.instance.collection(collection).doc(id).update({
+        'date': itemDate.value.text,
+        'name': nameId.value,
+        'pay': pay.text,
+        'receive': receive.text,
+        'comment': comments.value.text,
+      });
+      addingNewValue.value = false;
+    } catch (e) {
+      addingNewValue.value = false;
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  deleteCapitalOrOutstandingOrGeneralExpenses(String collection, String id) {
+    try {
+      FirebaseFirestore.instance.collection(collection).doc(id).delete();
+      Get.back();
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
   // this function is to get colors
   getColors() async {
     var typeDoc = await FirebaseFirestore.instance
@@ -510,6 +664,28 @@ class CarTradingController extends GetxController {
         .snapshots()
         .listen((year) {
       allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
+    });
+  }
+
+  // this function is to get names of people
+  getNamesOfPeople() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'NAMES_OF_PEOPLE')
+        .get();
+
+    var typeId = typeDoc.docs.first.id;
+    namesListId.value = typeId;
+    namesListMasterdById.value = typeDoc.docs.first.data()['mastered_by'];
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typeId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .orderBy('added_date')
+        .snapshots()
+        .listen((year) {
+      allNames.value = {for (var doc in year.docs) doc.id: doc.data()};
     });
   }
 
@@ -629,12 +805,14 @@ class CarTradingController extends GetxController {
           final itemName =
               getdataName(item['item'], allItems).toString().toLowerCase();
           final payStr = item['pay']?.toString().toLowerCase() ?? '';
+          final nameStr = item['name']?.toString().toLowerCase() ?? '';
           final receiveStr = item['receive']?.toString().toLowerCase() ?? '';
           final commentStr = item['comment']?.toString().toLowerCase() ?? '';
 
           return dateStr.contains(query) ||
               itemName.contains(query) ||
               payStr.contains(query) ||
+              nameStr.contains(query) ||
               commentStr.contains(query) ||
               receiveStr.contains(query);
         }).toList(),
@@ -690,40 +868,67 @@ class CarTradingController extends GetxController {
     }
   }
 
-  // void filterTrades() {
-  //   final query = search.value.text.trim().toLowerCase();
-  //   if (query.isEmpty) {
-  //     filteredTrades.clear();
-  //   } else {
-  //     filteredTrades.assignAll(
-  //       allTrades.where((trade) {
-  //         final year = getdataName(trade['year'], allYears).toLowerCase();
-  //         final colorIN =
-  //             getdataName(trade['color_in'], allColors).toLowerCase();
-  //         final colorOUT =
-  //             getdataName(trade['color_out'], allColors).toLowerCase();
-  //         final engineSize =
-  //             getdataName(trade['engine_size'], allEngineSizes).toLowerCase();
-  //         final specification =
-  //             getdataName(trade['specification'], allCarSpecifications)
-  //                 .toLowerCase();
-  //         final status = trade['status']?.toString().toLowerCase() ?? '';
-  //         final mileage = trade['mileage']?.toString().toLowerCase() ?? '';
-  //         final brand =
-  //             getdataName(trade['car_brand'], allBrands).toLowerCase();
-  //         final model = getCarModelName(trade['car_brand'], trade['car_model'])
-  //             .toString()
-  //             .toLowerCase();
+  // this function is to filter the search results for web
+  void filterCapitalsOrOutstandingOrGeneralExpenses(
+      Rx<TextEditingController> mapQuery,
+      RxList<DocumentSnapshot<Object?>> allMap,
+      RxList<DocumentSnapshot<Object?>> filteredMap) {
+    query.value = mapQuery.value.text.toLowerCase();
+    if (query.value.isEmpty) {
+      filteredMap.clear();
+    } else {
+      filteredMap.assignAll(
+        allMap.where((cap) {
+          return cap['pay'].toString().toLowerCase().contains(query) ||
+              cap['receive'].toString().toLowerCase().contains(query) ||
+              cap['comment'].toString().toLowerCase().contains(query) ||
+              getdataName(cap['name'], allNames)
+                  .toString()
+                  .toLowerCase()
+                  .contains(query) ||
+              textToDate(cap['date']).toLowerCase().contains(query);
+        }).toList(),
+      );
+    }
+  }
 
-  //         return year.contains(query) ||
-  //             specification.contains(query) ||
-  //             status.contains(query) ||
-  //             engineSize.contains(query) ||
-  //             mileage.contains(query) ||
-  //             brand.contains(query) ||
-  //             model.contains(query) ||
-  //             colorIN.contains(query) ||
-  //             colorOUT.contains(query);
+  //  // this function is to filter the search results for web
+  // void filterOutstanding() {
+  //   query.value = searchForOutstanding.value.text.toLowerCase();
+  //   if (query.value.isEmpty) {
+  //     filteredCapitals.clear();
+  //   } else {
+  //     filteredCapitals.assignAll(
+  //       allCapitals.where((cap) {
+  //         return cap['pay'].toString().toLowerCase().contains(query) ||
+  //             cap['receive'].toString().toLowerCase().contains(query) ||
+  //             cap['comment'].toString().toLowerCase().contains(query) ||
+  //             getdataName(cap['name'], allNames)
+  //                 .toString()
+  //                 .toLowerCase()
+  //                 .contains(query) ||
+  //             textToDate(cap['date']).toLowerCase().contains(query);
+  //       }).toList(),
+  //     );
+  //   }
+  // }
+
+  //  // this function is to filter the search results for web
+  // void filterCapitals() {
+  //   query.value = searchForCapitals.value.text.toLowerCase();
+  //   if (query.value.isEmpty) {
+  //     filteredCapitals.clear();
+  //   } else {
+  //     filteredCapitals.assignAll(
+  //       allCapitals.where((cap) {
+  //         return cap['pay'].toString().toLowerCase().contains(query) ||
+  //             cap['receive'].toString().toLowerCase().contains(query) ||
+  //             cap['comment'].toString().toLowerCase().contains(query) ||
+  //             getdataName(cap['name'], allNames)
+  //                 .toString()
+  //                 .toLowerCase()
+  //                 .contains(query) ||
+  //             textToDate(cap['date']).toLowerCase().contains(query);
   //       }).toList(),
   //     );
   //   }

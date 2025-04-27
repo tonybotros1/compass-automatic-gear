@@ -233,10 +233,12 @@ DataRow dataRowForTheTable(Map<String, dynamic> itemData, context, constraints,
         Text(controller.getdataName(itemData['item'], controller.allItems))),
     DataCell(Align(
         alignment: Alignment.centerRight,
-        child: textForDataRowInTable(text: itemData['pay']))),
+        child: textForDataRowInTable(
+            text: itemData['pay'], isBold: true, color: Colors.red))),
     DataCell(Align(
         alignment: Alignment.centerRight,
-        child: textForDataRowInTable(text: itemData['receive']))),
+        child: textForDataRowInTable(
+            text: itemData['receive'], isBold: true, color: Colors.green))),
     DataCell(Text(itemData['comment'])),
     DataCell(Row(
       spacing: 5,
@@ -274,6 +276,7 @@ ElevatedButton editSection(context, CarTradingController controller,
         controller.comments.value.text = itemData['comment'];
         controller.itemDate.value.text = itemData['date'];
         itemDialog(
+            isTrade: true,
             controller: controller,
             canEdit: true,
             onPressed: () {
@@ -312,6 +315,7 @@ ElevatedButton newItemButton(
       controller.comments.value.text = '';
       controller.itemDate.value.text = textToDate(DateTime.now());
       itemDialog(
+          isTrade: true,
           controller: controller,
           canEdit: true,
           onPressed: () {

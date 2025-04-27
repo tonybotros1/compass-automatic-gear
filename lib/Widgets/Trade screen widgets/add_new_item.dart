@@ -12,9 +12,11 @@ Widget addNewItemOrEdit({
   required BuildContext context,
   required CarTradingController controller,
   required bool canEdit,
+  required bool isTrade,
 }) {
   return GetX<CarTradingController>(builder: (controller) {
     bool isItemsLoading = controller.allItems.isEmpty;
+    bool isNamesLoading = controller.allNames.isEmpty;
     return ListView(
       children: [
         Row(
@@ -37,42 +39,78 @@ Widget addNewItemOrEdit({
             Expanded(flex: 3, child: SizedBox())
           ],
         ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: CustomDropdown(
-                validator: true,
-                textcontroller: controller.item.text,
-                showedSelectedName: 'name',
-                hintText: 'Item',
-                items: isItemsLoading ? {} : controller.allItems,
-                // itemBuilder: (context, key, value) {
-                //   return ListTile(
-                //     title: Text(value['name']),
-                //   );
-                // },
-                onChanged: (key, value) {
-                  controller.item.text = value['name'];
-                  controller.itemId.value = key;
-                },
-              ),
-            ),
-            valSectionInTheTable(
-              controller.listOfValuesController,
-              controller.newItemListID.value,
-              context,
-              constraints,
-              controller.newItemListMasteredByID.value,
-              'New Item',
-              'Items',
-              valuesSection(
-                constraints: constraints,
-                context: context,
-              ),
-            ),
-          ],
+        SizedBox(
+          height: 10,
         ),
+        isTrade == true
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: CustomDropdown(
+                      validator: true,
+                      textcontroller: controller.item.text,
+                      showedSelectedName: 'name',
+                      hintText: 'Item',
+                      items: isItemsLoading ? {} : controller.allItems,
+                      // itemBuilder: (context, key, value) {
+                      //   return ListTile(
+                      //     title: Text(value['name']),
+                      //   );
+                      // },
+                      onChanged: (key, value) {
+                        controller.item.text = value['name'];
+                        controller.itemId.value = key;
+                      },
+                    ),
+                  ),
+                  valSectionInTheTable(
+                    controller.listOfValuesController,
+                    controller.newItemListID.value,
+                    context,
+                    constraints,
+                    controller.newItemListMasteredByID.value,
+                    'New Item',
+                    'Items',
+                    valuesSection(
+                      constraints: constraints,
+                      context: context,
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: CustomDropdown(
+                      validator: true,
+                      textcontroller: controller.name.text,
+                      showedSelectedName: 'name',
+                      hintText: 'Name',
+                      items: isNamesLoading ? {} : controller.allNames,
+                     
+                      onChanged: (key, value) {
+                        controller.name.text = value['name'];
+                        controller.nameId.value = key;
+                      },
+                    ),
+                  ),
+                  valSectionInTheTable(
+                    controller.listOfValuesController,
+                    controller.namesListId.value,
+                    context,
+                    constraints,
+                    controller.namesListMasterdById.value,
+                    'New Name',
+                    'Names of People',
+                    valuesSection(
+                      constraints: constraints,
+                      context: context,
+                    ),
+                  ),
+                ],
+              ),
         SizedBox(
           height: 10,
         ),

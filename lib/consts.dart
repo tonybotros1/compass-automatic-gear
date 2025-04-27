@@ -36,7 +36,30 @@ var newButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
-
+var capitalButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Color(0xff3D365C),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+var coutstandingButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Color(0xff7C4585),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+var cgeneralExpensesButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Color(0xffC95792),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
 
 var soldButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blueGrey,
