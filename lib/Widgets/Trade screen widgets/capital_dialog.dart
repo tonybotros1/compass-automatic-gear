@@ -6,16 +6,15 @@ import '../../../consts.dart';
 import '../../Controllers/Trading Controllers/car_trading_controller.dart';
 import 'add_or_edit_capital.dart';
 
-Future<dynamic> capitalOrOutstandingOrGeneralExpensesDialog({
-  required CarTradingController controller,
-  required bool canEdit,
-  required String screenName,
-  required RxList<DocumentSnapshot<Object?>> map,
-  required RxList<DocumentSnapshot<Object?>> filteredMap,
-  required String collection,
-  required Rx<TextEditingController> search,
-
-}) {
+Future<dynamic> capitalOrOutstandingOrGeneralExpensesDialog(
+    {required CarTradingController controller,
+    required bool canEdit,
+    required String screenName,
+    required RxList<DocumentSnapshot<Object?>> map,
+    required RxList<DocumentSnapshot<Object?>> filteredMap,
+    required String collection,
+    required Rx<TextEditingController> search,
+    required bool isGeneralExpenses}) {
   return Get.dialog(
       barrierDismissible: false,
       Dialog(
@@ -51,8 +50,9 @@ Future<dynamic> capitalOrOutstandingOrGeneralExpensesDialog({
                     child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: addNewCapitalOrOutstandingOrGeneralExpensesOrEdit(
-                    search: search,
-                    collection:collection,
+                      isGeneralExpenses: isGeneralExpenses,
+                      search: search,
+                      collection: collection,
                       map: map,
                       filteredMap: filteredMap,
                       constraints: constraints,

@@ -276,6 +276,7 @@ ElevatedButton editSection(context, CarTradingController controller,
         controller.comments.value.text = itemData['comment'];
         controller.itemDate.value.text = itemData['date'];
         itemDialog(
+            isGeneralExpenses: false,
             isTrade: true,
             controller: controller,
             canEdit: true,
@@ -315,6 +316,7 @@ ElevatedButton newItemButton(
       controller.comments.value.text = '';
       controller.itemDate.value.text = textToDate(DateTime.now());
       itemDialog(
+          isGeneralExpenses: false,
           isTrade: true,
           controller: controller,
           canEdit: true,

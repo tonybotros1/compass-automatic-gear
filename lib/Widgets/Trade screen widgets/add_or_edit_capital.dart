@@ -16,6 +16,7 @@ Widget addNewCapitalOrOutstandingOrGeneralExpensesOrEdit({
   required RxList<DocumentSnapshot<Object?>> filteredMap,
   required String collection,
   required Rx<TextEditingController> search,
+  required bool isGeneralExpenses,
 }) {
   return Column(
     children: [
@@ -36,14 +37,14 @@ Widget addNewCapitalOrOutstandingOrGeneralExpensesOrEdit({
                   child: Column(
                     children: [
                       searchBar(
-                          search: search,
-                          constraints: constraints,
-                          context: context,
-                          controller: controller,
-                          title: 'Search for Items',
-                          button:
-                              newItemButton(context, controller, collection),
-                          ),
+                        search: search,
+                        constraints: constraints,
+                        context: context,
+                        controller: controller,
+                        title: 'Search for Items',
+                        button: newItemButton(
+                            context, controller, collection, isGeneralExpenses),
+                      ),
                       Expanded(child:
                           GetX<CarTradingController>(builder: (controller) {
                         if (map.isEmpty) {
@@ -56,14 +57,14 @@ Widget addNewCapitalOrOutstandingOrGeneralExpensesOrEdit({
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
-                              search: search,
-                              collection: collection,
-                              allMap: map,
-                              filteredMap: filteredMap,
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
-                            ),
+                                search: search,
+                                collection: collection,
+                                allMap: map,
+                                filteredMap: filteredMap,
+                                constraints: constraints,
+                                context: context,
+                                controller: controller,
+                                isGeneralExpenses: isGeneralExpenses),
                           ),
                         );
                       })),
@@ -121,7 +122,8 @@ Widget tableOfScreens(
     required RxList<DocumentSnapshot<Object?>> filteredMap,
     required String collection,
     required Rx<TextEditingController> search,
-    required CarTradingController controller}) {
+    required CarTradingController controller,
+    required bool isGeneralExpenses}) {
   return DataTable(
     horizontalMargin: horizontalMarginForTable,
     dataRowMaxHeight: 40,
@@ -144,7 +146,7 @@ Widget tableOfScreens(
       DataColumn(
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Name',
+          text: isGeneralExpenses == true ? 'Item' : 'Name',
         ),
         // onSort: controller.onSort,
       ),
@@ -184,24 +186,41 @@ Widget tableOfScreens(
             final itemData = item.data() as Map<String, dynamic>;
             final capitalId = item.id;
             return dataRowForTheTable(itemData, context, constraints,
-                controller, capitalId, collection);
+                controller, capitalId, collection, isGeneralExpenses);
           }).toList()
         : filteredMap.asMap().entries.map<DataRow>((entry) {
             final item = entry.value;
             final itemData = item.data() as Map<String, dynamic>;
             final capitalId = item.id;
             return dataRowForTheTable(itemData, context, constraints,
-                controller, capitalId, collection);
+                controller, capitalId, collection, isGeneralExpenses);
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> itemData, context, constraints,
-    CarTradingController controller, String capitalId, String collection) {
+DataRow dataRowForTheTable(
+    Map<String, dynamic> itemData,
+    context,
+    constraints,
+    CarTradingController controller,
+    String capitalId,
+    String collection,
+    bool isGeneralExpenses) {
   return DataRow(cells: [
     DataCell(Text(itemData['date'])),
     DataCell(
-        Text(controller.getdataName(itemData['name'], controller.allNames))),
+      Text(
+        isGeneralExpenses == false
+            ? controller.getdataName(
+                (itemData['name'] ?? '').toString(),
+                controller.allNames,
+              )
+            : controller.getdataName(
+                (itemData['item'] ?? '').toString(),
+                controller.allItems,
+              ),
+      ),
+    ),
     DataCell(Align(
         alignment: Alignment.centerRight,
         child: textForDataRowInTable(
@@ -215,8 +234,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> itemData, context, constraints,
       spacing: 5,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        editSection(
-            context, controller, itemData, constraints, collection, capitalId),
+        editSection(context, controller, itemData, constraints, collection,
+            capitalId, isGeneralExpenses),
         deleteSection(controller, context, itemData, capitalId, collection),
       ],
     )),
@@ -246,18 +265,26 @@ ElevatedButton editSection(
     Map<String, dynamic> itemData,
     constraints,
     String collection,
-    String capitalId) {
+    String capitalId,
+    bool isGeneralExpenses) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () async {
-        controller.name.text =
-            controller.getdataName(itemData['name'], controller.allNames);
-        controller.nameId.value = itemData['name'];
+        if (isGeneralExpenses == true) {
+          controller.item.text =
+              controller.getdataName(itemData['item'], controller.allItems);
+          controller.itemId.value = itemData['item'];
+        } else {
+          controller.name.text =
+              controller.getdataName(itemData['name'], controller.allNames);
+          controller.nameId.value = itemData['name'];
+        }
         controller.pay.text = itemData['pay'];
         controller.receive.text = itemData['receive'];
         controller.comments.value.text = itemData['comment'];
         controller.itemDate.value.text = itemData['date'];
         itemDialog(
+            isGeneralExpenses: isGeneralExpenses,
             isTrade: false,
             controller: controller,
             canEdit: true,
@@ -268,7 +295,7 @@ ElevatedButton editSection(
                 showSnackBar('Alert', 'Please fill all fields');
               } else {
                 controller.updateCapitalsOrOutstandingOrGeneralExpenses(
-                    collection, capitalId);
+                    collection, capitalId, isGeneralExpenses);
               }
             });
       },
@@ -276,27 +303,32 @@ ElevatedButton editSection(
 }
 
 ElevatedButton newItemButton(
-    BuildContext context, CarTradingController controller, String collection) {
+    BuildContext context,
+    CarTradingController controller,
+    String collection,
+    bool isGeneralExpenses) {
   return ElevatedButton(
     onPressed: () {
       controller.name.clear();
       controller.nameId.value = '';
+      controller.item.clear();
+      controller.itemId.value = '';
       controller.pay.text = '0';
       controller.receive.text = '0';
       controller.comments.value.text = '';
       controller.itemDate.value.text = textToDate(DateTime.now());
       itemDialog(
+          isGeneralExpenses: isGeneralExpenses,
           isTrade: false,
           controller: controller,
           canEdit: true,
           onPressed: () {
-            if (controller.name.value.text.isEmpty ||
-                controller.pay.value.text.isEmpty ||
+            if (controller.pay.value.text.isEmpty ||
                 controller.receive.value.text.isEmpty) {
               showSnackBar('Alert', 'Please fill all fields');
             } else {
-              controller
-                  .addNewCapitalsOrOutstandingOrGeneralExpenses(collection);
+              controller.addNewCapitalsOrOutstandingOrGeneralExpenses(
+                  collection, isGeneralExpenses);
             }
           });
     },

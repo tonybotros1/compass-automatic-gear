@@ -127,15 +127,15 @@ class CarTradingController extends GetxController {
     });
     searchForCapitals.value.addListener(() {
       filterCapitalsOrOutstandingOrGeneralExpenses(
-          searchForCapitals, allCapitals, filteredCapitals);
+          searchForCapitals, allCapitals, filteredCapitals, false);
     });
     searchForOutstanding.value.addListener(() {
       filterCapitalsOrOutstandingOrGeneralExpenses(
-          searchForOutstanding, allOutstanding, filteredOutstanding);
+          searchForOutstanding, allOutstanding, filteredOutstanding, false);
     });
     searchForGeneralexpenses.value.addListener(() {
       filterCapitalsOrOutstandingOrGeneralExpenses(searchForGeneralexpenses,
-          allGeneralExpenses, filteredGeneralExpenses);
+          allGeneralExpenses, filteredGeneralExpenses, true);
     });
     super.onInit();
   }
@@ -531,17 +531,23 @@ class CarTradingController extends GetxController {
     }
   }
 
-  addNewCapitalsOrOutstandingOrGeneralExpenses(String collection) async {
+  addNewCapitalsOrOutstandingOrGeneralExpenses(
+      String collection, bool isGeneral) async {
     try {
       addingNewValue.value = true;
-      await FirebaseFirestore.instance.collection(collection).add({
+      var data = {
         'company_id': companyId.value,
         'date': itemDate.value.text,
-        'name': nameId.value,
         'pay': pay.text,
         'receive': receive.text,
         'comment': comments.value.text,
-      });
+      };
+      if (isGeneral == true) {
+        data['item'] = itemId.value;
+      } else {
+        data['name'] = nameId.value;
+      }
+      await FirebaseFirestore.instance.collection(collection).add(data);
       addingNewValue.value = false;
       Get.back();
     } catch (e) {
@@ -551,18 +557,25 @@ class CarTradingController extends GetxController {
   }
 
   updateCapitalsOrOutstandingOrGeneralExpenses(
-      String collection, String id) async {
+      String collection, String id, bool isGeneral) async {
     try {
       Get.back();
-
-      addingNewValue.value = true;
-      await FirebaseFirestore.instance.collection(collection).doc(id).update({
+      var data = {
         'date': itemDate.value.text,
-        'name': nameId.value,
         'pay': pay.text,
         'receive': receive.text,
         'comment': comments.value.text,
-      });
+      };
+      if (isGeneral == true) {
+        data['item'] = itemId.value;
+      } else {
+        data['name'] = nameId.value;
+      }
+      addingNewValue.value = true;
+      await FirebaseFirestore.instance
+          .collection(collection)
+          .doc(id)
+          .update(data);
       addingNewValue.value = false;
     } catch (e) {
       addingNewValue.value = false;
@@ -872,7 +885,8 @@ class CarTradingController extends GetxController {
   void filterCapitalsOrOutstandingOrGeneralExpenses(
       Rx<TextEditingController> mapQuery,
       RxList<DocumentSnapshot<Object?>> allMap,
-      RxList<DocumentSnapshot<Object?>> filteredMap) {
+      RxList<DocumentSnapshot<Object?>> filteredMap,
+      bool isGeneral) {
     query.value = mapQuery.value.text.toLowerCase();
     if (query.value.isEmpty) {
       filteredMap.clear();
@@ -882,7 +896,8 @@ class CarTradingController extends GetxController {
           return cap['pay'].toString().toLowerCase().contains(query) ||
               cap['receive'].toString().toLowerCase().contains(query) ||
               cap['comment'].toString().toLowerCase().contains(query) ||
-              getdataName(cap['name'], allNames)
+              getdataName(isGeneral == false ? cap['name'] : cap['item'],
+                      isGeneral == false ? allNames : allItems)
                   .toString()
                   .toLowerCase()
                   .contains(query) ||

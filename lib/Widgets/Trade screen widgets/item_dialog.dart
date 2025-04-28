@@ -9,6 +9,7 @@ Future<dynamic> itemDialog(
     {required CarTradingController controller,
     required bool canEdit,
     required bool isTrade,
+    required bool isGeneralExpenses,
     required void Function()? onPressed}) {
   return Get.dialog(
       barrierDismissible: false,
@@ -67,6 +68,7 @@ Future<dynamic> itemDialog(
                     child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: addNewItemOrEdit(
+                    isGeneralExpenses:isGeneralExpenses,
                       isTrade: isTrade,
                       constraints: constraints,
                       context: context,

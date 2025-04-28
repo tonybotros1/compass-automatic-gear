@@ -154,7 +154,7 @@ class TradingDashboardController extends GetxController {
         .doc(typeId)
         .collection('values')
         .where('available', isEqualTo: true)
-        .orderBy('name')
+        .orderBy('name',descending: true)
         .snapshots()
         .listen((year) {
       allYears.value = {for (var doc in year.docs) doc.id: doc.data()};

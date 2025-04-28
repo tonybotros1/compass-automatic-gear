@@ -820,6 +820,7 @@ ElevatedButton capitalButton(
 
             await controller.getAllCapitals();
             capitalOrOutstandingOrGeneralExpensesDialog(
+              isGeneralExpenses: false,
               search: controller.searchForCapitals,
               collection: 'all_capitals',
               filteredMap: controller.filteredCapitals,
@@ -855,6 +856,7 @@ ElevatedButton outstandingButton(
 
             await controller.getAllOutstanding();
             capitalOrOutstandingOrGeneralExpensesDialog(
+              isGeneralExpenses: false,
               search: controller.searchForOutstanding,
               collection: 'all_outstanding',
               filteredMap: controller.filteredOutstanding,
@@ -889,6 +891,7 @@ ElevatedButton generalExpensesButton(
             controller.searchForGeneralexpenses.value.clear();
             await controller.getAllGeneralExpenses();
             capitalOrOutstandingOrGeneralExpensesDialog(
+              isGeneralExpenses: true,
               search: controller.searchForGeneralexpenses,
               collection: 'all_general_expenses',
               filteredMap: controller.filteredGeneralExpenses,

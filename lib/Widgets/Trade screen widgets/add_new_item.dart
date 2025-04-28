@@ -12,6 +12,7 @@ Widget addNewItemOrEdit({
   required BuildContext context,
   required CarTradingController controller,
   required bool canEdit,
+  required bool isGeneralExpenses,
   required bool isTrade,
 }) {
   return GetX<CarTradingController>(builder: (controller) {
@@ -42,7 +43,7 @@ Widget addNewItemOrEdit({
         SizedBox(
           height: 10,
         ),
-        isTrade == true
+        isTrade == true || isGeneralExpenses == true
             ? Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
