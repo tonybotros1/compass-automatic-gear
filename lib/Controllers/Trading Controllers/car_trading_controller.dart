@@ -19,7 +19,9 @@ class CarTradingController extends GetxController {
   Rx<TextEditingController> carBrand = TextEditingController().obs;
   Rx<TextEditingController> carModel = TextEditingController().obs;
   Rx<TextEditingController> engineSize = TextEditingController().obs;
+  Rx<TextEditingController> boughtFrom = TextEditingController().obs;
   Rx<TextEditingController> year = TextEditingController().obs;
+  Rx<TextEditingController> soldTo = TextEditingController().obs;
   TextEditingController pay = TextEditingController();
   TextEditingController receive = TextEditingController();
   Rx<TextEditingController> comments = TextEditingController().obs;
@@ -58,7 +60,9 @@ class CarTradingController extends GetxController {
   RxString carModelId = RxString('');
   RxString carBrandId = RxString('');
   RxString engineSizeId = RxString('');
+  RxString boughtFromId = RxString('');
   RxString yearId = RxString('');
+  RxString soldToId = RxString('');
   RxString itemId = RxString('');
   RxString nameId = RxString('');
   RxString status = RxString('');
@@ -72,6 +76,7 @@ class CarTradingController extends GetxController {
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
   RxMap allEngineSizes = RxMap({});
+  RxMap allBuyersAndSellers = RxMap({});
   RxMap allYears = RxMap({});
   RxMap allNames = RxMap({});
   RxMap allItems = RxMap({});
@@ -88,7 +93,9 @@ class CarTradingController extends GetxController {
   RxString yearListMasterdById = RxString('');
   RxString namesListMasterdById = RxString('');
   RxString engineSizeListId = RxString('');
+  RxString buyersAndSellersListId = RxString('');
   RxString engineSizeListMasterdById = RxString('');
+  RxString buyersAndSellersMasterdById = RxString('');
   RxString newItemListMasteredByID = RxString('');
   RxString newItemListID = RxString('');
   CarBrandsController carBrandsController = Get.put(CarBrandsController());
@@ -105,20 +112,22 @@ class CarTradingController extends GetxController {
   final Map<String, Future<String>> _receivedFutureCache = {};
   final Map<String, Future<String>> _netsFutureCache = {};
   var buttonLoadingStates = <String, bool>{}.obs;
-  final RxnString selectedTradeId = RxnString();
+  final RxnString selectedTradeId = RxnString('');
   RxInt pagesPerPage = RxInt(17);
 
   @override
   void onInit() async {
     await getCompanyId();
-    getAllTrades();
+    getBuyersAndSellers();
     getColors();
     getCarSpecifications();
-    getCarBrands();
+    await getCarBrands();
     getEngineSizes();
-    getYears();
+     getNamesOfPeople();
+    await getYears();
     getItems();
-    getNamesOfPeople();
+    getAllTrades();
+
     search.value.addListener(() {
       filterTrades();
     });
@@ -277,6 +286,10 @@ class CarTradingController extends GetxController {
   }
 
   clearValues() {
+    boughtFrom.value.clear();
+    boughtFromId.value = '';
+    soldTo.value.clear();
+    soldToId.value = '';
     totalPays.value = 0.0;
     totalNETs.value = 0.0;
     totalReceives.value = 0.0;
@@ -308,6 +321,15 @@ class CarTradingController extends GetxController {
   }
 
   loadValues(Map data) async {
+    if (data['bought_from'] != null) {
+      boughtFrom.value.text =
+          getdataName(data['bought_from'], allBuyersAndSellers);
+      boughtFromId.value = data['bought_from'];
+    }
+    if (data['sold_to'] != null) {
+      soldTo.value.text = getdataName(data['sold_to'], allBuyersAndSellers);
+      soldToId.value = data['sold_to'];
+    }
     isValuesLoading.value = true;
     date.value.text = textToDate(data['date']);
     mileage.value.text = data['mileage'];
@@ -363,6 +385,8 @@ class CarTradingController extends GetxController {
 
       if (currentTradId.value == '') {
         var addedTrade = await currentTrade.add({
+          'bought_from': boughtFromId.value,
+          'sold_to': soldToId.value,
           'date': parsedDate.toString(),
           'car_brand': carBrandId.value,
           'car_model': carModelId.value,
@@ -384,6 +408,8 @@ class CarTradingController extends GetxController {
         showSnackBar('Success', 'Addedd Successfully');
       } else {
         await currentTrade.doc(currentTradId.value).update({
+          'bought_from': boughtFromId.value,
+          'sold_to': soldToId.value,
           'date': parsedDate.toString(),
           'car_brand': carBrandId.value,
           'car_model': carModelId.value,
@@ -414,6 +440,8 @@ class CarTradingController extends GetxController {
           .collection('all_trades')
           .doc(tradeId)
           .update({
+        'bought_from': boughtFromId.value,
+        'sold_to': soldToId.value,
         'date': parsedDate.toString(),
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
@@ -436,6 +464,7 @@ class CarTradingController extends GetxController {
 
   deleteTrade(tradeId) {
     try {
+      Get.back();
       Get.back();
       FirebaseFirestore.instance.collection('all_trades').doc(tradeId).delete();
     } catch (e) {
@@ -463,10 +492,10 @@ class CarTradingController extends GetxController {
           .snapshots()
           .listen((trade) {
         allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
-        isScreenLoding.value = false;
         initTradeSearchIndex();
         initTotalsCache();
         calculateTotalsForAllTrades();
+        isScreenLoding.value = false;
       });
     } catch (e) {
       isScreenLoding.value = false;
@@ -680,6 +709,31 @@ class CarTradingController extends GetxController {
     });
   }
 
+  // this function is to get years
+  getBuyersAndSellers() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'BUYERS_AND_SELLERS')
+        .get();
+
+    var typeId = typeDoc.docs.first.id;
+    buyersAndSellersListId.value = typeId;
+    buyersAndSellersMasterdById.value =
+        typeDoc.docs.first.data()['mastered_by'];
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typeId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .orderBy('added_date')
+        .snapshots()
+        .listen((year) {
+      allBuyersAndSellers.value = {
+        for (var doc in year.docs) doc.id: doc.data()
+      };
+    });
+  }
+
   // this function is to get names of people
   getNamesOfPeople() async {
     var typeDoc = await FirebaseFirestore.instance
@@ -890,6 +944,7 @@ class CarTradingController extends GetxController {
     query.value = mapQuery.value.text.toLowerCase();
     if (query.value.isEmpty) {
       filteredMap.clear();
+      calculateTotalsForCapitals(allMap);
     } else {
       filteredMap.assignAll(
         allMap.where((cap) {

@@ -603,7 +603,10 @@ Widget textForDataRowInTable({
   );
 }
 
-Container statusBox(String status, {hieght = 30.0, width}) {
+Container statusBox(String status,
+    {hieght = 30.0,
+    width,
+    EdgeInsetsGeometry? padding = const EdgeInsets.symmetric(horizontal: 16)}) {
   return Container(
     alignment: Alignment.center,
     decoration: BoxDecoration(
@@ -624,7 +627,7 @@ Container statusBox(String status, {hieght = 30.0, width}) {
                                 : Colors.brown),
     height: hieght,
     width: width,
-    padding: const EdgeInsets.symmetric(horizontal: 16),
+    padding: padding,
     child: Text(
       status,
       style: const TextStyle(color: Colors.white),

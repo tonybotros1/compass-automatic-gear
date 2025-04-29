@@ -289,14 +289,8 @@ ElevatedButton editSection(
             controller: controller,
             canEdit: true,
             onPressed: () {
-              if (controller.name.value.text.isEmpty ||
-                  controller.pay.value.text.isEmpty ||
-                  controller.receive.value.text.isEmpty) {
-                showSnackBar('Alert', 'Please fill all fields');
-              } else {
-                controller.updateCapitalsOrOutstandingOrGeneralExpenses(
-                    collection, capitalId, isGeneralExpenses);
-              }
+              controller.updateCapitalsOrOutstandingOrGeneralExpenses(
+                  collection, capitalId, isGeneralExpenses);
             });
       },
       child: const Text('Edit'));
@@ -323,13 +317,8 @@ ElevatedButton newItemButton(
           controller: controller,
           canEdit: true,
           onPressed: () {
-            if (controller.pay.value.text.isEmpty ||
-                controller.receive.value.text.isEmpty) {
-              showSnackBar('Alert', 'Please fill all fields');
-            } else {
-              controller.addNewCapitalsOrOutstandingOrGeneralExpenses(
-                  collection, isGeneralExpenses);
-            }
+            controller.addNewCapitalsOrOutstandingOrGeneralExpenses(
+                collection, isGeneralExpenses);
           });
     },
     style: newButtonStyle,

@@ -8,6 +8,7 @@ import '../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../Widgets/Trade screen widgets/capital_dialog.dart';
 import '../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../consts.dart';
+// import 'package:data_table_2/data_table_2.dart';
 
 class CarTrading extends StatelessWidget {
   const CarTrading({super.key});
@@ -61,6 +62,7 @@ class CarTrading extends StatelessWidget {
                         Expanded(
                           child: GetX<CarTradingController>(
                             builder: (controller) {
+                              final _ = controller.selectedTradeId.value;
                               if (controller.isScreenLoding.value) {
                                 return const Center(
                                   child: CircularProgressIndicator(),
@@ -72,8 +74,6 @@ class CarTrading extends StatelessWidget {
                                 );
                               }
                               return SingleChildScrollView(
-                                scrollDirection: Axis
-                                    .vertical, // Horizontal scrolling for the table
                                 child: SizedBox(
                                   width: constraints.maxWidth,
                                   child: tableOfScreens(
@@ -182,6 +182,7 @@ Widget tableOfScreens({
       sortAscending: controller.isAscending.value,
       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
       columns: [
+        DataColumn(label: SizedBox()),
         DataColumn(
           label: Column(
             spacing: 5,
@@ -316,7 +317,6 @@ Widget tableOfScreens({
         ),
         DataColumn(
           headingRowAlignment: MainAxisAlignment.end,
-
           label: Column(
             spacing: 5,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -329,7 +329,6 @@ Widget tableOfScreens({
         ),
         DataColumn(
           headingRowAlignment: MainAxisAlignment.end,
-
           label: Column(
             spacing: 5,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -340,7 +339,30 @@ Widget tableOfScreens({
           ),
           // onSort: controller.onSort,
         ),
-        const DataColumn(label: Text('')),
+        DataColumn(
+          headingRowAlignment: MainAxisAlignment.start,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Bought From'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          headingRowAlignment: MainAxisAlignment.start,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Sold To'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
       ],
       source: dataSource,
     ),
@@ -602,47 +624,46 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
         }
       },
       cells: [
-        DataCell(textForDataRowInTable(
-            text: controller.getdataName(
-                tradeData['car_brand'], controller.allBrands))),
         DataCell(
-          FutureBuilder<String>(
-            future: controller.getCarModelName(
-                tradeData['car_brand'], tradeData['car_model']),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
-        ),
-        // DataCell(
-        //   // textForDataRowInTable(
-        //   //       text:
-        //   //           '${controller.getdataName(tradeData['car_brand'], controller.allBrands)} ${controller.getCachedCarModelName(tradeData['car_brand'], tradeData['car_model'])}')
-        //   Builder(builder: (_) {
-        //     final data = tradeData;
-        //     final brand =
-        //         controller.getdataName(data['car_brand'], controller.allBrands);
-        //     final model = controller.getCachedCarModelName(
-        //       data['car_brand'],
-        //       data['car_model'],
-        //     );
-        //     final display = model.isNotEmpty ? '$brand $model' : 'Loading...';
+            editSection(context, controller, tradeData, constraints, tradeId)),
+        DataCell(Text(controller.getdataName(
+            tradeData['car_brand'], controller.allBrands))),
 
-        //     return textForDataRowInTable(text: display, maxWidth: null);
-        //   }),
+        // DataCell(
+        //   FutureBuilder<String>(
+        //     future: controller.getCarModelName(
+        //         tradeData['car_brand'], tradeData['car_model']),
+        //     builder: (context, snapshot) {
+        //       if (snapshot.connectionState == ConnectionState.waiting) {
+        //         return const Text('Loading...');
+        //       } else if (snapshot.hasError) {
+        //         return const Text('Error');
+        //       } else {
+        //         return textForDataRowInTable(
+        //           text: '${snapshot.data}',
+        //         );
+        //       }
+        //     },
+        //   ),
         // ),
+        DataCell(
+              Builder(builder: (_) {
+            final data = tradeData;
+            
+            final model = controller.getCachedCarModelName(
+              data['car_brand'],
+              data['car_model'],
+            );
+            final display = model.isNotEmpty ? model : 'Loading...';
+
+            return textForDataRowInTable(text: display, maxWidth: null);
+          }),
+        ),
         DataCell(Text(
             controller.getdataName(tradeData['year'], controller.allYears))),
         DataCell(tradeData['status'] != ''
-            ? statusBox('${tradeData['status']}', hieght: 35, width: 100)
+            ? statusBox('${tradeData['status']}',
+                hieght: 35, width: 60, padding: null)
             : const SizedBox()),
         DataCell(Text(controller.getdataName(
             tradeData['specification'], controller.allCarSpecifications))),
@@ -726,31 +747,17 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
             ),
           ),
         ),
-        DataCell(Row(
-          spacing: 5,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            editSection(context, controller, tradeData, constraints, tradeId),
-            deleteSection(controller, tradeId, context),
-          ],
-        )),
+        DataCell(tradeData['bought_from'] != null
+            ? textForDataRowInTable(
+                text: controller.getdataName(
+                    tradeData['bought_from'], controller.allBuyersAndSellers))
+            : SizedBox()),
+        DataCell(tradeData['sold_to'] != null
+            ? textForDataRowInTable(
+                text: controller.getdataName(
+                    tradeData['sold_to'], controller.allBuyersAndSellers))
+            : SizedBox()),
       ]);
-}
-
-ElevatedButton deleteSection(
-    CarTradingController controller, tradeId, context) {
-  return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            controller: controller,
-            content: "The trade will be deleted permanently",
-            onPressed: () {
-              controller.deleteTrade(tradeId);
-            });
-      },
-      child: const Text("Delete"));
 }
 
 Widget editSection(context, CarTradingController controller,
@@ -758,8 +765,7 @@ Widget editSection(context, CarTradingController controller,
   return GetX<CarTradingController>(builder: (controller) {
     bool isLoading = controller.buttonLoadingStates[tradeId] ?? false;
 
-    return ElevatedButton(
-        style: editButtonStyle,
+    return IconButton(
         onPressed: controller.buttonLoadingStates[tradeId] == null ||
                 controller.buttonLoadingStates[tradeId] == false
             ? () async {
@@ -770,6 +776,7 @@ Widget editSection(context, CarTradingController controller,
                 controller.setButtonLoading(tradeId, false);
 
                 tradesDialog(
+                    tradeID: tradeId,
                     controller: controller,
                     canEdit: true,
                     onPressed: controller.addingNewValue.value
@@ -779,20 +786,19 @@ Widget editSection(context, CarTradingController controller,
                           });
               }
             : null,
-        child: isLoading
+        icon: isLoading
             ? const SizedBox(
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: Colors.blue,
                   strokeWidth: 2,
                 ),
               )
-            : const Text('Edit')
-
-        //  const Text('Edit')
-
-        );
+            : const Icon(
+                Icons.edit_note_rounded,
+                color: Colors.blue,
+              ));
   });
 }
 
@@ -802,6 +808,7 @@ ElevatedButton newtradeesButton(
     onPressed: () {
       controller.clearValues();
       tradesDialog(
+          tradeID: '',
           controller: controller,
           canEdit: true,
           onPressed: controller.addingNewValue.value
@@ -954,5 +961,5 @@ class TradeDataSource extends DataTableSource {
   int get rowCount => trades.length;
 
   @override
-  int get selectedRowCount => 0;
+  int get selectedRowCount => controller.selectedTradeId.value!.isEmpty ? 0 : 1;
 }

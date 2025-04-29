@@ -8,6 +8,7 @@ import 'add_or_edit_trade.dart';
 Future<dynamic> tradesDialog(
     {required CarTradingController controller,
     required bool canEdit,
+    required String tradeID,
     required void Function()? onPressed}) {
   return Get.dialog(
       barrierDismissible: false,
@@ -41,7 +42,24 @@ Future<dynamic> tradesDialog(
                             : SizedBox();
                       }),
                       const Spacer(),
-                    
+                      tradeID != ''
+                          ? ElevatedButton(
+                              style: closeButtonStyle,
+                              onPressed: () {
+                                alertDialog(
+                                    context: context,
+                                    controller: controller,
+                                    content:
+                                        "The trade will be deleted permanently",
+                                    onPressed: () {
+                                      controller.deleteTrade(tradeID);
+                                    });
+                              },
+                              child: const Text(
+                                "Delete",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ))
+                          : SizedBox(),
                       GetX<CarTradingController>(builder: (controller) {
                         return controller.currentTradId.value != ''
                             ? ElevatedButton(

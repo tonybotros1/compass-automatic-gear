@@ -253,6 +253,69 @@ Container carInformation({
               );
             })),
         Expanded(
+            flex: 1,
+            child: GetX<CarTradingController>(builder: (controller) {
+              bool isBuyersAndSellersLoading =
+                  controller.allBuyersAndSellers.isEmpty;
+
+              return Column(
+                spacing: 10,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: CustomDropdown(
+                          textcontroller: controller.boughtFrom.value.text,
+                          showedSelectedName: 'name',
+                          hintText: 'Bought From',
+                          items: isBuyersAndSellersLoading
+                              ? {}
+                              : controller.allBuyersAndSellers,
+                          onChanged: (key, value) {
+                            controller.boughtFrom.value.text = value['name'];
+                            controller.boughtFromId.value = key;
+                          },
+                        ),
+                      ),
+                      valSectionInTheTable(
+                        controller.listOfValuesController,
+                        controller.buyersAndSellersListId.value,
+                        context,
+                        constraints,
+                        controller.buyersAndSellersMasterdById.value,
+                        'New Buyers and Sellers',
+                        'Buyers and Sellers',
+                        valuesSection(
+                          constraints: constraints,
+                          context: context,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomDropdown(
+                          showedSelectedName: 'name',
+                          textcontroller: controller.soldTo.value.text,
+                          hintText: 'Sold To',
+                          items: isBuyersAndSellersLoading
+                              ? {}
+                              : controller.allBuyersAndSellers,
+                          onChanged: (key, value) {
+                            controller.soldTo.value.text = value['name'];
+                            controller.soldToId.value = key;
+                          },
+                        ),
+                      ),
+                      IconButton(onPressed: null, icon: SizedBox())
+                    ],
+                  ),
+                ],
+              );
+            })),
+        Expanded(
           flex: 3,
           child: GetBuilder<CarTradingController>(builder: (controller) {
             return myTextFormFieldWithBorder(

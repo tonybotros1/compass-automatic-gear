@@ -281,25 +281,19 @@ ElevatedButton editSection(context, CarTradingController controller,
             controller: controller,
             canEdit: true,
             onPressed: () {
-              if (controller.item.value.text.isEmpty ||
-                  controller.pay.value.text.isEmpty ||
-                  controller.receive.value.text.isEmpty) {
-                showSnackBar('Alert', 'Please fill all fields');
-              } else {
-                int index = controller.addedItems
-                    .indexWhere((item) => item['id'] == itemData['id']);
-                if (index != -1) {
-                  controller.addedItems[index] = {
-                    'id': itemData['id'],
-                    'comment': controller.comments.value.text,
-                    'date': controller.itemDate.value.text,
-                    'item': controller.itemId.value,
-                    'pay': controller.pay.value.text,
-                    'receive': controller.receive.value.text,
-                  };
-                }
-                Get.back();
+              int index = controller.addedItems
+                  .indexWhere((item) => item['id'] == itemData['id']);
+              if (index != -1) {
+                controller.addedItems[index] = {
+                  'id': itemData['id'],
+                  'comment': controller.comments.value.text,
+                  'date': controller.itemDate.value.text,
+                  'item': controller.itemId.value,
+                  'pay': controller.pay.value.text,
+                  'receive': controller.receive.value.text,
+                };
               }
+              Get.back();
             });
       },
       child: const Text('Edit'));
@@ -321,13 +315,7 @@ ElevatedButton newItemButton(
           controller: controller,
           canEdit: true,
           onPressed: () {
-            if (controller.item.value.text.isEmpty ||
-                controller.pay.value.text.isEmpty ||
-                controller.receive.value.text.isEmpty) {
-              showSnackBar('Alert', 'Please fill all fields');
-            } else {
-              controller.addNewItem();
-            }
+            controller.addNewItem();
           });
     },
     style: newButtonStyle,
