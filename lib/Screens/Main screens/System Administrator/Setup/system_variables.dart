@@ -33,7 +33,7 @@ class SystemVariables extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        controller: controller,
+                        // controller: controller,
                         title: 'Search for variables',
                         button:
                             newValueButton(context, constraints, controller),

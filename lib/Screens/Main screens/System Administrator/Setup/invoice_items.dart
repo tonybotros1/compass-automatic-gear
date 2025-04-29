@@ -33,7 +33,7 @@ class InvoiceItems extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        controller: controller,
+                        // controller: controller,
                         title: 'Search for invoice items',
                         button: newInvoiceItemButton(
                             context, constraints, controller),

@@ -80,7 +80,7 @@ Widget addNewTradeOrEdit({
                             search: controller.searchForItems,
                             constraints: constraints,
                             context: context,
-                            controller: controller,
+                            // controller: controller,
                             title: 'Search for Items',
                             button: newItemButton(context, controller),
                           ),

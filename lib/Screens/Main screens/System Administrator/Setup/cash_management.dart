@@ -33,7 +33,7 @@ class CashManagement extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        controller: controller,
+                        // controller: controller,
                         title: 'Search for cashes',
                         button:
                             newReceiptButton(context, constraints, controller),

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../consts.dart';
 
 Row searchBar({
   required BoxConstraints constraints,
   required context,
-  required controller,
+  // required controller,
   required title,
   Widget? button,
   void Function(String)? onChanged,
-  required search,
+  required Rx<TextEditingController> search,
 }) {
   return Row(
     children: [

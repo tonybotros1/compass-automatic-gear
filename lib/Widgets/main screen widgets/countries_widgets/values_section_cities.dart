@@ -25,7 +25,7 @@ Widget citiesSection({
               search: controller.searchForCities,
               constraints: constraints,
               context: context,
-              controller: controller,
+              // controller: controller,
               title: 'Search for cities',
               button: newCityButton(context, constraints, controller),
             );

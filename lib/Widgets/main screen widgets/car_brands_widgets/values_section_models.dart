@@ -25,7 +25,7 @@ Widget modelsSection({
               search: controller.searchForModels,
               constraints: constraints,
               context: context,
-              controller: controller,
+              // controller: controller,
               title: 'Search for models',
               button: newModelButton(context, constraints, controller),
             );

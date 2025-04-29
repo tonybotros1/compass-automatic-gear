@@ -40,7 +40,7 @@ Widget addNewCapitalOrOutstandingOrGeneralExpensesOrEdit({
                         search: search,
                         constraints: constraints,
                         context: context,
-                        controller: controller,
+                        // controller: controller,
                         title: 'Search for Items',
                         button: newItemButton(
                             context, controller, collection, isGeneralExpenses),

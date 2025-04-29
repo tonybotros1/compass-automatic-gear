@@ -33,7 +33,7 @@ class Branches extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        controller: controller,
+                        // controller: controller,
                         title: 'Search for branches',
                         button:
                             newBranchesButton(context, constraints, controller),

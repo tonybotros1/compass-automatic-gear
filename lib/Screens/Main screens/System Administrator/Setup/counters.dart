@@ -33,7 +33,7 @@ class Counters extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        controller: controller,
+                        // controller: controller,
                         title: 'Search for counters',
                         button:
                             newCounterButton(context, constraints, controller),

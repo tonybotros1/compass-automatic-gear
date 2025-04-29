@@ -106,7 +106,7 @@ class CarTradingController extends GetxController {
   final Map<String, Future<String>> _netsFutureCache = {};
   var buttonLoadingStates = <String, bool>{}.obs;
   final RxnString selectedTradeId = RxnString();
-  RxInt pagesPerPage = RxInt(5);
+  RxInt pagesPerPage = RxInt(17);
 
   @override
   void onInit() async {
@@ -904,6 +904,7 @@ class CarTradingController extends GetxController {
               textToDate(cap['date']).toLowerCase().contains(query);
         }).toList(),
       );
+      calculateTotalsForCapitals(filteredMap);
     }
   }
 

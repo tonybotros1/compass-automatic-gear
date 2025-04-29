@@ -30,7 +30,7 @@ Widget invoiceItemsDialog(
                       search: controller.searchForInvoiceItems,
                       constraints: constraints,
                       context: context,
-                      controller: controller,
+                      // controller: controller,
                       title: 'Search for invoices',
                       button: newinvoiceItemsButton(
                           context, constraints, controller, jobId),

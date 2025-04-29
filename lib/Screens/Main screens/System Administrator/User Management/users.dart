@@ -31,7 +31,7 @@ class Users extends StatelessWidget {
                     search: usersController.search,
                     constraints: constraints,
                     context: context,
-                    controller: usersController,
+                    // controller: usersController,
                     title: 'Search for users by email',
                     button: newUserButton(context, constraints),
                   ),

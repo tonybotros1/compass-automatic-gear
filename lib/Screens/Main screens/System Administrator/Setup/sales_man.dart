@@ -33,7 +33,7 @@ class SalesMan extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        controller: controller,
+                        // controller: controller,
                         title: 'Search for sales man',
                         button:
                             newSalesManButton(context, constraints, controller),

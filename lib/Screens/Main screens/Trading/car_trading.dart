@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Responsive/responsive.dart';
 import 'package:datahubai/Widgets/Trade%20screen%20widgets/trade_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,25 +34,28 @@ class CarTrading extends StatelessWidget {
                         GetX<CarTradingController>(
                           init: CarTradingController(),
                           builder: (controller) {
-                            return searchBar(
-                              search: controller.search,
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
-                              title: 'Search for Trades',
-                              button: Row(
-                                spacing: 10,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  capitalButton(context, controller),
-                                  outstandingButton(context, controller),
-                                  generalExpensesButton(context, controller),
-                                  // Spacer(),
-                                  newtradeesButton(context, controller),
-                                ],
-                              ),
-                            );
+                            return ScreenSize.isWeb(context)
+                                ? searchBar(
+                                    search: controller.search,
+                                    constraints: constraints,
+                                    context: context,
+                                    // controller: controller,
+                                    title: 'Search for Trades',
+                                    button: Row(
+                                      spacing: 10,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        capitalButton(context, controller),
+                                        outstandingButton(context, controller),
+                                        generalExpensesButton(
+                                            context, controller),
+                                        // Spacer(),
+                                        newtradeesButton(context, controller),
+                                      ],
+                                    ),
+                                  )
+                                : SizedBox();
                           },
                         ),
                         Expanded(
@@ -89,37 +93,41 @@ class CarTrading extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 8, right: 4),
                   child: GetX<CarTradingController>(builder: (controller) {
-                    return Row(
-                      spacing: 10,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Total Paid:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        textForDataRowInTable(
-                            text: '${controller.totalPaysForAllTrades.value}',
-                            color: Colors.red,
-                            isBold: true),
-                        Text(
-                          'Total Received:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        textForDataRowInTable(
-                            text:
-                                '${controller.totalReceivesForAllTrades.value}',
-                            color: Colors.green,
-                            isBold: true),
-                        Text(
-                          'Net:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        textForDataRowInTable(
-                            text: '${controller.totalNETsForAllTrades.value}',
-                            color: Colors.blueGrey,
-                            isBold: true)
-                      ],
-                    );
+                    return ScreenSize.isWeb(context)
+                        ? Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Total Paid:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              textForDataRowInTable(
+                                  text:
+                                      '${controller.totalPaysForAllTrades.value}',
+                                  color: Colors.red,
+                                  isBold: true),
+                              Text(
+                                'Total Received:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              textForDataRowInTable(
+                                  text:
+                                      '${controller.totalReceivesForAllTrades.value}',
+                                  color: Colors.green,
+                                  isBold: true),
+                              Text(
+                                'Net:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              textForDataRowInTable(
+                                  text:
+                                      '${controller.totalNETsForAllTrades.value}',
+                                  color: Colors.blueGrey,
+                                  isBold: true)
+                            ],
+                          )
+                        : SizedBox();
                   }),
                 )
               ],
@@ -131,27 +139,220 @@ class CarTrading extends StatelessWidget {
   }
 }
 
-// Widget tableOfScreens({
-//   required BoxConstraints constraints,
-//   required BuildContext context,
-//   required CarTradingController controller,
-// }) {
-//   final trades =
-//       controller.filteredTrades.isEmpty && controller.search.value.text.isEmpty
-//           ? controller.allTrades
-//           : controller.filteredTrades;
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required CarTradingController controller,
+}) {
+  final trades =
+      controller.filteredTrades.isEmpty && controller.search.value.text.isEmpty
+          ? controller.allTrades
+          : controller.filteredTrades;
 
-//   final dataSource = TradeDataSource(
-//     trades: trades,
-//     context: context,
-//     constraints: constraints,
-//     controller: controller,
-//   );
+  final dataSource = TradeDataSource(
+    trades: trades,
+    context: context,
+    constraints: constraints,
+    controller: controller,
+  );
 
+  return DataTableTheme(
+    data: DataTableThemeData(
+      headingTextStyle: fontStyleForTableHeader,
+      dataTextStyle: regTextStyle,
+      dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.grey.shade300;
+        }
+        return null;
+      }),
+    ),
+    child: PaginatedDataTable(
+      rowsPerPage: controller.pagesPerPage.value,
+      availableRowsPerPage: const [5, 10, 17, 25],
+      onRowsPerPageChanged: (rows) {
+        controller.changeRowsPerPage(rows!);
+      },
+      showCheckboxColumn: false,
+      horizontalMargin: horizontalMarginForTable,
+      dataRowMaxHeight: 40,
+      dataRowMinHeight: 30,
+      columnSpacing: 5,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+      columns: [
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AutoSizedText(text: 'Car', constraints: constraints),
+              AutoSizedText(text: 'Brand', constraints: constraints)
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(),
+              AutoSizedText(text: 'Model', constraints: constraints)
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Year'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Status'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Specification'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AutoSizedText(constraints: constraints, text: 'Color'),
+              AutoSizedText(constraints: constraints, text: 'Outside'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Inside'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Engine Size'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Mileage'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Date'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          headingRowAlignment: MainAxisAlignment.end,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Paid'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          headingRowAlignment: MainAxisAlignment.end,
+
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Received'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          headingRowAlignment: MainAxisAlignment.end,
+
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(),
+              AutoSizedText(constraints: constraints, text: 'Net'),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        const DataColumn(label: Text('')),
+      ],
+      source: dataSource,
+    ),
+  );
+}
+
+// Widget tableOfScreens(
+//     {required constraints,
+//     required context,
+//     required CarTradingController controller}) {
 //   return DataTableTheme(
 //     data: DataTableThemeData(
-//       headingTextStyle: fontStyleForTableHeader,
-//       dataTextStyle: regTextStyle,
 //       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
 //         if (states.contains(WidgetState.selected)) {
 //           return Colors.grey.shade300;
@@ -159,17 +360,15 @@ class CarTrading extends StatelessWidget {
 //         return null;
 //       }),
 //     ),
-//     child: PaginatedDataTable(
-//       rowsPerPage: controller.pagesPerPage.value,
-//       // availableRowsPerPage: const [5, 10],
-//       // onRowsPerPageChanged: (rows) {
-//       //   controller.changeRowsPerPage(rows!);
-//       // },
+//     child: DataTable(
 //       showCheckboxColumn: false,
 //       horizontalMargin: horizontalMarginForTable,
 //       dataRowMaxHeight: 40,
 //       dataRowMinHeight: 30,
 //       columnSpacing: 5,
+//       showBottomBorder: true,
+//       dataTextStyle: regTextStyle,
+//       headingTextStyle: fontStyleForTableHeader,
 //       sortColumnIndex: controller.sortColumnIndex.value,
 //       sortAscending: controller.isAscending.value,
 //       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
@@ -361,245 +560,27 @@ class CarTrading extends StatelessWidget {
 //           label: Text(''),
 //         ),
 //       ],
-//       source: dataSource,
+//       rows: controller.filteredTrades.isEmpty &&
+//               controller.search.value.text.isEmpty
+//           ? controller.allTrades.asMap().entries.map<DataRow>((entry) {
+//               final index = entry.key;
+//               final trade = entry.value;
+//               final tradeData = trade.data() as Map<String, dynamic>;
+//               final tradeId = trade.id;
+//               return dataRowForTheTable(
+//                   tradeData, context, constraints, tradeId, controller, index);
+//             }).toList()
+//           : controller.filteredTrades.asMap().entries.map<DataRow>((entry) {
+//               final index = entry.key;
+//               final trade = entry.value;
+//               final tradeData = trade.data() as Map<String, dynamic>;
+//               final tradeId = trade.id;
+//               return dataRowForTheTable(
+//                   tradeData, context, constraints, tradeId, controller, index);
+//             }).toList(),
 //     ),
 //   );
 // }
-
-Widget tableOfScreens(
-    {required constraints,
-    required context,
-    required CarTradingController controller}) {
-  return DataTableTheme(
-    data: DataTableThemeData(
-      dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(WidgetState.selected)) {
-          return Colors.grey.shade300;
-        }
-        return null;
-      }),
-    ),
-    child: DataTable(
-      showCheckboxColumn: false,
-      horizontalMargin: horizontalMarginForTable,
-      dataRowMaxHeight: 40,
-      dataRowMinHeight: 30,
-      columnSpacing: 5,
-      showBottomBorder: true,
-      dataTextStyle: regTextStyle,
-      headingTextStyle: fontStyleForTableHeader,
-      sortColumnIndex: controller.sortColumnIndex.value,
-      sortAscending: controller.isAscending.value,
-      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-      columns: [
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                text: 'Car',
-                constraints: constraints,
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Year',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Status',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Specification',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Color',
-              ),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Outside',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Inside',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Engine Size',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Mileage',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Date',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Paid',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Received',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(),
-              AutoSizedText(
-                constraints: constraints,
-                text: 'Net',
-              ),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        const DataColumn(
-          label: Text(''),
-        ),
-      ],
-      rows: controller.filteredTrades.isEmpty &&
-              controller.search.value.text.isEmpty
-          ? controller.allTrades.asMap().entries.map<DataRow>((entry) {
-              final index = entry.key;
-              final trade = entry.value;
-              final tradeData = trade.data() as Map<String, dynamic>;
-              final tradeId = trade.id;
-              return dataRowForTheTable(
-                  tradeData, context, constraints, tradeId, controller, index);
-            }).toList()
-          : controller.filteredTrades.asMap().entries.map<DataRow>((entry) {
-              final index = entry.key;
-              final trade = entry.value;
-              final tradeData = trade.data() as Map<String, dynamic>;
-              final tradeId = trade.id;
-              return dataRowForTheTable(
-                  tradeData, context, constraints, tradeId, controller, index);
-            }).toList(),
-    ),
-  );
-}
 
 DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
     tradeId, CarTradingController controller, int index) {
@@ -621,20 +602,43 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
         }
       },
       cells: [
+        DataCell(textForDataRowInTable(
+            text: controller.getdataName(
+                tradeData['car_brand'], controller.allBrands))),
         DataCell(
-          Builder(builder: (_) {
-            final data = tradeData;
-            final brand =
-                controller.getdataName(data['car_brand'], controller.allBrands);
-            final model = controller.getCachedCarModelName(
-              data['car_brand'],
-              data['car_model'],
-            );
-            final display = model.isNotEmpty ? '$brand $model' : 'Loading...';
-
-            return textForDataRowInTable(text: display, maxWidth: null);
-          }),
+          FutureBuilder<String>(
+            future: controller.getCarModelName(
+                tradeData['car_brand'], tradeData['car_model']),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('Loading...');
+              } else if (snapshot.hasError) {
+                return const Text('Error');
+              } else {
+                return textForDataRowInTable(
+                  text: '${snapshot.data}',
+                );
+              }
+            },
+          ),
         ),
+        // DataCell(
+        //   // textForDataRowInTable(
+        //   //       text:
+        //   //           '${controller.getdataName(tradeData['car_brand'], controller.allBrands)} ${controller.getCachedCarModelName(tradeData['car_brand'], tradeData['car_model'])}')
+        //   Builder(builder: (_) {
+        //     final data = tradeData;
+        //     final brand =
+        //         controller.getdataName(data['car_brand'], controller.allBrands);
+        //     final model = controller.getCachedCarModelName(
+        //       data['car_brand'],
+        //       data['car_model'],
+        //     );
+        //     final display = model.isNotEmpty ? '$brand $model' : 'Loading...';
+
+        //     return textForDataRowInTable(text: display, maxWidth: null);
+        //   }),
+        // ),
         DataCell(Text(
             controller.getdataName(tradeData['year'], controller.allYears))),
         DataCell(tradeData['status'] != ''
