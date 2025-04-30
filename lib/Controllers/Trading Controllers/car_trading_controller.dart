@@ -123,7 +123,7 @@ class CarTradingController extends GetxController {
     getCarSpecifications();
     await getCarBrands();
     getEngineSizes();
-     getNamesOfPeople();
+    getNamesOfPeople();
     await getYears();
     getItems();
     getAllTrades();
@@ -321,14 +321,20 @@ class CarTradingController extends GetxController {
   }
 
   loadValues(Map data) async {
-    if (data['bought_from'] != null) {
+    if (data['bought_from'] != null && data['bought_from'] != '') {
       boughtFrom.value.text =
           getdataName(data['bought_from'], allBuyersAndSellers);
       boughtFromId.value = data['bought_from'];
+    } else {
+      boughtFrom.value.clear();
+      boughtFromId.value = '';
     }
-    if (data['sold_to'] != null) {
+    if (data['sold_to'] != null && data['sold_to'] != '') {
       soldTo.value.text = getdataName(data['sold_to'], allBuyersAndSellers);
       soldToId.value = data['sold_to'];
+    } else {
+      soldTo.value.clear();
+      soldToId.value = '';
     }
     isValuesLoading.value = true;
     date.value.text = textToDate(data['date']);
@@ -910,6 +916,8 @@ class CarTradingController extends GetxController {
         data['status']?.toString() ?? '',
         data['mileage']?.toString() ?? '',
         getdataName(data['car_brand'], allBrands),
+        getdataName(data['bought_from'] ?? '', allBuyersAndSellers),
+        getdataName(data['sold_to'] ?? '', allBuyersAndSellers),
         _modelCache[data['car_model']] ?? '',
       ];
       _searchStrings[doc.id] = parts.join(' ').toLowerCase();

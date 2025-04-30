@@ -158,7 +158,7 @@ Widget tableOfScreens(
     horizontalMargin: horizontalMarginForTable,
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
-    columnSpacing: 5,
+    columnSpacing: 10,
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
@@ -198,7 +198,7 @@ Widget tableOfScreens(
         // onSort: controller.onSort,
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
+        headingRowAlignment: MainAxisAlignment.start,
 
         label: AutoSizedText(
           constraints: constraints,

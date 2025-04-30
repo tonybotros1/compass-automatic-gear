@@ -62,7 +62,7 @@ class CarTrading extends StatelessWidget {
                         Expanded(
                           child: GetX<CarTradingController>(
                             builder: (controller) {
-                              final _ = controller.selectedTradeId.value;
+                              // final _ = controller.selectedTradeId.value;
                               if (controller.isScreenLoding.value) {
                                 return const Center(
                                   child: CircularProgressIndicator(),
@@ -177,7 +177,7 @@ Widget tableOfScreens({
       horizontalMargin: horizontalMarginForTable,
       dataRowMaxHeight: 40,
       dataRowMinHeight: 30,
-      columnSpacing: 5,
+      columnSpacing: 10,
       sortColumnIndex: controller.sortColumnIndex.value,
       sortAscending: controller.isAscending.value,
       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
@@ -340,25 +340,27 @@ Widget tableOfScreens({
           // onSort: controller.onSort,
         ),
         DataColumn(
-          headingRowAlignment: MainAxisAlignment.start,
+          // headingRowAlignment: MainAxisAlignment.start,
           label: Column(
             spacing: 5,
             mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(),
-              AutoSizedText(constraints: constraints, text: 'Bought From'),
+              AutoSizedText(constraints: constraints, text: 'Bought'),
+              AutoSizedText(constraints: constraints, text: 'From'),
             ],
           ),
           // onSort: controller.onSort,
         ),
         DataColumn(
-          headingRowAlignment: MainAxisAlignment.start,
+          // headingRowAlignment: MainAxisAlignment.start,
           label: Column(
             spacing: 5,
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              SizedBox(),
-              AutoSizedText(constraints: constraints, text: 'Sold To'),
+              AutoSizedText(constraints: constraints, text: 'Sold'),
+              AutoSizedText(constraints: constraints, text: 'To'),
             ],
           ),
           // onSort: controller.onSort,
@@ -606,7 +608,7 @@ Widget tableOfScreens({
 
 DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
     tradeId, CarTradingController controller, int index) {
-  final isSelected = controller.selectedTradeId.value == tradeId;
+  // final isSelected = controller.selectedTradeId.value == tradeId;
   final isEvenRow = index % 2 == 0;
   return DataRow(
       color: WidgetStateProperty.resolveWith<Color?>((states) {
@@ -615,50 +617,50 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
         }
         return isEvenRow ? Colors.grey.shade200 : Colors.white;
       }),
-      selected: isSelected,
-      onSelectChanged: (selected) {
-        if (selected != null && selected) {
-          controller.selectedTradeId.value = tradeId;
-        } else {
-          controller.selectedTradeId.value = '';
-        }
-      },
+      // selected: isSelected,
+      // onSelectChanged: (selected) {
+      //   if (selected != null && selected) {
+      //     controller.selectedTradeId.value = tradeId;
+      //   } else {
+      //     controller.selectedTradeId.value = '';
+      //   }
+      // },
       cells: [
         DataCell(
             editSection(context, controller, tradeData, constraints, tradeId)),
         DataCell(Text(controller.getdataName(
             tradeData['car_brand'], controller.allBrands))),
 
-        // DataCell(
-        //   FutureBuilder<String>(
-        //     future: controller.getCarModelName(
-        //         tradeData['car_brand'], tradeData['car_model']),
-        //     builder: (context, snapshot) {
-        //       if (snapshot.connectionState == ConnectionState.waiting) {
-        //         return const Text('Loading...');
-        //       } else if (snapshot.hasError) {
-        //         return const Text('Error');
-        //       } else {
-        //         return textForDataRowInTable(
-        //           text: '${snapshot.data}',
-        //         );
-        //       }
-        //     },
-        //   ),
-        // ),
         DataCell(
-              Builder(builder: (_) {
-            final data = tradeData;
-            
-            final model = controller.getCachedCarModelName(
-              data['car_brand'],
-              data['car_model'],
-            );
-            final display = model.isNotEmpty ? model : 'Loading...';
-
-            return textForDataRowInTable(text: display, maxWidth: null);
-          }),
+          FutureBuilder<String>(
+            future: controller.getCarModelName(
+                tradeData['car_brand'], tradeData['car_model']),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('Loading...');
+              } else if (snapshot.hasError) {
+                return const Text('Error');
+              } else {
+                return textForDataRowInTable(
+                  text: '${snapshot.data}',
+                );
+              }
+            },
+          ),
         ),
+        // DataCell(
+        //   Builder(builder: (_) {
+        //     final data = tradeData;
+
+        //     final model = controller.getCachedCarModelName(
+        //       data['car_brand'],
+        //       data['car_model'],
+        //     );
+        //     final display = model.isNotEmpty ? model : 'Loading...';
+
+        //     return textForDataRowInTable(text: display, maxWidth: null);
+        //   }),
+        // ),
         DataCell(Text(
             controller.getdataName(tradeData['year'], controller.allYears))),
         DataCell(tradeData['status'] != ''
@@ -961,5 +963,6 @@ class TradeDataSource extends DataTableSource {
   int get rowCount => trades.length;
 
   @override
-  int get selectedRowCount => controller.selectedTradeId.value!.isEmpty ? 0 : 1;
+  int get selectedRowCount =>
+      0; //controller.selectedTradeId.value!.isEmpty ? 0 : 1;
 }
