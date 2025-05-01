@@ -371,6 +371,15 @@ var thisYearButtonStyle = ElevatedButton.styleFrom(
   minimumSize: const Size(100, 40),
 );
 
+var homeButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Color(0xffFA812F),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
 var screenPadding = const EdgeInsets.only(
   left: 14,
   right: 14,
@@ -411,6 +420,11 @@ var textStyleForCardsLabelsCarBrandAndModel = TextStyle(
 var textStyleForCardsContents = const TextStyle(
   fontSize: 19,
   color: Colors.black54,
+);
+var textStyleForFavoritesCards = const TextStyle(
+  fontSize: 22,
+  fontWeight: FontWeight.bold,
+  color: Color(0xffE9F5BE),
 );
 
 var textStyleForInspectionHints = TextStyle(

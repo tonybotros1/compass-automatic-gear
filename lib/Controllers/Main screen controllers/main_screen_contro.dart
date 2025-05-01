@@ -25,9 +25,11 @@ import '../../Screens/Main screens/System Administrator/Setup/system_variables.d
 import '../../Screens/Main screens/System Administrator/User Management/menus.dart';
 import '../../Screens/Main screens/System Administrator/User Management/responsibilities.dart';
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
+import '../../Widgets/main screen widgets/first_main_screen_widgets/first_main_screen.dart';
 import '../../consts.dart';
 
 class MainScreenController extends GetxController {
+  final RxList<DocumentSnapshot> favoriteScreens = RxList<DocumentSnapshot>([]);
   late TreeController<MyTreeNode> treeController;
   RxList<MyTreeNode> roots = <MyTreeNode>[].obs;
   RxBool isLoading = RxBool(false);
@@ -37,12 +39,16 @@ class MainScreenController extends GetxController {
   RxList<String> roleMenus = RxList([]);
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
-  Rx<Widget> selectedScreen = const SizedBox().obs;
-  Rx<String> selectedScreenName = RxString('');
+  Rx<Widget> selectedScreen = const SizedBox(
+    child: FirstMainScreen(),
+  ).obs;
+  Rx<String> selectedScreenName = RxString('🏡 Home');
+  Rx<String> selectedScreenRoute = RxString('/home');
   RxString userName = RxString('');
   RxString userEmail = RxString('');
   RxString userJoiningDate = RxString('');
   RxString userExpiryDate = RxString('');
+  RxString companyId = RxString('');
   RxBool errorLoading = RxBool(false);
   RxMap allMenus = RxMap({});
   RxMap allScreens = RxMap({});
@@ -52,9 +58,10 @@ class MainScreenController extends GetxController {
   MyTreeNode? previouslySelectedNode;
 
   @override
-  void onInit() {
+  void onInit() async {
     // init();
-    getCompanyDetails();
+    await getCompanyDetails();
+    getFavoriteScreens();
     getScreens();
     super.onInit();
   }
@@ -62,12 +69,12 @@ class MainScreenController extends GetxController {
   // this function is to get company details
   getCompanyDetails() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final companyId = prefs.getString('companyId');
-    if (companyId == null || companyId.isEmpty) return;
+    companyId.value = '${prefs.getString('companyId')}';
+    if (companyId.value == '' || companyId.isEmpty) return;
 
     var companyDetails = await FirebaseFirestore.instance
         .collection('companies')
-        .doc(companyId)
+        .doc(companyId.value)
         .get();
     if (companyDetails.exists) {
       companyImageURL.value = companyDetails.data()!['company_logo'];
@@ -83,6 +90,8 @@ class MainScreenController extends GetxController {
 // this function is to get the screen and show it on the right side of the main screen
   Widget getScreenFromRoute(String? routeName) {
     switch (routeName) {
+      case '/home':
+        return SizedBox(child: FirstMainScreen());
       case '/users':
         return SizedBox(child: Users());
       case '/functions':
@@ -313,5 +322,45 @@ class MainScreenController extends GetxController {
       parentProvider: (MyTreeNode node) => node.parent,
     );
     isLoading.value = false;
+  }
+
+  void getFavoriteScreens() {
+    FirebaseFirestore.instance
+        .collection('favorite_screens')
+        .where('company_id', isEqualTo: companyId.value)
+        .orderBy('added_date', descending: true)
+        .limit(10)
+        .snapshots()
+        .listen((fav) {
+      favoriteScreens.assignAll(fav.docs);
+    }, onError: (e) {
+      // print(e);
+      // Handle errors here
+    });
+  }
+
+  addScreenToFavorite() {
+    try {
+      FirebaseFirestore.instance.collection('favorite_screens').add({
+        'screen_name': selectedScreenName.value,
+        'screen_route': selectedScreenRoute.value,
+        'added_date': DateTime.now(),
+        'company_id': companyId.value
+      });
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try agian');
+    }
+  }
+
+  void removeScreenFromFavorite(String route) {
+    FirebaseFirestore.instance
+        .collection('favorite_screens')
+        .where('screen_route', isEqualTo: route)
+        .get()
+        .then((snap) {
+      for (var doc in snap.docs) {
+        doc.reference.delete();
+      }
+    });
   }
 }
