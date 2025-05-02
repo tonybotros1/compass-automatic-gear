@@ -21,6 +21,7 @@ import '../../Screens/Main screens/System Administrator/Setup/branches.dart';
 import '../../Screens/Main screens/System Administrator/Setup/cash_management.dart';
 import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
+import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../Screens/Main screens/System Administrator/Setup/system_variables.dart';
 import '../../Screens/Main screens/System Administrator/User Management/menus.dart';
 import '../../Screens/Main screens/System Administrator/User Management/responsibilities.dart';
@@ -118,6 +119,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Branches());
       case '/jobCards':
         return SizedBox(child: JobCard());
+      case '/quotationCards':
+        return SizedBox(child: QuotationCard());
       case '/countries':
         return const SizedBox(child: Countries());
       case '/carBrands':

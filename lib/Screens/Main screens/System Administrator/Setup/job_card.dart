@@ -2,14 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart'
-    show EntityInformationsController;
+import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/Mobile widgets/inspection report widgets/inspection_report_body.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart'
-    show addNewEntityOrEdit;
+import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/internal_notes_widget.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/invoice_items_widget.dart';
