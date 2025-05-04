@@ -62,79 +62,75 @@ Widget addNewQuotationCardOrEdit(
                       'Quotation Details',
                       style: fontStyle1,
                     ),
-                    const SizedBox(width: 10),
-                    GetX<QuotationCardController>(builder: (controller) {
-                      if (controller.quotationStatus.value.isNotEmpty) {
-                        return statusBox(controller.quotationStatus.value);
-                      } else {
-                        return const SizedBox();
-                      }
-                    }),
+                   
+                   
                     const Spacer(),
-                    quotaionId != null && quotaionId != ''
-                        ? Row(
-                            spacing: 10,
-                            children: [
-                              GetX<QuotationCardController>(
-                                  builder: (controller) {
-                                return ElevatedButton(
-                                    style: postButtonStyle,
-                                    onPressed: () {
-                                      if (controller.quotationStatus.value !=
-                                              'Posted' &&
-                                          controller.quotationStatus.value !=
-                                              'Cancelled' &&
-                                          controller.quotationStatus.value
-                                              .isNotEmpty) {
-                                        // controller.editPostForQuotation(jobId);
-                                      } else if (controller
-                                              .quotationStatus.value ==
-                                          'Posted') {
-                                        showSnackBar('Alert',
-                                            'Quotation is Already Posted');
-                                      } else if (controller
-                                              .quotationStatus.value ==
-                                          'Cancelled') {
-                                        showSnackBar(
-                                            'Alert', 'Quotation is Cancelled');
-                                      } else if (controller
-                                          .quotationStatus.value.isEmpty) {
-                                        showSnackBar('Alert',
-                                            'Please Save The Quotation First');
-                                      }
-                                    },
-                                    child: const Text('Post',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)));
-                              }),
-                              GetX<QuotationCardController>(
-                                  builder: (controller) {
-                                return ElevatedButton(
-                                    style: cancelJobButtonStyle,
-                                    onPressed: () {
-                                      if (controller.quotationStatus.value !=
-                                              'Cancelled' &&
-                                          controller.quotationStatus.value
-                                              .isNotEmpty) {
-                                        // controller.editCancelForQuotation(jobId);
-                                      } else if (controller
-                                              .quotationStatus.value ==
-                                          'Cancelled') {
-                                        showSnackBar('Alert',
-                                            'Quotation Already Cancelled');
-                                      } else if (controller
-                                          .quotationStatus.value.isEmpty) {
-                                        showSnackBar('Alert',
-                                            'Please Save The Quotation First');
-                                      }
-                                    },
-                                    child: const Text('Cancel',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)));
-                              }),
-                            ],
-                          )
-                        : const SizedBox(),
+                    // quotaionId != null && quotaionId != ''
+                    //     ? Row(
+                    //         spacing: 10,
+                    //         children: [
+                    //           GetBuilder<QuotationCardController>(
+                    //               builder: (controller) {
+                    //             return ElevatedButton(
+                    //                 style: postButtonStyle,
+                    //                 onPressed: () {
+                    //                   if (controller.quotationStatus.value !=
+                    //                           'Posted' &&
+                    //                       controller.quotationStatus.value !=
+                    //                           'Cancelled' &&
+                    //                       controller.quotationStatus.value
+                    //                           .isNotEmpty) {
+                    //                     controller
+                    //                         .editPostForQuotation(quotaionId);
+                    //                   } else if (controller
+                    //                           .quotationStatus.value ==
+                    //                       'Posted') {
+                    //                     showSnackBar('Alert',
+                    //                         'Quotation is Already Posted');
+                    //                   } else if (controller
+                    //                           .quotationStatus.value ==
+                    //                       'Cancelled') {
+                    //                     showSnackBar(
+                    //                         'Alert', 'Quotation is Cancelled');
+                    //                   } else if (controller
+                    //                       .quotationStatus.value.isEmpty) {
+                    //                     showSnackBar('Alert',
+                    //                         'Please Save The Quotation First');
+                    //                   }
+                    //                 },
+                    //                 child: const Text('Post',
+                    //                     style: TextStyle(
+                    //                         fontWeight: FontWeight.bold)));
+                    //           }),
+                    //           GetBuilder<QuotationCardController>(
+                    //               builder: (controller) {
+                    //             return ElevatedButton(
+                    //                 style: cancelJobButtonStyle,
+                    //                 onPressed: () {
+                    //                   if (controller.quotationStatus.value !=
+                    //                           'Cancelled' &&
+                    //                       controller.quotationStatus.value
+                    //                           .isNotEmpty) {
+                    //                     controller
+                    //                         .editCancelForQuotation(quotaionId);
+                    //                   } else if (controller
+                    //                           .quotationStatus.value ==
+                    //                       'Cancelled') {
+                    //                     showSnackBar('Alert',
+                    //                         'Quotation Already Cancelled');
+                    //                   } else if (controller
+                    //                       .quotationStatus.value.isEmpty) {
+                    //                     showSnackBar('Alert',
+                    //                         'Please Save The Quotation First');
+                    //                   }
+                    //                 },
+                    //                 child: const Text('Cancel',
+                    //                     style: TextStyle(
+                    //                         fontWeight: FontWeight.bold)));
+                    //           }),
+                    //         ],
+                    //       )
+                    //     : const SizedBox(),
                   ],
                 )),
                 quotationsSection(context, controller)
@@ -143,12 +139,18 @@ Widget addNewQuotationCardOrEdit(
           ],
         ),
         labelContainer(
-            lable: Text(
-          'Invoice Items',
-          style: fontStyle1,
+            lable: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Invoice Items',
+              style: fontStyle1,
+            ),
+            newinvoiceItemsButton(context, constraints, controller, quotaionId),
+          ],
         )),
         SizedBox(
-          height: 300,
+          height: 250,
           child: invoiceItemsSection(
               constraints: constraints,
               context: context,

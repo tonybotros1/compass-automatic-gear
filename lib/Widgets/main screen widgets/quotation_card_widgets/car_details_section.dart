@@ -19,29 +19,32 @@ Widget carDetailsSection() {
         spacing: 10,
         children: [
           Row(
+            spacing: 10,
             children: [
               Expanded(
+                  flex: 2,
                   child: CustomDropdown(
-                showedSelectedName: 'name',
-                textcontroller: controller.carBrand.text,
-                hintText: 'Brand',
-                items: isBrandsLoading ? {} : controller.allBrands,
-                onChanged: (key, value) {
-                  controller.carBrandLogo.value = value['logo'];
-                  controller.carBrand.text = value['name'];
-                  controller.carModel.clear();
-                  controller.getModelsByCarBrand(key);
-                  controller.carBrandId.value = key;
-                },
-              )),
-              Expanded(child: SizedBox())
+                    showedSelectedName: 'name',
+                    textcontroller: controller.carBrand.text,
+                    hintText: 'Brand',
+                    items: isBrandsLoading ? {} : controller.allBrands,
+                    onChanged: (key, value) {
+                      controller.carBrandLogo.value = value['logo'];
+                      controller.carBrand.text = value['name'];
+                      controller.carModel.clear();
+                      controller.getModelsByCarBrand(key);
+                      controller.carBrandId.value = key;
+                    },
+                  )),
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
             ],
           ),
           Row(
             spacing: 10,
             children: [
               Expanded(
-                  flex: 3,
+                  flex: 2,
                   child: CustomDropdown(
                     showedSelectedName: 'name',
                     textcontroller: controller.carModel.text,
@@ -54,6 +57,17 @@ Widget carDetailsSection() {
                       controller.carModelId.value = key;
                     },
                   )),
+              Expanded(
+                  child: CustomDropdown(
+                showedSelectedName: 'name',
+                textcontroller: controller.color.text,
+                hintText: 'Color',
+                items: isColorsLoading ? {} : controller.allColors,
+                onChanged: (key, value) {
+                  controller.color.text = value['name'];
+                  controller.colorId.value = key;
+                },
+              )),
               Expanded(
                   child: myTextFormFieldWithBorder(
                 controller: controller.year,
@@ -115,22 +129,6 @@ Widget carDetailsSection() {
                 },
               )),
               Expanded(child: SizedBox())
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
-                  child: CustomDropdown(
-                showedSelectedName: 'name',
-                textcontroller: controller.color.text,
-                hintText: 'Color',
-                items: isColorsLoading ? {} : controller.allColors,
-                onChanged: (key, value) {
-                  controller.color.text = value['name'];
-                  controller.colorId.value = key;
-                },
-              )),
-              Expanded(flex: 3, child: SizedBox())
             ],
           ),
           Row(

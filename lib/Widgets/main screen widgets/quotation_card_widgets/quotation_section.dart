@@ -97,6 +97,7 @@ Container quotationsSection(context, QuotationCardController controller) {
           ],
         ),
         Row(
+          spacing: 10,
           children: [
             Expanded(
                 child: myTextFormFieldWithBorder(
@@ -105,11 +106,6 @@ Container quotationsSection(context, QuotationCardController controller) {
               labelText: 'Warrenty Days',
               hintText: 'Enter Warrenty Days',
             )),
-            Expanded(flex: 2, child: SizedBox())
-          ],
-        ),
-        Row(
-          children: [
             Expanded(
                 child: myTextFormFieldWithBorder(
               isnumber: true,

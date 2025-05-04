@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/quotation_card_controller.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../web_functions.dart';
 
-Future internalNotesDialog(
-    JobCardController controller, BoxConstraints constraints, String jobId) {
+Future internalNotesDialog(QuotationCardController controller,
+    BoxConstraints constraints, String quotationId) {
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
@@ -48,17 +48,7 @@ Future internalNotesDialog(
                       fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: IconButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                      )),
-                )
+                closeIcon()
               ],
             ),
           ),
@@ -66,7 +56,7 @@ Future internalNotesDialog(
             child: SizedBox(
               width: double.infinity,
               child: StreamBuilder<List<Map<String, dynamic>>>(
-                stream: controller.getJobCardInternalNotes(jobId),
+                stream: controller.getQuotationCardInternalNotes(quotationId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -339,7 +329,7 @@ Future internalNotesDialog(
                     bottomLeft: Radius.circular(10),
                     bottomRight: Radius.circular(10),
                   )),
-              child: GetX<JobCardController>(builder: (controller) {
+              child: GetX<QuotationCardController>(builder: (controller) {
                 return Row(
                   children: [
                     Padding(
@@ -430,40 +420,49 @@ Future internalNotesDialog(
                     ),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: GetX<JobCardController>(builder: (controller) {
+                      child:
+                          GetX<QuotationCardController>(builder: (controller) {
                         return controller.addingNewInternalNotProcess.isFalse
                             ? IconButton(
                                 onPressed: () async {
-                                  if (controller.noteMessage.value
-                                      .trim()
-                                      .isNotEmpty) {
-                                    controller.internalNote.value.clear();
-                                    await controller.addNewInternalNote(jobId, {
-                                      'type': 'Text',
-                                      'note':
-                                          controller.noteMessage.value.trim(),
-                                      'user_id': controller.userId.value,
-                                      'time': DateTime.now(),
+                                  if (controller.quotationStatus.value ==
+                                      'New') {
+                                    if (controller.noteMessage.value
+                                        .trim()
+                                        .isNotEmpty) {
+                                      controller.internalNote.value.clear();
+                                      await controller
+                                          .addNewInternalNote(quotationId, {
+                                        'type': 'Text',
+                                        'note':
+                                            controller.noteMessage.value.trim(),
+                                        'user_id': controller.userId.value,
+                                        'time': DateTime.now(),
+                                      });
+                                      controller.noteMessage.value = '';
+                                    } else if (controller.fileBytes.value !=
+                                        null) {
+                                      await controller
+                                          .addNewInternalNote(quotationId, {
+                                        'file_name': controller.fileName.value,
+                                        'type': controller.fileType.value,
+                                        'note': controller.fileBytes.value,
+                                        'user_id': controller.userId.value,
+                                        'time': DateTime.now(),
+                                      });
+                                      controller.fileBytes.value = null;
+                                      controller.fileType.value = '';
+                                      controller.fileName.value = '';
+                                    }
+                                    Future.delayed(
+                                        const Duration(milliseconds: 100), () {
+                                      controller.textFieldFocusNode
+                                          .requestFocus();
                                     });
-                                    controller.noteMessage.value = '';
-                                  } else if (controller.fileBytes.value !=
-                                      null) {
-                                    await controller.addNewInternalNote(jobId, {
-                                      'file_name': controller.fileName.value,
-                                      'type': controller.fileType.value,
-                                      'note': controller.fileBytes.value,
-                                      'user_id': controller.userId.value,
-                                      'time': DateTime.now(),
-                                    });
-                                    controller.fileBytes.value = null;
-                                    controller.fileType.value = '';
-                                    controller.fileName.value = '';
+                                  } else {
+                                    showSnackBar(
+                                        'Alert', 'Only New Quotations Allowed');
                                   }
-                                  Future.delayed(
-                                      const Duration(milliseconds: 100), () {
-                                    controller.textFieldFocusNode
-                                        .requestFocus();
-                                  });
                                 },
                                 icon: Icon(
                                   Icons.send_rounded,

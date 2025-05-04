@@ -332,7 +332,7 @@ class MainScreenController extends GetxController {
         .collection('favorite_screens')
         .where('company_id', isEqualTo: companyId.value)
         .orderBy('added_date', descending: true)
-        .limit(10)
+        .limit(15)
         .snapshots()
         .listen((fav) {
       favoriteScreens.assignAll(fav.docs);

@@ -1,15 +1,11 @@
-
 import 'package:datahubai/Controllers/Main%20screen%20controllers/quotation_card_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../consts.dart';
 import 'add_new_invoice_item_or_edit.dart';
 
 Future<dynamic> invoiceItemsForQuotationDialog(
-    {
-    required QuotationCardController controller,
+    {required QuotationCardController controller,
     required BoxConstraints constraints,
     required void Function()? onPressed}) {
   return Get.dialog(
@@ -18,6 +14,7 @@ Future<dynamic> invoiceItemsForQuotationDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: SizedBox(
           width: Get.width / 2,
+          height: 600,
           child: Column(
             children: [
               Container(
@@ -36,13 +33,12 @@ Future<dynamic> invoiceItemsForQuotationDialog(
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
                     const Spacer(),
-                    GetX<JobCardController>(
+                    GetX<QuotationCardController>(
                         builder: (controller) => ElevatedButton(
                               onPressed: onPressed,
                               style: new2ButtonStyle,
                               child:
-                                  controller.addingNewinvoiceItemsValue.value ==
-                                          false
+                                  controller.addingNewinvoiceItemsValue.isFalse
                                       ? const Text(
                                           'Save',
                                           style: TextStyle(

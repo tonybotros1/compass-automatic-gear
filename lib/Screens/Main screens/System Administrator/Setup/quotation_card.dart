@@ -1,18 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
-import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Controllers/Main screen controllers/quotation_card_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/Mobile widgets/inspection report widgets/inspection_report_body.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
-import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
-import '../../../../Widgets/main screen widgets/job_cards_widgets/internal_notes_widget.dart';
-import '../../../../Widgets/main screen widgets/job_cards_widgets/invoice_items_widget.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/add_new_quotation_card_or_edit.dart';
+import '../../../../Widgets/main screen widgets/quotation_card_widgets/internal_notes_widget.dart';
 import '../../../../consts.dart';
 
 class QuotationCard extends StatelessWidget {
@@ -144,6 +137,7 @@ Widget tableOfScreens({
       sortAscending: controller.isAscending.value,
       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
       columns: [
+        DataColumn(label: SizedBox()),
         DataColumn(
           label: Column(
             spacing: 5,
@@ -187,42 +181,6 @@ Widget tableOfScreens({
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AutoSizedText(text: 'Invoice', constraints: constraints),
-              AutoSizedText(text: 'Number', constraints: constraints),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'Date', constraints: constraints),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'LPO Number', constraints: constraints),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
               AutoSizedText(text: 'Car', constraints: constraints),
               AutoSizedText(text: 'Brand', constraints: constraints),
             ],
@@ -237,6 +195,18 @@ Widget tableOfScreens({
             children: [
               const SizedBox(),
               AutoSizedText(text: 'Model', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(),
+              AutoSizedText(text: 'Color', constraints: constraints),
             ],
           ),
           // onSort: controller.onSort,
@@ -340,9 +310,6 @@ Widget tableOfScreens({
           // onSort: controller.onSort,
         ),
       ],
-      // rows: _getOtherRows(
-      //     controller: controller, constraints: constraints, data: data),
-
       source: dataSource,
     ),
   );
@@ -359,6 +326,11 @@ DataRow dataRowForTheTable(Map<String, dynamic> cardData, context, constraints,
         return isEvenRow ? Colors.grey.shade200 : Colors.white;
       }),
       cells: [
+        DataCell(Row(
+          children: [
+            editSection(context, controller, cardData, constraints, cardId)
+          ],
+        )),
         DataCell(
             textForDataRowInTable(text: '${cardData['quotation_number']}')),
         DataCell(textForDataRowInTable(
@@ -367,17 +339,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> cardData, context, constraints,
                 : '')),
         DataCell(cardData['quotation_status'] != ''
             ? statusBox('${cardData['quotation_status']}',
-                hieght: 35, width: 60, padding: EdgeInsets.all(0))
+                hieght: 35, padding: EdgeInsets.symmetric(horizontal: 5))
             : const SizedBox()),
-        DataCell(textForDataRowInTable(text: '${cardData['invoice_number']}')),
-        DataCell(textForDataRowInTable(
-            text: cardData['invoice_number'] != ''
-                ? textToDate(cardData['invoice_date'])
-                : '')),
-        DataCell(SelectableText(
-          '${cardData['lpo_number']}',
-          maxLines: 1,
-        )),
         DataCell(textForDataRowInTable(
             text: controller.getdataName(
                 cardData['car_brand'], controller.allBrands))),
@@ -398,6 +361,9 @@ DataRow dataRowForTheTable(Map<String, dynamic> cardData, context, constraints,
             },
           ),
         ),
+        DataCell(Text(
+          controller.getdataName(cardData['color'], controller.allColors),
+        )),
         DataCell(SelectableText(
           cardData['plate_number'],
           maxLines: 1,
@@ -501,19 +467,42 @@ DataRow dataRowForTheTable(Map<String, dynamic> cardData, context, constraints,
       ]);
 }
 
-ElevatedButton editSection(context, QuotationCardController controller,
-    Map<String, dynamic> cardData, constraints, jobId) {
-  return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () async {
-        // controller.currentCountryVAT.value = controller.getdataName(
-        //     controller.companyDetails['contact_details']['country'],
-        //     controller.allCountries,
-        //     title: 'vat');
-        // controller.loadValues(cardData);
-        // editJobCardDialog(controller, cardData, jobId);
-      },
-      child: const Text('Edit'));
+Widget editSection(context, QuotationCardController controller,
+    Map<String, dynamic> cardData, constraints, cardId) {
+  return GetX<QuotationCardController>(builder: (controller) {
+    bool isLoading = controller.buttonLoadingStates[cardId] ?? false;
+
+    return IconButton(
+        tooltip: 'Edit',
+        onPressed:
+            controller.buttonLoadingStates[cardId] == null || isLoading == false
+                ? () async {
+                    controller.setButtonLoading(cardId, true);
+
+                    controller.getAllInvoiceItems(cardId);
+                    controller.currentCountryVAT.value = controller.getdataName(
+                        controller.companyDetails['contact_details']['country'],
+                        controller.allCountries,
+                        title: 'vat');
+                    await controller.loadValues(cardData);
+                    editJobCardDialog(controller, cardData, cardId);
+                    controller.setButtonLoading(cardId, false);
+                  }
+                : null,
+        icon: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.blue,
+                  strokeWidth: 2,
+                ),
+              )
+            : const Icon(
+                Icons.edit_note_rounded,
+                color: Colors.blue,
+              ));
+  });
 }
 
 ElevatedButton historySection(
@@ -526,8 +515,8 @@ ElevatedButton historySection(
       child: const Text('History'));
 }
 
-Future<dynamic> editJobCardDialog(
-    QuotationCardController controller, Map<String, dynamic> cardData, jobId) {
+Future<dynamic> editJobCardDialog(QuotationCardController controller,
+    Map<String, dynamic> cardData, quotationId) {
   return Get.dialog(
       barrierDismissible: false,
       Dialog(
@@ -552,6 +541,84 @@ Future<dynamic> editJobCardDialog(
                         '${controller.getScreenName()}',
                         style: fontStyleForScreenNameUsedInButtons,
                       ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      GetX<QuotationCardController>(builder: (controller) {
+                        if (controller.quotationStatus.value.isNotEmpty) {
+                          return statusBox(
+                            controller.quotationStatus.value,
+                          );
+                        } else {
+                          return const SizedBox();
+                        }
+                      }),
+                      const Spacer(),
+                      GetX<QuotationCardController>(builder: (controller) {
+                        return ElevatedButton(
+                            style: makeJobButtonStyle,
+                            onPressed: () async {
+                              // var newData =
+                              //     await controller.copyQuotation(quotationId);
+                              // Get.back();
+                              // controller.loadValues(newData['data']);
+                              // editJobCardDialog(controller, newData['data'],
+                              //     newData['newId']);
+                            },
+                            child: controller.loadingMakeJob.isFalse
+                                ? const Text(
+                                    'Create Job',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                : const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ));
+                      }),
+                      ElevatedButton(
+                        style: internalNotesButtonStyle,
+                        onPressed: () async {
+                          controller.noteMessage.value = '';
+                          controller.internalNote.value.clear();
+                          internalNotesDialog(
+                              controller, constraints, quotationId);
+                        },
+                        child: const Text(
+                          'Internal Notes',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      GetX<QuotationCardController>(builder: (controller) {
+                        return ElevatedButton(
+                            style: copyJobButtonStyle,
+                            onPressed: () async {
+                              var newData =
+                                  await controller.copyQuotation(quotationId);
+                              Get.back();
+                              controller.loadValues(newData['data']);
+                              editJobCardDialog(controller, newData['data'],
+                                  newData['newId']);
+                            },
+                            child: controller.loadingCopyQuotation.isFalse
+                                ? const Text(
+                                    'Copy',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                : const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ));
+                      }),
                       const Spacer(),
                       GetX<QuotationCardController>(builder: (controller) {
                         return ElevatedButton(
@@ -560,22 +627,7 @@ Future<dynamic> editJobCardDialog(
                               : () async {
                                   controller.addingNewValue.value = true;
 
-                                  // if (cardData['quotation_number'] == '' &&
-                                  //     controller.isQuotationExpanded.isTrue) {
-                                  //   controller.quotationStatus.value = 'New';
-                                  //   controller.label.value = '';
-                                  //   await controller
-                                  //       .getCurrentQuotationCounterNumber();
-                                  // }
-                                  // if (cardData['job_number'] == '' &&
-                                  //     controller.isJobCardExpanded.isTrue) {
-                                  //   controller.jobStatus1.value = 'New';
-                                  //   controller.jobStatus2.value = 'New';
-                                  //   controller.label.value = '';
-                                  //   await controller
-                                  //       .getCurrentJobCardCounterNumber();
-                                  // }
-                                  // controller.editJobCardAndQuotation(jobId);
+                                  controller.editQuotationCard(quotationId);
                                 },
                           style: new2ButtonStyle,
                           child: controller.addingNewValue.value == false
@@ -593,277 +645,91 @@ Future<dynamic> editJobCardDialog(
                                 ),
                         );
                       }),
+                      const Spacer(),
+                      GetBuilder<QuotationCardController>(
+                          builder: (controller) {
+                        return ElevatedButton(
+                            style: postButtonStyle,
+                            onPressed: () {
+                              if (controller.quotationStatus.value !=
+                                      'Posted' &&
+                                  controller.quotationStatus.value !=
+                                      'Cancelled' &&
+                                  controller.quotationStatus.value.isNotEmpty) {
+                                controller.editPostForQuotation(quotationId);
+                              } else if (controller.quotationStatus.value ==
+                                  'Posted') {
+                                showSnackBar(
+                                    'Alert', 'Quotation is Already Posted');
+                              } else if (controller.quotationStatus.value ==
+                                  'Cancelled') {
+                                showSnackBar('Alert', 'Quotation is Cancelled');
+                              } else if (controller
+                                  .quotationStatus.value.isEmpty) {
+                                showSnackBar(
+                                    'Alert', 'Please Save The Quotation First');
+                              }
+                            },
+                            child: const Text('Post',
+                                style: TextStyle(fontWeight: FontWeight.bold)));
+                      }),
+                      GetBuilder<QuotationCardController>(
+                          builder: (controller) {
+                        return ElevatedButton(
+                            style: cancelJobButtonStyle,
+                            onPressed: () {
+                              if (controller.quotationStatus.value !=
+                                      'Cancelled' &&
+                                  controller.quotationStatus.value.isNotEmpty) {
+                                controller.editCancelForQuotation(quotationId);
+                              } else if (controller.quotationStatus.value ==
+                                  'Cancelled') {
+                                showSnackBar(
+                                    'Alert', 'Quotation Already Cancelled');
+                              } else if (controller
+                                  .quotationStatus.value.isEmpty) {
+                                showSnackBar(
+                                    'Alert', 'Please Save The Quotation First');
+                              }
+                            },
+                            child: const Text('Cancel',
+                                style: TextStyle(fontWeight: FontWeight.bold)));
+                      }),
                       ElevatedButton(
                           style: cancelJobButtonStyle,
                           onPressed: () {
-                            // if (controller.jobStatus1.value == 'New' ||
-                            //     controller.jobStatus1.value == '' ||
-                            //     controller.quotationStatus.value == 'New' ||
-                            //     controller.quotationStatus.value == '') {
-                            //   alertDialog(
-                            //       context: context,
-                            //       controller: controller,
-                            //       content: "Theis will be deleted permanently",
-                            //       onPressed: () {
-                            //         controller.deleteJobCard(jobId);
-                            //       });
-                            // } else {
-                            //   showSnackBar('Can Not Delete',
-                            //       'Only New Cards Can be Deleted');
-                            // }
+                            if (controller.quotationStatus.value == 'New' ||
+                                controller.quotationStatus.value == '') {
+                              alertDialog(
+                                  context: context,
+                                  controller: controller,
+                                  content: "Theis will be deleted permanently",
+                                  onPressed: () {
+                                    controller.deleteQuotationCard(quotationId);
+                                  });
+                            } else {
+                              showSnackBar('Can Not Delete',
+                                  'Only New Cards Can be Deleted');
+                            }
                           },
                           child: const Text('Delete',
                               style: TextStyle(fontWeight: FontWeight.bold))),
-                      GetX<QuotationCardController>(builder: (controller) {
-                        return ElevatedButton(
-                            style: copyJobButtonStyle,
-                            onPressed: () async {
-                              // var newData = await controller.copyJob(jobId);
-                              // Get.back();
-                              // controller.loadValues(newData['data']);
-                              // editJobCardDialog(controller, newData['data'],
-                              //     newData['newId']);
-                            },
-                            child: controller.loadingCopyJob.isFalse
-                                ? const Text(
-                                    'Copy',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ));
-                      }),
-                      ElevatedButton(
-                          style: inspectionFormButtonStyle,
-                          onPressed: () {
-                            // controller.loadInspectionFormValues(jobId, cardData);
-                            Get.dialog(
-                                barrierDismissible: false,
-                                Dialog(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5)),
-                                    insetPadding: const EdgeInsets.all(20),
-                                    child: SizedBox(
-                                      width: 600,
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(5),
-                                                      topRight:
-                                                          Radius.circular(5)),
-                                              color: mainColor,
-                                            ),
-                                            padding: const EdgeInsets.all(16),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                const Text(
-                                                  '🚘 Inspection Form',
-                                                  style: TextStyle(
-                                                      fontSize: 20,
-                                                      color: Colors.white),
-                                                ),
-                                                IconButton(
-                                                  onPressed: () {
-                                                    Get.back();
-                                                  },
-                                                  icon: const Icon(Icons.close,
-                                                      color: Colors.white),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: buildInspectionReportBody(
-                                                  context),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )));
-                          },
-                          child: const Text(
-                            'Inspection From',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          )),
-                      ElevatedButton(
-                        style: internalNotesButtonStyle,
-                        onPressed: () async {
-                          // internalNotesDialog(controller, constraints, jobId);
-                        },
-                        child: const Text(
-                          'Internal Notes',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      ElevatedButton(
-                        style: innvoiceItemsButtonStyle,
-                        onPressed: () {
-                          // controller.getAllInvoiceItems(jobId);
-                          Get.dialog(
-                              barrierDismissible: true,
-                              Dialog(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5)),
-                                insetPadding: const EdgeInsets.all(40),
-                                child: LayoutBuilder(
-                                    builder: (context, constraints) {
-                                  return Column(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: const BorderRadius.only(
-                                              topLeft: Radius.circular(5),
-                                              topRight: Radius.circular(5)),
-                                          color: mainColor,
-                                        ),
-                                        padding: const EdgeInsets.all(16),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text(
-                                              '💵 Invoice Items',
-                                              style: TextStyle(
-                                                  fontSize: 20,
-                                                  color: Colors.white),
-                                            ),
-                                            IconButton(
-                                              onPressed: () {
-                                                Get.back();
-                                              },
-                                              icon: const Icon(Icons.close,
-                                                  color: Colors.white),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: invoiceItemsDialog(
-                                              constraints: constraints,
-                                              context: context,
-                                              jobId: jobId),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }),
-                              ));
-                        },
-                        child: const Text('Invoice Items',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      ElevatedButton(
-                          style: new2ButtonStyle,
-                          onPressed: () {
-                            EntityInformationsController otherController =
-                                Get.put(EntityInformationsController());
-
-                            otherController.clearAllVariables();
-                            Get.dialog(
-                                barrierDismissible: false,
-                                Dialog(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5)),
-                                  insetPadding: const EdgeInsets.all(40),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(16),
-                                        width: constraints.maxWidth,
-                                        decoration: BoxDecoration(
-                                          borderRadius: const BorderRadius.only(
-                                              topLeft: Radius.circular(5),
-                                              topRight: Radius.circular(5)),
-                                          color: mainColor,
-                                        ),
-                                        child: Row(
-                                          spacing: 10,
-                                          children: [
-                                            const Spacer(),
-                                            Obx(() => ElevatedButton(
-                                                  onPressed: otherController
-                                                          .addingNewEntity.value
-                                                      ? null
-                                                      : () async {
-                                                          await otherController
-                                                              .addNewEntity();
-                                                        },
-                                                  style: new2ButtonStyle,
-                                                  child: otherController
-                                                              .addingNewEntity
-                                                              .value ==
-                                                          false
-                                                      ? const Text(
-                                                          'Save',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        )
-                                                      : const SizedBox(
-                                                          height: 20,
-                                                          width: 20,
-                                                          child:
-                                                              CircularProgressIndicator(
-                                                            color: Colors.white,
-                                                            strokeWidth: 2,
-                                                          ),
-                                                        ),
-                                                )),
-                                            closeButton
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: addNewEntityOrEdit(
-                                            controller: otherController,
-                                            constraints: constraints,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ));
-                          },
-                          child: const Text(
-                            'New Customer',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          )),
-                      closeButton
+                      const Spacer(),
+                      closeIcon()
                     ],
                   ),
                 ),
-                // Expanded(
-                //   child: Padding(
-                //     padding: const EdgeInsets.all(8.0),
-                //     child: addNewJobCardOrEdit(
-                //       jobId: jobId,
-                //       controller: controller,
-                //       constraints: constraints,
-                //       context: context,
-                //     ),
-                //   ),
-                // ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: addNewQuotationCardOrEdit(
+                      quotaionId: quotationId,
+                      controller: controller,
+                      constraints: constraints,
+                      context: context,
+                    ),
+                  ),
+                ),
               ],
             );
           })));
@@ -873,41 +739,38 @@ ElevatedButton newQuotationCardButton(BuildContext context,
     BoxConstraints constraints, QuotationCardController controller) {
   return ElevatedButton(
     onPressed: () {
-      // controller.quotationDate.value.text = textToDate(DateTime.now());
-      // controller.currentCountryVAT.value = controller.getdataName(
-      //     controller.companyDetails['contact_details']['country'],
-      //     controller.allCountries,
-      //     title: 'vat');
-      // controller.country.text = controller.getdataName(
-      //     controller.companyDetails['contact_details']['country'],
-      //     controller.allCountries);
-      // controller.countryId.value =
-      //     controller.companyDetails['contact_details']['country'];
-      // controller.getCitiesByCountryID(
-      //     controller.companyDetails['contact_details']['country']);
-      // controller.mileageIn.value.text = '0';
-      // controller.mileageOut.value.text = '0';
-      // controller.inOutDiff.value.text = '0';
-      // controller.customerCreditNumber.text = '0';
-      // controller.customerOutstanding.text = '0';
-      // controller.isCashSelected.value = true;
-      // controller.payType.value = 'Cash';
-      // controller.jobCardDate.value.text = textToDate(DateTime.now());
-      // controller.invoiceDate.value.text = textToDate(DateTime.now());
-      // controller.startDate.value.text = textToDate(DateTime.now());
-      // var entry = controller.allCurrencies.entries.firstWhere(
-      //     (entry) =>
-      //         entry.value['country_id'] ==
-      //         controller.companyDetails['contact_details']['country'],
-      //     orElse: () => const MapEntry('', {}));
-      // controller.customerCurrencyId.value = entry.key ?? '';
-      // controller.customerCurrencyRate.text =
-      //     (entry.value['rate'] ?? '1').toString();
-      // controller.customerCurrency.text = controller.getdataName(
-      //     controller.companyDetails['contact_details']['country'],
-      //     controller.allCountries,
-      //     title: 'currency_code');
-      // controller.clearValues();
+      controller.quotationDate.value.text = textToDate(DateTime.now());
+      controller.currentCountryVAT.value = controller.getdataName(
+          controller.companyDetails['contact_details']['country'],
+          controller.allCountries,
+          title: 'vat');
+      controller.country.text = controller.getdataName(
+          controller.companyDetails['contact_details']['country'],
+          controller.allCountries);
+      controller.countryId.value =
+          controller.companyDetails['contact_details']['country'];
+      controller.getCitiesByCountryID(
+          controller.companyDetails['contact_details']['country']);
+      controller.mileageIn.value.text = '0';
+      controller.mileageOut.value.text = '0';
+      controller.inOutDiff.value.text = '0';
+      controller.customerCreditNumber.text = '0';
+      controller.customerOutstanding.text = '0';
+      controller.isCashSelected.value = true;
+      controller.payType.value = 'Cash';
+      var entry = controller.allCurrencies.entries.firstWhere(
+          (entry) =>
+              entry.value['country_id'] ==
+              controller.companyDetails['contact_details']['country'],
+          orElse: () => const MapEntry('', {}));
+      controller.customerCurrencyId.value = entry.key ?? '';
+      controller.customerCurrencyRate.text =
+          (entry.value['rate'] ?? '1').toString();
+      controller.customerCurrency.text = controller.getdataName(
+          controller.companyDetails['contact_details']['country'],
+          controller.allCountries,
+          title: 'currency_code');
+      controller.clearValues();
       Get.dialog(
           barrierDismissible: false,
           Dialog(
@@ -930,81 +793,32 @@ ElevatedButton newQuotationCardButton(BuildContext context,
                           '${controller.getScreenName()}',
                           style: fontStyleForScreenNameUsedInButtons,
                         ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        GetX<QuotationCardController>(builder: (controller) {
+                          if (controller.quotationStatus.value.isNotEmpty) {
+                            return statusBox(
+                              controller.quotationStatus.value,
+                            );
+                          } else {
+                            return const SizedBox();
+                          }
+                        }),
                         const Spacer(),
-                        // ElevatedButton(
-                        //   style: innvoiceItemsButtonStyle,
-                        //   onPressed: () {
-                        //     // if (controller
-                        //     //     .canAddInternalNotesAndInvoiceItems.isTrue) {
-                        //     //   Dialog(
-                        //     //     shape: RoundedRectangleBorder(
-                        //     //         borderRadius: BorderRadius.circular(5)),
-                        //     //     insetPadding: const EdgeInsets.all(40),
-                        //     //     child: LayoutBuilder(
-                        //     //         builder: (context, constraints) {
-                        //     //       return Column(
-                        //     //         children: [
-                        //     //           Container(
-                        //     //             decoration: BoxDecoration(
-                        //     //               borderRadius: const BorderRadius.only(
-                        //     //                   topLeft: Radius.circular(5),
-                        //     //                   topRight: Radius.circular(5)),
-                        //     //               color: mainColor,
-                        //     //             ),
-                        //     //             padding: const EdgeInsets.all(8),
-                        //     //             child: Row(
-                        //     //               mainAxisAlignment:
-                        //     //                   MainAxisAlignment.spaceBetween,
-                        //     //               children: [
-                        //     //                 const Text(
-                        //     //                   'Invoice Items',
-                        //     //                   style: TextStyle(
-                        //     //                       fontSize: 20,
-                        //     //                       color: Colors.white),
-                        //     //                 ),
-                        //     //                 IconButton(
-                        //     //                   onPressed: () {
-                        //     //                     Get.back();
-                        //     //                   },
-                        //     //                   icon: const Icon(Icons.close,
-                        //     //                       color: Colors.white),
-                        //     //                 )
-                        //     //               ],
-                        //     //             ),
-                        //     //           ),
-                        //     //           Expanded(
-                        //     //             child: Padding(
-                        //     //               padding: const EdgeInsets.all(8.0),
-                        //     //               child: invoiceItemsDialog(
-                        //     //                   constraints: constraints,
-                        //     //                   context: context,
-                        //     //                   jobId: controller
-                        //     //                       .curreentJobCardId.value),
-                        //     //             ),
-                        //     //           ),
-                        //     //         ],
-                        //     //       );
-                        //     //     }),
-                        //     //   );
-                        //     // } else {
-                        //     //   showSnackBar('Alert', 'Please Save Job First');
-                        //     // }
-                        //   },
-                        //   child: const Text(
-                        //     'Invoice Items',
-                        //     style: TextStyle(fontWeight: FontWeight.bold),
-                        //   ),
-                        // ),
                         ElevatedButton(
                           style: internalNotesButtonStyle,
                           onPressed: () {
-                            // if (controller
-                            //     .canAddInternalNotesAndInvoiceItems.isTrue) {
-                            //   internalNotesDialog(controller, constraints,
-                            //       controller.curreentJobCardId.value);
-                            // } else {
-                            //   showSnackBar('Alert', 'Please Save Job First');
-                            // }
+                            if (controller
+                                .canAddInternalNotesAndInvoiceItems.isTrue) {
+                              controller.noteMessage.value = '';
+                              controller.internalNote.value.clear();
+                              internalNotesDialog(controller, constraints,
+                                  controller.curreentQuotationCardId.value);
+                            } else {
+                              showSnackBar(
+                                  'Alert', 'Please Save Quotation First');
+                            }
                           },
                           child: const Text(
                             'Internal Notes',

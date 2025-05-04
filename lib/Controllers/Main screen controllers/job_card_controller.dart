@@ -194,11 +194,7 @@ class JobCardController extends GetxController {
     super.onClose();
   }
 
-  void openImageViewer(List imageUrls, int index) {
-    Get.toNamed('/imageViewer',
-        arguments: {'images': imageUrls, 'index': index});
-  }
-
+ 
   getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
@@ -855,7 +851,7 @@ class JobCardController extends GetxController {
 
         // Determine MIME type
         final mimeType =
-            note['type'] as String? ?? _getMimeTypeFromExtension(extension);
+            note['type'] as String? ?? getMimeTypeFromExtension(extension);
 
         // Upload file and wait for completion
         final UploadTask uploadTask = storageRef.putData(
@@ -887,23 +883,7 @@ class JobCardController extends GetxController {
     }
   }
 
-// Helper to get MIME type from file extension
-  String? _getMimeTypeFromExtension(String extension) {
-    const mimeTypes = {
-      'pdf': 'application/pdf',
-      'doc': 'application/msword',
-      'docx':
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'xls': 'application/vnd.ms-excel',
-      'xlsx':
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'ppt': 'application/vnd.ms-powerpoint',
-      'pptx':
-          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'txt': 'text/plain',
-    };
-    return mimeTypes[extension.toLowerCase()];
-  }
+
 
   addNewInvoiceItem(String jobId) async {
     try {
@@ -1234,21 +1214,7 @@ class JobCardController extends GetxController {
     }
   }
 
-// this function is to see if the warrant date is end or not
-  bool isBeforeToday(String dateStr) {
-    if (dateStr.isEmpty) {
-      throw const FormatException("The date string is empty or null.");
-    }
 
-    DateFormat format = DateFormat("dd-MM-yyyy");
-
-    DateTime inputDate = format.parse(dateStr);
-
-    DateTime today = DateTime.now();
-    DateTime todayOnly = DateTime(today.year, today.month, today.day);
-
-    return inputDate.isBefore(todayOnly);
-  }
 
   deleteInvoiceItem(String jobId, String itemId) {
     try {
@@ -1366,6 +1332,7 @@ class JobCardController extends GetxController {
   getCurrencies() {
     FirebaseFirestore.instance
         .collection('currencies')
+        .where('company_id', isEqualTo: companyId.value)
         .snapshots()
         .listen((branches) {
       allCurrencies.value = {for (var doc in branches.docs) doc.id: doc.data()};
@@ -1375,6 +1342,7 @@ class JobCardController extends GetxController {
   getBranches() {
     FirebaseFirestore.instance
         .collection('branches')
+        .where('company_id', isEqualTo: companyId.value)
         .snapshots()
         .listen((branches) {
       allBranches.value = {for (var doc in branches.docs) doc.id: doc.data()};
@@ -1384,6 +1352,7 @@ class JobCardController extends GetxController {
   getInvoiceItemsFromCollection() {
     FirebaseFirestore.instance
         .collection('invoice_items')
+        .where('company_id', isEqualTo: companyId.value)
         .snapshots()
         .listen((items) {
       allInvoiceItemsFromCollection.value = {
@@ -1395,6 +1364,7 @@ class JobCardController extends GetxController {
   getSalesMan() {
     FirebaseFirestore.instance
         .collection('sales_man')
+        .where('company_id', isEqualTo: companyId.value)
         .snapshots()
         .listen((branches) {
       salesManMap.value = {for (var doc in branches.docs) doc.id: doc.data()};
@@ -1404,6 +1374,7 @@ class JobCardController extends GetxController {
   getTechnicians() {
     FirebaseFirestore.instance
         .collection('all_technicians')
+        .where('company_id', isEqualTo: companyId.value)
         .snapshots()
         .listen((tech) {
       allTechnicians.value = {for (var doc in tech.docs) doc.id: doc.data()};
@@ -1519,6 +1490,7 @@ class JobCardController extends GetxController {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
+          .where('company_id', isEqualTo: companyId.value)
           .where('entity_code', arrayContains: 'Customer')
           .snapshots()
           .listen((customers) {

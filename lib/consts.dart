@@ -94,7 +94,7 @@ var postButtonStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(80, 40),
 );
 
 var saveButtonStyle = ElevatedButton.styleFrom(
@@ -130,7 +130,7 @@ var cancelJobButtonStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(80, 40),
 );
 
 var internalNotesButtonStyle = ElevatedButton.styleFrom(
@@ -154,6 +154,15 @@ var inspectionFormButtonStyle = ElevatedButton.styleFrom(
 var copyJobButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff7D1C4A),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  minimumSize: const Size(100, 40),
+);
+
+var makeJobButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.grey.shade300,
+  foregroundColor: const Color(0xff393E46),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
@@ -670,3 +679,54 @@ Container statusBox(String status,
 //     );
 //   }
 // }
+
+void openImageViewer(List imageUrls, int index) {
+  Get.toNamed('/imageViewer', arguments: {'images': imageUrls, 'index': index});
+}
+
+// Helper to get MIME type from file extension
+String? getMimeTypeFromExtension(String extension) {
+  const mimeTypes = {
+    'pdf': 'application/pdf',
+    'doc': 'application/msword',
+    'docx':
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'xls': 'application/vnd.ms-excel',
+    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'ppt': 'application/vnd.ms-powerpoint',
+    'pptx':
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'txt': 'text/plain',
+  };
+  return mimeTypes[extension.toLowerCase()];
+}
+
+Widget closeIcon() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: IconButton(
+        onPressed: () {
+          Get.back();
+        },
+        icon: const Icon(
+          Icons.close,
+          color: Colors.white,
+        )),
+  );
+}
+
+// this function is to see if the warrant date is end or not
+bool isBeforeToday(String dateStr) {
+  if (dateStr.isEmpty) {
+    throw const FormatException("The date string is empty or null.");
+  }
+
+  DateFormat format = DateFormat("dd-MM-yyyy");
+
+  DateTime inputDate = format.parse(dateStr);
+
+  DateTime today = DateTime.now();
+  DateTime todayOnly = DateTime(today.year, today.month, today.day);
+
+  return inputDate.isBefore(todayOnly);
+}
