@@ -134,7 +134,7 @@ Widget tableOfScreens(
           rows: [
             ...controller.allInvoiceItems.map<DataRow>((invoiceItems) {
               final invoiceItemsData =
-                  invoiceItems.data() as Map<String, dynamic>;
+                  invoiceItems.data();
               final invoiceItemsId = invoiceItems.id;
               return dataRowForTheTable(invoiceItemsData, context, constraints,
                   invoiceItemsId, controller, quotationId);
