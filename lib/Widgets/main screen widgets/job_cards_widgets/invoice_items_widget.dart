@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../consts.dart';
-import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../auto_size_box.dart';
 import 'invoice_items_for_job_dialog.dart';
 
-Widget invoiceItemsDialog(
+Widget invoiceItemsSection(
     {required BuildContext context,
     required BoxConstraints constraints,
     required jobId}) {
@@ -18,51 +16,31 @@ Widget invoiceItemsDialog(
       children: [
         Expanded(
           child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                GetX<JobCardController>(
-                  builder: (controller) {
-                    return searchBar(
-                      search: controller.searchForInvoiceItems,
+            decoration: containerDecor,
+            child: Expanded(
+              child: GetX<JobCardController>(
+                builder: (controller) {
+                  if (controller.loadingInvoiceItems.value) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (controller.allInvoiceItems.isEmpty) {
+                    return const Center(
+                      child: Text('No Element'),
+                    );
+                  }
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: tableOfScreens(
                       constraints: constraints,
                       context: context,
-                      // controller: controller,
-                      title: 'Search for invoices',
-                      button: newinvoiceItemsButton(
-                          context, constraints, controller, jobId),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: GetX<JobCardController>(
-                    builder: (controller) {
-                      if (controller.loadingInvoiceItems.value) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      if (controller.allInvoiceItems.isEmpty) {
-                        return const Center(
-                          child: Text('No Element'),
-                        );
-                      }
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: tableOfScreens(
-                          constraints: constraints,
-                          context: context,
-                          controller: controller,
-                          jobId: jobId,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                      controller: controller,
+                      jobId: jobId,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -83,148 +61,117 @@ Widget tableOfScreens(
     child: SizedBox(
       width: constraints.maxWidth - 17,
       child: DataTable(
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
-        columnSpacing: 5,
-        horizontalMargin: horizontalMarginForTable,
-        showBottomBorder: true,
-        dataTextStyle: regTextStyle,
-        headingTextStyle: fontStyleForTableHeader,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-        columns: [
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Line No.',
+          dataRowMaxHeight: 40,
+          dataRowMinHeight: 30,
+          columnSpacing: 5,
+          horizontalMargin: horizontalMarginForTable,
+          showBottomBorder: true,
+          dataTextStyle: regTextStyle,
+          headingTextStyle: fontStyleForTableHeader,
+          sortColumnIndex: controller.sortColumnIndex.value,
+          sortAscending: controller.isAscending.value,
+          headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+          columns: [
+            DataColumn(
+              label: AutoSizedText(
+                constraints: constraints,
+                text: '',
+              ),
             ),
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Name',
+            DataColumn(
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Line No.',
+              ),
             ),
-          ),
-          DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Quantity',
+            DataColumn(
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Name',
+              ),
             ),
-          ),
-          DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Price',
+            DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Quantity',
+              ),
             ),
-          ),
-          DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Amount',
+            DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Price',
+              ),
             ),
-          ),
-          DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Discount',
+            DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Amount',
+              ),
             ),
-          ),
-          DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Total',
+            DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Discount',
+              ),
             ),
-          ),
-          DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'VAT',
+            DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Total',
+              ),
             ),
-          ),
-          DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'NET',
+            DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'VAT',
+              ),
             ),
-          ),
-          const DataColumn(
-              headingRowAlignment: MainAxisAlignment.center, label: SizedBox()),
-        ],
-        rows: controller.filteredInvoiceItems.isEmpty &&
-                controller.searchForInvoiceItems.value.text.isEmpty
-            ? [
-                ...controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-                  final invoiceItemsData =
-                      invoiceItems.data() as Map<String, dynamic>;
-                  final invoiceItemsId = invoiceItems.id;
-                  return dataRowForTheTable(invoiceItemsData, context,
-                      constraints, invoiceItemsId, controller, jobId);
-                }),
-                DataRow(selected: true, cells: [
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  const DataCell(Align(
-                      alignment: Alignment.centerRight, child: Text('Totals'))),
-                  DataCell(Align(
-                    alignment: Alignment.centerRight,
-                    child: textForDataRowInTable(
-                        text: '${data[0]}', color: Colors.blue),
-                  )),
-                  DataCell(Align(
-                      alignment: Alignment.centerRight,
-                      child: textForDataRowInTable(
-                          text: '${data[1]}', color: Colors.green))),
-                  DataCell(Align(
-                      alignment: Alignment.centerRight,
-                      child: textForDataRowInTable(
-                          text: '${data[2]}', color: Colors.red))),
-                  const DataCell(Text('')),
-                ])
-              ]
-            : [
-                ...controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
-                  final invoiceItemsData =
-                      invoiceItems.data() as Map<String, dynamic>;
-                  final invoiceItemsId = invoiceItems.id;
-                  return dataRowForTheTable(invoiceItemsData, context,
-                      constraints, invoiceItemsId, controller, jobId);
-                }),
-                DataRow(selected: true, cells: [
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  const DataCell(Align(
-                      alignment: Alignment.centerRight, child: Text('Totals'))),
-                  DataCell(Align(
-                    alignment: Alignment.centerRight,
-                    child: textForDataRowInTable(
-                        text: '${data[0]}', color: Colors.blue),
-                  )),
-                  DataCell(Align(
-                      alignment: Alignment.centerRight,
-                      child: textForDataRowInTable(
-                          text: '${data[1]}', color: Colors.green))),
-                  DataCell(Align(
-                      alignment: Alignment.centerRight,
-                      child: textForDataRowInTable(
-                          text: '${data[2]}', color: Colors.red))),
-                  const DataCell(Text('')),
-                ])
-              ],
-      ),
+            DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'NET',
+              ),
+            ),
+          ],
+          rows: [
+            ...controller.allInvoiceItems.map<DataRow>((invoiceItems) {
+              final invoiceItemsData =
+                  invoiceItems.data() as Map<String, dynamic>;
+              final invoiceItemsId = invoiceItems.id;
+              return dataRowForTheTable(invoiceItemsData, context, constraints,
+                  invoiceItemsId, controller, jobId);
+            }),
+            DataRow(selected: true, cells: [
+              const DataCell(Text('')),
+              const DataCell(Text('')),
+              const DataCell(Text('')),
+              const DataCell(Text('')),
+              const DataCell(Text('')),
+              const DataCell(Text('')),
+              const DataCell(Align(
+                  alignment: Alignment.centerRight, child: Text('Totals'))),
+              DataCell(Align(
+                alignment: Alignment.centerRight,
+                child: textForDataRowInTable(
+                    text: '${data[0]}', color: Colors.blue),
+              )),
+              DataCell(Align(
+                  alignment: Alignment.centerRight,
+                  child: textForDataRowInTable(
+                      text: '${data[1]}', color: Colors.green))),
+              DataCell(Align(
+                  alignment: Alignment.centerRight,
+                  child: textForDataRowInTable(
+                      text: '${data[2]}', color: Colors.red))),
+            ])
+          ]),
     ),
   );
 }
@@ -237,6 +184,13 @@ DataRow dataRowForTheTable(
     JobCardController controller,
     String jobId) {
   return DataRow(cells: [
+    DataCell(Row(
+      children: [
+        deleteSection(jobId, context, controller, invoiceItemsId),
+        editSection(jobId, controller, invoiceItemsData, context, constraints,
+            invoiceItemsId)
+      ],
+    )),
     DataCell(Text('${invoiceItemsData['line_number'] ?? ''}')),
     DataCell(textForDataRowInTable(
         text: controller.getdataName(
@@ -263,22 +217,12 @@ DataRow dataRowForTheTable(
     DataCell(Align(
         alignment: Alignment.centerRight,
         child: textForDataRowInTable(text: '${invoiceItemsData['net']}'))),
-    DataCell(Row(
-      spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        editSection(jobId, controller, invoiceItemsData, context, constraints,
-            invoiceItemsId),
-        deleteSection(jobId, context, controller, invoiceItemsId),
-      ],
-    )),
   ]);
 }
 
-ElevatedButton deleteSection(
+Widget deleteSection(
     String jobId, context, JobCardController controller, invoiceItemsId) {
-  return ElevatedButton(
-      style: deleteButtonStyle,
+  return IconButton(
       onPressed: () {
         alertDialog(
             context: context,
@@ -288,18 +232,20 @@ ElevatedButton deleteSection(
               controller.deleteInvoiceItem(jobId, invoiceItemsId);
             });
       },
-      child: const Text('Delete'));
+      icon: const Icon(
+        Icons.delete,
+        color: Colors.red,
+      ));
 }
 
-ElevatedButton editSection(
+Widget editSection(
     String jobId,
     JobCardController controller,
     Map<String, dynamic> invoiceItemsData,
     context,
     constraints,
     String invoiceItemsId) {
-  return ElevatedButton(
-      style: editButtonStyle,
+  return IconButton(
       onPressed: () {
         controller.invoiceItemNameId.value = invoiceItemsData['name'];
         controller.invoiceItemName.text = controller.getdataName(
@@ -324,7 +270,10 @@ ElevatedButton editSection(
                     controller.editInvoiceItem(jobId, invoiceItemsId);
                   });
       },
-      child: const Text('Edit'));
+      icon: const Icon(
+        Icons.edit_note_rounded,
+        color: Colors.blue,
+      ));
 }
 
 ElevatedButton newinvoiceItemsButton(BuildContext context,
@@ -347,7 +296,10 @@ ElevatedButton newinvoiceItemsButton(BuildContext context,
                   }
                 });
     },
-    style: newButtonStyle,
-    child: const Text('New item'),
+    style: new2ButtonStyle,
+    child: const Text(
+      'New item',
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ),
   );
 }

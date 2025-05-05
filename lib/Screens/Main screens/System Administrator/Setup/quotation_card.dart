@@ -485,7 +485,7 @@ Widget editSection(context, QuotationCardController controller,
                         controller.allCountries,
                         title: 'vat');
                     await controller.loadValues(cardData);
-                    editJobCardDialog(controller, cardData, cardId);
+                    editQuotationCardDialog(controller, cardData, cardId);
                     controller.setButtonLoading(cardId, false);
                   }
                 : null,
@@ -515,7 +515,7 @@ ElevatedButton historySection(
       child: const Text('History'));
 }
 
-Future<dynamic> editJobCardDialog(QuotationCardController controller,
+Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
     Map<String, dynamic> cardData, quotationId) {
   return Get.dialog(
       barrierDismissible: false,
@@ -601,7 +601,7 @@ Future<dynamic> editJobCardDialog(QuotationCardController controller,
                                   await controller.copyQuotation(quotationId);
                               Get.back();
                               controller.loadValues(newData['data']);
-                              editJobCardDialog(controller, newData['data'],
+                              editQuotationCardDialog(controller, newData['data'],
                                   newData['newId']);
                             },
                             child: controller.loadingCopyQuotation.isFalse

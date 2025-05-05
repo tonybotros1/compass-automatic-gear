@@ -29,15 +29,6 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> minTestKms = TextEditingController().obs;
   Rx<TextEditingController> invoiceCounter = TextEditingController().obs;
   Rx<TextEditingController> lpoCounter = TextEditingController().obs;
-  Rx<TextEditingController> quotationCounter = TextEditingController().obs;
-  Rx<TextEditingController> quotationDate = TextEditingController().obs;
-  Rx<TextEditingController> quotationDays = TextEditingController().obs;
-  Rx<TextEditingController> validityEndDate = TextEditingController().obs;
-  Rx<TextEditingController> referenceNumber = TextEditingController().obs;
-  Rx<TextEditingController> deliveryTime = TextEditingController().obs;
-  Rx<TextEditingController> quotationWarrentyDays = TextEditingController().obs;
-  Rx<TextEditingController> quotationWarrentyKM = TextEditingController().obs;
-  TextEditingController quotationNotes = TextEditingController();
   TextEditingController jobNotes = TextEditingController();
   TextEditingController deliveryNotes = TextEditingController();
   TextEditingController plateNumber = TextEditingController();
@@ -83,7 +74,6 @@ class JobCardController extends GetxController {
   RxString queryForInvoiceItems = RxString('');
   RxString label = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
-  Rx<TextEditingController> searchForInvoiceItems = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
   RxBool loadingInvoiceItems = RxBool(false);
   final RxList<DocumentSnapshot> allJobCards = RxList<DocumentSnapshot>([]);
@@ -91,8 +81,7 @@ class JobCardController extends GetxController {
   final RxList<DocumentSnapshot> allInvoiceItems = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredJobCards =
       RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredInvoiceItems =
-      RxList<DocumentSnapshot>([]);
+  
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
@@ -107,6 +96,7 @@ class JobCardController extends GetxController {
   RxMap allInvoiceItemsFromCollection = RxMap({});
   RxBool loadingCopyJob = RxBool(false);
   var selectedRowIndex = Rxn<int>();
+  var buttonLoadingStates = <String, bool>{}.obs;
 
   RxMap allBrands = RxMap({});
   RxMap allTechnicians = RxMap({});
@@ -117,13 +107,10 @@ class JobCardController extends GetxController {
   RxBool isCreditSelected = RxBool(false);
   RxString payType = RxString('Cash');
   DateFormat format = DateFormat("dd-MM-yyyy");
-  RxBool isQuotationExpanded = RxBool(false);
-  RxBool isJobCardExpanded = RxBool(true);
   RxMap allUsers = RxMap();
   RxString userId = RxString('');
   RxString jobStatus1 = RxString('');
   RxString jobStatus2 = RxString('');
-  RxString quotationStatus = RxString('');
   RxBool postingJob = RxBool(false);
   // internal notes section
   RxBool addingNewInternalNotProcess = RxBool(false);
@@ -183,9 +170,7 @@ class JobCardController extends GetxController {
     search.value.addListener(() {
       filterJobCards();
     });
-    searchForInvoiceItems.value.addListener(() {
-      filterInvoiceItems();
-    });
+   
   }
 
   @override
@@ -194,7 +179,12 @@ class JobCardController extends GetxController {
     super.onClose();
   }
 
- 
+  // function to manage loading button
+  void setButtonLoading(String menuId, bool isLoading) {
+    buttonLoadingStates[menuId] = isLoading;
+    buttonLoadingStates.refresh(); // Notify listeners
+  }
+
   getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
@@ -244,10 +234,7 @@ class JobCardController extends GetxController {
     double sumofVAT = 0.0;
     double sumofNET = 0.0;
 
-    for (var job in filteredInvoiceItems.isEmpty &&
-            searchForInvoiceItems.value.text.isEmpty
-        ? allInvoiceItems
-        : filteredInvoiceItems) {
+    for (var job in allInvoiceItems) {
       var data = job.data() as Map<String, dynamic>?;
       sumofTotal += double.parse(data?['total']);
       sumofNET += double.parse(data?['net']);
@@ -367,14 +354,11 @@ class JobCardController extends GetxController {
     jobCancelationDate.value.text = '';
     jobStatus1.value = '';
     jobStatus2.value = '';
-    quotationStatus.value = '';
     carBrandLogo.value = '';
     technician.clear();
     technicianId.value = '';
-    isQuotationExpanded.value = false;
     allModels.clear();
     jobCardCounter.value.clear();
-    quotationCounter.value.clear();
     invoiceCounter.value.clear();
     curreentJobCardId.value = '';
     jobCardAdded.value = false;
@@ -401,13 +385,6 @@ class JobCardController extends GetxController {
     customerSaleMan.value = '';
     customerBranchId.value = '';
     customerBranch.clear();
-    quotationDays.value.clear();
-    validityEndDate.value.clear();
-    referenceNumber.value.clear();
-    deliveryTime.value.clear();
-    quotationWarrentyDays.value.text = '0';
-    quotationWarrentyKM.value.text = '0';
-    quotationNotes.clear();
     lpoCounter.value.clear();
     approvalDate.value.clear();
     finishDate.value.clear();
@@ -615,7 +592,6 @@ class JobCardController extends GetxController {
     jobCancelationDate.value.text = textToDate(data['job_cancelation_date']);
     jobStatus1.value = data['job_status_1'];
     jobStatus2.value = data['job_status_2'];
-    quotationStatus.value = data['quotation_status'];
     carBrandLogo.value = data['car_brand_logo'];
     carBrandId.value = data['car_brand'];
     technician.text = getdataName(data['technician'], allTechnicians);
@@ -670,22 +646,8 @@ class JobCardController extends GetxController {
     data['payment_method'] == 'Cash'
         ? (isCashSelected.value = true) && (isCreditSelected.value = false)
         : (isCreditSelected.value = true) && (isCashSelected.value = false);
-    quotationCounter.value.text = data['quotation_number'];
-    quotationCounter.value.text.isNotEmpty
-        ? isQuotationExpanded.value = true
-        : isQuotationExpanded.value = false;
-    quotationDate.value.text = data['quotation_date'];
-    quotationDays.value.text = data['validity_days'];
-    validityEndDate.value.text = data['validity_end_date'];
-    referenceNumber.value.text = data['reference_number'];
-    deliveryTime.value.text = data['delivery_time'];
-    quotationWarrentyDays.value.text = data['quotation_warrenty_days'];
-    quotationWarrentyKM.value.text = data['quotation_warrenty_km'];
-    quotationNotes.text = data['quotation_notes'];
     jobCardCounter.value.text = data['job_number'];
-    jobCardCounter.value.text.isNotEmpty
-        ? isJobCardExpanded.value = true
-        : isJobCardExpanded.value = false;
+
     invoiceCounter.value.text = data['invoice_number'];
     lpoCounter.value.text = data['lpo_number'];
     jobCardDate.value.text = data['job_date'];
@@ -712,7 +674,6 @@ class JobCardController extends GetxController {
         'label': '',
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
-        'quotation_status': quotationStatus.value,
         'car_brand_logo': carBrandLogo.value,
         'technician': technicianId.value,
         'company_id': companyId.value,
@@ -742,15 +703,6 @@ class JobCardController extends GetxController {
         'currency': customerCurrencyId.value,
         'rate': customerCurrencyRate.text,
         'payment_method': payType.value,
-        'quotation_number': quotationCounter.value.text,
-        'quotation_date': quotationDate.value.text,
-        'validity_days': quotationDays.value.text,
-        'validity_end_date': validityEndDate.value.text,
-        'reference_number': referenceNumber.value.text,
-        'delivery_time': deliveryTime.value.text,
-        'quotation_warrenty_days': quotationWarrentyDays.value.text,
-        'quotation_warrenty_km': quotationWarrentyKM.value.text,
-        'quotation_notes': quotationNotes.text,
         'job_number': jobCardCounter.value.text,
         'invoice_number': invoiceCounter.value.text,
         'lpo_number': lpoCounter.value.text,
@@ -772,15 +724,7 @@ class JobCardController extends GetxController {
         'job_delivery_notes': deliveryNotes.text,
       };
 
-      if (isQuotationExpanded.isTrue && quotationCounter.value.text.isEmpty) {
-        quotationStatus.value = 'New';
-        newData['quotation_status'] = 'New';
-        newData['label'] = '';
-
-        await getCurrentQuotationCounterNumber();
-        newData['quotation_number'] = quotationCounter.value.text;
-      }
-      if (isJobCardExpanded.isTrue && jobCardCounter.value.text.isEmpty) {
+      if (jobCardCounter.value.text.isEmpty) {
         jobStatus1.value = 'New';
         jobStatus2.value = 'New';
         newData['label'] = '';
@@ -883,8 +827,6 @@ class JobCardController extends GetxController {
     }
   }
 
-
-
   addNewInvoiceItem(String jobId) async {
     try {
       addingNewinvoiceItemsValue.value = true;
@@ -944,7 +886,6 @@ class JobCardController extends GetxController {
         'label': label.value,
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
-        'quotation_status': quotationStatus.value,
         'car_brand_logo': carBrandLogo.value,
         'technician': technicianId.value,
         'car_brand': carBrandId.value,
@@ -973,15 +914,6 @@ class JobCardController extends GetxController {
         'currency': customerCurrencyId.value,
         'rate': customerCurrencyRate.text,
         'payment_method': payType.value,
-        'quotation_number': quotationCounter.value.text,
-        'quotation_date': quotationDate.value.text,
-        'validity_days': quotationDays.value.text,
-        'validity_end_date': validityEndDate.value.text,
-        'reference_number': referenceNumber.value.text,
-        'delivery_time': deliveryTime.value.text,
-        'quotation_warrenty_days': quotationWarrentyDays.value.text,
-        'quotation_warrenty_km': quotationWarrentyKM.value.text,
-        'quotation_notes': quotationNotes.text,
         'job_number': jobCardCounter.value.text,
         'invoice_number': invoiceCounter.value.text,
         'lpo_number': lpoCounter.value.text,
@@ -1045,30 +977,16 @@ class JobCardController extends GetxController {
         data['job_cancelation_date'] = '';
         data['job_notes'] = '';
         data['job_delivery_notes'] = '';
+        data['job_status_1'] = 'New';
+        data['job_status_2'] = 'New';
+        await getCurrentJobCardCounterNumber();
+        data['job_number'] = jobCardCounter.value.text;
         if (isBeforeToday(data['job_warrenty_end_date'])) {
           data['label'] = '';
         } else {
           data['label'] = 'Returned';
         }
-        if (isQuotationExpanded.isTrue) {
-          data['quotation_status'] = 'New';
 
-          await getCurrentQuotationCounterNumber();
-          data['quotation_number'] = quotationCounter.value.text;
-        } else {
-          data['quotation_status'] = 'New';
-          data['quotation_number'] = '';
-        }
-        if (isJobCardExpanded.isTrue) {
-          data['job_status_1'] = 'New';
-          data['job_status_2'] = 'New';
-          await getCurrentJobCardCounterNumber();
-          data['job_number'] = jobCardCounter.value.text;
-        } else {
-          data['job_status_1'] = 'New';
-          data['job_status_2'] = 'New';
-          data['job_number'] = '';
-        }
         data['job_warrenty_end_date'] = '';
 
         var newCopiedJob =
@@ -1190,32 +1108,6 @@ class JobCardController extends GetxController {
     }
   }
 
-  editPostForQuotation(jobId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({'quotation_status': 'Posted'});
-      quotationStatus.value = 'Posted';
-    } catch (e) {
-      //
-    }
-  }
-
-  editCancelForQuotation(jobId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({'quotation_status': 'Cancelled'});
-      quotationStatus.value = 'Cancelled';
-    } catch (e) {
-      //
-    }
-  }
-
-
-
   deleteInvoiceItem(String jobId, String itemId) {
     try {
       Get.back();
@@ -1292,20 +1184,7 @@ class JobCardController extends GetxController {
     });
   }
 
-  changingDaysDependingOnQuotationEndDate() {
-    DateTime specificDate = format.parse(validityEndDate.value.text);
-
-    quotationDays.value.text =
-        (specificDate.difference(format.parse(quotationDate.value.text)).inDays)
-            .toString();
-  }
-
-  changeQuotationEndDateDependingOnDays() {
-    DateTime date = format.parse(quotationDate.value.text);
-    DateTime newDate =
-        date.add(Duration(days: int.parse(quotationDays.value.text)));
-    validityEndDate.value.text = format.format(newDate);
-  }
+  
 
   Future<void> selectDateContext(
       BuildContext context, TextEditingController date) async {
@@ -1610,54 +1489,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  Future<void> getCurrentQuotationCounterNumber() async {
-    try {
-      var qnId = '';
-      var updateqn = '';
-      var qnDoc = await FirebaseFirestore.instance
-          .collection('counters')
-          .where('code', isEqualTo: 'QN')
-          .where('company_id', isEqualTo: companyId.value)
-          .get();
-
-      if (qnDoc.docs.isEmpty) {
-        // Define constants for new counter values
-        const prefix = 'QN';
-        const separator = '-';
-        const initialValue = 1;
-
-        var newCounter =
-            await FirebaseFirestore.instance.collection('counters').add({
-          'code': 'QN',
-          'description': 'Quotation Number',
-          'prefix': prefix,
-          'value': initialValue,
-          'length': 0,
-          'separator': separator,
-          'added_date': DateTime.now().toString(),
-          'company_id': companyId.value,
-          'status': true,
-        });
-        qnId = newCounter.id;
-        // Set the counter text with prefix and separator
-        quotationCounter.value.text = '$prefix$separator$initialValue';
-        updateqn = initialValue.toString();
-      } else {
-        var firstDoc = qnDoc.docs.first;
-        qnId = firstDoc.id;
-        var currentValue = firstDoc.data()['value'] ?? 0;
-        quotationCounter.value.text =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
-        updateqn = (currentValue + 1).toString();
-      }
-
-      await FirebaseFirestore.instance.collection('counters').doc(qnId).update({
-        'value': int.parse(updateqn),
-      });
-    } catch (e) {
-      //
-    }
-  }
+  
 
   getCountries() {
     try {
@@ -1854,53 +1686,7 @@ class JobCardController extends GetxController {
         getdataName(currentUserDetails.value['sales_man'], salesManMap);
   }
 
-  void filterInvoiceItems() async {
-    final searchQuery = searchForInvoiceItems.value.text.toLowerCase();
-    queryForInvoiceItems.value = searchQuery;
-    if (searchQuery.isEmpty) {
-      filteredInvoiceItems.clear();
-    } else {
-      filteredInvoiceItems.assignAll(
-        allInvoiceItems.where((item) {
-          return item['line_number']
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForInvoiceItems) ||
-              item['description']
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForInvoiceItems) ||
-              item['discount']
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForInvoiceItems) ||
-              item['net']
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForInvoiceItems) ||
-              item['price']
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForInvoiceItems) ||
-              item['quantity']
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForInvoiceItems) ||
-              item['total']
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForInvoiceItems) ||
-              item['vat']
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForInvoiceItems) ||
-              getdataName(item['name'], allCustomers, title: 'entity_name')
-                  .toLowerCase()
-                  .contains(queryForInvoiceItems);
-        }).toList(),
-      );
-    }
-  }
+  
 
   void filterJobCards() async {
     final searchQuery = search.value.text.toLowerCase();
