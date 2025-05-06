@@ -5,7 +5,7 @@ import '../../../../Controllers/Main screen controllers/quotation_card_controlle
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/add_new_quotation_card_or_edit.dart';
-import '../../../../Widgets/main screen widgets/quotation_card_widgets/internal_notes_widget.dart';
+import '../../../../Widgets/main screen widgets/quotation_card_widgets/quotation_card_buttons.dart';
 import '../../../../consts.dart';
 
 class QuotationCard extends StatelessWidget {
@@ -535,14 +535,11 @@ Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
                   padding: const EdgeInsets.all(16),
                   width: constraints.maxWidth,
                   child: Row(
-                    spacing: 10,
+                    spacing: 3,
                     children: [
                       Text(
                         '${controller.getScreenName()}',
                         style: fontStyleForScreenNameUsedInButtons,
-                      ),
-                      SizedBox(
-                        width: 10,
                       ),
                       GetX<QuotationCardController>(builder: (controller) {
                         if (controller.quotationStatus.value.isNotEmpty) {
@@ -554,167 +551,16 @@ Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
                         }
                       }),
                       const Spacer(),
-                      GetX<QuotationCardController>(builder: (controller) {
-                        return ElevatedButton(
-                            style: makeJobButtonStyle,
-                            onPressed: () async {
-                              // var newData =
-                              //     await controller.copyQuotation(quotationId);
-                              // Get.back();
-                              // controller.loadValues(newData['data']);
-                              // editJobCardDialog(controller, newData['data'],
-                              //     newData['newId']);
-                            },
-                            child: controller.loadingMakeJob.isFalse
-                                ? const Text(
-                                    'Create Job',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ));
-                      }),
-                      ElevatedButton(
-                        style: internalNotesButtonStyle,
-                        onPressed: () async {
-                          controller.noteMessage.value = '';
-                          controller.internalNote.value.clear();
-                          internalNotesDialog(
-                              controller, constraints, quotationId);
-                        },
-                        child: const Text(
-                          'Internal Notes',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      GetX<QuotationCardController>(builder: (controller) {
-                        return ElevatedButton(
-                            style: copyJobButtonStyle,
-                            onPressed: () async {
-                              var newData =
-                                  await controller.copyQuotation(quotationId);
-                              Get.back();
-                              controller.loadValues(newData['data']);
-                              editQuotationCardDialog(controller, newData['data'],
-                                  newData['newId']);
-                            },
-                            child: controller.loadingCopyQuotation.isFalse
-                                ? const Text(
-                                    'Copy',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ));
-                      }),
+                      creatJobButton(),
+                      internalNotesButton(controller, constraints, quotationId),
+                      copyQuotationButton(quotationId),
                       const Spacer(),
-                      GetX<QuotationCardController>(builder: (controller) {
-                        return ElevatedButton(
-                          onPressed: controller.addingNewValue.value
-                              ? null
-                              : () async {
-                                  controller.addingNewValue.value = true;
-
-                                  controller.editQuotationCard(quotationId);
-                                },
-                          style: new2ButtonStyle,
-                          child: controller.addingNewValue.value == false
-                              ? const Text(
-                                  'Save',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                )
-                              : const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                        );
-                      }),
+                      saveQuotationButton(
+                          () => controller.editQuotationCard(quotationId)),
                       const Spacer(),
-                      GetBuilder<QuotationCardController>(
-                          builder: (controller) {
-                        return ElevatedButton(
-                            style: postButtonStyle,
-                            onPressed: () {
-                              if (controller.quotationStatus.value !=
-                                      'Posted' &&
-                                  controller.quotationStatus.value !=
-                                      'Cancelled' &&
-                                  controller.quotationStatus.value.isNotEmpty) {
-                                controller.editPostForQuotation(quotationId);
-                              } else if (controller.quotationStatus.value ==
-                                  'Posted') {
-                                showSnackBar(
-                                    'Alert', 'Quotation is Already Posted');
-                              } else if (controller.quotationStatus.value ==
-                                  'Cancelled') {
-                                showSnackBar('Alert', 'Quotation is Cancelled');
-                              } else if (controller
-                                  .quotationStatus.value.isEmpty) {
-                                showSnackBar(
-                                    'Alert', 'Please Save The Quotation First');
-                              }
-                            },
-                            child: const Text('Post',
-                                style: TextStyle(fontWeight: FontWeight.bold)));
-                      }),
-                      GetBuilder<QuotationCardController>(
-                          builder: (controller) {
-                        return ElevatedButton(
-                            style: cancelJobButtonStyle,
-                            onPressed: () {
-                              if (controller.quotationStatus.value !=
-                                      'Cancelled' &&
-                                  controller.quotationStatus.value.isNotEmpty) {
-                                controller.editCancelForQuotation(quotationId);
-                              } else if (controller.quotationStatus.value ==
-                                  'Cancelled') {
-                                showSnackBar(
-                                    'Alert', 'Quotation Already Cancelled');
-                              } else if (controller
-                                  .quotationStatus.value.isEmpty) {
-                                showSnackBar(
-                                    'Alert', 'Please Save The Quotation First');
-                              }
-                            },
-                            child: const Text('Cancel',
-                                style: TextStyle(fontWeight: FontWeight.bold)));
-                      }),
-                      ElevatedButton(
-                          style: cancelJobButtonStyle,
-                          onPressed: () {
-                            if (controller.quotationStatus.value == 'New' ||
-                                controller.quotationStatus.value == '') {
-                              alertDialog(
-                                  context: context,
-                                  controller: controller,
-                                  content: "Theis will be deleted permanently",
-                                  onPressed: () {
-                                    controller.deleteQuotationCard(quotationId);
-                                  });
-                            } else {
-                              showSnackBar('Can Not Delete',
-                                  'Only New Cards Can be Deleted');
-                            }
-                          },
-                          child: const Text('Delete',
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      const Spacer(),
+                      changeStatusToPostedButton(quotationId),
+                      changeStatusToCanceledButton(quotationId),
+                      deleteButton(controller, context, quotationId),
                       closeIcon()
                     ],
                   ),
@@ -779,76 +625,41 @@ ElevatedButton newQuotationCardButton(BuildContext context,
               insetPadding: const EdgeInsets.all(8),
               child: LayoutBuilder(builder: (context, constraints) {
                 return Column(children: [
-                  Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(5),
-                            topRight: Radius.circular(5)),
-                        color: mainColor,
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      width: constraints.maxWidth,
-                      child: Row(spacing: 10, children: [
-                        Text(
-                          '${controller.getScreenName()}',
-                          style: fontStyleForScreenNameUsedInButtons,
+                  GetX<QuotationCardController>(builder: (controller) {
+                    return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(5),
+                              topRight: Radius.circular(5)),
+                          color: mainColor,
                         ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        GetX<QuotationCardController>(builder: (controller) {
-                          if (controller.quotationStatus.value.isNotEmpty) {
-                            return statusBox(
-                              controller.quotationStatus.value,
-                            );
-                          } else {
-                            return const SizedBox();
-                          }
-                        }),
-                        const Spacer(),
-                        ElevatedButton(
-                          style: internalNotesButtonStyle,
-                          onPressed: () {
-                            if (controller
-                                .canAddInternalNotesAndInvoiceItems.isTrue) {
-                              controller.noteMessage.value = '';
-                              controller.internalNote.value.clear();
-                              internalNotesDialog(controller, constraints,
-                                  controller.curreentQuotationCardId.value);
-                            } else {
-                              showSnackBar(
-                                  'Alert', 'Please Save Quotation First');
-                            }
-                          },
-                          child: const Text(
-                            'Internal Notes',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        padding: const EdgeInsets.all(16),
+                        width: constraints.maxWidth,
+                        child: Row(spacing: 3, children: [
+                          Text(
+                            '${controller.getScreenName()}',
+                            style: fontStyleForScreenNameUsedInButtons,
                           ),
-                        ),
-                        GetX<QuotationCardController>(
-                          builder: (controller) => ElevatedButton(
-                            onPressed: () async {
-                              await controller.addNewQuotationCard();
-                            },
-                            style: new2ButtonStyle,
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        closeButton
-                      ])),
+                          controller.quotationStatus.value.isNotEmpty
+                              ? statusBox(
+                                  controller.quotationStatus.value,
+                                )
+                              : SizedBox(),
+                          const Spacer(),
+                          creatJobButton(),
+                          internalNotesButton(controller, constraints,
+                              controller.curreentQuotationCardId.value),
+                          const Spacer(),
+                          saveQuotationButton(
+                              () => controller.addNewQuotationCard()),
+                          const Spacer(),
+                          changeStatusToPostedButton(
+                              controller.curreentQuotationCardId.value),
+                          changeStatusToCanceledButton(
+                              controller.curreentQuotationCardId.value),
+                          closeIcon()
+                        ]));
+                  }),
                   Expanded(
                       child: Padding(
                     padding: const EdgeInsets.all(8),

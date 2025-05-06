@@ -9,43 +9,39 @@ Widget invoiceItemsSection(
     {required BuildContext context,
     required BoxConstraints constraints,
     required jobId}) {
-  return SizedBox(
-    child: Column(
-      spacing: 2,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Container(
-            decoration: containerDecor,
-            child: Expanded(
-              child: GetX<JobCardController>(
-                builder: (controller) {
-                  if (controller.loadingInvoiceItems.value) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (controller.allInvoiceItems.isEmpty) {
-                    return const Center(
-                      child: Text('No Element'),
-                    );
-                  }
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: tableOfScreens(
-                      constraints: constraints,
-                      context: context,
-                      controller: controller,
-                      jobId: jobId,
-                    ),
-                  );
-                },
-              ),
-            ),
+  return Column(
+    spacing: 2,
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      Expanded(
+        child: Container(
+          decoration: containerDecor,
+          child: GetX<JobCardController>(
+            builder: (controller) {
+              if (controller.loadingInvoiceItems.value) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (controller.allInvoiceItems.isEmpty) {
+                return const Center(
+                  child: Text('No Element'),
+                );
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: tableOfScreens(
+                  constraints: constraints,
+                  context: context,
+                  controller: controller,
+                  jobId: jobId,
+                ),
+              );
+            },
           ),
         ),
-      ],
-    ),
+      ),
+    ],
   );
 }
 
@@ -280,21 +276,27 @@ ElevatedButton newinvoiceItemsButton(BuildContext context,
     BoxConstraints constraints, JobCardController controller, String jobId) {
   return ElevatedButton(
     onPressed: () {
-      controller.clearInvoiceItemsVariables();
+      if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
+        if (controller.jobStatus1.value == 'New') {
+          controller.clearInvoiceItemsVariables();
 
-      invoiceItemsForJobDialog(
-          jobId: jobId,
-          controller: controller,
-          constraints: constraints,
-          onPressed: controller.addingNewinvoiceItemsValue.value
-              ? null
-              : () async {
-                  if (!controller.formKeyForInvoiceItems.currentState!
-                      .validate()) {
-                  } else {
-                    controller.addNewInvoiceItem(jobId);
-                  }
-                });
+          invoiceItemsForJobDialog(
+              jobId: jobId,
+              controller: controller,
+              constraints: constraints,
+              onPressed: controller.addingNewinvoiceItemsValue.value
+                  ? null
+                  : () async {
+                      controller.addNewInvoiceItem(jobId != ''
+                          ? jobId
+                          : controller.curreentJobCardId.value);
+                    });
+        } else {
+          showSnackBar('Alert', 'Only New Jobs Allowed');
+        }
+      } else {
+        showSnackBar('Alert', 'Please Save Job First');
+      }
     },
     style: new2ButtonStyle,
     child: const Text(

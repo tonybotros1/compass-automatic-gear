@@ -12,6 +12,7 @@ import '../Mobile section controllers/cards_screen_controller.dart';
 import 'main_screen_contro.dart';
 
 class JobCardController extends GetxController {
+  Rx<TextEditingController> quotationCounter = TextEditingController().obs;
   Rx<TextEditingController> jobCardCounter = TextEditingController().obs;
   Rx<TextEditingController> jobCardDate = TextEditingController().obs;
   Rx<TextEditingController> invoiceDate = TextEditingController().obs;
@@ -34,7 +35,6 @@ class JobCardController extends GetxController {
   TextEditingController plateNumber = TextEditingController();
   TextEditingController plateCode = TextEditingController();
   TextEditingController carBrand = TextEditingController();
-  TextEditingController technician = TextEditingController();
   TextEditingController carModel = TextEditingController();
   TextEditingController country = TextEditingController();
   TextEditingController city = TextEditingController();
@@ -59,7 +59,6 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> mileageOut = TextEditingController().obs;
   Rx<TextEditingController> inOutDiff = TextEditingController().obs;
   RxString carBrandId = RxString('');
-  RxString technicianId = RxString('');
   RxString carBrandLogo = RxString('');
   RxString carModelId = RxString('');
   RxString countryId = RxString('');
@@ -81,10 +80,11 @@ class JobCardController extends GetxController {
   final RxList<DocumentSnapshot> allInvoiceItems = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredJobCards =
       RxList<DocumentSnapshot>([]);
-  
+
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
+  RxBool creatingNewQuotation = RxBool(false);
   RxString companyId = RxString('');
   RxMap companyDetails = RxMap({});
   RxMap allCountries = RxMap({});
@@ -99,7 +99,6 @@ class JobCardController extends GetxController {
   var buttonLoadingStates = <String, bool>{}.obs;
 
   RxMap allBrands = RxMap({});
-  RxMap allTechnicians = RxMap({});
   RxMap allModels = RxMap({});
   RxMap allCustomers = RxMap({});
   RxMap salesManMap = RxMap({});
@@ -112,6 +111,10 @@ class JobCardController extends GetxController {
   RxString jobStatus1 = RxString('');
   RxString jobStatus2 = RxString('');
   RxBool postingJob = RxBool(false);
+  RxBool cancellingJob = RxBool(false);
+  RxBool newingJob = RxBool(false);
+  RxBool approvingJob = RxBool(false);
+  RxBool readingJob = RxBool(false);
   // internal notes section
   RxBool addingNewInternalNotProcess = RxBool(false);
   RxBool jobCardAdded = RxBool(false);
@@ -165,12 +168,10 @@ class JobCardController extends GetxController {
     getColors();
     getEngineTypes();
     getAllJobCards();
-    getTechnicians();
     getInvoiceItemsFromCollection();
     search.value.addListener(() {
       filterJobCards();
     });
-   
   }
 
   @override
@@ -351,12 +352,12 @@ class JobCardController extends GetxController {
   }
 
   clearValues() {
+    canAddInternalNotesAndInvoiceItems.value = false;
+    allInvoiceItems.clear();
     jobCancelationDate.value.text = '';
     jobStatus1.value = '';
     jobStatus2.value = '';
     carBrandLogo.value = '';
-    technician.clear();
-    technicianId.value = '';
     allModels.clear();
     jobCardCounter.value.clear();
     invoiceCounter.value.clear();
@@ -404,9 +405,8 @@ class JobCardController extends GetxController {
     controller.imagesList.clear();
     controller.currenyJobId.value = id;
     controller.inEditMode.value = true;
-    controller.technicianName.value.text = technician.text;
     controller.inEditMode.value = true;
-    controller.technicianId.value = data?['technician'];
+    controller.technicianId.value = data?['technician'] ?? '';
     controller.date.text = textToDate(data?['added_date']);
     controller.customer.text = customerName.text;
     controller.customerId.value = data?['customer'];
@@ -581,7 +581,7 @@ class JobCardController extends GetxController {
             ) ??
             {};
 
-    controller.carImagesURLs.assignAll(List<String>.from(data?['car_images']));
+    controller.carImagesURLs.assignAll(List<String>.from(data?['car_images'] ?? []));
     controller.customerSignatureURL.value = data?['customer_signature'] ?? '';
     controller.advisorSignatureURL.value = data?['advisor_signature'] ?? '';
     controller.carDialogImageURL.value = data?['car_dialog'] ?? '';
@@ -589,13 +589,12 @@ class JobCardController extends GetxController {
   }
 
   loadValues(Map<String, dynamic> data) {
+    canAddInternalNotesAndInvoiceItems.value = true;
     jobCancelationDate.value.text = textToDate(data['job_cancelation_date']);
     jobStatus1.value = data['job_status_1'];
     jobStatus2.value = data['job_status_2'];
     carBrandLogo.value = data['car_brand_logo'];
     carBrandId.value = data['car_brand'];
-    technician.text = getdataName(data['technician'], allTechnicians);
-    technicianId.value = '${data['technician']}';
     carBrand.text = getdataName(data['car_brand'], allBrands);
     carModelId.value = data['car_model'];
     getCitiesByCountryID(data['country']);
@@ -667,7 +666,7 @@ class JobCardController extends GetxController {
     deliveryNotes.text = data['job_delivery_notes'];
   }
 
-  Future<void> addNewJobCardAndQuotation() async {
+  Future<void> addNewJobCard() async {
     try {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
@@ -675,7 +674,6 @@ class JobCardController extends GetxController {
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'car_brand_logo': carBrandLogo.value,
-        'technician': technicianId.value,
         'company_id': companyId.value,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
@@ -742,18 +740,22 @@ class JobCardController extends GetxController {
             .add(newData);
         jobCardAdded.value = true;
         curreentJobCardId.value = newJob.id;
+        getAllInvoiceItems(newJob.id);
+        showSnackBar('Done', 'Job Added Successfully');
       } else {
         newData.remove('added_date');
         await FirebaseFirestore.instance
             .collection('job_cards')
             .doc(curreentJobCardId.value)
             .update(newData);
+        showSnackBar('Done', 'Updated Successfully');
       }
       canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
     } catch (e) {
       canAddInternalNotesAndInvoiceItems.value = false;
       addingNewValue.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
     }
   }
 
@@ -880,14 +882,15 @@ class JobCardController extends GetxController {
     }
   }
 
-  void editJobCardAndQuotation(jobId) {
+  void editJobCard(jobId) {
     try {
+      addingNewValue.value = true;
+
       FirebaseFirestore.instance.collection('job_cards').doc(jobId).update({
         'label': label.value,
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'car_brand_logo': carBrandLogo.value,
-        'technician': technicianId.value,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
         'plate_number': plateNumber.text,
@@ -934,8 +937,117 @@ class JobCardController extends GetxController {
         'job_delivery_notes': deliveryNotes.text,
       });
       addingNewValue.value = false;
+      showSnackBar('Done', 'Job Updated Successfully');
     } catch (e) {
       addingNewValue.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
+  }
+
+  Future<void> getCurrentQuotationCounterNumber() async {
+    try {
+      var qnId = '';
+      var updateqn = '';
+      var qnDoc = await FirebaseFirestore.instance
+          .collection('counters')
+          .where('code', isEqualTo: 'QN')
+          .where('company_id', isEqualTo: companyId.value)
+          .get();
+
+      if (qnDoc.docs.isEmpty) {
+        // Define constants for new counter values
+        const prefix = 'QN';
+        const separator = '-';
+        const initialValue = 1;
+
+        var newCounter =
+            await FirebaseFirestore.instance.collection('counters').add({
+          'code': 'QN',
+          'description': 'Quotation Number',
+          'prefix': prefix,
+          'value': initialValue,
+          'length': 0,
+          'separator': separator,
+          'added_date': DateTime.now().toString(),
+          'company_id': companyId.value,
+          'status': true,
+        });
+        qnId = newCounter.id;
+        // Set the counter text with prefix and separator
+        quotationCounter.value.text = '$prefix$separator$initialValue';
+        updateqn = initialValue.toString();
+      } else {
+        var firstDoc = qnDoc.docs.first;
+        qnId = firstDoc.id;
+        var currentValue = firstDoc.data()['value'] ?? 0;
+        quotationCounter.value.text =
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
+        updateqn = (currentValue + 1).toString();
+      }
+
+      await FirebaseFirestore.instance.collection('counters').doc(qnId).update({
+        'value': int.parse(updateqn),
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> createQuotationCard() async {
+    try {
+      creatingNewQuotation.value = true;
+      Map<String, dynamic> newData = {
+        'quotation_status': 'New',
+        'car_brand_logo': carBrandLogo.value,
+        'company_id': companyId.value,
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'plate_number': plateNumber.text,
+        'plate_code': plateCode.text,
+        'country': countryId.value,
+        'city': cityId.value,
+        'year': year.text,
+        'color': colorId.value,
+        'engine_type': engineTypeId.value,
+        'vehicle_identification_number': vin.text,
+        'transmission_type': transmissionType.text,
+        'mileage_in': mileageIn.value.text,
+        'mileage_out': mileageOut.value.text,
+        'mileage_in_out_diff': inOutDiff.value.text,
+        'customer': customerId.value,
+        'contact_name': customerEntityName.text,
+        'contact_number': customerEntityPhoneNumber.text,
+        'contact_email': customerEntityEmail.text,
+        'credit_limit': customerCreditNumber.text,
+        'outstanding': customerOutstanding.text,
+        'saleMan': customerSaleManId.value,
+        'branch': customerBranchId.value,
+        'currency': customerCurrencyId.value,
+        'rate': customerCurrencyRate.text,
+        'payment_method': payType.value,
+        'quotation_number': quotationCounter.value.text,
+        'quotation_date': '',
+        'validity_days': '',
+        'validity_end_date': '',
+        'reference_number': '',
+        'delivery_time': '',
+        'quotation_warrenty_days': '',
+        'quotation_warrenty_km': '',
+        'quotation_notes': '',
+      };
+
+      await getCurrentQuotationCounterNumber();
+      newData['quotation_number'] = quotationCounter.value.text;
+      newData['added_date'] = DateTime.now().toString();
+      await FirebaseFirestore.instance
+          .collection('quotation_cards')
+          .add(newData);
+      showSnackBar('Done', 'Quotation Created Successfully');
+
+      creatingNewQuotation.value = false;
+    } catch (e) {
+      creatingNewQuotation.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
     }
   }
 
@@ -963,7 +1075,6 @@ class JobCardController extends GetxController {
         data['lpo_number'] = '';
         data['job_date'] = textToDate(DateTime.now());
         data['invoice_date'] = textToDate(DateTime.now());
-        data['job_approval_date'] = '';
         data['job_start_date'] = '';
         data['job_approval_date'] = textToDate(DateTime.now());
         data['job_finish_date'] = '';
@@ -981,24 +1092,39 @@ class JobCardController extends GetxController {
         data['job_status_2'] = 'New';
         await getCurrentJobCardCounterNumber();
         data['job_number'] = jobCardCounter.value.text;
-        if (isBeforeToday(data['job_warrenty_end_date'])) {
+        final warrentyEndDate = data['job_warrenty_end_date'];
+        if (warrentyEndDate != null && isBeforeToday(warrentyEndDate)) {
           data['label'] = '';
         } else {
           data['label'] = 'Returned';
         }
-
         data['job_warrenty_end_date'] = '';
 
         var newCopiedJob =
             await FirebaseFirestore.instance.collection('job_cards').add(data);
 
-        loadingCopyJob.value = false;
+        var jobInvoices = await FirebaseFirestore.instance
+            .collection('job_cards')
+            .doc(jobId)
+            .collection('invoice_items')
+            .get();
+        if (jobInvoices.docs.isNotEmpty) {
+          for (var element in jobInvoices.docs) {
+            await FirebaseFirestore.instance
+                .collection('job_cards')
+                .doc(newCopiedJob.id)
+                .collection('invoice_items')
+                .add(element.data());
+          }
+        }
+
         return {
           'newId': newCopiedJob.id,
           'data': data,
         };
       } else {
         loadingCopyJob.value = false;
+        showSnackBar('Alert', 'Job has no data');
         throw Exception('Job data is empty');
       }
     } catch (e) {
@@ -1011,6 +1137,7 @@ class JobCardController extends GetxController {
 
   editApproveForJobCard(jobId, status) async {
     try {
+      approvingJob.value = true;
       await FirebaseFirestore.instance
           .collection('job_cards')
           .doc(jobId)
@@ -1020,13 +1147,15 @@ class JobCardController extends GetxController {
       });
       approvalDate.value.text = textToDate(DateTime.now());
       jobStatus2.value = 'Approved';
+      approvingJob.value = false;
     } catch (e) {
-      //
+      approvingJob.value = false;
     }
   }
 
   editReadyForJobCard(jobId, status) async {
     try {
+      readingJob.value = true;
       await FirebaseFirestore.instance
           .collection('job_cards')
           .doc(jobId)
@@ -1036,13 +1165,15 @@ class JobCardController extends GetxController {
       });
       finishDate.value.text = textToDate(DateTime.now());
       jobStatus2.value = 'Ready';
+      readingJob.value = false;
     } catch (e) {
-      //
+      readingJob.value = false;
     }
   }
 
   editNewForJobCard(jobId, status) async {
     try {
+      newingJob.value = true;
       await FirebaseFirestore.instance
           .collection('job_cards')
           .doc(jobId)
@@ -1056,13 +1187,15 @@ class JobCardController extends GetxController {
       approvalDate.value.text = '';
       jobStatus2.value = 'New';
       jobStatus1.value = 'New';
+      newingJob.value = false;
     } catch (e) {
-      //
+      newingJob.value = false;
     }
   }
 
   editCancelForJobCard(jobId, status) async {
     try {
+      cancellingJob.value = true;
       await FirebaseFirestore.instance
           .collection('job_cards')
           .doc(jobId)
@@ -1074,8 +1207,9 @@ class JobCardController extends GetxController {
       jobCancelationDate.value.text = textToDate(DateTime.now());
       jobStatus1.value = status;
       jobStatus2.value = status;
+      cancellingJob.value = false;
     } catch (e) {
-      //
+      cancellingJob.value = false;
     }
   }
 
@@ -1083,27 +1217,38 @@ class JobCardController extends GetxController {
     try {
       var status2 = '';
       postingJob.value = true;
-      if (isBeforeToday(jobWarrentyEndDate.value.text)) {
-        status2 = 'Closed';
-      } else {
-        status2 = 'Warranty';
-      }
-      await getCurrentInvoiceCounterNumber();
-      await FirebaseFirestore.instance
+      var doc = await FirebaseFirestore.instance
           .collection('job_cards')
           .doc(jobId)
-          .update({
-        'invoice_number': invoiceCounter.value.text,
-        'invoice_date': DateTime.now().toString(),
-        'job_status_1': 'Posted',
-        'job_status_2': status2,
-      });
+          .get();
+      var warrEndDate = doc.data()?['job_warrenty_end_date'];
 
-      jobStatus1.value = 'Posted';
-      jobStatus2.value = status2;
+      if (warrEndDate != '') {
+        if (isBeforeToday(jobWarrentyEndDate.value.text)) {
+          status2 = 'Closed';
+        } else {
+          status2 = 'Warranty';
+        }
+        await getCurrentInvoiceCounterNumber();
+        await FirebaseFirestore.instance
+            .collection('job_cards')
+            .doc(jobId)
+            .update({
+          'invoice_number': invoiceCounter.value.text,
+          'invoice_date': DateTime.now().toString(),
+          'job_status_1': 'Posted',
+          'job_status_2': status2,
+        });
 
-      postingJob.value = false;
+        jobStatus1.value = 'Posted';
+        jobStatus2.value = status2;
+        postingJob.value = false;
+      } else {
+        showSnackBar('Alert', 'Save Job To get the Warrenty End Date');
+        postingJob.value = false;
+      }
     } catch (e) {
+      print(e);
       postingJob.value = false;
     }
   }
@@ -1184,8 +1329,6 @@ class JobCardController extends GetxController {
     });
   }
 
-  
-
   Future<void> selectDateContext(
       BuildContext context, TextEditingController date) async {
     final DateTime? picked = await showDatePicker(
@@ -1247,16 +1390,6 @@ class JobCardController extends GetxController {
         .snapshots()
         .listen((branches) {
       salesManMap.value = {for (var doc in branches.docs) doc.id: doc.data()};
-    });
-  }
-
-  getTechnicians() {
-    FirebaseFirestore.instance
-        .collection('all_technicians')
-        .where('company_id', isEqualTo: companyId.value)
-        .snapshots()
-        .listen((tech) {
-      allTechnicians.value = {for (var doc in tech.docs) doc.id: doc.data()};
     });
   }
 
@@ -1489,8 +1622,6 @@ class JobCardController extends GetxController {
     }
   }
 
-  
-
   getCountries() {
     try {
       FirebaseFirestore.instance
@@ -1602,6 +1733,7 @@ class JobCardController extends GetxController {
       FirebaseFirestore.instance
           .collection('job_cards')
           .where('company_id', isEqualTo: companyId.value)
+          .orderBy('job_number', descending: true)
           .snapshots()
           .listen((jobCards) {
         allJobCards.assignAll(List<DocumentSnapshot>.from(jobCards.docs));
@@ -1685,8 +1817,6 @@ class JobCardController extends GetxController {
     customerSaleMan.value =
         getdataName(currentUserDetails.value['sales_man'], salesManMap);
   }
-
-  
 
   void filterJobCards() async {
     final searchQuery = search.value.text.toLowerCase();

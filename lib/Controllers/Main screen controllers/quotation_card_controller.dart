@@ -12,6 +12,7 @@ import 'main_screen_contro.dart';
 
 class QuotationCardController extends GetxController {
   Rx<TextEditingController> quotationCounter = TextEditingController().obs;
+  Rx<TextEditingController> jobCardCounter = TextEditingController().obs;
   Rx<TextEditingController> quotationDate = TextEditingController().obs;
   Rx<TextEditingController> quotationDays = TextEditingController().obs;
   Rx<TextEditingController> validityEndDate = TextEditingController().obs;
@@ -75,10 +76,12 @@ class QuotationCardController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxMap allBrands = RxMap({});
   RxMap allTechnicians = RxMap({});
-  RxMap allModels = RxMap({});
+  final RxMap<String, Map<String, dynamic>> allModels =
+      <String, Map<String, dynamic>>{}.obs;
   RxMap allCustomers = RxMap({});
   RxMap salesManMap = RxMap({});
   RxBool addingNewValue = RxBool(false);
+  RxBool creatingNewJob = RxBool(false);
   RxString companyId = RxString('');
   RxMap companyDetails = RxMap({});
   RxMap allCountries = RxMap({});
@@ -124,7 +127,8 @@ class QuotationCardController extends GetxController {
   Rx<TextEditingController> internalNote = TextEditingController().obs;
   RxString noteMessage = RxString('');
   RxBool addingNewInternalNotProcess = RxBool(false);
-
+  RxBool postingQuotation = RxBool(false);
+  RxBool cancelingQuotation = RxBool(false);
   @override
   void onInit() async {
     super.onInit();
@@ -446,14 +450,14 @@ class QuotationCardController extends GetxController {
         quotationCardAdded.value = true;
         curreentQuotationCardId.value = newQuotation.id;
         getAllInvoiceItems(newQuotation.id);
-        showSnackBar('Donr', 'Added Successfully');
+        showSnackBar('Done', 'Added Successfully');
       } else {
         newData.remove('added_date');
         await FirebaseFirestore.instance
             .collection('quotation_cards')
             .doc(curreentQuotationCardId.value)
             .update(newData);
-        showSnackBar('Donr', 'Updated Successfully');
+        showSnackBar('Done', 'Updated Successfully');
       }
       canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
@@ -466,6 +470,8 @@ class QuotationCardController extends GetxController {
 
   void editQuotationCard(id) {
     try {
+      addingNewValue.value = true;
+
       FirebaseFirestore.instance.collection('quotation_cards').doc(id).update({
         'quotation_status': quotationStatus.value,
         'car_brand_logo': carBrandLogo.value,
@@ -529,25 +535,153 @@ class QuotationCardController extends GetxController {
 
   editPostForQuotation(id) async {
     try {
+      postingQuotation.value = true;
       await FirebaseFirestore.instance
           .collection('quotation_cards')
           .doc(id)
           .update({'quotation_status': 'Posted'});
       quotationStatus.value = 'Posted';
+      postingQuotation.value = false;
     } catch (e) {
-      //
+      postingQuotation.value = false;
     }
   }
 
   editCancelForQuotation(id) async {
     try {
+      cancelingQuotation.value = true;
       await FirebaseFirestore.instance
           .collection('quotation_cards')
           .doc(id)
           .update({'quotation_status': 'Cancelled'});
       quotationStatus.value = 'Cancelled';
+      cancelingQuotation.value = false;
     } catch (e) {
-      //
+      cancelingQuotation.value = false;
+    }
+  }
+
+  Future<void> getCurrentJobCardCounterNumber() async {
+    try {
+      var jcnId = '';
+      var updateJobCard = '';
+      var jcnDoc = await FirebaseFirestore.instance
+          .collection('counters')
+          .where('code', isEqualTo: 'JCN')
+          .where('company_id', isEqualTo: companyId.value)
+          .get();
+
+      if (jcnDoc.docs.isEmpty) {
+        // Define constants for the new counter values
+        const prefix = 'JCN';
+        const separator = '-';
+        const initialValue = 1;
+
+        var newCounter =
+            await FirebaseFirestore.instance.collection('counters').add({
+          'code': 'JCN',
+          'description': 'Job Card Number',
+          'prefix': prefix,
+          'value': initialValue,
+          'length': 0,
+          'separator': separator,
+          'added_date': DateTime.now().toString(),
+          'company_id': companyId.value,
+          'status': true,
+        });
+        jcnId = newCounter.id;
+        // Set the counter text with prefix and separator
+        jobCardCounter.value.text = '$prefix$separator$initialValue';
+        updateJobCard = initialValue.toString();
+      } else {
+        var firstDoc = jcnDoc.docs.first;
+        jcnId = firstDoc.id;
+        var currentValue = firstDoc.data()['value'] ?? 0;
+        // Use the existing prefix and separator from the document
+        jobCardCounter.value.text =
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
+        updateJobCard = (currentValue + 1).toString();
+      }
+
+      await FirebaseFirestore.instance
+          .collection('counters')
+          .doc(jcnId)
+          .update({
+        'value': int.parse(updateJobCard),
+      });
+    } catch (e) {
+      // Optionally handle errors here
+      // print("Error in getCurrentJobCardCounterNumber: $e");
+    }
+  }
+
+  Future<void> createNewJobCard() async {
+    try {
+      creatingNewJob.value = true;
+      Map<String, dynamic> newData = {
+        'label': '',
+        'job_status_1': 'New',
+        'job_status_2': 'New',
+        'car_brand_logo': carBrandLogo.value,
+        'company_id': companyId.value,
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'plate_number': plateNumber.text,
+        'plate_code': plateCode.text,
+        'country': countryId.value,
+        'city': cityId.value,
+        'year': year.text,
+        'color': colorId.value,
+        'engine_type': engineTypeId.value,
+        'vehicle_identification_number': vin.text,
+        'transmission_type': transmissionType.text,
+        'mileage_in': mileageIn.value.text,
+        'fuel_amount': fuelAmount.value.text,
+        'mileage_out': mileageOut.value.text,
+        'mileage_in_out_diff': inOutDiff.value.text,
+        'customer': customerId.value,
+        'contact_name': customerEntityName.text,
+        'contact_number': customerEntityPhoneNumber.text,
+        'contact_email': customerEntityEmail.text,
+        'credit_limit': customerCreditNumber.text,
+        'outstanding': customerOutstanding.text,
+        'saleMan': customerSaleManId.value,
+        'branch': customerBranchId.value,
+        'currency': customerCurrencyId.value,
+        'rate': customerCurrencyRate.text,
+        'payment_method': payType.value,
+        'job_number': jobCardCounter.value.text,
+        'invoice_number': '',
+        'lpo_number': '',
+        'job_date': '',
+        'invoice_date': '',
+        'job_approval_date': '',
+        'job_start_date': '',
+        'job_cancelation_date': '',
+        'job_finish_date': '',
+        'job_delivery_date': '',
+        'job_warrenty_days': '',
+        'job_warrenty_km': '',
+        'job_warrenty_end_date': '',
+        'job_min_test_km': '',
+        'job_reference_1': '',
+        'job_reference_2': '',
+        'job_reference_3': '',
+        'job_notes': '',
+        'job_delivery_notes': '',
+      };
+
+      await getCurrentJobCardCounterNumber();
+      newData['job_number'] = jobCardCounter.value.text;
+      newData['added_date'] = DateTime.now().toString();
+
+      await FirebaseFirestore.instance.collection('job_cards').add(newData);
+
+      creatingNewJob.value = false;
+      showSnackBar('Done', 'Job Created Successfully');
+    } catch (e) {
+      creatingNewJob.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
     }
   }
 
@@ -580,6 +714,21 @@ class QuotationCardController extends GetxController {
             .collection('quotation_cards')
             .add(data);
 
+        var quotationInvoices = await FirebaseFirestore.instance
+            .collection('quotation_cards')
+            .doc(id)
+            .collection('invoice_items')
+            .get();
+        if (quotationInvoices.docs.isNotEmpty) {
+          for (var element in quotationInvoices.docs) {
+            await FirebaseFirestore.instance
+                .collection('quotation_cards')
+                .doc(newCopiedQuotation.id)
+                .collection('invoice_items')
+                .add(element.data());
+          }
+        }
+
         loadingCopyQuotation.value = false;
         return {
           'newId': newCopiedQuotation.id,
@@ -587,6 +736,7 @@ class QuotationCardController extends GetxController {
         };
       } else {
         loadingCopyQuotation.value = false;
+        showSnackBar('Alert', 'Quotation has no data');
         throw Exception('Job data is empty');
       }
     } catch (e) {
@@ -1051,16 +1201,19 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  getModelsByCarBrand(brandId) {
+  getModelsByCarBrand(String brandId) {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
           .doc(brandId)
           .collection('values')
           .snapshots()
-          .listen((models) {
-        allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
-      });
+          .listen((snapshot) {
+        final Map<String, Map<String, dynamic>> mapped = {
+          for (var doc in snapshot.docs) doc.id: doc.data()
+        };
+        allModels.value = mapped;
+      }, onError: (e) {});
     } catch (e) {
       //
     }

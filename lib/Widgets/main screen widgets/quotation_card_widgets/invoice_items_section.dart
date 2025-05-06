@@ -275,7 +275,7 @@ ElevatedButton newinvoiceItemsButton(
     String quotationId) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
+      if (controller.canAddInternalNotesAndInvoiceItems.isTrue) { 
         if (controller.quotationStatus.value == 'New') {
           controller.clearInvoiceItemsVariables();
 

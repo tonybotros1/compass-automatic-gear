@@ -1,15 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
-import '../../../../Widgets/Mobile widgets/inspection report widgets/inspection_report_body.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
-import '../../../../Widgets/main screen widgets/job_cards_widgets/internal_notes_widget.dart';
+import '../../../../Widgets/main screen widgets/job_cards_widgets/job_card_buttons.dart';
+import '../../../../Widgets/text_button.dart';
 import '../../../../consts.dart';
 
 class JobCard extends StatelessWidget {
@@ -287,9 +284,26 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
         // DataCell(jobData['job_status_1'] != ''
         //     ? statusBox('${jobData['job_status_1']}', hieght: 35, width: 100)
         //     : SizedBox()),
-        DataCell(jobData['job_status_2'] != ''
-            ? statusBox('${jobData['job_status_2']}', hieght: 35, width: 100)
-            : const SizedBox()),
+        //   if (isBeforeToday(jobWarrentyEndDate.value.text)) {
+        //   status2 = 'Closed';
+        // } else {
+        //   status2 = 'Warranty';
+        // }
+        DataCell(
+          statusBox(
+            jobData['job_status_1'] == 'Posted'
+                ? ((isBeforeToday(jobData['job_warrenty_end_date']))
+                    ? 'Closed'
+                    : 'Warranty')
+                : (jobData['job_status_2'] as String? ?? 'Unknown'),
+            hieght: 35,
+            padding: EdgeInsets.symmetric(horizontal: 5),
+          ),
+        ),
+
+        // DataCell(jobData['job_status_2'] != ''
+        //     ? statusBox('${jobData['job_status_2']}', hieght: 35, width: 100)
+        //     : const SizedBox()),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
         DataCell(textForDataRowInTable(
             text: jobData['invoice_number'] != ''
@@ -488,231 +502,213 @@ Future<dynamic> editJobCardDialog(
                   padding: const EdgeInsets.all(16),
                   width: constraints.maxWidth,
                   child: Row(
-                    spacing: 10,
+                    spacing: 3,
                     children: [
                       Text(
                         '${controller.getScreenName()}',
                         style: fontStyleForScreenNameUsedInButtons,
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
+
                       GetX<JobCardController>(builder: (controller) {
-                        if (controller.jobStatus2.value.isNotEmpty) {
-                          return statusBox(controller.jobStatus2.value);
+                        if (controller.jobStatus2.value.isNotEmpty &&
+                            controller.jobStatus1.value.isNotEmpty) {
+                          return statusBox(
+                            controller.jobStatus1.value == 'Posted'
+                                ? ((isBeforeToday(controller
+                                        .jobWarrentyEndDate.value.text))
+                                    ? 'Closed'
+                                    : 'Warranty')
+                                : (controller.jobStatus2.value),
+                            hieght: 35,
+                            padding: EdgeInsets.symmetric(horizontal: 5),
+                          );
                         } else {
                           return const SizedBox();
                         }
                       }),
-                      const Spacer(),
-                      GetX<JobCardController>(builder: (controller) {
-                        return ElevatedButton(
-                          onPressed: controller.addingNewValue.value
-                              ? null
-                              : () async {
-                                  controller.addingNewValue.value = true;
 
-                                  if (jobData['job_number'] == '') {
-                                    controller.jobStatus1.value = 'New';
-                                    controller.jobStatus2.value = 'New';
-                                    controller.label.value = '';
-                                    await controller
-                                        .getCurrentJobCardCounterNumber();
-                                  }
-                                  controller.editJobCardAndQuotation(jobId);
-                                },
-                          style: new2ButtonStyle,
-                          child: controller.addingNewValue.value == false
-                              ? const Text(
-                                  'Save',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                )
-                              : const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                        );
-                      }),
-                      ElevatedButton(
-                          style: cancelJobButtonStyle,
-                          onPressed: () {
-                            if (controller.jobStatus1.value == 'New' ||
-                                controller.jobStatus1.value == '') {
-                              alertDialog(
-                                  context: context,
-                                  controller: controller,
-                                  content: "Theis will be deleted permanently",
-                                  onPressed: () {
-                                    controller.deleteJobCard(jobId);
-                                  });
-                            } else {
-                              showSnackBar('Can Not Delete',
-                                  'Only New Cards Can be Deleted');
-                            }
-                          },
-                          child: const Text('Delete',
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      GetX<JobCardController>(builder: (controller) {
-                        return ElevatedButton(
-                            style: copyJobButtonStyle,
-                            onPressed: () async {
-                              var newData = await controller.copyJob(jobId);
-                              Get.back();
-                              controller.loadValues(newData['data']);
-                              editJobCardDialog(controller, newData['data'],
-                                  newData['newId']);
-                            },
-                            child: controller.loadingCopyJob.isFalse
-                                ? const Text(
-                                    'Copy',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ));
-                      }),
-                      ElevatedButton(
-                          style: inspectionFormButtonStyle,
-                          onPressed: () {
-                            controller.loadInspectionFormValues(jobId, jobData);
-                            Get.dialog(
-                                barrierDismissible: false,
-                                Dialog(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5)),
-                                    insetPadding: const EdgeInsets.all(20),
-                                    child: SizedBox(
-                                      width: 600,
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(5),
-                                                      topRight:
-                                                          Radius.circular(5)),
-                                              color: mainColor,
-                                            ),
-                                            padding: const EdgeInsets.all(16),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                const Text(
-                                                  '🚘 Inspection Form',
-                                                  style: TextStyle(
-                                                      fontSize: 20,
-                                                      color: Colors.white),
-                                                ),
-                                                IconButton(
-                                                  onPressed: () {
-                                                    Get.back();
-                                                  },
-                                                  icon: const Icon(Icons.close,
-                                                      color: Colors.white),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: buildInspectionReportBody(
-                                                  context),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )));
-                          },
-                          child: const Text(
-                            'Inspection From',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          )),
-                      ElevatedButton(
-                        style: internalNotesButtonStyle,
-                        onPressed: () async {
-                          internalNotesDialog(controller, constraints, jobId);
-                        },
-                        child: const Text(
-                          'Internal Notes',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      // ElevatedButton(
-                      //   style: innvoiceItemsButtonStyle,
-                      //   onPressed: () {
-                      //     controller.getAllInvoiceItems(jobId);
-                      //     Get.dialog(
-                      //         barrierDismissible: true,
-                      //         Dialog(
-                      //           shape: RoundedRectangleBorder(
-                      //               borderRadius: BorderRadius.circular(5)),
-                      //           insetPadding: const EdgeInsets.all(40),
-                      //           child: LayoutBuilder(
-                      //               builder: (context, constraints) {
-                      //             return Column(
-                      //               children: [
-                      //                 Container(
-                      //                   decoration: BoxDecoration(
-                      //                     borderRadius: const BorderRadius.only(
-                      //                         topLeft: Radius.circular(5),
-                      //                         topRight: Radius.circular(5)),
-                      //                     color: mainColor,
-                      //                   ),
-                      //                   padding: const EdgeInsets.all(16),
-                      //                   child: Row(
-                      //                     mainAxisAlignment:
-                      //                         MainAxisAlignment.spaceBetween,
-                      //                     children: [
-                      //                       const Text(
-                      //                         '💵 Invoice Items',
-                      //                         style: TextStyle(
-                      //                             fontSize: 20,
-                      //                             color: Colors.white),
-                      //                       ),
-                      //                       IconButton(
-                      //                         onPressed: () {
-                      //                           Get.back();
-                      //                         },
-                      //                         icon: const Icon(Icons.close,
-                      //                             color: Colors.white),
-                      //                       )
-                      //                     ],
-                      //                   ),
-                      //                 ),
-                      //                 Expanded(
-                      //                   child: Padding(
-                      //                     padding: const EdgeInsets.all(8.0),
-                      //                     child: invoiceItemsDialog(
-                      //                         constraints: constraints,
-                      //                         context: context,
-                      //                         jobId: jobId),
-                      //                   ),
-                      //                 ),
-                      //               ],
-                      //             );
-                      //           }),
-                      //         ));
-                      //   },
-                      //   child: const Text('Invoice Items',
-                      //       style: TextStyle(fontWeight: FontWeight.bold)),
+                      // Container(
+                      //   padding: EdgeInsets.symmetric(horizontal: 8),
+                      //   decoration: BoxDecoration(
+                      //       border: Border.all(color: Colors.white),
+                      //       borderRadius: BorderRadius.circular(5)),
+                      //   child: Row(
+                      //     children: [
+                      //       Text(
+                      //         'Change Job Status',
+                      //         style: TextStyle(
+                      //             color: Colors.white,
+                      //             fontWeight: FontWeight.bold),
+                      //       ),
+                      //       PopupMenuButton<String>(
+                      //         tooltip: 'Select Job Status',
+                      //         position: PopupMenuPosition.under,
+                      //         iconColor: Colors.white,
+                      //         icon:
+                      //             Icon(Icons.more_vert), // The 3 vertical dots
+                      //         onSelected: (value) {
+                      //           if (value == 'New') {
+                      //             if (controller.jobStatus1.value == 'New' &&
+                      //                 controller.jobStatus2.value != 'New') {
+                      //               controller.editNewForJobCard(jobId, 'New');
+                      //             } else if (controller.jobStatus2.value ==
+                      //                 'New') {
+                      //               showSnackBar('Alert', 'Job is Already New');
+                      //             } else if (controller.jobStatus1.value ==
+                      //                 'Cancelled') {
+                      //               showSnackBar('Alert', 'Job is Cancelled');
+                      //             } else if (controller.jobStatus1.value ==
+                      //                 'Posted') {
+                      //               showSnackBar('Alert', 'Job is Posted');
+                      //             } else if (controller
+                      //                 .jobStatus1.value.isEmpty) {
+                      //               showSnackBar(
+                      //                   'Alert', 'Please Save The Job First');
+                      //             }
+                      //           } else if (value == 'Approve') {
+                      //             if (controller.jobStatus1.value == 'New' &&
+                      //                 controller.jobStatus2.value !=
+                      //                     'Approved') {
+                      //               controller.editApproveForJobCard(
+                      //                   jobId, 'Approved');
+                      //             } else if (controller.jobStatus2.value ==
+                      //                 'Approved') {
+                      //               showSnackBar(
+                      //                   'Alert', 'Job is Already Approved');
+                      //             } else if (controller.jobStatus1.value ==
+                      //                 'Posted') {
+                      //               showSnackBar('Alert', 'Job is Posted');
+                      //             } else if (controller.jobStatus1.value ==
+                      //                 'Cancelled') {
+                      //               showSnackBar('Alert', 'Job is Cancelled');
+                      //             } else if (controller
+                      //                 .jobStatus1.value.isEmpty) {
+                      //               showSnackBar(
+                      //                   'Alert', 'Please Save The Job First');
+                      //             }
+                      //           } else if (value == 'Ready') {
+                      //             if (controller.jobStatus1.value == 'New' &&
+                      //                 controller.jobStatus2.value != 'Ready') {
+                      //               controller.editReadyForJobCard(
+                      //                   jobId, 'Ready');
+                      //             } else if (controller.jobStatus2.value ==
+                      //                 'Ready') {
+                      //               showSnackBar(
+                      //                   'Alert', 'Job is Already Ready');
+                      //             } else if (controller.jobStatus1.value ==
+                      //                 'Posted') {
+                      //               showSnackBar('Alert', 'Job is Posted');
+                      //             } else if (controller.jobStatus1.value ==
+                      //                 'Cancelled') {
+                      //               showSnackBar('Alert', 'Job is Cancelled');
+                      //             } else if (controller
+                      //                 .jobStatus1.value.isEmpty) {
+                      //               showSnackBar(
+                      //                   'Alert', 'Please Save The Job First');
+                      //             }
+                      //           } else if (value == 'Post') {
+                      //             if (controller.jobStatus1.value == 'Posted') {
+                      //               showSnackBar(
+                      //                   'Alert', 'Job is Already Posted');
+                      //             } else if (controller.jobStatus1.value ==
+                      //                 'Cancelled') {
+                      //               showSnackBar('Alert', 'Job is Cancelled');
+                      //             } else if (controller.jobWarrentyEndDate.value
+                      //                     .text.isEmpty &&
+                      //                 controller.jobStatus1.value.isNotEmpty &&
+                      //                 controller.jobStatus1.value !=
+                      //                     'Cancelled' &&
+                      //                 controller.jobStatus1.value != 'Posted') {
+                      //               showSnackBar('Alert',
+                      //                   'You Must Enter Warranty End Date First');
+                      //             } else if (controller
+                      //                 .jobStatus1.value.isEmpty) {
+                      //               showSnackBar(
+                      //                   'Alert', 'Please Save The Job First');
+                      //             } else {
+                      //               controller.editPostForJobCard(jobId);
+                      //             }
+                      //           } else if (value == 'Cancel') {
+                      //             if (controller.jobStatus1.value ==
+                      //                 'Cancelled') {
+                      //               showSnackBar(
+                      //                   'Alert', 'Job is Already Cancelled');
+                      //             } else if (controller.jobStatus1.value ==
+                      //                 'Posted') {
+                      //               showSnackBar('Alert', 'Job is Cancelled');
+                      //             } else if (controller.jobStatus1.value !=
+                      //                     'Cancelled' &&
+                      //                 controller.jobStatus2.value !=
+                      //                     'Cancelled' &&
+                      //                 controller.jobStatus1.value != '') {
+                      //               controller.editCancelForJobCard(
+                      //                   jobId, 'Cancelled');
+                      //             } else if (controller
+                      //                 .jobStatus1.value.isEmpty) {
+                      //               showSnackBar(
+                      //                   'Alert', 'Please Save The Job First');
+                      //             }
+                      //           }
+                      //         },
+                      //         itemBuilder: (BuildContext context) =>
+                      //             <PopupMenuEntry<String>>[
+                      //           PopupMenuItem<String>(
+                      //             value: 'New',
+                      //             child: Text(
+                      //               'New',
+                      //               style: TextStyle(
+                      //                   fontWeight: FontWeight.bold,
+                      //                   color: Colors.green),
+                      //             ),
+                      //           ),
+                      //           PopupMenuItem<String>(
+                      //             value: 'Approve',
+                      //             child: Text('Approve',
+                      //                 style: TextStyle(
+                      //                     fontWeight: FontWeight.bold,
+                      //                     color: Color(0xffD2665A))),
+                      //           ),
+                      //           PopupMenuItem<String>(
+                      //             value: 'Ready',
+                      //             child: Text('Ready',
+                      //                 style: TextStyle(
+                      //                     fontWeight: FontWeight.bold,
+                      //                     color: Color(0xff7886C7))),
+                      //           ),
+                      //           PopupMenuItem<String>(
+                      //             value: 'Post',
+                      //             child: Text('Post',
+                      //                 style: TextStyle(
+                      //                     fontWeight: FontWeight.bold,
+                      //                     color: Colors.teal)),
+                      //           ),
+                      //           PopupMenuItem<String>(
+                      //             value: 'Cancel',
+                      //             child: Text('Cancel',
+                      //                 style: TextStyle(
+                      //                     fontWeight: FontWeight.bold,
+                      //                     color: Colors.red)),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     ],
+                      //   ),
                       // ),
+                      const Spacer(),
+                      creatQuotationButton(controller),
 
+                      copyJobButton(jobId),
+                      inspectionFormButton(controller, jobId, jobData, context),
+                      internalNotesButton(controller, constraints, jobId),
+                      Spacer(),
+                      saveJobButton(() => controller.editJobCard(jobId)),
+                      Spacer(),
+                      changeStatusToNewButton(jobId),
+                      changeStatusToApproveButton(jobId),
+                      changeStatusToReadyButton(jobId),
+                      changeStatusToPostedButton(controller, jobId),
+                      changeStatusToCanceledButton(jobId),
+                      deleteJobButton(controller, context, jobId),
                       closeIcon()
                     ],
                   ),
@@ -779,135 +775,54 @@ ElevatedButton newJobCardButton(BuildContext context,
               insetPadding: const EdgeInsets.all(8),
               child: LayoutBuilder(builder: (context, constraints) {
                 return Column(children: [
-                  Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(5),
-                            topRight: Radius.circular(5)),
-                        color: mainColor,
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      width: constraints.maxWidth,
-                      child: Row(spacing: 10, children: [
-                        Text(
-                          '${controller.getScreenName()}',
-                          style: fontStyleForScreenNameUsedInButtons,
+                  GetX<JobCardController>(builder: (controller) {
+                    return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(5),
+                              topRight: Radius.circular(5)),
+                          color: mainColor,
                         ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        GetX<JobCardController>(builder: (controller) {
-                          if (controller.jobStatus2.value.isNotEmpty) {
-                            return statusBox(controller.jobStatus2.value);
-                          } else {
-                            return const SizedBox();
-                          }
-                        }),
-                        const Spacer(),
-                        // ElevatedButton(
-                        //   style: innvoiceItemsButtonStyle,
-                        //   onPressed: () {
-                        //     if (controller
-                        //         .canAddInternalNotesAndInvoiceItems.isTrue) {
-                        //       Dialog(
-                        //         shape: RoundedRectangleBorder(
-                        //             borderRadius: BorderRadius.circular(5)),
-                        //         insetPadding: const EdgeInsets.all(40),
-                        //         child: LayoutBuilder(
-                        //             builder: (context, constraints) {
-                        //           return Column(
-                        //             children: [
-                        //               Container(
-                        //                 decoration: BoxDecoration(
-                        //                   borderRadius: const BorderRadius.only(
-                        //                       topLeft: Radius.circular(5),
-                        //                       topRight: Radius.circular(5)),
-                        //                   color: mainColor,
-                        //                 ),
-                        //                 padding: const EdgeInsets.all(8),
-                        //                 child: Row(
-                        //                   mainAxisAlignment:
-                        //                       MainAxisAlignment.spaceBetween,
-                        //                   children: [
-                        //                     const Text(
-                        //                       'Invoice Items',
-                        //                       style: TextStyle(
-                        //                           fontSize: 20,
-                        //                           color: Colors.white),
-                        //                     ),
-                        //                     IconButton(
-                        //                       onPressed: () {
-                        //                         Get.back();
-                        //                       },
-                        //                       icon: const Icon(Icons.close,
-                        //                           color: Colors.white),
-                        //                     )
-                        //                   ],
-                        //                 ),
-                        //               ),
-                        //               Expanded(
-                        //                 child: Padding(
-                        //                   padding: const EdgeInsets.all(8.0),
-                        //                   child: invoiceItemsDialog(
-                        //                       constraints: constraints,
-                        //                       context: context,
-                        //                       jobId: controller
-                        //                           .curreentJobCardId.value),
-                        //                 ),
-                        //               ),
-                        //             ],
-                        //           );
-                        //         }),
-                        //       );
-                        //     } else {
-                        //       showSnackBar('Alert', 'Please Save Job First');
-                        //     }
-                        //   },
-                        //   child: const Text(
-                        //     'Invoice Items',
-                        //     style: TextStyle(fontWeight: FontWeight.bold),
-                        //   ),
-                        // ),
-                        ElevatedButton(
-                          style: internalNotesButtonStyle,
-                          onPressed: () {
-                            if (controller
-                                .canAddInternalNotesAndInvoiceItems.isTrue) {
-                              internalNotesDialog(controller, constraints,
-                                  controller.curreentJobCardId.value);
-                            } else {
-                              showSnackBar('Alert', 'Please Save Job First');
-                            }
-                          },
-                          child: const Text(
-                            'Internal Notes',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        padding: const EdgeInsets.all(16),
+                        width: constraints.maxWidth,
+                        child: Row(spacing: 3, children: [
+                          Text(
+                            '${controller.getScreenName()}',
+                            style: fontStyleForScreenNameUsedInButtons,
                           ),
-                        ),
-                        GetX<JobCardController>(
-                          builder: (controller) => ElevatedButton(
-                            onPressed: () async {
-                              await controller.addNewJobCardAndQuotation();
-                            },
-                            style: new2ButtonStyle,
-                            child: controller.addingNewValue.value == false
-                                ? const Text(
-                                    'Save',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )
-                                : const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        closeIcon()
-                      ])),
+                          controller.jobStatus2.value.isNotEmpty
+                              ? statusBox(
+                                  controller.jobStatus1.value == 'Posted'
+                                      ? ((isBeforeToday(controller
+                                              .jobWarrentyEndDate.value.text))
+                                          ? 'Closed'
+                                          : 'Warranty')
+                                      : (controller.jobStatus2.value),
+                                  hieght: 35,
+                                  padding: EdgeInsets.symmetric(horizontal: 5),
+                                )
+                              : SizedBox(),
+                          const Spacer(),
+                          creatQuotationButton(controller),
+                          internalNotesButton(controller, constraints,
+                              controller.curreentJobCardId.value),
+                          Spacer(),
+                          saveJobButton(() => controller.addNewJobCard()),
+                          Spacer(),
+                          changeStatusToNewButton(
+                              controller.curreentJobCardId.value),
+                          changeStatusToApproveButton(
+                              controller.curreentJobCardId.value),
+                          changeStatusToReadyButton(
+                              controller.curreentJobCardId.value),
+                          changeStatusToPostedButton(
+                              controller, controller.curreentJobCardId.value),
+                          changeStatusToCanceledButton(
+                              controller.curreentJobCardId.value),
+                         
+                          closeIcon()
+                        ]));
+                  }),
                   Expanded(
                       child: Padding(
                     padding: const EdgeInsets.all(8),
@@ -964,6 +879,11 @@ class CardDataSource extends DataTableSource {
   int get rowCount => cards.length;
 
   @override
-  int get selectedRowCount =>
-      0; //controller.selectedcardId.value!.isEmpty ? 0 : 1;
+  int get selectedRowCount => 0;
+}
+
+class JobID {
+  String? id;
+
+  JobID({this.id});
 }

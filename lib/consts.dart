@@ -27,6 +27,9 @@ var footerTextStylr = TextStyle(
 var hintMarkTestStyle =
     TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.bold);
 
+var fontStyleForElevatedButtons =
+    const TextStyle(fontWeight: FontWeight.bold, fontSize: 12);
+
 var newButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
   foregroundColor: Colors.white,
@@ -80,21 +83,23 @@ var isNotPressedButtonStyle = ElevatedButton.styleFrom(
 );
 
 var new2ButtonStyle = ElevatedButton.styleFrom(
+  padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.green,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var postButtonStyle = ElevatedButton.styleFrom(
+  padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.teal,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(80, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var saveButtonStyle = ElevatedButton.styleFrom(
@@ -125,48 +130,53 @@ var cancelButtonStyle = ElevatedButton.styleFrom(
 );
 
 var cancelJobButtonStyle = ElevatedButton.styleFrom(
+  padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.red,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(80, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var internalNotesButtonStyle = ElevatedButton.styleFrom(
+  padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xffFA812F),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var inspectionFormButtonStyle = ElevatedButton.styleFrom(
+  padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff034C53),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var copyJobButtonStyle = ElevatedButton.styleFrom(
+  padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff7D1C4A),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 
-var makeJobButtonStyle = ElevatedButton.styleFrom(
+var creatJobOrQuotationButtonStyle = ElevatedButton.styleFrom(
+  padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff393E46),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var innvoiceItemsButtonStyle = ElevatedButton.styleFrom(
@@ -267,21 +277,23 @@ var closeButtonStyle = ElevatedButton.styleFrom(
 );
 
 var approveButtonStyle = ElevatedButton.styleFrom(
+  padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xffD2665A),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var readyButtonStyle = ElevatedButton.styleFrom(
+  padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff7886C7),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var welcomButtonStyle = ElevatedButton.styleFrom(
@@ -702,23 +714,20 @@ String? getMimeTypeFromExtension(String extension) {
 }
 
 Widget closeIcon() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 20),
-    child: IconButton(
-        onPressed: () {
-          Get.back();
-        },
-        icon: const Icon(
-          Icons.close,
-          color: Colors.white,
-        )),
-  );
+  return IconButton(
+      onPressed: () {
+        Get.back();
+      },
+      icon: const Icon(
+        Icons.close,
+        color: Colors.white,
+      ));
 }
 
 // this function is to see if the warrant date is end or not
 bool isBeforeToday(String dateStr) {
   if (dateStr.isEmpty) {
-    throw const FormatException("The date string is empty or null.");
+    return false;
   }
 
   DateFormat format = DateFormat("dd-MM-yyyy");
@@ -730,3 +739,11 @@ bool isBeforeToday(String dateStr) {
 
   return inputDate.isBefore(todayOnly);
 }
+
+var loadingProcess = const SizedBox(
+  height: 20,
+  width: 20,
+  child: CircularProgressIndicator(
+    strokeWidth: 2,
+  ),
+);

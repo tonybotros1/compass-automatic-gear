@@ -1,8 +1,6 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/job_cards_widgets/invoice_items_widget.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../../consts.dart';
 import 'car_details_section.dart';
 import 'customer_details_section.dart';
@@ -58,9 +56,9 @@ Widget addNewJobCardOrEdit(
                       'Job Details',
                       style: fontStyle1,
                     ),
-                   
-                   
+
                     const Spacer(),
+                    
                     // jobId != null
                     //     ? Row(
                     //         spacing: 10,
@@ -254,9 +252,7 @@ Widget addNewJobCardOrEdit(
       SizedBox(
         height: 250,
         child: invoiceItemsSection(
-            constraints: constraints,
-            context: context,
-            jobId: jobId),
+            constraints: constraints, context: context, jobId: jobId),
       )
     ],
   );
