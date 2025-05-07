@@ -50,82 +50,10 @@ Widget addNewQuotationCardOrEdit(
               child: Column(
             children: [
               labelContainer(
-                  lable: Row(
-                children: [
-                  Text(
+                  lable: Text(
                     'Quotation Details',
                     style: fontStyle1,
-                  ),
-
-                  const Spacer(),
-                  // quotaionId != null && quotaionId != ''
-                  //     ? Row(
-                  //         spacing: 10,
-                  //         children: [
-                  //           GetBuilder<QuotationCardController>(
-                  //               builder: (controller) {
-                  //             return ElevatedButton(
-                  //                 style: postButtonStyle,
-                  //                 onPressed: () {
-                  //                   if (controller.quotationStatus.value !=
-                  //                           'Posted' &&
-                  //                       controller.quotationStatus.value !=
-                  //                           'Cancelled' &&
-                  //                       controller.quotationStatus.value
-                  //                           .isNotEmpty) {
-                  //                     controller
-                  //                         .editPostForQuotation(quotaionId);
-                  //                   } else if (controller
-                  //                           .quotationStatus.value ==
-                  //                       'Posted') {
-                  //                     showSnackBar('Alert',
-                  //                         'Quotation is Already Posted');
-                  //                   } else if (controller
-                  //                           .quotationStatus.value ==
-                  //                       'Cancelled') {
-                  //                     showSnackBar(
-                  //                         'Alert', 'Quotation is Cancelled');
-                  //                   } else if (controller
-                  //                       .quotationStatus.value.isEmpty) {
-                  //                     showSnackBar('Alert',
-                  //                         'Please Save The Quotation First');
-                  //                   }
-                  //                 },
-                  //                 child: const Text('Post',
-                  //                     style: TextStyle(
-                  //                         fontWeight: FontWeight.bold)));
-                  //           }),
-                  //           GetBuilder<QuotationCardController>(
-                  //               builder: (controller) {
-                  //             return ElevatedButton(
-                  //                 style: cancelJobButtonStyle,
-                  //                 onPressed: () {
-                  //                   if (controller.quotationStatus.value !=
-                  //                           'Cancelled' &&
-                  //                       controller.quotationStatus.value
-                  //                           .isNotEmpty) {
-                  //                     controller
-                  //                         .editCancelForQuotation(quotaionId);
-                  //                   } else if (controller
-                  //                           .quotationStatus.value ==
-                  //                       'Cancelled') {
-                  //                     showSnackBar('Alert',
-                  //                         'Quotation Already Cancelled');
-                  //                   } else if (controller
-                  //                       .quotationStatus.value.isEmpty) {
-                  //                     showSnackBar('Alert',
-                  //                         'Please Save The Quotation First');
-                  //                   }
-                  //                 },
-                  //                 child: const Text('Cancel',
-                  //                     style: TextStyle(
-                  //                         fontWeight: FontWeight.bold)));
-                  //           }),
-                  //         ],
-                  //       )
-                  //     : const SizedBox(),
-                ],
-              )),
+                  )),
               quotationsSection(context, controller)
             ],
           ))

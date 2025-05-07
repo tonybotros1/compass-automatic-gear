@@ -28,9 +28,9 @@ class _ClickableHoverTextState extends State<ClickableHoverText> {
           widget.text,
           style: TextStyle(
             color: _isHovering
-                ? widget.color1 ?? Colors.blue
-                : widget.color2 ?? Colors.white,
-            decoration: TextDecoration.underline,
+                ? widget.color1 ?? Colors.white
+                : widget.color2 ?? Colors.grey.shade400,
+            // decoration: TextDecoration.underline,
           ),
         ),
       ),

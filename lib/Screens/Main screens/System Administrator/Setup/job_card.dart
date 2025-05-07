@@ -6,7 +6,6 @@ import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dar
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/job_card_buttons.dart';
-import '../../../../Widgets/text_button.dart';
 import '../../../../consts.dart';
 
 class JobCard extends StatelessWidget {
@@ -262,7 +261,9 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
       }),
       cells: [
         DataCell(Row(
-          children: [editSection(context, jobData, constraints, jobId)],
+          children: [
+            editSection(context, jobData, constraints, jobId),
+          ],
         )),
         DataCell(jobData['label'] == 'Draft'
                 ? statusBox('D')
@@ -429,41 +430,51 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
       ]);
 }
 
-Widget editSection(context, Map<String, dynamic> jobData, constraints, jobId) {
-  return GetX<JobCardController>(builder: (controller) {
-    bool isLoading = controller.buttonLoadingStates[jobId] ?? false;
+Widget editSection(BuildContext context, Map<String, dynamic> jobData,
+    BoxConstraints constraints, String jobId) {
+  return GetX<JobCardController>(
+    builder: (controller) {
+      // Always read the reactive map here so GetX rebuilds when it changes
+      final isLoading = controller.buttonLoadingStates[jobId] ?? false;
 
-    return IconButton(
+      return IconButton(
         tooltip: 'Edit',
-        onPressed:
-            controller.buttonLoadingStates[jobId] == null || isLoading == false
-                ? () async {
-                    controller.setButtonLoading(jobId, true);
-                    controller.getAllInvoiceItems(jobId);
+        onPressed: isLoading
+            ? null
+            : () async {
+                // 1. Enter loading state
+                controller.setButtonLoading(jobId, true);
 
-                    controller.currentCountryVAT.value = controller.getdataName(
-                        controller.companyDetails['contact_details']['country'],
-                        controller.allCountries,
-                        title: 'vat');
-                    await controller.loadValues(jobData);
-                    editJobCardDialog(controller, jobData, jobId);
-                    controller.setButtonLoading(jobId, false);
-                  }
-                : null,
+                try {
+                  // 2. Await every Future so the spinner stays up
+                  await controller.getAllInvoiceItems(jobId);
+                  controller.currentCountryVAT.value = controller.getdataName(
+                    controller.companyDetails['contact_details']['country'],
+                    controller.allCountries,
+                    title: 'vat',
+                  );
+                  await controller.loadValues(jobData);
+
+                  // 3. Open your dialog (await if it returns a Future)
+                  await editJobCardDialog(controller, jobData, jobId);
+                } finally {
+                  // 4. Always clear loading state
+                  controller.setButtonLoading(jobId, false);
+                }
+              },
         icon: isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.blue,
-                  strokeWidth: 2,
-                ),
+            ? SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(
                 Icons.edit_note_rounded,
                 color: Colors.blue,
-              ));
-  });
+              ),
+      );
+    },
+  );
 }
 
 ElevatedButton historySection(
@@ -485,248 +496,98 @@ ElevatedButton historySection(
 Future<dynamic> editJobCardDialog(
     JobCardController controller, Map<String, dynamic> jobData, jobId) {
   return Get.dialog(
-      barrierDismissible: false,
-      Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          insetPadding: const EdgeInsets.all(8),
-          child: LayoutBuilder(builder: (context, constraints) {
-            return Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(5),
-                        topRight: Radius.circular(5)),
-                    color: mainColor,
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  width: constraints.maxWidth,
+    barrierDismissible: false,
+    Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      insetPadding: const EdgeInsets.all(8),
+      child: LayoutBuilder(builder: (context, constraints) {
+        return Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(5),
+                  topRight: Radius.circular(5),
+                ),
+                color: mainColor,
+              ),
+              padding: const EdgeInsets.all(16),
+              width: constraints.maxWidth,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints:
+                      BoxConstraints(minWidth: constraints.maxWidth - 40),
                   child: Row(
-                    spacing: 3,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '${controller.getScreenName()}',
-                        style: fontStyleForScreenNameUsedInButtons,
+                      Row(
+                        spacing: 10,
+                        children: [
+                          Text(
+                            controller.getScreenName(),
+                            style: fontStyleForScreenNameUsedInButtons,
+                          ),
+                          GetX<JobCardController>(builder: (ctl) {
+                            if (ctl.jobStatus2.value.isNotEmpty &&
+                                ctl.jobStatus1.value.isNotEmpty) {
+                              return statusBox(
+                                ctl.jobStatus1.value == 'Posted'
+                                    ? (isBeforeToday(
+                                            ctl.jobWarrentyEndDate.value.text)
+                                        ? 'Closed'
+                                        : 'Warranty')
+                                    : ctl.jobStatus2.value,
+                                hieght: 35,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5),
+                              );
+                            }
+                            return const SizedBox();
+                          }),
+                        ],
                       ),
-
-                      GetX<JobCardController>(builder: (controller) {
-                        if (controller.jobStatus2.value.isNotEmpty &&
-                            controller.jobStatus1.value.isNotEmpty) {
-                          return statusBox(
-                            controller.jobStatus1.value == 'Posted'
-                                ? ((isBeforeToday(controller
-                                        .jobWarrentyEndDate.value.text))
-                                    ? 'Closed'
-                                    : 'Warranty')
-                                : (controller.jobStatus2.value),
-                            hieght: 35,
-                            padding: EdgeInsets.symmetric(horizontal: 5),
-                          );
-                        } else {
-                          return const SizedBox();
-                        }
-                      }),
-
-                      // Container(
-                      //   padding: EdgeInsets.symmetric(horizontal: 8),
-                      //   decoration: BoxDecoration(
-                      //       border: Border.all(color: Colors.white),
-                      //       borderRadius: BorderRadius.circular(5)),
-                      //   child: Row(
-                      //     children: [
-                      //       Text(
-                      //         'Change Job Status',
-                      //         style: TextStyle(
-                      //             color: Colors.white,
-                      //             fontWeight: FontWeight.bold),
-                      //       ),
-                      //       PopupMenuButton<String>(
-                      //         tooltip: 'Select Job Status',
-                      //         position: PopupMenuPosition.under,
-                      //         iconColor: Colors.white,
-                      //         icon:
-                      //             Icon(Icons.more_vert), // The 3 vertical dots
-                      //         onSelected: (value) {
-                      //           if (value == 'New') {
-                      //             if (controller.jobStatus1.value == 'New' &&
-                      //                 controller.jobStatus2.value != 'New') {
-                      //               controller.editNewForJobCard(jobId, 'New');
-                      //             } else if (controller.jobStatus2.value ==
-                      //                 'New') {
-                      //               showSnackBar('Alert', 'Job is Already New');
-                      //             } else if (controller.jobStatus1.value ==
-                      //                 'Cancelled') {
-                      //               showSnackBar('Alert', 'Job is Cancelled');
-                      //             } else if (controller.jobStatus1.value ==
-                      //                 'Posted') {
-                      //               showSnackBar('Alert', 'Job is Posted');
-                      //             } else if (controller
-                      //                 .jobStatus1.value.isEmpty) {
-                      //               showSnackBar(
-                      //                   'Alert', 'Please Save The Job First');
-                      //             }
-                      //           } else if (value == 'Approve') {
-                      //             if (controller.jobStatus1.value == 'New' &&
-                      //                 controller.jobStatus2.value !=
-                      //                     'Approved') {
-                      //               controller.editApproveForJobCard(
-                      //                   jobId, 'Approved');
-                      //             } else if (controller.jobStatus2.value ==
-                      //                 'Approved') {
-                      //               showSnackBar(
-                      //                   'Alert', 'Job is Already Approved');
-                      //             } else if (controller.jobStatus1.value ==
-                      //                 'Posted') {
-                      //               showSnackBar('Alert', 'Job is Posted');
-                      //             } else if (controller.jobStatus1.value ==
-                      //                 'Cancelled') {
-                      //               showSnackBar('Alert', 'Job is Cancelled');
-                      //             } else if (controller
-                      //                 .jobStatus1.value.isEmpty) {
-                      //               showSnackBar(
-                      //                   'Alert', 'Please Save The Job First');
-                      //             }
-                      //           } else if (value == 'Ready') {
-                      //             if (controller.jobStatus1.value == 'New' &&
-                      //                 controller.jobStatus2.value != 'Ready') {
-                      //               controller.editReadyForJobCard(
-                      //                   jobId, 'Ready');
-                      //             } else if (controller.jobStatus2.value ==
-                      //                 'Ready') {
-                      //               showSnackBar(
-                      //                   'Alert', 'Job is Already Ready');
-                      //             } else if (controller.jobStatus1.value ==
-                      //                 'Posted') {
-                      //               showSnackBar('Alert', 'Job is Posted');
-                      //             } else if (controller.jobStatus1.value ==
-                      //                 'Cancelled') {
-                      //               showSnackBar('Alert', 'Job is Cancelled');
-                      //             } else if (controller
-                      //                 .jobStatus1.value.isEmpty) {
-                      //               showSnackBar(
-                      //                   'Alert', 'Please Save The Job First');
-                      //             }
-                      //           } else if (value == 'Post') {
-                      //             if (controller.jobStatus1.value == 'Posted') {
-                      //               showSnackBar(
-                      //                   'Alert', 'Job is Already Posted');
-                      //             } else if (controller.jobStatus1.value ==
-                      //                 'Cancelled') {
-                      //               showSnackBar('Alert', 'Job is Cancelled');
-                      //             } else if (controller.jobWarrentyEndDate.value
-                      //                     .text.isEmpty &&
-                      //                 controller.jobStatus1.value.isNotEmpty &&
-                      //                 controller.jobStatus1.value !=
-                      //                     'Cancelled' &&
-                      //                 controller.jobStatus1.value != 'Posted') {
-                      //               showSnackBar('Alert',
-                      //                   'You Must Enter Warranty End Date First');
-                      //             } else if (controller
-                      //                 .jobStatus1.value.isEmpty) {
-                      //               showSnackBar(
-                      //                   'Alert', 'Please Save The Job First');
-                      //             } else {
-                      //               controller.editPostForJobCard(jobId);
-                      //             }
-                      //           } else if (value == 'Cancel') {
-                      //             if (controller.jobStatus1.value ==
-                      //                 'Cancelled') {
-                      //               showSnackBar(
-                      //                   'Alert', 'Job is Already Cancelled');
-                      //             } else if (controller.jobStatus1.value ==
-                      //                 'Posted') {
-                      //               showSnackBar('Alert', 'Job is Cancelled');
-                      //             } else if (controller.jobStatus1.value !=
-                      //                     'Cancelled' &&
-                      //                 controller.jobStatus2.value !=
-                      //                     'Cancelled' &&
-                      //                 controller.jobStatus1.value != '') {
-                      //               controller.editCancelForJobCard(
-                      //                   jobId, 'Cancelled');
-                      //             } else if (controller
-                      //                 .jobStatus1.value.isEmpty) {
-                      //               showSnackBar(
-                      //                   'Alert', 'Please Save The Job First');
-                      //             }
-                      //           }
-                      //         },
-                      //         itemBuilder: (BuildContext context) =>
-                      //             <PopupMenuEntry<String>>[
-                      //           PopupMenuItem<String>(
-                      //             value: 'New',
-                      //             child: Text(
-                      //               'New',
-                      //               style: TextStyle(
-                      //                   fontWeight: FontWeight.bold,
-                      //                   color: Colors.green),
-                      //             ),
-                      //           ),
-                      //           PopupMenuItem<String>(
-                      //             value: 'Approve',
-                      //             child: Text('Approve',
-                      //                 style: TextStyle(
-                      //                     fontWeight: FontWeight.bold,
-                      //                     color: Color(0xffD2665A))),
-                      //           ),
-                      //           PopupMenuItem<String>(
-                      //             value: 'Ready',
-                      //             child: Text('Ready',
-                      //                 style: TextStyle(
-                      //                     fontWeight: FontWeight.bold,
-                      //                     color: Color(0xff7886C7))),
-                      //           ),
-                      //           PopupMenuItem<String>(
-                      //             value: 'Post',
-                      //             child: Text('Post',
-                      //                 style: TextStyle(
-                      //                     fontWeight: FontWeight.bold,
-                      //                     color: Colors.teal)),
-                      //           ),
-                      //           PopupMenuItem<String>(
-                      //             value: 'Cancel',
-                      //             child: Text('Cancel',
-                      //                 style: TextStyle(
-                      //                     fontWeight: FontWeight.bold,
-                      //                     color: Colors.red)),
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
-                      const Spacer(),
-                      creatQuotationButton(controller),
-
-                      copyJobButton(jobId),
-                      inspectionFormButton(controller, jobId, jobData, context),
-                      internalNotesButton(controller, constraints, jobId),
-                      Spacer(),
-                      saveJobButton(() => controller.editJobCard(jobId)),
-                      Spacer(),
-                      changeStatusToNewButton(jobId),
-                      changeStatusToApproveButton(jobId),
-                      changeStatusToReadyButton(jobId),
-                      changeStatusToPostedButton(controller, jobId),
-                      changeStatusToCanceledButton(jobId),
-                      deleteJobButton(controller, context, jobId),
-                      closeIcon()
+                      Row(
+                        spacing: 10,
+                        children: [
+                          creatQuotationButton(controller),
+                          inspectionFormButton(
+                              controller, jobId, jobData, context),
+                          internalNotesButton(controller, constraints, jobId),
+                          separator(),
+                          saveJobButton(() => controller.editJobCard(jobId)),
+                          copyJobButton(jobId),
+                          deleteJobButton(controller, context, jobId),
+                          separator(),
+                          changeStatusToPostedButton(controller, jobId),
+                          changeStatusToCancelledButton(jobId),
+                          changeStatusToNewButton(jobId),
+                          changeStatusToApproveButton(jobId),
+                          changeStatusToReadyButton(jobId),
+                          closeIcon(),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: addNewJobCardOrEdit(
-                      jobId: jobId,
-                      controller: controller,
-                      constraints: constraints,
-                      context: context,
-                    ),
-                  ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: addNewJobCardOrEdit(
+                  jobId: jobId,
+                  controller: controller,
+                  constraints: constraints,
+                  context: context,
                 ),
-              ],
-            );
-          })));
+              ),
+            ),
+          ],
+        );
+      }),
+    ),
+  );
 }
 
 ElevatedButton newJobCardButton(BuildContext context,
@@ -785,43 +646,70 @@ ElevatedButton newJobCardButton(BuildContext context,
                         ),
                         padding: const EdgeInsets.all(16),
                         width: constraints.maxWidth,
-                        child: Row(spacing: 3, children: [
-                          Text(
-                            '${controller.getScreenName()}',
-                            style: fontStyleForScreenNameUsedInButtons,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                                minWidth: constraints.maxWidth - 40),
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    spacing: 10,
+                                    children: [
+                                      Text(
+                                        '${controller.getScreenName()}',
+                                        style:
+                                            fontStyleForScreenNameUsedInButtons,
+                                      ),
+                                      controller.jobStatus2.value.isNotEmpty
+                                          ? statusBox(
+                                              controller.jobStatus1.value ==
+                                                      'Posted'
+                                                  ? ((isBeforeToday(controller
+                                                          .jobWarrentyEndDate
+                                                          .value
+                                                          .text))
+                                                      ? 'Closed'
+                                                      : 'Warranty')
+                                                  : (controller
+                                                      .jobStatus2.value),
+                                              hieght: 35,
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 5),
+                                            )
+                                          : SizedBox(),
+                                    ],
+                                  ),
+                                  Row(
+                                    spacing: 10,
+                                    children: [
+                                      creatQuotationButton(controller),
+                                      internalNotesButton(
+                                          controller,
+                                          constraints,
+                                          controller.curreentJobCardId.value),
+                                      separator(),
+                                      saveJobButton(
+                                          () => controller.addNewJobCard()),
+                                      separator(),
+                                      changeStatusToPostedButton(controller,
+                                          controller.curreentJobCardId.value),
+                                      changeStatusToCancelledButton(
+                                          controller.curreentJobCardId.value),
+                                      changeStatusToNewButton(
+                                          controller.curreentJobCardId.value),
+                                      changeStatusToApproveButton(
+                                          controller.curreentJobCardId.value),
+                                      changeStatusToReadyButton(
+                                          controller.curreentJobCardId.value),
+                                      closeIcon()
+                                    ],
+                                  ),
+                                ]),
                           ),
-                          controller.jobStatus2.value.isNotEmpty
-                              ? statusBox(
-                                  controller.jobStatus1.value == 'Posted'
-                                      ? ((isBeforeToday(controller
-                                              .jobWarrentyEndDate.value.text))
-                                          ? 'Closed'
-                                          : 'Warranty')
-                                      : (controller.jobStatus2.value),
-                                  hieght: 35,
-                                  padding: EdgeInsets.symmetric(horizontal: 5),
-                                )
-                              : SizedBox(),
-                          const Spacer(),
-                          creatQuotationButton(controller),
-                          internalNotesButton(controller, constraints,
-                              controller.curreentJobCardId.value),
-                          Spacer(),
-                          saveJobButton(() => controller.addNewJobCard()),
-                          Spacer(),
-                          changeStatusToNewButton(
-                              controller.curreentJobCardId.value),
-                          changeStatusToApproveButton(
-                              controller.curreentJobCardId.value),
-                          changeStatusToReadyButton(
-                              controller.curreentJobCardId.value),
-                          changeStatusToPostedButton(
-                              controller, controller.curreentJobCardId.value),
-                          changeStatusToCanceledButton(
-                              controller.curreentJobCardId.value),
-                         
-                          closeIcon()
-                        ]));
+                        ));
                   }),
                   Expanded(
                       child: Padding(
@@ -887,3 +775,170 @@ class JobID {
 
   JobID({this.id});
 }
+ // Container(
+                        //   padding: EdgeInsets.symmetric(horizontal: 8),
+                        //   decoration: BoxDecoration(
+                        //       border: Border.all(color: Colors.white),
+                        //       borderRadius: BorderRadius.circular(5)),
+                        //   child: Row(
+                        //     children: [
+                        //       Text(
+                        //         'Change Job Status',
+                        //         style: TextStyle(
+                        //             color: Colors.white,
+                        //             fontWeight: FontWeight.bold),
+                        //       ),
+                        //       PopupMenuButton<String>(
+                        //         tooltip: 'Select Job Status',
+                        //         position: PopupMenuPosition.under,
+                        //         iconColor: Colors.white,
+                        //         icon:
+                        //             Icon(Icons.more_vert), // The 3 vertical dots
+                        //         onSelected: (value) {
+                        //           if (value == 'New') {
+                        //             if (controller.jobStatus1.value == 'New' &&
+                        //                 controller.jobStatus2.value != 'New') {
+                        //               controller.editNewForJobCard(jobId, 'New');
+                        //             } else if (controller.jobStatus2.value ==
+                        //                 'New') {
+                        //               showSnackBar('Alert', 'Job is Already New');
+                        //             } else if (controller.jobStatus1.value ==
+                        //                 'Cancelled') {
+                        //               showSnackBar('Alert', 'Job is Cancelled');
+                        //             } else if (controller.jobStatus1.value ==
+                        //                 'Posted') {
+                        //               showSnackBar('Alert', 'Job is Posted');
+                        //             } else if (controller
+                        //                 .jobStatus1.value.isEmpty) {
+                        //               showSnackBar(
+                        //                   'Alert', 'Please Save The Job First');
+                        //             }
+                        //           } else if (value == 'Approve') {
+                        //             if (controller.jobStatus1.value == 'New' &&
+                        //                 controller.jobStatus2.value !=
+                        //                     'Approved') {
+                        //               controller.editApproveForJobCard(
+                        //                   jobId, 'Approved');
+                        //             } else if (controller.jobStatus2.value ==
+                        //                 'Approved') {
+                        //               showSnackBar(
+                        //                   'Alert', 'Job is Already Approved');
+                        //             } else if (controller.jobStatus1.value ==
+                        //                 'Posted') {
+                        //               showSnackBar('Alert', 'Job is Posted');
+                        //             } else if (controller.jobStatus1.value ==
+                        //                 'Cancelled') {
+                        //               showSnackBar('Alert', 'Job is Cancelled');
+                        //             } else if (controller
+                        //                 .jobStatus1.value.isEmpty) {
+                        //               showSnackBar(
+                        //                   'Alert', 'Please Save The Job First');
+                        //             }
+                        //           } else if (value == 'Ready') {
+                        //             if (controller.jobStatus1.value == 'New' &&
+                        //                 controller.jobStatus2.value != 'Ready') {
+                        //               controller.editReadyForJobCard(
+                        //                   jobId, 'Ready');
+                        //             } else if (controller.jobStatus2.value ==
+                        //                 'Ready') {
+                        //               showSnackBar(
+                        //                   'Alert', 'Job is Already Ready');
+                        //             } else if (controller.jobStatus1.value ==
+                        //                 'Posted') {
+                        //               showSnackBar('Alert', 'Job is Posted');
+                        //             } else if (controller.jobStatus1.value ==
+                        //                 'Cancelled') {
+                        //               showSnackBar('Alert', 'Job is Cancelled');
+                        //             } else if (controller
+                        //                 .jobStatus1.value.isEmpty) {
+                        //               showSnackBar(
+                        //                   'Alert', 'Please Save The Job First');
+                        //             }
+                        //           } else if (value == 'Post') {
+                        //             if (controller.jobStatus1.value == 'Posted') {
+                        //               showSnackBar(
+                        //                   'Alert', 'Job is Already Posted');
+                        //             } else if (controller.jobStatus1.value ==
+                        //                 'Cancelled') {
+                        //               showSnackBar('Alert', 'Job is Cancelled');
+                        //             } else if (controller.jobWarrentyEndDate.value
+                        //                     .text.isEmpty &&
+                        //                 controller.jobStatus1.value.isNotEmpty &&
+                        //                 controller.jobStatus1.value !=
+                        //                     'Cancelled' &&
+                        //                 controller.jobStatus1.value != 'Posted') {
+                        //               showSnackBar('Alert',
+                        //                   'You Must Enter Warranty End Date First');
+                        //             } else if (controller
+                        //                 .jobStatus1.value.isEmpty) {
+                        //               showSnackBar(
+                        //                   'Alert', 'Please Save The Job First');
+                        //             } else {
+                        //               controller.editPostForJobCard(jobId);
+                        //             }
+                        //           } else if (value == 'Cancel') {
+                        //             if (controller.jobStatus1.value ==
+                        //                 'Cancelled') {
+                        //               showSnackBar(
+                        //                   'Alert', 'Job is Already Cancelled');
+                        //             } else if (controller.jobStatus1.value ==
+                        //                 'Posted') {
+                        //               showSnackBar('Alert', 'Job is Cancelled');
+                        //             } else if (controller.jobStatus1.value !=
+                        //                     'Cancelled' &&
+                        //                 controller.jobStatus2.value !=
+                        //                     'Cancelled' &&
+                        //                 controller.jobStatus1.value != '') {
+                        //               controller.editCancelForJobCard(
+                        //                   jobId, 'Cancelled');
+                        //             } else if (controller
+                        //                 .jobStatus1.value.isEmpty) {
+                        //               showSnackBar(
+                        //                   'Alert', 'Please Save The Job First');
+                        //             }
+                        //           }
+                        //         },
+                        //         itemBuilder: (BuildContext context) =>
+                        //             <PopupMenuEntry<String>>[
+                        //           PopupMenuItem<String>(
+                        //             value: 'New',
+                        //             child: Text(
+                        //               'New',
+                        //               style: TextStyle(
+                        //                   fontWeight: FontWeight.bold,
+                        //                   color: Colors.green),
+                        //             ),
+                        //           ),
+                        //           PopupMenuItem<String>(
+                        //             value: 'Approve',
+                        //             child: Text('Approve',
+                        //                 style: TextStyle(
+                        //                     fontWeight: FontWeight.bold,
+                        //                     color: Color(0xffD2665A))),
+                        //           ),
+                        //           PopupMenuItem<String>(
+                        //             value: 'Ready',
+                        //             child: Text('Ready',
+                        //                 style: TextStyle(
+                        //                     fontWeight: FontWeight.bold,
+                        //                     color: Color(0xff7886C7))),
+                        //           ),
+                        //           PopupMenuItem<String>(
+                        //             value: 'Post',
+                        //             child: Text('Post',
+                        //                 style: TextStyle(
+                        //                     fontWeight: FontWeight.bold,
+                        //                     color: Colors.teal)),
+                        //           ),
+                        //           PopupMenuItem<String>(
+                        //             value: 'Cancel',
+                        //             child: Text('Cancel',
+                        //                 style: TextStyle(
+                        //                     fontWeight: FontWeight.bold,
+                        //                     color: Colors.red)),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),

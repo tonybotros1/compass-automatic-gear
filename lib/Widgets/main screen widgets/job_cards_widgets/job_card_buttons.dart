@@ -8,11 +8,12 @@ import '../../Mobile widgets/inspection report widgets/inspection_report_body.da
 import '../../text_button.dart';
 import 'internal_notes_widget.dart';
 
-ElevatedButton deleteJobButton(
+Widget deleteJobButton(
     JobCardController controller, BuildContext context, jobId) {
-  return ElevatedButton(
-      style: cancelJobButtonStyle,
-      onPressed: () {
+  return ClickableHoverText(
+
+      // style: cancelJobButtonStyle,
+      onTap: () {
         if (controller.jobStatus1.value == 'New' ||
             controller.jobStatus1.value == '') {
           alertDialog(
@@ -26,40 +27,13 @@ ElevatedButton deleteJobButton(
           showSnackBar('Can Not Delete', 'Only New Cards Can be Deleted');
         }
       },
-      child: Text(
-        'Delete',
-        style: fontStyleForElevatedButtons,
-      ));
+      text: 'Delete');
 }
 
-// GetX<JobCardController> changeStatusToCanceledButton(jobId) {
-//   return GetX<JobCardController>(builder: (controller) {
-//     return ElevatedButton(
-//         style: cancelJobButtonStyle,
-//         onPressed: () {
-//           if (controller.jobStatus1.value == 'Cancelled') {
-//             showSnackBar('Alert', 'Job is Already Cancelled');
-//           } else if (controller.jobStatus1.value == 'Posted') {
-//             showSnackBar('Alert', 'Job is Cancelled');
-//           } else if (controller.jobStatus1.value != 'Cancelled' &&
-//               controller.jobStatus2.value != 'Cancelled' &&
-//               controller.jobStatus1.value != '') {
-//             controller.editCancelForJobCard(jobId, 'Cancelled');
-//           } else if (controller.jobStatus1.value.isEmpty) {
-//             showSnackBar('Alert', 'Please Save The Job First');
-//           }
-//         },
-//         child: controller.cancellingJob.isFalse
-//             ? Text('Cancel', style: fontStyleForElevatedButtons)
-//             : loadingProcess);
-//   });
-// }
-
-GetBuilder<JobCardController> changeStatusToCanceledButton(jobId) {
+GetBuilder<JobCardController> changeStatusToCancelledButton(jobId) {
   return GetBuilder<JobCardController>(builder: (controller) {
     return ClickableHoverText(
-        color1: Colors.red,
-        color2: Colors.white,
+
         // style: cancelJobButtonStyle,
         onTap: () {
           if (controller.jobStatus1.value == 'Cancelled') {
@@ -77,33 +51,6 @@ GetBuilder<JobCardController> changeStatusToCanceledButton(jobId) {
         text: 'Cancel');
   });
 }
-
-// GetX<JobCardController> changeStatusToPostedButton(
-//     JobCardController controller, jobId) {
-//   return GetX<JobCardController>(builder: (controllerr) {
-//     return ElevatedButton(
-//         style: postButtonStyle,
-//         onPressed: () {
-//           if (controller.jobStatus1.value == 'Posted') {
-//             showSnackBar('Alert', 'Job is Already Posted');
-//           } else if (controller.jobStatus1.value == 'Cancelled') {
-//             showSnackBar('Alert', 'Job is Cancelled');
-//           } else if (controller.jobWarrentyEndDate.value.text.isEmpty &&
-//               controller.jobStatus1.value.isNotEmpty &&
-//               controller.jobStatus1.value != 'Cancelled' &&
-//               controller.jobStatus1.value != 'Posted') {
-//             showSnackBar('Alert', 'You Must Enter Warranty End Date First');
-//           } else if (controller.jobStatus1.value.isEmpty) {
-//             showSnackBar('Alert', 'Please Save The Job First');
-//           } else {
-//             controllerr.editPostForJobCard(jobId);
-//           }
-//         },
-//         child: controllerr.postingJob.isFalse
-//             ? Text('Post', style: fontStyleForElevatedButtons)
-//             : loadingProcess);
-//   });
-// }
 
 GetBuilder<JobCardController> changeStatusToPostedButton(
     JobCardController controller, jobId) {
@@ -130,11 +77,12 @@ GetBuilder<JobCardController> changeStatusToPostedButton(
   });
 }
 
-GetX<JobCardController> changeStatusToReadyButton(jobId) {
-  return GetX<JobCardController>(builder: (controller) {
-    return ElevatedButton(
-        style: readyButtonStyle,
-        onPressed: () {
+GetBuilder<JobCardController> changeStatusToReadyButton(jobId) {
+  return GetBuilder<JobCardController>(builder: (controller) {
+    return ClickableHoverText(
+
+        // style: readyButtonStyle,
+        onTap: () {
           if (controller.jobStatus1.value == 'New' &&
               controller.jobStatus2.value != 'Ready') {
             controller.editReadyForJobCard(jobId, 'Ready');
@@ -148,17 +96,16 @@ GetX<JobCardController> changeStatusToReadyButton(jobId) {
             showSnackBar('Alert', 'Please Save The Job First');
           }
         },
-        child: controller.readingJob.isFalse
-            ? Text('Ready', style: fontStyleForElevatedButtons)
-            : loadingProcess);
+        text: 'Ready');
   });
 }
 
-GetX<JobCardController> changeStatusToApproveButton(String jobId) {
-  return GetX<JobCardController>(builder: (controller) {
-    return ElevatedButton(
-        style: approveButtonStyle,
-        onPressed: () {
+GetBuilder<JobCardController> changeStatusToApproveButton(String jobId) {
+  return GetBuilder<JobCardController>(builder: (controller) {
+    return ClickableHoverText(
+
+        // style: approveButtonStyle,
+        onTap: () {
           if (controller.jobStatus1.value == 'New' &&
               controller.jobStatus2.value != 'Approved') {
             controller.editApproveForJobCard(jobId, 'Approved');
@@ -172,79 +119,68 @@ GetX<JobCardController> changeStatusToApproveButton(String jobId) {
             showSnackBar('Alert', 'Please Save The Job First');
           }
         },
-        child: controller.approvingJob.isFalse
-            ? Text('Approve', style: fontStyleForElevatedButtons)
-            : loadingProcess);
+        text: 'Approve');
   });
 }
 
-GetX<JobCardController> changeStatusToNewButton(jobId) {
-  return GetX<JobCardController>(builder: (controller) {
-    return ElevatedButton(
-        style: new2ButtonStyle,
-        onPressed: () {
+GetBuilder<JobCardController> changeStatusToNewButton(jobId) {
+  return GetBuilder<JobCardController>(builder: (controller) {
+    return ClickableHoverText(
+
+        // style: new2ButtonStyle,
+        onTap: () {
           if (controller.jobStatus1.value == 'New' &&
               controller.jobStatus2.value != 'New') {
             controller.editNewForJobCard(jobId, 'New');
           } else if (controller.jobStatus2.value == 'New') {
             showSnackBar('Alert', 'Job is Already New');
           } else if (controller.jobStatus1.value == 'Cancelled') {
-            showSnackBar('Alert', 'Job is Cancelled');
+            // showSnackBar('Alert', 'Job is Cancelled');
+            controller.editNewForJobCard(jobId, 'New');
           } else if (controller.jobStatus1.value == 'Posted') {
             showSnackBar('Alert', 'Job is Posted');
           } else if (controller.jobStatus1.value.isEmpty) {
             showSnackBar('Alert', 'Please Save The Job First');
           }
         },
-        child: controller.newingJob.isFalse
-            ? Text('New', style: fontStyleForElevatedButtons)
-            : loadingProcess);
+        text: 'New');
   });
 }
 
-GetX<JobCardController> saveJobButton(void Function() onSave) {
-  return GetX<JobCardController>(builder: (controller) {
-    return ElevatedButton(
-        style: new2ButtonStyle,
-        onPressed: controller.addingNewValue.value
+GetBuilder<JobCardController> saveJobButton(void Function() onSave) {
+  return GetBuilder<JobCardController>(builder: (controller) {
+    return ClickableHoverText(
+        // style: new2ButtonStyle,
+        onTap: controller.addingNewValue.value
             ? null
             : () {
                 onSave();
               },
-        child: controller.addingNewValue.value == false
-            ? Text(
-                'Save',
-                style: fontStyleForElevatedButtons,
-              )
-            : loadingProcess);
+        text: 'Save');
   });
 }
 
-ElevatedButton internalNotesButton(
+Widget internalNotesButton(
     JobCardController controller, BoxConstraints constraints, String jobId) {
-  return ElevatedButton(
-    style: internalNotesButtonStyle,
-    onPressed: () async {
-      if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
-        controller.noteMessage.value = '';
-        controller.internalNote.value.clear();
-        internalNotesDialog(controller, constraints, jobId);
-      } else {
-        showSnackBar('Alert', 'Please Save Job First');
-      }
-    },
-    child: Text(
-      'Internal Notes',
-      style: fontStyleForElevatedButtons,
-    ),
-  );
+  return ClickableHoverText(
+      // style: internalNotesButtonStyle,
+      onTap: () async {
+        if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
+          controller.noteMessage.value = '';
+          controller.internalNote.value.clear();
+          internalNotesDialog(controller, constraints, jobId);
+        } else {
+          showSnackBar('Alert', 'Please Save Job First');
+        }
+      },
+      text: 'Internal Notes');
 }
 
-ElevatedButton inspectionFormButton(JobCardController controller, jobId,
+Widget inspectionFormButton(JobCardController controller, jobId,
     Map<String, dynamic> jobData, BuildContext context) {
-  return ElevatedButton(
-      style: inspectionFormButtonStyle,
-      onPressed: () {
+  return ClickableHoverText(
+      // style: inspectionFormButtonStyle,
+      onTap: () {
         controller.loadInspectionFormValues(jobId, jobData);
         Get.dialog(
             barrierDismissible: false,
@@ -292,54 +228,47 @@ ElevatedButton inspectionFormButton(JobCardController controller, jobId,
                   ),
                 )));
       },
-      child: Text('Inspection Form', style: fontStyleForElevatedButtons));
+      text: 'Inspection Form');
 }
 
-GetX<JobCardController> copyJobButton(jobId) {
-  return GetX<JobCardController>(builder: (controller) {
-    return ElevatedButton(
-        style: copyJobButtonStyle,
-        onPressed: () async {
-          var newData = await controller.copyJob(jobId);
-          Get.back();
-          await controller.loadValues(newData['data']);
-          await controller.getAllInvoiceItems(newData['newId']);
-          controller.loadingCopyJob.value = false;
+GetBuilder<JobCardController> copyJobButton(jobId) {
+  return GetBuilder<JobCardController>(builder: (controller) {
+    return ClickableHoverText(
+        // style: copyJobButtonStyle,
+        onTap: () async {
+          if (controller.jobStatus1.value == 'New' ||
+              controller.jobStatus1.value == 'Approved' ||
+              controller.jobStatus1.value == 'Ready') {
+            showSnackBar('Alert', 'Only Posted / Cancelled Jobs Can be Copied');
+          } else {
+            showSnackBar('Copying', 'Please Wait');
 
-          editJobCardDialog(controller, newData['data'], newData['newId']);
+            var newData = await controller.copyJob(jobId);
+            Get.back();
+            await controller.loadValues(newData['data']);
+            await controller.getAllInvoiceItems(newData['newId']);
+            controller.loadingCopyJob.value = false;
+            showSnackBar('Done', 'Job Copied Successfully');
+
+            editJobCardDialog(controller, newData['data'], newData['newId']);
+          }
         },
-        child: controller.loadingCopyJob.isFalse
-            ? Text(
-                'Copy',
-                style: fontStyleForElevatedButtons,
-              )
-            : const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              ));
+        text: 'Copy');
   });
 }
 
-GetX<JobCardController> creatQuotationButton(JobCardController controller) {
-  return GetX<JobCardController>(builder: (context) {
-    return ElevatedButton(
-        style: creatJobOrQuotationButtonStyle,
-        onPressed: () {
+GetBuilder<JobCardController> creatQuotationButton(
+    JobCardController controller) {
+  return GetBuilder<JobCardController>(builder: (context) {
+    return ClickableHoverText(
+        // style: creatJobOrQuotationButtonStyle,
+        onTap: () {
           if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
             controller.createQuotationCard();
           } else {
             showSnackBar('Alert', 'Please Save Job First');
           }
         },
-        child: controller.creatingNewQuotation.isFalse
-            ? Text(
-                'Create Quotation',
-                style: fontStyleForElevatedButtons,
-              )
-            : loadingProcess);
+        text: 'Create Quotation');
   });
 }

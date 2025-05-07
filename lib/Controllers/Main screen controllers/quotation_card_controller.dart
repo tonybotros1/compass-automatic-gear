@@ -159,6 +159,7 @@ class QuotationCardController extends GetxController {
   }
 
   clearValues() {
+    jobCardCounter.value.clear();
     allInvoiceItems.clear();
     canAddInternalNotesAndInvoiceItems.value = false;
     quotationStatus.value = '';
@@ -206,6 +207,7 @@ class QuotationCardController extends GetxController {
   }
 
   Future<void> loadValues(Map<String, dynamic> data) async {
+    jobCardCounter.value.text = data['job_number'] ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
     quotationStatus.value = data['quotation_status'] as String? ?? '';
     carBrandLogo.value = data['car_brand_logo'] as String? ?? '';
@@ -394,6 +396,7 @@ class QuotationCardController extends GetxController {
     try {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
+        'job_number': '',
         'quotation_status': quotationStatus.value,
         'car_brand_logo': carBrandLogo.value,
         'company_id': companyId.value,
@@ -470,6 +473,11 @@ class QuotationCardController extends GetxController {
 
   void editQuotationCard(id) {
     try {
+      if (quotationStatus.value == 'Posted' ||
+          quotationStatus.value == 'Cancelled') {
+        showSnackBar('Alert', 'Can\'t Edit For Posted / Cancelled Quotations');
+        return;
+      }
       addingNewValue.value = true;
 
       FirebaseFirestore.instance.collection('quotation_cards').doc(id).update({
@@ -618,7 +626,19 @@ class QuotationCardController extends GetxController {
   Future<void> createNewJobCard() async {
     try {
       creatingNewJob.value = true;
+      var job = await FirebaseFirestore.instance
+          .collection('job_cards')
+          .where('company_id', isEqualTo: companyId.value)
+          .where('quotation_number', isEqualTo: quotationCounter.value.text)
+          .get();
+
+      if (job.docs.isNotEmpty) {
+        showSnackBar('Alert', 'Job Already Created');
+        return;
+      }
+
       Map<String, dynamic> newData = {
+        'quotation_number': quotationCounter.value.text,
         'label': '',
         'job_status_1': 'New',
         'job_status_2': 'New',

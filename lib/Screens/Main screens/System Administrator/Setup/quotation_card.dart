@@ -490,14 +490,7 @@ Widget editSection(context, QuotationCardController controller,
                   }
                 : null,
         icon: isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.blue,
-                  strokeWidth: 2,
-                ),
-              )
+            ? loadingProcess
             : const Icon(
                 Icons.edit_note_rounded,
                 color: Colors.blue,
@@ -534,35 +527,54 @@ Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
                   ),
                   padding: const EdgeInsets.all(16),
                   width: constraints.maxWidth,
-                  child: Row(
-                    spacing: 3,
-                    children: [
-                      Text(
-                        '${controller.getScreenName()}',
-                        style: fontStyleForScreenNameUsedInButtons,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints:
+                          BoxConstraints(minWidth: constraints.maxWidth - 40),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            spacing: 10,
+                            children: [
+                              Text(
+                                '${controller.getScreenName()}',
+                                style: fontStyleForScreenNameUsedInButtons,
+                              ),
+                              GetX<QuotationCardController>(
+                                  builder: (controller) {
+                                if (controller
+                                    .quotationStatus.value.isNotEmpty) {
+                                  return statusBox(
+                                    controller.quotationStatus.value,
+                                  );
+                                } else {
+                                  return const SizedBox();
+                                }
+                              }),
+                            ],
+                          ),
+                          Row(
+                            spacing: 10,
+                            children: [
+                              creatJobButton(),
+                              internalNotesButton(
+                                  controller, constraints, quotationId),
+                              separator(),
+                              copyQuotationButton(quotationId),
+                              saveQuotationButton(() =>
+                                  controller.editQuotationCard(quotationId)),
+                              deleteButton(controller, context, quotationId),
+                              separator(),
+                              changeStatusToPostedButton(quotationId),
+                              changeStatusToCanceledButton(quotationId),
+                              closeIcon()
+                            ],
+                          ),
+                        ],
                       ),
-                      GetX<QuotationCardController>(builder: (controller) {
-                        if (controller.quotationStatus.value.isNotEmpty) {
-                          return statusBox(
-                            controller.quotationStatus.value,
-                          );
-                        } else {
-                          return const SizedBox();
-                        }
-                      }),
-                      const Spacer(),
-                      creatJobButton(),
-                      internalNotesButton(controller, constraints, quotationId),
-                      copyQuotationButton(quotationId),
-                      const Spacer(),
-                      saveQuotationButton(
-                          () => controller.editQuotationCard(quotationId)),
-                      const Spacer(),
-                      changeStatusToPostedButton(quotationId),
-                      changeStatusToCanceledButton(quotationId),
-                      deleteButton(controller, context, quotationId),
-                      closeIcon()
-                    ],
+                    ),
                   ),
                 ),
                 Expanded(
@@ -635,30 +647,54 @@ ElevatedButton newQuotationCardButton(BuildContext context,
                         ),
                         padding: const EdgeInsets.all(16),
                         width: constraints.maxWidth,
-                        child: Row(spacing: 3, children: [
-                          Text(
-                            '${controller.getScreenName()}',
-                            style: fontStyleForScreenNameUsedInButtons,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                                minWidth: constraints.maxWidth - 40),
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    spacing: 10,
+                                    children: [
+                                      Text(
+                                        '${controller.getScreenName()}',
+                                        style:
+                                            fontStyleForScreenNameUsedInButtons,
+                                      ),
+                                      controller
+                                              .quotationStatus.value.isNotEmpty
+                                          ? statusBox(
+                                              controller.quotationStatus.value,
+                                            )
+                                          : SizedBox(),
+                                    ],
+                                  ),
+                                  Row(
+                                    spacing: 10,
+                                    children: [
+                                      creatJobButton(),
+                                      internalNotesButton(
+                                          controller,
+                                          constraints,
+                                          controller
+                                              .curreentQuotationCardId.value),
+                                      separator(),
+                                      saveQuotationButton(() =>
+                                          controller.addNewQuotationCard()),
+                                      separator(),
+                                      changeStatusToPostedButton(controller
+                                          .curreentQuotationCardId.value),
+                                      changeStatusToCanceledButton(controller
+                                          .curreentQuotationCardId.value),
+                                      closeIcon()
+                                    ],
+                                  ),
+                                ]),
                           ),
-                          controller.quotationStatus.value.isNotEmpty
-                              ? statusBox(
-                                  controller.quotationStatus.value,
-                                )
-                              : SizedBox(),
-                          const Spacer(),
-                          creatJobButton(),
-                          internalNotesButton(controller, constraints,
-                              controller.curreentQuotationCardId.value),
-                          const Spacer(),
-                          saveQuotationButton(
-                              () => controller.addNewQuotationCard()),
-                          const Spacer(),
-                          changeStatusToPostedButton(
-                              controller.curreentQuotationCardId.value),
-                          changeStatusToCanceledButton(
-                              controller.curreentQuotationCardId.value),
-                          closeIcon()
-                        ]));
+                        ));
                   }),
                   Expanded(
                       child: Padding(

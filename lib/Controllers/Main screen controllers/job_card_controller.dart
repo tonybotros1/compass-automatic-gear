@@ -581,7 +581,8 @@ class JobCardController extends GetxController {
             ) ??
             {};
 
-    controller.carImagesURLs.assignAll(List<String>.from(data?['car_images'] ?? []));
+    controller.carImagesURLs
+        .assignAll(List<String>.from(data?['car_images'] ?? []));
     controller.customerSignatureURL.value = data?['customer_signature'] ?? '';
     controller.advisorSignatureURL.value = data?['advisor_signature'] ?? '';
     controller.carDialogImageURL.value = data?['car_dialog'] ?? '';
@@ -650,14 +651,14 @@ class JobCardController extends GetxController {
     invoiceCounter.value.text = data['invoice_number'];
     lpoCounter.value.text = data['lpo_number'];
     jobCardDate.value.text = data['job_date'];
-    invoiceDate.value.text = data['invoice_date'];
+    invoiceDate.value.text = textToDate(data['invoice_date']);
     approvalDate.value.text = textToDate(data['job_approval_date']);
-    startDate.value.text = data['job_start_date'];
-    finishDate.value.text = data['job_finish_date'];
-    deliveryDate.value.text = data['job_delivery_date'];
+    startDate.value.text = textToDate(data['job_start_date']);
+    finishDate.value.text = textToDate(data['job_finish_date']);
+    deliveryDate.value.text = textToDate(data['job_delivery_date']);
     jobWarrentyDays.value.text = data['job_warrenty_days'];
     jobWarrentyKM.value.text = data['job_warrenty_km'];
-    jobWarrentyEndDate.value.text = data['job_warrenty_end_date'];
+    jobWarrentyEndDate.value.text = textToDate(data['job_warrenty_end_date']);
     minTestKms.value.text = data['job_min_test_km'];
     reference1.value.text = data['job_reference_1'];
     reference2.value.text = data['job_reference_2'];
@@ -668,6 +669,7 @@ class JobCardController extends GetxController {
 
   Future<void> addNewJobCard() async {
     try {
+      showSnackBar('Adding', 'Please Wait');
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'label': '',
@@ -884,6 +886,10 @@ class JobCardController extends GetxController {
 
   void editJobCard(jobId) {
     try {
+      if (jobStatus1.value == 'Posted' || jobStatus1.value == 'Cancelled') {
+        showSnackBar('Alert', 'Can\'t Edit For Posted / Cancelled Jobs');
+        return;
+      }
       addingNewValue.value = true;
 
       FirebaseFirestore.instance.collection('job_cards').doc(jobId).update({
@@ -995,6 +1001,7 @@ class JobCardController extends GetxController {
 
   Future<void> createQuotationCard() async {
     try {
+      showSnackBar('Creating', 'Please Wait');
       creatingNewQuotation.value = true;
       Map<String, dynamic> newData = {
         'quotation_status': 'New',
@@ -1148,6 +1155,7 @@ class JobCardController extends GetxController {
       approvalDate.value.text = textToDate(DateTime.now());
       jobStatus2.value = 'Approved';
       approvingJob.value = false;
+      showSnackBar('Done', 'Status is Approved Now');
     } catch (e) {
       approvingJob.value = false;
     }
@@ -1166,6 +1174,7 @@ class JobCardController extends GetxController {
       finishDate.value.text = textToDate(DateTime.now());
       jobStatus2.value = 'Ready';
       readingJob.value = false;
+      showSnackBar('Done', 'Status is Ready Now');
     } catch (e) {
       readingJob.value = false;
     }
@@ -1188,6 +1197,8 @@ class JobCardController extends GetxController {
       jobStatus2.value = 'New';
       jobStatus1.value = 'New';
       newingJob.value = false;
+
+      showSnackBar('Done', 'Status is New Now');
     } catch (e) {
       newingJob.value = false;
     }
@@ -1208,6 +1219,7 @@ class JobCardController extends GetxController {
       jobStatus1.value = status;
       jobStatus2.value = status;
       cancellingJob.value = false;
+      showSnackBar('Done', 'Status is Cancelled Now');
     } catch (e) {
       cancellingJob.value = false;
     }
@@ -1243,12 +1255,12 @@ class JobCardController extends GetxController {
         jobStatus1.value = 'Posted';
         jobStatus2.value = status2;
         postingJob.value = false;
+        showSnackBar('Done', 'Status is Posted Now');
       } else {
         showSnackBar('Alert', 'Save Job To get the Warrenty End Date');
         postingJob.value = false;
       }
     } catch (e) {
-      print(e);
       postingJob.value = false;
     }
   }

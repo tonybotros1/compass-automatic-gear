@@ -30,6 +30,8 @@ var hintMarkTestStyle =
 var fontStyleForElevatedButtons =
     const TextStyle(fontWeight: FontWeight.bold, fontSize: 12);
 
+var paddingForButtons = EdgeInsets.symmetric(horizontal: 16);
+
 var newButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
   foregroundColor: Colors.white,
@@ -83,7 +85,7 @@ var isNotPressedButtonStyle = ElevatedButton.styleFrom(
 );
 
 var new2ButtonStyle = ElevatedButton.styleFrom(
-  padding: EdgeInsets.symmetric(horizontal: 8),
+  padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.green,
   shape: RoundedRectangleBorder(
@@ -93,7 +95,7 @@ var new2ButtonStyle = ElevatedButton.styleFrom(
 );
 
 var postButtonStyle = ElevatedButton.styleFrom(
-  padding: EdgeInsets.symmetric(horizontal: 8),
+  padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.teal,
   shape: RoundedRectangleBorder(
@@ -130,7 +132,7 @@ var cancelButtonStyle = ElevatedButton.styleFrom(
 );
 
 var cancelJobButtonStyle = ElevatedButton.styleFrom(
-  padding: EdgeInsets.symmetric(horizontal: 8),
+  padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.red,
   shape: RoundedRectangleBorder(
@@ -140,7 +142,7 @@ var cancelJobButtonStyle = ElevatedButton.styleFrom(
 );
 
 var internalNotesButtonStyle = ElevatedButton.styleFrom(
-  padding: EdgeInsets.symmetric(horizontal: 8),
+  padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xffFA812F),
   shape: RoundedRectangleBorder(
@@ -150,7 +152,7 @@ var internalNotesButtonStyle = ElevatedButton.styleFrom(
 );
 
 var inspectionFormButtonStyle = ElevatedButton.styleFrom(
-  padding: EdgeInsets.symmetric(horizontal: 8),
+  padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff034C53),
   shape: RoundedRectangleBorder(
@@ -160,7 +162,7 @@ var inspectionFormButtonStyle = ElevatedButton.styleFrom(
 );
 
 var copyJobButtonStyle = ElevatedButton.styleFrom(
-  padding: EdgeInsets.symmetric(horizontal: 8),
+  padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff7D1C4A),
   shape: RoundedRectangleBorder(
@@ -170,7 +172,7 @@ var copyJobButtonStyle = ElevatedButton.styleFrom(
 );
 
 var creatJobOrQuotationButtonStyle = ElevatedButton.styleFrom(
-  padding: EdgeInsets.symmetric(horizontal: 8),
+  padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff393E46),
   shape: RoundedRectangleBorder(
@@ -411,6 +413,8 @@ var screenPadding = const EdgeInsets.only(
 String formatPhrase(String phrase) {
   return phrase.replaceAll(' ', '_');
 }
+Text separator() => Text('|', style: TextStyle(color: Colors.white));
+
 
 double horizontalMarginForTable = 8;
 

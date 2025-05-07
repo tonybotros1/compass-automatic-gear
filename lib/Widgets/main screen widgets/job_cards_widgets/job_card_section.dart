@@ -9,7 +9,7 @@ Container jobCardSection(context, JobCardController controller) {
       decoration: containerDecor,
       child: Column(spacing: 10, children: [
         Row(
-          spacing: 5,
+          spacing: 10,
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(
@@ -35,7 +35,7 @@ Container jobCardSection(context, JobCardController controller) {
           ],
         ),
         Row(
-          spacing: 5,
+          spacing: 10,
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(
@@ -79,7 +79,7 @@ Container jobCardSection(context, JobCardController controller) {
           ],
         ),
         Row(
-          spacing: 5,
+          spacing: 10,
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(
@@ -123,24 +123,30 @@ Container jobCardSection(context, JobCardController controller) {
           ],
         ),
         Row(
-          spacing: 5,
+          spacing: 10,
           children: [
             Expanded(
-              child: myTextFormFieldWithBorder(
-                isnumber: true,
-                controller: controller.jobWarrentyDays.value,
-                labelText: 'Warrenty Days',
+              child: Row(
+                spacing: 10,
+                children: [
+                  Expanded(
+                    child: myTextFormFieldWithBorder(
+                      isnumber: true,
+                      controller: controller.jobWarrentyDays.value,
+                      labelText: 'Warrenty Days',
+                    ),
+                  ),
+                  Expanded(
+                    child: myTextFormFieldWithBorder(
+                      isnumber: true,
+                      controller: controller.jobWarrentyKM.value,
+                      labelText: 'Warrenty KM',
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
-              child: myTextFormFieldWithBorder(
-                isnumber: true,
-                controller: controller.jobWarrentyKM.value,
-                labelText: 'Warrenty KM',
-              ),
-            ),
-            Expanded(
-              flex: 2,
               child: myTextFormFieldWithBorder(
                 suffixIcon: IconButton(
                     onPressed: () {
@@ -154,16 +160,24 @@ Container jobCardSection(context, JobCardController controller) {
               ),
             ),
             Expanded(
-              child: myTextFormFieldWithBorder(
-                isnumber: true,
-                controller: controller.minTestKms.value,
-                labelText: 'Min Test KMs',
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: myTextFormFieldWithBorder(
+                      isnumber: true,
+                      controller: controller.minTestKms.value,
+                      labelText: 'Min Test KMs',
+                    ),
+                  ),
+                  Expanded(child: SizedBox())
+                ],
               ),
             ),
           ],
         ),
         Row(
-          spacing: 5,
+          spacing: 10,
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(
@@ -200,7 +214,7 @@ Container jobCardSection(context, JobCardController controller) {
           ],
         ),
         Row(
-          spacing: 5,
+          spacing: 10,
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(

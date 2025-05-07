@@ -4,13 +4,13 @@ import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/quotation_card_controller.dart';
 import '../../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../../consts.dart';
+import '../../text_button.dart';
 import 'internal_notes_widget.dart';
 
-ElevatedButton deleteButton(
+Widget deleteButton(
     QuotationCardController controller, BuildContext context, quotationId) {
-  return ElevatedButton(
-      style: cancelJobButtonStyle,
-      onPressed: () {
+  return ClickableHoverText(
+      onTap: () {
         if (controller.quotationStatus.value == 'New' ||
             controller.quotationStatus.value == '') {
           alertDialog(
@@ -24,14 +24,13 @@ ElevatedButton deleteButton(
           showSnackBar('Can Not Delete', 'Only New Cards Can be Deleted');
         }
       },
-      child: Text('Delete', style: fontStyleForElevatedButtons));
+      text: 'Delete');
 }
 
-GetX<QuotationCardController> changeStatusToCanceledButton(quotationId) {
-  return GetX<QuotationCardController>(builder: (controller) {
-    return ElevatedButton(
-        style: cancelJobButtonStyle,
-        onPressed: controller.cancelingQuotation.isFalse
+GetBuilder<QuotationCardController> changeStatusToCanceledButton(quotationId) {
+  return GetBuilder<QuotationCardController>(builder: (controller) {
+    return ClickableHoverText(
+        onTap: controller.cancelingQuotation.isFalse
             ? () {
                 if (controller.quotationStatus.value != 'Cancelled' &&
                     controller.quotationStatus.value.isNotEmpty) {
@@ -43,17 +42,14 @@ GetX<QuotationCardController> changeStatusToCanceledButton(quotationId) {
                 }
               }
             : null,
-        child: controller.cancelingQuotation.isFalse
-            ? Text('Cancel', style: fontStyleForElevatedButtons)
-            : loadingProcess);
+        text: 'Cancel');
   });
 }
 
-GetX<QuotationCardController> changeStatusToPostedButton(quotationId) {
-  return GetX<QuotationCardController>(builder: (controller) {
-    return ElevatedButton(
-        style: postButtonStyle,
-        onPressed: controller.postingQuotation.isFalse
+GetBuilder<QuotationCardController> changeStatusToPostedButton(quotationId) {
+  return GetBuilder<QuotationCardController>(builder: (controller) {
+    return ClickableHoverText(
+        onTap: controller.postingQuotation.isFalse
             ? () {
                 if (controller.quotationStatus.value != 'Posted' &&
                     controller.quotationStatus.value != 'Cancelled' &&
@@ -68,58 +64,49 @@ GetX<QuotationCardController> changeStatusToPostedButton(quotationId) {
                 }
               }
             : null,
-        child: controller.postingQuotation.isFalse
-            ? Text('Post', style: fontStyleForElevatedButtons)
-            : loadingProcess);
+        text: 'Post');
   });
 }
 
-GetX<QuotationCardController> saveQuotationButton(void Function() onSave) {
-  return GetX<QuotationCardController>(builder: (controller) {
-    return ElevatedButton(
-      onPressed: controller.addingNewValue.value
+GetBuilder<QuotationCardController> saveQuotationButton(
+    void Function() onSave) {
+  return GetBuilder<QuotationCardController>(builder: (controller) {
+    return ClickableHoverText(
+      onTap: controller.addingNewValue.value
           ? null
           : () async {
               onSave();
             },
-      style: new2ButtonStyle,
-      child: controller.addingNewValue.value == false
-          ? Text(
-              'Save',
-              style: fontStyleForElevatedButtons,
-            )
-          : loadingProcess,
+      text: 'Save',
     );
   });
 }
 
-GetX<QuotationCardController> copyQuotationButton(quotationId) {
-  return GetX<QuotationCardController>(builder: (controller) {
-    return ElevatedButton(
-        style: copyJobButtonStyle,
-        onPressed: controller.loadingCopyQuotation.isFalse
+GetBuilder<QuotationCardController> copyQuotationButton(quotationId) {
+  return GetBuilder<QuotationCardController>(builder: (controller) {
+    return ClickableHoverText(
+        onTap: controller.loadingCopyQuotation.isFalse
             ? () async {
-                var newData = await controller.copyQuotation(quotationId);
-                Get.back();
-                controller.loadValues(newData['data']);
-                editQuotationCardDialog(
-                    controller, newData['data'], newData['newId']);
+                if (controller.quotationStatus.value == 'New') {
+                  showSnackBar('Alert',
+                      'Only Posted / Cancelled Quotations Can be Copied');
+                } else {
+                  var newData = await controller.copyQuotation(quotationId);
+                  Get.back();
+                  controller.loadValues(newData['data']);
+                  editQuotationCardDialog(
+                      controller, newData['data'], newData['newId']);
+                }
               }
             : null,
-        child: controller.loadingCopyQuotation.isFalse
-            ? Text(
-                'Copy',
-                style: fontStyleForElevatedButtons,
-              )
-            : loadingProcess);
+        text: 'Copy');
   });
 }
 
-ElevatedButton internalNotesButton(QuotationCardController controller,
+Widget internalNotesButton(QuotationCardController controller,
     BoxConstraints constraints, quotationId) {
-  return ElevatedButton(
-    style: internalNotesButtonStyle,
-    onPressed: () async {
+  return ClickableHoverText(
+    onTap: () async {
       if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
         controller.noteMessage.value = '';
         controller.internalNote.value.clear();
@@ -128,31 +115,28 @@ ElevatedButton internalNotesButton(QuotationCardController controller,
         showSnackBar('Alert', 'Please Save Quotation First');
       }
     },
-    child: Text(
-      'Internal Notes',
-      style: fontStyleForElevatedButtons,
-    ),
+    text: 'Internal Notes',
   );
 }
 
-GetX<QuotationCardController> creatJobButton() {
-  return GetX<QuotationCardController>(builder: (controller) {
-    return ElevatedButton(
-        style: creatJobOrQuotationButtonStyle,
-        onPressed: controller.creatingNewJob.isFalse
+GetBuilder<QuotationCardController> creatJobButton() {
+  return GetBuilder<QuotationCardController>(builder: (controller) {
+    return ClickableHoverText(
+        // style: creatJobOrQuotationButtonStyle,
+        onTap: controller.creatingNewJob.isFalse
             ? () async {
-                if (controller.canAddInternalNotesAndInvoiceItems.isFalse) {
-                  controller.createNewJobCard();
+                if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
+                  if (controller.quotationStatus.value == 'Posted') {
+                    controller.createNewJobCard();
+                  } else {
+                    showSnackBar(
+                        'Alert', 'Only Posted Quotations Can Create Job From');
+                  }
                 } else {
                   showSnackBar('Alert', 'Please Save Quotation First');
                 }
               }
             : null,
-        child: controller.creatingNewJob.isFalse
-            ? Text(
-                'Create Job',
-                style: fontStyleForElevatedButtons,
-              )
-            : loadingProcess);
+        text: 'Create Job');
   });
 }
