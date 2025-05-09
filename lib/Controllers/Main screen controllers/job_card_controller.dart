@@ -239,10 +239,10 @@ class JobCardController extends GetxController {
 
       quotationCardController.getAllInvoiceItems(id);
       await quotationCardController.loadValues(data);
+      showSnackBar('Done', 'Opened Successfully');
       await editQuotationCardDialog(quotationCardController, data, id,
           screenName: '🧾 Quotation');
       openingQuotationCardScreen.value = false;
-      showSnackBar('Done', 'Opened Successfully');
     } catch (e) {
       openingQuotationCardScreen.value = false;
       showSnackBar('Alert', 'Something Went Wrong');

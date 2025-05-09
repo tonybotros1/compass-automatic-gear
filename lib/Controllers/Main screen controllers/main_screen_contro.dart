@@ -56,15 +56,22 @@ class MainScreenController extends GetxController {
   RxString companyImageURL = RxString('');
   RxString companyName = RxString('');
   RxDouble menuWidth = RxDouble(250);
+  RxString userId = RxString('');
   MyTreeNode? previouslySelectedNode;
 
   @override
   void onInit() async {
     // init();
     await getCompanyDetails();
+    await getUserId();
     getFavoriteScreens();
     getScreens();
     super.onInit();
+  }
+
+  getUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId.value = prefs.getString('userId')!;
   }
 
   // this function is to get company details
@@ -331,6 +338,7 @@ class MainScreenController extends GetxController {
     FirebaseFirestore.instance
         .collection('favorite_screens')
         .where('company_id', isEqualTo: companyId.value)
+        .where('user_id', isEqualTo: userId.value)
         .orderBy('added_date', descending: true)
         .limit(15)
         .snapshots()
@@ -348,7 +356,8 @@ class MainScreenController extends GetxController {
         'screen_name': selectedScreenName.value,
         'screen_route': selectedScreenRoute.value,
         'added_date': DateTime.now(),
-        'company_id': companyId.value
+        'company_id': companyId.value,
+        'user_id': userId.value,
       });
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try agian');
