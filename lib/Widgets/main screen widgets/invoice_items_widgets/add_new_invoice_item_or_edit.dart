@@ -6,43 +6,37 @@ Widget addNewinvoiceItemsOrEdit({
   required InvoiceItemsController controller,
   bool? canEdit,
 }) {
-  return Form(
-    key: controller.formKeyForAddingNewvalue,
-    child: ListView(
-      children: [
-        const SizedBox(
-          height: 10,
-        ),
-        myTextFormFieldWithBorder(
-          obscureText: false,
-          controller: controller.name,
-          labelText: 'Name',
-          hintText: 'Enter Name',
-          validate: true,
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        myTextFormFieldWithBorder(
-          maxLines: 10,
-          obscureText: false,
-          controller: controller.description,
-          labelText: 'Description',
-          hintText: 'Enter Description',
-          validate: false,
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        myTextFormFieldWithBorder(
-          isDouble: true,
-          obscureText: false,
-          controller: controller.price,
-          labelText: 'Price',
-          hintText: 'Enter Price',
-          validate: false,
-        ),
-      ],
-    ),
+  return ListView(
+    children: [
+      const SizedBox(
+        height: 10,
+      ),
+      myTextFormFieldWithBorder(
+        obscureText: false,
+        controller: controller.name,
+        labelText: 'Name',
+        hintText: 'Enter Name',
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      myTextFormFieldWithBorder(
+        maxLines: 10,
+        obscureText: false,
+        controller: controller.description,
+        labelText: 'Description',
+        hintText: 'Enter Description',
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      myTextFormFieldWithBorder(
+        isDouble: true,
+        obscureText: false,
+        controller: controller.price,
+        labelText: 'Price',
+        hintText: 'Enter Price',
+      ),
+    ],
   );
 }

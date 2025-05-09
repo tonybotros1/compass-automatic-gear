@@ -1,7 +1,9 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/job_cards_widgets/invoice_items_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../consts.dart';
+import '../../text_button.dart';
 import 'car_details_section.dart';
 import 'customer_details_section.dart';
 import 'job_card_section.dart';
@@ -50,10 +52,36 @@ Widget addNewJobCardOrEdit(
             child: Column(
               children: [
                 labelContainer(
-                    lable: Text(
+                    lable: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
                       'Job Details',
                       style: fontStyle1,
-                    )),
+                    ),
+                    GetX<JobCardController>(builder: (controller) {
+                      return controller.quotationCounter.value.text.isNotEmpty
+                          ? ClickableHoverText(
+                              color2:
+                                  controller.openingQuotationCardScreen.isFalse
+                                      ? null
+                                      : Colors.yellow,
+                              text:
+                                  controller.openingQuotationCardScreen.isFalse
+                                      ? controller.quotationCounter.value.text
+                                      : 'Loading...',
+                              onTap:
+                                  controller.openingQuotationCardScreen.isFalse
+                                      ? () async {
+                                          controller
+                                              .openQuotationCardScreenByNumber();
+                                        }
+                                      : null,
+                            )
+                          : SizedBox();
+                    })
+                  ],
+                )),
                 jobCardSection(context, controller)
               ],
             ),

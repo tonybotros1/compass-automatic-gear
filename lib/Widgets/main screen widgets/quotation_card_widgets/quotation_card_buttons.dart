@@ -91,11 +91,13 @@ GetBuilder<QuotationCardController> copyQuotationButton(quotationId) {
                   showSnackBar('Alert',
                       'Only Posted / Cancelled Quotations Can be Copied');
                 } else {
+
                   var newData = await controller.copyQuotation(quotationId);
                   Get.back();
                   controller.loadValues(newData['data']);
                   editQuotationCardDialog(
                       controller, newData['data'], newData['newId']);
+                  showSnackBar('Done', 'Quotation Copied');
                 }
               }
             : null,

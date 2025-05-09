@@ -138,8 +138,7 @@ Widget tableOfScreens(
           ],
           rows: [
             ...controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-              final invoiceItemsData =
-                  invoiceItems.data() as Map<String, dynamic>;
+              final invoiceItemsData = invoiceItems.data();
               final invoiceItemsId = invoiceItems.id;
               return dataRowForTheTable(invoiceItemsData, context, constraints,
                   invoiceItemsId, controller, jobId);
@@ -220,13 +219,17 @@ Widget deleteSection(
     String jobId, context, JobCardController controller, invoiceItemsId) {
   return IconButton(
       onPressed: () {
-        alertDialog(
-            context: context,
-            controller: controller,
-            content: 'This will be deleted permanently',
-            onPressed: () {
-              controller.deleteInvoiceItem(jobId, invoiceItemsId);
-            });
+        if (controller.jobStatus1.value == 'New') {
+          alertDialog(
+              context: context,
+              controller: controller,
+              content: 'This will be deleted permanently',
+              onPressed: () {
+                controller.deleteInvoiceItem(jobId, invoiceItemsId);
+              });
+        } else {
+          showSnackBar('Alert', 'Only New Jobs Allowed');
+        }
       },
       icon: const Icon(
         Icons.delete,
@@ -243,28 +246,33 @@ Widget editSection(
     String invoiceItemsId) {
   return IconButton(
       onPressed: () {
-        controller.invoiceItemNameId.value = invoiceItemsData['name'];
-        controller.invoiceItemName.text = controller.getdataName(
-            invoiceItemsData['name'], controller.allInvoiceItemsFromCollection);
-        controller.lineNumber.text =
-            (invoiceItemsData['line_number'] ?? '').toString();
-        controller.description.text = invoiceItemsData['description'];
-        controller.quantity.text = invoiceItemsData['quantity'];
-        controller.price.text = invoiceItemsData['price'];
-        controller.amount.text = invoiceItemsData['amount'];
-        controller.discount.text = invoiceItemsData['discount'];
-        controller.total.text = invoiceItemsData['total'];
-        controller.vat.text = invoiceItemsData['vat'];
-        controller.net.text = invoiceItemsData['net'];
-        invoiceItemsForJobDialog(
-            jobId: jobId,
-            controller: controller,
-            constraints: constraints,
-            onPressed: controller.addingNewinvoiceItemsValue.value
-                ? null
-                : () {
-                    controller.editInvoiceItem(jobId, invoiceItemsId);
-                  });
+        if (controller.jobStatus1.value == 'New') {
+          controller.invoiceItemNameId.value = invoiceItemsData['name'];
+          controller.invoiceItemName.text = controller.getdataName(
+              invoiceItemsData['name'],
+              controller.allInvoiceItemsFromCollection);
+          controller.lineNumber.text =
+              (invoiceItemsData['line_number'] ?? '').toString();
+          controller.description.text = invoiceItemsData['description'];
+          controller.quantity.text = invoiceItemsData['quantity'];
+          controller.price.text = invoiceItemsData['price'];
+          controller.amount.text = invoiceItemsData['amount'];
+          controller.discount.text = invoiceItemsData['discount'];
+          controller.total.text = invoiceItemsData['total'];
+          controller.vat.text = invoiceItemsData['vat'];
+          controller.net.text = invoiceItemsData['net'];
+          invoiceItemsForJobDialog(
+              jobId: jobId,
+              controller: controller,
+              constraints: constraints,
+              onPressed: controller.addingNewinvoiceItemsValue.value
+                  ? null
+                  : () {
+                      controller.editInvoiceItem(jobId, invoiceItemsId);
+                    });
+        } else {
+          showSnackBar('Alert', 'Only New Jobs Allowed');
+        }
       },
       icon: const Icon(
         Icons.edit_note_rounded,

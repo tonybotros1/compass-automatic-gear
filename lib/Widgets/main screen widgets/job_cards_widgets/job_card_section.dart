@@ -180,25 +180,31 @@ Container jobCardSection(context, JobCardController controller) {
           spacing: 10,
           children: [
             Expanded(
-              child: myTextFormFieldWithBorder(
-                controller: controller.reference1.value,
-                labelText: 'Reference 1',
+              child: Row(
+                spacing: 10,
+                children: [
+                  Expanded(
+                    child: myTextFormFieldWithBorder(
+                      controller: controller.reference1.value,
+                      labelText: 'Reference 1',
+                    ),
+                  ),
+                  Expanded(
+                    child: myTextFormFieldWithBorder(
+                      controller: controller.reference2.value,
+                      labelText: 'Reference 2',
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
-              child: myTextFormFieldWithBorder(
-                controller: controller.reference2.value,
-                labelText: 'Reference 2',
-              ),
-            ),
+                child: myTextFormFieldWithBorder(
+              controller: controller.deliveryTime.value,
+              labelText: 'Delivery Time',
+              hintText: 'Enter Delivery Time',
+            )),
             Expanded(
-              child: myTextFormFieldWithBorder(
-                controller: controller.reference3.value,
-                labelText: 'Reference 3',
-              ),
-            ),
-            Expanded(
-              flex: 2,
               child: myTextFormFieldWithBorder(
                 suffixIcon: IconButton(
                     onPressed: () {

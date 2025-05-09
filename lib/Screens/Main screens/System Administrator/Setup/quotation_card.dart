@@ -509,7 +509,8 @@ ElevatedButton historySection(
 }
 
 Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
-    Map<String, dynamic> cardData, quotationId) {
+    Map<String, dynamic> cardData, String quotationId,
+    {String screenName = ''}) {
   return Get.dialog(
       barrierDismissible: false,
       Dialog(
@@ -539,7 +540,9 @@ Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
                             spacing: 10,
                             children: [
                               Text(
-                                '${controller.getScreenName()}',
+                                screenName == ''
+                                    ? '${controller.getScreenName()}'
+                                    : screenName,
                                 style: fontStyleForScreenNameUsedInButtons,
                               ),
                               GetX<QuotationCardController>(
@@ -558,17 +561,23 @@ Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
                           Row(
                             spacing: 10,
                             children: [
+                              separator(),
                               creatJobButton(),
+                              point(),
                               internalNotesButton(
                                   controller, constraints, quotationId),
                               separator(),
-                              copyQuotationButton(quotationId),
                               saveQuotationButton(() =>
                                   controller.editQuotationCard(quotationId)),
+                              point(),
+                              copyQuotationButton(quotationId),
+                              point(),
                               deleteButton(controller, context, quotationId),
                               separator(),
                               changeStatusToPostedButton(quotationId),
+                              point(),
                               changeStatusToCanceledButton(quotationId),
+                              separator(),
                               closeIcon()
                             ],
                           ),
@@ -675,7 +684,9 @@ ElevatedButton newQuotationCardButton(BuildContext context,
                                   Row(
                                     spacing: 10,
                                     children: [
+                                      separator(),
                                       creatJobButton(),
+                                      point(),
                                       internalNotesButton(
                                           controller,
                                           constraints,
@@ -687,8 +698,10 @@ ElevatedButton newQuotationCardButton(BuildContext context,
                                       separator(),
                                       changeStatusToPostedButton(controller
                                           .curreentQuotationCardId.value),
+                                      point(),
                                       changeStatusToCanceledButton(controller
                                           .curreentQuotationCardId.value),
+                                      separator(),
                                       closeIcon()
                                     ],
                                   ),

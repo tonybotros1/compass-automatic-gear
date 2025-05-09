@@ -19,6 +19,7 @@ Widget carDetailsSection() {
         spacing: 10,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             spacing: 10,
             children: [
               Expanded(
@@ -36,7 +37,11 @@ Widget carDetailsSection() {
                       controller.carBrandId.value = key;
                     },
                   )),
-              Expanded(child: SizedBox()),
+              Expanded(
+                  child: Container(
+                alignment: Alignment.centerLeft,
+                child: carLogo(controller.carBrandLogo.value),
+              )),
               Expanded(child: SizedBox()),
             ],
           ),
@@ -87,6 +92,7 @@ Widget carDetailsSection() {
               )),
               Expanded(
                   child: myTextFormFieldWithBorder(
+                isCapitaLetters: true,
                 controller: controller.plateCode,
                 labelText: 'Code',
                 hintText: 'Enter Plate Code',
@@ -139,6 +145,7 @@ Widget carDetailsSection() {
                 controller: controller.transmissionType,
                 labelText: 'Transmission Type',
                 hintText: 'Enter Transmission Type',
+                isCapitaLetters: true,
               )),
               Expanded(
                   child: CustomDropdown(
@@ -161,6 +168,7 @@ Widget carDetailsSection() {
                   child: myTextFormFieldWithBorder(
                 controller: controller.vin,
                 labelText: 'VIN',
+                isCapitaLetters: true,
                 hintText: 'Enter VIN',
               )),
               Expanded(child: SizedBox())

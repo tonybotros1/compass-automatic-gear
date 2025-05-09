@@ -1,12 +1,14 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Screens/Main screens/System Administrator/Setup/job_card.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
 
@@ -129,6 +131,7 @@ class QuotationCardController extends GetxController {
   RxBool addingNewInternalNotProcess = RxBool(false);
   RxBool postingQuotation = RxBool(false);
   RxBool cancelingQuotation = RxBool(false);
+  RxBool openingJobCardScreen = RxBool(false);
   @override
   void onInit() async {
     super.onInit();
@@ -156,6 +159,28 @@ class QuotationCardController extends GetxController {
     // searchForInvoiceItems.value.addListener(() {
     //   filterInvoiceItems();
     // });
+  }
+
+  openJobCardScreenByNumber() async {
+    try {
+      openingJobCardScreen.value = true;
+      var job = await FirebaseFirestore.instance
+          .collection('job_cards')
+          .where('job_number', isEqualTo: jobCardCounter.value.text)
+          .get();
+      var id = job.docs.first.id;
+      var data = job.docs.first.data();
+
+      JobCardController jobCardController = Get.put(JobCardController());
+      jobCardController.getAllInvoiceItems(id);
+      await jobCardController.loadValues(data);
+      editJobCardDialog(jobCardController, data, id, screenName: '💳 Job Card');
+      openingJobCardScreen.value = false;
+      showSnackBar('Done', 'Opened Successfully');
+    } catch (e) {
+      openingJobCardScreen.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
   }
 
   clearValues() {
@@ -550,6 +575,7 @@ class QuotationCardController extends GetxController {
           .update({'quotation_status': 'Posted'});
       quotationStatus.value = 'Posted';
       postingQuotation.value = false;
+      showSnackBar('Done', 'Quotation Posted');
     } catch (e) {
       postingQuotation.value = false;
     }
@@ -564,6 +590,7 @@ class QuotationCardController extends GetxController {
           .update({'quotation_status': 'Cancelled'});
       quotationStatus.value = 'Cancelled';
       cancelingQuotation.value = false;
+      showSnackBar('Done', 'Quotation Cancelled');
     } catch (e) {
       cancelingQuotation.value = false;
     }
@@ -626,6 +653,8 @@ class QuotationCardController extends GetxController {
   Future<void> createNewJobCard() async {
     try {
       creatingNewJob.value = true;
+      showSnackBar('Creating', 'Please Wait');
+
       var job = await FirebaseFirestore.instance
           .collection('job_cards')
           .where('company_id', isEqualTo: companyId.value)
@@ -695,7 +724,17 @@ class QuotationCardController extends GetxController {
       newData['job_number'] = jobCardCounter.value.text;
       newData['added_date'] = DateTime.now().toString();
 
-      await FirebaseFirestore.instance.collection('job_cards').add(newData);
+      var newJob =
+          await FirebaseFirestore.instance.collection('job_cards').add(newData);
+
+      for (var element in allInvoiceItems) {
+        var data = element.data();
+        await FirebaseFirestore.instance
+            .collection('job_cards')
+            .doc(newJob.id)
+            .collection('invoice_items')
+            .add(data);
+      }
 
       creatingNewJob.value = false;
       showSnackBar('Done', 'Job Created Successfully');
@@ -707,8 +746,8 @@ class QuotationCardController extends GetxController {
 
   Future<Map<String, dynamic>> copyQuotation(String id) async {
     try {
+      showSnackBar('Copying', 'Please Wait');
       loadingCopyQuotation.value = true;
-
       var mainJob = await FirebaseFirestore.instance
           .collection('quotation_cards')
           .doc(id)
@@ -717,14 +756,6 @@ class QuotationCardController extends GetxController {
       Map<String, dynamic>? data = mainJob.data();
       if (data != null) {
         data.remove('id');
-        data['quotation_date'] = '';
-        data['validity_days'] = '';
-        data['validity_end_date'] = '';
-        data['reference_number'] = '';
-        data['delivery_time'] = '';
-        data['quotation_warrenty_days'] = '0';
-        data['quotation_warrenty_km'] = '0';
-        data['quotation_notes'] = '';
         data['quotation_status'] = 'New';
 
         await getCurrentQuotationCounterNumber();
@@ -942,6 +973,7 @@ class QuotationCardController extends GetxController {
     FirebaseFirestore.instance
         .collection('invoice_items')
         .where('company_id', isEqualTo: companyId.value)
+        .orderBy('name')
         .snapshots()
         .listen((items) {
       allInvoiceItemsFromCollection.value = {
@@ -1019,6 +1051,7 @@ class QuotationCardController extends GetxController {
         .doc(typeId)
         .collection('values')
         .where('available', isEqualTo: true)
+        .orderBy('name')
         .snapshots()
         .listen((colors) {
       allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
@@ -1029,6 +1062,7 @@ class QuotationCardController extends GetxController {
     FirebaseFirestore.instance
         .collection('branches')
         .where('company_id', isEqualTo: companyId.value)
+        .orderBy('name')
         .snapshots()
         .listen((branches) {
       allBranches.value = {for (var doc in branches.docs) doc.id: doc.data()};
@@ -1049,6 +1083,7 @@ class QuotationCardController extends GetxController {
     FirebaseFirestore.instance
         .collection('sales_man')
         .where('company_id', isEqualTo: companyId.value)
+        .orderBy('name')
         .snapshots()
         .listen((branches) {
       salesManMap.value = {for (var doc in branches.docs) doc.id: doc.data()};
@@ -1093,6 +1128,7 @@ class QuotationCardController extends GetxController {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
+          .orderBy('name')
           .snapshots()
           .listen((countries) {
         allCountries.value = {
@@ -1108,6 +1144,7 @@ class QuotationCardController extends GetxController {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
+          .orderBy('name')
           .snapshots()
           .listen((brands) {
         allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
@@ -1123,6 +1160,7 @@ class QuotationCardController extends GetxController {
           .collection('entity_informations')
           .where('company_id', isEqualTo: companyId.value)
           .where('entity_code', arrayContains: 'Customer')
+          .orderBy('entity_name')
           .snapshots()
           .listen((customers) {
         allCustomers.value = {

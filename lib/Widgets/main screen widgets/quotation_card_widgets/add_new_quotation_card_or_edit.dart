@@ -1,6 +1,8 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/quotation_card_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../consts.dart';
+import '../../text_button.dart';
 import 'car_details_section.dart';
 import 'customer_details_screen.dart';
 import 'invoice_items_section.dart';
@@ -50,10 +52,32 @@ Widget addNewQuotationCardOrEdit(
               child: Column(
             children: [
               labelContainer(
-                  lable: Text(
+                  lable: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
                     'Quotation Details',
                     style: fontStyle1,
-                  )),
+                  ),
+                  GetX<QuotationCardController>(builder: (controller) {
+                    return controller.jobCardCounter.value.text.isNotEmpty
+                        ? ClickableHoverText(
+                            color2: controller.openingJobCardScreen.isFalse
+                                ? null
+                                : Colors.yellow,
+                            text: controller.openingJobCardScreen.isFalse
+                                ? controller.jobCardCounter.value.text
+                                : 'Loading...',
+                            onTap: controller.openingJobCardScreen.isFalse
+                                ? () {
+                                    controller.openJobCardScreenByNumber();
+                                  }
+                                : null,
+                          )
+                        : SizedBox();
+                  })
+                ],
+              )),
               quotationsSection(context, controller)
             ],
           ))

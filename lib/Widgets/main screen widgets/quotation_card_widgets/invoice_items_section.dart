@@ -133,8 +133,7 @@ Widget tableOfScreens(
           ],
           rows: [
             ...controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-              final invoiceItemsData =
-                  invoiceItems.data();
+              final invoiceItemsData = invoiceItems.data();
               final invoiceItemsId = invoiceItems.id;
               return dataRowForTheTable(invoiceItemsData, context, constraints,
                   invoiceItemsId, controller, quotationId);
@@ -217,13 +216,17 @@ Widget deleteSection(String quotationId, context,
     QuotationCardController controller, invoiceItemsId) {
   return IconButton(
       onPressed: () {
-        alertDialog(
-            context: context,
-            controller: controller,
-            content: 'This will be deleted permanently',
-            onPressed: () {
-              controller.deleteInvoiceItem(quotationId, invoiceItemsId);
-            });
+        if (controller.quotationStatus.value == 'New') {
+          alertDialog(
+              context: context,
+              controller: controller,
+              content: 'This will be deleted permanently',
+              onPressed: () {
+                controller.deleteInvoiceItem(quotationId, invoiceItemsId);
+              });
+        } else {
+          showSnackBar('Alert', 'Only New Quotations Allowed');
+        }
       },
       icon: const Icon(
         Icons.delete_forever,
@@ -240,27 +243,32 @@ Widget editSection(
     String invoiceItemsId) {
   return IconButton(
       onPressed: () {
-        controller.invoiceItemNameId.value = invoiceItemsData['name'];
-        controller.invoiceItemName.text = controller.getdataName(
-            invoiceItemsData['name'], controller.allInvoiceItemsFromCollection);
-        controller.lineNumber.text =
-            (invoiceItemsData['line_number'] ?? '').toString();
-        controller.description.text = invoiceItemsData['description'];
-        controller.quantity.text = invoiceItemsData['quantity'];
-        controller.price.text = invoiceItemsData['price'];
-        controller.amount.text = invoiceItemsData['amount'];
-        controller.discount.text = invoiceItemsData['discount'];
-        controller.total.text = invoiceItemsData['total'];
-        controller.vat.text = invoiceItemsData['vat'];
-        controller.net.text = invoiceItemsData['net'];
-        invoiceItemsForQuotationDialog(
-            controller: controller,
-            constraints: constraints,
-            onPressed: controller.addingNewinvoiceItemsValue.value
-                ? null
-                : () {
-                    controller.editInvoiceItem(quotationId, invoiceItemsId);
-                  });
+        if (controller.quotationStatus.value == 'New') {
+          controller.invoiceItemNameId.value = invoiceItemsData['name'];
+          controller.invoiceItemName.text = controller.getdataName(
+              invoiceItemsData['name'],
+              controller.allInvoiceItemsFromCollection);
+          controller.lineNumber.text =
+              (invoiceItemsData['line_number'] ?? '').toString();
+          controller.description.text = invoiceItemsData['description'];
+          controller.quantity.text = invoiceItemsData['quantity'];
+          controller.price.text = invoiceItemsData['price'];
+          controller.amount.text = invoiceItemsData['amount'];
+          controller.discount.text = invoiceItemsData['discount'];
+          controller.total.text = invoiceItemsData['total'];
+          controller.vat.text = invoiceItemsData['vat'];
+          controller.net.text = invoiceItemsData['net'];
+          invoiceItemsForQuotationDialog(
+              controller: controller,
+              constraints: constraints,
+              onPressed: controller.addingNewinvoiceItemsValue.value
+                  ? null
+                  : () {
+                      controller.editInvoiceItem(quotationId, invoiceItemsId);
+                    });
+        } else {
+          showSnackBar('Alert', 'Only New Quotations Allowed');
+        }
       },
       icon: const Icon(
         Icons.edit_note_rounded,
@@ -275,7 +283,7 @@ ElevatedButton newinvoiceItemsButton(
     String quotationId) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.canAddInternalNotesAndInvoiceItems.isTrue) { 
+      if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
         if (controller.quotationStatus.value == 'New') {
           controller.clearInvoiceItemsVariables();
 

@@ -8,8 +8,10 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../Mobile section controllers/cards_screen_controller.dart';
 import 'main_screen_contro.dart';
+import 'quotation_card_controller.dart';
 
 class JobCardController extends GetxController {
   Rx<TextEditingController> quotationCounter = TextEditingController().obs;
@@ -26,7 +28,8 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> jobCancelationDate = TextEditingController().obs;
   Rx<TextEditingController> reference1 = TextEditingController().obs;
   Rx<TextEditingController> reference2 = TextEditingController().obs;
-  Rx<TextEditingController> reference3 = TextEditingController().obs;
+  Rx<TextEditingController> deliveryTime = TextEditingController().obs;
+
   Rx<TextEditingController> minTestKms = TextEditingController().obs;
   Rx<TextEditingController> invoiceCounter = TextEditingController().obs;
   Rx<TextEditingController> lpoCounter = TextEditingController().obs;
@@ -77,7 +80,8 @@ class JobCardController extends GetxController {
   RxBool loadingInvoiceItems = RxBool(false);
   final RxList<DocumentSnapshot> allJobCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> historyJobCards = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> allInvoiceItems = RxList<DocumentSnapshot>([]);
+  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allInvoiceItems =
+      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
   final RxList<DocumentSnapshot> filteredJobCards =
       RxList<DocumentSnapshot>([]);
 
@@ -148,6 +152,7 @@ class JobCardController extends GetxController {
   RxString currentCountryVAT = RxString('');
   TextEditingController net = TextEditingController();
   CardsScreenController controller = Get.put(CardsScreenController());
+  RxBool openingQuotationCardScreen = RxBool(false);
   @override
   void onInit() async {
     super.onInit();
@@ -178,6 +183,30 @@ class JobCardController extends GetxController {
   void onClose() {
     textFieldFocusNode.dispose();
     super.onClose();
+  }
+
+  openQuotationCardScreenByNumber() async {
+    try {
+      openingQuotationCardScreen.value = true;
+      var quotation = await FirebaseFirestore.instance
+          .collection('quotation_cards')
+          .where('quotation_number', isEqualTo: quotationCounter.value.text)
+          .get();
+      var id = quotation.docs.first.id;
+      var data = quotation.docs.first.data();
+
+      QuotationCardController quotationCardController =
+          Get.put(QuotationCardController());
+      quotationCardController.getAllInvoiceItems(id);
+      await quotationCardController.loadValues(data);
+      editQuotationCardDialog(quotationCardController, data, id,
+          screenName: '🧾 Quotation');
+      openingQuotationCardScreen.value = false;
+      showSnackBar('Done', 'Opened Successfully');
+    } catch (e) {
+      openingQuotationCardScreen.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
   }
 
   // function to manage loading button
@@ -353,6 +382,7 @@ class JobCardController extends GetxController {
 
   clearValues() {
     canAddInternalNotesAndInvoiceItems.value = false;
+    quotationCounter.value.clear();
     allInvoiceItems.clear();
     jobCancelationDate.value.text = '';
     jobStatus1.value = '';
@@ -396,7 +426,7 @@ class JobCardController extends GetxController {
     minTestKms.value.clear();
     reference1.value.clear();
     reference2.value.clear();
-    reference3.value.clear();
+    deliveryTime.value.clear();
     jobNotes.clear();
     deliveryNotes.clear();
   }
@@ -590,6 +620,7 @@ class JobCardController extends GetxController {
   }
 
   loadValues(Map<String, dynamic> data) {
+    quotationCounter.value.text = data['quotation_number'] ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
     jobCancelationDate.value.text = textToDate(data['job_cancelation_date']);
     jobStatus1.value = data['job_status_1'];
@@ -662,7 +693,8 @@ class JobCardController extends GetxController {
     minTestKms.value.text = data['job_min_test_km'];
     reference1.value.text = data['job_reference_1'];
     reference2.value.text = data['job_reference_2'];
-    reference3.value.text = data['job_reference_3'];
+    deliveryTime.value.text = data['delivery_time'] ?? '';
+
     jobNotes.text = data['job_notes'];
     deliveryNotes.text = data['job_delivery_notes'];
   }
@@ -719,7 +751,7 @@ class JobCardController extends GetxController {
         'job_min_test_km': minTestKms.value.text,
         'job_reference_1': reference1.value.text,
         'job_reference_2': reference2.value.text,
-        'job_reference_3': reference3.value.text,
+        'delivery_time': deliveryTime.value.text,
         'job_notes': jobNotes.text,
         'job_delivery_notes': deliveryNotes.text,
       };
@@ -938,7 +970,7 @@ class JobCardController extends GetxController {
         'job_min_test_km': minTestKms.value.text,
         'job_reference_1': reference1.value.text,
         'job_reference_2': reference2.value.text,
-        'job_reference_3': reference3.value.text,
+        'delivery_time': deliveryTime.value.text,
         'job_notes': jobNotes.text,
         'job_delivery_notes': deliveryNotes.text,
       });
@@ -1004,6 +1036,7 @@ class JobCardController extends GetxController {
       showSnackBar('Creating', 'Please Wait');
       creatingNewQuotation.value = true;
       Map<String, dynamic> newData = {
+        'job_number': jobCardCounter.value.text,
         'quotation_status': 'New',
         'car_brand_logo': carBrandLogo.value,
         'company_id': companyId.value,
@@ -1046,9 +1079,18 @@ class JobCardController extends GetxController {
       await getCurrentQuotationCounterNumber();
       newData['quotation_number'] = quotationCounter.value.text;
       newData['added_date'] = DateTime.now().toString();
-      await FirebaseFirestore.instance
+      var newQuotation = await FirebaseFirestore.instance
           .collection('quotation_cards')
           .add(newData);
+
+      for (var element in allInvoiceItems) {
+        var data = element.data();
+        await FirebaseFirestore.instance
+            .collection('quotation_cards')
+            .doc(newQuotation.id)
+            .collection('invoice_items')
+            .add(data);
+      }
       showSnackBar('Done', 'Quotation Created Successfully');
 
       creatingNewQuotation.value = false;
@@ -1070,31 +1112,6 @@ class JobCardController extends GetxController {
       Map<String, dynamic>? data = mainJob.data();
       if (data != null) {
         data.remove('id');
-        data['quotation_date'] = '';
-        data['validity_days'] = '';
-        data['validity_end_date'] = '';
-        data['reference_number'] = '';
-        data['delivery_time'] = '';
-        data['quotation_warrenty_days'] = '0';
-        data['quotation_warrenty_km'] = '0';
-        data['quotation_notes'] = '';
-        data['invoice_number'] = '';
-        data['lpo_number'] = '';
-        data['job_date'] = textToDate(DateTime.now());
-        data['invoice_date'] = textToDate(DateTime.now());
-        data['job_start_date'] = '';
-        data['job_approval_date'] = textToDate(DateTime.now());
-        data['job_finish_date'] = '';
-        data['job_delivery_date'] = '';
-        data['job_warrenty_days'] = '0';
-        data['job_warrenty_km'] = '0';
-        data['job_min_test_km'] = '0';
-        data['job_reference_1'] = '';
-        data['job_reference_2'] = '';
-        data['job_reference_3'] = '';
-        data['job_cancelation_date'] = '';
-        data['job_notes'] = '';
-        data['job_delivery_notes'] = '';
         data['job_status_1'] = 'New';
         data['job_status_2'] = 'New';
         await getCurrentJobCardCounterNumber();
@@ -1105,7 +1122,6 @@ class JobCardController extends GetxController {
         } else {
           data['label'] = 'Returned';
         }
-        data['job_warrenty_end_date'] = '';
 
         var newCopiedJob =
             await FirebaseFirestore.instance.collection('job_cards').add(data);
@@ -1377,6 +1393,7 @@ class JobCardController extends GetxController {
     FirebaseFirestore.instance
         .collection('branches')
         .where('company_id', isEqualTo: companyId.value)
+        .orderBy('name')
         .snapshots()
         .listen((branches) {
       allBranches.value = {for (var doc in branches.docs) doc.id: doc.data()};
@@ -1387,6 +1404,7 @@ class JobCardController extends GetxController {
     FirebaseFirestore.instance
         .collection('invoice_items')
         .where('company_id', isEqualTo: companyId.value)
+        .orderBy('name')
         .snapshots()
         .listen((items) {
       allInvoiceItemsFromCollection.value = {
@@ -1399,6 +1417,7 @@ class JobCardController extends GetxController {
     FirebaseFirestore.instance
         .collection('sales_man')
         .where('company_id', isEqualTo: companyId.value)
+        .orderBy('name')
         .snapshots()
         .listen((branches) {
       salesManMap.value = {for (var doc in branches.docs) doc.id: doc.data()};
@@ -1483,6 +1502,7 @@ class JobCardController extends GetxController {
         .doc(typeId)
         .collection('values')
         .where('available', isEqualTo: true)
+        .orderBy('name')
         .snapshots()
         .listen((colors) {
       allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
@@ -1516,6 +1536,7 @@ class JobCardController extends GetxController {
           .collection('entity_informations')
           .where('company_id', isEqualTo: companyId.value)
           .where('entity_code', arrayContains: 'Customer')
+          .orderBy('entity_name')
           .snapshots()
           .listen((customers) {
         allCustomers.value = {
@@ -1638,6 +1659,7 @@ class JobCardController extends GetxController {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
+          .orderBy('name')
           .snapshots()
           .listen((countries) {
         allCountries.value = {
@@ -1668,6 +1690,7 @@ class JobCardController extends GetxController {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
+          .orderBy('name')
           .snapshots()
           .listen((brands) {
         allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
@@ -1786,8 +1809,8 @@ class JobCardController extends GetxController {
           .collection('invoice_items')
           .orderBy('line_number')
           .snapshots()
-          .listen((items) {
-        allInvoiceItems.assignAll(List<DocumentSnapshot>.from(items.docs));
+          .listen((QuerySnapshot<Map<String, dynamic>> items) {
+        allInvoiceItems.assignAll(items.docs);
         loadingInvoiceItems.value = false;
       });
     } catch (e) {

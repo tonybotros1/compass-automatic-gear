@@ -16,7 +16,6 @@ class InvoiceItemsController extends GetxController {
   final RxList<DocumentSnapshot> allInvoiceItems = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredInvoiceItems =
       RxList<DocumentSnapshot>([]);
-  final GlobalKey<FormState> formKeyForAddingNewvalue = GlobalKey<FormState>();
   RxString companyId = RxString('');
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);

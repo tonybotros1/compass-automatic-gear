@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,6 +16,7 @@ Future<dynamic> invoiceItemsForJobDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: SizedBox(
           width: Get.width / 2,
+          height: 600,
           child: Column(
             children: [
               Container(

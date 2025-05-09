@@ -19,6 +19,7 @@ Widget carDetailsSection() {
         spacing: 10,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             spacing: 10,
             children: [
               Expanded(
@@ -36,7 +37,11 @@ Widget carDetailsSection() {
                       controller.carBrandId.value = key;
                     },
                   )),
-              Expanded(child: SizedBox()),
+              Expanded(
+                  child: Container(
+                alignment: Alignment.centerLeft,
+                child: carLogo(controller.carBrandLogo.value),
+              )),
               Expanded(child: SizedBox()),
             ],
           ),
@@ -90,6 +95,7 @@ Widget carDetailsSection() {
                 controller: controller.plateCode,
                 labelText: 'Code',
                 hintText: 'Enter Plate Code',
+                isCapitaLetters: true,
               )),
               Expanded(flex: 2, child: SizedBox())
             ],
@@ -139,6 +145,7 @@ Widget carDetailsSection() {
                 controller: controller.transmissionType,
                 labelText: 'Transmission Type',
                 hintText: 'Enter Transmission Type',
+                isCapitaLetters: true,
               )),
               Expanded(
                   child: CustomDropdown(
@@ -162,6 +169,7 @@ Widget carDetailsSection() {
                 controller: controller.vin,
                 labelText: 'VIN',
                 hintText: 'Enter VIN',
+                isCapitaLetters: true,
               )),
               Expanded(child: SizedBox())
             ],

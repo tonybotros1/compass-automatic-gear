@@ -413,8 +413,14 @@ var screenPadding = const EdgeInsets.only(
 String formatPhrase(String phrase) {
   return phrase.replaceAll(' ', '_');
 }
+
 Text separator() => Text('|', style: TextStyle(color: Colors.white));
 
+Text point() {
+  return Text('•',
+      style:
+          TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.bold));
+}
 
 double horizontalMarginForTable = 8;
 
@@ -751,3 +757,19 @@ var loadingProcess = const SizedBox(
     strokeWidth: 2,
   ),
 );
+
+Container carLogo(String logo) {
+  return Container(
+    height: 40,
+    width: 40,
+    decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.grey, width: 2)),
+    child: logo != ''
+        ? Image.network(logo)
+        : SizedBox(
+            height: 40,
+            width: 40,
+          ),
+  );
+}

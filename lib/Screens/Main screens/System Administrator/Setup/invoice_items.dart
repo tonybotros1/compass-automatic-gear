@@ -188,8 +188,8 @@ ElevatedButton editSection(context, InvoiceItemsController controller,
           onPressed: controller.addingNewValue.value
               ? null
               : () async {
-                  if (!controller.formKeyForAddingNewvalue.currentState!
-                      .validate()) {
+                  if (controller.name.text.isEmpty) {
+                    showSnackBar('Alert', 'Please Enter Name');
                   } else {
                     await controller.editInvoiceItem(invoiceItemsId);
                   }
@@ -205,15 +205,15 @@ ElevatedButton newInvoiceItemButton(BuildContext context,
     onPressed: () {
       controller.name.clear();
       controller.description.clear();
-      controller.price.clear();
+      controller.price.text = '0';
       invoiceItemsDialog(
         constraints: constraints,
         controller: controller,
         onPressed: controller.addingNewValue.value
             ? null
             : () async {
-                if (!controller.formKeyForAddingNewvalue.currentState!
-                    .validate()) {
+                if (controller.name.text.isEmpty) {
+                  showSnackBar('Alert', 'Please Enter Name');
                 } else {
                   await controller.addNewInvoiceItem();
                 }
