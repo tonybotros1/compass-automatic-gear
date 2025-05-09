@@ -59,7 +59,7 @@ class QuotationCardController extends GetxController {
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
   final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allInvoiceItems =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
-
+  final ScrollController scrollControllerFotTable1 = ScrollController();
   RxString carBrandId = RxString('');
   RxString carBrandLogo = RxString('');
   RxString carModelId = RxString('');
@@ -132,6 +132,10 @@ class QuotationCardController extends GetxController {
   RxBool postingQuotation = RxBool(false);
   RxBool cancelingQuotation = RxBool(false);
   RxBool openingJobCardScreen = RxBool(false);
+  RxInt numberOfQuotations = RxInt(0);
+  RxDouble allQuotationsVATS = RxDouble(0.0);
+  RxDouble allQuotationsTotals = RxDouble(0.0);
+  RxDouble allQuotationsNET = RxDouble(0.0);
   @override
   void onInit() async {
     super.onInit();
@@ -159,6 +163,36 @@ class QuotationCardController extends GetxController {
     // searchForInvoiceItems.value.addListener(() {
     //   filterInvoiceItems();
     // });
+  }
+
+  calculateMoneyForAllJobs() async {
+    try {
+      allQuotationsVATS.value = 0.0;
+      allQuotationsTotals.value = 0.0;
+      allQuotationsNET.value = 0.0;
+
+      for (var quot in filteredQuotationCards.isEmpty
+          ? allQuotationCards
+          : filteredQuotationCards) {
+        final id = quot.id;
+
+        FirebaseFirestore.instance
+            .collection('quotation_cards')
+            .doc(id)
+            .collection('invoice_items')
+            .snapshots()
+            .listen((invoices) {
+          for (var invoice in invoices.docs) {
+            var data = invoice.data() as Map<String, dynamic>?;
+            allQuotationsVATS.value += double.parse(data?['vat']);
+            allQuotationsTotals.value += double.parse(data?['total']);
+            allQuotationsNET.value += double.parse(data?['net']);
+          }
+        });
+      }
+    } catch (e) {
+      // print(e);
+    }
   }
 
   openJobCardScreenByNumber() async {
@@ -1286,6 +1320,7 @@ class QuotationCardController extends GetxController {
           .snapshots()
           .listen((QuerySnapshot<Map<String, dynamic>> cards) {
         allQuotationCards.assignAll(cards.docs);
+        calculateMoneyForAllJobs();
         isScreenLoding.value = false;
       });
     } catch (e) {

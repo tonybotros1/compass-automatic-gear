@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
+import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/job_card_buttons.dart';
@@ -22,62 +23,102 @@ class JobCard extends StatelessWidget {
             padding: screenPadding,
             child: SizedBox(
               width: constraints.maxWidth,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: ListView(
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        children: [
-                          GetX<JobCardController>(
-                            init: JobCardController(),
-                            builder: (controller) {
-                              return searchBar(
-                                search: controller.search,
-                                constraints: constraints,
-                                context: context,
-                                // controller: controller,
-                                title: 'Search for job cards',
-                                button: newJobCardButton(
-                                    context, constraints, controller),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: GetX<JobCardController>(
+                        init: JobCardController(),
+                        builder: (controller) {
+                          return Row(
+                            spacing: 10,
+                            children: [
+                              customBox(
+                                  title: 'NUMBER OF JOBS',
+                                  value: Text(
+                                    '${controller.numberOfJobs.value}',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: mainColor,
+                                        fontSize: 16),
+                                  )),
+                              customBox(
+                                  title: 'TOTALS',
+                                  value: textForDataRowInTable(
+                                    fontSize: 16,
+                                    color: Colors.red,
+                                    isBold: true,
+                                    text: '${controller.allJobsTotals.value}',
+                                  )),
+                              customBox(
+                                  title: 'VATS',
+                                  value: textForDataRowInTable(
+                                    fontSize: 16,
+                                    color: Colors.green,
+                                    isBold: true,
+                                    text: '${controller.allJobsVATS.value}',
+                                  )),
+                              customBox(
+                                  title: 'NETS',
+                                  value: textForDataRowInTable(
+                                    fontSize: 16,
+                                    color: Colors.blueGrey,
+                                    isBold: true,
+                                    text: '${controller.allJobsNET.value}',
+                                  )),
+                            ],
+                          );
+                        }),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        GetX<JobCardController>(
+                          builder: (controller) {
+                            return searchBar(
+                              search: controller.search,
+                              constraints: constraints,
+                              context: context,
+                              // controller: controller,
+                              title: 'Search for job cards',
+                              button: newJobCardButton(
+                                  context, constraints, controller),
+                            );
+                          },
+                        ),
+                        GetX<JobCardController>(
+                          builder: (controller) {
+                            if (controller.isScreenLoding.value) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
                               );
-                            },
-                          ),
-                          GetX<JobCardController>(
-                            builder: (controller) {
-                              if (controller.isScreenLoding.value) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                              if (controller.allJobCards.isEmpty) {
-                                return const Center(
-                                  child: Text('No Element'),
-                                );
-                              }
-                              return SizedBox(
-                                width: constraints.maxWidth,
-                                child: tableOfScreens(
-                                    showHistoryButton: true,
-                                    scrollController:
-                                        controller.scrollControllerFotTable1,
-                                    constraints: constraints,
-                                    context: context,
-                                    controller: controller,
-                                    data: controller.filteredJobCards.isEmpty &&
-                                            controller.search.value.text.isEmpty
-                                        ? controller.allJobCards
-                                        : controller.filteredJobCards),
+                            }
+                            if (controller.allJobCards.isEmpty) {
+                              return const Center(
+                                child: Text('No Element'),
                               );
-                            },
-                          ),
-                        ],
-                      ),
+                            }
+                            return SizedBox(
+                              width: constraints.maxWidth,
+                              child: tableOfScreens(
+                                  showHistoryButton: true,
+                                  scrollController:
+                                      controller.scrollControllerFotTable1,
+                                  constraints: constraints,
+                                  context: context,
+                                  controller: controller,
+                                  data: controller.filteredJobCards.isEmpty &&
+                                          controller.search.value.text.isEmpty
+                                      ? controller.allJobCards
+                                      : controller.filteredJobCards),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   // const SizedBox(
@@ -146,85 +187,90 @@ Widget tableOfScreens({
         return null;
       }),
     ),
-    child: PaginatedDataTable(
-      rowsPerPage: 5,
-      showCheckboxColumn: false,
-      dataRowMaxHeight: 40,
-      dataRowMinHeight: 30,
-      headingRowHeight: 70,
-      columnSpacing: 15,
-      // showBottomBorder: true,
-      // dataTextStyle: regTextStyle,
-      // headingTextStyle: fontStyleForTableHeader,
-      sortColumnIndex: controller.sortColumnIndex.value,
-      sortAscending: controller.isAscending.value,
-      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-      columns: [
-        const DataColumn(
-          label: SizedBox(),
-          // onSort: controller.onSort,
-        ),
-        const DataColumn(
-          label: SizedBox(),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: columnForTable(constraints, 'Job', 'Number'),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(label: columnForTable(constraints, '', 'Date')
+    child: Scrollbar(
+      thumbVisibility: true,
+      controller: scrollController,
+      child: PaginatedDataTable(
+        controller: scrollController,
+        rowsPerPage: 5,
+        showCheckboxColumn: false,
+        dataRowMaxHeight: 40,
+        dataRowMinHeight: 30,
+        headingRowHeight: 70,
+        columnSpacing: 15,
+        // showBottomBorder: true,
+        // dataTextStyle: regTextStyle,
+        // headingTextStyle: fontStyleForTableHeader,
+        sortColumnIndex: controller.sortColumnIndex.value,
+        sortAscending: controller.isAscending.value,
+        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+        columns: [
+          const DataColumn(
+            label: SizedBox(),
             // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, '', 'Status')
+          ),
+          const DataColumn(
+            label: SizedBox(),
             // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, 'Invoice', 'Number')
+          ),
+          DataColumn(
+            label: columnForTable(constraints, 'Job', 'Number'),
             // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, '', 'Date')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, '', 'LPO Number')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, 'Car', 'Brand')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, '', 'Model')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, 'Plate', 'Number')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, '', 'Code')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, '', 'City')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, '', 'Customer Name')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(label: columnForTable(constraints, '', 'VIN')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: columnForTable(constraints, '', 'Total Job')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: columnForTable(constraints, '', 'VAT')
-            // onSort: controller.onSort,
-            ),
-        DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-            label: columnForTable(constraints, '', 'NET')
-            // onSort: controller.onSort,
-            ),
-      ],
-      source: dataSource,
+          ),
+          DataColumn(label: columnForTable(constraints, '', 'Date')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(label: columnForTable(constraints, '', 'Status')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(label: columnForTable(constraints, 'Invoice', 'Number')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(label: columnForTable(constraints, '', 'Date')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(label: columnForTable(constraints, '', 'LPO Number')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(label: columnForTable(constraints, 'Car', 'Brand')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(label: columnForTable(constraints, '', 'Model')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(label: columnForTable(constraints, 'Plate', 'Number')
+              // onSort: controller.onSort,
+              ),
+          // DataColumn(label: columnForTable(constraints, '', 'Code')
+          //     // onSort: controller.onSort,
+          //     ),
+          // DataColumn(label: columnForTable(constraints, '', 'City')
+          //     // onSort: controller.onSort,
+          //     ),
+          DataColumn(label: columnForTable(constraints, '', 'Customer Name')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(label: columnForTable(constraints, '', 'VIN')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: columnForTable(constraints, '', 'Totals')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: columnForTable(constraints, '', 'VAT')
+              // onSort: controller.onSort,
+              ),
+          DataColumn(
+              headingRowAlignment: MainAxisAlignment.end,
+              label: columnForTable(constraints, '', 'NET')
+              // onSort: controller.onSort,
+              ),
+        ],
+        source: dataSource,
+      ),
     ),
   );
 }
@@ -259,30 +305,14 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
           ],
         )),
         DataCell(jobData['label'] == 'Draft'
-                ? statusBox('D')
-                : jobData['label'] == 'Returned'
-                    ? statusBox('R')
-                    : SizedBox()
-            // textForDataRowInTable(
-            //   text: '${jobData['label']}',
-            //   color: jobData['label'] == 'New'
-            //       ? Colors.green
-            //       : jobData['label'] == 'Draft'
-            //           ? Colors.blueGrey
-            //           : Colors.red)
-            ),
+            ? statusBox('D')
+            : jobData['label'] == 'Returned'
+                ? statusBox('R')
+                : SizedBox()),
 
         DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
         DataCell(textForDataRowInTable(
             text: jobData['job_number'] != '' ? '${jobData['job_date']}' : '')),
-        // DataCell(jobData['job_status_1'] != ''
-        //     ? statusBox('${jobData['job_status_1']}', hieght: 35, width: 100)
-        //     : SizedBox()),
-        //   if (isBeforeToday(jobWarrentyEndDate.value.text)) {
-        //   status2 = 'Closed';
-        // } else {
-        //   status2 = 'Warranty';
-        // }
         DataCell(
           statusBox(
             jobData['job_status_1'] == 'Posted'
@@ -295,9 +325,6 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
           ),
         ),
 
-        // DataCell(jobData['job_status_2'] != ''
-        //     ? statusBox('${jobData['job_status_2']}', hieght: 35, width: 100)
-        //     : const SizedBox()),
         DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
         DataCell(textForDataRowInTable(
             text: jobData['invoice_number'] != ''
@@ -331,29 +358,30 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
           jobData['plate_number'],
           maxLines: 1,
         )),
-        DataCell(SelectableText(
-          jobData['plate_code'],
-          maxLines: 1,
-        )),
-        DataCell(
-          FutureBuilder<String>(
-            future: controller.getCityName(jobData['country'], jobData['city']),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
-        ),
+        // DataCell(SelectableText(
+        //   jobData['plate_code'],
+        //   maxLines: 1,
+        // )),
+        // DataCell(
+        //   FutureBuilder<String>(
+        //     future: controller.getCityName(jobData['country'], jobData['city']),
+        //     builder: (context, snapshot) {
+        //       if (snapshot.connectionState == ConnectionState.waiting) {
+        //         return const Text('Loading...');
+        //       } else if (snapshot.hasError) {
+        //         return const Text('Error');
+        //       } else {
+        //         return textForDataRowInTable(
+        //           text: '${snapshot.data}',
+        //         );
+        //       }
+        //     },
+        //   ),
+        // ),
         DataCell(
           textForDataRowInTable(
             maxWidth: null,
+            // maxWidth: 1,
             text: controller.getdataName(
                 jobData['customer'], controller.allCustomers,
                 title: 'entity_name'),
@@ -375,6 +403,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
                   return const Text('Error');
                 } else {
                   return textForDataRowInTable(
+                    color: Colors.green,
+                    isBold: true,
                     text: '${snapshot.data}',
                   );
                 }
@@ -394,6 +424,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
                   return const Text('Error');
                 } else {
                   return textForDataRowInTable(
+                    color: Colors.red,
+                    isBold: true,
                     text: '${snapshot.data}',
                   );
                 }
@@ -413,6 +445,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
                   return const Text('Error');
                 } else {
                   return textForDataRowInTable(
+                    color: Colors.blueGrey,
+                    isBold: true,
                     text: '${snapshot.data}',
                   );
                 }

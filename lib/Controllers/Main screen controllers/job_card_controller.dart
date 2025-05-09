@@ -153,6 +153,10 @@ class JobCardController extends GetxController {
   TextEditingController net = TextEditingController();
   CardsScreenController controller = Get.put(CardsScreenController());
   RxBool openingQuotationCardScreen = RxBool(false);
+  RxInt numberOfJobs = RxInt(0);
+  RxDouble allJobsVATS = RxDouble(0.0);
+  RxDouble allJobsTotals = RxDouble(0.0);
+  RxDouble allJobsNET = RxDouble(0.0);
   @override
   void onInit() async {
     super.onInit();
@@ -183,6 +187,35 @@ class JobCardController extends GetxController {
   void onClose() {
     textFieldFocusNode.dispose();
     super.onClose();
+  }
+
+  calculateMoneyForAllJobs() async {
+    try {
+      allJobsVATS.value = 0.0;
+      allJobsTotals.value = 0.0;
+      allJobsNET.value = 0.0;
+
+      for (var job
+          in filteredJobCards.isEmpty ? allJobCards : filteredJobCards) {
+        final id = job.id;
+
+        FirebaseFirestore.instance
+            .collection('job_cards')
+            .doc(id)
+            .collection('invoice_items')
+            .snapshots()
+            .listen((invoices) {
+          for (var invoice in invoices.docs) {
+            var data = invoice.data() as Map<String, dynamic>?;
+            allJobsVATS.value += double.parse(data?['vat']);
+            allJobsTotals.value += double.parse(data?['total']);
+            allJobsNET.value += double.parse(data?['net']);
+          }
+        });
+      }
+    } catch (e) {
+      // print(e);
+    }
   }
 
   openQuotationCardScreenByNumber() async {
@@ -231,32 +264,6 @@ class JobCardController extends GetxController {
       }
     }).toList());
   }
-
-  // Stream<Map<String, double>> calculateGrandSums() {
-  //   return FirebaseFirestore.instance
-  //       .collectionGroup('invoice_items')
-  //       .where('company_id', isEqualTo: companyId.value)
-  //       .snapshots()
-  //       .map((invoiceItemsSnapshot) {
-  //     double grandTotal = 0.0;
-  //     double grandVAT = 0.0;
-  //     double grandNET = 0.0;
-
-  //     for (var job in invoiceItemsSnapshot.docs) {
-  //       var data = job.data() as Map<String, dynamic>?;
-
-  //       grandTotal += double.tryParse(data?['total']?.toString() ?? '0') ?? 0;
-  //       grandVAT += double.tryParse(data?['vat']?.toString() ?? '0') ?? 0;
-  //       grandNET += double.tryParse(data?['net']?.toString() ?? '0') ?? 0;
-  //     }
-
-  //     return {
-  //       'total': grandTotal,
-  //       'vat': grandVAT,
-  //       'net': grandNET,
-  //     };
-  //   });
-  // }
 
   List<double> calculateTotals() {
     // this is for invoice items
@@ -1772,7 +1779,10 @@ class JobCardController extends GetxController {
           .snapshots()
           .listen((jobCards) {
         allJobCards.assignAll(List<DocumentSnapshot>.from(jobCards.docs));
+        numberOfJobs.value = allJobCards.length;
+
         isScreenLoding.value = false;
+        calculateMoneyForAllJobs();
       });
     } catch (e) {
       isScreenLoding.value = false;
@@ -1859,6 +1869,8 @@ class JobCardController extends GetxController {
 
     if (searchQuery.isEmpty) {
       filteredJobCards.clear();
+      calculateMoneyForAllJobs();
+
       return;
     }
 
@@ -1920,5 +1932,6 @@ class JobCardController extends GetxController {
         .where((card) => card != null)
         .cast<DocumentSnapshot<Object?>>();
     filteredJobCards.assignAll(filtered.toList());
+    calculateMoneyForAllJobs();
   }
 }

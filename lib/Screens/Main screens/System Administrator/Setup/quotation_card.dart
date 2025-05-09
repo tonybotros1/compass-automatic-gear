@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/quotation_card_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
+import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/add_new_quotation_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/quotation_card_buttons.dart';
@@ -23,66 +24,108 @@ class QuotationCard extends StatelessWidget {
             padding: screenPadding,
             child: SizedBox(
               width: constraints.maxWidth,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: ListView(
+                // crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        children: [
-                          GetX<QuotationCardController>(
-                            init: QuotationCardController(),
-                            builder: (controller) {
-                              return searchBar(
-                                search: controller.search,
-                                constraints: constraints,
-                                context: context,
-                                title: 'Search for quotation cards',
-                                button: newQuotationCardButton(
-                                    context, constraints, controller),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: GetX<QuotationCardController>(
+                        init: QuotationCardController(),
+                        builder: (controller) {
+                          return Row(
+                            spacing: 10,
+                            children: [
+                              customBox(
+                                  title: 'NUMBER OF JOBS',
+                                  value: Text(
+                                    '${controller.numberOfQuotations.value}',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: mainColor,
+                                        fontSize: 16),
+                                  )),
+                              customBox(
+                                  title: 'TOTALS',
+                                  value: textForDataRowInTable(
+                                    fontSize: 16,
+                                    color: Colors.red,
+                                    isBold: true,
+                                    text:
+                                        '${controller.allQuotationsTotals.value}',
+                                  )),
+                              customBox(
+                                  title: 'VATS',
+                                  value: textForDataRowInTable(
+                                    fontSize: 16,
+                                    color: Colors.green,
+                                    isBold: true,
+                                    text:
+                                        '${controller.allQuotationsVATS.value}',
+                                  )),
+                              customBox(
+                                  title: 'NETS',
+                                  value: textForDataRowInTable(
+                                    fontSize: 16,
+                                    color: Colors.blueGrey,
+                                    isBold: true,
+                                    text:
+                                        '${controller.allQuotationsNET.value}',
+                                  )),
+                            ],
+                          );
+                        }),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        GetX<QuotationCardController>(
+                          builder: (controller) {
+                            return searchBar(
+                              search: controller.search,
+                              constraints: constraints,
+                              context: context,
+                              title: 'Search for quotation cards',
+                              button: newQuotationCardButton(
+                                  context, constraints, controller),
+                            );
+                          },
+                        ),
+                        GetX<QuotationCardController>(
+                          builder: (controller) {
+                            if (controller.isScreenLoding.value) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
                               );
-                            },
-                          ),
-                          Expanded(
-                            child: GetX<QuotationCardController>(
-                              builder: (controller) {
-                                if (controller.isScreenLoding.value) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                                if (controller.allQuotationCards.isEmpty) {
-                                  return const Center(
-                                    child: Text('No Elements'),
-                                  );
-                                }
-                                return SingleChildScrollView(
-                                  scrollDirection: Axis.vertical,
-                                  child: SizedBox(
-                                    width: constraints.maxWidth,
-                                    child: tableOfScreens(
-                                        constraints: constraints,
-                                        context: context,
-                                        controller: controller,
-                                        data: controller.filteredQuotationCards
-                                                    .isEmpty &&
-                                                controller
-                                                    .search.value.text.isEmpty
-                                            ? controller.allQuotationCards
-                                            : controller
-                                                .filteredQuotationCards),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                            }
+                            if (controller.allQuotationCards.isEmpty) {
+                              return const Center(
+                                child: Text('No Elements'),
+                              );
+                            }
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+                              child: SizedBox(
+                                width: constraints.maxWidth,
+                                child: tableOfScreens(
+                                    scrollController:
+                                        controller.scrollControllerFotTable1,
+                                    constraints: constraints,
+                                    context: context,
+                                    controller: controller,
+                                    data: controller.filteredQuotationCards
+                                                .isEmpty &&
+                                            controller.search.value.text.isEmpty
+                                        ? controller.allQuotationCards
+                                        : controller.filteredQuotationCards),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(
@@ -103,7 +146,7 @@ Widget tableOfScreens({
   required BuildContext context,
   required QuotationCardController controller,
   required RxList<DocumentSnapshot> data,
-  // required ScrollController scrollController,
+  required ScrollController scrollController,
 }) {
   final dataSource = CardDataSource(
     cards: data,
@@ -122,195 +165,200 @@ Widget tableOfScreens({
         return null;
       }),
     ),
-    child: PaginatedDataTable(
-      rowsPerPage: controller.pagesPerPage.value,
-      availableRowsPerPage: const [5, 10, 17, 25],
-      onRowsPerPageChanged: (rows) {
-        controller.pagesPerPage.value = rows!;
-      },
-      showCheckboxColumn: false,
-      dataRowMaxHeight: 40,
-      dataRowMinHeight: 30,
-      headingRowHeight: 70,
-      columnSpacing: 15,
-      sortColumnIndex: controller.sortColumnIndex.value,
-      sortAscending: controller.isAscending.value,
-      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-      columns: [
-        DataColumn(label: SizedBox()),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AutoSizedText(text: 'Quotation', constraints: constraints),
-              AutoSizedText(text: 'Number', constraints: constraints),
-            ],
+    child: Scrollbar(
+      thumbVisibility: true,
+      controller: scrollController,
+      child: PaginatedDataTable(
+        controller: scrollController,
+        rowsPerPage: controller.pagesPerPage.value,
+        availableRowsPerPage: const [5, 10, 17, 25],
+        onRowsPerPageChanged: (rows) {
+          controller.pagesPerPage.value = rows!;
+        },
+        showCheckboxColumn: false,
+        dataRowMaxHeight: 40,
+        dataRowMinHeight: 30,
+        headingRowHeight: 70,
+        columnSpacing: 15,
+        sortColumnIndex: controller.sortColumnIndex.value,
+        sortAscending: controller.isAscending.value,
+        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+        columns: [
+          DataColumn(label: SizedBox()),
+          DataColumn(
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AutoSizedText(text: 'Quotation', constraints: constraints),
+                AutoSizedText(text: 'Number', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              // AutoSizedText(text: '', constraints: constraints),
-              AutoSizedText(text: 'Date', constraints: constraints),
-            ],
+          DataColumn(
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(),
+                // AutoSizedText(text: '', constraints: constraints),
+                AutoSizedText(text: 'Date', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'Status', constraints: constraints),
-            ],
+          DataColumn(
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(),
+                AutoSizedText(text: 'Status', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AutoSizedText(text: 'Car', constraints: constraints),
-              AutoSizedText(text: 'Brand', constraints: constraints),
-            ],
+          DataColumn(
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AutoSizedText(text: 'Car', constraints: constraints),
+                AutoSizedText(text: 'Brand', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'Model', constraints: constraints),
-            ],
+          DataColumn(
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(),
+                AutoSizedText(text: 'Model', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'Color', constraints: constraints),
-            ],
+          DataColumn(
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(),
+                AutoSizedText(text: 'Color', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AutoSizedText(text: 'Plate', constraints: constraints),
-              AutoSizedText(text: 'Number', constraints: constraints),
-            ],
+          DataColumn(
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AutoSizedText(text: 'Plate', constraints: constraints),
+                AutoSizedText(text: 'Number', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'Code', constraints: constraints),
-            ],
+          // DataColumn(
+          //   label: Column(
+          //     spacing: 5,
+          //     mainAxisAlignment: MainAxisAlignment.end,
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       const SizedBox(),
+          //       AutoSizedText(text: 'Code', constraints: constraints),
+          //     ],
+          //   ),
+          //   // onSort: controller.onSort,
+          // ),
+          // DataColumn(
+          //   label: Column(
+          //     spacing: 5,
+          //     mainAxisAlignment: MainAxisAlignment.end,
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       const SizedBox(),
+          //       AutoSizedText(text: 'City', constraints: constraints),
+          //     ],
+          //   ),
+          //   // onSort: controller.onSort,
+          // ),
+          DataColumn(
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(),
+                AutoSizedText(text: 'Customer Name', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'City', constraints: constraints),
-            ],
+          DataColumn(
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(),
+                AutoSizedText(text: 'VIN', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'Customer Name', constraints: constraints),
-            ],
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const SizedBox(),
+                AutoSizedText(text: 'Totals', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'VIN', constraints: constraints),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'Total Job', constraints: constraints),
-            ],
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
 
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'VAT', constraints: constraints),
-            ],
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const SizedBox(),
+                AutoSizedText(text: 'VAT', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
 
-          label: Column(
-            spacing: 5,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const SizedBox(),
-              AutoSizedText(text: 'NET', constraints: constraints),
-            ],
+            label: Column(
+              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const SizedBox(),
+                AutoSizedText(text: 'NET', constraints: constraints),
+              ],
+            ),
+            // onSort: controller.onSort,
           ),
-          // onSort: controller.onSort,
-        ),
-      ],
-      source: dataSource,
+        ],
+        source: dataSource,
+      ),
     ),
   );
 }
@@ -368,27 +416,27 @@ DataRow dataRowForTheTable(Map<String, dynamic> cardData, context, constraints,
           cardData['plate_number'],
           maxLines: 1,
         )),
-        DataCell(SelectableText(
-          cardData['plate_code'],
-          maxLines: 1,
-        )),
-        DataCell(
-          FutureBuilder<String>(
-            future:
-                controller.getCityName(cardData['country'], cardData['city']),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
-        ),
+        // DataCell(SelectableText(
+        //   cardData['plate_code'],
+        //   maxLines: 1,
+        // )),
+        // DataCell(
+        //   FutureBuilder<String>(
+        //     future:
+        //         controller.getCityName(cardData['country'], cardData['city']),
+        //     builder: (context, snapshot) {
+        //       if (snapshot.connectionState == ConnectionState.waiting) {
+        //         return const Text('Loading...');
+        //       } else if (snapshot.hasError) {
+        //         return const Text('Error');
+        //       } else {
+        //         return textForDataRowInTable(
+        //           text: '${snapshot.data}',
+        //         );
+        //       }
+        //     },
+        //   ),
+        // ),
         DataCell(
           textForDataRowInTable(
             maxWidth: null,
