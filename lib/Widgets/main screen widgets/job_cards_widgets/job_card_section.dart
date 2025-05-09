@@ -131,10 +131,19 @@ Container jobCardSection(context, JobCardController controller) {
                 children: [
                   Expanded(
                     child: myTextFormFieldWithBorder(
-                      isnumber: true,
-                      controller: controller.jobWarrentyDays.value,
-                      labelText: 'Warrenty Days',
-                    ),
+                        isnumber: true,
+                        controller: controller.jobWarrentyDays.value,
+                        labelText: 'Warrenty Days',
+                        onChanged: (value) {
+                          if (controller.jobWarrentyDays.value.text.isEmpty) {
+                            controller.jobWarrentyEndDate.value.clear();
+                          } else {
+                            if (int.parse(value) < 3000) {
+                              controller
+                                  .changejobWarrentyEndDateDependingOnWarrentyDays();
+                            }
+                          }
+                        }),
                   ),
                   Expanded(
                     child: myTextFormFieldWithBorder(

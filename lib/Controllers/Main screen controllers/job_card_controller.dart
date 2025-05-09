@@ -189,6 +189,13 @@ class JobCardController extends GetxController {
     super.onClose();
   }
 
+  changejobWarrentyEndDateDependingOnWarrentyDays() {
+    DateTime date = format.parse(deliveryDate.value.text);
+    DateTime newDate =
+        date.add(Duration(days: int.parse(jobWarrentyDays.value.text)));
+    jobWarrentyEndDate.value.text = format.format(newDate);
+  }
+
   calculateMoneyForAllJobs() async {
     try {
       allJobsVATS.value = 0.0;

@@ -70,57 +70,53 @@ class JobCard extends StatelessWidget {
                           );
                         }),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
-                        GetX<JobCardController>(
-                          builder: (controller) {
-                            return searchBar(
-                              search: controller.search,
-                              constraints: constraints,
-                              context: context,
-                              // controller: controller,
-                              title: 'Search for job cards',
-                              button: newJobCardButton(
-                                  context, constraints, controller),
-                            );
-                          },
-                        ),
-                        GetX<JobCardController>(
-                          builder: (controller) {
-                            if (controller.isScreenLoding.value) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            if (controller.allJobCards.isEmpty) {
-                              return const Center(
-                                child: Text('No Element'),
-                              );
-                            }
-                            return SizedBox(
-                              width: constraints.maxWidth,
-                              child: tableOfScreens(
-                                  showHistoryButton: true,
-                                  scrollController:
-                                      controller.scrollControllerFotTable1,
-                                  constraints: constraints,
-                                  context: context,
-                                  controller: controller,
-                                  data: controller.filteredJobCards.isEmpty &&
-                                          controller.search.value.text.isEmpty
-                                      ? controller.allJobCards
-                                      : controller.filteredJobCards),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+                  GetX<JobCardController>(builder: (controller) {
+                    return Container(
+                      height: controller.allJobCards.isEmpty ? 300 : null,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        children: [
+                          searchBar(
+                            search: controller.search,
+                            constraints: constraints,
+                            context: context,
+                            title: 'Search for job cards',
+                            button: newJobCardButton(
+                                context, constraints, controller),
+                          ),
+                          controller.isScreenLoding.isTrue
+                              ? Expanded(
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              : controller.allJobCards.isEmpty
+                                  ? const Center(
+                                      child: Text('No Element'),
+                                    )
+                                  : SizedBox(
+                                      width: constraints.maxWidth,
+                                      child: tableOfScreens(
+                                          showHistoryButton: true,
+                                          scrollController: controller
+                                              .scrollControllerFotTable1,
+                                          constraints: constraints,
+                                          context: context,
+                                          controller: controller,
+                                          data: controller.filteredJobCards
+                                                      .isEmpty &&
+                                                  controller
+                                                      .search.value.text.isEmpty
+                                              ? controller.allJobCards
+                                              : controller.filteredJobCards),
+                                    )
+                        ],
+                      ),
+                    );
+                  }),
                   // const SizedBox(
                   //   height: 10,
                   // ),
