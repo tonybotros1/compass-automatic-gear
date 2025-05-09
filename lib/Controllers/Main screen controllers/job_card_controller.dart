@@ -228,6 +228,8 @@ class JobCardController extends GetxController {
   openQuotationCardScreenByNumber() async {
     try {
       openingQuotationCardScreen.value = true;
+      QuotationCardController quotationCardController =
+          Get.put(QuotationCardController());
       var quotation = await FirebaseFirestore.instance
           .collection('quotation_cards')
           .where('quotation_number', isEqualTo: quotationCounter.value.text)
@@ -235,11 +237,9 @@ class JobCardController extends GetxController {
       var id = quotation.docs.first.id;
       var data = quotation.docs.first.data();
 
-      QuotationCardController quotationCardController =
-          Get.put(QuotationCardController());
       quotationCardController.getAllInvoiceItems(id);
       await quotationCardController.loadValues(data);
-      editQuotationCardDialog(quotationCardController, data, id,
+      await editQuotationCardDialog(quotationCardController, data, id,
           screenName: '🧾 Quotation');
       openingQuotationCardScreen.value = false;
       showSnackBar('Done', 'Opened Successfully');
@@ -633,7 +633,7 @@ class JobCardController extends GetxController {
     controller.carBrandLogo.value = data?['car_brand_logo'] ?? '';
   }
 
-  loadValues(Map<String, dynamic> data) {
+  loadValues(Map<String, dynamic> data) async {
     quotationCounter.value.text = data['quotation_number'] ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
     jobCancelationDate.value.text = textToDate(data['job_cancelation_date']);
@@ -645,7 +645,7 @@ class JobCardController extends GetxController {
     carModelId.value = data['car_model'];
     getCitiesByCountryID(data['country']);
     getModelsByCarBrand(data['car_brand']);
-    getModelName(data['car_brand'], data['car_model']).then((value) {
+    await getModelName(data['car_brand'], data['car_model']).then((value) {
       carModel.text = value;
     });
     plateNumber.text = data['plate_number'];
@@ -653,7 +653,7 @@ class JobCardController extends GetxController {
     countryId.value = data['country'];
     country.text = getdataName(data['country'], allCountries);
     cityId.value = data['city'];
-    getCityName(data['country'], data['city']).then((value) {
+    await getCityName(data['country'], data['city']).then((value) {
       city.text = value;
     });
     year.text = data['year'];
