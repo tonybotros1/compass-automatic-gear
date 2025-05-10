@@ -14,7 +14,7 @@ import 'main_screen_contro.dart';
 
 class QuotationCardController extends GetxController {
   Rx<TextEditingController> quotationCounter = TextEditingController().obs;
-  Rx<TextEditingController> jobCardCounter = TextEditingController().obs;
+  RxString jobCardCounter = RxString('');
   Rx<TextEditingController> quotationDate = TextEditingController().obs;
   Rx<TextEditingController> quotationDays = TextEditingController().obs;
   Rx<TextEditingController> validityEndDate = TextEditingController().obs;
@@ -200,7 +200,7 @@ class QuotationCardController extends GetxController {
       openingJobCardScreen.value = true;
       var job = await FirebaseFirestore.instance
           .collection('job_cards')
-          .where('job_number', isEqualTo: jobCardCounter.value.text)
+          .where('job_number', isEqualTo: jobCardCounter.value)
           .get();
       var id = job.docs.first.id;
       var data = job.docs.first.data();
@@ -208,7 +208,8 @@ class QuotationCardController extends GetxController {
       JobCardController jobCardController = Get.put(JobCardController());
       jobCardController.getAllInvoiceItems(id);
       await jobCardController.loadValues(data);
-      editJobCardDialog(jobCardController, data, id, screenName: '💳 Job Card');
+      editJobCardDialog(jobCardController, data, id,
+          screenName: '💳 Job Card', headerColor: Colors.deepPurple);
       openingJobCardScreen.value = false;
       showSnackBar('Done', 'Opened Successfully');
     } catch (e) {
@@ -218,7 +219,7 @@ class QuotationCardController extends GetxController {
   }
 
   clearValues() {
-    jobCardCounter.value.clear();
+    jobCardCounter.value = '';
     allInvoiceItems.clear();
     canAddInternalNotesAndInvoiceItems.value = false;
     quotationStatus.value = '';
@@ -265,8 +266,17 @@ class QuotationCardController extends GetxController {
     buttonLoadingStates.refresh(); // Notify listeners
   }
 
-  Future<void> loadValues(Map<String, dynamic> data) async {
-    jobCardCounter.value.text = data['job_number'] ?? '';
+  Future<void> loadValues(Map<String, dynamic> data, String id) async {
+    var job = await FirebaseFirestore.instance
+        .collection('job_cards')
+        .where('quotation_id', isEqualTo: id)
+        .get();
+    if (job.docs.isNotEmpty) {
+      jobCardCounter.value = job.docs.first.data()['job_number'];
+    } else {
+      jobCardCounter.value = '';
+    }
+    // jobCardCounter.value.text = data['job_number'] ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
     quotationStatus.value = data['quotation_status'] as String? ?? '';
     carBrandLogo.value = data['car_brand_logo'] as String? ?? '';
@@ -660,14 +670,14 @@ class QuotationCardController extends GetxController {
         });
         jcnId = newCounter.id;
         // Set the counter text with prefix and separator
-        jobCardCounter.value.text = '$prefix$separator$initialValue';
+        jobCardCounter.value = '$prefix$separator$initialValue';
         updateJobCard = initialValue.toString();
       } else {
         var firstDoc = jcnDoc.docs.first;
         jcnId = firstDoc.id;
         var currentValue = firstDoc.data()['value'] ?? 0;
         // Use the existing prefix and separator from the document
-        jobCardCounter.value.text =
+        jobCardCounter.value =
             '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
         updateJobCard = (currentValue + 1).toString();
       }
@@ -684,24 +694,26 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  Future<void> createNewJobCard() async {
+  Future<void> createNewJobCard(quotationID) async {
     try {
       creatingNewJob.value = true;
-      showSnackBar('Creating', 'Please Wait');
 
-      var job = await FirebaseFirestore.instance
-          .collection('job_cards')
-          .where('company_id', isEqualTo: companyId.value)
-          .where('quotation_number', isEqualTo: quotationCounter.value.text)
-          .get();
+      // var job = await FirebaseFirestore.instance
+      //     .collection('job_cards')
+      //     .where('company_id', isEqualTo: companyId.value)
+      //     .where('quotation_id', isEqualTo: quotationID)
+      //     .get();
 
-      if (job.docs.isNotEmpty) {
-        showSnackBar('Alert', 'Job Already Created');
+      if (jobCardCounter.value.isNotEmpty) {
+        showSnackBar('Alert', 'Job Already Exists');
+        creatingNewJob.value = false;
+
         return;
       }
+      showSnackBar('Creating', 'Please Wait');
 
       Map<String, dynamic> newData = {
-        'quotation_number': quotationCounter.value.text,
+        'quotation_id': quotationID,
         'label': '',
         'job_status_1': 'New',
         'job_status_2': 'New',
@@ -733,7 +745,7 @@ class QuotationCardController extends GetxController {
         'currency': customerCurrencyId.value,
         'rate': customerCurrencyRate.text,
         'payment_method': payType.value,
-        'job_number': jobCardCounter.value.text,
+        'job_number': jobCardCounter.value,
         'invoice_number': '',
         'lpo_number': '',
         'job_date': '',
@@ -755,7 +767,7 @@ class QuotationCardController extends GetxController {
       };
 
       await getCurrentJobCardCounterNumber();
-      newData['job_number'] = jobCardCounter.value.text;
+      newData['job_number'] = jobCardCounter.value;
       newData['added_date'] = DateTime.now().toString();
 
       var newJob =

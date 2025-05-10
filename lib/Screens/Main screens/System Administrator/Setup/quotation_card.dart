@@ -96,32 +96,24 @@ class QuotationCard extends StatelessWidget {
                         ),
                         GetX<QuotationCardController>(
                           builder: (controller) {
-                            if (controller.isScreenLoding.value) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
+                            if (controller.isScreenLoding.value &&
+                                controller.allQuotationCards.isEmpty) {
+                              return loadingProcess;
                             }
-                            if (controller.allQuotationCards.isEmpty) {
-                              return const Center(
-                                child: Text('No Elements'),
-                              );
-                            }
-                            return SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: SizedBox(
-                                width: constraints.maxWidth,
-                                child: tableOfScreens(
-                                    scrollController:
-                                        controller.scrollControllerFotTable1,
-                                    constraints: constraints,
-                                    context: context,
-                                    controller: controller,
-                                    data: controller.filteredQuotationCards
-                                                .isEmpty &&
-                                            controller.search.value.text.isEmpty
-                                        ? controller.allQuotationCards
-                                        : controller.filteredQuotationCards),
-                              ),
+
+                            return SizedBox(
+                              width: constraints.maxWidth,
+                              child: tableOfScreens(
+                                  scrollController:
+                                      controller.scrollControllerFotTable1,
+                                  constraints: constraints,
+                                  context: context,
+                                  controller: controller,
+                                  data: controller
+                                              .filteredQuotationCards.isEmpty &&
+                                          controller.search.value.text.isEmpty
+                                      ? controller.allQuotationCards
+                                      : controller.filteredQuotationCards),
                             );
                           },
                         ),
@@ -528,11 +520,11 @@ Widget editSection(context, QuotationCardController controller,
                     controller.setButtonLoading(cardId, true);
 
                     controller.getAllInvoiceItems(cardId);
-                    controller.currentCountryVAT.value = controller.getdataName(
-                        controller.companyDetails['contact_details']['country'],
-                        controller.allCountries,
-                        title: 'vat');
-                    await controller.loadValues(cardData);
+                    // controller.currentCountryVAT.value = controller.getdataName(
+                    //     controller.companyDetails['contact_details']['country'],
+                    //     controller.allCountries,
+                    //     title: 'vat');
+                    await controller.loadValues(cardData, cardId);
                     editQuotationCardDialog(controller, cardData, cardId);
                     controller.setButtonLoading(cardId, false);
                   }
@@ -558,7 +550,7 @@ ElevatedButton historySection(
 
 Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
     Map<String, dynamic> cardData, String quotationId,
-    {String screenName = ''}) {
+    {String screenName = '', headerColor = ''}) {
   return Get.dialog(
       barrierDismissible: false,
       Dialog(
@@ -572,7 +564,7 @@ Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
                     borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(5),
                         topRight: Radius.circular(5)),
-                    color: mainColor,
+                    color: headerColor == '' ? mainColor : headerColor,
                   ),
                   padding: const EdgeInsets.all(16),
                   width: constraints.maxWidth,
@@ -610,7 +602,7 @@ Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
                             spacing: 10,
                             children: [
                               separator(),
-                              creatJobButton(),
+                              creatJobButton(quotationId),
                               point(),
                               internalNotesButton(
                                   controller, constraints, quotationId),
@@ -733,7 +725,8 @@ ElevatedButton newQuotationCardButton(BuildContext context,
                                     spacing: 10,
                                     children: [
                                       separator(),
-                                      creatJobButton(),
+                                      creatJobButton(controller
+                                          .curreentQuotationCardId.value),
                                       point(),
                                       internalNotesButton(
                                           controller,

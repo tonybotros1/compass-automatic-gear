@@ -169,20 +169,19 @@ Container jobCardSection(context, JobCardController controller) {
               ),
             ),
             Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: myTextFormFieldWithBorder(
-                      isnumber: true,
-                      controller: controller.minTestKms.value,
-                      labelText: 'Min Test KMs',
-                    ),
-                  ),
-                  Expanded(child: SizedBox())
-                ],
+              child: myTextFormFieldWithBorder(
+                suffixIcon: IconButton(
+                    onPressed: () {
+                      controller.selectDateContext(
+                          context, controller.jobCancelationDate.value);
+                    },
+                    icon: const Icon(Icons.date_range)),
+                isDate: true,
+                controller: controller.jobCancelationDate.value,
+                labelText: 'Cancelation Date',
               ),
-            ),
+            )
+          
           ],
         ),
         Row(
@@ -213,19 +212,15 @@ Container jobCardSection(context, JobCardController controller) {
               labelText: 'Delivery Time',
               hintText: 'Enter Delivery Time',
             )),
-            Expanded(
-              child: myTextFormFieldWithBorder(
-                suffixIcon: IconButton(
-                    onPressed: () {
-                      controller.selectDateContext(
-                          context, controller.jobCancelationDate.value);
-                    },
-                    icon: const Icon(Icons.date_range)),
-                isDate: true,
-                controller: controller.jobCancelationDate.value,
-                labelText: 'Cancelation Date',
-              ),
-            )
+             Expanded(
+                    
+                    child: myTextFormFieldWithBorder(
+                      isnumber: true,
+                      controller: controller.minTestKms.value,
+                      labelText: 'Required KMs For Test',
+                    ),
+                  ),
+            
           ],
         ),
         Row(

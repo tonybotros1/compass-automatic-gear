@@ -535,6 +535,20 @@ void showSnackBar(title, body) {
   );
 }
 
+Future<dynamic> alertMessage(
+    {required context,
+    required String content,
+    required void Function() onPressed}) {
+  return Get.defaultDialog(
+    title: 'Alert',
+    middleText: 'This is an alert message!',
+    confirm: ElevatedButton(
+      onPressed: () => Get.back(),
+      child: Text('OK'),
+    ),
+  );
+}
+
 Future<dynamic> alertDialog(
     {required context,
     controller,

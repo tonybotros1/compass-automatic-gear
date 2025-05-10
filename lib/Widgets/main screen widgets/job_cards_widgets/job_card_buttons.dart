@@ -231,7 +231,7 @@ Widget inspectionFormButton(JobCardController controller, jobId,
       text: 'Inspection Form');
 }
 
-GetBuilder<JobCardController> copyJobButton(jobId) {
+GetBuilder<JobCardController> copyJobButton(jobId, context) {
   return GetBuilder<JobCardController>(builder: (controller) {
     return ClickableHoverText(
         // style: copyJobButtonStyle,
@@ -249,8 +249,14 @@ GetBuilder<JobCardController> copyJobButton(jobId) {
             await controller.getAllInvoiceItems(newData['newId']);
             controller.loadingCopyJob.value = false;
             showSnackBar('Done', 'Job Copied Successfully');
-
             editJobCardDialog(controller, newData['data'], newData['newId']);
+            // alertMessage(
+            //     context: context,
+            //     content: "Job Copied Successfully",
+            //     onPressed: () {
+            //       Get.back();
+            //       // controller.deleteJobCard(jobId);
+            //     });
           }
         },
         text: 'Copy');
@@ -258,13 +264,13 @@ GetBuilder<JobCardController> copyJobButton(jobId) {
 }
 
 GetBuilder<JobCardController> creatQuotationButton(
-    JobCardController controller) {
+    JobCardController controller,String jobId) {
   return GetBuilder<JobCardController>(builder: (context) {
     return ClickableHoverText(
         // style: creatJobOrQuotationButtonStyle,
         onTap: () {
           if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
-            controller.createQuotationCard();
+            controller.createQuotationCard(jobId);
           } else {
             showSnackBar('Alert', 'Please Save Job First');
           }

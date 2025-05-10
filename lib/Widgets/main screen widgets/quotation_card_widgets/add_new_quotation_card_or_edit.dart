@@ -60,13 +60,13 @@ Widget addNewQuotationCardOrEdit(
                     style: fontStyle1,
                   ),
                   GetX<QuotationCardController>(builder: (controller) {
-                    return controller.jobCardCounter.value.text.isNotEmpty
+                    return controller.jobCardCounter.value.isNotEmpty
                         ? ClickableHoverText(
                             color2: controller.openingJobCardScreen.isFalse
                                 ? null
                                 : Colors.yellow,
                             text: controller.openingJobCardScreen.isFalse
-                                ? controller.jobCardCounter.value.text
+                                ? controller.jobCardCounter.value
                                 : 'Loading...',
                             onTap: controller.openingJobCardScreen.isFalse
                                 ? () {

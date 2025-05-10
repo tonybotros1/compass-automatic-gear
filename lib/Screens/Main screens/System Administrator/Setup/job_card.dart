@@ -72,7 +72,7 @@ class JobCard extends StatelessWidget {
                   ),
                   GetX<JobCardController>(builder: (controller) {
                     return Container(
-                      height: controller.allJobCards.isEmpty ? 300 : null,
+                      // height: controller.allJobCards.isEmpty ? 300 : null,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(10),
@@ -87,32 +87,25 @@ class JobCard extends StatelessWidget {
                             button: newJobCardButton(
                                 context, constraints, controller),
                           ),
-                          controller.isScreenLoding.isTrue
-                              ? Expanded(
-                                  child: const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                )
-                              : controller.allJobCards.isEmpty
-                                  ? const Center(
-                                      child: Text('No Element'),
-                                    )
-                                  : SizedBox(
-                                      width: constraints.maxWidth,
-                                      child: tableOfScreens(
-                                          showHistoryButton: true,
-                                          scrollController: controller
-                                              .scrollControllerFotTable1,
-                                          constraints: constraints,
-                                          context: context,
-                                          controller: controller,
-                                          data: controller.filteredJobCards
-                                                      .isEmpty &&
+                          controller.isScreenLoding.isTrue &&
+                                  controller.allJobCards.isEmpty
+                              ? loadingProcess
+                              : SizedBox(
+                                  width: constraints.maxWidth,
+                                  child: tableOfScreens(
+                                      showHistoryButton: true,
+                                      scrollController:
+                                          controller.scrollControllerFotTable1,
+                                      constraints: constraints,
+                                      context: context,
+                                      controller: controller,
+                                      data:
+                                          controller.filteredJobCards.isEmpty &&
                                                   controller
                                                       .search.value.text.isEmpty
                                               ? controller.allJobCards
                                               : controller.filteredJobCards),
-                                    )
+                                )
                         ],
                       ),
                     );
@@ -475,8 +468,7 @@ Widget editSection(BuildContext context, Map<String, dynamic> jobData,
                     title: 'vat',
                   );
                   await controller.loadValues(jobData);
-
-                  await editJobCardDialog(controller, jobData, jobId);
+                  editJobCardDialog(controller, jobData, jobId);
                 } finally {
                   controller.setButtonLoading(jobId, false);
                 }
@@ -514,7 +506,7 @@ ElevatedButton historySection(
 
 Future<dynamic> editJobCardDialog(
     JobCardController controller, Map<String, dynamic> jobData, String jobId,
-    {String screenName = ''}) {
+    {String screenName = '', headerColor = ''}) {
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
@@ -529,7 +521,7 @@ Future<dynamic> editJobCardDialog(
                   topLeft: Radius.circular(5),
                   topRight: Radius.circular(5),
                 ),
-                color: mainColor,
+                color: headerColor == '' ? mainColor : headerColor,
               ),
               padding: const EdgeInsets.all(16),
               width: constraints.maxWidth,
@@ -573,7 +565,7 @@ Future<dynamic> editJobCardDialog(
                         spacing: 10,
                         children: [
                           separator(),
-                          creatQuotationButton(controller),
+                          creatQuotationButton(controller, jobId),
                           point(),
                           inspectionFormButton(
                               controller, jobId, jobData, context),
@@ -582,7 +574,7 @@ Future<dynamic> editJobCardDialog(
                           separator(),
                           saveJobButton(() => controller.editJobCard(jobId)),
                           point(),
-                          copyJobButton(jobId),
+                          copyJobButton(jobId, context),
                           point(),
                           deleteJobButton(controller, context, jobId),
                           separator(),
@@ -718,7 +710,8 @@ ElevatedButton newJobCardButton(BuildContext context,
                                     spacing: 10,
                                     children: [
                                       separator(),
-                                      creatQuotationButton(controller),
+                                      creatQuotationButton(controller,
+                                          controller.curreentJobCardId.value),
                                       point(),
                                       internalNotesButton(
                                           controller,

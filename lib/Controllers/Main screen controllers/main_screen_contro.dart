@@ -63,21 +63,16 @@ class MainScreenController extends GetxController {
   void onInit() async {
     // init();
     await getCompanyDetails();
-    await getUserId();
     getFavoriteScreens();
     getScreens();
     super.onInit();
-  }
-
-  getUserId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId.value = prefs.getString('userId')!;
   }
 
   // this function is to get company details
   getCompanyDetails() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = '${prefs.getString('companyId')}';
+    userId.value = prefs.getString('userId')!;
     if (companyId.value == '' || companyId.isEmpty) return;
 
     var companyDetails = await FirebaseFirestore.instance

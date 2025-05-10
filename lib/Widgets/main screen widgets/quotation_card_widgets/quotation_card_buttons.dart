@@ -94,7 +94,7 @@ GetBuilder<QuotationCardController> copyQuotationButton(quotationId) {
 
                   var newData = await controller.copyQuotation(quotationId);
                   Get.back();
-                  controller.loadValues(newData['data']);
+                  controller.loadValues(newData['data'],quotationId);
                   editQuotationCardDialog(
                       controller, newData['data'], newData['newId']);
                   showSnackBar('Done', 'Quotation Copied');
@@ -121,7 +121,7 @@ Widget internalNotesButton(QuotationCardController controller,
   );
 }
 
-GetBuilder<QuotationCardController> creatJobButton() {
+GetBuilder<QuotationCardController> creatJobButton(quotationID) {
   return GetBuilder<QuotationCardController>(builder: (controller) {
     return ClickableHoverText(
         // style: creatJobOrQuotationButtonStyle,
@@ -129,7 +129,7 @@ GetBuilder<QuotationCardController> creatJobButton() {
             ? () async {
                 if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
                   if (controller.quotationStatus.value == 'Posted') {
-                    controller.createNewJobCard();
+                    controller.createNewJobCard(quotationID);
                   } else {
                     showSnackBar(
                         'Alert', 'Only Posted Quotations Can Create Job From');

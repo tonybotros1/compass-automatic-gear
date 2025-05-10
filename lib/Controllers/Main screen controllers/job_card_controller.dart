@@ -14,7 +14,7 @@ import 'main_screen_contro.dart';
 import 'quotation_card_controller.dart';
 
 class JobCardController extends GetxController {
-  Rx<TextEditingController> quotationCounter = TextEditingController().obs;
+  RxString quotationCounter = RxString('');
   Rx<TextEditingController> jobCardCounter = TextEditingController().obs;
   Rx<TextEditingController> jobCardDate = TextEditingController().obs;
   Rx<TextEditingController> invoiceDate = TextEditingController().obs;
@@ -157,6 +157,8 @@ class JobCardController extends GetxController {
   RxDouble allJobsVATS = RxDouble(0.0);
   RxDouble allJobsTotals = RxDouble(0.0);
   RxDouble allJobsNET = RxDouble(0.0);
+  DocumentSnapshot? lastDocument;
+  bool hasMore = true;
   @override
   void onInit() async {
     super.onInit();
@@ -232,16 +234,16 @@ class JobCardController extends GetxController {
           Get.put(QuotationCardController());
       var quotation = await FirebaseFirestore.instance
           .collection('quotation_cards')
-          .where('quotation_number', isEqualTo: quotationCounter.value.text)
+          .where('quotation_number', isEqualTo: quotationCounter.value)
           .get();
       var id = quotation.docs.first.id;
       var data = quotation.docs.first.data();
 
       quotationCardController.getAllInvoiceItems(id);
-      await quotationCardController.loadValues(data);
+      await quotationCardController.loadValues(data, id);
       showSnackBar('Done', 'Opened Successfully');
       await editQuotationCardDialog(quotationCardController, data, id,
-          screenName: '🧾 Quotation');
+          screenName: '🧾 Quotation', headerColor: Colors.deepPurple);
       openingQuotationCardScreen.value = false;
     } catch (e) {
       openingQuotationCardScreen.value = false;
@@ -396,7 +398,7 @@ class JobCardController extends GetxController {
 
   clearValues() {
     canAddInternalNotesAndInvoiceItems.value = false;
-    quotationCounter.value.clear();
+    quotationCounter.value = '';
     allInvoiceItems.clear();
     jobCancelationDate.value.text = '';
     jobStatus1.value = '';
@@ -634,7 +636,20 @@ class JobCardController extends GetxController {
   }
 
   loadValues(Map<String, dynamic> data) async {
-    quotationCounter.value.text = data['quotation_number'] ?? '';
+    var quotationId = data['quotation_id'] ?? '';
+    if (quotationId != '') {
+      var quotation = await FirebaseFirestore.instance
+          .collection('quotation_cards')
+          .where(FieldPath.documentId, isEqualTo: quotationId)
+          .get();
+      if (quotation.docs.isNotEmpty) {
+        quotationCounter.value =
+            quotation.docs.first.data()['quotation_number'];
+      } else {
+        quotationCounter.value = '';
+      }
+    }
+    // quotationCounter.value = data['quotation_number'] ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
     jobCancelationDate.value.text = textToDate(data['job_cancelation_date']);
     jobStatus1.value = data['job_status_1'];
@@ -1026,13 +1041,13 @@ class JobCardController extends GetxController {
         });
         qnId = newCounter.id;
         // Set the counter text with prefix and separator
-        quotationCounter.value.text = '$prefix$separator$initialValue';
+        quotationCounter.value = '$prefix$separator$initialValue';
         updateqn = initialValue.toString();
       } else {
         var firstDoc = qnDoc.docs.first;
         qnId = firstDoc.id;
         var currentValue = firstDoc.data()['value'] ?? 0;
-        quotationCounter.value.text =
+        quotationCounter.value =
             '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
         updateqn = (currentValue + 1).toString();
       }
@@ -1045,12 +1060,11 @@ class JobCardController extends GetxController {
     }
   }
 
-  Future<void> createQuotationCard() async {
+  Future<void> createQuotationCard(jobId) async {
     try {
       showSnackBar('Creating', 'Please Wait');
       creatingNewQuotation.value = true;
       Map<String, dynamic> newData = {
-        'job_number': jobCardCounter.value.text,
         'quotation_status': 'New',
         'car_brand_logo': carBrandLogo.value,
         'company_id': companyId.value,
@@ -1079,7 +1093,7 @@ class JobCardController extends GetxController {
         'currency': customerCurrencyId.value,
         'rate': customerCurrencyRate.text,
         'payment_method': payType.value,
-        'quotation_number': quotationCounter.value.text,
+        'quotation_number': quotationCounter.value,
         'quotation_date': '',
         'validity_days': '',
         'validity_end_date': '',
@@ -1091,7 +1105,7 @@ class JobCardController extends GetxController {
       };
 
       await getCurrentQuotationCounterNumber();
-      newData['quotation_number'] = quotationCounter.value.text;
+      newData['quotation_number'] = quotationCounter.value;
       newData['added_date'] = DateTime.now().toString();
       var newQuotation = await FirebaseFirestore.instance
           .collection('quotation_cards')
@@ -1105,6 +1119,10 @@ class JobCardController extends GetxController {
             .collection('invoice_items')
             .add(data);
       }
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({'quotation_id': newQuotation.id});
       showSnackBar('Done', 'Quotation Created Successfully');
 
       creatingNewQuotation.value = false;
@@ -1795,6 +1813,46 @@ class JobCardController extends GetxController {
       isScreenLoding.value = false;
     }
   }
+
+  // Future<void> getAllJobCards({bool isNextPage = false}) async {
+  //   if (!hasMore) return;
+
+  //   try {
+  //     Query query = FirebaseFirestore.instance
+  //         .collection('job_cards')
+  //         .where('company_id', isEqualTo: companyId.value)
+  //         .orderBy('job_number', descending: true)
+  //         .limit(5);
+
+  //     if (isNextPage && lastDocument != null) {
+  //       query = query.startAfterDocument(lastDocument!);
+  //     }
+
+  //     final querySnapshot = await query.get();
+
+  //     if (querySnapshot.docs.isNotEmpty) {
+  //       if (isNextPage) {
+  //         allJobCards.addAll(querySnapshot.docs);
+  //       } else {
+  //         allJobCards.assignAll(querySnapshot.docs);
+  //       }
+
+  //       lastDocument = querySnapshot.docs.last;
+  //       numberOfJobs.value = allJobCards.length;
+
+  //       // If fewer than 5 documents are returned, there are no more
+  //       if (querySnapshot.docs.length < 5) hasMore = false;
+  //     } else {
+  //       hasMore = false;
+  //     }
+
+  //     isScreenLoding.value = false;
+  //     calculateMoneyForAllJobs();
+  //   } catch (e) {
+  //     isScreenLoding.value = false;
+  //     // print('Error: $e');
+  //   }
+  // }
 
   Stream<List<Map<String, dynamic>>> getJobCardInternalNotes(String jobId) {
     return FirebaseFirestore.instance
