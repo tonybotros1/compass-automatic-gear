@@ -2,6 +2,8 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_contr
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../Screens/Main screens/System Administrator/Setup/invoice_items.dart';
+import '../../../consts.dart';
 import '../../my_text_field.dart';
 
 Widget addNewinvoiceItemsOrEdit({
@@ -43,19 +45,72 @@ Widget addNewinvoiceItemsOrEdit({
                   GetX<JobCardController>(builder: (context) {
                     bool isLoading =
                         controller.allInvoiceItemsFromCollection.isEmpty;
-                    return CustomDropdown(
-                      hintText: 'Name',
-                      textcontroller: controller.invoiceItemName.text,
-                      showedSelectedName: 'name',
-                      validator: true,
-                      items: isLoading
-                          ? {}
-                          : controller.allInvoiceItemsFromCollection,
-                      onChanged: (key, value) {
-                        controller.invoiceItemName.text = value['name'];
-                        controller.description.text = value['description'];
-                        controller.invoiceItemNameId.value = key;
-                      },
+                    return Row(crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: CustomDropdown(
+                            hintText: 'Name',
+                            textcontroller: controller.invoiceItemName.text,
+                            showedSelectedName: 'name',
+                            validator: true,
+                            items: isLoading
+                                ? {}
+                                : controller.allInvoiceItemsFromCollection,
+                            onChanged: (key, value) {
+                              controller.invoiceItemName.text = value['name'];
+                              controller.description.text =
+                                  value['description'];
+                              controller.invoiceItemNameId.value = key;
+                            },
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              Get.dialog(
+                                  barrierDismissible: false,
+                                  Dialog(
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5)),
+                                    insetPadding: const EdgeInsets.all(8),
+                                    child: LayoutBuilder(
+                                        builder: (context, constraints) {
+                                      return Column(
+                                        children: [
+                                          Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    const BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(5),
+                                                        topRight:
+                                                            Radius.circular(5)),
+                                                color: mainColor,
+                                              ),
+                                              padding: const EdgeInsets.all(16),
+                                              width: constraints.maxWidth,
+                                              child:
+                                                  Row(spacing: 10, children: [
+                                                Text(
+                                                  'Invoice Items',
+                                                  style:
+                                                      fontStyleForScreenNameUsedInButtons,
+                                                ),
+                                                const Spacer(),
+                                                closeIcon()
+                                              ])),
+                                          Expanded(
+                                              child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8),
+                                                  child: InvoiceItems()))
+                                        ],
+                                      );
+                                    }),
+                                  ));
+                            },
+                            icon: Icon(Icons.add))
+                      ],
                     );
                   }),
                   SizedBox(height: 12),
