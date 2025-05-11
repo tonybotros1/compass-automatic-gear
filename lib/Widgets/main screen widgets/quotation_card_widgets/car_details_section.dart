@@ -183,34 +183,27 @@ Widget carDetailsSection() {
                       controller: controller.mileageIn.value,
                       labelText: 'Mileage In',
                       hintText: 'Enter Mileage In',
-                      onChanged: (value) {
-                        if (controller.mileageIn.value.text.isNotEmpty) {
-                          controller.inOutDiffCalculating();
-                        } else {
-                          controller.mileageIn.value.text = '0';
-                          controller.inOutDiffCalculating();
-                        }
-                      })),
-              Expanded(
-                  child: myTextFormFieldWithBorder(
-                      isnumber: true,
-                      controller: controller.mileageOut.value,
-                      labelText: 'Mileage Out',
-                      hintText: 'Enter Mileage Out',
-                      onChanged: (value) {
-                        if (controller.mileageOut.value.text.isNotEmpty) {
-                          controller.inOutDiffCalculating();
-                        } else {
-                          controller.mileageOut.value.text = '0';
-                          controller.inOutDiffCalculating();
-                        }
-                      })),
-              Expanded(
-                  child: myTextFormFieldWithBorder(
-                isEnabled: false,
-                controller: controller.inOutDiff.value,
-                labelText: 'In Out Diff',
-              )),
+                   )),
+              // Expanded(
+              //     child: myTextFormFieldWithBorder(
+              //         isnumber: true,
+              //         controller: controller.mileageOut.value,
+              //         labelText: 'Mileage Out',
+              //         hintText: 'Enter Mileage Out',
+              //         onChanged: (value) {
+              //           if (controller.mileageOut.value.text.isNotEmpty) {
+              //             controller.inOutDiffCalculating();
+              //           } else {
+              //             controller.mileageOut.value.text = '0';
+              //             controller.inOutDiffCalculating();
+              //           }
+              //         })),
+              // Expanded(
+              //     child: myTextFormFieldWithBorder(
+              //   isEnabled: false,
+              //   controller: controller.inOutDiff.value,
+              //   labelText: 'In Out Diff',
+              // )),
               Expanded(child: SizedBox())
             ],
           ),

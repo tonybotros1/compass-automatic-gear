@@ -47,8 +47,6 @@ class QuotationCardController extends GetxController {
   TextEditingController customerCurrencyRate = TextEditingController();
   Rx<TextEditingController> mileageIn = TextEditingController().obs;
   Rx<TextEditingController> fuelAmount = TextEditingController().obs;
-  Rx<TextEditingController> mileageOut = TextEditingController().obs;
-  Rx<TextEditingController> inOutDiff = TextEditingController().obs;
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
   RxBool loadingInvoiceItems = RxBool(false);
@@ -283,6 +281,7 @@ class QuotationCardController extends GetxController {
     carBrandId.value = data['car_brand'] as String? ?? '';
 
     color.text = getdataName(data['color'], allColors);
+    colorId.value = data['color'];
 
     // Car brand & model (with async model name lookup)
     final brandId = data['car_brand'] as String? ?? '';
@@ -316,8 +315,6 @@ class QuotationCardController extends GetxController {
     // Mileage & fuel amounts
     mileageIn.value.text = data['mileage_in'] as String? ?? '';
     fuelAmount.value.text = data['fuel_amount'] as String? ?? '';
-    mileageOut.value.text = data['mileage_out'] as String? ?? '';
-    inOutDiff.value.text = data['mileage_in_out_diff'] as String? ?? '';
 
     // Customer info
     final custId = data['customer'] as String? ?? '';
@@ -481,8 +478,6 @@ class QuotationCardController extends GetxController {
         'vehicle_identification_number': vin.text,
         'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
-        'mileage_out': mileageOut.value.text,
-        'mileage_in_out_diff': inOutDiff.value.text,
         'customer': customerId.value,
         'contact_name': customerEntityName.text,
         'contact_number': customerEntityPhoneNumber.text,
@@ -565,8 +560,6 @@ class QuotationCardController extends GetxController {
         'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
         'fuel_amount': fuelAmount.value.text,
-        'mileage_out': mileageOut.value.text,
-        'mileage_in_out_diff': inOutDiff.value.text,
         'customer': customerId.value,
         'contact_name': customerEntityName.text,
         'contact_number': customerEntityPhoneNumber.text,
@@ -732,8 +725,6 @@ class QuotationCardController extends GetxController {
         'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
         'fuel_amount': fuelAmount.value.text,
-        'mileage_out': mileageOut.value.text,
-        'mileage_in_out_diff': inOutDiff.value.text,
         'customer': customerId.value,
         'contact_name': customerEntityName.text,
         'contact_number': customerEntityPhoneNumber.text,
@@ -755,8 +746,8 @@ class QuotationCardController extends GetxController {
         'job_cancelation_date': '',
         'job_finish_date': '',
         'job_delivery_date': '',
-        'job_warrenty_days': '',
-        'job_warrenty_km': '',
+        'job_warrenty_days': quotationWarrentyDays.value.text,
+        'job_warrenty_km': quotationWarrentyKM.value.text,
         'job_warrenty_end_date': '',
         'job_min_test_km': '',
         'job_reference_1': '',
@@ -1231,11 +1222,7 @@ class QuotationCardController extends GetxController {
     payType.value = isCash ? 'Cash' : 'Credit';
   }
 
-  inOutDiffCalculating() {
-    inOutDiff.value.text =
-        (int.parse(mileageOut.value.text) - int.parse(mileageIn.value.text))
-            .toString();
-  }
+ 
 
   Future<void> selectDateContext(
       BuildContext context, TextEditingController date) async {
@@ -1281,11 +1268,11 @@ class QuotationCardController extends GetxController {
 
     customerEntityPhoneNumber.text = phoneDetails['number'] ?? '';
     customerEntityName.text = phoneDetails['name'] ?? '';
-    customerEntityEmail.text = phoneDetails['email'];
+    customerEntityEmail.text = phoneDetails['email'] ?? '';
 
     customerCreditNumber.text =
         (currentUserDetails.value['credit_limit'] ?? '0').toString();
-    customerSaleManId.value = currentUserDetails.value['sales_man'];
+    customerSaleManId.value = currentUserDetails.value['sales_man'] ?? '';
     customerSaleMan.value =
         getdataName(currentUserDetails.value['sales_man'], salesManMap);
   }

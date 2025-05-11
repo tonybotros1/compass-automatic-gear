@@ -98,7 +98,10 @@ class QuotationCard extends StatelessWidget {
                           builder: (controller) {
                             if (controller.isScreenLoding.value &&
                                 controller.allQuotationCards.isEmpty) {
-                              return loadingProcess;
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: loadingProcess,
+                              );
                             }
 
                             return SizedBox(
@@ -659,8 +662,6 @@ ElevatedButton newQuotationCardButton(BuildContext context,
       controller.getCitiesByCountryID(
           controller.companyDetails['contact_details']['country']);
       controller.mileageIn.value.text = '0';
-      controller.mileageOut.value.text = '0';
-      controller.inOutDiff.value.text = '0';
       controller.customerCreditNumber.text = '0';
       controller.customerOutstanding.text = '0';
       controller.isCashSelected.value = true;

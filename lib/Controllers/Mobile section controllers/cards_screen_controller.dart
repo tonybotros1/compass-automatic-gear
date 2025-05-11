@@ -789,25 +789,26 @@ class CardsScreenController extends GetxController {
           .where('company_id', isEqualTo: companyId.value)
           .orderBy('added_date', descending: true)
           .snapshots()
-          .listen((event) {
-        allCarCards.assignAll(event.docs); // Assign all cards first
+          .listen((QuerySnapshot<Map<String, dynamic>> event) {
+        // 1) Cast the underlying JSArray<dynamic> to the correct typed list:
+        final docs =
+            event.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>();
 
-        // Clear the lists before refilling
-        newCarCards.clear();
-        doneCarCards.clear();
+        // 2) Assign all cards first
+        allCarCards.assignAll(docs);
 
-        for (var element in event.docs) {
-          var data = element.data();
-          if (data['label'] == 'Draft') {
-            newCarCards.add(element);
-          } else {
-            doneCarCards.add(element);
-          }
-        }
+        // 3) Clear and repartition into Draft vs Done
+        newCarCards
+          ..clear()
+          ..addAll(docs.where((doc) => doc.data()['label'] == 'Draft'));
 
+        doneCarCards
+          ..clear()
+          ..addAll(docs.where((doc) => doc.data()['label'] != 'Draft'));
+
+        // 4) Update counts and loading state
         numberOfNewCars.value = newCarCards.length;
         numberOfDoneCars.value = doneCarCards.length;
-
         loading.value = false;
       }, onError: (e) {
         loading.value = false;

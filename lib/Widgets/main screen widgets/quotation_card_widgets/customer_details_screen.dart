@@ -31,11 +31,12 @@ Widget customerDetailsSection() {
                         showedSelectedName: 'entity_name',
                         textcontroller: controller.customerName.text,
                         hintText: 'Customer',
-                        items: isCustomersLoading ? {} : controller.allCustomers,
+                        items:
+                            isCustomersLoading ? {} : controller.allCustomers,
                         onChanged: (key, value) {
                           controller.customerName.text = value['entity_name'];
                           controller.onSelectForCustomers(key);
-                      
+
                           controller.customerId.value = key;
                         },
                       ),
@@ -131,6 +132,7 @@ Widget customerDetailsSection() {
                     child: FocusTraversalOrder(
                   order: NumericFocusOrder(4),
                   child: myTextFormFieldWithBorder(
+                    isEnabled: false,
                     isnumber: true,
                     controller: controller.customerCreditNumber,
                     labelText: 'Credit Limit',
@@ -141,6 +143,7 @@ Widget customerDetailsSection() {
                     child: FocusTraversalOrder(
                   order: NumericFocusOrder(5),
                   child: myTextFormFieldWithBorder(
+                    isEnabled: false,
                     isnumber: true,
                     controller: controller.customerOutstanding,
                     labelText: 'Outstanding',
@@ -158,7 +161,6 @@ Widget customerDetailsSection() {
                     order: NumericFocusOrder(6),
                     child: Focus(
                       child: CustomDropdown(
-                        
                         showedSelectedName: 'name',
                         textcontroller: controller.customerSaleMan.value,
                         hintText: 'Sales Man',

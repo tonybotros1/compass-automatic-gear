@@ -241,15 +241,15 @@ GetBuilder<JobCardController> copyJobButton(jobId, context) {
               controller.jobStatus1.value == 'Ready') {
             showSnackBar('Alert', 'Only Posted / Cancelled Jobs Can be Copied');
           } else {
+            Get.back();
             showSnackBar('Copying', 'Please Wait');
 
             var newData = await controller.copyJob(jobId);
-            Get.back();
-            await controller.loadValues(newData['data']);
             await controller.getAllInvoiceItems(newData['newId']);
+            await controller.loadValues(newData['data']);
             controller.loadingCopyJob.value = false;
-            showSnackBar('Done', 'Job Copied Successfully');
             editJobCardDialog(controller, newData['data'], newData['newId']);
+            showSnackBar('Done', 'Job Copied Successfully');
             // alertMessage(
             //     context: context,
             //     content: "Job Copied Successfully",
@@ -264,7 +264,7 @@ GetBuilder<JobCardController> copyJobButton(jobId, context) {
 }
 
 GetBuilder<JobCardController> creatQuotationButton(
-    JobCardController controller,String jobId) {
+    JobCardController controller, String jobId) {
   return GetBuilder<JobCardController>(builder: (context) {
     return ClickableHoverText(
         // style: creatJobOrQuotationButtonStyle,

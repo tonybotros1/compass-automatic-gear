@@ -89,7 +89,10 @@ class JobCard extends StatelessWidget {
                           ),
                           controller.isScreenLoding.isTrue &&
                                   controller.allJobCards.isEmpty
-                              ? loadingProcess
+                              ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: loadingProcess,
+                              )
                               : SizedBox(
                                   width: constraints.maxWidth,
                                   child: tableOfScreens(

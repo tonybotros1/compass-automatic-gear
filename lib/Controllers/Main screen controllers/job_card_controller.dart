@@ -78,7 +78,8 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
   RxBool loadingInvoiceItems = RxBool(false);
-  final RxList<DocumentSnapshot> allJobCards = RxList<DocumentSnapshot>([]);
+  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allJobCards =
+      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
   final RxList<DocumentSnapshot> historyJobCards = RxList<DocumentSnapshot>([]);
   final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allInvoiceItems =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
@@ -652,80 +653,80 @@ class JobCardController extends GetxController {
     // quotationCounter.value = data['quotation_number'] ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
     jobCancelationDate.value.text = textToDate(data['job_cancelation_date']);
-    jobStatus1.value = data['job_status_1'];
-    jobStatus2.value = data['job_status_2'];
-    carBrandLogo.value = data['car_brand_logo'];
-    carBrandId.value = data['car_brand'];
+    jobStatus1.value = data['job_status_1'] ?? '';
+    jobStatus2.value = data['job_status_2'] ?? '';
+    carBrandLogo.value = data['car_brand_logo'] ?? '';
+    carBrandId.value = data['car_brand'] ?? '';
     carBrand.text = getdataName(data['car_brand'], allBrands);
-    carModelId.value = data['car_model'];
-    getCitiesByCountryID(data['country']);
-    getModelsByCarBrand(data['car_brand']);
+    carModelId.value = data['car_model'] ?? '';
+    getCitiesByCountryID(data['country']) ?? '';
+    getModelsByCarBrand(data['car_brand']) ?? '';
     await getModelName(data['car_brand'], data['car_model']).then((value) {
       carModel.text = value;
     });
-    plateNumber.text = data['plate_number'];
-    plateCode.text = data['plate_code'];
-    countryId.value = data['country'];
+    plateNumber.text = data['plate_number'] ?? '';
+    plateCode.text = data['plate_code'] ?? '';
+    countryId.value = data['country'] ?? '';
     country.text = getdataName(data['country'], allCountries);
-    cityId.value = data['city'];
+    cityId.value = data['city'] ?? '';
     await getCityName(data['country'], data['city']).then((value) {
       city.text = value;
     });
-    year.text = data['year'];
-    colorId.value = data['color'];
-    engineTypeId.value = data['engine_type'];
+    year.text = data['year'] ?? '';
+    colorId.value = data['color'] ?? '';
+    engineTypeId.value = data['engine_type'] ?? '';
     color.text = getdataName(data['color'], allColors);
     engineType.text = getdataName(data['engine_type'], allEngineType);
-    vin.text = data['vehicle_identification_number'];
-    transmissionType.text = data['transmission_type'];
-    mileageIn.value.text = data['mileage_in'];
+    vin.text = data['vehicle_identification_number'] ?? '';
+    transmissionType.text = data['transmission_type'] ?? '';
+    mileageIn.value.text = data['mileage_in'] ?? '';
     fuelAmount.value.text = data['fuel_amount'] ?? '';
-    mileageOut.value.text = data['mileage_out'];
-    inOutDiff.value.text = data['mileage_in_out_diff'];
-    customerId.value = data['customer'];
+    mileageOut.value.text = data['mileage_out'] ?? '';
+    inOutDiff.value.text = data['mileage_in_out_diff'] ?? '';
+    customerId.value = data['customer'] ?? '';
     customerName.text =
         getdataName(data['customer'], allCustomers, title: 'entity_name');
-    customerEntityName.text = data['contact_name'];
-    customerEntityPhoneNumber.text = data['contact_number'];
-    customerEntityEmail.text = data['contact_email'];
-    customerCreditNumber.text = data['credit_limit'];
-    customerOutstanding.text = data['outstanding'];
-    customerSaleManId.value = data['saleMan'];
+    customerEntityName.text = data['contact_name'] ?? '';
+    customerEntityPhoneNumber.text = data['contact_number'] ?? '';
+    customerEntityEmail.text = data['contact_email'] ?? '';
+    customerCreditNumber.text = data['credit_limit'] ?? '';
+    customerOutstanding.text = data['outstanding'] ?? '';
+    customerSaleManId.value = data['saleMan'] ?? '';
     customerSaleMan.value = getdataName(data['saleMan'], salesManMap);
-    customerBranchId.value = data['branch'];
+    customerBranchId.value = data['branch'] ?? '';
     customerBranch.text = getdataName(data['branch'], allBranches);
-    customerCurrencyId.value = data['currency'];
+    customerCurrencyId.value = data['currency'] ?? '';
     customerCurrency.text = data['currency'] != ''
         ? getdataName(
             getdataName(data['currency'], allCurrencies, title: 'country_id'),
             allCountries,
             title: 'currency_code')
         : '';
-    customerCurrencyRate.text = data['rate'];
-    payType.value = data['payment_method'];
+    customerCurrencyRate.text = data['rate'] ?? '';
+    payType.value = data['payment_method'] ?? '';
     data['payment_method'] == 'Cash'
         ? (isCashSelected.value = true) && (isCreditSelected.value = false)
         : (isCreditSelected.value = true) && (isCashSelected.value = false);
-    jobCardCounter.value.text = data['job_number'];
+    jobCardCounter.value.text = data['job_number'] ?? '';
 
-    invoiceCounter.value.text = data['invoice_number'];
-    lpoCounter.value.text = data['lpo_number'];
-    jobCardDate.value.text = data['job_date'];
+    invoiceCounter.value.text = data['invoice_number'] ?? '';
+    lpoCounter.value.text = data['lpo_number'] ?? '';
+    jobCardDate.value.text = data['job_date'] ?? '';
     invoiceDate.value.text = textToDate(data['invoice_date']);
     approvalDate.value.text = textToDate(data['job_approval_date']);
     startDate.value.text = textToDate(data['job_start_date']);
     finishDate.value.text = textToDate(data['job_finish_date']);
     deliveryDate.value.text = textToDate(data['job_delivery_date']);
-    jobWarrentyDays.value.text = data['job_warrenty_days'];
-    jobWarrentyKM.value.text = data['job_warrenty_km'];
+    jobWarrentyDays.value.text = data['job_warrenty_days'] ?? '';
+    jobWarrentyKM.value.text = data['job_warrenty_km'] ?? '';
     jobWarrentyEndDate.value.text = textToDate(data['job_warrenty_end_date']);
-    minTestKms.value.text = data['job_min_test_km'];
-    reference1.value.text = data['job_reference_1'];
-    reference2.value.text = data['job_reference_2'];
+    minTestKms.value.text = data['job_min_test_km'] ?? '';
+    reference1.value.text = data['job_reference_1'] ?? '';
+    reference2.value.text = data['job_reference_2'] ?? '';
     deliveryTime.value.text = data['delivery_time'] ?? '';
 
-    jobNotes.text = data['job_notes'];
-    deliveryNotes.text = data['job_delivery_notes'];
+    jobNotes.text = data['job_notes'] ?? '';
+    deliveryNotes.text = data['job_delivery_notes'] ?? '';
   }
 
   Future<void> addNewJobCard() async {
@@ -1099,8 +1100,8 @@ class JobCardController extends GetxController {
         'validity_end_date': '',
         'reference_number': '',
         'delivery_time': '',
-        'quotation_warrenty_days': '',
-        'quotation_warrenty_km': '',
+        'quotation_warrenty_days': jobWarrentyDays.value.text,
+        'quotation_warrenty_km': jobWarrentyKM.value.text,
         'quotation_notes': '',
       };
 
@@ -1146,6 +1147,8 @@ class JobCardController extends GetxController {
         data.remove('id');
         data['job_status_1'] = 'New';
         data['job_status_2'] = 'New';
+        data['invoice_number'] = '';
+        data['invoice_date'] = '';
         await getCurrentJobCardCounterNumber();
         data['job_number'] = jobCardCounter.value.text;
         final warrentyEndDate = data['job_warrenty_end_date'];
@@ -1795,22 +1798,28 @@ class JobCardController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  getAllJobCards() {
+  void getAllJobCards() {
     try {
       FirebaseFirestore.instance
           .collection('job_cards')
           .where('company_id', isEqualTo: companyId.value)
           .orderBy('job_number', descending: true)
           .snapshots()
-          .listen((jobCards) {
-        allJobCards.assignAll(List<DocumentSnapshot>.from(jobCards.docs));
-        numberOfJobs.value = allJobCards.length;
+          .listen((QuerySnapshot<Map<String, dynamic>> jobCards) {
+        // Cast the underlying JSArray<dynamic> to the correct Dart type:
+        final docs =
+            jobCards.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>();
 
+        // Now assign into your RxList without error:
+        allJobCards.assignAll(docs);
+
+        numberOfJobs.value = allJobCards.length;
         isScreenLoding.value = false;
         calculateMoneyForAllJobs();
       });
     } catch (e) {
       isScreenLoding.value = false;
+      // you might log or rethrow here if you want
     }
   }
 
@@ -1919,11 +1928,11 @@ class JobCardController extends GetxController {
 
     customerEntityPhoneNumber.text = phoneDetails['number'] ?? '';
     customerEntityName.text = phoneDetails['name'] ?? '';
-    customerEntityEmail.text = phoneDetails['email'];
+    customerEntityEmail.text = phoneDetails['email'] ?? '';
 
     customerCreditNumber.text =
         (currentUserDetails.value['credit_limit'] ?? '0').toString();
-    customerSaleManId.value = currentUserDetails.value['sales_man'];
+    customerSaleManId.value = currentUserDetails.value['sales_man'] ?? '';
     customerSaleMan.value =
         getdataName(currentUserDetails.value['sales_man'], salesManMap);
   }
@@ -1942,7 +1951,7 @@ class JobCardController extends GetxController {
     // Map each card to a Future that returns the card if it matches, else null.
     List<Future<DocumentSnapshot<Object?>?>> futures =
         allJobCards.map((card) async {
-      final data = card.data() as Map<String, dynamic>;
+      final data = card.data();
 
       // Run asynchronous operations concurrently.
       final results = await Future.wait([
