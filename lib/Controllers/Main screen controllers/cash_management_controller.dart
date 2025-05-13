@@ -30,7 +30,6 @@ class CashManagementController extends GetxController {
 
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-  final GlobalKey<FormState> formKeyForAddingNewvalue = GlobalKey<FormState>();
   RxBool addingNewValue = RxBool(false);
   RxBool postingReceipts = RxBool(false);
   RxBool isChequeSelected = RxBool(false);
@@ -52,14 +51,18 @@ class CashManagementController extends GetxController {
   RxMap allBanks = RxMap({});
   RxBool isReceiptAdded = RxBool(false);
   RxString currentReceiptID = RxString('');
+  var editingIndex = (-1).obs;
+  final ScrollController scrollController = ScrollController();
+  var buttonLoadingStates = <String, bool>{}.obs;
+
   @override
   void onInit() async {
     await getCompanyId();
-    getAllCashes();
     getAllCustomers();
     getAllAccounts();
-    getReceiptsTypes();
     getBanks();
+    await getReceiptsTypes();
+    getAllReceipts();
     // callEchoTestFunction();
     search.value.addListener(() {
       // filterCities();
@@ -67,12 +70,76 @@ class CashManagementController extends GetxController {
     super.onInit();
   }
 
+  // function to manage loading button
+  void setButtonLoading(String menuId, bool isLoading) {
+    buttonLoadingStates[menuId] = isLoading;
+    buttonLoadingStates.refresh(); // Notify listeners
+  }
+
+  /// Call this to enter edit mode on a row
+  void startEditing(int idx) {
+    editingIndex.value = idx;
+  }
+
+  /// Call this when editing is done (Enter pressed)
+  void finishEditing(String newValue, int idx) {
+    // Update the data source
+    selectedAvailableReceipts[idx]['receipt_amount'] = newValue;
+    selectedAvailableReceipts[idx]['outstanding_amount'] = (double.parse(
+                selectedAvailableReceipts[idx]['invoice_amount'] ?? '0.0') -
+            double.parse(newValue))
+        .toString();
+    // Exit edit mode
+    calculateAmountForSelectedReceipts();
+    editingIndex.value = -1;
+  }
+
   getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
+  loadValues(Map data) async {
+    status.value = data['status'];
+    isReceiptAdded.value = true;
+    if (data['customer'] != '') {
+      await getCustomerInvoices(data['customer']);
+      List jobIDs = data['job_ids'];
+      for (var i = 0; i < availableReceipts.length; i++) {
+        if (jobIDs.contains(availableReceipts[i]['job_id'])) {
+          selectJobReceipt(i, true);
+        }
+      }
+      addSelectedReceipts();
+    }
+    receiptCounter.value.text = data['receipt_number'] ?? '';
+    receiptDate.value.text = textToDate(data['receipt_date']);
+    customerName.text =
+        getdataName(data['customer'], allCustomers, title: 'entity_name');
+    customerNameId.value = data['customer'] ?? '';
+    outstanding.text = await calculateCustomerOutstanding(data['customer']);
+    note.text = data['note'] ?? '';
+    receiptType.text = getdataName(data['receipt_type'], allReceiptTypes);
+    receiptType.text == 'Cheque'
+        ? isChequeSelected.value = true
+        : isChequeSelected.value = false;
+    receiptTypeId.value = data['receipt_type'] ?? '';
+    chequeNumber.text = data['cheque_number'] ?? '';
+    bankName.text = getdataName(data['bank_name'], allBanks);
+    bankId.value = data['bank_name'];
+    chequeDate.text = textToDate(data['cheque_date']);
+    account.text =
+        getdataName(data['account'], allAccounts, title: 'account_number');
+    accountId.value = data['account'];
+    currency.text = data['currency'] ?? '';
+    rate.text = data['rate'] ?? '';
+  }
+
   clearValues() {
+    currency.clear();
+    rate.clear();
+    account.clear();
+    accountId.value = '';
     outstanding.clear();
     isReceiptAdded.value = false;
     receiptDate.value.text = textToDate(DateTime.now().toString());
@@ -164,19 +231,25 @@ class CashManagementController extends GetxController {
     return mainScreenController.selectedScreenName.value;
   }
 
-  // this function is to select single receipt
-  void selectJobReceipt(int i, bool value) {
-    availableReceipts[i]['is_selected'] = value;
-    update();
+  // // this function is to select single receipt
+  void selectJobReceipt(int index, bool isSelected) {
+    // rebuild a new Map object
+    final updated = {
+      ...availableReceipts[index],
+      'is_selected': isSelected,
+    };
+
+    // reassign into the RxList — that triggers the update
+    availableReceipts[index] = updated;
   }
 
 // this function is to select all receipts
-  void selectAllJobReceipts(bool value) {
-    for (var element in availableReceipts) {
-      element['is_selected'] = value;
-    }
-    isAllJobReceiptsSelected.value = value;
-    update();
+  void selectAllJobReceipts(bool select) {
+    isAllJobReceiptsSelected.value = select;
+
+    final newList =
+        availableReceipts.map((r) => {...r, 'is_selected': select}).toList();
+    availableReceipts.assignAll(newList);
   }
 
   calculateAmountForSelectedReceipts() {
@@ -211,37 +284,25 @@ class CashManagementController extends GetxController {
     Get.back();
   }
 
-  removeSelectedReceipt(int i) {
-    final removed = selectedAvailableReceipts[i];
-
-    // Find the matching receipt in availableReceipts
-    final indexInAvailable = availableReceipts.indexWhere(
-      (receipt) => receipt['invoice_number'] == removed['invoice_number'],
+  void removeSelectedReceipt(String invoiceNumber) {
+    // 1) Un‐select it in the main list
+    final availIdx = availableReceipts.indexWhere(
+      (r) => r['invoice_number'] == invoiceNumber,
     );
-
-    // Set is_selected to false if found
-    if (indexInAvailable != -1) {
-      availableReceipts[indexInAvailable]['is_selected'] = false;
+    if (availIdx != -1) {
+      final updated = {
+        ...availableReceipts[availIdx],
+        'is_selected': false,
+      };
+      availableReceipts[availIdx] = updated;
     }
 
-    selectedAvailableReceipts.removeAt(i);
+    // 2) Remove from the selected list
+    selectedAvailableReceipts
+        .removeWhere((r) => r['invoice_number'] == invoiceNumber);
+
+    // 3) Recalculate totals, etc.
     calculateAmountForSelectedReceipts();
-    update();
-  }
-
-  getAllCashes() {
-    try {
-      // FirebaseFirestore.instance
-      //     .collection('all_countries')
-      //     .snapshots()
-      //     .listen((countries) {
-      //   allCountries.assignAll(List<DocumentSnapshot>.from(countries.docs));
-      //   isScreenLoding.value = false;
-      // });
-      isScreenLoding.value = false;
-    } catch (e) {
-      isScreenLoding.value = false;
-    }
   }
 
   // this function is to get colors
@@ -322,56 +383,44 @@ class CashManagementController extends GetxController {
     }
   }
 
+  Future<double> getReceiptReceivedAmount(String receiptId) async {
+    try {
+      final HttpsCallable callable = FirebaseFunctions.instance
+          .httpsCallable('get_receipt_received_amount');
+
+      final HttpsCallableResult result = await callable.call(receiptId);
+
+      // ✅ Extract the total from the map correctly
+      final data = result.data;
+      return double.tryParse(data['total_received_amount'].toString()) ?? 0.0;
+    } catch (e) {
+      return 0.0;
+    } finally {
+      loadingInvoices.value = false;
+    }
+  }
+
+  getAllReceipts() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_receipts')
+          .where('company_id', isEqualTo: companyId.value)
+          .orderBy('receipt_number', descending: true)
+          .snapshots()
+          .listen((QuerySnapshot<Map<String, dynamic>> receipts) {
+        allCashsManagements.assignAll(receipts.docs);
+        isScreenLoding.value = false;
+      });
+      isScreenLoding.value = false;
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
+  }
+
   addNewReceipts() async {
     try {
       addingNewValue.value = true;
 
-      // Map<String, dynamic> jobsMap = {};
-      // List<String> jobIds = [];
-
-      // for (final receipt in selectedAvailableReceipts) {
-      //   final String? jobId = receipt['job_id'];
-      //   final dynamic amount = receipt['receipt_amount'];
-
-      //   if (jobId != null && amount != null) {
-      //     jobsMap[jobId] = amount;
-      //     jobIds.add(jobId);
-      //   }
-      // }
-
-      var currentReceipt =
-          await FirebaseFirestore.instance.collection('all_receipts').add({
-        'receipt_number': receiptCounter.value.text,
-        'receipt_date': receiptDate.value.text,
-        'customer': customerNameId.value,
-        'note': note.text,
-        'receipt_type': receiptTypeId.value,
-        'cheque_number': chequeNumber.text,
-        'bank_name': bankName.text,
-        'cheque_date': chequeDate.text,
-        'jobs': {},
-        'job_ids': [],
-        'account': accountId.value,
-        'currency': currency.text,
-        'rate': rate.text,
-        'status': 'New',
-      });
-      currentReceiptID.value = currentReceipt.id;
-      status.value = 'New';
-      addingNewValue.value = false;
-      isReceiptAdded.value = true;
-    } catch (e) {
-      addingNewValue.value = false;
-      isReceiptAdded.value = false;
-      showSnackBar('Failed', 'Please try again');
-      // Handle any errors here
-    }
-  }
-
-  postReceipt(receiptID) async {
-    try {
-      await getCurrentReceiptCounterNumber();
-      receiptDate.value.text = textToDate(DateTime.now().toString());
       Map<String, dynamic> jobsMap = {};
       List<String> jobIds = [];
 
@@ -384,16 +433,131 @@ class CashManagementController extends GetxController {
           jobIds.add(jobId);
         }
       }
+
+      var newData = {
+        'receipt_number': receiptCounter.value.text,
+        'receipt_date': receiptDate.value.text,
+        'customer': customerNameId.value,
+        'note': note.text,
+        'receipt_type': receiptTypeId.value,
+        'cheque_number': chequeNumber.text,
+        'bank_name': bankId.value,
+        'cheque_date': chequeDate.text,
+        'jobs': jobsMap,
+        'job_ids': jobIds,
+        'account': accountId.value,
+        'currency': currency.text,
+        'rate': rate.text,
+      };
+
+      if (isReceiptAdded.isFalse) {
+        newData['status'] = 'New';
+        newData['company_id'] = companyId.value;
+        var currentReceipt = await FirebaseFirestore.instance
+            .collection('all_receipts')
+            .add(newData);
+        status.value = 'New';
+        currentReceiptID.value = currentReceipt.id;
+        addingNewValue.value = false;
+        isReceiptAdded.value = true;
+        showSnackBar('Done', 'Added Successfully');
+      } else {
+        await FirebaseFirestore.instance
+            .collection('all_receipts')
+            .doc(currentReceiptID.value)
+            .update(newData);
+        addingNewValue.value = false;
+        showSnackBar('Done', 'Updated Successfully');
+      }
+      update();
+    } catch (e) {
+      addingNewValue.value = false;
+      isReceiptAdded.value = false;
+      showSnackBar('Failed', 'Please try again');
+      // Handle any errors here
+    }
+  }
+
+  editReceipt(id) async {
+    try {
+      addingNewValue.value = true;
+
+      Map<String, dynamic> jobsMap = {};
+      List<String> jobIds = [];
+
+      for (final receipt in selectedAvailableReceipts) {
+        final String? jobId = receipt['job_id'];
+        final dynamic amount = receipt['receipt_amount'];
+
+        if (jobId != null && amount != null) {
+          jobsMap[jobId] = amount;
+          jobIds.add(jobId);
+        }
+      }
+
+      var newData = {
+        'receipt_date': receiptDate.value.text,
+        'customer': customerNameId.value,
+        'note': note.text,
+        'receipt_type': receiptTypeId.value,
+        'cheque_number': chequeNumber.text,
+        'bank_name': bankId.value,
+        'cheque_date': chequeDate.text,
+        'jobs': jobsMap,
+        'job_ids': jobIds,
+        'account': accountId.value,
+        'rate': rate.text,
+      };
+
+      await FirebaseFirestore.instance
+          .collection('all_receipts')
+          .doc(id)
+          .update(newData);
+      addingNewValue.value = false;
+      showSnackBar('Done', 'Updated Successfully');
+    } catch (e) {
+      addingNewValue.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
+  }
+
+  deleteReceipt(id) async {
+    try {
+      Get.close(2);
+      await FirebaseFirestore.instance
+          .collection('all_receipts')
+          .doc(id)
+          .delete();
+    } catch (e) {
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
+  }
+
+  postReceipt(receiptID) async {
+    try {
+      if (isReceiptAdded.isFalse) {
+        showSnackBar('Alert', 'Please Save Receipt First');
+        return;
+      }
+
+      if (status.value == 'Posted') {
+        showSnackBar('Alert', 'Receipt is Already Posted');
+        return;
+      }
+      await getCurrentReceiptCounterNumber();
+      receiptDate.value.text = textToDate(DateTime.now().toString());
+
       FirebaseFirestore.instance
           .collection('all_receipts')
           .doc(receiptID)
           .update({
         'status': 'Posted',
-        'jobs': jobsMap,
-        'job_ids': jobIds,
-        'receipt_date': receiptDate.value.text
+        'receipt_date': receiptDate.value.text,
+        'receipt_number': receiptCounter.value.text
       });
       status.value = 'Posted';
+      showSnackBar('Done', 'Receipt Posted');
+      update();
     } catch (e) {
       showSnackBar('Something Went Wrong', 'Please try again');
     }

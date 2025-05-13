@@ -7,6 +7,7 @@ app = initialize_app()
 
 from receipts_functions.get_customer_invoices import get_customer_invoices
 from receipts_functions.get_customer_outstanding import calculate_customer_outstanding
+from receipts_functions.get_receipt_received_amount import get_receipt_received_amount
 from currency_functions.get_currency_data import get_currency_name
 from currency_functions.get_currency_data import get_currency_rate
 from brand_and_models.get_model_data import get_model_name

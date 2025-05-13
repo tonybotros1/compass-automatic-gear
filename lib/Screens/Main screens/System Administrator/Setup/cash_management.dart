@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -43,26 +44,28 @@ class CashManagement extends StatelessWidget {
                   Expanded(
                     child: GetX<CashManagementController>(
                       builder: (controller) {
-                        if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
+                        if (controller.isScreenLoding.value &&
+                            controller.allCashsManagements.isEmpty) {
+                          return Center(
+                            child: loadingProcess,
                           );
                         }
-                        if (controller.allCashsManagements.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
-                        }
+
                         return SingleChildScrollView(
                           scrollDirection: Axis
                               .vertical, // Horizontal scrolling for the table
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
-                            ),
+                                constraints: constraints,
+                                context: context,
+                                controller: controller,
+                                data: controller
+                                            .filteredCashsManagements.isEmpty &&
+                                        controller.search.value.text.isEmpty
+                                    ? controller.allCashsManagements
+                                    : controller.filteredCashsManagements,
+                                scrollController: controller.scrollController),
                           ),
                         );
                       },
@@ -78,210 +81,244 @@ class CashManagement extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens(
-    {required constraints,
-    required context,
-    required CashManagementController controller}) {
-  return DataTable(
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
-    columnSpacing: 5,
-    horizontalMargin: horizontalMarginForTable,
-    showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
-    sortColumnIndex: controller.sortColumnIndex.value,
-    sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-    columns: [
-      DataColumn(
-        label: AutoSizedText(
-          text: 'Receipt Number',
-          constraints: constraints,
-        ),
-        // onSort: controller.onSort,
+Widget tableOfScreens({
+  required constraints,
+  required context,
+  required CashManagementController controller,
+  required RxList<DocumentSnapshot> data,
+  required ScrollController scrollController,
+}) {
+  final dataSource = CardDataSource(
+    cards: data,
+    context: context,
+    constraints: constraints,
+    controller: controller,
+  );
+  return DataTableTheme(
+    data: DataTableThemeData(
+      headingTextStyle: fontStyleForTableHeader,
+      dataTextStyle: regTextStyle,
+      dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.grey.shade300;
+        }
+        return null;
+      }),
+    ),
+    child: Scrollbar(
+      thumbVisibility: true,
+      controller: scrollController,
+      child: PaginatedDataTable(
+        controller: scrollController,
+        showFirstLastButtons: true,
+        dataRowMaxHeight: 40,
+        dataRowMinHeight: 30,
+        columnSpacing: 5,
+        rowsPerPage: 5,
+        horizontalMargin: horizontalMarginForTable,
+        sortColumnIndex: controller.sortColumnIndex.value,
+        sortAscending: controller.isAscending.value,
+        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+        columns: [
+          DataColumn(label: SizedBox()
+              // onSort: controller.onSort,
+              ),
+          DataColumn(
+            label: AutoSizedText(
+              text: 'Receipt Number',
+              constraints: constraints,
+            ),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Status',
+            ),
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Date',
+            ),
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Customer Name',
+            ),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Receipt Type',
+            ),
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Account',
+            ),
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Bank Name',
+            ),
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Cheque Number',
+            ),
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Date',
+            ),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            headingRowAlignment: MainAxisAlignment.end,
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Received',
+            ),
+            // onSort: controller.onSort,
+          ),
+        ],
+        source: dataSource,
       ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Receipt Date',
-        ),
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Name',
-        ),
-        // onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Calling Code',
-        ),
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
-        // onSort: controller.onSort,
-      ),
-      const DataColumn(
-          headingRowAlignment: MainAxisAlignment.center, label: Text('')),
-    ],
-    rows: controller.filteredCashsManagements.isEmpty &&
-            controller.search.value.text.isEmpty
-        ? controller.allCashsManagements.map<DataRow>((cashManagement) {
-            final cashManagementData =
-                cashManagement.data() as Map<String, dynamic>;
-            final cashManagementId = cashManagement.id;
-            return dataRowForTheTable(cashManagementData, context, constraints,
-                cashManagementId, controller);
-          }).toList()
-        : controller.filteredCashsManagements.map<DataRow>((cashManagement) {
-            final cashManagementData =
-                cashManagement.data() as Map<String, dynamic>;
-            final cashManagementId = cashManagement.id;
-            return dataRowForTheTable(cashManagementData, context, constraints,
-                cashManagementId, controller);
-          }).toList(),
+    ),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> cashManagementData, context,
-    constraints, cashManagementId, CashManagementController controller) {
+DataRow dataRowForTheTable(
+    Map<String, dynamic> cashManagementData,
+    context,
+    constraints,
+    cashManagementId,
+    CashManagementController controller,
+    int index) {
   return DataRow(cells: [
+    DataCell(editSection(context, controller, cashManagementData, constraints,
+        cashManagementId)),
     DataCell(Text(
       cashManagementData['receipt_number'] ?? '',
     )),
-    DataCell(Text(textToDate(cashManagementData['receipt_date']))),
-    DataCell(
-      Text(
-        cashManagementData['name'] ?? 'no name',
-      ),
-    ),
-    DataCell(
-      Text(
-        cashManagementData['calling_code'] ?? 'no calling code',
-      ),
-    ),
-    DataCell(
-      Text(
-        cashManagementData['added_date'] != null &&
-                cashManagementData['added_date'] != ''
-            ? textToDate(cashManagementData['added_date']) //
-            : 'N/A',
-      ),
-    ),
-    DataCell(Row(
-      spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        valSectionInTheTable(controller, cashManagementId, context, constraints,
-            cashManagementData),
-        editSection(context, controller, cashManagementData, constraints,
-            cashManagementId),
-        deleteSection(controller, cashManagementId, context),
-      ],
+    DataCell(cashManagementData['status'] != ''
+        ? statusBox(cashManagementData['status'],
+            width: 60, padding: EdgeInsets.all(0))
+        : SizedBox()),
+    DataCell(Text(
+      cashManagementData['receipt_date'] != null &&
+              cashManagementData['receipt_date'] != ''
+          ? textToDate(cashManagementData['receipt_date']) //
+          : 'N/A',
     )),
+    DataCell(
+      Text(getdataName(cashManagementData['customer'], controller.allCustomers,
+          title: 'entity_name')),
+    ),
+    DataCell(
+      Text(getdataName(
+        cashManagementData['receipt_type'],
+        controller.allReceiptTypes,
+      )),
+    ),
+    DataCell(
+      Text(getdataName(cashManagementData['account'], controller.allAccounts,
+          title: 'account_number')),
+    ),
+    DataCell(
+      Text(getdataName(
+        cashManagementData['bank_name'],
+        controller.allBanks,
+      )),
+    ),
+    DataCell(
+      Text(cashManagementData['cheque_number']),
+    ),
+    DataCell(Text(
+      cashManagementData['cheque_date'] != null &&
+              cashManagementData['cheque_date'] != ''
+          ? textToDate(cashManagementData['cheque_date']) //
+          : 'N/A',
+    )),
+    DataCell(
+      Align(
+        alignment: Alignment.centerRight,
+        child: FutureBuilder<double>(
+          future: controller.getReceiptReceivedAmount(cashManagementId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(
+                color: Colors.green,
+                isBold: true,
+                text: '${snapshot.data}',
+              );
+            }
+          },
+        ),
+      ),
+    ),
   ]);
 }
 
-ElevatedButton valSectionInTheTable(CashManagementController controller,
-    cashManagementId, context, BoxConstraints constraints, cashManagementData) {
-  return ElevatedButton(
-      style: viewButtonStyle,
-      onPressed: () {
-        // controller.getCitiesValues(cashManagementId);
-        // controller.cashManagementIdToWorkWith.value = cashManagementId;
-        Get.dialog(
-            barrierDismissible: false,
-            Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              child: SizedBox(
-                height: constraints.maxHeight,
-                width: constraints.maxWidth,
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(15),
-                            topRight: Radius.circular(15)),
-                        color: mainColor,
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            '🏙️ Cities',
-                            style: fontStyleForScreenNameUsedInButtons,
-                          ),
-                          const Spacer(),
-                          closeButton
-                        ],
-                      ),
-                    ),
-                    // Expanded(
-                    //     child: Padding(
-                    //   padding: const EdgeInsets.all(16),
-                    //   child: citiesSection(
-                    //     constraints: constraints,
-                    //     context: context,
-                    //   ),
-                    // ))
-                  ],
-                ),
-              ),
-            ));
-      },
-      child: const Text('Cities'));
-}
-
-ElevatedButton deleteSection(
-    CashManagementController controller, cashManagementId, context) {
-  return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            controller: controller,
-            content: "The cashManagement will be deleted permanently",
-            onPressed: () {
-              // controller.deletecashManagement(cashManagementId);
-            });
-      },
-      child: const Text("Delete"));
-}
-
-ElevatedButton editSection(context, CashManagementController controller,
+Widget editSection(context, CashManagementController controller,
     Map<String, dynamic> cashManagementData, constraints, cashManagementId) {
-  return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () {
-        // controller.cashManagementName.text = cashManagementData['name'];
-        // controller.cashManagementCallingCode.text = cashManagementData['calling_code'];
-        // controller.cashManagementCode.text = cashManagementData['code'];
-        // controller.currencyName.text = cashManagementData['currency_name'];
-        // controller.currencyCode.text = cashManagementData['currency_code'];
-        // controller.vat.text = cashManagementData['vat'];
+  return GetX<CashManagementController>(builder: (controller) {
+    bool isLoading = controller.buttonLoadingStates[cashManagementId] ?? false;
 
-        // controller.flagUrl.value = cashManagementData['flag'] ?? '';
-        // controller.imageBytes.value = Uint8List(0);
-        // controller.flagSelectedError.value = false;
-        // countriesDialog(
-        //     canEdit: false,
-        //     constraints: constraints,
-        //     controller: controller,
-        //     onPressed: controller.addingNewValue.value
-        //         ? null
-        //         : () {
-        //             controller.editCountries(cashManagementId);
-        //           });
-      },
-      child: const Text('Edit'));
+    return IconButton(
+        onPressed: controller.buttonLoadingStates[cashManagementId] == null ||
+                isLoading == false
+            ? () async {
+                controller.setButtonLoading(cashManagementId, true);
+
+                await controller.loadValues(cashManagementData);
+                controller.setButtonLoading(cashManagementId, false);
+
+                receiptDialog(
+                  context: context,
+                  canEdit: true,
+                  constraints: constraints,
+                  controller: controller,
+                  onPressedForPost: controller.postingReceipts.isTrue
+                      ? null
+                      : () {
+                          controller.postReceipt(cashManagementId);
+                        },
+                  onPressedForSave: controller.addingNewValue.value
+                      ? null
+                      : () {
+                          if (controller.status.value == 'Posted') {
+                            showSnackBar(
+                                'Alert', 'Only New Receipts Can be Edited');
+                            return;
+                          }
+                          controller.editReceipt(cashManagementId);
+                        },
+                  onPressedForDelete: () {
+                    alertDialog(
+                        context: context,
+                        controller: controller,
+                        content: "This will be deleted permanently",
+                        onPressed: () {
+                          controller.deleteReceipt(cashManagementId);
+                        });
+                  },
+                );
+              }
+            : null,
+        icon: isLoading ? loadingProcess : editIcon);
+  });
 }
 
 ElevatedButton newReceiptButton(BuildContext context,
@@ -290,6 +327,7 @@ ElevatedButton newReceiptButton(BuildContext context,
     onPressed: () {
       controller.clearValues();
       receiptDialog(
+          onPressedForDelete: null,
           context: context,
           canEdit: true,
           constraints: constraints,
@@ -303,21 +341,50 @@ ElevatedButton newReceiptButton(BuildContext context,
               ? null
               : () {
                   controller.addNewReceipts();
-                }
-          //  controller.addingNewValue.value
-          //     ? null
-          //     : () async {
-          //         if (!controller.formKeyForAddingNewvalue.currentState!
-          //             .validate()) {}
-          //         if (controller.imageBytes.value.isEmpty) {
-          //           controller.flagSelectedError.value = true;
-          //         } else {
-          //           await controller.addNewcashManagement();
-          //         }
-          //       }
-          );
+                });
     },
     style: newButtonStyle,
     child: const Text('New Receipt'),
   );
+}
+
+class CardDataSource extends DataTableSource {
+  final List<DocumentSnapshot> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final CashManagementController controller;
+
+  CardDataSource({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final trade = cards[index];
+    final cardData = trade.data() as Map<String, dynamic>;
+    final cardId = trade.id;
+
+    return dataRowForTheTable(
+      cardData,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

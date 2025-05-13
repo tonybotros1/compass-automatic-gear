@@ -19,6 +19,7 @@ Widget accountInformations(BuildContext context) {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Row(
+            spacing: 20,
             children: [
               Expanded(
                 child: CustomDropdown(
@@ -27,11 +28,11 @@ Widget accountInformations(BuildContext context) {
                   hintText: 'Receipt Type',
                   items:
                       isReceiptTypesLoading ? {} : controller.allReceiptTypes,
-                  itemBuilder: (context, key, value) {
-                    return ListTile(
-                      title: Text(value['name']),
-                    );
-                  },
+                  // itemBuilder: (context, key, value) {
+                  //   return ListTile(
+                  //     title: Text(value['name']),
+                  //   );
+                  // },
                   onChanged: (key, value) {
                     controller.receiptTypeId.value = key;
                     controller.receiptType.text = value['name'];
@@ -45,9 +46,8 @@ Widget accountInformations(BuildContext context) {
                   },
                 ),
               ),
-              const SizedBox(width: 10),
               Expanded(
-                flex: 2,
+                flex: 3,
                 child: const SizedBox(),
               ),
             ],
@@ -64,22 +64,23 @@ Widget accountInformations(BuildContext context) {
                 ),
               ),
               Expanded(
+                  flex: 2,
                   child: CustomDropdown(
-                hintText: 'Bank Name',
-                enabled: controller.isChequeSelected.isTrue,
-                textcontroller: controller.bankName.text,
-                showedSelectedName: 'name',
-                items: isBanksLoading ? {} : controller.allBanks,
-                itemBuilder: (context, key, value) {
-                  return ListTile(
-                    title: Text(value['name']),
-                  );
-                },
-                onChanged: (key, value) {
-                  controller.bankId.value = key;
-                  controller.bankName.text = value['name'];
-                },
-              )),
+                    hintText: 'Bank Name',
+                    enabled: controller.isChequeSelected.isTrue,
+                    textcontroller: controller.bankName.text,
+                    showedSelectedName: 'name',
+                    items: isBanksLoading ? {} : controller.allBanks,
+                    // itemBuilder: (context, key, value) {
+                    //   return ListTile(
+                    //     title: Text(value['name']),
+                    //   );
+                    // },
+                    onChanged: (key, value) {
+                      controller.bankId.value = key;
+                      controller.bankName.text = value['name'];
+                    },
+                  )),
               Expanded(
                 child: myTextFormFieldWithBorder(
                   suffixIcon: IconButton(
@@ -98,7 +99,6 @@ Widget accountInformations(BuildContext context) {
           ),
           // const SizedBox(height: 10),
           Row(
-            spacing: 10,
             children: [
               Expanded(
                 child: CustomDropdown(
@@ -106,11 +106,11 @@ Widget accountInformations(BuildContext context) {
                   hintText: 'Account',
                   showedSelectedName: 'account_number',
                   items: isAccountsLoading ? {} : controller.allAccounts,
-                  itemBuilder: (context, key, value) {
-                    return ListTile(
-                      title: Text(value['account_number']),
-                    );
-                  },
+                  // itemBuilder: (context, key, value) {
+                  //   return ListTile(
+                  //     title: Text(value['account_number']),
+                  //   );
+                  // },
                   onChanged: (key, value) async {
                     controller.account.text = value['account_number'];
                     controller.accountId.value = key;
@@ -121,27 +121,33 @@ Widget accountInformations(BuildContext context) {
                   },
                 ),
               ),
-              Expanded(flex: 1, child: SizedBox())
+              Expanded(flex: 2, child: SizedBox())
             ],
           ),
           Row(
-            spacing: 10,
             children: [
               Expanded(
-                child: myTextFormFieldWithBorder(
-                  isEnabled: false,
-                  controller: controller.currency,
-                  labelText: 'Currency',
+                child: Row(
+                  spacing: 10,
+                  children: [
+                    Expanded(
+                      child: myTextFormFieldWithBorder(
+                        isEnabled: false,
+                        controller: controller.currency,
+                        labelText: 'Currency',
+                      ),
+                    ),
+                    Expanded(
+                      child: myTextFormFieldWithBorder(
+                        isDouble: true,
+                        controller: controller.rate,
+                        labelText: 'Rate',
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Expanded(
-                child: myTextFormFieldWithBorder(
-                  isDouble: true,
-                  controller: controller.rate,
-                  labelText: 'Rate',
-                ),
-              ),
-              Expanded(flex: 1, child: SizedBox())
+              Expanded(flex: 2, child: SizedBox())
             ],
           ),
         ],

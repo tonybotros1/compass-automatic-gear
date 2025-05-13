@@ -181,8 +181,9 @@ class JobCardController extends GetxController {
     getEngineTypes();
     getAllJobCards();
     getInvoiceItemsFromCollection();
-    search.value.addListener(() {
-      filterJobCards();
+    search.value.addListener(() async {
+      await filterJobCards();
+      calculateMoneyForAllJobs();
     });
   }
 
@@ -209,19 +210,22 @@ class JobCardController extends GetxController {
           in filteredJobCards.isEmpty ? allJobCards : filteredJobCards) {
         final id = job.id;
 
-        FirebaseFirestore.instance
+        final invoicesSnapshot = await FirebaseFirestore.instance
             .collection('job_cards')
             .doc(id)
             .collection('invoice_items')
-            .snapshots()
-            .listen((invoices) {
-          for (var invoice in invoices.docs) {
-            var data = invoice.data() as Map<String, dynamic>?;
-            allJobsVATS.value += double.parse(data?['vat']);
-            allJobsTotals.value += double.parse(data?['total']);
-            allJobsNET.value += double.parse(data?['net']);
+            .get(); // Use get() instead of listen()
+
+        for (var invoice in invoicesSnapshot.docs) {
+          var data = invoice.data() as Map<String, dynamic>?;
+
+          if (data != null) {
+            allJobsVATS.value += double.tryParse(data['vat'].toString()) ?? 0.0;
+            allJobsTotals.value +=
+                double.tryParse(data['total'].toString()) ?? 0.0;
+            allJobsNET.value += double.tryParse(data['net'].toString()) ?? 0.0;
           }
-        });
+        }
       }
     } catch (e) {
       // print(e);
@@ -1937,13 +1941,15 @@ class JobCardController extends GetxController {
         getdataName(currentUserDetails.value['sales_man'], salesManMap);
   }
 
-  void filterJobCards() async {
+  filterJobCards() async {
     final searchQuery = search.value.text.toLowerCase();
     query.value = searchQuery;
 
     if (searchQuery.isEmpty) {
       filteredJobCards.clear();
-      calculateMoneyForAllJobs();
+      numberOfJobs.value = allJobCards.length;
+
+      // calculateMoneyForAllJobs();
 
       return;
     }
@@ -2006,6 +2012,7 @@ class JobCardController extends GetxController {
         .where((card) => card != null)
         .cast<DocumentSnapshot<Object?>>();
     filteredJobCards.assignAll(filtered.toList());
-    calculateMoneyForAllJobs();
+    numberOfJobs.value = filteredJobCards.length;
+    // calculateMoneyForAllJobs();
   }
 }

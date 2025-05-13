@@ -9,39 +9,27 @@ Widget invoiceItemsSection(
     {required BuildContext context,
     required BoxConstraints constraints,
     required jobId}) {
-  return Column(
-    spacing: 2,
-    crossAxisAlignment: CrossAxisAlignment.end,
-    children: [
-      Expanded(
-        child: Container(
-          decoration: containerDecor,
-          child: GetX<JobCardController>(
-            builder: (controller) {
-              if (controller.loadingInvoiceItems.value) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (controller.allInvoiceItems.isEmpty) {
-                return const Center(
-                  child: Text('No Element'),
-                );
-              }
-              return SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: tableOfScreens(
-                  constraints: constraints,
-                  context: context,
-                  controller: controller,
-                  jobId: jobId,
-                ),
-              );
-            },
+  return Container(
+    decoration: containerDecor,
+    child: GetX<JobCardController>(
+      builder: (controller) {
+        if (controller.loadingInvoiceItems.value && controller.allInvoiceItems.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+       
+        return SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: tableOfScreens(
+            constraints: constraints,
+            context: context,
+            controller: controller,
+            jobId: jobId,
           ),
-        ),
-      ),
-    ],
+        );
+      },
+    ),
   );
 }
 

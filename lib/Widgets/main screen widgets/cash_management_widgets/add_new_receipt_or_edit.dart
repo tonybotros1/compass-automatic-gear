@@ -1,12 +1,12 @@
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
-import '../../../Models/tabel_cell_model.dart';
-import '../../../Models/tabel_row_model.dart';
-import '../../tabel_widgets/build_tabel.dart';
 import 'account_informations_section.dart';
+import 'customer_invoices_dialog.dart';
+import 'invoices_table_section.dart';
 import 'receipt_headers_sectiob.dart';
 
 Widget addNewReceiptOrEdit({
@@ -14,172 +14,197 @@ Widget addNewReceiptOrEdit({
   required CashManagementController controller,
   required bool canEdit,
 }) {
-  return Form(
-    key: controller.formKeyForAddingNewvalue,
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Expanded(
-            child: CustomScrollView(
-              physics: NeverScrollableScrollPhysics(),
-              slivers: [
-                // Sliver for the upper portion of your form
-                SliverToBoxAdapter(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            // Scrollable content
+            Expanded(
+              child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight -
+                          60), // reserve space for total
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Top sections
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            labelContainer(
-                                lable: Text(
-                              'Receipt Header',
-                              style: fontStyle1,
-                            )),
-                            receiptHeader(context),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  labelContainer(
+                                    lable: Text('Receipt Header',
+                                        style: fontStyle1),
+                                  ),
+                                  receiptHeader(context),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  labelContainer(
+                                    lable: Text('Account Information',
+                                        style: fontStyle1),
+                                  ),
+                                  accountInformations(context),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            labelContainer(
-                                lable: Text(
-                              'Account Informations',
-                              style: fontStyle1,
-                            )),
-                            accountInformations(context),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Divider
-                SliverToBoxAdapter(
-                  child: Divider(color: Colors.black),
-                ),
-                // Container that fills the remaining space
-                SliverToBoxAdapter(
-                  child: buildCustomTableHeader(
-                    suffix: TextButton(onPressed: null, child: SizedBox()),
-                    cellConfigs: [
-                      TableCellConfig(label: 'Invoice Number'),
-                      TableCellConfig(label: 'Invoice NET'),
-                      TableCellConfig(label: 'Invoice Amount'),
-                      TableCellConfig(label: 'Outsanding Amount'),
-                      TableCellConfig(label: 'Note', flex: 5),
-                    ],
-                  ),
-                ),
-                SliverFillRemaining(
-                  hasScrollBody: true,
-                  child: Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: secColor, width: 2),
-                        // color: Color.fromARGB(255, 202, 204, 202),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: SingleChildScrollView(
-                        child: GetBuilder<CashManagementController>(
-                          builder: (controller) {
-                            return controller
-                                    .selectedAvailableReceipts.isNotEmpty
-                                ? Column(
-                                    spacing: 2,
-                                    children: List.generate(
-                                      controller
-                                          .selectedAvailableReceipts.length,
-                                      (i) {
-                                        final receipt = controller
-                                            .selectedAvailableReceipts[i];
-                                        return KeyedSubtree(
-                                          key: ValueKey(receipt[
-                                              'invoice_number']), // Use a unique identifier
-                                          child: buildCustomRow(
-                                            suffix: TextButton(
-                                              onPressed: () {
+                        const SizedBox(height: 10),
+                        // Invoices button
+                        labelContainer(
+                          lable: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Invoices', style: fontStyle1),
+                              GetX<CashManagementController>(builder: (_) {
+                                return ElevatedButton(
+                                  style: new2ButtonStyle,
+                                  onPressed: controller.customerNameId.isEmpty
+                                      ? () {
+                                          showSnackBar('Alert',
+                                              'Please Select customer First');
+                                        }
+                                      : () {
+                                          if (controller
+                                              .availableReceipts.isEmpty) {
+                                            controller.getCustomerInvoices(
                                                 controller
-                                                    .removeSelectedReceipt(i);
-                                              },
-                                              child: Text(
-                                                'Delete',
-                                                style: TextStyle(
-                                                    color: mainColor,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    .customerNameId.value);
+                                          }
+                                          Get.dialog(
+                                            barrierDismissible: false,
+                                            Dialog(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
                                               ),
-                                            ),
-                                            cellConfigs: [
-                                              RowCellConfig(
-                                                initialValue:
-                                                    receipt['invoice_number'],
-                                                flex: 1,
-                                                isEnabled: false,
-                                              ),
-                                              RowCellConfig(
-                                                initialValue:
-                                                    receipt['invoice_amount'],
-                                                flex: 1,
-                                                isEnabled: false,
-                                              ),
-                                              RowCellConfig(
-                                                initialValue:
-                                                    receipt['receipt_amount']
-                                                        .toString(),
-                                                flex: 1,
-                                                isEnabled: true,
-                                                onChanged: (value) {
-                                                  receipt['receipt_amount'] =
-                                                      value;
+                                              child: LayoutBuilder(
+                                                builder:
+                                                    (context, dlgConstraints) {
+                                                  return Column(
+                                                    children: [
+                                                      Container(
+                                                        width: dlgConstraints
+                                                                .maxWidth /
+                                                            1.1,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(16),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              const BorderRadius
+                                                                  .only(
+                                                            topLeft:
+                                                                Radius.circular(
+                                                                    5),
+                                                            topRight:
+                                                                Radius.circular(
+                                                                    5),
+                                                          ),
+                                                          color: mainColor,
+                                                        ),
+                                                        child: Row(
+                                                          spacing: 10,
+                                                          children: [
+                                                            Text('💸 Invoices',
+                                                                style:
+                                                                    fontStyleForScreenNameUsedInButtons),
+                                                            const Spacer(),
+                                                            ElevatedButton(
+                                                              style:
+                                                                  new2ButtonStyle,
+                                                              onPressed: controller
+                                                                  .addSelectedReceipts,
+                                                              child: Text('Add',
+                                                                  style:
+                                                                      fontStyleForElevatedButtons),
+                                                            ),
+                                                            closeButton,
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child:
+                                                            customerInvoicesDialog(
+                                                                dlgConstraints,
+                                                                context),
+                                                      ),
+                                                    ],
+                                                  );
                                                 },
                                               ),
-                                              RowCellConfig(
-                                                initialValue: receipt[
-                                                        'outstanding_amount']
-                                                    .toString(),
-                                                flex: 1,
-                                                isEnabled: false,
-                                              ),
-                                              RowCellConfig(
-                                                initialValue: receipt['notes'],
-                                                flex: 5,
-                                                isEnabled: false,
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ))
-                                : SizedBox();
-                          },
+                                            ),
+                                          );
+                                        },
+                                  child: Text('Customer Invoices',
+                                      style: fontStyleForElevatedButtons),
+                                );
+                              }),
+                            ],
+                          ),
                         ),
-                      )),
+                        // Expanding invoices table
+                        Expanded(
+                          child: Container(
+                            decoration: containerDecor,
+                            child: invoicesTable(
+                              context: context,
+                              constraints: BoxConstraints(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
-          SizedBox(height: 2),
-          GetX<CashManagementController>(builder: (controller) {
-            return buildCustomTableFooter(
-              suffix: TextButton(onPressed: null, child: SizedBox()),
-              cellConfigs: [
-                TableCellConfig(label: ''),
-                TableCellConfig(label: 'Totals'),
-                TableCellConfig(
-                    label:
-                        '${controller.calculatedAmountForAllSelectedReceipts.value}',
-                    hasBorder: true),
-                TableCellConfig(label: ''),
-                TableCellConfig(label: '', flex: 5),
-              ],
-            );
-          })
-        ],
-      ),
-    ),
+            // Fixed Total Amount at bottom
+            GetX<CashManagementController>(builder: (controller) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12.0),
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Total Invoice Amount: ',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: NumberFormat("#,##0.00").format(
+                          controller.calculatedAmountForAllSelectedReceipts.value 
+                              
+                        ),
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              );
+            }),
+          ],
+        ),
+      );
+    },
   );
 }

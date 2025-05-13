@@ -534,10 +534,7 @@ Widget editSection(context, QuotationCardController controller,
                 : null,
         icon: isLoading
             ? loadingProcess
-            : const Icon(
-                Icons.edit_note_rounded,
-                color: Colors.blue,
-              ));
+            : editIcon);
   });
 }
 

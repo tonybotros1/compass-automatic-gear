@@ -27,8 +27,7 @@ var footerTextStylr = TextStyle(
 var hintMarkTestStyle =
     TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.bold);
 
-var fontStyleForElevatedButtons =
-    const TextStyle(fontWeight: FontWeight.bold, fontSize: 12);
+var fontStyleForElevatedButtons = const TextStyle(fontWeight: FontWeight.bold);
 
 var paddingForButtons = EdgeInsets.symmetric(horizontal: 16);
 
@@ -401,6 +400,16 @@ var homeButtonStyle = ElevatedButton.styleFrom(
     borderRadius: BorderRadius.circular(5),
   ),
   minimumSize: const Size(100, 40),
+);
+
+var deleteIcon = const Icon(
+  Icons.delete_forever,
+  color: Colors.red,
+);
+
+var editIcon = const Icon(
+  Icons.edit_note_rounded,
+  color: Colors.blue,
 );
 
 var screenPadding = const EdgeInsets.only(
@@ -786,4 +795,15 @@ Container carLogo(String logo) {
             width: 40,
           ),
   );
+}
+
+String getdataName(String id, Map allData, {title = 'name'}) {
+  try {
+    final data = allData.entries.firstWhere(
+      (data) => data.key == id,
+    );
+    return data.value[title];
+  } catch (e) {
+    return '';
+  }
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
 import '../../../consts.dart';
+import '../../text_button.dart';
 import 'add_new_receipt_or_edit.dart';
 
 Future<dynamic> receiptDialog(
@@ -11,6 +12,7 @@ Future<dynamic> receiptDialog(
     required CashManagementController controller,
     required void Function()? onPressedForSave,
     required void Function()? onPressedForPost,
+    required void Function()? onPressedForDelete,
     required bool canEdit}) {
   return Get.dialog(
       barrierDismissible: false,
@@ -42,47 +44,30 @@ Future<dynamic> receiptDialog(
                           : SizedBox();
                     }),
                     const Spacer(),
-                    GetX<CashManagementController>(builder: (controller) {
-                      return controller.isReceiptAdded.isTrue
-                          ? ElevatedButton(
-                              style: postButtonStyle,
-                              onPressed: onPressedForPost,
-                              child: controller.postingReceipts.isFalse
-                                  ? Text(
-                                      'Post',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  : const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    ))
-                          : const SizedBox();
-                    }),
-                    GetX<CashManagementController>(
-                        builder: (controller) => ElevatedButton(
-                              onPressed: onPressedForSave,
-                              style: new2ButtonStyle,
-                              child: controller.addingNewValue.value == false
-                                  ? const Text(
-                                      'Save',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  : const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
+                    separator(),
+                    GetBuilder<CashManagementController>(
+                        builder: (controller) => ClickableHoverText(
+                              onTap: onPressedForSave,
+                              text: 'Save',
                             )),
-                    closeButton,
+                    point(),
+                    GetBuilder<CashManagementController>(builder: (controller) {
+                      return ClickableHoverText(
+                          onTap: onPressedForPost, text: 'Post');
+                    }),
+                    separator(),
+                    if (onPressedForDelete != null)
+                      GetBuilder<CashManagementController>(
+                          builder: (controller) {
+                        return Row(spacing: 10,
+                          children: [
+                            ClickableHoverText(
+                                onTap: onPressedForDelete, text: 'Delete'),
+                            separator(),
+                          ],
+                        );
+                      }),
+                    closeIcon(),
                   ],
                 ),
               ),
