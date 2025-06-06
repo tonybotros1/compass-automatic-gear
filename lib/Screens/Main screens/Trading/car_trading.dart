@@ -628,8 +628,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
       cells: [
         DataCell(
             editSection(context, controller, tradeData, constraints, tradeId)),
-        DataCell(Text(controller.getdataName(
-            tradeData['car_brand'], controller.allBrands))),
+        DataCell(Text(controller.allBrands[tradeData['car_brand']] ?? '')),
 
         DataCell(
           FutureBuilder<String>(
@@ -661,30 +660,25 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
         //     return textForDataRowInTable(text: display, maxWidth: null);
         //   }),
         // ),
-        DataCell(Text(
-            controller.getdataName(tradeData['year'], controller.allYears))),
+        DataCell(Text(controller.allYears[tradeData['year']]??"")),
         DataCell(tradeData['status'] != ''
             ? statusBox('${tradeData['status']}',
                 hieght: 35, width: 60, padding: null)
             : const SizedBox()),
-        DataCell(Text(controller.getdataName(
-            tradeData['specification'], controller.allCarSpecifications))),
-        DataCell(Text(controller.getdataName(
-            tradeData['color_out'], controller.allColors))),
-        DataCell(Text(controller.getdataName(
-            tradeData['color_in'], controller.allColors))),
-        DataCell(Text(controller.getdataName(
-            tradeData['engine_size'], controller.allEngineSizes))),
+        DataCell(Text(
+            controller.allCarSpecifications[tradeData['specification']] ?? '')),
+        DataCell(Text(controller.allColors[tradeData['color_out']] ?? '')),
+        DataCell(Text(controller.allColors[tradeData['color_in']] ?? '')),
         DataCell(
-          Text(tradeData['mileage']),
-        ),
+            Text(controller.allEngineSizes[tradeData['engine_size']] ?? '')),
+        DataCell(Text(tradeData['mileage'])),
         DataCell(
           Text(
-            style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold),
-            tradeData['date'] != null && tradeData['date'] != ''
-                ? textToDate(tradeData['date'])
-                : 'N/A',
-          ),
+              style:
+                  TextStyle(color: Colors.purple, fontWeight: FontWeight.bold),
+              tradeData['date'] != null && tradeData['date'] != ''
+                  ? textToDate(tradeData['date'])
+                  : 'N/A'),
         ),
         DataCell(
           Align(
@@ -749,15 +743,17 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
             ),
           ),
         ),
-        DataCell(tradeData['bought_from'] != null
+        DataCell(tradeData['bought_from'] != null &&
+                tradeData['bought_from'] != ''
             ? textForDataRowInTable(
-                text: controller.getdataName(
-                    tradeData['bought_from'], controller.allBuyersAndSellers))
+                text:
+                    controller.allBuyersAndSellers[tradeData['bought_from']] ??
+                        '')
             : SizedBox()),
-        DataCell(tradeData['sold_to'] != null
+        DataCell(tradeData['sold_to'] != null && tradeData['sold_to'] != ''
             ? textForDataRowInTable(
-                text: controller.getdataName(
-                    tradeData['sold_to'], controller.allBuyersAndSellers))
+                text:
+                    controller.allBuyersAndSellers[tradeData['sold_to']] ?? '')
             : SizedBox()),
       ]);
 }

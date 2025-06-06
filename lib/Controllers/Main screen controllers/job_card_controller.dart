@@ -1802,29 +1802,159 @@ class JobCardController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
+  // void getAllJobCards() {
+  //   try {
+  //     FirebaseFirestore.instance
+  //         .collection('job_cards')
+  //         .where('company_id', isEqualTo: companyId.value)
+  //         .orderBy('job_number', descending: true)
+  //         .snapshots()
+  //         .listen((QuerySnapshot<Map<String, dynamic>> jobCards) {
+  //       final docs =
+  //           jobCards.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>();
+
+  //       allJobCards.assignAll(docs);
+
+  //       numberOfJobs.value = allJobCards.length;
+  //       isScreenLoding.value = false;
+  //       calculateMoneyForAllJobs();
+  //     });
+  //   } catch (e) {
+  //     isScreenLoding.value = false;
+  //   }
+  // }
+
+// new: store the resolved car-model names by job-card ID:
+  final RxMap<String, String> carBrandsNames = <String, String>{}.obs;
+  final RxMap<String, String> carModelsNames = <String, String>{}.obs;
+  final RxMap<String, String> customerNames = <String, String>{}.obs;
+
+ 
+
   void getAllJobCards() {
-    try {
-      FirebaseFirestore.instance
-          .collection('job_cards')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('job_number', descending: true)
-          .snapshots()
-          .listen((QuerySnapshot<Map<String, dynamic>> jobCards) {
-        // Cast the underlying JSArray<dynamic> to the correct Dart type:
-        final docs =
-            jobCards.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>();
+    FirebaseFirestore.instance
+        .collection('job_cards')
+        .where('company_id', isEqualTo: companyId.value)
+        .orderBy('job_number', descending: true)
+        .snapshots()
+        .asyncMap((snapshot) async {
+      final docs = snapshot.docs;
 
-        // Now assign into your RxList without error:
-        allJobCards.assignAll(docs);
+      // collect unique, non-empty IDs
+      final brandIds = docs
+          .map((d) => d.data()['car_brand'] as String?)
+          .whereType<String>()
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toSet()
+          .toList();
 
-        numberOfJobs.value = allJobCards.length;
-        isScreenLoding.value = false;
-        calculateMoneyForAllJobs();
-      });
-    } catch (e) {
+      final modelIds = docs
+          .map((d) => d.data()['car_model'] as String?)
+          .whereType<String>()
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toSet()
+          .toList();
+
+      final customerIds = docs
+          .map((d) => d.data()['customer'] as String?)
+          .whereType<String>()
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toSet()
+          .toList();
+
+      // 1) chunk helper
+      List<List<T>> chunk<T>(List<T> list, int size) {
+        final chunks = <List<T>>[];
+        for (var i = 0; i < list.length; i += size) {
+          chunks.add(
+            list.sublist(
+              i,
+              i + size > list.length ? list.length : i + size,
+            ),
+          );
+        }
+        return chunks;
+      }
+
+      // 2) batch-fetch brands in chunks
+      final Map<String, String> brandIdToName = {};
+      for (var chunkIds in chunk(brandIds, 10)) {
+        final snaps = await FirebaseFirestore.instance
+            .collection('all_brands')
+            .where(FieldPath.documentId, whereIn: chunkIds)
+            .get();
+        for (var b in snaps.docs) {
+          brandIdToName[b.id] = b.data()['name'] as String;
+        }
+      }
+
+      // 3) fetch models per brand
+      final Map<String, String> modelIdToName = {};
+      for (var brandId in brandIds) {
+        final sub = await FirebaseFirestore.instance
+            .collection('all_brands')
+            .doc(brandId)
+            .collection('values')
+            .get();
+        for (var m in sub.docs) {
+          if (modelIds.contains(m.id)) {
+            modelIdToName[m.id] = m.data()['name'] as String;
+          }
+        }
+      }
+
+      // 4) batch-fetch customers in chunks
+      final Map<String, String> customerIdToName = {};
+      for (var chunkIds in chunk(customerIds, 10)) {
+        final snaps = await FirebaseFirestore.instance
+            .collection('entity_informations')
+            .where(FieldPath.documentId, whereIn: chunkIds)
+            .where('company_id', isEqualTo: companyId.value)
+            .get();
+        for (var c in snaps.docs) {
+          customerIdToName[c.id] = c.data()['entity_name'] as String;
+        }
+      }
+
+      // 5) build lookups per job-card
+      final brandLookup = <String, String>{};
+      final modelLookup = <String, String>{};
+      final customerLookup = <String, String>{};
+
+      for (var doc in docs) {
+        final data = doc.data();
+        final bId = (data['car_brand'] as String?)?.trim();
+        final mId = (data['car_model'] as String?)?.trim();
+        final cId = (data['customer'] as String?)?.trim();
+
+        if (bId != null && brandIdToName.containsKey(bId)) {
+          brandLookup[doc.id] = brandIdToName[bId]!;
+        }
+        if (mId != null && modelIdToName.containsKey(mId)) {
+          modelLookup[doc.id] = modelIdToName[mId]!;
+        }
+        if (cId != null && customerIdToName.containsKey(cId)) {
+          customerLookup[doc.id] = customerIdToName[cId]!;
+        }
+      }
+
+      return _Batch(docs, brandLookup, modelLookup, customerLookup);
+    }).listen((batch) {
+      allJobCards.assignAll(batch.docs);
+      carBrandsNames.assignAll(batch.brandLookup);
+      carModelsNames.assignAll(batch.modelLookup);
+      customerNames.assignAll(batch.customerLookup);
+
+      numberOfJobs.value = batch.docs.length;
       isScreenLoding.value = false;
-      // you might log or rethrow here if you want
-    }
+      calculateMoneyForAllJobs();
+    }, onError: (_) {
+      isScreenLoding.value = false;
+      // handle error…
+    });
   }
 
   // Future<void> getAllJobCards({bool isNextPage = false}) async {
@@ -2015,4 +2145,14 @@ class JobCardController extends GetxController {
     numberOfJobs.value = filteredJobCards.length;
     // calculateMoneyForAllJobs();
   }
+}
+
+// 1) Define a simple holder for the two things you want to return:
+class _Batch {
+  final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
+  final Map<String, String> brandLookup;
+  final Map<String, String> modelLookup;
+  final Map<String, String> customerLookup;
+
+  _Batch(this.docs, this.brandLookup, this.modelLookup, this.customerLookup);
 }

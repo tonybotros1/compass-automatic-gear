@@ -90,9 +90,9 @@ class JobCard extends StatelessWidget {
                           controller.isScreenLoding.isTrue &&
                                   controller.allJobCards.isEmpty
                               ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: loadingProcess,
-                              )
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: loadingProcess,
+                                )
                               : SizedBox(
                                   width: constraints.maxWidth,
                                   child: tableOfScreens(
@@ -326,26 +326,30 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
           '${jobData['lpo_number']}',
           maxLines: 1,
         )),
-        DataCell(textForDataRowInTable(
-            text: controller.getdataName(
-                jobData['car_brand'], controller.allBrands))),
         DataCell(
-          FutureBuilder<String>(
-            future: controller.getModelName(
-                jobData['car_brand'], jobData['car_model']),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
-        ),
+            textForDataRowInTable(text: '${controller.carBrandsNames[jobId]}')),
+        // DataCell(textForDataRowInTable(
+        //     text: controller.getdataName(
+        //         jobData['car_brand'], controller.allBrands))),
+        DataCell(
+            textForDataRowInTable(text: '${controller.carModelsNames[jobId]}')),
+        // DataCell(
+        //   FutureBuilder<String>(
+        //     future: controller.getModelName(
+        //         jobData['car_brand'], jobData['car_model']),
+        //     builder: (context, snapshot) {
+        //       if (snapshot.connectionState == ConnectionState.waiting) {
+        //         return const Text('Loading...');
+        //       } else if (snapshot.hasError) {
+        //         return const Text('Error');
+        //       } else {
+        //         return textForDataRowInTable(
+        //           text: '${snapshot.data}',
+        //         );
+        //       }
+        //     },
+        //   ),
+        // ),
         DataCell(SelectableText(
           jobData['plate_number'],
           maxLines: 1,
@@ -370,15 +374,17 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
         //     },
         //   ),
         // ),
-        DataCell(
-          textForDataRowInTable(
-            maxWidth: null,
-            // maxWidth: 1,
-            text: controller.getdataName(
-                jobData['customer'], controller.allCustomers,
-                title: 'entity_name'),
-          ),
-        ),
+        DataCell(textForDataRowInTable(
+            maxWidth: null, text: '${controller.customerNames[jobId]}')),
+        // DataCell(
+        //   textForDataRowInTable(
+        //     maxWidth: null,
+        //     // maxWidth: 1,
+        //     text: controller.getdataName(
+        //         jobData['customer'], controller.allCustomers,
+        //         title: 'entity_name'),
+        //   ),
+        // ),
         DataCell(SelectableText(
           jobData['vehicle_identification_number'],
           maxLines: 1,

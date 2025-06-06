@@ -121,11 +121,11 @@ class CarTradingController extends GetxController {
     getBuyersAndSellers();
     getColors();
     getCarSpecifications();
-    await getCarBrands();
+    getCarBrands();
     getEngineSizes();
     getNamesOfPeople();
-    await getYears();
-    getItems();
+    getYears();
+    await getItems();
     getAllTrades();
 
     search.value.addListener(() {
@@ -206,10 +206,6 @@ class CarTradingController extends GetxController {
     gettradeNETsCached(tradeId, forceRefresh: true);
     allTrades.refresh();
     filteredTrades.refresh();
-  }
-
-  String getCachedCarModelName(String brandId, String modelId) {
-    return _modelCache[modelId] ?? '';
   }
 
   getCompanyId() async {
@@ -644,7 +640,9 @@ class CarTradingController extends GetxController {
         .where('available', isEqualTo: true)
         .snapshots()
         .listen((colors) {
-      allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
+      allColors.value = {
+        for (var doc in colors.docs) doc.id: doc.data()['name']
+      };
     });
   }
 
@@ -667,7 +665,7 @@ class CarTradingController extends GetxController {
         .snapshots()
         .listen((car) {
       allCarSpecifications.value = {
-        for (var doc in car.docs) doc.id: doc.data()
+        for (var doc in car.docs) doc.id: doc.data()['name']
       };
     });
   }
@@ -689,7 +687,9 @@ class CarTradingController extends GetxController {
         .where('available', isEqualTo: true)
         .snapshots()
         .listen((engine) {
-      allEngineSizes.value = {for (var doc in engine.docs) doc.id: doc.data()};
+      allEngineSizes.value = {
+        for (var doc in engine.docs) doc.id: doc.data()['name']
+      };
     });
   }
 
@@ -711,7 +711,7 @@ class CarTradingController extends GetxController {
         .orderBy('added_date')
         .snapshots()
         .listen((year) {
-      allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
+      allYears.value = {for (var doc in year.docs) doc.id: doc.data()['name']};
     });
   }
 
@@ -735,7 +735,7 @@ class CarTradingController extends GetxController {
         .snapshots()
         .listen((year) {
       allBuyersAndSellers.value = {
-        for (var doc in year.docs) doc.id: doc.data()
+        for (var doc in year.docs) doc.id: doc.data()['name']
       };
     });
   }
@@ -790,7 +790,9 @@ class CarTradingController extends GetxController {
           .collection('all_brands')
           .snapshots()
           .listen((brands) {
-        allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
+        allBrands.value = {
+          for (var doc in brands.docs) doc.id: doc.data()['name']
+        };
       });
     } catch (e) {
       //
@@ -822,6 +824,7 @@ class CarTradingController extends GetxController {
       return '';
     }
   }
+  
 
   Future<String> getCarModelName(brandId, modelId) async {
     try {
@@ -893,35 +896,34 @@ class CarTradingController extends GetxController {
     }
   }
 
-  final Map<String, String> _modelCache = {};
   final Map<String, String> _searchStrings = {};
 
   Future<void> initTradeSearchIndex() async {
-    for (var doc in allTrades) {
-      final brandId = doc.get('car_brand');
-      final modelId = doc.get('car_model');
-      if (!_modelCache.containsKey(modelId)) {
-        _modelCache[modelId] = await getCarModelName(brandId, modelId);
-      }
-    }
-
-    for (var doc in allTrades) {
+    final futures = allTrades.map((doc) async {
       final data = doc.data()! as Map<String, dynamic>;
+      final brandId = data['car_brand'];
+      final modelId = data['car_model'];
+
+      final modelName = await getCarModelName(brandId, modelId);
+
       final parts = <String>[
-        getdataName(data['year'], allYears),
-        getdataName(data['color_in'], allColors),
-        getdataName(data['color_out'], allColors),
-        getdataName(data['engine_size'], allEngineSizes),
-        getdataName(data['specification'], allCarSpecifications),
+        allYears[data['year']],
+        allColors[data['color_in']],
+        allColors[data['color_out']],
+        allEngineSizes[data['engine_size']],
+        allCarSpecifications[data['specification']],
         data['status']?.toString() ?? '',
         data['mileage']?.toString() ?? '',
-        getdataName(data['car_brand'], allBrands),
-        getdataName(data['bought_from'] ?? '', allBuyersAndSellers),
-        getdataName(data['sold_to'] ?? '', allBuyersAndSellers),
-        _modelCache[data['car_model']] ?? '',
+        allBrands[data['car_brand']],
+        allBuyersAndSellers[data['bought_from']] ?? '',
+        allBuyersAndSellers[data['sold_to']] ?? '',
+        modelName,
       ];
+
       _searchStrings[doc.id] = parts.join(' ').toLowerCase();
-    }
+    }).toList();
+
+    await Future.wait(futures);
 
     filteredTrades.assignAll(allTrades);
   }
