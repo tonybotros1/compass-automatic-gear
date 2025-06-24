@@ -2,11 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
-import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
+import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/job_card_buttons.dart';
+import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
 class JobCard extends StatelessWidget {
@@ -25,6 +26,241 @@ class JobCard extends StatelessWidget {
               width: constraints.maxWidth,
               child: ListView(
                 children: [
+                  GetX<JobCardController>(builder: (controller) {
+                    bool isBrandLoading = controller.allBrands.isEmpty;
+                    bool isModelLoading = controller.allModels.isEmpty;
+                    bool isCustomersLoading = controller.allCustomers.isEmpty;
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      spacing: 10,
+                      children: [
+                        Expanded(
+                            child: myTextFormFieldWithBorder(
+                          labelText: 'Job NO.',
+                          controller: controller.jobNumberFilter.value,
+                        )),
+                        Expanded(
+                            child: myTextFormFieldWithBorder(
+                          labelText: 'Invoice NO.',
+                          controller: controller.invoiceNumberFilter.value,
+                        )),
+                        Expanded(
+                          flex: 2,
+                          child: CustomDropdown(
+                            showedSelectedName: 'name',
+                            textcontroller:
+                                controller.carBrandIdFilterName.value.text,
+                            hintText: 'Car Brand',
+                            items: isBrandLoading ? {} : controller.allBrands,
+                            onChanged: (key, value) async {
+                              controller.carModel.clear();
+                              controller.getModelsByCarBrand(key);
+                              controller.carBrandIdFilter.value = key;
+                              controller.carBrandIdFilterName.value.text =
+                                  value['name'];
+                              controller.carModelIdFilter.value = '';
+                              controller.carModelIdFilterName.value.text = '';
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: CustomDropdown(
+                            showedSelectedName: 'name',
+                            textcontroller:
+                                controller.carModelIdFilterName.value.text,
+                            hintText: 'Car Model',
+                            items: isModelLoading ? {} : controller.allModels,
+                            onChanged: (key, value) async {
+                              controller.carModelIdFilter.value = key;
+                              controller.carModelIdFilterName.value.text =
+                                  value['name'];
+                            },
+                          ),
+                        ),
+                        Expanded(
+                            child: myTextFormFieldWithBorder(
+                          labelText: 'Plate NO.',
+                          controller: controller.plateNumberFilter.value,
+                        )),
+                        Expanded(
+                            flex: 2,
+                            child: myTextFormFieldWithBorder(
+                              labelText: 'VIN',
+                              controller: controller.vinFilter.value,
+                            )),
+                        Expanded(
+                            flex: 3,
+                            child: CustomDropdown(
+                                textcontroller: controller
+                                    .customerNameIdFilterName.value.text,
+                                showedSelectedName: 'entity_name',
+                                hintText: 'Customer Name',
+                                onChanged: (key, value) async {
+                                  controller.customerNameIdFilterName.value
+                                      .text = value['entity_name'];
+                                  controller.customerNameIdFilter.value = key;
+                                },
+                                items: isCustomersLoading
+                                    ? {}
+                                    : controller.allCustomers))
+                      ],
+                    );
+                  }),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  GetBuilder<JobCardController>(builder: (controller) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Row(
+                            spacing: 10,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                  child: myTextFormFieldWithBorder(
+                                controller: controller.fromDate.value,
+                                labelText: 'From Date',
+                                onFieldSubmitted: (_) async {
+                                  await normalizeDate(
+                                      controller.fromDate.value.text,
+                                      controller.fromDate.value);
+                                  // if (nor) {
+                                  //   controller.searchEngine();
+                                  // }
+                                },
+                              )),
+                              Expanded(
+                                  child: myTextFormFieldWithBorder(
+                                controller: controller.toDate.value,
+                                labelText: 'To Date',
+                                onFieldSubmitted: (_) async {
+                                  await normalizeDate(
+                                      controller.toDate.value.text,
+                                      controller.toDate.value);
+                                  // if (nor) {
+                                  //   controller.searchEngine();
+                                  // }
+                                },
+                              )),
+                              ElevatedButton(
+                                  style: allButtonStyle,
+                                  onPressed: () {
+                                    controller.clearAllFilters();
+                                    controller.isAllSelected.value = true;
+                                    controller.isTodaySelected.value = false;
+                                    controller.isThisMonthSelected.value =
+                                        false;
+                                    controller.isThisYearSelected.value = false;
+                                    controller.carBrand.clear();
+                                    controller.carModel.clear();
+                                    controller.carBrandId.value = '';
+                                    controller.carModelId.value = '';
+                                    controller.allModels.clear();
+                                    controller.searchEngine();
+                                  },
+                                  child: Text('All')),
+                              ElevatedButton(
+                                  style: todayButtonStyle,
+                                  onPressed: controller.isTodaySelected.isFalse
+                                      ? () {
+                                          controller.isAllSelected.value =
+                                              false;
+                                          controller.isTodaySelected.value =
+                                              true;
+                                          controller.isThisMonthSelected.value =
+                                              false;
+                                          controller.isThisYearSelected.value =
+                                              false;
+                                          controller.isYearSelected.value =
+                                              false;
+                                          controller.isMonthSelected.value =
+                                              false;
+                                          controller.isDaySelected.value = true;
+                                          controller.searchEngine();
+                                        }
+                                      : null,
+                                  child: Text('Today')),
+                              ElevatedButton(
+                                  style: thisMonthButtonStyle,
+                                  onPressed: controller
+                                          .isThisMonthSelected.isFalse
+                                      ? () {
+                                          controller.isAllSelected.value =
+                                              false;
+                                          controller.isTodaySelected.value =
+                                              false;
+                                          controller.isThisMonthSelected.value =
+                                              true;
+                                          controller.isThisYearSelected.value =
+                                              false;
+                                          controller.isYearSelected.value =
+                                              false;
+                                          controller.isMonthSelected.value =
+                                              true;
+                                          controller.isDaySelected.value =
+                                              false;
+                                          controller.searchEngine();
+                                        }
+                                      : null,
+                                  child: Text('This Month')),
+                              ElevatedButton(
+                                  style: thisYearButtonStyle,
+                                  onPressed: controller
+                                          .isThisYearSelected.isFalse
+                                      ? () {
+                                          controller.isTodaySelected.value =
+                                              false;
+                                          controller.isThisMonthSelected.value =
+                                              false;
+                                          controller.isThisYearSelected.value =
+                                              true;
+                                          controller.isYearSelected.value =
+                                              true;
+                                          controller.isMonthSelected.value =
+                                              false;
+                                          controller.isDaySelected.value =
+                                              false;
+                                          controller.searchEngine();
+                                        }
+                                      : null,
+                                  child: Text('This Year')),
+                              ElevatedButton(
+                                  style: saveButtonStyle,
+                                  onPressed:
+                                      controller.isThisYearSelected.isFalse
+                                          ? () async {
+                                              await controller.removeFilters();
+                                              controller.searchEngine();
+                                            }
+                                          : null,
+                                  child: Text(
+                                    'Find',
+                                    style: fontStyleForElevatedButtons,
+                                  )),
+                              ElevatedButton(
+                                  style: clearVariablesButtonStyle,
+                                  onPressed:
+                                      controller.isThisYearSelected.isFalse
+                                          ? () {
+                                              controller.clearAllFilters();
+                                              controller.update();
+                                            }
+                                          : null,
+                                  child: Text(
+                                    'Clear Filters',
+                                    style: fontStyleForElevatedButtons,
+                                  )),
+                            ],
+                          ),
+                        ),
+                        Expanded(flex: 2, child: SizedBox()),
+                        newJobCardButton(context, constraints, controller)
+                      ],
+                    );
+                  }),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<JobCardController>(
@@ -79,14 +315,14 @@ class JobCard extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          searchBar(
-                            search: controller.search,
-                            constraints: constraints,
-                            context: context,
-                            title: 'Search for job cards',
-                            button: newJobCardButton(
-                                context, constraints, controller),
-                          ),
+                          // searchBar(
+                          //   search: controller.search,
+                          //   constraints: constraints,
+                          //   context: context,
+                          //   title: 'Search for job cards',
+                          //   button: newJobCardButton(
+                          //       context, constraints, controller),
+                          // ),
                           controller.isScreenLoding.isTrue &&
                                   controller.allJobCards.isEmpty
                               ? Padding(
@@ -304,7 +540,9 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
 
         DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
         DataCell(textForDataRowInTable(
-            text: jobData['job_number'] != '' ? '${jobData['job_date']}' : '')),
+            text: jobData['job_number'] != ''
+                ? textToDate(jobData['job_date'])
+                : '')),
         DataCell(
           statusBox(
             jobData['job_status_1'] == 'Posted'
@@ -326,30 +564,30 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
           '${jobData['lpo_number']}',
           maxLines: 1,
         )),
-        DataCell(
-            textForDataRowInTable(text: '${controller.carBrandsNames[jobId]}')),
-        // DataCell(textForDataRowInTable(
-        //     text: controller.getdataName(
-        //         jobData['car_brand'], controller.allBrands))),
-        DataCell(
-            textForDataRowInTable(text: '${controller.carModelsNames[jobId]}')),
         // DataCell(
-        //   FutureBuilder<String>(
-        //     future: controller.getModelName(
-        //         jobData['car_brand'], jobData['car_model']),
-        //     builder: (context, snapshot) {
-        //       if (snapshot.connectionState == ConnectionState.waiting) {
-        //         return const Text('Loading...');
-        //       } else if (snapshot.hasError) {
-        //         return const Text('Error');
-        //       } else {
-        //         return textForDataRowInTable(
-        //           text: '${snapshot.data}',
-        //         );
-        //       }
-        //     },
-        //   ),
-        // ),
+        //     textForDataRowInTable(text: '${controller.carBrandsNames[jobId]}')),
+        DataCell(textForDataRowInTable(
+            text: controller.getdataName(
+                jobData['car_brand'], controller.allBrands))),
+        // DataCell(
+        //     textForDataRowInTable(text: '${controller.carModelsNames[jobId]}')),
+        DataCell(
+          FutureBuilder<String>(
+            future: controller.getModelName(
+                jobData['car_brand'], jobData['car_model']),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('Loading...');
+              } else if (snapshot.hasError) {
+                return const Text('Error');
+              } else {
+                return textForDataRowInTable(
+                  text: '${snapshot.data}',
+                );
+              }
+            },
+          ),
+        ),
         DataCell(SelectableText(
           jobData['plate_number'],
           maxLines: 1,
@@ -374,17 +612,17 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
         //     },
         //   ),
         // ),
-        DataCell(textForDataRowInTable(
-            maxWidth: null, text: '${controller.customerNames[jobId]}')),
-        // DataCell(
-        //   textForDataRowInTable(
-        //     maxWidth: null,
-        //     // maxWidth: 1,
-        //     text: controller.getdataName(
-        //         jobData['customer'], controller.allCustomers,
-        //         title: 'entity_name'),
-        //   ),
-        // ),
+        // DataCell(textForDataRowInTable(
+        //     maxWidth: null, text: '${controller.customerNames[jobId]}')),
+        DataCell(
+          textForDataRowInTable(
+            maxWidth: null,
+            // maxWidth: 1,
+            text: controller.getdataName(
+                jobData['customer'], controller.allCustomers,
+                title: 'entity_name'),
+          ),
+        ),
         DataCell(SelectableText(
           jobData['vehicle_identification_number'],
           maxLines: 1,

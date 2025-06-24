@@ -121,7 +121,7 @@ class CarTradingController extends GetxController {
     getBuyersAndSellers();
     getColors();
     getCarSpecifications();
-    getCarBrands();
+    await getCarBrands();
     getEngineSizes();
     getNamesOfPeople();
     getYears();
@@ -234,14 +234,30 @@ class CarTradingController extends GetxController {
     update();
   }
 
+  // calculateTotals() {
+  //   totalNETs.value = 0.0;
+  //   totalPays.value = 0.0;
+  //   totalReceives.value = 0.0;
+  //   for (var item in addedItems) {
+  //     totalPays.value += double.tryParse(item['pay'] ?? '0')!;
+  //     totalReceives.value += double.tryParse(item['receive'] ?? '0')!;
+  //   }
+  //   totalNETs.value = totalReceives.value - totalPays.value;
+  // }
+
   calculateTotals() {
     totalNETs.value = 0.0;
     totalPays.value = 0.0;
     totalReceives.value = 0.0;
+
     for (var item in addedItems) {
-      totalPays.value += double.tryParse(item['pay'])!;
-      totalReceives.value += double.tryParse(item['receive'])!;
+      final pay = double.tryParse(item['pay'] ?? '') ?? 0.0;
+      final receive = double.tryParse(item['receive'] ?? '') ?? 0.0;
+
+      totalPays.value += pay;
+      totalReceives.value += receive;
     }
+
     totalNETs.value = totalReceives.value - totalPays.value;
   }
 
@@ -266,15 +282,15 @@ class CarTradingController extends GetxController {
 
     for (var trade in newList) {
       final data = trade.data() as Map<String, dynamic>;
-      final itemsList = data['items'] as List<dynamic>?;
+      final itemsList = data['items'] as List<dynamic>? ?? [];
 
-      if (itemsList != null) {
+      if (itemsList.isNotEmpty) {
         for (var item in itemsList) {
-          final pay = double.tryParse(item['pay'] ?? 0);
-          final receive = double.tryParse(item['receive'] ?? 0);
+          final pay = double.tryParse(item['pay'] ?? 0) ?? 0.0;
+          final receive = double.tryParse(item['receive'] ?? 0) ?? 0.0;
 
-          totalPaysForAllTrades.value += pay!;
-          totalReceivesForAllTrades.value += receive!;
+          totalPaysForAllTrades.value += pay;
+          totalReceivesForAllTrades.value += receive;
           totalNETsForAllTrades.value += (receive - pay);
         }
       }
@@ -334,29 +350,29 @@ class CarTradingController extends GetxController {
     }
     isValuesLoading.value = true;
     date.value.text = textToDate(data['date']);
-    mileage.value.text = data['mileage'];
+    mileage.value.text = data['mileage'] ?? '';
     colorIn.value.text = getdataName(data['color_in'], allColors);
-    colorInId.value = data['color_in'];
+    colorInId.value = data['color_in'] ?? '';
     colorOut.value.text = getdataName(data['color_out'], allColors);
-    colorOutId.value = data['color_out'];
+    colorOutId.value = data['color_out'] ?? '';
     carBrand.value.text = getdataName(data['car_brand'], allBrands);
-    carBrandId.value = data['car_brand'];
+    carBrandId.value = data['car_brand'] ?? '';
     carSpecification.value.text =
         getdataName(data['specification'], allCarSpecifications);
-    carSpecificationId.value = data['specification'];
+    carSpecificationId.value = data['specification'] ?? '';
     engineSize.value.text = getdataName(data['engine_size'], allEngineSizes);
-    engineSizeId.value = data['engine_size'];
+    engineSizeId.value = data['engine_size'] ?? '';
     year.value.text = getdataName(data['year'], allYears);
-    yearId.value = data['year'];
-    note.text = data['note'];
+    yearId.value = data['year'] ?? '';
+    note.text = data['note'] ?? '';
     addedItems.assignAll((data['items'] as List)
         .map((e) => Map<String, dynamic>.from(e))
         .toList());
 
-    status.value = data['status'];
+    status.value = data['status'] ?? '';
     carModel.value.text =
         await getCarModelName(data['car_brand'], data['car_model']);
-    carModelId.value = data['car_model'];
+    carModelId.value = data['car_model'] ?? '';
     getModelsByCarBrand(data['car_brand']);
     calculateTotals();
     isValuesLoading.value = false;
@@ -640,9 +656,7 @@ class CarTradingController extends GetxController {
         .where('available', isEqualTo: true)
         .snapshots()
         .listen((colors) {
-      allColors.value = {
-        for (var doc in colors.docs) doc.id: doc.data()['name']
-      };
+      allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
     });
   }
 
@@ -665,7 +679,7 @@ class CarTradingController extends GetxController {
         .snapshots()
         .listen((car) {
       allCarSpecifications.value = {
-        for (var doc in car.docs) doc.id: doc.data()['name']
+        for (var doc in car.docs) doc.id: doc.data()
       };
     });
   }
@@ -687,9 +701,7 @@ class CarTradingController extends GetxController {
         .where('available', isEqualTo: true)
         .snapshots()
         .listen((engine) {
-      allEngineSizes.value = {
-        for (var doc in engine.docs) doc.id: doc.data()['name']
-      };
+      allEngineSizes.value = {for (var doc in engine.docs) doc.id: doc.data()};
     });
   }
 
@@ -711,7 +723,7 @@ class CarTradingController extends GetxController {
         .orderBy('added_date')
         .snapshots()
         .listen((year) {
-      allYears.value = {for (var doc in year.docs) doc.id: doc.data()['name']};
+      allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
     });
   }
 
@@ -735,7 +747,7 @@ class CarTradingController extends GetxController {
         .snapshots()
         .listen((year) {
       allBuyersAndSellers.value = {
-        for (var doc in year.docs) doc.id: doc.data()['name']
+        for (var doc in year.docs) doc.id: doc.data()
       };
     });
   }
@@ -790,9 +802,7 @@ class CarTradingController extends GetxController {
           .collection('all_brands')
           .snapshots()
           .listen((brands) {
-        allBrands.value = {
-          for (var doc in brands.docs) doc.id: doc.data()['name']
-        };
+        allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
       });
     } catch (e) {
       //
@@ -816,15 +826,18 @@ class CarTradingController extends GetxController {
 
   String getdataName(String id, Map allData, {title = 'name'}) {
     try {
-      final data = allData.entries.firstWhere(
-        (data) => data.key == id,
-      );
-      return data.value[title];
+      if (id != '') {
+        final data = allData.entries.firstWhere(
+          (data) => data.key == id,
+        );
+        return data.value[title];
+      } else {
+        return '';
+      }
     } catch (e) {
       return '';
     }
   }
-  
 
   Future<String> getCarModelName(brandId, modelId) async {
     try {
@@ -901,22 +914,22 @@ class CarTradingController extends GetxController {
   Future<void> initTradeSearchIndex() async {
     final futures = allTrades.map((doc) async {
       final data = doc.data()! as Map<String, dynamic>;
-      final brandId = data['car_brand'];
-      final modelId = data['car_model'];
+      final brandId = data['car_brand'] ?? '';
+      final modelId = data['car_model'] ?? '';
 
       final modelName = await getCarModelName(brandId, modelId);
 
       final parts = <String>[
-        allYears[data['year']],
-        allColors[data['color_in']],
-        allColors[data['color_out']],
-        allEngineSizes[data['engine_size']],
-        allCarSpecifications[data['specification']],
+        getdataName(data['year'] ?? '', allYears),
+        getdataName(data['color_in'] ?? '', allColors),
+        getdataName(data['color_out'] ?? '', allColors),
+        getdataName(data['engine_size'] ?? '', allEngineSizes),
+        getdataName(data['specification'] ?? '', allCarSpecifications),
         data['status']?.toString() ?? '',
         data['mileage']?.toString() ?? '',
-        allBrands[data['car_brand']],
-        allBuyersAndSellers[data['bought_from']] ?? '',
-        allBuyersAndSellers[data['sold_to']] ?? '',
+        getdataName(data['car_brand'], allBrands),
+        getdataName(data['bought_from'] ?? '', allBuyersAndSellers),
+        getdataName(data['sold_to'] ?? '', allBuyersAndSellers),
         modelName,
       ];
 
@@ -924,7 +937,6 @@ class CarTradingController extends GetxController {
     }).toList();
 
     await Future.wait(futures);
-
     filteredTrades.assignAll(allTrades);
   }
 

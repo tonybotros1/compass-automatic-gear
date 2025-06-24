@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -362,35 +363,39 @@ var newCompannyButtonStyle = ElevatedButton.styleFrom(
 var allButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff328E6E),
   foregroundColor: Colors.white,
+  padding: EdgeInsets.all(8),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var todayButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff94B4C1),
   foregroundColor: Colors.white,
+  padding: EdgeInsets.all(8),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 var thisMonthButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff547792),
   foregroundColor: Colors.white,
+  padding: EdgeInsets.all(8),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 var thisYearButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff213448),
   foregroundColor: Colors.white,
+  padding: EdgeInsets.all(8),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var homeButtonStyle = ElevatedButton.styleFrom(
@@ -591,29 +596,49 @@ Future<dynamic> alertDialog(
   );
 }
 
-// function to convert text to date and make the format dd-mm-yyyy
 String textToDate(dynamic inputDate) {
-  if (inputDate is String) {
-    if (inputDate.isEmpty) {
-      return '';
-    }
+  // 1) Null or empty
+  if (inputDate == null) return '';
 
-    // Check if the input is already in dd-MM-yyyy format
-    final RegExp dateFormatRegex = RegExp(r'^\d{2}-\d{2}-\d{4}$');
-    if (dateFormatRegex.hasMatch(inputDate)) {
-      return inputDate;
-    }
-
-    try {
-      DateTime parsedDate = DateFormat("yyyy-MM-dd").parse(inputDate);
-      return DateFormat("dd-MM-yyyy").format(parsedDate);
-    } catch (e) {
-      return ''; // Return empty string if parsing fails
-    }
-  } else if (inputDate is DateTime) {
-    return DateFormat("dd-MM-yyyy").format(inputDate);
+  // 2) Firestore Timestamp
+  if (inputDate is Timestamp) {
+    final dt = inputDate.toDate();
+    return DateFormat('dd-MM-yyyy').format(dt);
   }
-  return ''; // Return empty string for unsupported types
+
+  // 3) Dart DateTime
+  if (inputDate is DateTime) {
+    return DateFormat('dd-MM-yyyy').format(inputDate);
+  }
+
+  // 4) String
+  if (inputDate is String) {
+    final raw = inputDate.trim();
+    if (raw.isEmpty) return '';
+
+    // Already in dd-MM-yyyy?
+    final ddMMyyyy = RegExp(r'^\d{2}-\d{2}-\d{4}$');
+    if (ddMMyyyy.hasMatch(raw)) {
+      return raw;
+    }
+
+    // Try parsing (e.g. "yyyy-MM-dd", ISO, etc.)
+    try {
+      final parsed = DateTime.parse(raw);
+      return DateFormat('dd-MM-yyyy').format(parsed);
+    } catch (_) {
+      // Fallback: try strict yyyy-MM-dd
+      try {
+        final parsedStrict = DateFormat('yyyy-MM-dd').parseStrict(raw);
+        return DateFormat('dd-MM-yyyy').format(parsedStrict);
+      } catch (e) {
+        return '';
+      }
+    }
+  }
+
+  // Unsupported type
+  return '';
 }
 
 Container labelContainer({
@@ -646,28 +671,39 @@ Widget textForDataRowInTable({
   Color? color,
   bool isBold = false,
   double? fontSize,
+  bool isSelectable = true, // New parameter
 }) {
   // Try parsing the text as a double
   String formattedText = text;
   double? parsedValue = double.tryParse(text);
 
   if (parsedValue != null) {
-    formattedText =
-        NumberFormat("#,##0.00").format(parsedValue); // Formats as double
+    formattedText = NumberFormat("#,##0.00").format(parsedValue);
   }
 
   return Container(
     constraints: maxWidth != null ? BoxConstraints(maxWidth: maxWidth) : null,
-    child: SelectableText(
-      formattedText,
-      maxLines: 1,
-      style: TextStyle(
-        fontSize: fontSize,
-        overflow: TextOverflow.ellipsis,
-        color: color,
-        fontWeight: isBold ? FontWeight.bold : null,
-      ),
-    ),
+    child: isSelectable
+        ? SelectableText(
+            formattedText,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: fontSize,
+              overflow: TextOverflow.ellipsis,
+              color: color,
+              fontWeight: isBold ? FontWeight.bold : null,
+            ),
+          )
+        : Text(
+            formattedText,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: fontSize,
+              color: color,
+              fontWeight: isBold ? FontWeight.bold : null,
+            ),
+          ),
   );
 }
 
@@ -806,4 +842,87 @@ String getdataName(String id, Map allData, {title = 'name'}) {
   } catch (e) {
     return '';
   }
+}
+
+Map getDaysInMonth(String monthName) {
+  // Map of lowercase month names to their respective numeric values.
+  const monthMap = {
+    'january': 1,
+    'february': 2,
+    'march': 3,
+    'april': 4,
+    'may': 5,
+    'june': 6,
+    'july': 7,
+    'august': 8,
+    'september': 9,
+    'october': 10,
+    'november': 11,
+    'december': 12,
+  };
+
+  final key = monthName.toLowerCase();
+  if (!monthMap.containsKey(key)) {
+    throw ArgumentError('Invalid month name: $monthName');
+  }
+
+  final month = monthMap[key]!;
+  final year = DateTime.now().year;
+
+  // DateTime(year, month + 1, 0) is the “zero‑th” day of the next month,
+  // which resolves to the last day of [month].
+  final lastDay = DateTime(year, month + 1, 0).day;
+  return {
+    for (var day = 1; day <= lastDay; day++)
+      day.toString(): {'name': day.toString()},
+  };
+}
+
+normalizeDate(String input, TextEditingController date) {
+  final raw = input.trim();
+  if (raw.isEmpty) return false;
+
+  // 1) جرب الصيغ المنفصلة بشرطات أو شرط مائل أو نقاط
+  final sepPattern = RegExp(r'^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$');
+  final sepMatch = sepPattern.firstMatch(raw);
+  if (sepMatch != null) {
+    final d = int.tryParse(sepMatch.group(1)!)!;
+    final m = int.tryParse(sepMatch.group(2)!)!;
+    final y = int.tryParse(sepMatch.group(3)!)!;
+    date.text = _formatIfValid(d, m, y);
+    if (date.text == '') {
+      return false;
+    }
+    return true;
+  }
+
+  // 2) جرب الصيغ بدون فاصل (سبعة أو ثمانية أرقام)
+  final noSepPattern = RegExp(r'^(\d{1,2})(\d{1,2})(\d{4})$');
+  final noSepMatch = noSepPattern.firstMatch(raw);
+  if (noSepMatch != null) {
+    final d = int.tryParse(noSepMatch.group(1)!)!;
+    final m = int.tryParse(noSepMatch.group(2)!)!;
+    final y = int.tryParse(noSepMatch.group(3)!)!;
+    date.text = _formatIfValid(d, m, y);
+    if (date.text == '') {
+      return false;
+    }
+    return true;
+  }
+
+  // 3) فشل كل المحاولات
+  date.text = '';
+  return false;
+}
+
+/// يتأكد إن اليوم/الشهر/السنة يولّدوا تاريخ صالح، ويعيده بصيغة "dd-MM-yyyy"
+String _formatIfValid(int day, int month, int year) {
+  try {
+    final dt = DateTime(year, month, day);
+    // تأكد إنه فعلاً نفس القيم (مثلاً 31-02-2025 ينتج مارس أو يتعدى)
+    if (dt.year == year && dt.month == month && dt.day == day) {
+      return DateFormat('dd-MM-yyyy').format(dt);
+    }
+  } catch (_) {}
+  return '';
 }

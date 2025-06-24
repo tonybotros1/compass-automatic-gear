@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../consts.dart';
+
 class TradingDashboardController extends GetxController {
   Rx<TextEditingController> year = TextEditingController().obs;
   TextEditingController month = TextEditingController();
@@ -229,39 +231,7 @@ class TradingDashboardController extends GetxController {
     });
   }
 
-  Map getDaysInMonth(String monthName) {
-    // Map of lowercase month names to their respective numeric values.
-    const monthMap = {
-      'january': 1,
-      'february': 2,
-      'march': 3,
-      'april': 4,
-      'may': 5,
-      'june': 6,
-      'july': 7,
-      'august': 8,
-      'september': 9,
-      'october': 10,
-      'november': 11,
-      'december': 12,
-    };
-
-    final key = monthName.toLowerCase();
-    if (!monthMap.containsKey(key)) {
-      throw ArgumentError('Invalid month name: $monthName');
-    }
-
-    final month = monthMap[key]!;
-    final year = DateTime.now().year;
-
-    // DateTime(year, month + 1, 0) is the “zero‑th” day of the next month,
-    // which resolves to the last day of [month].
-    final lastDay = DateTime(year, month + 1, 0).day;
-    return {
-      for (var day = 1; day <= lastDay; day++)
-        day.toString(): {'name': day.toString()},
-    };
-  }
+ 
 
   getAllTrades() {
     try {
@@ -442,15 +412,15 @@ class TradingDashboardController extends GetxController {
 
     for (var trade in filteredTrades) {
       final data = trade.data() as Map<String, dynamic>;
-      final itemsList = data['items'] as List<dynamic>?;
+      final itemsList = data['items'] as List<dynamic>? ?? [];
 
-      if (itemsList != null) {
+      if (itemsList.isNotEmpty) {
         for (var item in itemsList) {
-          final pay = double.tryParse(item['pay'] ?? 0);
-          final receive = double.tryParse(item['receive'] ?? 0);
+          final pay = double.tryParse(item['pay'] ?? 0) ?? 0.0;
+          final receive = double.tryParse(item['receive'] ?? 0) ?? 0.0;
 
-          totalPaysForAllTrades.value += pay!;
-          totalReceivesForAllTrades.value += receive!;
+          totalPaysForAllTrades.value += pay;
+          totalReceivesForAllTrades.value += receive;
           totalNETsForAllTrades.value += (receive - pay);
         }
       }

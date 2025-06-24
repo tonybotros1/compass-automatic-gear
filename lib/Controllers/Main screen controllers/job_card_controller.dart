@@ -76,7 +76,7 @@ class JobCardController extends GetxController {
   RxString queryForInvoiceItems = RxString('');
   RxString label = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
-  RxBool isScreenLoding = RxBool(true);
+  RxBool isScreenLoding = RxBool(false);
   RxBool loadingInvoiceItems = RxBool(false);
   final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allJobCards =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
@@ -160,6 +160,27 @@ class JobCardController extends GetxController {
   RxDouble allJobsNET = RxDouble(0.0);
   DocumentSnapshot? lastDocument;
   bool hasMore = true;
+  RxBool isYearSelected = RxBool(false);
+  RxBool isMonthSelected = RxBool(false);
+  RxBool isDaySelected = RxBool(false);
+  RxBool isTodaySelected = RxBool(false);
+  RxBool isAllSelected = RxBool(false);
+  RxBool isThisMonthSelected = RxBool(false);
+  RxBool isThisYearSelected = RxBool(false);
+  // search section
+  Rx<TextEditingController> jobNumberFilter = TextEditingController().obs;
+  Rx<TextEditingController> invoiceNumberFilter = TextEditingController().obs;
+  Rx<TextEditingController> carBrandIdFilterName = TextEditingController().obs;
+  RxString carBrandIdFilter = RxString('');
+  RxString carModelIdFilter = RxString('');
+  RxString customerNameIdFilter = RxString('');
+  Rx<TextEditingController> carModelIdFilterName = TextEditingController().obs;
+  Rx<TextEditingController> customerNameIdFilterName =
+      TextEditingController().obs;
+  Rx<TextEditingController> plateNumberFilter = TextEditingController().obs;
+  Rx<TextEditingController> vinFilter = TextEditingController().obs;
+  Rx<TextEditingController> fromDate = TextEditingController().obs;
+  Rx<TextEditingController> toDate = TextEditingController().obs;
   @override
   void onInit() async {
     super.onInit();
@@ -179,7 +200,7 @@ class JobCardController extends GetxController {
     getCurrencies();
     getColors();
     getEngineTypes();
-    getAllJobCards();
+    // getAllJobCards();
     getInvoiceItemsFromCollection();
     search.value.addListener(() async {
       await filterJobCards();
@@ -346,7 +367,7 @@ class JobCardController extends GetxController {
     });
   }
 
-  void updateCalculating() {
+  void updateCalculating() { 
     if (price.text.isEmpty) price.text = '0';
     if (quantity.text.isEmpty) quantity.text = '0';
     if (discount.text.isEmpty) discount.text = '0';
@@ -715,7 +736,7 @@ class JobCardController extends GetxController {
 
     invoiceCounter.value.text = data['invoice_number'] ?? '';
     lpoCounter.value.text = data['lpo_number'] ?? '';
-    jobCardDate.value.text = data['job_date'] ?? '';
+    jobCardDate.value.text = textToDate(data['job_date']);
     invoiceDate.value.text = textToDate(data['invoice_date']);
     approvalDate.value.text = textToDate(data['job_approval_date']);
     startDate.value.text = textToDate(data['job_start_date']);
@@ -772,8 +793,8 @@ class JobCardController extends GetxController {
         'job_number': jobCardCounter.value.text,
         'invoice_number': invoiceCounter.value.text,
         'lpo_number': lpoCounter.value.text,
-        'job_date': jobCardDate.value.text,
-        'invoice_date': invoiceDate.value.text,
+        // 'job_date': jobCardDate.value.text,
+        // 'invoice_date': invoiceDate.value.text,
         'job_approval_date': approvalDate.value.text,
         'job_start_date': startDate.value.text,
         'job_cancelation_date': jobCancelationDate.value.text,
@@ -789,6 +810,30 @@ class JobCardController extends GetxController {
         'job_notes': jobNotes.text,
         'job_delivery_notes': deliveryNotes.text,
       };
+
+      final rawDate = jobCardDate.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['job_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate),
+          );
+        } catch (e) {
+          // إذا حابب تعرض للمستخدم خطأ في التنسيق
+          // print('Invalid quotation_date format: $e');
+        }
+      }
+
+      final rawDate2 = invoiceDate.value.text.trim();
+      if (rawDate2.isNotEmpty) {
+        try {
+          newData['invoice_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate2),
+          );
+        } catch (e) {
+          // إذا حابب تعرض للمستخدم خطأ في التنسيق
+          // print('Invalid quotation_date format: $e');
+        }
+      }
 
       if (jobCardCounter.value.text.isEmpty) {
         jobStatus1.value = 'New';
@@ -958,7 +1003,7 @@ class JobCardController extends GetxController {
       }
       addingNewValue.value = true;
 
-      FirebaseFirestore.instance.collection('job_cards').doc(jobId).update({
+      Map<String, dynamic> updatedData = {
         'label': label.value,
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
@@ -992,8 +1037,8 @@ class JobCardController extends GetxController {
         'job_number': jobCardCounter.value.text,
         'invoice_number': invoiceCounter.value.text,
         'lpo_number': lpoCounter.value.text,
-        'job_date': jobCardDate.value.text,
-        'invoice_date': invoiceDate.value.text,
+        // 'job_date': jobCardDate.value.text,
+        // 'invoice_date': invoiceDate.value.text,
         'job_approval_date': approvalDate.value.text,
         'job_start_date': startDate.value.text,
         'job_finish_date': finishDate.value.text,
@@ -1007,7 +1052,38 @@ class JobCardController extends GetxController {
         'delivery_time': deliveryTime.value.text,
         'job_notes': jobNotes.text,
         'job_delivery_notes': deliveryNotes.text,
-      });
+      };
+
+      // تحويل التاريخ إلى Timestamp إذا حقل التاريخ غير فارغ
+      final rawDate = jobCardDate.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          updatedData['job_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate),
+          );
+        } catch (e) {
+          // اختياري: تقدر تعرض تنبيه إذا التنسيق خاطئ
+          // print('Invalid quotation_date format: $e');
+        }
+      }
+
+      final rawDate2 = invoiceDate.value.text.trim();
+      if (rawDate2.isNotEmpty) {
+        try {
+          updatedData['invoice_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate2),
+          );
+        } catch (e) {
+          // اختياري: تقدر تعرض تنبيه إذا التنسيق خاطئ
+          // print('Invalid quotation_date format: $e');
+        }
+      }
+
+      FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update(updatedData);
+
       addingNewValue.value = false;
       showSnackBar('Done', 'Job Updated Successfully');
     } catch (e) {
@@ -1829,8 +1905,6 @@ class JobCardController extends GetxController {
   final RxMap<String, String> carModelsNames = <String, String>{}.obs;
   final RxMap<String, String> customerNames = <String, String>{}.obs;
 
- 
-
   void getAllJobCards() {
     FirebaseFirestore.instance
         .collection('job_cards')
@@ -2144,6 +2218,167 @@ class JobCardController extends GetxController {
     filteredJobCards.assignAll(filtered.toList());
     numberOfJobs.value = filteredJobCards.length;
     // calculateMoneyForAllJobs();
+  }
+
+  Future<void> searchEngine() async {
+    isScreenLoding.value = true;
+    final collection = FirebaseFirestore.instance
+        .collection('job_cards')
+        .where('company_id', isEqualTo: companyId.value);
+    Query<Map<String, dynamic>> query = collection;
+
+    // 1) زر "All" يجلب كل البيانات فورًا
+    if (isAllSelected.value) {
+      // لا نضيف أي where، نجلب كل الوثائق
+      final snapshot = await query.get();
+      allJobCards.assignAll(snapshot.docs);
+      calculateMoneyForAllJobs();
+      numberOfJobs.value = allJobCards.length;
+
+      isScreenLoding.value = false;
+      return;
+    }
+
+    // 2) زر "Today"
+    if (isTodaySelected.value) {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay =
+          startOfDay.add(Duration(days: 1)).subtract(Duration(milliseconds: 1));
+      fromDate.value.text = textToDate(startOfDay);
+      toDate.value.text = textToDate(endOfDay);
+      query = query
+          .where('job_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('job_date', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay));
+    }
+
+    // 3) زر "This Month"
+    else if (isThisMonthSelected.value) {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      final startOfNextMonth = (now.month < 12)
+          ? DateTime(now.year, now.month + 1, 1)
+          : DateTime(now.year + 1, 1, 1);
+      final endOfMonth = startOfNextMonth.subtract(Duration(milliseconds: 1));
+      fromDate.value.text = textToDate(startOfMonth);
+      toDate.value.text = textToDate(endOfMonth);
+      query = query
+          .where('job_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where('job_date',
+              isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth));
+    }
+
+    // 4) زر "This Year"
+    else if (isThisYearSelected.value) {
+      final now = DateTime.now();
+      final startOfYear = DateTime(now.year, 1, 1);
+      final startOfNextYear = DateTime(now.year + 1, 1, 1);
+      final endOfYear = startOfNextYear.subtract(Duration(milliseconds: 1));
+      fromDate.value.text = textToDate(startOfYear);
+      toDate.value.text = textToDate(endOfYear);
+      query = query
+          .where('job_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
+          .where('job_date',
+              isLessThanOrEqualTo: Timestamp.fromDate(endOfYear));
+    }
+
+    // 5) إذا لم يُختر أي من الأزرار الخاصة بالفترة، نطبق فلتر التواريخ اليدوي
+    else {
+      if (fromDate.value.text.trim().isNotEmpty) {
+        try {
+          final dtFrom = format.parseStrict(fromDate.value.text.trim());
+          query = query.where(
+            'job_date',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
+          );
+        } catch (_) {}
+      }
+      if (toDate.value.text.trim().isNotEmpty) {
+        try {
+          final dtTo = format.parseStrict(toDate.value.text.trim());
+          query = query.where(
+            'job_date',
+            isLessThanOrEqualTo: Timestamp.fromDate(dtTo),
+          );
+        } catch (_) {}
+      }
+    }
+
+    // 6) باقي الفلاتر العامة
+    if (jobNumberFilter.value.text.trim().isNotEmpty) {
+      query = query.where(
+        'job_number',
+        isEqualTo: jobNumberFilter.value.text.trim(),
+      );
+    }
+    if (carBrandIdFilter.value.isNotEmpty) {
+      query = query.where('car_brand', isEqualTo: carBrandIdFilter.value);
+    }
+    if (carModelIdFilter.value.isNotEmpty) {
+      query = query.where('car_model', isEqualTo: carModelIdFilter.value);
+    }
+    if (plateNumberFilter.value.text.trim().isNotEmpty) {
+      query = query.where(
+        'plate_number',
+        isEqualTo: plateNumberFilter.value.text.trim(),
+      );
+    }
+    if (vinFilter.value.text.trim().isNotEmpty) {
+      query = query.where(
+        'vehicle_identification_number',
+        isEqualTo: vinFilter.value.text.trim(),
+      );
+    }
+    if (customerNameIdFilter.value.isNotEmpty) {
+      query = query.where(
+        'customer',
+        isEqualTo: customerNameIdFilter.value,
+      );
+    }
+
+    // 7) تنفيذ الاستعلام وجلب النتائج
+    final snapshot = await query.get();
+    allJobCards.assignAll(snapshot.docs);
+    numberOfJobs.value = allJobCards.length;
+    calculateMoneyForAllJobs();
+    isScreenLoding.value = false;
+  }
+
+  removeFilters() {
+    isAllSelected.value = false;
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+  }
+
+  clearAllFilters() {
+    
+    allJobCards.clear();
+    numberOfJobs.value = 0;
+    allJobsTotals.value = 0;
+    allJobsVATS.value = 0;
+    allJobsNET.value = 0;
+    allModels.clear();
+    isAllSelected.value = false;
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+    jobNumberFilter.value.clear();
+    invoiceNumberFilter.value.clear();
+    carBrandIdFilterName.value.clear();
+    carBrandIdFilter = RxString('');
+    carModelIdFilter = RxString('');
+    customerNameIdFilter = RxString('');
+    carModelIdFilterName.value.clear();
+    customerNameIdFilterName.value.clear();
+    plateNumberFilter.value.clear();
+    vinFilter.value.clear();
+    fromDate.value.clear();
+    toDate.value.clear();
+    isScreenLoding.value = false;
   }
 }
 

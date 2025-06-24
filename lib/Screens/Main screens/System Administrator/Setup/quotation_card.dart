@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/quotation_card_controller.dart';
-import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
+import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/add_new_quotation_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/quotation_card_buttons.dart';
@@ -27,16 +28,247 @@ class QuotationCard extends StatelessWidget {
               child: ListView(
                 // crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  GetX<QuotationCardController>(builder: (controller) {
+                    bool isBrandLoading = controller.allBrands.isEmpty;
+                    bool isModelLoading = controller.allModels.isEmpty;
+                    bool isCustomersLoading = controller.allCustomers.isEmpty;
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      spacing: 10,
+                      children: [
+                        Expanded(
+                            child: myTextFormFieldWithBorder(
+                          labelText: 'Quotation NO.',
+                          controller: controller.quotaionNumberFilter.value,
+                        )),
+                        Expanded(
+                          flex: 2,
+                          child: CustomDropdown(
+                            showedSelectedName: 'name',
+                            textcontroller:
+                                controller.carBrandIdFilterName.value.text,
+                            hintText: 'Car Brand',
+                            items: isBrandLoading ? {} : controller.allBrands,
+                            onChanged: (key, value) async {
+                              controller.carModel.clear();
+                              controller.getModelsByCarBrand(key);
+                              controller.carBrandIdFilter.value = key;
+                              controller.carBrandIdFilterName.value.text =
+                                  value['name'];
+                              controller.carModelIdFilter.value = '';
+                              controller.carModelIdFilterName.value.text = '';
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: CustomDropdown(
+                            showedSelectedName: 'name',
+                            textcontroller:
+                                controller.carModelIdFilterName.value.text,
+                            hintText: 'Car Model',
+                            items: isModelLoading ? {} : controller.allModels,
+                            onChanged: (key, value) async {
+                              controller.carModelIdFilter.value = key;
+                              controller.carModelIdFilterName.value.text =
+                                  value['name'];
+                            },
+                          ),
+                        ),
+                        Expanded(
+                            child: myTextFormFieldWithBorder(
+                          labelText: 'Plate NO.',
+                          controller: controller.plateNumberFilter.value,
+                        )),
+                        Expanded(
+                            flex: 2,
+                            child: myTextFormFieldWithBorder(
+                              labelText: 'VIN',
+                              controller: controller.vinFilter.value,
+                            )),
+                        Expanded(
+                            flex: 3,
+                            child: CustomDropdown(
+                                textcontroller: controller
+                                    .customerNameIdFilterName.value.text,
+                                showedSelectedName: 'entity_name',
+                                hintText: 'Customer Name',
+                                onChanged: (key, value) async {
+                                  controller.customerNameIdFilterName.value
+                                      .text = value['entity_name'];
+                                  controller.customerNameIdFilter.value = key;
+                                },
+                                items: isCustomersLoading
+                                    ? {}
+                                    : controller.allCustomers))
+                      ],
+                    );
+                  }),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  GetBuilder<QuotationCardController>(builder: (controller) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Row(
+                            spacing: 10,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                  child: myTextFormFieldWithBorder(
+                                controller: controller.fromDate.value,
+                                labelText: 'From Date',
+                                onFieldSubmitted: (_) async {
+                                  await normalizeDate(
+                                      controller.fromDate.value.text,
+                                      controller.fromDate.value);
+                                  // if (nor) {
+                                  //   controller.searchEngine();
+                                  // }
+                                },
+                              )),
+                              Expanded(
+                                  child: myTextFormFieldWithBorder(
+                                controller: controller.toDate.value,
+                                labelText: 'To Date',
+                                onFieldSubmitted: (_) async {
+                                  await normalizeDate(
+                                      controller.toDate.value.text,
+                                      controller.toDate.value);
+                                  // if (nor) {
+                                  //   controller.searchEngine();
+                                  // }
+                                },
+                              )),
+                              ElevatedButton(
+                                  style: allButtonStyle,
+                                  onPressed: () {
+                                    controller.clearAllFilters();
+                                    controller.isAllSelected.value = true;
+                                    controller.isTodaySelected.value = false;
+                                    controller.isThisMonthSelected.value =
+                                        false;
+                                    controller.isThisYearSelected.value = false;
+                                    controller.carBrand.clear();
+                                    controller.carModel.clear();
+                                    controller.carBrandId.value = '';
+                                    controller.carModelId.value = '';
+                                    controller.allModels.clear();
+                                    controller.searchEngine();
+                                  },
+                                  child: Text('All')),
+                              ElevatedButton(
+                                  style: todayButtonStyle,
+                                  onPressed: controller.isTodaySelected.isFalse
+                                      ? () {
+                                          controller.isAllSelected.value =
+                                              false;
+                                          controller.isTodaySelected.value =
+                                              true;
+                                          controller.isThisMonthSelected.value =
+                                              false;
+                                          controller.isThisYearSelected.value =
+                                              false;
+                                          controller.isYearSelected.value =
+                                              false;
+                                          controller.isMonthSelected.value =
+                                              false;
+                                          controller.isDaySelected.value = true;
+                                          controller.searchEngine();
+                                        }
+                                      : null,
+                                  child: Text('Today')),
+                              ElevatedButton(
+                                  style: thisMonthButtonStyle,
+                                  onPressed: controller
+                                          .isThisMonthSelected.isFalse
+                                      ? () {
+                                          controller.isAllSelected.value =
+                                              false;
+                                          controller.isTodaySelected.value =
+                                              false;
+                                          controller.isThisMonthSelected.value =
+                                              true;
+                                          controller.isThisYearSelected.value =
+                                              false;
+                                          controller.isYearSelected.value =
+                                              false;
+                                          controller.isMonthSelected.value =
+                                              true;
+                                          controller.isDaySelected.value =
+                                              false;
+                                          controller.searchEngine();
+                                        }
+                                      : null,
+                                  child: Text('This Month')),
+                              ElevatedButton(
+                                  style: thisYearButtonStyle,
+                                  onPressed: controller
+                                          .isThisYearSelected.isFalse
+                                      ? () {
+                                          controller.isTodaySelected.value =
+                                              false;
+                                          controller.isThisMonthSelected.value =
+                                              false;
+                                          controller.isThisYearSelected.value =
+                                              true;
+                                          controller.isYearSelected.value =
+                                              true;
+                                          controller.isMonthSelected.value =
+                                              false;
+                                          controller.isDaySelected.value =
+                                              false;
+                                          controller.searchEngine();
+                                        }
+                                      : null,
+                                  child: Text('This Year')),
+                              ElevatedButton(
+                                  style: saveButtonStyle,
+                                  onPressed:
+                                      controller.isThisYearSelected.isFalse
+                                          ? () async {
+                                              await controller.removeFilters();
+                                              controller.searchEngine();
+                                            }
+                                          : null,
+                                  child: Text(
+                                    'Find',
+                                    style: fontStyleForElevatedButtons,
+                                  )),
+                              ElevatedButton(
+                                  style: clearVariablesButtonStyle,
+                                  onPressed:
+                                      controller.isThisYearSelected.isFalse
+                                          ? () {
+                                              controller.clearAllFilters();
+                                              controller.update();
+                                            }
+                                          : null,
+                                  child: Text(
+                                    'Clear Filters',
+                                    style: fontStyleForElevatedButtons,
+                                  )),
+                            ],
+                          ),
+                        ),
+                        Expanded(flex: 2, child: SizedBox()),
+                        newQuotationCardButton(context, constraints, controller)
+                      ],
+                    );
+                  }),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<QuotationCardController>(
                         init: QuotationCardController(),
                         builder: (controller) {
                           return Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             spacing: 10,
                             children: [
                               customBox(
-                                  title: 'NUMBER OF JOBS',
+                                  title: 'NUMBER OF QUOTATIONS',
                                   value: Text(
                                     '${controller.numberOfQuotations.value}',
                                     style: TextStyle(
@@ -76,24 +308,27 @@ class QuotationCard extends StatelessWidget {
                         }),
                   ),
                   Container(
+                    padding: EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10)),
                     ),
                     child: Column(
                       children: [
-                        GetX<QuotationCardController>(
-                          builder: (controller) {
-                            return searchBar(
-                              search: controller.search,
-                              constraints: constraints,
-                              context: context,
-                              title: 'Search for quotation cards',
-                              button: newQuotationCardButton(
-                                  context, constraints, controller),
-                            );
-                          },
-                        ),
+                        // GetX<QuotationCardController>(
+                        //   builder: (controller) {
+                        //     return searchBar(
+                        //       search: controller.search,
+                        //       constraints: constraints,
+                        //       context: context,
+                        //       title: 'Search for quotation cards',
+                        //       button: newQuotationCardButton(
+                        //           context, constraints, controller),
+                        //     );
+                        //   },
+                        // ),
                         GetX<QuotationCardController>(
                           builder: (controller) {
                             if (controller.isScreenLoding.value &&
@@ -165,8 +400,8 @@ Widget tableOfScreens({
       controller: scrollController,
       child: PaginatedDataTable(
         controller: scrollController,
-        rowsPerPage: controller.pagesPerPage.value,
-        availableRowsPerPage: const [5, 10, 17, 25],
+        // rowsPerPage: controller.numberOfQuotations.value +1,
+        // availableRowsPerPage: const [1, 10, 17, 25],
         onRowsPerPageChanged: (rows) {
           controller.pagesPerPage.value = rows!;
         },
@@ -378,7 +613,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> cardData, context, constraints,
             textForDataRowInTable(text: '${cardData['quotation_number']}')),
         DataCell(textForDataRowInTable(
             text: cardData['quotation_number'] != ''
-                ? '${cardData['quotation_date']}'
+                ? textToDate(cardData['quotation_date'])
                 : '')),
         DataCell(cardData['quotation_status'] != ''
             ? statusBox('${cardData['quotation_status']}',
@@ -523,18 +758,16 @@ Widget editSection(context, QuotationCardController controller,
                     controller.setButtonLoading(cardId, true);
 
                     controller.getAllInvoiceItems(cardId);
-                    // controller.currentCountryVAT.value = controller.getdataName(
-                    //     controller.companyDetails['contact_details']['country'],
-                    //     controller.allCountries,
-                    //     title: 'vat');
+                    controller.currentCountryVAT.value = controller.getdataName(
+                        controller.companyDetails['contact_details']['country'],
+                        controller.allCountries,
+                        title: 'vat');
                     await controller.loadValues(cardData, cardId);
                     editQuotationCardDialog(controller, cardData, cardId);
                     controller.setButtonLoading(cardId, false);
                   }
                 : null,
-        icon: isLoading
-            ? loadingProcess
-            : editIcon);
+        icon: isLoading ? loadingProcess : editIcon);
   });
 }
 

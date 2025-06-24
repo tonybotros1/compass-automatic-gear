@@ -64,13 +64,6 @@ Widget tableOfScreens({
         headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Invoice Net',
-        ),
-      ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.end,
-        label: AutoSizedText(
-          constraints: constraints,
           text: 'Invoice Amount',
         ),
       ),
@@ -78,7 +71,14 @@ Widget tableOfScreens({
         headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Outsanding Amount',
+          text: 'Outsanding',
+        ),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.end,
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Amount Received',
         ),
       ),
     ],
@@ -92,7 +92,7 @@ Widget tableOfScreens({
       final receipt = e.value;
       // If you need the original index in the full list you can look it up,
       // otherwise just pass `e.key` as the index in this filtered list:
-      final originalIndex = controller.availableReceipts
+      final originalIndex = controller.selectedAvailableReceipts
           .indexWhere((r) => r['invoice_number'] == receipt['invoice_number']);
       final invoice = receipt['invoice_number'] as String;
       return dataRowForTheTable(
@@ -121,6 +121,9 @@ DataRow dataRowForTheTable(
         alignment: Alignment.centerRight,
         child:
             textForDataRowInTable(text: receiptData['invoice_amount'] ?? ''))),
+    DataCell(Align(
+        alignment: Alignment.centerRight,
+        child: textForDataRowInTable(text: receiptData['outstanding_amount']))),
     DataCell(
       controller.editingIndex.value == index
           ? SizedBox(
@@ -157,13 +160,11 @@ DataRow dataRowForTheTable(
               child: Align(
                 alignment: Alignment.centerRight,
                 child: textForDataRowInTable(
-                    text: receiptData['receipt_amount']?.toString() ?? ''),
+                  isSelectable: false,
+                   text:   receiptData['receipt_amount']?.toString() ?? ''),
               ),
             ),
     ),
-    DataCell(Align(
-        alignment: Alignment.centerRight,
-        child: textForDataRowInTable(text: receiptData['outstanding_amount']))),
   ]);
 }
 

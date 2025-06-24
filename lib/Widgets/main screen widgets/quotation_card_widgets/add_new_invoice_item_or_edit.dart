@@ -149,7 +149,7 @@ Widget addNewinvoiceItemsOrEdit({
                   ),
                   SizedBox(height: 12),
                   myTextFormFieldWithBorder(
-                    onChanged: (_) => controller.updateCalculating(),
+                    onChanged: (_) => controller.updateCalculating(), 
                     isDouble: true,
                     controller: controller.price,
                     labelText: 'Price',

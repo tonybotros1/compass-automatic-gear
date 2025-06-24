@@ -61,7 +61,7 @@ class TradingDashboard extends StatelessWidget {
                                   isMonthsLoading ? {} : controller.allMonths,
                               onChanged: (key, value) {
                                 controller.allDays.assignAll(
-                                    controller.getDaysInMonth(value['name']));
+                                    getDaysInMonth(value['name']));
                                 controller.month.text = value['name'];
                                 controller.day.clear();
                                 controller.isMonthSelected.value = true;

@@ -30,6 +30,7 @@ class QuotationCardController extends GetxController {
   TextEditingController country = TextEditingController();
   TextEditingController city = TextEditingController();
   TextEditingController year = TextEditingController();
+
   TextEditingController vin = TextEditingController();
   TextEditingController transmissionType = TextEditingController();
   TextEditingController color = TextEditingController();
@@ -48,7 +49,7 @@ class QuotationCardController extends GetxController {
   Rx<TextEditingController> mileageIn = TextEditingController().obs;
   Rx<TextEditingController> fuelAmount = TextEditingController().obs;
   Rx<TextEditingController> search = TextEditingController().obs;
-  RxBool isScreenLoding = RxBool(true);
+  RxBool isScreenLoding = RxBool(false);
   RxBool loadingInvoiceItems = RxBool(false);
   final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allQuotationCards =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
@@ -76,6 +77,7 @@ class QuotationCardController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxMap allBrands = RxMap({});
   RxMap allTechnicians = RxMap({});
+  RxMap allYears = RxMap({});
   final RxMap<String, Map<String, dynamic>> allModels =
       <String, Map<String, dynamic>>{}.obs;
   RxMap allCustomers = RxMap({});
@@ -134,6 +136,27 @@ class QuotationCardController extends GetxController {
   RxDouble allQuotationsVATS = RxDouble(0.0);
   RxDouble allQuotationsTotals = RxDouble(0.0);
   RxDouble allQuotationsNET = RxDouble(0.0);
+  RxBool isYearSelected = RxBool(false);
+  RxBool isMonthSelected = RxBool(false);
+  RxBool isDaySelected = RxBool(false);
+  RxBool isTodaySelected = RxBool(false);
+  RxBool isAllSelected = RxBool(false);
+  RxBool isThisMonthSelected = RxBool(false);
+  RxBool isThisYearSelected = RxBool(false);
+  // search section
+  Rx<TextEditingController> quotaionNumberFilter = TextEditingController().obs;
+  Rx<TextEditingController> carBrandIdFilterName = TextEditingController().obs;
+  RxString carBrandIdFilter = RxString('');
+  RxString carModelIdFilter = RxString('');
+  RxString customerNameIdFilter = RxString('');
+  Rx<TextEditingController> carModelIdFilterName = TextEditingController().obs;
+  Rx<TextEditingController> customerNameIdFilterName =
+      TextEditingController().obs;
+  Rx<TextEditingController> plateNumberFilter = TextEditingController().obs;
+  Rx<TextEditingController> vinFilter = TextEditingController().obs;
+  Rx<TextEditingController> fromDate = TextEditingController().obs;
+  Rx<TextEditingController> toDate = TextEditingController().obs;
+
   @override
   void onInit() async {
     super.onInit();
@@ -153,7 +176,8 @@ class QuotationCardController extends GetxController {
     getBranches();
     getCurrencies();
     getEngineTypes();
-    getAllQuotationCards();
+    getYears();
+    // getAllQuotationCards();
     getInvoiceItemsFromCollection();
     // search.value.addListener(() {
     //   filterJobCards();
@@ -161,6 +185,26 @@ class QuotationCardController extends GetxController {
     // searchForInvoiceItems.value.addListener(() {
     //   filterInvoiceItems();
     // });
+  }
+
+  // this function is to get years
+  getYears() async {
+    var typeDoc = await FirebaseFirestore.instance
+        .collection('all_lists')
+        .where('code', isEqualTo: 'YEARS')
+        .get();
+
+    var typeId = typeDoc.docs.first.id;
+    FirebaseFirestore.instance
+        .collection('all_lists')
+        .doc(typeId)
+        .collection('values')
+        .where('available', isEqualTo: true)
+        .orderBy('name', descending: true)
+        .snapshots()
+        .listen((year) {
+      allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
+    });
   }
 
   calculateMoneyForAllJobs() async {
@@ -356,7 +400,8 @@ class QuotationCardController extends GetxController {
 
     // Quotation metadata
     quotationCounter.value.text = data['quotation_number'] as String? ?? '';
-    quotationDate.value.text = data['quotation_date'] as String? ?? '';
+    quotationDate.value.text =
+        textToDate(data['quotation_date']) as String? ?? '';
     quotationDays.value.text = data['validity_days'] as String? ?? '';
     validityEndDate.value.text = data['validity_end_date'] as String? ?? '';
     referenceNumber.value.text = data['reference_number'] as String? ?? '';
@@ -490,7 +535,9 @@ class QuotationCardController extends GetxController {
         'rate': customerCurrencyRate.text,
         'payment_method': payType.value,
         'quotation_number': quotationCounter.value.text,
-        'quotation_date': quotationDate.value.text,
+        // 'quotation_date': Timestamp.fromDate(
+        //   format.parse(quotationDate.value.text.trim()),
+        // ),
         'validity_days': quotationDays.value.text,
         'validity_end_date': validityEndDate.value.text,
         'reference_number': referenceNumber.value.text,
@@ -499,6 +546,18 @@ class QuotationCardController extends GetxController {
         'quotation_warrenty_km': quotationWarrentyKM.value.text,
         'quotation_notes': quotationNotes.text,
       };
+
+      final rawDate = quotationDate.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['quotation_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate),
+          );
+        } catch (e) {
+          // إذا حابب تعرض للمستخدم خطأ في التنسيق
+          // print('Invalid quotation_date format: $e');
+        }
+      }
 
       if (quotationCounter.value.text.isEmpty) {
         quotationStatus.value = 'New';
@@ -535,16 +594,19 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  void editQuotationCard(id) {
+  void editQuotationCard(String id) {
     try {
+      // منع التعديل إذا الحالة Posted أو Cancelled
       if (quotationStatus.value == 'Posted' ||
           quotationStatus.value == 'Cancelled') {
         showSnackBar('Alert', 'Can\'t Edit For Posted / Cancelled Quotations');
         return;
       }
+
       addingNewValue.value = true;
 
-      FirebaseFirestore.instance.collection('quotation_cards').doc(id).update({
+      // بناء خريطة التحديث بدون quotation_date مبدئيًا
+      Map<String, dynamic> updatedData = {
         'quotation_status': quotationStatus.value,
         'car_brand_logo': carBrandLogo.value,
         'car_brand': carBrandId.value,
@@ -572,7 +634,7 @@ class QuotationCardController extends GetxController {
         'rate': customerCurrencyRate.text,
         'payment_method': payType.value,
         'quotation_number': quotationCounter.value.text,
-        'quotation_date': quotationDate.value.text,
+        // 'quotation_date' نضيفه لاحقًا بشرط عدم كونه فارغ
         'validity_days': quotationDays.value.text,
         'validity_end_date': validityEndDate.value.text,
         'reference_number': referenceNumber.value.text,
@@ -580,12 +642,38 @@ class QuotationCardController extends GetxController {
         'quotation_warrenty_days': quotationWarrentyDays.value.text,
         'quotation_warrenty_km': quotationWarrentyKM.value.text,
         'quotation_notes': quotationNotes.text,
+      };
+
+      // تحويل التاريخ إلى Timestamp إذا حقل التاريخ غير فارغ
+      final rawDate = quotationDate.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          updatedData['quotation_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate),
+          );
+        } catch (e) {
+          // اختياري: تقدر تعرض تنبيه إذا التنسيق خاطئ
+          // print('Invalid quotation_date format: $e');
+        }
+      }
+
+      // تنفيذ التحديث في Firestore
+      FirebaseFirestore.instance
+          .collection('quotation_cards')
+          .doc(id)
+          .update(updatedData)
+          .then((_) {
+        addingNewValue.value = false;
+        showSnackBar('Done', 'Updated Successfully');
+      }).catchError((e) {
+        addingNewValue.value = false;
+        showSnackBar('Alert', 'Something Went Wrong');
+        // print('Error updating quotation_card $id: $e');
       });
-      addingNewValue.value = false;
-      showSnackBar('Done', 'Updated Successfully');
     } catch (e) {
       addingNewValue.value = false;
       showSnackBar('Alert', 'Something Went Wrong');
+      // print('Unexpected error in editQuotationCard: $e');
     }
   }
 
@@ -973,7 +1061,7 @@ class QuotationCardController extends GetxController {
     //     (double.tryParse(net.text)! - double.tryParse(total.text)!).toString();
   }
 
-  void updateCalculating() {
+  void updateCalculating() { 
     if (price.text.isEmpty) price.text = '0';
     if (quantity.text.isEmpty) quantity.text = '0';
     if (discount.text.isEmpty) discount.text = '0';
@@ -1222,8 +1310,6 @@ class QuotationCardController extends GetxController {
     payType.value = isCash ? 'Cash' : 'Credit';
   }
 
- 
-
   Future<void> selectDateContext(
       BuildContext context, TextEditingController date) async {
     final DateTime? picked = await showDatePicker(
@@ -1431,5 +1517,166 @@ class QuotationCardController extends GetxController {
     } catch (e) {
       return ''; // Return empty string on error
     }
+  }
+
+  Future<void> searchEngine() async {
+    isScreenLoding.value = true;
+    final collection = FirebaseFirestore.instance
+        .collection('quotation_cards')
+        .where('company_id', isEqualTo: companyId.value);
+    Query<Map<String, dynamic>> query = collection;
+
+    // 1) زر "All" يجلب كل البيانات فورًا
+    if (isAllSelected.value) {
+      // لا نضيف أي where، نجلب كل الوثائق
+      final snapshot = await query.get();
+      allQuotationCards.assignAll(snapshot.docs);
+      calculateMoneyForAllJobs();
+      numberOfQuotations.value = allQuotationCards.length;
+
+      isScreenLoding.value = false;
+      return;
+    }
+
+    // 2) زر "Today"
+    if (isTodaySelected.value) {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay =
+          startOfDay.add(Duration(days: 1)).subtract(Duration(milliseconds: 1));
+      fromDate.value.text = textToDate(startOfDay);
+      toDate.value.text = textToDate(endOfDay);
+      query = query
+          .where('quotation_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('quotation_date',
+              isLessThanOrEqualTo: Timestamp.fromDate(endOfDay));
+    }
+
+    // 3) زر "This Month"
+    else if (isThisMonthSelected.value) {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      final startOfNextMonth = (now.month < 12)
+          ? DateTime(now.year, now.month + 1, 1)
+          : DateTime(now.year + 1, 1, 1);
+      final endOfMonth = startOfNextMonth.subtract(Duration(milliseconds: 1));
+      fromDate.value.text = textToDate(startOfMonth);
+      toDate.value.text = textToDate(endOfMonth);
+      query = query
+          .where('quotation_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where('quotation_date',
+              isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth));
+    }
+
+    // 4) زر "This Year"
+    else if (isThisYearSelected.value) {
+      final now = DateTime.now();
+      final startOfYear = DateTime(now.year, 1, 1);
+      final startOfNextYear = DateTime(now.year + 1, 1, 1);
+      final endOfYear = startOfNextYear.subtract(Duration(milliseconds: 1));
+      fromDate.value.text = textToDate(startOfYear);
+      toDate.value.text = textToDate(endOfYear);
+      query = query
+          .where('quotation_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
+          .where('quotation_date',
+              isLessThanOrEqualTo: Timestamp.fromDate(endOfYear));
+    }
+
+    // 5) إذا لم يُختر أي من الأزرار الخاصة بالفترة، نطبق فلتر التواريخ اليدوي
+    else {
+      if (fromDate.value.text.trim().isNotEmpty) {
+        try {
+          final dtFrom = format.parseStrict(fromDate.value.text.trim());
+          query = query.where(
+            'quotation_date',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
+          );
+        } catch (_) {}
+      }
+      if (toDate.value.text.trim().isNotEmpty) {
+        try {
+          final dtTo = format.parseStrict(toDate.value.text.trim());
+          query = query.where(
+            'quotation_date',
+            isLessThanOrEqualTo: Timestamp.fromDate(dtTo),
+          );
+        } catch (_) {}
+      }
+    }
+
+    // 6) باقي الفلاتر العامة
+    if (quotaionNumberFilter.value.text.trim().isNotEmpty) {
+      query = query.where(
+        'quotation_number',
+        isEqualTo: quotaionNumberFilter.value.text.trim(),
+      );
+    }
+    if (carBrandIdFilter.value.isNotEmpty) {
+      query = query.where('car_brand', isEqualTo: carBrandIdFilter.value);
+    }
+    if (carModelIdFilter.value.isNotEmpty) {
+      query = query.where('car_model', isEqualTo: carModelIdFilter.value);
+    }
+    if (plateNumberFilter.value.text.trim().isNotEmpty) {
+      query = query.where(
+        'plate_number',
+        isEqualTo: plateNumberFilter.value.text.trim(),
+      );
+    }
+    if (vinFilter.value.text.trim().isNotEmpty) {
+      query = query.where(
+        'vehicle_identification_number',
+        isEqualTo: vinFilter.value.text.trim(),
+      );
+    }
+    if (customerNameIdFilter.value.isNotEmpty) {
+      query = query.where(
+        'customer',
+        isEqualTo: customerNameIdFilter.value,
+      );
+    }
+
+    // 7) تنفيذ الاستعلام وجلب النتائج
+    final snapshot = await query.get();
+    allQuotationCards.assignAll(snapshot.docs);
+    numberOfQuotations.value = allQuotationCards.length;
+    calculateMoneyForAllJobs();
+    isScreenLoding.value = false;
+  }
+
+  removeFilters() {
+    isAllSelected.value = false;
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+  }
+
+  clearAllFilters() {
+    numberOfQuotations.value = 0;
+    allQuotationsTotals.value = 0;
+    allQuotationsVATS.value = 0;
+    allQuotationsNET.value = 0;
+    allModels.clear();
+    isAllSelected.value = false;
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+    quotaionNumberFilter.value.clear();
+    carBrandIdFilterName.value.clear();
+    carBrandIdFilter = RxString('');
+    carModelIdFilter = RxString('');
+    customerNameIdFilter = RxString('');
+    carModelIdFilterName.value.clear();
+    customerNameIdFilterName.value.clear();
+    plateNumberFilter.value.clear();
+    vinFilter.value.clear();
+    fromDate.value.clear();
+    toDate.value.clear();
+    allQuotationCards.clear();
+    isScreenLoding.value = false;
+
   }
 }

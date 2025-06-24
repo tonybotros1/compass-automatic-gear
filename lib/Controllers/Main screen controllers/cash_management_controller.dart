@@ -83,6 +83,7 @@ class CashManagementController extends GetxController {
 
   /// Call this when editing is done (Enter pressed)
   void finishEditing(String newValue, int idx) {
+    print('svklsnlkvnslkvnkvnsklvnslvnskln $idx');
     // Update the data source
     selectedAvailableReceipts[idx]['receipt_amount'] = newValue;
     selectedAvailableReceipts[idx]['outstanding_amount'] = (double.parse(
@@ -100,17 +101,24 @@ class CashManagementController extends GetxController {
   }
 
   loadValues(Map data) async {
-    status.value = data['status'];
+    status.value = data['status'] ?? '';
     isReceiptAdded.value = true;
+    availableReceipts.clear();
     if (data['customer'] != '') {
-      await getCustomerInvoices(data['customer']);
-      List jobIDs = data['job_ids'];
-      for (var i = 0; i < availableReceipts.length; i++) {
-        if (jobIDs.contains(availableReceipts[i]['job_id'])) {
-          selectJobReceipt(i, true);
-        }
-      }
-      addSelectedReceipts();
+      print(data['customer']);
+      print(data['job_ids']);
+      await getCurrentCustomerInvoices(data['customer'], data['job_ids']);
+      print(selectedAvailableReceipts);
+      calculateAmountForSelectedReceipts();
+      calculateOutstandingForSelectedReceipts();
+      // await getCustomerInvoices(data['customer']);
+      // List jobIDs = data['job_ids'];
+      // for (var i = 0; i < availableReceipts.length; i++) {
+      //   if (jobIDs.contains(availableReceipts[i]['job_id'])) {
+      //     selectJobReceipt(i, true);
+      //   }
+      // }
+      // addSelectedReceipts();
     }
     receiptCounter.value.text = data['receipt_number'] ?? '';
     receiptDate.value.text = textToDate(data['receipt_date']);
@@ -270,7 +278,7 @@ class CashManagementController extends GetxController {
 
 // this functions is to add the selected receipts to the table in the new receipts screen
   addSelectedReceipts() {
-    selectedAvailableReceipts.clear();
+    // selectedAvailableReceipts.clear();
 
     for (var element in availableReceipts) {
       if (element['is_selected'] == true) {
@@ -352,6 +360,34 @@ class CashManagementController extends GetxController {
       });
     } catch (e) {
       //
+    }
+  }
+
+  Future<void> getCurrentCustomerInvoices(
+      String customerId, List jobIds) async {
+    // loadingInvoices.value = true;
+    try {
+      // Create an instance of the callable function.
+      final HttpsCallable callable = FirebaseFunctions.instance
+          .httpsCallable('get_current_customer_invoices');
+
+      // Call the function with the required parameter.
+      final HttpsCallableResult result =
+          await callable.call({'customer_id': customerId, 'job_ids': jobIds});
+
+      // The callable function returns a Map; extract the invoices list.
+      final data = result.data;
+      if (data is Map<String, dynamic> && data.containsKey('invoices')) {
+        final List<dynamic> invoices = data['invoices'];
+        selectedAvailableReceipts.assignAll(invoices);
+      }
+    } on FirebaseFunctionsException catch (e) {
+      // Catch and log errors from the Firebase function.
+      showSnackBar('Alert', 'Error: ${e.message}');
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+    } finally {
+      // loadingInvoices.value = false;
     }
   }
 

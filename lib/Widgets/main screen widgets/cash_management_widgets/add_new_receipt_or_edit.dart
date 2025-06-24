@@ -180,7 +180,7 @@ Widget addNewReceiptOrEdit({
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Total Invoice Amount: ',
+                        text: 'Total Amount Received: ',
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,

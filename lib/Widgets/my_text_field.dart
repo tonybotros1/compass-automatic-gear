@@ -26,6 +26,7 @@ Widget myTextFormFieldWithBorder(
     int? minLines,
     TextInputType? keyboardType,
     void Function(String)? onChanged,
+    void Function(String)? onFieldSubmitted,
     bool? isEnabled = true}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,6 +43,7 @@ Widget myTextFormFieldWithBorder(
       SizedBox(
         height: maxLines == 1 ? textFieldHeight : null,
         child: TextFormField(
+          onFieldSubmitted: onFieldSubmitted,
           textAlign: textAlign!,
           initialValue: initialValue,
           style: textFieldFontStyle,
