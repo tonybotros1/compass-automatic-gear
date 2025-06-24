@@ -83,7 +83,6 @@ class CashManagementController extends GetxController {
 
   /// Call this when editing is done (Enter pressed)
   void finishEditing(String newValue, int idx) {
-    print('svklsnlkvnslkvnkvnsklvnslvnskln $idx');
     // Update the data source
     selectedAvailableReceipts[idx]['receipt_amount'] = newValue;
     selectedAvailableReceipts[idx]['outstanding_amount'] = (double.parse(
@@ -105,10 +104,7 @@ class CashManagementController extends GetxController {
     isReceiptAdded.value = true;
     availableReceipts.clear();
     if (data['customer'] != '') {
-      print(data['customer']);
-      print(data['job_ids']);
       await getCurrentCustomerInvoices(data['customer'], data['job_ids']);
-      print(selectedAvailableReceipts);
       calculateAmountForSelectedReceipts();
       calculateOutstandingForSelectedReceipts();
       // await getCustomerInvoices(data['customer']);
