@@ -28,6 +28,9 @@ class CashManagementController extends GetxController {
   final RxList<DocumentSnapshot> filteredCashsManagements =
       RxList<DocumentSnapshot>([]);
 
+       final RxList<DocumentSnapshot> allMiscPayement =
+      RxList<DocumentSnapshot>([]);
+
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
@@ -38,6 +41,7 @@ class CashManagementController extends GetxController {
   RxString accountId = RxString('');
   RxString bankId = RxString('');
   RxString status = RxString('');
+  RxString miscStatus = RxString('');
   RxList availableReceipts = RxList([]);
   RxList selectedAvailableReceipts = RxList([]);
   RxBool isAllJobReceiptsSelected = RxBool(false);
@@ -53,6 +57,7 @@ class CashManagementController extends GetxController {
   RxString currentReceiptID = RxString('');
   var editingIndex = (-1).obs;
   final ScrollController scrollController = ScrollController();
+  final ScrollController scrollController2 = ScrollController();
   var buttonLoadingStates = <String, bool>{}.obs;
 
   @override

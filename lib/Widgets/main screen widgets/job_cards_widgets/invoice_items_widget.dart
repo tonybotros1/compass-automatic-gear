@@ -13,12 +13,13 @@ Widget invoiceItemsSection(
     decoration: containerDecor,
     child: GetX<JobCardController>(
       builder: (controller) {
-        if (controller.loadingInvoiceItems.value && controller.allInvoiceItems.isEmpty) {
+        if (controller.loadingInvoiceItems.value &&
+            controller.allInvoiceItems.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
-       
+
         return SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: tableOfScreens(

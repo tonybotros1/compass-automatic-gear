@@ -109,6 +109,7 @@ class QuotationCard extends StatelessWidget {
                   ),
                   GetBuilder<QuotationCardController>(builder: (controller) {
                     return Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Expanded(
                           flex: 3,

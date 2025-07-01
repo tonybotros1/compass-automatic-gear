@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/cash_management_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/cash_management_widgets/misc_dialog.dart';
 import '../../../../Widgets/main screen widgets/cash_management_widgets/receipt_dialog.dart';
 import '../../../../consts.dart';
 
@@ -14,62 +15,105 @@ class CashManagement extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Padding(
             padding: screenPadding,
-            child: Container(
-              width: constraints.maxWidth,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
+            child: SingleChildScrollView(
               child: Column(
+                spacing: 20,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GetX<CashManagementController>(
-                    init: CashManagementController(),
-                    builder: (controller) {
-                      return searchBar(
-                        search: controller.search,
-                        constraints: constraints,
-                        context: context,
-                        // controller: controller,
-                        title: 'Search for cashes',
-                        button:
-                            newReceiptButton(context, constraints, controller),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: GetX<CashManagementController>(
-                      builder: (controller) {
-                        if (controller.isScreenLoding.value &&
-                            controller.allCashsManagements.isEmpty) {
-                          return Center(
-                            child: loadingProcess,
-                          );
-                        }
-
-                        return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
-                                constraints: constraints,
-                                context: context,
-                                controller: controller,
-                                data: controller
-                                            .filteredCashsManagements.isEmpty &&
-                                        controller.search.value.text.isEmpty
-                                    ? controller.allCashsManagements
-                                    : controller.filteredCashsManagements,
-                                scrollController: controller.scrollController),
-                          ),
-                        );
-                      },
+                  Container(
+                    width: constraints.maxWidth,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    child: Column(
+                      children: [
+                        GetX<CashManagementController>(
+                          init: CashManagementController(),
+                          builder: (controller) {
+                            return searchBar(
+                              search: controller.search,
+                              constraints: constraints,
+                              context: context,
+                              title: 'Search for cashes',
+                              button: newReceiptButton(
+                                  context, constraints, controller),
+                            );
+                          },
+                        ),
+                        GetX<CashManagementController>(
+                          builder: (controller) {
+                            if (controller.isScreenLoding.value &&
+                                controller.allCashsManagements.isEmpty) {
+                              return Center(child: loadingProcess);
+                            }
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: SizedBox(
+                                width: constraints.maxWidth,
+                                child: tableOfScreens(
+                                  constraints: constraints,
+                                  context: context,
+                                  controller: controller,
+                                  data: controller.filteredCashsManagements
+                                              .isEmpty &&
+                                          controller.search.value.text.isEmpty
+                                      ? controller.allCashsManagements
+                                      : controller.filteredCashsManagements,
+                                  scrollController: controller.scrollController,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(spacing: 10,
+                    children: [
+                      GetBuilder<CashManagementController>(
+                          builder: (controller) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            newMiscButton(context, constraints, controller)
+                          ],
+                        );
+                      }),
+                      Container(
+                        width: constraints.maxWidth,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: GetX<CashManagementController>(
+                          builder: (controller) {
+                            if (controller.isScreenLoding.value &&
+                                controller.allCashsManagements.isEmpty) {
+                              return Center(child: loadingProcess);
+                            }
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: SizedBox(
+                                width: constraints.maxWidth,
+                                child: tableOfScreens(
+                                  constraints: constraints,
+                                  context: context,
+                                  controller: controller,
+                                  data: controller.allMiscPayement,
+                                  scrollController:
+                                      controller.scrollController2,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -345,6 +389,33 @@ ElevatedButton newReceiptButton(BuildContext context,
     },
     style: newButtonStyle,
     child: const Text('New Receipt'),
+  );
+}
+
+ElevatedButton newMiscButton(BuildContext context, BoxConstraints constraints,
+    CashManagementController controller) {
+  return ElevatedButton(
+    onPressed: () {
+      // controller.clearValues();
+      miscDialog(
+          onPressedForDelete: null,
+          context: context,
+          canEdit: true,
+          constraints: constraints,
+          controller: controller,
+          onPressedForPost: controller.postingReceipts.isTrue
+              ? null
+              : () {
+                  controller.postReceipt(controller.currentReceiptID.value);
+                },
+          onPressedForSave: controller.addingNewValue.value
+              ? null
+              : () {
+                  controller.addNewReceipts();
+                });
+    },
+    style: newButtonStyle,
+    child: const Text('New Misc'),
   );
 }
 

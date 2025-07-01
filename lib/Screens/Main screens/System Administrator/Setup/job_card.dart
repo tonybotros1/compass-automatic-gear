@@ -112,6 +112,8 @@ class JobCard extends StatelessWidget {
                   ),
                   GetBuilder<JobCardController>(builder: (controller) {
                     return Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+
                       children: [
                         Expanded(
                           flex: 3,

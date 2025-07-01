@@ -671,14 +671,16 @@ Widget textForDataRowInTable({
   Color? color,
   bool isBold = false,
   double? fontSize,
-  bool isSelectable = true, // New parameter
+  bool isSelectable = true,
+  bool formatDouble = true, // New parameter with default true
 }) {
-  // Try parsing the text as a double
   String formattedText = text;
-  double? parsedValue = double.tryParse(text);
 
-  if (parsedValue != null) {
-    formattedText = NumberFormat("#,##0.00").format(parsedValue);
+  if (formatDouble) {
+    double? parsedValue = double.tryParse(text);
+    if (parsedValue != null) {
+      formattedText = NumberFormat("#,##0.00").format(parsedValue);
+    }
   }
 
   return Container(
@@ -706,6 +708,7 @@ Widget textForDataRowInTable({
           ),
   );
 }
+
 
 Container statusBox(String status,
     {hieght = 30.0,
@@ -926,3 +929,18 @@ String _formatIfValid(int day, int month, int year) {
   } catch (_) {}
   return '';
 }
+
+
+Future<void> selectDateContext(
+      BuildContext context, TextEditingController date) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null) {
+      date.text = textToDate(picked.toString());
+    }
+  }
