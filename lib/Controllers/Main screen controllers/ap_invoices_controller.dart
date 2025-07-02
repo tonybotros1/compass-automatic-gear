@@ -313,6 +313,29 @@ class ApInvoicesController extends GetxController {
     }
   }
 
+  editInvoiceItem(String jobId, String itemId) async {
+    try {
+      Get.back();
+      await FirebaseFirestore.instance
+          .collection('ap_invoices')
+          .doc(jobId)
+          .collection('invoices')
+          .doc(itemId)
+          .update({
+        'transaction_type': transactionTypeId.value,
+        'amount': amount.text,
+        'vat': vat.text,
+        'invoice_number': invoiceNumber.text,
+        'vendor': vendorForInvoiceId.value,
+        'job_number': jobNumber.text,
+        'note': invoiceNote.text,
+        'report_reference': '',
+      });
+    } catch (e) {
+      //
+    }
+  }
+
   Future<void> getCurrentApInvoicesNumber() async {
     try {
       var apnId = '';

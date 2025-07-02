@@ -139,12 +139,12 @@ DataRow dataRowForTheTable(
     constraints,
     String invoiceItemsId,
     ApInvoicesController controller,
-    String jobId) {
+    String apInvoiceID) {
   return DataRow(cells: [
     DataCell(Row(
       children: [
-        deleteSection(jobId, context, controller, invoiceItemsId),
-        editSection(jobId, controller, invoiceItemsData, context, constraints,
+        deleteSection(apInvoiceID, context, controller, invoiceItemsId),
+        editSection(apInvoiceID, controller, invoiceItemsData, context, constraints,
             invoiceItemsId)
       ],
     )),
@@ -180,7 +180,7 @@ DataRow dataRowForTheTable(
 }
 
 Widget deleteSection(
-    String jobId, context, ApInvoicesController controller, invoiceItemsId) {
+    String apInvoiceID, context, ApInvoicesController controller, invoiceItemsId) {
   return IconButton(
       onPressed: () {
         if (controller.status.value == 'New') {
@@ -189,7 +189,7 @@ Widget deleteSection(
               controller: controller,
               content: 'This will be deleted permanently',
               onPressed: () {
-                controller.deleteInvoiceItem(jobId, invoiceItemsId);
+                controller.deleteInvoiceItem(apInvoiceID, invoiceItemsId);
               });
         } else {
           showSnackBar('Alert', 'Only New Jobs Allowed');
@@ -202,7 +202,7 @@ Widget deleteSection(
 }
 
 Widget editSection(
-    String jobId,
+    String apInvoiceID,
     ApInvoicesController controller,
     Map<String, dynamic> invoiceItemsData,
     context,
@@ -211,29 +211,33 @@ Widget editSection(
   return IconButton(
       onPressed: () {
         if (controller.status.value == 'New') {
-          // controller.invoiceItemNameId.value = invoiceItemsData['name'];
-          // controller.invoiceItemName.text = controller.getdataName(
-          //     invoiceItemsData['name'],
-          //     controller.allInvoiceItemsFromCollection);
-          // controller.lineNumber.text =
-          //     (invoiceItemsData['line_number'] ?? '').toString();
-          // controller.description.text = invoiceItemsData['description'];
-          // controller.quantity.text = invoiceItemsData['quantity'];
-          // controller.price.text = invoiceItemsData['price'];
-          // controller.amount.text = invoiceItemsData['amount'];
-          // controller.discount.text = invoiceItemsData['discount'];
-          // controller.total.text = invoiceItemsData['total'];
-          // controller.vat.text = invoiceItemsData['vat'];
-          // controller.net.text = invoiceItemsData['net'];
-          // invoiceItemsForJobDialog(
-          //     jobId: jobId,
-          //     controller: controller,
-          //     constraints: constraints,
-          //     onPressed: controller.addingNewinvoiceItemsValue.value
-          //         ? null
-          //         : () {
-          //             controller.editInvoiceItem(jobId, invoiceItemsId);
-          //           });
+          controller.transactionType.text = getdataName(
+              invoiceItemsData['transaction_type'],
+              controller.allTransactionsTypes,title: 'type');
+          controller.transactionTypeId.value =
+              invoiceItemsData['transaction_type'] ?? '';
+          controller.invoiceNote.text = invoiceItemsData['note'] ?? '';
+          controller.vat.text = invoiceItemsData['vat'] ?? '';
+          controller.amount.text = invoiceItemsData['amount'] ?? '';
+          controller.invoiceNumber.text =
+              invoiceItemsData['invoice_number'] ?? '';
+          controller.invoiceDate.text =
+              textToDate(invoiceItemsData['invoice_date']);
+          controller.jobNumber.text = invoiceItemsData['job_number'] ?? '';
+          controller.vendorForInvoice.text =
+              getdataName(invoiceItemsData['vendor'], controller.allVendors,title: 'entity_name');
+          controller.vendorForInvoiceId.value =
+              invoiceItemsData['vendor'] ?? '';
+          invoiceItemsForapInvoicesDialog(
+              apInvoiceID: invoiceItemsId,
+              controller: controller,
+              constraints: constraints,
+              onPressed: controller.addingNewinvoiceItemsValue.value
+                  ? null
+                  : () {
+                      controller.editInvoiceItem(apInvoiceID, invoiceItemsId);
+                    },
+              context: context);
         } else {
           showSnackBar('Alert', 'Only New Jobs Allowed');
         }
