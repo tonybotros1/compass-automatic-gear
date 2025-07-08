@@ -27,8 +27,8 @@ class ApInvoices extends StatelessWidget {
                   GetX<ApInvoicesController>(
                       init: ApInvoicesController(),
                       builder: (controller) {
-                        bool isMiscTypesLoading =
-                            controller.allMiscTypes.isEmpty;
+                        bool isInvoiceTypesLoading =
+                            controller.allInvoiceTypes.isEmpty;
                         bool isVendorsLoading = controller.allVendors.isEmpty;
                         return Row(
                           children: [
@@ -40,16 +40,17 @@ class ApInvoices extends StatelessWidget {
                                   Expanded(
                                     child: CustomDropdown(
                                       textcontroller:
-                                          controller.miscTypeFilter.text,
+                                          controller.invoiceTypeFilter.text,
                                       showedSelectedName: 'name',
-                                      hintText: 'Misc Type',
-                                      items: isMiscTypesLoading
+                                      hintText: 'Invoice Type',
+                                      items: isInvoiceTypesLoading
                                           ? {}
-                                          : controller.allMiscTypes,
+                                          : controller.allInvoiceTypes,
                                       onChanged: (key, value) {
-                                        controller.miscTypeFilter.text =
+                                        controller.invoiceTypeFilter.text =
                                             value['name'];
-                                        controller.miscTypeFilterId.value = key;
+                                        controller.invoiceTypeFilterId.value =
+                                            key;
                                       },
                                     ),
                                   ),
@@ -340,7 +341,7 @@ Widget tableOfScreens(
           DataColumn(label: SizedBox()),
           DataColumn(
             label: AutoSizedText(
-              text: 'Misc Type',
+              text: 'Invoice Type',
               constraints: constraints,
             ),
             // onSort: controller.onSort,
@@ -403,7 +404,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> typeData, context, constraints,
       ],
     )),
     DataCell(textForDataRowInTable(
-      text: getdataName(typeData['misc_type'], controller.allMiscTypes),
+      text: getdataName(typeData['invoice_type'] ?? '', controller.allInvoiceTypes),
     )),
     DataCell(
       statusBox(
@@ -492,8 +493,8 @@ ElevatedButton newInvoiceButton(BuildContext context,
     BoxConstraints constraints, ApInvoicesController controller) {
   return ElevatedButton(
     onPressed: () {
-      controller.miscType.clear();
-      controller.miscTypeId.value = '';
+      controller.invoiceType.clear();
+      controller.invoiceTypeId.value = '';
       controller.referenceNumber.clear();
       controller.transactionDate.clear();
       controller.vendor.clear();

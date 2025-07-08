@@ -42,7 +42,7 @@ Widget addNewAPInvoiceOrEdit({
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text('Invoices', style: fontStyle1),
-                                 newinvoiceItemsButton(context,constraints,controller,'')
+                                 newinvoiceItemsButton(context,constraints,controller,id)
                                   ],
                                 ),
                               ),

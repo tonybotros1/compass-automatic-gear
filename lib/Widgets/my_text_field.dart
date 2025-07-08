@@ -19,6 +19,9 @@ Widget myTextFormFieldWithBorder(
     bool? isDouble,
     bool? isDate,
     bool? isCapitaLetters,
+    FocusNode? focusNode,
+    TextInputAction? textInputAction,
+    void Function()? onEditingComplete,
     maxLines = 1,
     // double? borderRadius = 4,
     TextAlign? textAlign = TextAlign.start,
@@ -43,6 +46,9 @@ Widget myTextFormFieldWithBorder(
       SizedBox(
         height: maxLines == 1 ? textFieldHeight : null,
         child: TextFormField(
+          onEditingComplete: onEditingComplete,
+          textInputAction: textInputAction,
+          focusNode: focusNode,
           onFieldSubmitted: onFieldSubmitted,
           textAlign: textAlign!,
           initialValue: initialValue,

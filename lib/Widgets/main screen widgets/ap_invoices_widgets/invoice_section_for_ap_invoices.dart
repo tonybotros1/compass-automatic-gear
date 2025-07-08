@@ -15,7 +15,7 @@ Future<dynamic> invoiceItemsForapInvoicesDialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: SizedBox(
-          width: Get.width / 1.7,
+          width: Get.width / 3,
           height: 600,
           child: Column(
             children: [
@@ -66,7 +66,7 @@ Future<dynamic> invoiceItemsForapInvoicesDialog(
                 child: addNewinvoiceForApInvoicesOrEdit(
                   context: context,
                   controller: controller,
-                  constraints:constraints,
+                  constraints: constraints,
                 ),
               ))
             ],

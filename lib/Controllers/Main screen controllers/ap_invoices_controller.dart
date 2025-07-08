@@ -7,9 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../consts.dart';
 
 class ApInvoicesController extends GetxController {
-  TextEditingController miscType = TextEditingController();
-  RxString miscTypeFilterId = RxString('');
-  TextEditingController miscTypeFilter = TextEditingController();
+  TextEditingController invoiceType = TextEditingController();
+  RxString invoiceTypeFilterId = RxString('');
+  TextEditingController invoiceTypeFilter = TextEditingController();
   RxString status = RxString('');
   TextEditingController referenceNumber = TextEditingController();
   TextEditingController referenceNumberFilter = TextEditingController();
@@ -47,14 +47,14 @@ class ApInvoicesController extends GetxController {
   final RxList<DocumentSnapshot> filteredJobCards =
       RxList<DocumentSnapshot>([]);
   RxBool addingNewinvoiceItemsValue = RxBool(false);
-  RxString miscTypeId = RxString('');
+  RxString invoiceTypeId = RxString('');
   RxString vendorId = RxString('');
   RxString vendorForInvoiceId = RxString('');
   RxString transactionTypeId = RxString('');
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool loadingInvoices = RxBool(false);
-  RxMap allMiscTypes = RxMap({});
+  RxMap allInvoiceTypes = RxMap({});
   RxMap allBrands = RxMap({});
   RxMap allStatus = RxMap({
     '1': {'name': 'New'},
@@ -75,10 +75,26 @@ class ApInvoicesController extends GetxController {
   RxBool postingapInvoice = RxBool(false);
   RxBool cancellingapInvoice = RxBool(false);
 
+// for the new invoice item
+  final FocusNode focusNode1 = FocusNode();
+  final FocusNode focusNode2 = FocusNode();
+  final FocusNode focusNode3 = FocusNode();
+  final FocusNode focusNode4 = FocusNode();
+  final FocusNode focusNode5 = FocusNode();
+  final FocusNode focusNode6 = FocusNode();
+  final FocusNode focusNode7 = FocusNode();
+  final FocusNode focusNode8 = FocusNode();
+
+// for the payment header
+  final FocusNode focusNodePayementHeader1 = FocusNode();
+  final FocusNode focusNodePayementHeader2 = FocusNode();
+  final FocusNode focusNodePayementHeader3 = FocusNode();
+  final FocusNode focusNodePayementHeader4 = FocusNode();
+
   @override
   void onInit() async {
     await getCompanyId();
-    getMiscTypes();
+    getInvoiceTypes();
     // getAllVendors();
     getAllEntities();
     getCarBrands();
@@ -93,8 +109,9 @@ class ApInvoicesController extends GetxController {
 
   loadValues(typeId, typeData) async {
     await getAllInvoices(typeId);
-    miscType.text = getdataName(typeData['misc_type'], allMiscTypes);
-    miscTypeId.value = typeData['misc_type'] ?? '';
+    invoiceType.text =
+        getdataName(typeData['invoice_type'] ?? '', allInvoiceTypes);
+    invoiceTypeId.value = typeData['invoice_type'] ?? '';
     referenceNumber.text = typeData['reference_number'] ?? '';
     transactionDate.text = textToDate(typeData['transaction_date']);
     vendor.text =
@@ -114,7 +131,7 @@ class ApInvoicesController extends GetxController {
       }
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
-        'misc_type': miscTypeId.value,
+        'invoice_type': invoiceTypeId.value,
         'beneficiary': vendorId.value,
         'note': note.text,
       };
@@ -162,7 +179,7 @@ class ApInvoicesController extends GetxController {
       showSnackBar('Adding', 'Please Wait');
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
-        'misc_type': miscTypeId.value,
+        'invoice_type': invoiceTypeId.value,
         'beneficiary': vendorId.value,
         'note': note.text,
         'company_id': companyId.value
@@ -406,7 +423,7 @@ class ApInvoicesController extends GetxController {
   }
 
 // this function is to get colors
-  getMiscTypes() async {
+  getInvoiceTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'MISC_TYPE')
@@ -422,7 +439,7 @@ class ApInvoicesController extends GetxController {
         .orderBy('name')
         .snapshots()
         .listen((colors) {
-      allMiscTypes.value = {for (var doc in colors.docs) doc.id: doc.data()};
+      allInvoiceTypes.value = {for (var doc in colors.docs) doc.id: doc.data()};
     });
   }
 
@@ -636,8 +653,8 @@ class ApInvoicesController extends GetxController {
     if (vendorFilter.value.text.isNotEmpty) {
       query = query.where('beneficiary', isEqualTo: vendorFilter.value.text);
     }
-    if (miscTypeFilterId.value.isNotEmpty) {
-      query = query.where('misc_type', isEqualTo: miscTypeFilterId.value);
+    if (invoiceTypeFilterId.value.isNotEmpty) {
+      query = query.where('invoice_type', isEqualTo: invoiceTypeFilterId.value);
     }
 
     if (statusFilter.value.text.isNotEmpty) {
@@ -671,8 +688,8 @@ class ApInvoicesController extends GetxController {
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;
     referenceNumberFilter.clear();
-    miscTypeFilterId.value = '';
-    miscTypeFilter.clear();
+    invoiceTypeFilterId.value = '';
+    invoiceTypeFilter.clear();
     vendorFilter.value = TextEditingController();
 
     fromDate.value.clear();
