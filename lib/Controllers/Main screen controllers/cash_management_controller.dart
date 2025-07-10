@@ -41,7 +41,7 @@ class CashManagementController extends GetxController {
   RxString accountId = RxString('');
   RxString bankId = RxString('');
   RxString status = RxString('');
-  RxString miscStatus = RxString('');
+  RxString paymentStatus = RxString('');
   RxList availableReceipts = RxList([]);
   RxList selectedAvailableReceipts = RxList([]);
   RxBool isAllJobReceiptsSelected = RxBool(false);
@@ -51,6 +51,7 @@ class CashManagementController extends GetxController {
   RxString companyId = RxString('');
   RxMap allReceiptTypes = RxMap({});
   RxMap allCustomers = RxMap({});
+  RxMap allVendors = RxMap({});
   RxMap allAccounts = RxMap({});
   RxMap allBanks = RxMap({});
   RxBool isReceiptAdded = RxBool(false);

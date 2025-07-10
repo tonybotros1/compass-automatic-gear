@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/cash_management_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/cash_management_widgets/misc_dialog.dart';
+import '../../../../Widgets/main screen widgets/cash_management_widgets/payment_dialog.dart';
 import '../../../../Widgets/main screen widgets/cash_management_widgets/receipt_dialog.dart';
 import '../../../../consts.dart';
 
@@ -80,7 +80,7 @@ class CashManagement extends StatelessWidget {
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            newMiscButton(context, constraints, controller)
+                            newPaymentButton(context, constraints, controller)
                           ],
                         );
                       }),
@@ -392,12 +392,12 @@ ElevatedButton newReceiptButton(BuildContext context,
   );
 }
 
-ElevatedButton newMiscButton(BuildContext context, BoxConstraints constraints,
+ElevatedButton newPaymentButton(BuildContext context, BoxConstraints constraints,
     CashManagementController controller) {
   return ElevatedButton(
     onPressed: () {
       // controller.clearValues();
-      miscDialog(
+      paymentDialog(
           onPressedForDelete: null,
           context: context,
           canEdit: true,
@@ -415,7 +415,7 @@ ElevatedButton newMiscButton(BuildContext context, BoxConstraints constraints,
                 });
     },
     style: newButtonStyle,
-    child: const Text('New Misc'),
+    child: const Text('New Payment'),
   );
 }
 

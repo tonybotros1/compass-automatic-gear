@@ -17,7 +17,7 @@ class ApInvoicesController extends GetxController {
   TextEditingController vendor = TextEditingController();
   Rx<TextEditingController> vendorFilter = TextEditingController().obs;
   Rx<TextEditingController> statusFilter = TextEditingController().obs;
-  TextEditingController note = TextEditingController();
+  TextEditingController description = TextEditingController();
   TextEditingController searchForJobCards = TextEditingController();
   TextEditingController jobNumber = TextEditingController();
   TextEditingController vendorForInvoice = TextEditingController();
@@ -108,6 +108,8 @@ class ApInvoicesController extends GetxController {
   }
 
   loadValues(typeId, typeData) async {
+    invoiceNumber.text = typeData['invoice_number'] ?? '';
+    invoiceDate.text = textToDate(typeData['invoice_date'] ?? '');
     await getAllInvoices(typeId);
     invoiceType.text =
         getdataName(typeData['invoice_type'] ?? '', allInvoiceTypes);
@@ -115,9 +117,9 @@ class ApInvoicesController extends GetxController {
     referenceNumber.text = typeData['reference_number'] ?? '';
     transactionDate.text = textToDate(typeData['transaction_date']);
     vendor.text =
-        getdataName(typeData['beneficiary'], allVendors, title: 'entity_name');
-    vendorId.value = typeData['beneficiary'] ?? '';
-    note.text = typeData['note'] ?? '';
+        getdataName(typeData['vendor'] ?? '', allVendors, title: 'entity_name');
+    vendorId.value = typeData['vendor'] ?? '';
+    description.text = typeData['description'] ?? '';
 
     status.value = typeData['status'] ?? '';
     canAddInvoice.value = true;
@@ -132,8 +134,9 @@ class ApInvoicesController extends GetxController {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'invoice_type': invoiceTypeId.value,
-        'beneficiary': vendorId.value,
-        'note': note.text,
+        'vendor': vendorId.value,
+        'description': description.text,
+        'invoice_number': invoiceNumber.text
       };
 
       final rawDate = transactionDate.value.text.trim();
@@ -146,14 +149,26 @@ class ApInvoicesController extends GetxController {
           showSnackBar('Alert', 'Please Enter Valid Date');
           return;
         }
-
-        await FirebaseFirestore.instance
-            .collection('ap_invoices')
-            .doc(id)
-            .update(newData);
-        showSnackBar('Done', 'Updated Successfully');
-        addingNewValue.value = false;
       }
+
+      final rawDate2 = invoiceDate.value.text.trim();
+      if (rawDate2.isNotEmpty) {
+        try {
+          newData['invoice_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate2),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+        }
+      }
+
+      await FirebaseFirestore.instance
+          .collection('ap_invoices')
+          .doc(id)
+          .update(newData);
+      showSnackBar('Done', 'Updated Successfully');
+      addingNewValue.value = false;
     } catch (e) {
       addingNewValue.value = false;
       showSnackBar('Alert', 'Something Went Wrong');
@@ -180,9 +195,10 @@ class ApInvoicesController extends GetxController {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'invoice_type': invoiceTypeId.value,
-        'beneficiary': vendorId.value,
-        'note': note.text,
-        'company_id': companyId.value
+        'vendor': vendorId.value,
+        'description': description.text,
+        'company_id': companyId.value,
+        'invoice_number': invoiceNumber.text,
       };
 
       final rawDate = transactionDate.value.text.trim();
@@ -190,6 +206,20 @@ class ApInvoicesController extends GetxController {
         try {
           newData['transaction_date'] = Timestamp.fromDate(
             format.parseStrict(rawDate),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+          // إذا حابب تعرض للمستخدم خطأ في التنسيق
+          // print('Invalid quotation_date format: $e');
+        }
+      }
+
+      final rawDate2 = invoiceDate.value.text.trim();
+      if (rawDate2.isNotEmpty) {
+        try {
+          newData['invoice_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate2),
           );
         } catch (e) {
           showSnackBar('Alert', 'Please Enter Valid Date');
@@ -294,26 +324,26 @@ class ApInvoicesController extends GetxController {
         'transaction_type': transactionTypeId.value,
         'amount': amount.text,
         'vat': vat.text,
-        'invoice_number': invoiceNumber.text,
-        'vendor': vendorForInvoiceId.value,
+        // 'invoice_number': invoiceNumber.text,
+        // 'vendor': vendorForInvoiceId.value,
         'job_number': jobNumber.text,
         'note': invoiceNote.text,
         'report_reference': '',
       };
 
-      final rawDate = invoiceDate.value.text.trim();
-      if (rawDate.isNotEmpty) {
-        try {
-          newData['invoice_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate),
-          );
-        } catch (e) {
-          showSnackBar('Alert', 'Please Enter Valid Date');
-          return;
-          // إذا حابب تعرض للمستخدم خطأ في التنسيق
-          // print('Invalid quotation_date format: $e');
-        }
-      }
+      // final rawDate = invoiceDate.value.text.trim();
+      // if (rawDate.isNotEmpty) {
+      //   try {
+      //     newData['invoice_date'] = Timestamp.fromDate(
+      //       format.parseStrict(rawDate),
+      //     );
+      //   } catch (e) {
+      //     showSnackBar('Alert', 'Please Enter Valid Date');
+      //     return;
+      //     // إذا حابب تعرض للمستخدم خطأ في التنسيق
+      //     // print('Invalid quotation_date format: $e');
+      //   }
+      // }
 
       await FirebaseFirestore.instance
           .collection('ap_invoices')
@@ -324,7 +354,6 @@ class ApInvoicesController extends GetxController {
       addingNewinvoiceItemsValue.value = false;
       Get.back();
     } catch (e) {
-      print(e);
       addingNewinvoiceItemsValue.value = false;
       showSnackBar('Alert', 'Something Went Wrong Please Try Again');
     }
@@ -342,8 +371,8 @@ class ApInvoicesController extends GetxController {
         'transaction_type': transactionTypeId.value,
         'amount': amount.text,
         'vat': vat.text,
-        'invoice_number': invoiceNumber.text,
-        'vendor': vendorForInvoiceId.value,
+        // 'invoice_number': invoiceNumber.text,
+        // 'vendor': vendorForInvoiceId.value,
         'job_number': jobNumber.text,
         'note': invoiceNote.text,
         'report_reference': '',
@@ -651,7 +680,7 @@ class ApInvoicesController extends GetxController {
       );
     }
     if (vendorFilter.value.text.isNotEmpty) {
-      query = query.where('beneficiary', isEqualTo: vendorFilter.value.text);
+      query = query.where('vendor', isEqualTo: vendorFilter.value.text);
     }
     if (invoiceTypeFilterId.value.isNotEmpty) {
       query = query.where('invoice_type', isEqualTo: invoiceTypeFilterId.value);

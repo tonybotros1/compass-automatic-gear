@@ -66,7 +66,7 @@ class ApInvoices extends StatelessWidget {
                                       textcontroller:
                                           controller.vendorFilter.value.text,
                                       showedSelectedName: 'entity_name',
-                                      hintText: 'Beneficiary',
+                                      hintText: 'Vendor',
                                       items: isVendorsLoading
                                           ? {}
                                           : controller.allVendors,
@@ -370,14 +370,14 @@ Widget tableOfScreens(
           DataColumn(
             label: AutoSizedText(
               constraints: constraints,
-              text: 'Beneficiary',
+              text: 'Vendor',
             ),
             // onSort: controller.onS ort,
           ),
           DataColumn(
             label: AutoSizedText(
               constraints: constraints,
-              text: 'Note',
+              text: 'Description',
             ),
             // onSort: controller.onS ort,
           ),
@@ -426,7 +426,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> typeData, context, constraints,
       ),
     ),
     DataCell(textForDataRowInTable(
-      text: getdataName(typeData['beneficiary'], controller.allVendors,
+      text: getdataName(typeData['vendor'] ?? '', controller.allVendors,
           title: 'entity_name'),
     )),
     DataCell(textForDataRowInTable(
@@ -493,13 +493,15 @@ ElevatedButton newInvoiceButton(BuildContext context,
     BoxConstraints constraints, ApInvoicesController controller) {
   return ElevatedButton(
     onPressed: () {
+      controller.invoiceNumber.clear();
+      controller.invoiceDate.clear();
       controller.invoiceType.clear();
       controller.invoiceTypeId.value = '';
       controller.referenceNumber.clear();
       controller.transactionDate.clear();
       controller.vendor.clear();
       controller.vendorId.value = '';
-      controller.note.clear();
+      controller.description.clear();
       controller.allInvoices.clear();
       controller.status.value = '';
       controller.canAddInvoice.value = false;

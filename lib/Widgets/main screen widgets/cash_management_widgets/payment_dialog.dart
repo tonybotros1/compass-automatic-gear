@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
 import '../../../consts.dart';
 import '../../text_button.dart';
-import 'add_new_misc_or_delete.dart';
+import 'add_new_payment_or_edit.dart';
 
-Future<dynamic> miscDialog(
+Future<dynamic> paymentDialog(
     {required BoxConstraints constraints,
     required BuildContext context,
     required CashManagementController controller,
@@ -35,12 +35,12 @@ Future<dynamic> miscDialog(
                   spacing: 10,
                   children: [
                     Text(
-                      '💸 Misc',
+                      '💸 Payment',
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
                     GetX<CashManagementController>(builder: (controller) {
-                      return controller.miscStatus.value != ''
-                          ? statusBox(controller.miscStatus.value)
+                      return controller.paymentStatus.value != ''
+                          ? statusBox(controller.paymentStatus.value)
                           : SizedBox();
                     }),
                     const Spacer(),
@@ -74,7 +74,7 @@ Future<dynamic> miscDialog(
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: addNewMiscOrEdit(
+                  child: addNewPaymentOrEdit(
                     context: context,
                     controller: controller,
                     canEdit: canEdit,

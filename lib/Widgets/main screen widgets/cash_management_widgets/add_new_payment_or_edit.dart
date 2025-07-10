@@ -6,9 +6,9 @@ import 'package:intl/intl.dart';
 import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
 import 'customer_invoices_dialog.dart';
 import 'invoices_table_section.dart';
-import 'misc_header_section.dart';
+import 'payment_header_section.dart';
 
-Widget addNewMiscOrEdit({
+Widget addNewPaymentOrEdit({
   required BuildContext context,
   required CashManagementController controller,
   required bool canEdit,
@@ -22,23 +22,39 @@ Widget addNewMiscOrEdit({
             Expanded(
               child: SingleChildScrollView(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight -
-                          60), 
+                  constraints:
+                      BoxConstraints(minHeight: constraints.maxHeight - 60),
                   child: IntrinsicHeight(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              labelContainer(
-                                lable: Text('Misc Header',
-                                    style: fontStyle1),
+                        Row(
+                          spacing: 20,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  labelContainer(
+                                    lable: Text('Payment Header',
+                                        style: fontStyle1),
+                                  ),
+                                  paymentHeader(context),
+                                ],
                               ),
-                              miscHeader(context),
-                            ],
-                          ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  labelContainer(
+                                    lable: Text('Account Information',
+                                        style: fontStyle1),
+                                  ),
+                                  // paymentHeader(context),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(width: 20),
                         const SizedBox(height: 10),
@@ -168,10 +184,8 @@ Widget addNewMiscOrEdit({
                         ),
                       ),
                       TextSpan(
-                        text: NumberFormat("#,##0.00").format(
-                          controller.calculatedAmountForAllSelectedReceipts.value 
-                              
-                        ),
+                        text: NumberFormat("#,##0.00").format(controller
+                            .calculatedAmountForAllSelectedReceipts.value),
                         style: TextStyle(
                           color: Colors.green,
                           fontWeight: FontWeight.bold,

@@ -24,10 +24,12 @@ Widget paymentHeader(BuildContext context) {
               spacing: 10,
               children: [
                 Row(
+                  spacing: 10,
                   children: [
                     FocusTraversalOrder(
                       order: NumericFocusOrder(1),
                       child: Expanded(
+                        flex: 3,
                         child: CustomDropdown(
                           focusNode: controller.focusNodePayementHeader1,
                           nextFocusNode: controller.focusNodePayementHeader2,
@@ -44,49 +46,83 @@ Widget paymentHeader(BuildContext context) {
                         ),
                       ),
                     ),
-                    Expanded(flex: 3, child: SizedBox())
-                  ],
-                ),
-                Row(
-                  children: [
                     Expanded(
+                        flex: 2,
                         child: myTextFormFieldWithBorder(
                             controller: controller.referenceNumber,
                             isEnabled: false,
-                            labelText: 'Reference Number')),
-                    Expanded(flex: 4, child: SizedBox())
+                            labelText: 'Reference NO.')),
+                    Expanded(
+                        flex: 3,
+                        child: FocusTraversalOrder(
+                          order: NumericFocusOrder(2),
+                          child: myTextFormFieldWithBorder(
+                              textInputAction: TextInputAction.next,
+                              focusNode: controller.focusNodePayementHeader2,
+                              onEditingComplete: () {
+                                Get.focusScope!.requestFocus(
+                                    controller.focusNodePayementHeader3);
+                                // FocusScope.of(context).requestFocus(
+                                //     controller.focusNodePayementHeader3);
+                              },
+                              isDate: true,
+                              suffixIcon: IconButton(
+                                  focusNode: FocusNode(skipTraversal: true),
+                                  onPressed: () {
+                                    selectDateContext(
+                                        context, controller.transactionDate);
+                                  },
+                                  icon: const Icon(Icons.date_range)),
+                              controller: controller.transactionDate,
+                              onFieldSubmitted: (_) {
+                                normalizeDate(
+                                    controller.transactionDate.value.text,
+                                    controller.transactionDate);
+                              },
+                              labelText: 'Transaction Date'),
+                        )),
+                    Expanded(flex: 5, child: SizedBox())
                   ],
                 ),
                 Row(
+                  spacing: 10,
                   children: [
                     Expanded(
-                        child: FocusTraversalOrder(
-                      order: NumericFocusOrder(2),
+                      flex: 3,
                       child: myTextFormFieldWithBorder(
-                          textInputAction: TextInputAction.next,
-                          focusNode: controller.focusNodePayementHeader2,
+                          focusNode: controller.focusNode4,
                           onEditingComplete: () {
-                            Get.focusScope!.requestFocus(
-                                controller.focusNodePayementHeader3);
-                            // FocusScope.of(context).requestFocus(
-                            //     controller.focusNodePayementHeader3);
+                            FocusScope.of(context)
+                                .requestFocus(controller.focusNode5);
                           },
-                          isDate: true,
-                          suffixIcon: IconButton(
-                              focusNode: FocusNode(skipTraversal: true),
-                              onPressed: () {
-                                selectDateContext(
-                                    context, controller.transactionDate);
-                              },
-                              icon: const Icon(Icons.date_range)),
-                          controller: controller.transactionDate,
-                          onFieldSubmitted: (_) {
-                            normalizeDate(controller.transactionDate.value.text,
-                                controller.transactionDate);
-                          },
-                          labelText: 'Transaction Date'),
-                    )),
-                    Expanded(flex: 3, child: SizedBox())
+                          textInputAction: TextInputAction.next,
+                          labelText: 'Invoice Number',
+                          controller: controller.invoiceNumber),
+                    ),
+                    Expanded(
+                        flex: 3,
+                        child: myTextFormFieldWithBorder(
+                            focusNode: controller.focusNode5,
+                            onEditingComplete: () {
+                              FocusScope.of(context)
+                                  .requestFocus(controller.focusNode6);
+                            },
+                            isDate: true,
+                            suffixIcon: IconButton(
+                                focusNode: FocusNode(skipTraversal: true),
+                                onPressed: () {
+                                  selectDateContext(
+                                      context, controller.invoiceDate);
+                                },
+                                icon: const Icon(Icons.date_range)),
+                            controller: controller.invoiceDate,
+                            onFieldSubmitted: (_) {
+                              normalizeDate(controller.invoiceDate.value.text,
+                                  controller.invoiceDate);
+                            },
+                            labelText: 'Invoice Date')),
+                    SizedBox(),
+                    Expanded(flex: 7, child: SizedBox())
                   ],
                 ),
                 Row(
@@ -100,7 +136,7 @@ Widget paymentHeader(BuildContext context) {
                           nextFocusNode: controller.focusNodePayementHeader4,
                           showedSelectedName: 'entity_name',
                           textcontroller: controller.vendor.text,
-                          hintText: 'Beneficiary ',
+                          hintText: 'Vendor ',
                           items: isVendorLoading ? {} : controller.allVendors,
                           onChanged: (key, value) {
                             controller.vendorId.value = key;
@@ -121,9 +157,9 @@ Widget paymentHeader(BuildContext context) {
             child: myTextFormFieldWithBorder(
                 // focusNode: FocusNode(skipTraversal: true),
                 focusNode: controller.focusNodePayementHeader4,
-                labelText: 'Note',
-                maxLines: 10,
-                controller: controller.note),
+                labelText: 'Description',
+                maxLines: 7,
+                controller: controller.description),
           ))
         ],
       );

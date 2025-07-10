@@ -69,24 +69,24 @@ Widget tableOfScreens(
                 text: 'Transaction Type',
               ),
             ),
-            DataColumn(
-              label: AutoSizedText(
-                constraints: constraints,
-                text: 'Invoice No.',
-              ),
-            ),
-            DataColumn(
-              label: AutoSizedText(
-                constraints: constraints,
-                text: 'Invoice Date',
-              ),
-            ),
-            DataColumn(
-              label: AutoSizedText(
-                constraints: constraints,
-                text: 'Vendor',
-              ),
-            ),
+            // DataColumn(
+            //   label: AutoSizedText(
+            //     constraints: constraints,
+            //     text: 'Invoice No.',
+            //   ),
+            // ),
+            // DataColumn(
+            //   label: AutoSizedText(
+            //     constraints: constraints,
+            //     text: 'Invoice Date',
+            //   ),
+            // ),
+            // DataColumn(
+            //   label: AutoSizedText(
+            //     constraints: constraints,
+            //     text: 'Vendor',
+            //   ),
+            // ),
             DataColumn(
               label: AutoSizedText(
                 constraints: constraints,
@@ -96,7 +96,7 @@ Widget tableOfScreens(
             DataColumn(
               label: AutoSizedText(
                 constraints: constraints,
-                text: 'Report Reference',
+                text: 'Received Number',
               ),
             ),
             DataColumn(
@@ -144,21 +144,21 @@ DataRow dataRowForTheTable(
     DataCell(Row(
       children: [
         deleteSection(apInvoiceID, context, controller, invoiceItemsId),
-        editSection(apInvoiceID, controller, invoiceItemsData, context, constraints,
-            invoiceItemsId)
+        editSection(apInvoiceID, controller, invoiceItemsData, context,
+            constraints, invoiceItemsId)
       ],
     )),
     DataCell(textForDataRowInTable(
         text: getdataName(invoiceItemsData['transaction_type'],
             controller.allTransactionsTypes,
             title: 'type'))),
-    DataCell(textForDataRowInTable(
-        text: '${invoiceItemsData['invoice_number'] ?? ''}')),
-    DataCell(textForDataRowInTable(
-        text: textToDate(invoiceItemsData['invoice_date'] ?? ''))),
-    DataCell(textForDataRowInTable(
-        text: getdataName(invoiceItemsData['vendor'], controller.allVendors,
-            title: 'entity_name'))),
+    // DataCell(textForDataRowInTable(
+    //     text: '${invoiceItemsData['invoice_number'] ?? ''}')),
+    // DataCell(textForDataRowInTable(
+    //     text: textToDate(invoiceItemsData['invoice_date'] ?? ''))),
+    // DataCell(textForDataRowInTable(
+    //     text: getdataName(invoiceItemsData['vendor'], controller.allVendors,
+    //         title: 'entity_name'))),
     DataCell(textForDataRowInTable(text: '${invoiceItemsData['note'] ?? ''}')),
     DataCell(textForDataRowInTable(
         text: '${invoiceItemsData['report_reference'] ?? ''}')),
@@ -179,8 +179,8 @@ DataRow dataRowForTheTable(
   ]);
 }
 
-Widget deleteSection(
-    String apInvoiceID, context, ApInvoicesController controller, invoiceItemsId) {
+Widget deleteSection(String apInvoiceID, context,
+    ApInvoicesController controller, invoiceItemsId) {
   return IconButton(
       onPressed: () {
         if (controller.status.value == 'New') {
@@ -213,21 +213,22 @@ Widget editSection(
         if (controller.status.value == 'New') {
           controller.transactionType.text = getdataName(
               invoiceItemsData['transaction_type'],
-              controller.allTransactionsTypes,title: 'type');
+              controller.allTransactionsTypes,
+              title: 'type');
           controller.transactionTypeId.value =
               invoiceItemsData['transaction_type'] ?? '';
           controller.invoiceNote.text = invoiceItemsData['note'] ?? '';
           controller.vat.text = invoiceItemsData['vat'] ?? '';
           controller.amount.text = invoiceItemsData['amount'] ?? '';
-          controller.invoiceNumber.text =
-              invoiceItemsData['invoice_number'] ?? '';
-          controller.invoiceDate.text =
-              textToDate(invoiceItemsData['invoice_date']);
+          // controller.invoiceNumber.text =
+          //     invoiceItemsData['invoice_number'] ?? '';
+          // controller.invoiceDate.text =
+          //     textToDate(invoiceItemsData['invoice_date']);
           controller.jobNumber.text = invoiceItemsData['job_number'] ?? '';
-          controller.vendorForInvoice.text =
-              getdataName(invoiceItemsData['vendor'], controller.allVendors,title: 'entity_name');
-          controller.vendorForInvoiceId.value =
-              invoiceItemsData['vendor'] ?? '';
+          // controller.vendorForInvoice.text =
+          //     getdataName(invoiceItemsData['vendor'], controller.allVendors,title: 'entity_name');
+          // controller.vendorForInvoiceId.value =
+          //     invoiceItemsData['vendor'] ?? '';
           invoiceItemsForapInvoicesDialog(
               apInvoiceID: invoiceItemsId,
               controller: controller,
@@ -262,11 +263,11 @@ ElevatedButton newinvoiceItemsButton(
           controller.invoiceNote.clear();
           controller.vat.clear();
           controller.amount.clear();
-          controller.invoiceNumber.clear();
-          controller.invoiceDate.clear();
+          // controller.invoiceNumber.clear();
+          // controller.invoiceDate.clear();
           controller.jobNumber.clear();
-          controller.vendorForInvoice.clear();
-          controller.vendorForInvoiceId.value = '';
+          // controller.vendorForInvoice.clear();
+          // controller.vendorForInvoiceId.value = '';
 
           invoiceItemsForapInvoicesDialog(
               context: context,

@@ -5,7 +5,6 @@ import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../auto_size_box.dart';
-import 'payment_header.dart';
 
 Widget addNewinvoiceForApInvoicesOrEdit({
   required ApInvoicesController controller,
@@ -67,67 +66,67 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                 Expanded(child: SizedBox())
               ],
             ),
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  child: myTextFormFieldWithBorder(
-                      focusNode: controller.focusNode4,
-                      onEditingComplete: () {
-                        FocusScope.of(context)
-                            .requestFocus(controller.focusNode5);
-                      },
-                      textInputAction: TextInputAction.next,
-                      labelText: 'Invoice Number',
-                      controller: controller.invoiceNumber),
-                ),
-                Expanded(
-                    child: myTextFormFieldWithBorder(
-                        focusNode: controller.focusNode5,
-                        onEditingComplete: () {
-                          FocusScope.of(context)
-                              .requestFocus(controller.focusNode6);
-                        },
-                        isDate: true,
-                        suffixIcon: IconButton(
-                            focusNode: FocusNode(skipTraversal: true),
-                            onPressed: () {
-                              selectDateContext(
-                                  context, controller.invoiceDate);
-                            },
-                            icon: const Icon(Icons.date_range)),
-                        controller: controller.invoiceDate,
-                        onFieldSubmitted: (_) {
-                          normalizeDate(controller.invoiceDate.value.text,
-                              controller.invoiceDate);
-                        },
-                        labelText: 'Invoice Date')),
-                Expanded(child: SizedBox())
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: GetX<ApInvoicesController>(builder: (controller) {
-                    bool isVendorLoading = controller.allVendors.isEmpty;
-                    return CustomDropdown(
-                      focusNode: controller.focusNode6,
-                      nextFocusNode: controller.focusNode7,
-                      textcontroller: controller.vendorForInvoice.text,
-                      hintText: 'Vendor',
-                      showedSelectedName: 'entity_name',
-                      items: isVendorLoading ? {} : controller.allVendors,
-                      onChanged: (key, value) {
-                        controller.vendorForInvoice.text = value['entity_name'];
-                        controller.vendorForInvoiceId.value = key;
-                      },
-                    );
-                  }),
-                ),
-                addNewEntityButton()
-              ],
-            ),
+            // Row(
+            //   spacing: 10,
+            //   children: [
+            //     Expanded(
+            //       child: myTextFormFieldWithBorder(
+            //           focusNode: controller.focusNode4,
+            //           onEditingComplete: () {
+            //             FocusScope.of(context)
+            //                 .requestFocus(controller.focusNode5);
+            //           },
+            //           textInputAction: TextInputAction.next,
+            //           labelText: 'Invoice Number',
+            //           controller: controller.invoiceNumber),
+            //     ),
+            //     Expanded(
+            //         child: myTextFormFieldWithBorder(
+            //             focusNode: controller.focusNode5,
+            //             onEditingComplete: () {
+            //               FocusScope.of(context)
+            //                   .requestFocus(controller.focusNode6);
+            //             },
+            //             isDate: true,
+            //             suffixIcon: IconButton(
+            //                 focusNode: FocusNode(skipTraversal: true),
+            //                 onPressed: () {
+            //                   selectDateContext(
+            //                       context, controller.invoiceDate);
+            //                 },
+            //                 icon: const Icon(Icons.date_range)),
+            //             controller: controller.invoiceDate,
+            //             onFieldSubmitted: (_) {
+            //               normalizeDate(controller.invoiceDate.value.text,
+            //                   controller.invoiceDate);
+            //             },
+            //             labelText: 'Invoice Date')),
+            //     Expanded(child: SizedBox())
+            //   ],
+            // ),
+            // Row(
+            //   crossAxisAlignment: CrossAxisAlignment.end,
+            //   children: [
+            //     Expanded(
+            //       child: GetX<ApInvoicesController>(builder: (controller) {
+            //         bool isVendorLoading = controller.allVendors.isEmpty;
+            //         return CustomDropdown(
+            //           focusNode: controller.focusNode6,
+            //           nextFocusNode: controller.focusNode7,
+            //           textcontroller: controller.vendorForInvoice.text,
+            //           hintText: 'Vendor',
+            //           showedSelectedName: 'entity_name',
+            //           items: isVendorLoading ? {} : controller.allVendors,
+            //           onChanged: (key, value) {
+            //             controller.vendorForInvoice.text = value['entity_name'];
+            //             controller.vendorForInvoiceId.value = key;
+            //           },
+            //         );
+            //       }),
+            //     ),
+            //     addNewEntityButton()
+            //   ],
+            // ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
