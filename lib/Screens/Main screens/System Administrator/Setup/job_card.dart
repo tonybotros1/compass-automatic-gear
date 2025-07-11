@@ -103,7 +103,19 @@ class JobCard extends StatelessWidget {
                                 },
                                 items: isCustomersLoading
                                     ? {}
-                                    : controller.allCustomers))
+                                    : controller.allCustomers)),
+                        Expanded(
+                          child: CustomDropdown(
+                            textcontroller: controller.statusFilter.value.text,
+                            showedSelectedName: 'name',
+                            hintText: 'Status',
+                            items: allStatus,
+                            onChanged: (key, value) async {
+                              controller.statusFilter.value.text =
+                                  value['name'];
+                            },
+                          ),
+                        ),
                       ],
                     );
                   }),
@@ -112,8 +124,7 @@ class JobCard extends StatelessWidget {
                   ),
                   GetBuilder<JobCardController>(builder: (controller) {
                     return Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Expanded(
                           flex: 3,

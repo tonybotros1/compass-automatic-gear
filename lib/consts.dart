@@ -709,7 +709,6 @@ Widget textForDataRowInTable({
   );
 }
 
-
 Container statusBox(String status,
     {hieght = 30.0,
     width,
@@ -881,6 +880,12 @@ Map getDaysInMonth(String monthName) {
   };
 }
 
+RxMap allStatus = RxMap({
+  '1': {'name': 'New'},
+  '2': {'name': 'Posted'},
+  '3': {'name': 'Cancelled'}
+});
+
 normalizeDate(String input, TextEditingController date) {
   final raw = input.trim();
   if (raw.isEmpty) return false;
@@ -930,17 +935,16 @@ String _formatIfValid(int day, int month, int year) {
   return '';
 }
 
-
 Future<void> selectDateContext(
-      BuildContext context, TextEditingController date) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
+    BuildContext context, TextEditingController date) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(2000),
+    lastDate: DateTime(2101),
+  );
 
-    if (picked != null) {
-      date.text = textToDate(picked.toString());
-    }
+  if (picked != null) {
+    date.text = textToDate(picked.toString());
   }
+}

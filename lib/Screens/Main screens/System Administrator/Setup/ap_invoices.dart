@@ -82,7 +82,7 @@ class ApInvoices extends StatelessWidget {
                                           controller.statusFilter.value.text,
                                       showedSelectedName: 'name',
                                       hintText: 'Status',
-                                      items: controller.allStatus,
+                                      items: allStatus,
                                       onChanged: (key, value) async {
                                         controller.statusFilter.value.text =
                                             value['name'];

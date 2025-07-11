@@ -60,8 +60,8 @@ class TradingDashboard extends StatelessWidget {
                               items:
                                   isMonthsLoading ? {} : controller.allMonths,
                               onChanged: (key, value) {
-                                controller.allDays.assignAll(
-                                    getDaysInMonth(value['name']));
+                                controller.allDays
+                                    .assignAll(getDaysInMonth(value['name']));
                                 controller.month.text = value['name'];
                                 controller.day.clear();
                                 controller.isMonthSelected.value = true;
@@ -409,14 +409,28 @@ class TradingDashboard extends StatelessWidget {
                                 color: Color(0xff6F826A),
                                 fontSize: 16,
                                 isBold: true)),
-                        customBox(
-                            title: 'NET',
-                            value: textForDataRowInTable(
-                                text:
-                                    '${controller.totalNETsForAllGeneralExpenses.value}',
-                                color: Color(0xff328E6E),
-                                fontSize: 16,
-                                isBold: true)),
+                        Expanded(
+                          child: Row(spacing: 2,
+                            children: [
+                              customBox(
+                                  title: 'NET',
+                                  value: textForDataRowInTable(
+                                      text:
+                                          '${controller.totalNETsForAllGeneralExpenses.value}',
+                                      color: Color(0xff328E6E),
+                                      fontSize: 16,
+                                      isBold: true)),
+                              customBox(
+                                  title: 'TOTAL NETS',
+                                  value: textForDataRowInTable(
+                                      text:
+                                          '${controller.totalNETsForAll.value}',
+                                      color: Color(0xffFF7D29),
+                                      fontSize: 16,
+                                      isBold: true)),
+                            ],
+                          ),
+                        ),
                       ],
                     );
                   }),

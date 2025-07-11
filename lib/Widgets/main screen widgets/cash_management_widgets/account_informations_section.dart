@@ -6,7 +6,7 @@ import '../../../consts.dart';
 import '../../drop_down_menu3.dart';
 import '../../my_text_field.dart';
 
-Widget accountInformations(BuildContext context) {
+Widget accountInformations(BuildContext context, bool isPayment) {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
@@ -23,9 +23,11 @@ Widget accountInformations(BuildContext context) {
             children: [
               Expanded(
                 child: CustomDropdown(
-                  textcontroller: controller.receiptType.text,
+                  textcontroller: isPayment
+                      ? controller.paymentType.text
+                      : controller.receiptType.text,
                   showedSelectedName: 'name',
-                  hintText: 'Receipt Type',
+                  hintText: isPayment ? 'Payment Type' : 'Receipt Type',
                   items:
                       isReceiptTypesLoading ? {} : controller.allReceiptTypes,
                   // itemBuilder: (context, key, value) {
@@ -34,8 +36,13 @@ Widget accountInformations(BuildContext context) {
                   //   );
                   // },
                   onChanged: (key, value) {
-                    controller.receiptTypeId.value = key;
-                    controller.receiptType.text = value['name'];
+                    if (isPayment) {
+                      controller.paymentType.text = value['name'];
+                      controller.paymentTypeId.value = key;
+                    } else {
+                      controller.receiptTypeId.value = key;
+                      controller.receiptType.text = value['name'];
+                    }
                     if (value['name'] == 'Cheque') {
                       controller.isChequeSelected.value = true;
                       controller.chequeDate.text =
@@ -63,24 +70,26 @@ Widget accountInformations(BuildContext context) {
                   labelText: 'Cheque Number',
                 ),
               ),
-              Expanded(
-                  flex: 2,
-                  child: CustomDropdown(
-                    hintText: 'Bank Name',
-                    enabled: controller.isChequeSelected.isTrue,
-                    textcontroller: controller.bankName.text,
-                    showedSelectedName: 'name',
-                    items: isBanksLoading ? {} : controller.allBanks,
-                    // itemBuilder: (context, key, value) {
-                    //   return ListTile(
-                    //     title: Text(value['name']),
-                    //   );
-                    // },
-                    onChanged: (key, value) {
-                      controller.bankId.value = key;
-                      controller.bankName.text = value['name'];
-                    },
-                  )),
+              isPayment
+                  ? SizedBox()
+                  : Expanded(
+                      flex: 2,
+                      child: CustomDropdown(
+                        hintText: 'Bank Name',
+                        enabled: controller.isChequeSelected.isTrue,
+                        textcontroller: controller.bankName.text,
+                        showedSelectedName: 'name',
+                        items: isBanksLoading ? {} : controller.allBanks,
+                        // itemBuilder: (context, key, value) {
+                        //   return ListTile(
+                        //     title: Text(value['name']),
+                        //   );
+                        // },
+                        onChanged: (key, value) {
+                          controller.bankId.value = key;
+                          controller.bankName.text = value['name'];
+                        },
+                      )),
               Expanded(
                 child: myTextFormFieldWithBorder(
                   suffixIcon: IconButton(
@@ -95,6 +104,7 @@ Widget accountInformations(BuildContext context) {
                   isDate: true,
                 ),
               ),
+              isPayment ? Expanded(flex: 2, child: SizedBox()) : SizedBox()
             ],
           ),
           // const SizedBox(height: 10),

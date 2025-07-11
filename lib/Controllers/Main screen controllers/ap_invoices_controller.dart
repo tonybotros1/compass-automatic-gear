@@ -56,11 +56,7 @@ class ApInvoicesController extends GetxController {
   RxBool loadingInvoices = RxBool(false);
   RxMap allInvoiceTypes = RxMap({});
   RxMap allBrands = RxMap({});
-  RxMap allStatus = RxMap({
-    '1': {'name': 'New'},
-    '2': {'name': 'Posted'},
-    '3': {'name': 'Cancelled'}
-  });
+ 
   RxMap allTransactionsTypes = RxMap({});
   RxString companyId = RxString('');
   RxMap allVendors = RxMap({});

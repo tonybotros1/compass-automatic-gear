@@ -100,7 +100,19 @@ class QuotationCard extends StatelessWidget {
                                 },
                                 items: isCustomersLoading
                                     ? {}
-                                    : controller.allCustomers))
+                                    : controller.allCustomers)),
+                        Expanded(
+                          child: CustomDropdown(
+                            textcontroller: controller.statusFilter.value.text,
+                            showedSelectedName: 'name',
+                            hintText: 'Status',
+                            items: allStatus,
+                            onChanged: (key, value) async {
+                              controller.statusFilter.value.text =
+                                  value['name'];
+                            },
+                          ),
+                        ),
                       ],
                     );
                   }),

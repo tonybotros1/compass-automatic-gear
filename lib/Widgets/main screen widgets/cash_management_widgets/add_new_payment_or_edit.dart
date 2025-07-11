@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
+import 'account_informations_section.dart';
 import 'customer_invoices_dialog.dart';
 import 'invoices_table_section.dart';
 import 'payment_header_section.dart';
@@ -50,7 +51,7 @@ Widget addNewPaymentOrEdit({
                                     lable: Text('Account Information',
                                         style: fontStyle1),
                                   ),
-                                  // paymentHeader(context),
+                                  accountInformations(context, true),
                                 ],
                               ),
                             ),
@@ -67,17 +68,16 @@ Widget addNewPaymentOrEdit({
                               GetX<CashManagementController>(builder: (_) {
                                 return ElevatedButton(
                                   style: new2ButtonStyle,
-                                  onPressed: controller.customerNameId.isEmpty
+                                  onPressed: controller.vendorNameId.isEmpty
                                       ? () {
                                           showSnackBar('Alert',
-                                              'Please Select customer First');
+                                              'Please Select vendor First');
                                         }
                                       : () {
                                           if (controller
                                               .availableReceipts.isEmpty) {
-                                            controller.getCustomerInvoices(
-                                                controller
-                                                    .customerNameId.value);
+                                            controller.getVendorInvoices(
+                                                controller.vendorNameId.value);
                                           }
                                           Get.dialog(
                                             barrierDismissible: false,
@@ -145,7 +145,7 @@ Widget addNewPaymentOrEdit({
                                             ),
                                           );
                                         },
-                                  child: Text('Customer Invoices',
+                                  child: Text('Vendor Invoices',
                                       style: fontStyleForElevatedButtons),
                                 );
                               }),

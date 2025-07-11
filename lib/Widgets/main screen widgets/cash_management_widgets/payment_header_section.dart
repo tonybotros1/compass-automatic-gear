@@ -42,8 +42,17 @@ Widget paymentHeader(BuildContext context) {
               Expanded(
                   flex: 4,
                   child: CustomDropdown(
-                    hintText: 'Vendor',
+                    hintText: 'Vendor Name',
+                    showedSelectedName: 'entity_name',
                     items: isVendorLoading ? {} : controller.allVendors,
+                    onChanged: (key, value) async {
+                      controller.vendorName.text = value['entity_name'];
+                      controller.vendorNameId.value = key;
+                      controller.availableReceipts.clear();
+                      controller.selectedAvailableReceipts.clear();
+                      controller.outstanding.text =
+                          await controller.calculateCustomerOutstanding(key);
+                    },
                   )),
               Expanded(
                   child: myTextFormFieldWithBorder(

@@ -54,7 +54,7 @@ Widget addNewReceiptOrEdit({
                                     lable: Text('Account Information',
                                         style: fontStyle1),
                                   ),
-                                  accountInformations(context),
+                                  accountInformations(context,false),
                                 ],
                               ),
                             ),

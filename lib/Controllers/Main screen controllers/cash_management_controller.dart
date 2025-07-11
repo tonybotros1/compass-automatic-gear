@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:datahubai/consts.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,7 +12,9 @@ class CashManagementController extends GetxController {
   Rx<TextEditingController> receiptDate = TextEditingController().obs;
   Rx<TextEditingController> receiptCounter = TextEditingController().obs;
   TextEditingController receiptType = TextEditingController();
+  TextEditingController paymentType = TextEditingController();
   TextEditingController customerName = TextEditingController();
+  TextEditingController vendorName = TextEditingController();
   TextEditingController note = TextEditingController();
   TextEditingController outstanding = TextEditingController();
   TextEditingController chequeNumber = TextEditingController();
@@ -28,8 +31,7 @@ class CashManagementController extends GetxController {
   final RxList<DocumentSnapshot> filteredCashsManagements =
       RxList<DocumentSnapshot>([]);
 
-       final RxList<DocumentSnapshot> allMiscPayement =
-      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allMiscPayement = RxList<DocumentSnapshot>([]);
 
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
@@ -37,7 +39,9 @@ class CashManagementController extends GetxController {
   RxBool postingReceipts = RxBool(false);
   RxBool isChequeSelected = RxBool(false);
   RxString receiptTypeId = RxString('');
+  RxString paymentTypeId = RxString('');
   RxString customerNameId = RxString('');
+  RxString vendorNameId = RxString('');
   RxString accountId = RxString('');
   RxString bankId = RxString('');
   RxString status = RxString('');
@@ -64,7 +68,7 @@ class CashManagementController extends GetxController {
   @override
   void onInit() async {
     await getCompanyId();
-    getAllCustomers();
+    getAllEntities();
     getAllAccounts();
     getBanks();
     await getReceiptsTypes();
@@ -335,19 +339,43 @@ class CashManagementController extends GetxController {
     });
   }
 
-  getAllCustomers() {
+  getAllEntities() {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
-          .where('entity_code', arrayContains: 'Customer')
+          .where('company_id', isEqualTo: companyId.value)
+          .orderBy('entity_name')
           .snapshots()
-          .listen((customers) {
-        allCustomers.value = {
-          for (var doc in customers.docs) doc.id: doc.data()
-        };
+          .listen((entitiesSnapshot) {
+        // Temporary maps to hold filtered entities
+        Map<String, dynamic> vendorsMap = {};
+        Map<String, dynamic> customersMap = {};
+
+        for (var doc in entitiesSnapshot.docs) {
+          var data = doc.data();
+
+          // Safety check: entity_code must be a list
+          if (data['entity_code'] is List) {
+            List entityCodes = data['entity_code'];
+
+            // If 'Vendor' is in the list
+            if (entityCodes.contains('Vendor')) {
+              vendorsMap[doc.id] = data;
+            }
+
+            // If 'Customer' is in the list
+            if (entityCodes.contains('Customer')) {
+              customersMap[doc.id] = data;
+            }
+          }
+        }
+
+        // Assign to your observable maps
+        allVendors.value = vendorsMap;
+        allCustomers.value = customersMap;
       });
     } catch (e) {
-      //
+      // print('Error fetching entities: $e');
     }
   }
 
@@ -421,6 +449,21 @@ class CashManagementController extends GetxController {
     }
   }
 
+  getVendorInvoices(String vendorId) {
+    try {
+      List result = [];
+      var apInvoices = FirebaseFirestore.instance
+          .collection('ao_invoices')
+          .where('company_id', isEqualTo: companyId.value)
+          .where('status', isEqualTo: 'Posted')
+          .get();
+
+
+    } catch (e) {
+      //
+    }
+  }
+
   Future<double> getReceiptReceivedAmount(String receiptId) async {
     try {
       final HttpsCallable callable = FirebaseFunctions.instance
@@ -456,6 +499,67 @@ class CashManagementController extends GetxController {
   }
 
   addNewReceipts() async {
+    try {
+      addingNewValue.value = true;
+
+      Map<String, dynamic> jobsMap = {};
+      List<String> jobIds = [];
+
+      for (final receipt in selectedAvailableReceipts) {
+        final String? jobId = receipt['job_id'];
+        final dynamic amount = receipt['receipt_amount'];
+
+        if (jobId != null && amount != null) {
+          jobsMap[jobId] = amount;
+          jobIds.add(jobId);
+        }
+      }
+
+      var newData = {
+        'receipt_number': receiptCounter.value.text,
+        'receipt_date': receiptDate.value.text,
+        'customer': customerNameId.value,
+        'note': note.text,
+        'receipt_type': receiptTypeId.value,
+        'cheque_number': chequeNumber.text,
+        'bank_name': bankId.value,
+        'cheque_date': chequeDate.text,
+        'jobs': jobsMap,
+        'job_ids': jobIds,
+        'account': accountId.value,
+        'currency': currency.text,
+        'rate': rate.text,
+      };
+
+      if (isReceiptAdded.isFalse) {
+        newData['status'] = 'New';
+        newData['company_id'] = companyId.value;
+        var currentReceipt = await FirebaseFirestore.instance
+            .collection('all_receipts')
+            .add(newData);
+        status.value = 'New';
+        currentReceiptID.value = currentReceipt.id;
+        addingNewValue.value = false;
+        isReceiptAdded.value = true;
+        showSnackBar('Done', 'Added Successfully');
+      } else {
+        await FirebaseFirestore.instance
+            .collection('all_receipts')
+            .doc(currentReceiptID.value)
+            .update(newData);
+        addingNewValue.value = false;
+        showSnackBar('Done', 'Updated Successfully');
+      }
+      update();
+    } catch (e) {
+      addingNewValue.value = false;
+      isReceiptAdded.value = false;
+      showSnackBar('Failed', 'Please try again');
+      // Handle any errors here
+    }
+  }
+
+  addNewPayment() async {
     try {
       addingNewValue.value = true;
 

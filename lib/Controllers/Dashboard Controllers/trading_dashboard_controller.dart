@@ -48,6 +48,7 @@ class TradingDashboardController extends GetxController {
   RxDouble totalPaysForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalReceivesForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAllGeneralExpenses = RxDouble(0.0);
+  RxDouble totalNETsForAll = RxDouble(0.0);
   RxInt pagesPerPage = RxInt(7);
   DateFormat format = DateFormat('yyyy-MM-dd');
   DateFormat itemformat = DateFormat('dd-MM-yyyy');
@@ -99,6 +100,15 @@ class TradingDashboardController extends GetxController {
     getYears();
     getMonths();
     getItems();
+    everAll([
+      totalNETsForAllTrades,
+      totalNETsForAllCapitals,
+      totalNETsForAllGeneralExpenses,
+      totalNETsForAllOutstanding
+    ], (values) {
+      calculateTotalsForAll();
+    });
+
     super.onInit();
   }
 
@@ -156,7 +166,7 @@ class TradingDashboardController extends GetxController {
         .doc(typeId)
         .collection('values')
         .where('available', isEqualTo: true)
-        .orderBy('name',descending: true)
+        .orderBy('name', descending: true)
         .snapshots()
         .listen((year) {
       allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
@@ -230,8 +240,6 @@ class TradingDashboardController extends GetxController {
       allMonths.value = {for (var doc in year.docs) doc.id: doc.data()};
     });
   }
-
- 
 
   getAllTrades() {
     try {
@@ -425,6 +433,13 @@ class TradingDashboardController extends GetxController {
         }
       }
     }
+  }
+
+  calculateTotalsForAll() {
+    totalNETsForAll.value = totalNETsForAllCapitals.value +
+        totalNETsForAllGeneralExpenses.value +
+        totalNETsForAllOutstanding.value +
+        totalNETsForAllTrades.value;
   }
 
   void calculateTotalsForCapitals() {

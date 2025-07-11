@@ -156,6 +156,7 @@ class QuotationCardController extends GetxController {
   Rx<TextEditingController> vinFilter = TextEditingController().obs;
   Rx<TextEditingController> fromDate = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
+  Rx<TextEditingController> statusFilter = TextEditingController().obs;
 
   @override
   void onInit() async {
@@ -1061,7 +1062,7 @@ class QuotationCardController extends GetxController {
     //     (double.tryParse(net.text)! - double.tryParse(total.text)!).toString();
   }
 
-  void updateCalculating() { 
+  void updateCalculating() {
     if (price.text.isEmpty) price.text = '0';
     if (quantity.text.isEmpty) quantity.text = '0';
     if (discount.text.isEmpty) discount.text = '0';
@@ -1614,6 +1615,13 @@ class QuotationCardController extends GetxController {
         isEqualTo: quotaionNumberFilter.value.text.trim(),
       );
     }
+
+    if (statusFilter.value.text.trim().isNotEmpty) {
+      query = query.where(
+        'quotation_status',
+        isEqualTo: statusFilter.value.text.trim(),
+      );
+    }
     if (carBrandIdFilter.value.isNotEmpty) {
       query = query.where('car_brand', isEqualTo: carBrandIdFilter.value);
     }
@@ -1655,6 +1663,7 @@ class QuotationCardController extends GetxController {
   }
 
   clearAllFilters() {
+    statusFilter.value.clear();
     numberOfQuotations.value = 0;
     allQuotationsTotals.value = 0;
     allQuotationsVATS.value = 0;
@@ -1677,6 +1686,5 @@ class QuotationCardController extends GetxController {
     toDate.value.clear();
     allQuotationCards.clear();
     isScreenLoding.value = false;
-
   }
 }

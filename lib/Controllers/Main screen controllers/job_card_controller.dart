@@ -181,6 +181,8 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> vinFilter = TextEditingController().obs;
   Rx<TextEditingController> fromDate = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
+  Rx<TextEditingController> statusFilter = TextEditingController().obs;
+
   @override
   void onInit() async {
     super.onInit();
@@ -367,7 +369,7 @@ class JobCardController extends GetxController {
     });
   }
 
-  void updateCalculating() { 
+  void updateCalculating() {
     if (price.text.isEmpty) price.text = '0';
     if (quantity.text.isEmpty) quantity.text = '0';
     if (discount.text.isEmpty) discount.text = '0';
@@ -2314,6 +2316,13 @@ class JobCardController extends GetxController {
         isEqualTo: jobNumberFilter.value.text.trim(),
       );
     }
+
+    if (statusFilter.value.text.trim().isNotEmpty) {
+      query = query.where(
+        'job_status_1',
+        isEqualTo: statusFilter.value.text.trim(),
+      );
+    }
     if (carBrandIdFilter.value.isNotEmpty) {
       query = query.where('car_brand', isEqualTo: carBrandIdFilter.value);
     }
@@ -2355,7 +2364,7 @@ class JobCardController extends GetxController {
   }
 
   clearAllFilters() {
-    
+    statusFilter.value.clear();
     allJobCards.clear();
     numberOfJobs.value = 0;
     allJobsTotals.value = 0;
