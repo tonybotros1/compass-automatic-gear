@@ -265,14 +265,29 @@ class TradingDashboard extends StatelessWidget {
                                 color: Colors.green,
                                 fontSize: 16,
                                 isBold: true)),
-                        customBox(
-                            title: 'NET',
-                            value: textForDataRowInTable(
-                                text:
-                                    '${controller.totalNETsForAllTrades.value}',
-                                color: Colors.blueGrey,
-                                fontSize: 16,
-                                isBold: true)),
+                        Expanded(
+                          child: Row(
+                            spacing: 2,
+                            children: [
+                              customBox(
+                                  title: 'NET',
+                                  value: textForDataRowInTable(
+                                      text:
+                                          '${controller.totalNETsForAllTrades.value}',
+                                      color: Colors.blueGrey,
+                                      fontSize: 16,
+                                      isBold: true)),
+                              customBox(
+                                  title: 'CASH IN HAND',
+                                  value: textForDataRowInTable(
+                                      text:
+                                          '${controller.totalNETsForAll.value}',
+                                      color: Color(0xffFF7D29),
+                                      fontSize: 16,
+                                      isBold: true))
+                            ],
+                          ),
+                        ),
                       ],
                     );
                   }),
@@ -410,7 +425,8 @@ class TradingDashboard extends StatelessWidget {
                                 fontSize: 16,
                                 isBold: true)),
                         Expanded(
-                          child: Row(spacing: 2,
+                          child: Row(
+                            spacing: 2,
                             children: [
                               customBox(
                                   title: 'NET',
@@ -421,13 +437,13 @@ class TradingDashboard extends StatelessWidget {
                                       fontSize: 16,
                                       isBold: true)),
                               customBox(
-                                  title: 'TOTAL NETS',
+                                  title: 'NET PROFIT',
                                   value: textForDataRowInTable(
                                       text:
-                                          '${controller.totalNETsForAll.value}',
-                                      color: Color(0xffFF7D29),
+                                          '${controller.totalNetProfit.value}',
+                                      color: Color(0xff004030),
                                       fontSize: 16,
-                                      isBold: true)),
+                                      isBold: true))
                             ],
                           ),
                         ),

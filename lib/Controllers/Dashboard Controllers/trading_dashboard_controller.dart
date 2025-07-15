@@ -49,6 +49,7 @@ class TradingDashboardController extends GetxController {
   RxDouble totalReceivesForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAll = RxDouble(0.0);
+  RxDouble totalNetProfit = RxDouble(0.0);
   RxInt pagesPerPage = RxInt(7);
   DateFormat format = DateFormat('yyyy-MM-dd');
   DateFormat itemformat = DateFormat('dd-MM-yyyy');
@@ -106,7 +107,7 @@ class TradingDashboardController extends GetxController {
       totalNETsForAllGeneralExpenses,
       totalNETsForAllOutstanding
     ], (values) {
-      calculateTotalsForAll();
+      calculateTotalsForAllAndNetProfit();
     });
 
     super.onInit();
@@ -435,11 +436,14 @@ class TradingDashboardController extends GetxController {
     }
   }
 
-  calculateTotalsForAll() {
+  calculateTotalsForAllAndNetProfit() {
     totalNETsForAll.value = totalNETsForAllCapitals.value +
         totalNETsForAllGeneralExpenses.value +
         totalNETsForAllOutstanding.value +
         totalNETsForAllTrades.value;
+
+    totalNetProfit.value =
+        totalNETsForAllTrades.value + totalNETsForAllGeneralExpenses.value;
   }
 
   void calculateTotalsForCapitals() {

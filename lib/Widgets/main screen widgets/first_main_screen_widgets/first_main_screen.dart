@@ -32,23 +32,37 @@ class FirstMainScreen extends StatelessWidget {
                     },
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Color(0xFFE0F7F4),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        child: Center(
-                          child: Text(
-                            fav['screen_name'],
-                            style: textStyleForFavoritesCards.copyWith(
-                              color: Color(0xFF00695C),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                      child: Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                                color: mainColor,
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(5),
+                                    bottomLeft: Radius.circular(5))),
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xFFE0F7F4),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 16),
+                              child: Center(
+                                child: Text(
+                                  fav['screen_name'],
+                                  style: textStyleForFavoritesCards.copyWith(
+                                    color: Color(0xFF00695C),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   );
