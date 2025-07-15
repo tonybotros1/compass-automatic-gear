@@ -10,16 +10,19 @@ import '../auto_size_box.dart';
 Widget invoicesTable({
   required BuildContext context,
   required BoxConstraints constraints,
+  required bool isPayment,
+  required RxList list,
 }) {
   return GetX<CashManagementController>(
     builder: (controller) {
       return SizedBox(
-        height: controller.selectedAvailableReceipts.isEmpty ? 100 : null,
+        height: list.isEmpty ? 100 : null,
         child: tableOfScreens(
-          constraints: constraints,
-          context: context,
-          controller: controller,
-        ),
+            constraints: constraints,
+            context: context,
+            controller: controller,
+            isPayment: isPayment,
+            list: list),
       );
     },
   );
@@ -29,6 +32,8 @@ Widget tableOfScreens({
   required constraints,
   required context,
   required CashManagementController controller,
+  required bool isPayment,
+  required RxList list,
 }) {
   return DataTable(
     dataRowMaxHeight: 40,
@@ -78,11 +83,11 @@ Widget tableOfScreens({
         headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(
           constraints: constraints,
-          text: 'Amount Received',
+          text: isPayment ? 'Amount Paid' : 'Amount Received',
         ),
       ),
     ],
-    rows: controller.selectedAvailableReceipts
+    rows: list
         // cast each LinkedMap to a Map<String, dynamic>
         .map((entry) => Map<String, dynamic>.from(entry))
         .toList()
@@ -92,11 +97,11 @@ Widget tableOfScreens({
       final receipt = e.value;
       // If you need the original index in the full list you can look it up,
       // otherwise just pass `e.key` as the index in this filtered list:
-      final originalIndex = controller.selectedAvailableReceipts
+      final originalIndex = list
           .indexWhere((r) => r['invoice_number'] == receipt['invoice_number']);
       final invoice = receipt['invoice_number'] as String;
-      return dataRowForTheTable(
-          receipt, context, constraints, controller, originalIndex, invoice);
+      return dataRowForTheTable(receipt, context, constraints, controller,
+          originalIndex, invoice, isPayment);
     }).toList(),
   );
 }
@@ -108,11 +113,12 @@ DataRow dataRowForTheTable(
   CashManagementController controller,
   int index,
   String invoiceNumber,
+  bool isPayment,
 ) {
   return DataRow(cells: [
     DataCell(Row(
       children: [
-        deleteSection(context, controller, invoiceNumber),
+        deleteSection(context, controller, invoiceNumber, isPayment),
       ],
     )),
     DataCell(Text(receiptData['invoice_number'] ?? '')),
@@ -143,11 +149,17 @@ DataRow dataRowForTheTable(
                 cursorColor: Theme.of(context).textSelectionTheme.cursorColor,
                 autofocus: true,
                 controller: TextEditingController(
-                    text: receiptData['receipt_amount']?.toString()),
+                    text: isPayment
+                        ? receiptData['payment_amount']
+                        : receiptData['receipt_amount']?.toString()),
                 keyboardType: TextInputType.number,
                 onSubmitted: (value) {
                   final submittedValue = value.trim().isEmpty ? '0.0' : value;
-                  controller.finishEditing(submittedValue, index);
+                  isPayment
+                      ? controller.finishEditingForPayments(
+                          submittedValue, index)
+                      : controller.finishEditingForReceipts(
+                          submittedValue, index);
                 },
                 onTapOutside: (_) {
                   // revert back to the original value by cancelling the edit
@@ -160,19 +172,23 @@ DataRow dataRowForTheTable(
               child: Align(
                 alignment: Alignment.centerRight,
                 child: textForDataRowInTable(
-                  isSelectable: false,
-                   text:   receiptData['receipt_amount']?.toString() ?? ''),
+                    isSelectable: false,
+                    text: isPayment
+                        ? receiptData['payment_amount']?.toString() ?? ''
+                        : receiptData['receipt_amount']?.toString() ?? ''),
               ),
             ),
     ),
   ]);
 }
 
-Widget deleteSection(
-    context, CashManagementController controller, String invoiceNumber) {
+Widget deleteSection(context, CashManagementController controller,
+    String invoiceNumber, bool isPayment) {
   return IconButton(
       onPressed: () {
-        controller.removeSelectedReceipt(invoiceNumber);
+        isPayment
+            ? controller.removeSelectedPayment(invoiceNumber)
+            : controller.removeSelectedReceipt(invoiceNumber);
       },
       icon: const Icon(
         Icons.delete,

@@ -12,7 +12,7 @@ Widget addNewScreenOrView({
       ),
       myTextFormFieldWithBorder(
         obscureText: false,
-        controller:  controller.screenName,
+        controller: controller.screenName,
         labelText: 'Screen Name',
         hintText: 'Enter Screen name',
         keyboardType: TextInputType.name,
@@ -23,10 +23,20 @@ Widget addNewScreenOrView({
       ),
       myTextFormFieldWithBorder(
         obscureText: false,
-        controller:  controller.route,
+        controller: controller.route,
         labelText: 'Route',
         hintText: 'Enter route name',
-        keyboardType: TextInputType.emailAddress,
+        validate: true,
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      myTextFormFieldWithBorder(
+        maxLines: 4,
+        obscureText: false,
+        controller: controller.description,
+        labelText: 'Description',
+        keyboardType: TextInputType.text,
         validate: true,
       ),
     ],

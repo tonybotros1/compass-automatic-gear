@@ -222,6 +222,8 @@ AnimatedTreeView<MyTreeNode> leftTree(
                             '${entry.node.routeName}';
                         mainScreenController.selectedScreenName.value =
                             entry.node.title;
+                        mainScreenController.selectedScreenDescription.value =
+                            '${entry.node.description}';
                         Scaffold.of(context).closeDrawer();
                       }
                     : null,

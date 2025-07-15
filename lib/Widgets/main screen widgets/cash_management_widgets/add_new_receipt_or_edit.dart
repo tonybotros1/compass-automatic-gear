@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
 import 'account_informations_section.dart';
-import 'customer_invoices_dialog.dart';
+import 'available_invoices_dialog.dart';
 import 'invoices_table_section.dart';
 import 'receipt_headers_sectiob.dart';
 
@@ -54,7 +54,7 @@ Widget addNewReceiptOrEdit({
                                     lable: Text('Account Information',
                                         style: fontStyle1),
                                   ),
-                                  accountInformations(context,false),
+                                  accountInformations(context, false),
                                 ],
                               ),
                             ),
@@ -136,10 +136,14 @@ Widget addNewReceiptOrEdit({
                                                         ),
                                                       ),
                                                       Expanded(
-                                                        child:
-                                                            customerInvoicesDialog(
-                                                                dlgConstraints,
-                                                                context),
+                                                        child: availableInvoicesDialog(
+                                                            dlgConstraints,
+                                                            context,
+                                                            false,
+                                                            controller
+                                                                .availableReceipts,
+                                                            controller
+                                                                .selectedAvailableReceipts),
                                                       ),
                                                     ],
                                                   );
@@ -160,9 +164,10 @@ Widget addNewReceiptOrEdit({
                           child: Container(
                             decoration: containerDecor,
                             child: invoicesTable(
-                              context: context,
-                              constraints: BoxConstraints(),
-                            ),
+                                list: controller.selectedAvailableReceipts,
+                                context: context,
+                                constraints: BoxConstraints(),
+                                isPayment: false),
                           ),
                         ),
                       ],
@@ -187,10 +192,8 @@ Widget addNewReceiptOrEdit({
                         ),
                       ),
                       TextSpan(
-                        text: NumberFormat("#,##0.00").format(
-                          controller.calculatedAmountForAllSelectedReceipts.value 
-                              
-                        ),
+                        text: NumberFormat("#,##0.00").format(controller
+                            .calculatedAmountForAllSelectedReceipts.value),
                         style: TextStyle(
                           color: Colors.green,
                           fontWeight: FontWeight.bold,

@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
 import 'account_informations_section.dart';
-import 'customer_invoices_dialog.dart';
+import 'available_invoices_dialog.dart';
 import 'invoices_table_section.dart';
 import 'payment_header_section.dart';
 
@@ -75,7 +75,7 @@ Widget addNewPaymentOrEdit({
                                         }
                                       : () {
                                           if (controller
-                                              .availableReceipts.isEmpty) {
+                                              .availablePayments.isEmpty) {
                                             controller.getVendorInvoices(
                                                 controller.vendorNameId.value);
                                           }
@@ -123,7 +123,7 @@ Widget addNewPaymentOrEdit({
                                                               style:
                                                                   new2ButtonStyle,
                                                               onPressed: controller
-                                                                  .addSelectedReceipts,
+                                                                  .addSelectedPayments,
                                                               child: Text('Add',
                                                                   style:
                                                                       fontStyleForElevatedButtons),
@@ -134,9 +134,9 @@ Widget addNewPaymentOrEdit({
                                                       ),
                                                       Expanded(
                                                         child:
-                                                            customerInvoicesDialog(
+                                                            availableInvoicesDialog(
                                                                 dlgConstraints,
-                                                                context),
+                                                                context,true,controller.availablePayments,controller.selectedAvailablePayments),
                                                       ),
                                                     ],
                                                   );
@@ -159,6 +159,8 @@ Widget addNewPaymentOrEdit({
                             child: invoicesTable(
                               context: context,
                               constraints: BoxConstraints(),
+                              isPayment: true,
+                              list: controller.selectedAvailablePayments
                             ),
                           ),
                         ),
@@ -177,7 +179,7 @@ Widget addNewPaymentOrEdit({
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Total Amount Received: ',
+                        text: 'Total Amount Paid: ',
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,

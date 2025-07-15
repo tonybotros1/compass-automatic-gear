@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:datahubai/consts.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,8 +46,11 @@ class CashManagementController extends GetxController {
   RxString status = RxString('');
   RxString paymentStatus = RxString('');
   RxList availableReceipts = RxList([]);
+  RxList availablePayments = RxList([]);
   RxList selectedAvailableReceipts = RxList([]);
+  RxList selectedAvailablePayments = RxList([]);
   RxBool isAllJobReceiptsSelected = RxBool(false);
+  RxBool isAllPaymentsSelected = RxBool(false);
   RxBool loadingInvoices = RxBool(false);
   RxDouble calculatedAmountForAllSelectedReceipts = RxDouble(0.0);
   RxDouble calculatedOutstandingForAllSelectedReceipts = RxDouble(0.0);
@@ -92,7 +94,7 @@ class CashManagementController extends GetxController {
   }
 
   /// Call this when editing is done (Enter pressed)
-  void finishEditing(String newValue, int idx) {
+  void finishEditingForReceipts(String newValue, int idx) {
     // Update the data source
     selectedAvailableReceipts[idx]['receipt_amount'] = newValue;
     selectedAvailableReceipts[idx]['outstanding_amount'] = (double.parse(
@@ -101,6 +103,18 @@ class CashManagementController extends GetxController {
         .toString();
     // Exit edit mode
     calculateAmountForSelectedReceipts();
+    editingIndex.value = -1;
+  }
+
+  void finishEditingForPayments(String newValue, int idx) {
+    // Update the data source
+    selectedAvailablePayments[idx]['payment_amount'] = newValue;
+    selectedAvailablePayments[idx]['outstanding_amount'] = (double.parse(
+                selectedAvailablePayments[idx]['invoice_amount'] ?? '0.0') -
+            double.parse(newValue))
+        .toString();
+    // Exit edit mode
+    // calculateAmountForSelectedReceipts();
     editingIndex.value = -1;
   }
 
@@ -257,6 +271,17 @@ class CashManagementController extends GetxController {
     availableReceipts[index] = updated;
   }
 
+  void selectPayment(int index, bool isSelected) {
+    // rebuild a new Map object
+    final updated = {
+      ...availablePayments[index],
+      'is_selected': isSelected,
+    };
+
+    // reassign into the RxList — that triggers the update
+    availablePayments[index] = updated;
+  }
+
 // this function is to select all receipts
   void selectAllJobReceipts(bool select) {
     isAllJobReceiptsSelected.value = select;
@@ -264,6 +289,14 @@ class CashManagementController extends GetxController {
     final newList =
         availableReceipts.map((r) => {...r, 'is_selected': select}).toList();
     availableReceipts.assignAll(newList);
+  }
+
+  void selectAllPayments(bool select) {
+    isAllPaymentsSelected.value = select;
+
+    final newList =
+        availablePayments.map((r) => {...r, 'is_selected': select}).toList();
+    availablePayments.assignAll(newList);
   }
 
   calculateAmountForSelectedReceipts() {
@@ -298,6 +331,21 @@ class CashManagementController extends GetxController {
     Get.back();
   }
 
+  addSelectedPayments() {
+    // selectedAvailableReceipts.clear();
+
+    for (var element in availablePayments) {
+      if (element['is_selected'] == true) {
+        selectedAvailablePayments.add(element);
+      }
+    }
+
+    // calculateAmountForSelectedReceipts();
+    // calculateOutstandingForSelectedReceipts();
+    update();
+    Get.back();
+  }
+
   void removeSelectedReceipt(String invoiceNumber) {
     // 1) Un‐select it in the main list
     final availIdx = availableReceipts.indexWhere(
@@ -317,6 +365,27 @@ class CashManagementController extends GetxController {
 
     // 3) Recalculate totals, etc.
     calculateAmountForSelectedReceipts();
+  }
+
+  void removeSelectedPayment(String invoiceNumber) {
+    // 1) Un‐select it in the main list
+    final availIdx = availablePayments.indexWhere(
+      (r) => r['invoice_number'] == invoiceNumber,
+    );
+    if (availIdx != -1) {
+      final updated = {
+        ...availablePayments[availIdx],
+        'is_selected': false,
+      };
+      availablePayments[availIdx] = updated;
+    }
+
+    // 2) Remove from the selected list
+    selectedAvailablePayments
+        .removeWhere((r) => r['invoice_number'] == invoiceNumber);
+
+    // 3) Recalculate totals, etc.
+    // calculateAmountForSelectedReceipts();
   }
 
   // this function is to get colors
@@ -449,18 +518,90 @@ class CashManagementController extends GetxController {
     }
   }
 
-  getVendorInvoices(String vendorId) {
+  getVendorInvoices(String vendorId) async {
     try {
+      loadingInvoices.value = true;
+      availablePayments.clear();
       List result = [];
-      var apInvoices = FirebaseFirestore.instance
-          .collection('ao_invoices')
+      var apInvoices = await FirebaseFirestore.instance
+          .collection('ap_invoices')
           .where('company_id', isEqualTo: companyId.value)
+          .where('vendor', isEqualTo: vendorId)
           .where('status', isEqualTo: 'Posted')
           .get();
 
+      for (var apInvoice in apInvoices.docs) {
+        var apInvoiceId = apInvoice.id;
+        var apInvoiceData = apInvoice.data();
+        double invoiceAmount = await calculateSumOfAmounts(apInvoiceId) ?? 0.0;
+        double paymentAmount =
+            await calculateTotalPaymentsForAPInvoices(apInvoiceId) ?? 0.0;
 
+        double outstanding = invoiceAmount - paymentAmount;
+        if (outstanding > 0) {
+          var vendorId = apInvoiceData['vendor'] ?? '';
+          var vendorData = await FirebaseFirestore.instance
+              .collection('entity_informations')
+              .doc(vendorId)
+              .get();
+          var vendorName = vendorData.data()?['entity_name'] ?? '';
+          var date = textToDate(apInvoiceData['invoice_date'] ?? '');
+
+          String note =
+              'Invoice Number: ${apInvoiceData['invoice_number'] ?? ''}, Invoice Date: $date, Vendor: $vendorName';
+
+          result.add({
+            'is_selected': false,
+            'ap_invoice_id': apInvoiceId,
+            'invoice_number': apInvoiceData['invoice_number'] ?? '',
+            'invoice_date': date,
+            'invoice_amount': invoiceAmount.toString(),
+            'payment_amount': outstanding.toString(),
+            'outstanding_amount': outstanding.toString(),
+            'notes': note
+          });
+        }
+      }
+      availablePayments.assignAll(result);
+      loadingInvoices.value = false;
     } catch (e) {
-      //
+      loadingInvoices.value = false;
+    }
+  }
+
+  calculateSumOfAmounts(apId) async {
+    try {
+      double totalAmounts = 0.0;
+      var items = await FirebaseFirestore.instance
+          .collection('ap_invoices')
+          .doc(apId)
+          .collection('invoices')
+          .get();
+      for (var item in items.docs) {
+        var itemData = item.data();
+        totalAmounts += double.parse(itemData['amount'] ?? '0');
+      }
+      return totalAmounts;
+    } catch (e) {
+      return 0.0;
+    }
+  }
+
+  calculateTotalPaymentsForAPInvoices(apId) async {
+    try {
+      double total = 0.0;
+      var payments = await FirebaseFirestore.instance
+          .collection('all_payments')
+          .where('ap_invoice_ids', arrayContains: apId)
+          .get();
+
+      for (var pay in payments.docs) {
+        Map apInvoices = pay['ap_invoices'] ?? {};
+        total += double.parse(apInvoices[apId] ?? '0.0');
+      }
+      return total;
+    } catch (e) {
+      return 0.0;
     }
   }
 

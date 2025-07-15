@@ -8,6 +8,7 @@ import 'main_screen_contro.dart';
 class FunctionsController extends GetxController {
   late TextEditingController screenName = TextEditingController();
   late TextEditingController route = TextEditingController();
+  late TextEditingController description = TextEditingController();
   final RxList<DocumentSnapshot> allScreens = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredScreens = RxList<DocumentSnapshot>([]);
   RxBool isLoading = RxBool(true);
@@ -106,6 +107,7 @@ class FunctionsController extends GetxController {
           .update({
         'name': screenName.text,
         'routeName': route.text,
+        'description': description.text
       });
       addingNewScreenProcess.value = false;
       Get.back();
@@ -149,6 +151,7 @@ class FunctionsController extends GetxController {
         "name": screenName.text,
         "routeName": route.text,
         "added_date": DateTime.now().toString(),
+        "description": description.text
       });
       addingNewScreenProcess.value = false;
       Get.back();

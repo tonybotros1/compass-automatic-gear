@@ -4,22 +4,28 @@ import '../../../Controllers/Main screen controllers/cash_management_controller.
 import '../../../consts.dart';
 import '../auto_size_box.dart';
 
-Widget customerInvoicesDialog(
-    BoxConstraints constraints, BuildContext context) {
+Widget availableInvoicesDialog(
+  BoxConstraints constraints,
+  BuildContext context,
+  bool isPayment,
+  RxList<dynamic> availableList,
+  RxList<dynamic> selectedAvailableList,
+) {
   return SizedBox(
     width: constraints.maxWidth / 1.1,
     child: Padding(
       padding: const EdgeInsets.all(8.0),
       child: GetX<CashManagementController>(builder: (controller) {
-        if (controller.loadingInvoices.isTrue &&
-            controller.availableReceipts.isEmpty) {
+        if (controller.loadingInvoices.isTrue && availableList.isEmpty) {
           return Center(child: loadingProcess);
         }
         return tableOfScreens(
-          constraints: constraints,
-          context: context,
-          controller: controller,
-        );
+            constraints: constraints,
+            context: context,
+            controller: controller,
+            isPayment: isPayment,
+            availableList: availableList,
+            selectedAvailableList: selectedAvailableList);
       }),
     ),
   );
@@ -29,6 +35,9 @@ Widget tableOfScreens({
   required BoxConstraints constraints,
   required BuildContext context,
   required CashManagementController controller,
+  required bool isPayment,
+  required RxList<dynamic> availableList,
+  required RxList<dynamic> selectedAvailableList,
 }) {
   return DataTable(
     checkboxHorizontalMargin: 2,
@@ -40,14 +49,15 @@ Widget tableOfScreens({
     showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
-    sortColumnIndex: controller.sortColumnIndex.value,
-    sortAscending: controller.isAscending.value,
+
     headingRowColor: WidgetStateProperty.all(Colors.grey[300]),
 
     // **NEW**: select/deselect *all* rows
     onSelectAll: (allSelected) {
       if (allSelected != null) {
-        controller.selectAllJobReceipts(allSelected);
+        isPayment
+            ? controller.selectAllPayments(allSelected)
+            : controller.selectAllJobReceipts(allSelected);
       }
     },
 
@@ -69,9 +79,9 @@ Widget tableOfScreens({
       ),
     ],
 
-    rows: controller.availableReceipts
+    rows: availableList
         // filter out already‐selected receipts
-        .where((r) => !controller.selectedAvailableReceipts
+        .where((r) => !selectedAvailableList
             .any((sel) => sel['invoice_number'] == r['invoice_number']))
         .toList()
         // re‐index the filtered list
@@ -80,26 +90,21 @@ Widget tableOfScreens({
         .map((entry) {
       // cast each entry to Map<String,dynamic>
       final receipt = Map<String, dynamic>.from(entry.value);
-      final originalIndex = controller.availableReceipts
+      final originalIndex = availableList
           .indexWhere((r) => r['invoice_number'] == receipt['invoice_number']);
       return dataRowForTheTable(
-        receipt,
-        context,
-        constraints,
-        controller,
-        originalIndex,
-      );
+          receipt, context, constraints, controller, originalIndex, isPayment);
     }).toList(),
   );
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> receiptData,
-  BuildContext context,
-  BoxConstraints constraints,
-  CashManagementController controller,
-  int index,
-) {
+    Map<String, dynamic> receiptData,
+    BuildContext context,
+    BoxConstraints constraints,
+    CashManagementController controller,
+    int index,
+    bool isPayment) {
   final isSelected = receiptData['is_selected'] as bool? ?? false;
 
   return DataRow(
@@ -107,7 +112,9 @@ DataRow dataRowForTheTable(
     selected: isSelected,
     onSelectChanged: (value) {
       if (value != null) {
-        controller.selectJobReceipt(index, value);
+        isPayment
+            ? controller.selectPayment(index, value)
+            : controller.selectJobReceipt(index, value);
       }
     },
     cells: [

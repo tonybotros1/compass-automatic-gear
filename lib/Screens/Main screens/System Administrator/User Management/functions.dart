@@ -84,6 +84,7 @@ ElevatedButton newScreenButton(BuildContext context, BoxConstraints constraints,
     onPressed: () {
       controller.screenName.clear();
       controller.route.clear();
+      controller.description.clear();
       functionsDailog(
           controller: controller,
           constraints: constraints,
@@ -209,6 +210,7 @@ ElevatedButton editSection(context, FunctionsController controller,
       onPressed: () {
         controller.screenName.text = screenData['name'] ?? '';
         controller.route.text = screenData['routeName'] ?? '';
+        controller.description.text = screenData['description'] ?? '';
         functionsDailog(
             controller: controller,
             constraints: constraints,

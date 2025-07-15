@@ -47,6 +47,7 @@ class MainScreenController extends GetxController {
   ).obs;
   Rx<String> selectedScreenName = RxString('🏡 Home');
   Rx<String> selectedScreenRoute = RxString('/home');
+  Rx<String> selectedScreenDescription = RxString('');
   RxString userName = RxString('');
   RxString userEmail = RxString('');
   RxString userJoiningDate = RxString('');
@@ -60,6 +61,7 @@ class MainScreenController extends GetxController {
   RxDouble menuWidth = RxDouble(250);
   RxString userId = RxString('');
   MyTreeNode? previouslySelectedNode;
+  RxBool isHovered = RxBool(false);
 
   @override
   void onInit() async {
@@ -279,6 +281,7 @@ class MainScreenController extends GetxController {
         title: screenDoc.value['name'],
         children: [],
         routeName: screenDoc.value['routeName'],
+        description: screenDoc.value['description'] ?? ''
       );
     }).toList();
 
@@ -359,6 +362,7 @@ class MainScreenController extends GetxController {
         'added_date': DateTime.now(),
         'company_id': companyId.value,
         'user_id': userId.value,
+        'description': selectedScreenDescription.value
       });
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try agian');

@@ -44,6 +44,7 @@ class MyTreeNode {
     this.isMenu,
     this.routeName,
     this.isPressed = false,
+    this.description,
     required this.title,
     Iterable<MyTreeNode>? children,
   }) : children = <MyTreeNode>[] {
@@ -63,4 +64,5 @@ class MyTreeNode {
   bool? isMenu;
   String? id;
   bool? canRemove;
+  String? description;
 }

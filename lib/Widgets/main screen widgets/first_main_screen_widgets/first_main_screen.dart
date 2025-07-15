@@ -1,7 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/main_screen_contro.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
-
+import 'package:get/get.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import '../../../consts.dart';
 
 class FirstMainScreen extends StatelessWidget {
@@ -10,65 +10,117 @@ class FirstMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       body: GetX<MainScreenController>(builder: (controller) {
         bool isFavoriteLoading = controller.favoriteScreens.isEmpty;
         return isFavoriteLoading
-            ? Center(child: Text('No Favorits', style: fontStyleForAppBar))
+            ? Center(child: Text('No Favorites', style: fontStyleForAppBar))
             : GridView.count(
-                crossAxisCount: 5,
+                crossAxisCount:
+                    (MediaQuery.of(context).size.width ~/ 250).clamp(1, 5),
                 childAspectRatio: 1.5,
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
                 crossAxisSpacing: 40,
                 mainAxisSpacing: 40,
                 children: controller.favoriteScreens.map((fav) {
-                  return InkWell(
+                  final data = fav.data() as Map<String, dynamic>? ?? {};
+                  String screenName = data['screen_name'] ?? '';
+                  String emoji = screenName.characters.first;
+                  String name = screenName.substring(emoji.length).trim();
+                  String description = data.containsKey('description')
+                      ? data['description'] ?? ''
+                      : '';
+
+                  return _HoverCard(
+                    emoji: emoji,
+                    name: name,
+                    description: description,
                     onTap: () {
                       controller.selectedScreen.value =
-                          controller.getScreenFromRoute(fav['screen_route']);
+                          controller.getScreenFromRoute(data['screen_route']);
                       controller.selectedScreenRoute.value =
-                          fav['screen_route'];
-                      controller.selectedScreenName.value = fav['screen_name'];
+                          data['screen_route'];
+                      controller.selectedScreenName.value = data['screen_name'];
                     },
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: Row(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                                color: mainColor,
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(5),
-                                    bottomLeft: Radius.circular(5))),
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Color(0xFFE0F7F4),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 16),
-                              child: Center(
-                                child: Text(
-                                  fav['screen_name'],
-                                  style: textStyleForFavoritesCards.copyWith(
-                                    color: Color(0xFF00695C),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   );
                 }).toList(),
               );
       }),
+    );
+  }
+}
+
+class _HoverCard extends StatefulWidget {
+  final String emoji;
+  final String name;
+  final String description;
+  final VoidCallback onTap;
+
+  const _HoverCard({
+    required this.emoji,
+    required this.name,
+    required this.description,
+    required this.onTap,
+  });
+
+  @override
+  State<_HoverCard> createState() => _HoverCardState();
+}
+
+class _HoverCardState extends State<_HoverCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedScale(
+        scale: _isHovered ? 1.05 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Material(
+            shadowColor: Colors.black,
+            borderRadius: BorderRadius.circular(10),
+            elevation: 4,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(
+                    widget.emoji,
+                    style: const TextStyle(fontSize: 25),
+                  ),
+                  AutoSizeText(
+                    widget.name,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: textStyleForFavoritesCards.copyWith(
+                      color: const Color(0xFF00695C),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  AutoSizeText(
+                    widget.description,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
