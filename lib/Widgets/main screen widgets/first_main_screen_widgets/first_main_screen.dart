@@ -10,7 +10,7 @@ class FirstMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Colors.white,
       body: GetX<MainScreenController>(builder: (controller) {
         bool isFavoriteLoading = controller.favoriteScreens.isEmpty;
         return isFavoriteLoading
@@ -22,7 +22,9 @@ class FirstMainScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 crossAxisSpacing: 40,
                 mainAxisSpacing: 40,
-                children: controller.favoriteScreens.map((fav) {
+                children:
+                    List.generate(controller.favoriteScreens.length, (index) {
+                  final fav = controller.favoriteScreens[index];
                   final data = fav.data() as Map<String, dynamic>? ?? {};
                   String screenName = data['screen_name'] ?? '';
                   String emoji = screenName.characters.first;
@@ -31,10 +33,15 @@ class FirstMainScreen extends StatelessWidget {
                       ? data['description'] ?? ''
                       : '';
 
+                  // توزيع اللون حسب الفهرس
+                  final cardColor = controller
+                      .cardColors[index % controller.cardColors.length];
+
                   return _HoverCard(
                     emoji: emoji,
                     name: name,
                     description: description,
+                    color: cardColor,
                     onTap: () {
                       controller.selectedScreen.value =
                           controller.getScreenFromRoute(data['screen_route']);
@@ -43,7 +50,7 @@ class FirstMainScreen extends StatelessWidget {
                       controller.selectedScreenName.value = data['screen_name'];
                     },
                   );
-                }).toList(),
+                }),
               );
       }),
     );
@@ -55,12 +62,14 @@ class _HoverCard extends StatefulWidget {
   final String name;
   final String description;
   final VoidCallback onTap;
+  final Color color;
 
   const _HoverCard({
     required this.emoji,
     required this.name,
     required this.description,
     required this.onTap,
+    required this.color,
   });
 
   @override
@@ -88,7 +97,7 @@ class _HoverCardState extends State<_HoverCard> {
             elevation: 4,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: widget.color,
                 borderRadius: BorderRadius.circular(10),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -109,11 +118,17 @@ class _HoverCardState extends State<_HoverCard> {
                       fontSize: 16,
                     ),
                   ),
+                  Divider(),
                   AutoSizeText(
-                    widget.description,
+                    widget.description.isNotEmpty
+                        ? widget.description
+                        : 'Click To Start Working',
                     textAlign: TextAlign.center,
                     maxLines: 2,
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade700),
                   ),
                 ],
               ),
