@@ -20,7 +20,8 @@ import '../../Screens/Main screens/System Administrator/Setup/AP_payment_type.da
 import '../../Screens/Main screens/System Administrator/Setup/ap_invoices.dart';
 import '../../Screens/Main screens/System Administrator/Setup/banks_and_others.dart';
 import '../../Screens/Main screens/System Administrator/Setup/branches.dart';
-import '../../Screens/Main screens/System Administrator/Setup/cash_management.dart';
+import '../../Screens/Main screens/System Administrator/Setup/cash_management_payment.dart';
+import '../../Screens/Main screens/System Administrator/Setup/cash_management_receipts.dart';
 import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
@@ -152,8 +153,10 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: InvoiceItems());
       case '/technicians':
         return const SizedBox(child: Technician());
-      case '/cashManagement':
-        return const SizedBox(child: CashManagement());
+      case '/cashManagementReceipt':
+        return const SizedBox(child: CashManagementReceipt());
+      case '/cashManagementPayment':
+        return const SizedBox(child: CashManagementPayment());
       case '/banks':
         return const SizedBox(child: BanksAndOthers());
       case '/carTrading':

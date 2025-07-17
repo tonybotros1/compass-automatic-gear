@@ -19,18 +19,25 @@ Widget paymentHeader(BuildContext context) {
             spacing: 10,
             children: [
               Expanded(
-                  child:
-                      myTextFormFieldWithBorder(labelText: 'Payment Number')),
+                  child: myTextFormFieldWithBorder(
+                      labelText: 'Payment Number',
+                      controller: controller.paymentCounter.value,
+                      isEnabled: false)),
               Expanded(
                 child: myTextFormFieldWithBorder(
-                  // suffixIcon: IconButton(
-                  //     onPressed: () {
-                  //       controller.selectDateContext(
-                  //           context, controller.receiptDate.value);
-                  //     },
-                  //     icon: const Icon(Icons.date_range)),
+                  controller: controller.paymentDate.value,
+                  suffixIcon: IconButton(
+                      onPressed: () {
+                        controller.selectDateContext(
+                            context, controller.paymentDate.value);
+                      },
+                      icon: const Icon(Icons.date_range)),
                   isDate: true,
                   labelText: 'Payment Date',
+                  onFieldSubmitted: (_) async {
+                    await normalizeDate(controller.paymentDate.value.text,
+                        controller.paymentDate.value);
+                  },
                 ),
               ),
               Expanded(flex: 2, child: SizedBox()),
@@ -50,13 +57,15 @@ Widget paymentHeader(BuildContext context) {
                       controller.vendorNameId.value = key;
                       controller.availableReceipts.clear();
                       controller.selectedAvailableReceipts.clear();
-                      controller.outstanding.text =
-                          await controller.calculateCustomerOutstanding(key);
+                      // controller.outstanding.text =
+                      await controller.getVendorInvoices(key);
                     },
                   )),
               Expanded(
                   child: myTextFormFieldWithBorder(
-                      labelText: 'Outstanding', isEnabled: false)),
+                      controller: controller.outstanding,
+                      labelText: 'Outstanding',
+                      isEnabled: false)),
             ],
           ),
           Row(

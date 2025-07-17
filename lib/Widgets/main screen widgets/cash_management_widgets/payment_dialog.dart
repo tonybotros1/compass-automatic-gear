@@ -13,6 +13,7 @@ Future<dynamic> paymentDialog(
     required void Function()? onPressedForSave,
     required void Function()? onPressedForPost,
     required void Function()? onPressedForDelete,
+    required void Function()? onPressedForCancel,
     required bool canEdit}) {
   return Get.dialog(
       barrierDismissible: false,
@@ -55,11 +56,24 @@ Future<dynamic> paymentDialog(
                       return ClickableHoverText(
                           onTap: onPressedForPost, text: 'Post');
                     }),
+                    if (onPressedForCancel != null)
+                      Row(
+                        spacing: 10,
+                        children: [
+                          point(),
+                          GetBuilder<CashManagementController>(
+                              builder: (controller) {
+                            return ClickableHoverText(
+                                onTap: onPressedForCancel, text: 'Cancel');
+                          }),
+                        ],
+                      ),
                     separator(),
                     if (onPressedForDelete != null)
                       GetBuilder<CashManagementController>(
                           builder: (controller) {
-                        return Row(spacing: 10,
+                        return Row(
+                          spacing: 10,
                           children: [
                             ClickableHoverText(
                                 onTap: onPressedForDelete, text: 'Delete'),

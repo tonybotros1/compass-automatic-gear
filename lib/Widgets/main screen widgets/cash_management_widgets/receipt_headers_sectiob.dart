@@ -37,6 +37,10 @@ Widget receiptHeader(BuildContext context) {
                       icon: const Icon(Icons.date_range)),
                   isDate: true,
                   labelText: 'Receipt Date',
+                   onFieldSubmitted: (_) async {
+                    await normalizeDate(controller.receiptDate.value.text,
+                        controller.receiptDate.value);
+                  },
                 ),
               ),
               Expanded(

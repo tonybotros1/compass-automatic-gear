@@ -75,7 +75,9 @@ Widget addNewPaymentOrEdit({
                                         }
                                       : () {
                                           if (controller
-                                              .availablePayments.isEmpty) {
+                                                  .availablePayments.isEmpty &&
+                                              controller
+                                                  .loadingInvoices.isFalse) {
                                             controller.getVendorInvoices(
                                                 controller.vendorNameId.value);
                                           }
@@ -133,10 +135,14 @@ Widget addNewPaymentOrEdit({
                                                         ),
                                                       ),
                                                       Expanded(
-                                                        child:
-                                                            availableInvoicesDialog(
-                                                                dlgConstraints,
-                                                                context,true,controller.availablePayments,controller.selectedAvailablePayments),
+                                                        child: availableInvoicesDialog(
+                                                            dlgConstraints,
+                                                            context,
+                                                            true,
+                                                            controller
+                                                                .availablePayments,
+                                                            controller
+                                                                .selectedAvailablePayments),
                                                       ),
                                                     ],
                                                   );
@@ -157,11 +163,10 @@ Widget addNewPaymentOrEdit({
                           child: Container(
                             decoration: containerDecor,
                             child: invoicesTable(
-                              context: context,
-                              constraints: BoxConstraints(),
-                              isPayment: true,
-                              list: controller.selectedAvailablePayments
-                            ),
+                                context: context,
+                                constraints: BoxConstraints(),
+                                isPayment: true,
+                                list: controller.selectedAvailablePayments),
                           ),
                         ),
                       ],

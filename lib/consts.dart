@@ -880,11 +880,14 @@ Map getDaysInMonth(String monthName) {
   };
 }
 
+DateFormat format = DateFormat("dd-MM-yyyy");
+
 RxMap allStatus = RxMap({
   '1': {'name': 'New'},
   '2': {'name': 'Posted'},
   '3': {'name': 'Cancelled'}
 });
+
 
 normalizeDate(String input, TextEditingController date) {
   final raw = input.trim();

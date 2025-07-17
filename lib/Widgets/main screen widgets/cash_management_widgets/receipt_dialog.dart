@@ -12,6 +12,7 @@ Future<dynamic> receiptDialog(
     required CashManagementController controller,
     required void Function()? onPressedForSave,
     required void Function()? onPressedForPost,
+    required void Function()? onPressedForcancel,
     required void Function()? onPressedForDelete,
     required bool canEdit}) {
   return Get.dialog(
@@ -55,11 +56,24 @@ Future<dynamic> receiptDialog(
                       return ClickableHoverText(
                           onTap: onPressedForPost, text: 'Post');
                     }),
+                    if (onPressedForcancel != null)
+                      Row(
+                        spacing: 10,
+                        children: [
+                          point(),
+                          GetBuilder<CashManagementController>(
+                              builder: (controller) {
+                            return ClickableHoverText(
+                                onTap: onPressedForcancel, text: 'Cancel');
+                          }),
+                        ],
+                      ),
                     separator(),
                     if (onPressedForDelete != null)
                       GetBuilder<CashManagementController>(
                           builder: (controller) {
-                        return Row(spacing: 10,
+                        return Row(
+                          spacing: 10,
                           children: [
                             ClickableHoverText(
                                 onTap: onPressedForDelete, text: 'Delete'),

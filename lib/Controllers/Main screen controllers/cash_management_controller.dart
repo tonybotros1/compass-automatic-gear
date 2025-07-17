@@ -9,7 +9,9 @@ import 'main_screen_contro.dart';
 
 class CashManagementController extends GetxController {
   Rx<TextEditingController> receiptDate = TextEditingController().obs;
+  Rx<TextEditingController> paymentDate = TextEditingController().obs;
   Rx<TextEditingController> receiptCounter = TextEditingController().obs;
+  Rx<TextEditingController> paymentCounter = TextEditingController().obs;
   TextEditingController receiptType = TextEditingController();
   TextEditingController paymentType = TextEditingController();
   TextEditingController customerName = TextEditingController();
@@ -22,20 +24,19 @@ class CashManagementController extends GetxController {
   TextEditingController account = TextEditingController();
   TextEditingController currency = TextEditingController();
   TextEditingController rate = TextEditingController();
-  RxString query = RxString('');
-  Rx<TextEditingController> search = TextEditingController().obs;
-  RxBool isScreenLoding = RxBool(true);
-  final RxList<DocumentSnapshot> allCashsManagements =
-      RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredCashsManagements =
-      RxList<DocumentSnapshot>([]);
+  RxBool isScreenLodingForReceipts = RxBool(false);
+  RxBool isScreenLodingForPayments = RxBool(false);
+  final RxList<DocumentSnapshot> allReceipts = RxList<DocumentSnapshot>([]);
+  // final RxList<DocumentSnapshot> filteredCashsManagements =
+  //     RxList<DocumentSnapshot>([]);
 
-  final RxList<DocumentSnapshot> allMiscPayement = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allPayements = RxList<DocumentSnapshot>([]);
 
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
   RxBool postingReceipts = RxBool(false);
+  RxBool cancellingReceipts = RxBool(false);
   RxBool isChequeSelected = RxBool(false);
   RxString receiptTypeId = RxString('');
   RxString paymentTypeId = RxString('');
@@ -61,25 +62,46 @@ class CashManagementController extends GetxController {
   RxMap allAccounts = RxMap({});
   RxMap allBanks = RxMap({});
   RxBool isReceiptAdded = RxBool(false);
+  RxBool isPaymentAdded = RxBool(false);
   RxString currentReceiptID = RxString('');
+  RxString currentPaymentID = RxString('');
   var editingIndex = (-1).obs;
   final ScrollController scrollController = ScrollController();
   final ScrollController scrollController2 = ScrollController();
   var buttonLoadingStates = <String, bool>{}.obs;
-
+  // Filters
+  Rx<TextEditingController> receiptCounterFilter = TextEditingController().obs;
+  Rx<TextEditingController> chequeNumberFilter = TextEditingController().obs;
+  Rx<TextEditingController> customerNameFilter = TextEditingController().obs;
+  RxString customerNameFilterId = RxString('');
+  Rx<TextEditingController> receiptTypeFilter = TextEditingController().obs;
+  RxString receiptTypeFilterId = RxString('');
+  Rx<TextEditingController> accountFilter = TextEditingController().obs;
+  RxString accountFilterId = RxString('');
+  Rx<TextEditingController> bankNameFilter = TextEditingController().obs;
+  RxString bankNameFilterId = RxString('');
+  Rx<TextEditingController> statusFilter = TextEditingController().obs;
+  Rx<TextEditingController> fromDate = TextEditingController().obs;
+  Rx<TextEditingController> toDate = TextEditingController().obs;
+  RxBool isYearSelected = RxBool(false);
+  RxBool isMonthSelected = RxBool(false);
+  RxBool isDaySelected = RxBool(false);
+  RxBool isTodaySelected = RxBool(false);
+  RxBool isAllSelected = RxBool(false);
+  RxBool isThisMonthSelected = RxBool(false);
+  RxBool isThisYearSelected = RxBool(false);
+  RxInt numberOfReceipts = RxInt(0);
+  RxInt numberOfPayments = RxInt(0);
+  RxDouble totalReceiptsReceived = RxDouble(0.0);
+  RxDouble totalPaymentPaid = RxDouble(0.0);
   @override
   void onInit() async {
+    super.onInit();
     await getCompanyId();
     getAllEntities();
     getAllAccounts();
     getBanks();
     await getReceiptsTypes();
-    getAllReceipts();
-    // callEchoTestFunction();
-    search.value.addListener(() {
-      // filterCities();
-    });
-    super.onInit();
   }
 
   // function to manage loading button
@@ -247,6 +269,55 @@ class CashManagementController extends GetxController {
 
       await FirebaseFirestore.instance.collection('counters').doc(rnId).update({
         'value': int.parse(updatern),
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> getCurrentPaymentCounterNumber() async {
+    try {
+      var pnId = '';
+      var updatepn = '';
+      var pnDoc = await FirebaseFirestore.instance
+          .collection('counters')
+          .where('code', isEqualTo: 'PN')
+          .where('company_id', isEqualTo: companyId.value)
+          .get();
+
+      if (pnDoc.docs.isEmpty) {
+        // Define constants for new counter values
+        const prefix = 'PN';
+        const separator = '-';
+        const initialValue = 1;
+
+        var newCounter =
+            await FirebaseFirestore.instance.collection('counters').add({
+          'code': 'PN',
+          'description': 'Payment Number',
+          'prefix': prefix,
+          'value': initialValue,
+          'length': 0,
+          'separator': separator,
+          'added_date': DateTime.now().toString(),
+          'company_id': companyId.value,
+          'status': true,
+        });
+        pnId = newCounter.id;
+        // Set the counter text with prefix and separator
+        paymentCounter.value.text = '$prefix$separator$initialValue';
+        updatepn = initialValue.toString();
+      } else {
+        var firstDoc = pnDoc.docs.first;
+        pnId = firstDoc.id;
+        var currentValue = firstDoc.data()['value'] ?? 0;
+        paymentCounter.value.text =
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
+        updatepn = (currentValue + 1).toString();
+      }
+
+      await FirebaseFirestore.instance.collection('counters').doc(pnId).update({
+        'value': int.parse(updatepn),
       });
     } catch (e) {
       //
@@ -518,11 +589,13 @@ class CashManagementController extends GetxController {
     }
   }
 
+// ============================================================================================== //
   getVendorInvoices(String vendorId) async {
     try {
       loadingInvoices.value = true;
       availablePayments.clear();
-      List result = [];
+      double totalOutstanding = 0.0;
+      // List result = [];
       var apInvoices = await FirebaseFirestore.instance
           .collection('ap_invoices')
           .where('company_id', isEqualTo: companyId.value)
@@ -533,11 +606,12 @@ class CashManagementController extends GetxController {
       for (var apInvoice in apInvoices.docs) {
         var apInvoiceId = apInvoice.id;
         var apInvoiceData = apInvoice.data();
-        double invoiceAmount = await calculateSumOfAmounts(apInvoiceId) ?? 0.0;
+        double invoiceAmount = await calculateSumOfAmounts(apInvoice);
         double paymentAmount =
-            await calculateTotalPaymentsForAPInvoices(apInvoiceId) ?? 0.0;
+            await calculateTotalPaymentsForAPInvoices(apInvoiceId);
 
         double outstanding = invoiceAmount - paymentAmount;
+        totalOutstanding += outstanding;
         if (outstanding > 0) {
           var vendorId = apInvoiceData['vendor'] ?? '';
           var vendorData = await FirebaseFirestore.instance
@@ -550,7 +624,7 @@ class CashManagementController extends GetxController {
           String note =
               'Invoice Number: ${apInvoiceData['invoice_number'] ?? ''}, Invoice Date: $date, Vendor: $vendorName';
 
-          result.add({
+          availablePayments.add({
             'is_selected': false,
             'ap_invoice_id': apInvoiceId,
             'invoice_number': apInvoiceData['invoice_number'] ?? '',
@@ -562,24 +636,22 @@ class CashManagementController extends GetxController {
           });
         }
       }
-      availablePayments.assignAll(result);
+      // availablePayments.assignAll(result);
       loadingInvoices.value = false;
+      outstanding.text = totalOutstanding.toString();
+      // return totalOutstanding;
     } catch (e) {
       loadingInvoices.value = false;
     }
   }
 
-  calculateSumOfAmounts(apId) async {
+  Future<double> calculateSumOfAmounts(DocumentSnapshot apInvoice) async {
     try {
       double totalAmounts = 0.0;
-      var items = await FirebaseFirestore.instance
-          .collection('ap_invoices')
-          .doc(apId)
-          .collection('invoices')
-          .get();
+      var items = await apInvoice.reference.collection('invoices').get();
       for (var item in items.docs) {
         var itemData = item.data();
-        totalAmounts += double.parse(itemData['amount'] ?? '0');
+        totalAmounts += double.tryParse(itemData['amount'] ?? '0') ?? 0.0;
       }
       return totalAmounts;
     } catch (e) {
@@ -587,7 +659,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  calculateTotalPaymentsForAPInvoices(apId) async {
+  Future<double> calculateTotalPaymentsForAPInvoices(apId) async {
     try {
       double total = 0.0;
       var payments = await FirebaseFirestore.instance
@@ -604,6 +676,8 @@ class CashManagementController extends GetxController {
       return 0.0;
     }
   }
+
+// ============================================================================================== //
 
   Future<double> getReceiptReceivedAmount(String receiptId) async {
     try {
@@ -622,20 +696,20 @@ class CashManagementController extends GetxController {
     }
   }
 
-  getAllReceipts() {
+  Future<double> getPaymentPaidAmount(String receiptId) async {
     try {
-      FirebaseFirestore.instance
-          .collection('all_receipts')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('receipt_number', descending: true)
-          .snapshots()
-          .listen((QuerySnapshot<Map<String, dynamic>> receipts) {
-        allCashsManagements.assignAll(receipts.docs);
-        isScreenLoding.value = false;
-      });
-      isScreenLoding.value = false;
+      final HttpsCallable callable =
+          FirebaseFunctions.instance.httpsCallable('get_payment_paid_amount');
+
+      final HttpsCallableResult result = await callable.call(receiptId);
+
+      // ✅ Extract the total from the map correctly
+      final data = result.data;
+      return double.tryParse(data['total_paid_amount'].toString()) ?? 0.0;
     } catch (e) {
-      isScreenLoding.value = false;
+      return 0.0;
+    } finally {
+      loadingInvoices.value = false;
     }
   }
 
@@ -658,19 +732,44 @@ class CashManagementController extends GetxController {
 
       var newData = {
         'receipt_number': receiptCounter.value.text,
-        'receipt_date': receiptDate.value.text,
+        // 'receipt_date': receiptDate.value.text,
         'customer': customerNameId.value,
         'note': note.text,
         'receipt_type': receiptTypeId.value,
         'cheque_number': chequeNumber.text,
         'bank_name': bankId.value,
-        'cheque_date': chequeDate.text,
+        // 'cheque_date': chequeDate.text,
         'jobs': jobsMap,
         'job_ids': jobIds,
         'account': accountId.value,
         'currency': currency.text,
         'rate': rate.text,
       };
+
+      final rawDate = receiptDate.value.text.trim();
+      final rawDate2 = chequeDate.value.text.trim();
+
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['receipt_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+        }
+      }
+
+      if (rawDate2.isNotEmpty) {
+        try {
+          newData['cheque_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate2),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+        }
+      }
 
       if (isReceiptAdded.isFalse) {
         newData['status'] = 'New';
@@ -704,50 +803,74 @@ class CashManagementController extends GetxController {
     try {
       addingNewValue.value = true;
 
-      Map<String, dynamic> jobsMap = {};
-      List<String> jobIds = [];
+      Map<String, dynamic> apInvoicesMap = {};
+      List<String> apInvoicesIds = [];
 
-      for (final receipt in selectedAvailableReceipts) {
-        final String? jobId = receipt['job_id'];
-        final dynamic amount = receipt['receipt_amount'];
+      for (final payment in selectedAvailablePayments) {
+        final String? apInvoiceId = payment['ap_invoice_id'];
+        final dynamic amount = payment['payment_amount'];
 
-        if (jobId != null && amount != null) {
-          jobsMap[jobId] = amount;
-          jobIds.add(jobId);
+        if (apInvoiceId != null && amount != null) {
+          apInvoicesMap[apInvoiceId] = amount;
+          apInvoicesIds.add(apInvoiceId);
         }
       }
 
       var newData = {
-        'receipt_number': receiptCounter.value.text,
-        'receipt_date': receiptDate.value.text,
-        'customer': customerNameId.value,
+        'payment_number': paymentCounter.value.text,
+        // 'payment_date': paymentDate.value.text,
+        'vendor': vendorNameId.value,
         'note': note.text,
-        'receipt_type': receiptTypeId.value,
+        'payment_type': paymentTypeId.value,
         'cheque_number': chequeNumber.text,
-        'bank_name': bankId.value,
-        'cheque_date': chequeDate.text,
-        'jobs': jobsMap,
-        'job_ids': jobIds,
+        // 'cheque_date': chequeDate.text,
+        'ap_invoices': apInvoicesMap,
+        'ap_invoices_ids': apInvoicesIds,
         'account': accountId.value,
         'currency': currency.text,
         'rate': rate.text,
       };
 
-      if (isReceiptAdded.isFalse) {
+      final rawDate = paymentDate.value.text.trim();
+      final rawDate2 = chequeDate.value.text.trim();
+
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['payment_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+        }
+      }
+
+      if (rawDate2.isNotEmpty) {
+        try {
+          newData['cheque_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate2),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+        }
+      }
+
+      if (isPaymentAdded.isFalse) {
         newData['status'] = 'New';
         newData['company_id'] = companyId.value;
-        var currentReceipt = await FirebaseFirestore.instance
-            .collection('all_receipts')
+        var currentPayment = await FirebaseFirestore.instance
+            .collection('all_payments')
             .add(newData);
         status.value = 'New';
-        currentReceiptID.value = currentReceipt.id;
+        currentPaymentID.value = currentPayment.id;
         addingNewValue.value = false;
-        isReceiptAdded.value = true;
+        isPaymentAdded.value = true;
         showSnackBar('Done', 'Added Successfully');
       } else {
         await FirebaseFirestore.instance
-            .collection('all_receipts')
-            .doc(currentReceiptID.value)
+            .collection('all_payments')
+            .doc(currentPaymentID.value)
             .update(newData);
         addingNewValue.value = false;
         showSnackBar('Done', 'Updated Successfully');
@@ -755,7 +878,7 @@ class CashManagementController extends GetxController {
       update();
     } catch (e) {
       addingNewValue.value = false;
-      isReceiptAdded.value = false;
+      isPaymentAdded.value = false;
       showSnackBar('Failed', 'Please try again');
       // Handle any errors here
     }
@@ -779,18 +902,42 @@ class CashManagementController extends GetxController {
       }
 
       var newData = {
-        'receipt_date': receiptDate.value.text,
+        // 'receipt_date': receiptDate.value.text,
         'customer': customerNameId.value,
         'note': note.text,
         'receipt_type': receiptTypeId.value,
         'cheque_number': chequeNumber.text,
         'bank_name': bankId.value,
-        'cheque_date': chequeDate.text,
+        // 'cheque_date': chequeDate.text,
         'jobs': jobsMap,
         'job_ids': jobIds,
         'account': accountId.value,
         'rate': rate.text,
       };
+      final rawDate = receiptDate.value.text.trim();
+      final rawDate2 = chequeDate.value.text.trim();
+
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['receipt_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+        }
+      }
+
+      if (rawDate2.isNotEmpty) {
+        try {
+          newData['cheque_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate2),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+        }
+      }
 
       await FirebaseFirestore.instance
           .collection('all_receipts')
@@ -840,6 +987,62 @@ class CashManagementController extends GetxController {
       });
       status.value = 'Posted';
       showSnackBar('Done', 'Receipt Posted');
+      update();
+    } catch (e) {
+      showSnackBar('Something Went Wrong', 'Please try again');
+    }
+  }
+
+  cancelReceipt(receiptID) async {
+    try {
+      if (isReceiptAdded.isFalse) {
+        showSnackBar('Alert', 'Please Save Receipt First');
+        return;
+      }
+
+      if (status.value == 'Cancelled') {
+        showSnackBar('Alert', 'Receipt is Already Cancelled');
+        return;
+      }
+
+      FirebaseFirestore.instance
+          .collection('all_receipts')
+          .doc(receiptID)
+          .update({
+        'status': 'Cancelled',
+      });
+      status.value = 'Cancelled';
+      showSnackBar('Done', 'Receipt Cancelled');
+      update();
+    } catch (e) {
+      showSnackBar('Something Went Wrong', 'Please try again');
+    }
+  }
+
+  postPayment(paymentID) async {
+    try {
+      if (isPaymentAdded.isFalse) {
+        showSnackBar('Alert', 'Please Save Payment First');
+        return;
+      }
+
+      if (status.value == 'Posted') {
+        showSnackBar('Alert', 'Payment is Already Posted');
+        return;
+      }
+      await getCurrentPaymentCounterNumber();
+      paymentDate.value.text = textToDate(DateTime.now().toString());
+
+      FirebaseFirestore.instance
+          .collection('all_payments')
+          .doc(paymentID)
+          .update({
+        'status': 'Posted',
+        'payment_date': paymentDate.value.text,
+        'payment_number': paymentCounter.value.text
+      });
+      status.value = 'Posted';
+      showSnackBar('Done', 'Payment Posted');
       update();
     } catch (e) {
       showSnackBar('Something Went Wrong', 'Please try again');
@@ -916,5 +1119,422 @@ class CashManagementController extends GetxController {
         .listen((colors) {
       allBanks.value = {for (var doc in colors.docs) doc.id: doc.data()};
     });
+  }
+
+  calculateMoneyForAllReceipts() async {
+    try {
+      totalReceiptsReceived.value = 0.0;
+
+      for (var receipt in allReceipts) {
+        var data = receipt.data() as Map<String, dynamic>?;
+        Map jobs = data?['jobs'];
+        for (var value in jobs.values) {
+          totalReceiptsReceived.value += double.tryParse(value) ?? 0.0;
+        }
+      }
+    } catch (e) {
+      // print(e);
+    }
+  }
+
+  calculateMoneyForAllPayments() async {
+    try {
+      totalPaymentPaid.value = 0.0;
+
+      for (var payment in allPayements) {
+        var data = payment.data() as Map<String, dynamic>?;
+        Map apInvoices = data?['ap_invoices'];
+        for (var value in apInvoices.values) {
+          totalPaymentPaid.value += double.tryParse(value) ?? 0.0;
+        }
+      }
+    } catch (e) {
+      // print(e);
+    }
+  }
+
+  // Future<void> searchEngineForReceipts() async {
+  //   isScreenLodingForReceipts.value = true;
+  //   final collection = FirebaseFirestore.instance
+  //       .collection('all_receipts')
+  //       .where('company_id', isEqualTo: companyId.value);
+  //   Query<Map<String, dynamic>> query = collection;
+
+  //   if (isAllSelected.value) {
+  //     final snapshot = await query.get();
+  //     allReceipts.assignAll(snapshot.docs);
+  //     calculateMoneyForAllReceipts();
+  //     numberOfReceipts.value = allReceipts.length;
+
+  //     isScreenLodingForReceipts.value = false;
+  //     return;
+  //   }
+
+  //   // 2) زر "Today"
+  //   if (isTodaySelected.value) {
+  //     final now = DateTime.now();
+  //     final startOfDay = DateTime(now.year, now.month, now.day);
+  //     final endOfDay =
+  //         startOfDay.add(Duration(days: 1)).subtract(Duration(milliseconds: 1));
+  //     fromDate.value.text = textToDate(startOfDay);
+  //     toDate.value.text = textToDate(endOfDay);
+  //     query = query
+  //         .where('receipt_date',
+  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+  //         .where('receipt_date',
+  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfDay));
+  //   }
+
+  //   // 3) زر "This Month"
+  //   else if (isThisMonthSelected.value) {
+  //     final now = DateTime.now();
+  //     final startOfMonth = DateTime(now.year, now.month, 1);
+  //     final startOfNextMonth = (now.month < 12)
+  //         ? DateTime(now.year, now.month + 1, 1)
+  //         : DateTime(now.year + 1, 1, 1);
+  //     final endOfMonth = startOfNextMonth.subtract(Duration(milliseconds: 1));
+  //     fromDate.value.text = textToDate(startOfMonth);
+  //     toDate.value.text = textToDate(endOfMonth);
+  //     query = query
+  //         .where('receipt_date',
+  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+  //         .where('receipt_date',
+  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth));
+  //   }
+
+  //   // 4) زر "This Year"
+  //   else if (isThisYearSelected.value) {
+  //     final now = DateTime.now();
+  //     final startOfYear = DateTime(now.year, 1, 1);
+  //     final startOfNextYear = DateTime(now.year + 1, 1, 1);
+  //     final endOfYear = startOfNextYear.subtract(Duration(milliseconds: 1));
+  //     fromDate.value.text = textToDate(startOfYear);
+  //     toDate.value.text = textToDate(endOfYear);
+  //     query = query
+  //         .where('receipt_date',
+  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
+  //         .where('receipt_date',
+  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfYear));
+  //   }
+
+  //   // 5) إذا لم يُختر أي من الأزرار الخاصة بالفترة، نطبق فلتر التواريخ اليدوي
+  //   else {
+  //     if (fromDate.value.text.trim().isNotEmpty) {
+  //       try {
+  //         final dtFrom = format.parseStrict(fromDate.value.text.trim());
+  //         query = query.where(
+  //           'receipt_date',
+  //           isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
+  //         );
+  //       } catch (_) {}
+  //     }
+  //     if (toDate.value.text.trim().isNotEmpty) {
+  //       try {
+  //         final dtTo = format.parseStrict(toDate.value.text.trim());
+  //         query = query.where(
+  //           'receipt_date',
+  //           isLessThanOrEqualTo: Timestamp.fromDate(dtTo),
+  //         );
+  //       } catch (_) {}
+  //     }
+  //   }
+
+  //   // 6) باقي الفلاتر العامة
+  //   if (receiptCounterFilter.value.text.trim().isNotEmpty) {
+  //     query = query.where(
+  //       'receipt_number',
+  //       isEqualTo: receiptCounterFilter.value.text.trim(),
+  //     );
+  //   }
+  //   if (receiptTypeFilterId.value.isNotEmpty) {
+  //     query = query.where('receipt_type', isEqualTo: receiptTypeFilterId.value);
+  //   }
+  //   if (customerNameFilterId.value.isNotEmpty) {
+  //     query = query.where('customer', isEqualTo: customerNameFilterId.value);
+  //   }
+
+  //   if (statusFilter.value.text.isNotEmpty) {
+  //     query = query.where('status', isEqualTo: statusFilter.value.text);
+  //   }
+
+  //   if (accountFilterId.value.isNotEmpty) {
+  //     query = query.where('account', isEqualTo: accountFilterId.value);
+  //   }
+
+  //   if (bankNameFilterId.value.isNotEmpty) {
+  //     query = query.where('bank_name', isEqualTo: bankNameFilterId.value);
+  //   }
+
+  //   if (chequeNumberFilter.value.text.isNotEmpty) {
+  //     query = query.where('cheque_number',
+  //         isEqualTo: chequeNumberFilter.value.text);
+  //   }
+
+  //   // 7) تنفيذ الاستعلام وجلب النتائج
+  //   final snapshot = await query.get();
+  //   allReceipts.assignAll(snapshot.docs);
+  //   numberOfReceipts.value = allReceipts.length;
+  //   calculateMoneyForAllReceipts();
+  //   isScreenLodingForReceipts.value = false;
+  // }
+
+  Future<void> searchEngineForReceipts() async {
+    isScreenLodingForReceipts.value = true;
+
+    // Start with the base query for the company.
+    Query<Map<String, dynamic>> query = FirebaseFirestore.instance
+        .collection('all_receipts')
+        .where('company_id', isEqualTo: companyId.value);
+
+    // 1. APPLY DATE FILTERS TO THE FIRESTORE QUERY
+    // This is the only part of the filtering that will be done server-side.
+    // This approach requires only ONE composite index: (company_id, receipt_date).
+
+    if (isAllSelected.value) {
+      // No date filter needed if "All" is selected.
+    } else if (isTodaySelected.value) {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(Duration(days: 1));
+      fromDate.value.text = textToDate(startOfDay);
+      toDate.value.text = textToDate(endOfDay);
+      query = query
+          .where('receipt_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('receipt_date', isLessThan: Timestamp.fromDate(endOfDay));
+    } else if (isThisMonthSelected.value) {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      final endOfMonth = (now.month < 12)
+          ? DateTime(now.year, now.month + 1, 1)
+          : DateTime(now.year + 1, 1, 1);
+      fromDate.value.text = textToDate(startOfMonth);
+      toDate.value.text = textToDate(endOfMonth);
+      query = query
+          .where('receipt_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where('receipt_date', isLessThan: Timestamp.fromDate(endOfMonth));
+    } else if (isThisYearSelected.value) {
+      final now = DateTime.now();
+      final startOfYear = DateTime(now.year, 1, 1);
+      final endOfYear = DateTime(now.year + 1, 1, 1);
+      fromDate.value.text = textToDate(startOfYear);
+      toDate.value.text = textToDate(endOfYear);
+      query = query
+          .where('receipt_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
+          .where('receipt_date', isLessThan: Timestamp.fromDate(endOfYear));
+    } else {
+      // Manual date range
+      if (fromDate.value.text.trim().isNotEmpty) {
+        try {
+          final dtFrom = format.parseStrict(fromDate.value.text.trim());
+          query = query.where('receipt_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom));
+        } catch (_) {
+          // Handle parsing error if necessary
+        }
+      }
+      if (toDate.value.text.trim().isNotEmpty) {
+        try {
+          // Add 1 day to the 'to' date to make the range inclusive.
+          final dtTo = format
+              .parseStrict(toDate.value.text.trim())
+              .add(const Duration(days: 1));
+          query =
+              query.where('receipt_date', isLessThan: Timestamp.fromDate(dtTo));
+        } catch (_) {
+          // Handle parsing error if necessary
+        }
+      }
+    }
+
+    // 2. EXECUTE THE FIRESTORE QUERY
+    // Fetch all documents matching the company and date range.
+    final snapshot = await query.get();
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedReceipts =
+        snapshot.docs;
+
+    // 3. APPLY ALL OTHER FILTERS ON THE CLIENT-SIDE
+    // Now, filter the 'fetchedReceipts' list in memory.
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredReceipts =
+        fetchedReceipts.where((doc) {
+      final data = doc.data();
+
+      // Receipt Number Filter
+      if (receiptCounterFilter.value.text.trim().isNotEmpty &&
+          data['receipt_number'] != receiptCounterFilter.value.text.trim()) {
+        return false;
+      }
+      // Receipt Type Filter
+      if (receiptTypeFilterId.value.isNotEmpty &&
+          data['receipt_type'] != receiptTypeFilterId.value) {
+        return false;
+      }
+      // Customer Filter
+      if (customerNameFilterId.value.isNotEmpty &&
+          data['customer'] != customerNameFilterId.value) {
+        return false;
+      }
+      // Status Filter
+      if (statusFilter.value.text.isNotEmpty &&
+          data['status'] != statusFilter.value.text) {
+        return false;
+      }
+      // Account Filter
+      if (accountFilterId.value.isNotEmpty &&
+          data['account'] != accountFilterId.value) {
+        return false;
+      }
+      // Bank Name Filter
+      if (bankNameFilterId.value.isNotEmpty &&
+          data['bank_name'] != bankNameFilterId.value) {
+        return false;
+      }
+      // Cheque Number Filter
+      if (chequeNumberFilter.value.text.isNotEmpty &&
+          data['cheque_number'] != chequeNumberFilter.value.text) {
+        return false;
+      }
+
+      // If the document passed all filters, keep it.
+      return true;
+    }).toList();
+
+    // 4. UPDATE THE UI
+    allReceipts.assignAll(filteredReceipts);
+    numberOfReceipts.value = allReceipts.length;
+    calculateMoneyForAllReceipts(); // Make sure this function iterates over the final 'allReceipts' list
+    isScreenLodingForReceipts.value = false;
+  }
+
+  Future<void> searchEngineForPayments() async {
+    isScreenLodingForPayments.value = true;
+
+    Query<Map<String, dynamic>> query = FirebaseFirestore.instance
+        .collection('all_payments')
+        .where('company_id', isEqualTo: companyId.value);
+
+    if (isAllSelected.value) {
+    } else if (isTodaySelected.value) {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(Duration(days: 1));
+      fromDate.value.text = textToDate(startOfDay);
+      toDate.value.text = textToDate(endOfDay);
+      query = query
+          .where('payment_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('payment_date', isLessThan: Timestamp.fromDate(endOfDay));
+    } else if (isThisMonthSelected.value) {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      final endOfMonth = (now.month < 12)
+          ? DateTime(now.year, now.month + 1, 1)
+          : DateTime(now.year + 1, 1, 1);
+      fromDate.value.text = textToDate(startOfMonth);
+      toDate.value.text = textToDate(endOfMonth);
+      query = query
+          .where('payment_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where('payment_date', isLessThan: Timestamp.fromDate(endOfMonth));
+    } else if (isThisYearSelected.value) {
+      final now = DateTime.now();
+      final startOfYear = DateTime(now.year, 1, 1);
+      final endOfYear = DateTime(now.year + 1, 1, 1);
+      fromDate.value.text = textToDate(startOfYear);
+      toDate.value.text = textToDate(endOfYear);
+      query = query
+          .where('payment_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
+          .where('payment_date', isLessThan: Timestamp.fromDate(endOfYear));
+    } else {
+      if (fromDate.value.text.trim().isNotEmpty) {
+        try {
+          final dtFrom = format.parseStrict(fromDate.value.text.trim());
+          query = query.where('payment_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom));
+        } catch (_) {}
+      }
+      if (toDate.value.text.trim().isNotEmpty) {
+        try {
+          final dtTo = format
+              .parseStrict(toDate.value.text.trim())
+              .add(const Duration(days: 1));
+          query =
+              query.where('payment_date', isLessThan: Timestamp.fromDate(dtTo));
+        } catch (_) {}
+      }
+    }
+
+    final snapshot = await query.get();
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedReceipts =
+        snapshot.docs;
+
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredReceipts =
+        fetchedReceipts.where((doc) {
+      final data = doc.data();
+
+      if (receiptCounterFilter.value.text.trim().isNotEmpty &&
+          data['payment_number'] != receiptCounterFilter.value.text.trim()) {
+        return false;
+      }
+      if (receiptTypeFilterId.value.isNotEmpty &&
+          data['payment_type'] != receiptTypeFilterId.value) {
+        return false;
+      }
+      if (customerNameFilterId.value.isNotEmpty &&
+          data['vendor'] != customerNameFilterId.value) {
+        return false;
+      }
+      if (statusFilter.value.text.isNotEmpty &&
+          data['status'] != statusFilter.value.text) {
+        return false;
+      }
+      if (accountFilterId.value.isNotEmpty &&
+          data['account'] != accountFilterId.value) {
+        return false;
+      }
+      if (chequeNumberFilter.value.text.isNotEmpty &&
+          data['cheque_number'] != chequeNumberFilter.value.text) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+
+    allPayements.assignAll(filteredReceipts);
+    numberOfPayments.value = allPayements.length;
+    calculateMoneyForAllPayments();
+    isScreenLodingForPayments.value = false;
+  }
+
+  removeFilters() {
+    isAllSelected.value = false;
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+  }
+
+  clearAllFilters() {
+    statusFilter.value.clear();
+    allReceipts.clear();
+    isAllSelected.value = false;
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+    receiptCounterFilter.value = TextEditingController();
+    chequeNumberFilter.value.clear();
+    customerNameFilter.value.clear();
+    customerNameFilterId = RxString('');
+    receiptTypeFilterId = RxString('');
+    accountFilterId = RxString('');
+    receiptTypeFilter.value.clear();
+    accountFilter.value.clear();
+    bankNameFilter.value.clear();
+    bankNameFilterId = RxString('');
+    fromDate.value.clear();
+    toDate.value.clear();
+    isScreenLodingForReceipts.value = false;
   }
 }

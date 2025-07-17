@@ -30,11 +30,6 @@ Widget accountInformations(BuildContext context, bool isPayment) {
                   hintText: isPayment ? 'Payment Type' : 'Receipt Type',
                   items:
                       isReceiptTypesLoading ? {} : controller.allReceiptTypes,
-                  // itemBuilder: (context, key, value) {
-                  //   return ListTile(
-                  //     title: Text(value['name']),
-                  //   );
-                  // },
                   onChanged: (key, value) {
                     if (isPayment) {
                       controller.paymentType.text = value['name'];
@@ -49,6 +44,8 @@ Widget accountInformations(BuildContext context, bool isPayment) {
                           textToDate(DateTime.now().toString());
                     } else {
                       controller.isChequeSelected.value = false;
+                      controller.chequeDate.clear();
+                      controller.chequeNumber.clear();
                     }
                   },
                 ),

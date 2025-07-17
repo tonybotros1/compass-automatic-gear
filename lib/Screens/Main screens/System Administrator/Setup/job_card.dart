@@ -351,12 +351,7 @@ class JobCard extends StatelessWidget {
                                       constraints: constraints,
                                       context: context,
                                       controller: controller,
-                                      data:
-                                          controller.filteredJobCards.isEmpty &&
-                                                  controller
-                                                      .search.value.text.isEmpty
-                                              ? controller.allJobCards
-                                              : controller.filteredJobCards),
+                                      data: controller.allJobCards),
                                 )
                         ],
                       ),
