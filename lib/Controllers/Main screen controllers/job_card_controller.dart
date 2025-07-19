@@ -213,85 +213,77 @@ class JobCardController extends GetxController {
     jobWarrentyEndDate.value.text = format.format(newDate);
   }
 
-  // calculateMoneyForAllJobs() async {
+  // Future<void> calculateMoneyForAllJobs() async {
   //   try {
-  //     allJobsVATS.value = 0.0;
-  //     allJobsTotals.value = 0.0;
-  //     allJobsNET.value = 0.0;
+  //     // Reset totals at the beginning.
+  //     double totalVat = 0.0;
+  //     double grandTotal = 0.0;
+  //     double totalNet = 0.0;
 
+  //     if (allJobCards.isEmpty) {
+  //       allJobsVATS.value = 0;
+  //       allJobsTotals.value = 0;
+  //       allJobsNET.value = 0;
+  //       return;
+  //     }
+
+  //     // 1. Create a list of Futures, where each Future gets the 'invoice_items'
+  //     // subcollection for a single job card.
+  //     List<Future<QuerySnapshot<Map<String, dynamic>>>> futures = [];
   //     for (var job in allJobCards) {
-  //       final id = job.id;
-
-  //       final invoicesSnapshot = await FirebaseFirestore.instance
+  //       final future = FirebaseFirestore.instance
   //           .collection('job_cards')
-  //           .doc(id)
+  //           .doc(job.id)
   //           .collection('invoice_items')
-  //           .get(); // Use get() instead of listen()
+  //           .get();
+  //       futures.add(future);
+  //     }
 
-  //       for (var invoice in invoicesSnapshot.docs) {
-  //         var data = invoice.data() as Map<String, dynamic>?;
+  //     // 2. Execute all the Futures in parallel and wait for them all to complete.
+  //     // This is much faster than awaiting each one in a loop.
+  //     final List<QuerySnapshot<Map<String, dynamic>>> snapshots =
+  //         await Future.wait(futures);
 
-  //         if (data != null) {
-  //           allJobsVATS.value += double.tryParse(data['vat'].toString()) ?? 0.0;
-  //           allJobsTotals.value +=
-  //               double.tryParse(data['total'].toString()) ?? 0.0;
-  //           allJobsNET.value += double.tryParse(data['net'].toString()) ?? 0.0;
-  //         }
+  //     // 3. Now that all data is fetched, iterate through the results in memory.
+  //     // This part is very fast as there are no more network requests.
+  //     for (var invoiceListSnapshot in snapshots) {
+  //       for (var invoiceDoc in invoiceListSnapshot.docs) {
+  //         var data = invoiceDoc.data();
+  //         totalVat += double.tryParse(data['vat'].toString()) ?? 0.0;
+  //         grandTotal += double.tryParse(data['total'].toString()) ?? 0.0;
+  //         totalNet += double.tryParse(data['net'].toString()) ?? 0.0;
   //       }
   //     }
+
+  //     // 4. Update the UI with the final calculated totals.
+  //     allJobsVATS.value = totalVat;
+  //     allJobsTotals.value = grandTotal;
+  //     allJobsNET.value = totalNet;
   //   } catch (e) {
-  //     // print(e);
+  //     // Optionally reset values on error
+  //     allJobsVATS.value = 0;
+  //     allJobsTotals.value = 0;
+  //     allJobsNET.value = 0;
   //   }
   // }
 
   Future<void> calculateMoneyForAllJobs() async {
     try {
-      // Reset totals at the beginning.
-      double totalVat = 0.0;
-      double grandTotal = 0.0;
-      double totalNet = 0.0;
-
+      allJobsVATS.value = 0;
+      allJobsTotals.value = 0;
+      allJobsNET.value = 0;
       if (allJobCards.isEmpty) {
-        allJobsVATS.value = 0;
-        allJobsTotals.value = 0;
-        allJobsNET.value = 0;
         return;
       }
-
-      // 1. Create a list of Futures, where each Future gets the 'invoice_items'
-      // subcollection for a single job card.
-      List<Future<QuerySnapshot<Map<String, dynamic>>>> futures = [];
       for (var job in allJobCards) {
-        final future = FirebaseFirestore.instance
-            .collection('job_cards')
-            .doc(job.id)
-            .collection('invoice_items')
-            .get();
-        futures.add(future);
+        allJobsVATS.value +=
+            double.tryParse(job.data()['total_vat_amount'].toString()) ?? 0.0;
+        allJobsTotals.value +=
+            double.tryParse(job.data()['totals_amount'].toString()) ?? 0.0;
+        allJobsNET.value +=
+            double.tryParse(job.data()['total_net_amount'].toString()) ?? 0.0;
       }
-
-      // 2. Execute all the Futures in parallel and wait for them all to complete.
-      // This is much faster than awaiting each one in a loop.
-      final List<QuerySnapshot<Map<String, dynamic>>> snapshots =
-          await Future.wait(futures);
-
-      // 3. Now that all data is fetched, iterate through the results in memory.
-      // This part is very fast as there are no more network requests.
-      for (var invoiceListSnapshot in snapshots) {
-        for (var invoiceDoc in invoiceListSnapshot.docs) {
-          var data = invoiceDoc.data();
-          totalVat += double.tryParse(data['vat'].toString()) ?? 0.0;
-          grandTotal += double.tryParse(data['total'].toString()) ?? 0.0;
-          totalNet += double.tryParse(data['net'].toString()) ?? 0.0;
-        }
-      }
-
-      // 4. Update the UI with the final calculated totals.
-      allJobsVATS.value = totalVat;
-      allJobsTotals.value = grandTotal;
-      allJobsNET.value = totalNet;
     } catch (e) {
-      // Optionally reset values on error
       allJobsVATS.value = 0;
       allJobsTotals.value = 0;
       allJobsNET.value = 0;
@@ -1010,6 +1002,22 @@ class JobCardController extends GetxController {
       });
       addingNewinvoiceItemsValue.value = false;
       Get.back();
+      double allNets = 0.0;
+      double allVats = 0.0;
+      double alltotals = 0.0;
+      for (var invoice in allInvoiceItems) {
+        allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
+        allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
+        alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
+      }
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({
+        'total_net_amount': allNets,
+        'total_vat_amount': allVats,
+        'totals_amount': alltotals
+      });
     } catch (e) {
       addingNewinvoiceItemsValue.value = false;
     }
@@ -1034,6 +1042,23 @@ class JobCardController extends GetxController {
         'total': total.text,
         'vat': vat.text,
         'net': net.text,
+      });
+
+      double allNets = 0.0;
+      double allVats = 0.0;
+      double alltotals = 0.0;
+      for (var invoice in allInvoiceItems) {
+        allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
+        allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
+        alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
+      }
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({
+        'total_net_amount': allNets,
+        'total_vat_amount': allVats,
+        'totals_amount': alltotals
       });
     } catch (e) {
       //
@@ -1441,15 +1466,32 @@ class JobCardController extends GetxController {
     }
   }
 
-  deleteInvoiceItem(String jobId, String itemId) {
+  deleteInvoiceItem(String jobId, String itemId) async {
     try {
       Get.back();
-      FirebaseFirestore.instance
+      await FirebaseFirestore.instance
           .collection('job_cards')
           .doc(jobId)
           .collection('invoice_items')
           .doc(itemId)
           .delete();
+
+      double allNets = 0.0;
+      double allVats = 0.0;
+      double alltotals = 0.0;
+      for (var invoice in allInvoiceItems) {
+        allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
+        allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
+        alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
+      }
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({
+        'total_net_amount': allNets,
+        'total_vat_amount': allVats,
+        'totals_amount': alltotals
+      });
     } catch (e) {
       //
     }

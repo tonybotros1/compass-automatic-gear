@@ -87,22 +87,39 @@ Widget tableOfScreens({
         ),
       ),
     ],
-    rows: list
-        // cast each LinkedMap to a Map<String, dynamic>
-        .map((entry) => Map<String, dynamic>.from(entry))
-        .toList()
-        .asMap()
-        .entries
-        .map((e) {
-      final receipt = e.value;
-      // If you need the original index in the full list you can look it up,
-      // otherwise just pass `e.key` as the index in this filtered list:
-      final originalIndex = list
-          .indexWhere((r) => r['invoice_number'] == receipt['invoice_number']);
-      final invoice = receipt['invoice_number'] as String;
-      return dataRowForTheTable(receipt, context, constraints, controller,
-          originalIndex, invoice, isPayment);
-    }).toList(),
+    rows: isPayment
+        ? list
+            // cast each LinkedMap to a Map<String, dynamic>
+            .map((entry) => Map<String, dynamic>.from(entry))
+            .toList()
+            .asMap()
+            .entries
+            .map((e) {
+            final receipt = e.value;
+            // If you need the original index in the full list you can look it up,
+            // otherwise just pass `e.key` as the index in this filtered list:
+            final originalIndex = list.indexWhere(
+                (r) => r['reference_number'] == receipt['reference_number']);
+            final invoice = receipt['reference_number'] as String;
+            return dataRowForTheTable(receipt, context, constraints, controller,
+                originalIndex, invoice, isPayment);
+          }).toList()
+        : list
+            // cast each LinkedMap to a Map<String, dynamic>
+            .map((entry) => Map<String, dynamic>.from(entry))
+            .toList()
+            .asMap()
+            .entries
+            .map((e) {
+            final receipt = e.value;
+            // If you need the original index in the full list you can look it up,
+            // otherwise just pass `e.key` as the index in this filtered list:
+            final originalIndex = list.indexWhere(
+                (r) => r['invoice_number'] == receipt['invoice_number']);
+            final invoice = receipt['invoice_number'] as String;
+            return dataRowForTheTable(receipt, context, constraints, controller,
+                originalIndex, invoice, isPayment);
+          }).toList(),
   );
 }
 

@@ -365,7 +365,7 @@ Widget editSectionForPayments(context, CashManagementController controller,
             ? () async {
                 controller.setButtonLoading(cashManagementId, true);
 
-                await controller.loadValues(cashManagementData);
+                await controller.loadValuesForPayments(cashManagementData);
                 controller.setButtonLoading(cashManagementId, false);
 
                 paymentDialog(
@@ -391,7 +391,7 @@ Widget editSectionForPayments(context, CashManagementController controller,
                                 'Alert', 'Only New Receipts Can be Edited');
                             return;
                           }
-                          controller.editReceipt(cashManagementId);
+                          controller.editPayment(cashManagementId);
                         },
                   onPressedForDelete: () {
                     alertDialog(
@@ -399,7 +399,7 @@ Widget editSectionForPayments(context, CashManagementController controller,
                         controller: controller,
                         content: "This will be deleted permanently",
                         onPressed: () {
-                          controller.deleteReceipt(cashManagementId);
+                          controller.deletePayment(cashManagementId);
                         });
                   },
                 );

@@ -49,6 +49,7 @@ Widget paymentHeader(BuildContext context) {
               Expanded(
                   flex: 4,
                   child: CustomDropdown(
+                    textcontroller: controller.vendorName.text,
                     hintText: 'Vendor Name',
                     showedSelectedName: 'entity_name',
                     items: isVendorLoading ? {} : controller.allVendors,
@@ -58,7 +59,8 @@ Widget paymentHeader(BuildContext context) {
                       controller.availableReceipts.clear();
                       controller.selectedAvailableReceipts.clear();
                       // controller.outstanding.text =
-                      await controller.getVendorInvoices(key);
+                      // await controller.getVendorInvoices(key);
+                      controller.getVendorOutstanding(key);
                     },
                   )),
               Expanded(

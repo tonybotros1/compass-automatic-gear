@@ -9,6 +9,7 @@ import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/cash_management_widgets/receipt_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
+import 'cash_management_payment.dart';
 
 class CashManagementReceipt extends StatelessWidget {
   const CashManagementReceipt({super.key});
@@ -463,8 +464,11 @@ DataRow dataRowForTheTable(
     int index,
     bool isPayment) {
   return DataRow(cells: [
-    DataCell(editSection(context, controller, cashManagementData, constraints,
-        cashManagementId)),
+    DataCell(isPayment
+        ? editSectionForPayments(context, controller, cashManagementData,
+            constraints, cashManagementId)
+        : editSection(context, controller, cashManagementData, constraints,
+            cashManagementId)),
     DataCell(textForDataRowInTable(
         text: isPayment
             ? cashManagementData['payment_number'] ?? ''
@@ -571,7 +575,7 @@ Widget editSection(context, CashManagementController controller,
             ? () async {
                 controller.setButtonLoading(cashManagementId, true);
 
-                await controller.loadValues(cashManagementData);
+                await controller.loadValuesForReceipts(cashManagementData);
                 controller.setButtonLoading(cashManagementId, false);
 
                 receiptDialog(

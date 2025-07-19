@@ -122,8 +122,7 @@ Widget tableOfScreens(
           ],
           rows: [
             ...controller.allInvoices.map<DataRow>((invoiceItems) {
-              final invoiceItemsData =
-                  invoiceItems.data() as Map<String, dynamic>;
+              final invoiceItemsData = invoiceItems.data();
               final invoiceItemsId = invoiceItems.id;
               return dataRowForTheTable(invoiceItemsData, context, constraints,
                   invoiceItemsId, controller, id);
@@ -189,10 +188,14 @@ Widget deleteSection(String apInvoiceID, context,
               controller: controller,
               content: 'This will be deleted permanently',
               onPressed: () {
-                controller.deleteInvoiceItem(apInvoiceID, invoiceItemsId);
+                controller.deleteInvoiceItem(
+                    apInvoiceID != ''
+                        ? apInvoiceID
+                        : controller.currentApInvoiceId.value,
+                    invoiceItemsId);
               });
         } else {
-          showSnackBar('Alert', 'Only New Jobs Allowed');
+          showSnackBar('Alert', 'Only New AP Invoice Allowed');
         }
       },
       icon: const Icon(
@@ -236,11 +239,15 @@ Widget editSection(
               onPressed: controller.addingNewinvoiceItemsValue.value
                   ? null
                   : () {
-                      controller.editInvoiceItem(apInvoiceID, invoiceItemsId);
+                      controller.editInvoiceItem(
+                          apInvoiceID != ''
+                              ? apInvoiceID
+                              : controller.currentApInvoiceId.value,
+                          invoiceItemsId);
                     },
               context: context);
         } else {
-          showSnackBar('Alert', 'Only New Jobs Allowed');
+          showSnackBar('Alert', 'Only New AP Invoice Allowed');
         }
       },
       icon: const Icon(
@@ -282,10 +289,10 @@ ElevatedButton newinvoiceItemsButton(
                           : controller.currentApInvoiceId.value);
                     });
         } else {
-          showSnackBar('Alert', 'Only New Jobs Allowed');
+          showSnackBar('Alert', 'Only New AP Invoice Allowed');
         }
       } else {
-        showSnackBar('Alert', 'Please Save Job First');
+        showSnackBar('Alert', 'Please Save AP Invoice First');
       }
     },
     style: new2ButtonStyle,

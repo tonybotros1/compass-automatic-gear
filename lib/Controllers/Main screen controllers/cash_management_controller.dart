@@ -4,6 +4,7 @@ import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math';
 
 import 'main_screen_contro.dart';
 
@@ -54,7 +55,8 @@ class CashManagementController extends GetxController {
   RxBool isAllPaymentsSelected = RxBool(false);
   RxBool loadingInvoices = RxBool(false);
   RxDouble calculatedAmountForAllSelectedReceipts = RxDouble(0.0);
-  RxDouble calculatedOutstandingForAllSelectedReceipts = RxDouble(0.0);
+  RxDouble calculatedAmountForAllSelectedPayments = RxDouble(0.0);
+  // RxDouble calculatedOutstandingForAllSelectedReceipts = RxDouble(0.0);
   RxString companyId = RxString('');
   RxMap allReceiptTypes = RxMap({});
   RxMap allCustomers = RxMap({});
@@ -145,22 +147,14 @@ class CashManagementController extends GetxController {
     companyId.value = prefs.getString('companyId')!;
   }
 
-  loadValues(Map data) async {
+  loadValuesForReceipts(Map data) async {
     status.value = data['status'] ?? '';
     isReceiptAdded.value = true;
     availableReceipts.clear();
     if (data['customer'] != '') {
       await getCurrentCustomerInvoices(data['customer'], data['job_ids']);
       calculateAmountForSelectedReceipts();
-      calculateOutstandingForSelectedReceipts();
-      // await getCustomerInvoices(data['customer']);
-      // List jobIDs = data['job_ids'];
-      // for (var i = 0; i < availableReceipts.length; i++) {
-      //   if (jobIDs.contains(availableReceipts[i]['job_id'])) {
-      //     selectJobReceipt(i, true);
-      //   }
-      // }
-      // addSelectedReceipts();
+      // calculateOutstandingForSelectedReceipts();
     }
     receiptCounter.value.text = data['receipt_number'] ?? '';
     receiptDate.value.text = textToDate(data['receipt_date']);
@@ -185,6 +179,39 @@ class CashManagementController extends GetxController {
     rate.text = data['rate'] ?? '';
   }
 
+  loadValuesForPayments(Map data) async {
+    status.value = data['status'] ?? '';
+    isPaymentAdded.value = true;
+    availablePayments.clear();
+    selectedAvailablePayments.clear();
+
+    await getCurrentVendorInvoices(data['ap_invoices_ids']);
+    if (data['vendor'] != '') {
+      calculateAmountForSelectedPayments();
+      getVendorOutstanding(data['vendor']);
+
+      vendorName.text =
+          getdataName(data['vendor'], allVendors, title: 'entity_name');
+      vendorNameId.value = data['vendor'] ?? '';
+    }
+    paymentCounter.value.text = data['payment_number'] ?? '';
+    paymentDate.value.text = textToDate(data['payment_date']);
+
+    note.text = data['note'] ?? '';
+    paymentType.text = getdataName(data['payment_type'], allReceiptTypes);
+    paymentType.text == 'Cheque'
+        ? isChequeSelected.value = true
+        : isChequeSelected.value = false;
+    paymentTypeId.value = data['payment_type'] ?? '';
+    chequeNumber.text = data['cheque_number'] ?? '';
+    chequeDate.text = textToDate(data['cheque_date']);
+    account.text =
+        getdataName(data['account'], allAccounts, title: 'account_number');
+    accountId.value = data['account'];
+    currency.text = data['currency'] ?? '';
+    rate.text = data['rate'] ?? '';
+  }
+
   clearValues() {
     currency.clear();
     rate.clear();
@@ -192,23 +219,34 @@ class CashManagementController extends GetxController {
     accountId.value = '';
     outstanding.clear();
     isReceiptAdded.value = false;
+    isPaymentAdded.value = false;
     receiptDate.value.text = textToDate(DateTime.now().toString());
+    paymentDate.value.text = textToDate(DateTime.now().toString());
     receiptCounter.value.clear();
+    paymentCounter.value.clear();
     receiptType.clear();
+    paymentType.clear();
     customerName.clear();
+    vendorName.clear();
     note.clear();
     chequeNumber.clear();
     bankName.clear();
     chequeDate.clear();
     isChequeSelected.value = false;
     receiptTypeId.value = '';
+    paymentTypeId.value = '';
     customerNameId.value = '';
+    vendorNameId.value = '';
     availableReceipts.clear();
+    availablePayments.clear();
     selectedAvailableReceipts.clear();
+    selectedAvailablePayments.clear();
     isAllJobReceiptsSelected.value = false;
+    isAllPaymentsSelected.value = false;
     calculatedAmountForAllSelectedReceipts.value = 0.0;
-    calculatedOutstandingForAllSelectedReceipts.value = 0.0;
+    calculatedAmountForAllSelectedPayments.value = 0.0;
     currentReceiptID.value = '';
+    currentPaymentID.value = '';
     status.value = '';
   }
 
@@ -378,18 +416,25 @@ class CashManagementController extends GetxController {
     }
   }
 
-  calculateOutstandingForSelectedReceipts() {
-    calculatedOutstandingForAllSelectedReceipts.value = 0.0;
-    for (var element in selectedAvailableReceipts) {
-      calculatedOutstandingForAllSelectedReceipts.value +=
-          double.tryParse(element['outstanding_amount'] ?? 0)!;
+  calculateAmountForSelectedPayments() {
+    calculatedAmountForAllSelectedPayments.value = 0.0;
+    for (var element in selectedAvailablePayments) {
+      calculatedAmountForAllSelectedPayments.value +=
+          double.tryParse(element['payment_amount'] ?? 0)!;
     }
   }
+
+  // calculateOutstandingForSelectedReceipts() {
+  //   calculatedOutstandingForAllSelectedReceipts.value = 0.0;
+  //   for (var element in selectedAvailableReceipts) {
+  //     calculatedOutstandingForAllSelectedReceipts.value +=
+  //         double.tryParse(element['outstanding_amount'] ?? 0)!;
+  //   }
+  // }
 
 // this functions is to add the selected receipts to the table in the new receipts screen
   addSelectedReceipts() {
     // selectedAvailableReceipts.clear();
-
     for (var element in availableReceipts) {
       if (element['is_selected'] == true) {
         selectedAvailableReceipts.add(element);
@@ -397,13 +442,13 @@ class CashManagementController extends GetxController {
     }
 
     calculateAmountForSelectedReceipts();
-    calculateOutstandingForSelectedReceipts();
+    // calculateOutstandingForSelectedReceipts();
     update();
     Get.back();
   }
 
   addSelectedPayments() {
-    // selectedAvailableReceipts.clear();
+    // selectedAvailablePayments.clear();
 
     for (var element in availablePayments) {
       if (element['is_selected'] == true) {
@@ -411,8 +456,7 @@ class CashManagementController extends GetxController {
       }
     }
 
-    // calculateAmountForSelectedReceipts();
-    // calculateOutstandingForSelectedReceipts();
+    calculateAmountForSelectedPayments();
     update();
     Get.back();
   }
@@ -438,10 +482,10 @@ class CashManagementController extends GetxController {
     calculateAmountForSelectedReceipts();
   }
 
-  void removeSelectedPayment(String invoiceNumber) {
+  void removeSelectedPayment(String number) {
     // 1) Un‐select it in the main list
     final availIdx = availablePayments.indexWhere(
-      (r) => r['invoice_number'] == invoiceNumber,
+      (r) => r['reference_number'] == number,
     );
     if (availIdx != -1) {
       final updated = {
@@ -453,7 +497,7 @@ class CashManagementController extends GetxController {
 
     // 2) Remove from the selected list
     selectedAvailablePayments
-        .removeWhere((r) => r['invoice_number'] == invoiceNumber);
+        .removeWhere((r) => r['reference_number'] == number);
 
     // 3) Recalculate totals, etc.
     // calculateAmountForSelectedReceipts();
@@ -590,44 +634,150 @@ class CashManagementController extends GetxController {
   }
 
 // ============================================================================================== //
-  getVendorInvoices(String vendorId) async {
+  // getVendorInvoices(String vendorId) async {
+  //   try {
+  //     loadingInvoices.value = true;
+  //     availablePayments.clear();
+  //     double totalOutstanding = 0.0;
+  //     // List result = [];
+  //     var apInvoices = await FirebaseFirestore.instance
+  //         .collection('ap_invoices')
+  //         .where('company_id', isEqualTo: companyId.value)
+  //         .where('vendor', isEqualTo: vendorId)
+  //         .where('status', isEqualTo: 'Posted')
+  //         .get();
+
+  //     final selectedIds =
+  //         selectedAvailablePayments.map((e) => e['ap_invoice_id']).toSet();
+  //     for (var apInvoice in apInvoices.docs) {
+  //       var apInvoiceId = apInvoice.id;
+  //       var apInvoiceData = apInvoice.data();
+  //       if (selectedIds.contains(apInvoiceId)) {
+  //         continue;
+  //       }
+
+  //       double invoiceAmount =
+  //           double.tryParse(apInvoiceData['total_amount'].toString()) ?? 0.0;
+  //       double paymentAmount =
+  //           await calculateTotalPaymentsForAPInvoices(apInvoiceId);
+
+  //       double outstanding = invoiceAmount - paymentAmount;
+  //       if (outstanding > 0) {
+  //         totalOutstanding += outstanding;
+  //         var vendorId = apInvoiceData['vendor'] ?? '';
+
+  //         var vendorName =
+  //             getdataName(vendorId, allVendors, title: 'entity_name');
+  //         var date = textToDate(apInvoiceData['invoice_date'] ?? '');
+
+  //         String note =
+  //             'Invoice Number: ${apInvoiceData['invoice_number'] ?? ''}, Invoice Date: $date, Vendor: $vendorName';
+
+  //         availablePayments.add({
+  //           'is_selected': false,
+  //           'ap_invoice_id': apInvoiceId,
+  //           'invoice_number': apInvoiceData['invoice_number'] ?? '',
+  //           'reference_number': apInvoiceData['reference_number'] ?? '',
+  //           'invoice_date': date,
+  //           'invoice_amount': invoiceAmount.toString(),
+  //           'payment_amount': outstanding.toString(),
+  //           'outstanding_amount': outstanding.toString(),
+  //           'notes': note
+  //         });
+  //       }
+  //     }
+  //     loadingInvoices.value = false;
+  //     outstanding.text = totalOutstanding.toString();
+  //     // return totalOutstanding;
+  //   } catch (e) {
+  //     loadingInvoices.value = false;
+  //   }
+  // }
+
+  Future<void> getVendorInvoices(String vendorId) async {
     try {
       loadingInvoices.value = true;
       availablePayments.clear();
-      double totalOutstanding = 0.0;
-      // List result = [];
-      var apInvoices = await FirebaseFirestore.instance
+
+      // === QUERY 1: Get all posted invoices for the vendor ===
+      final apInvoicesQuery = await FirebaseFirestore.instance
           .collection('ap_invoices')
           .where('company_id', isEqualTo: companyId.value)
           .where('vendor', isEqualTo: vendorId)
           .where('status', isEqualTo: 'Posted')
           .get();
 
-      for (var apInvoice in apInvoices.docs) {
-        var apInvoiceId = apInvoice.id;
-        var apInvoiceData = apInvoice.data();
-        double invoiceAmount = await calculateSumOfAmounts(apInvoice);
-        double paymentAmount =
-            await calculateTotalPaymentsForAPInvoices(apInvoiceId);
+      // Filter out invoices that are already selected locally
+      final selectedIds =
+          selectedAvailablePayments.map((e) => e['ap_invoice_id']).toSet();
+      final unselectedInvoiceDocs = apInvoicesQuery.docs.where((doc) {
+        return !selectedIds.contains(doc.id);
+      }).toList();
 
-        double outstanding = invoiceAmount - paymentAmount;
-        totalOutstanding += outstanding;
+      if (unselectedInvoiceDocs.isEmpty) {
+        loadingInvoices.value = false;
+        // Optional: Recalculate outstanding based on already selected items if needed
+        outstanding.text = '0.0';
+        return;
+      }
+
+      final List<String> invoiceIdsToFetchPayments =
+          unselectedInvoiceDocs.map((doc) => doc.id).toList();
+
+      // === QUERY 2 (Chunked): Get all payments for the needed invoices ===
+      final Map<String, double> paymentsByInvoiceId = {};
+      const chunkSize = 30; // Firestore's limit for 'array-contains-any'
+      List<Future<QuerySnapshot<Map<String, dynamic>>>> paymentFutures = [];
+
+      for (var i = 0; i < invoiceIdsToFetchPayments.length; i += chunkSize) {
+        final chunk = invoiceIdsToFetchPayments.sublist(
+            i, min(i + chunkSize, invoiceIdsToFetchPayments.length));
+        paymentFutures.add(FirebaseFirestore.instance
+            .collection('all_payments')
+            .where('ap_invoices_ids', arrayContainsAny: chunk)
+            .get());
+      }
+
+      // Execute all payment queries concurrently and process results
+      final paymentSnapshots = await Future.wait(paymentFutures);
+      for (final snapshot in paymentSnapshots) {
+        for (final paymentDoc in snapshot.docs) {
+          final Map<String, dynamic> apInvoicesMap =
+              paymentDoc.data()['ap_invoices'] ?? {};
+          apInvoicesMap.forEach((invoiceId, paymentAmount) {
+            final double amount =
+                double.tryParse(paymentAmount.toString()) ?? 0.0;
+            paymentsByInvoiceId[invoiceId] =
+                (paymentsByInvoiceId[invoiceId] ?? 0.0) + amount;
+          });
+        }
+      }
+
+      // === PROCESS IN MEMORY: Now build the final list with all data present ===
+      double totalOutstanding = 0.0;
+      for (final apInvoice in unselectedInvoiceDocs) {
+        final apInvoiceData = apInvoice.data();
+        final double invoiceAmount =
+            double.tryParse(apInvoiceData['total_amount'].toString()) ?? 0.0;
+
+        // Get the pre-fetched payment amount from our map
+        final double paymentAmount = paymentsByInvoiceId[apInvoice.id] ?? 0.0;
+        final double outstanding = invoiceAmount - paymentAmount;
+
         if (outstanding > 0) {
-          var vendorId = apInvoiceData['vendor'] ?? '';
-          var vendorData = await FirebaseFirestore.instance
-              .collection('entity_informations')
-              .doc(vendorId)
-              .get();
-          var vendorName = vendorData.data()?['entity_name'] ?? '';
-          var date = textToDate(apInvoiceData['invoice_date'] ?? '');
-
-          String note =
+          totalOutstanding += outstanding;
+          final vendorName = getdataName(
+              apInvoiceData['vendor'] ?? '', allVendors,
+              title: 'entity_name');
+          final date = textToDate(apInvoiceData['invoice_date'] ?? '');
+          final note =
               'Invoice Number: ${apInvoiceData['invoice_number'] ?? ''}, Invoice Date: $date, Vendor: $vendorName';
 
           availablePayments.add({
             'is_selected': false,
-            'ap_invoice_id': apInvoiceId,
+            'ap_invoice_id': apInvoice.id,
             'invoice_number': apInvoiceData['invoice_number'] ?? '',
+            'reference_number': apInvoiceData['reference_number'] ?? '',
             'invoice_date': date,
             'invoice_amount': invoiceAmount.toString(),
             'payment_amount': outstanding.toString(),
@@ -636,35 +786,192 @@ class CashManagementController extends GetxController {
           });
         }
       }
-      // availablePayments.assignAll(result);
-      loadingInvoices.value = false;
+
       outstanding.text = totalOutstanding.toString();
-      // return totalOutstanding;
     } catch (e) {
+      // print('Error getting vendor invoices: $e');
+      // Handle error state appropriately
+    } finally {
       loadingInvoices.value = false;
     }
   }
 
-  Future<double> calculateSumOfAmounts(DocumentSnapshot apInvoice) async {
+  // getCurrentVendorInvoices(List apIDs) async {
+  //   try {
+  //     for (var id in apIDs) {
+  //       var apInvoice = await FirebaseFirestore.instance
+  //           .collection('ap_invoices')
+  //           .doc(id)
+  //           .get();
+
+  //       var apInvoiceId = apInvoice.id;
+  //       var apInvoiceData = apInvoice.data() as Map<String, dynamic>;
+  //       double invoiceAmount =
+  //           double.tryParse(apInvoiceData['total_amount'].toString()) ?? 0.0;
+  //       double paymentAmount =
+  //           await calculateTotalPaymentsForAPInvoices(apInvoiceId);
+
+  //       double outstanding = invoiceAmount - paymentAmount;
+  //       var vendorId = apInvoiceData['vendor'] ?? '';
+
+  //       var vendorName =
+  //           getdataName(vendorId, allVendors, title: 'entity_name');
+  //       var date = textToDate(apInvoiceData['invoice_date'] ?? '');
+
+  //       String note =
+  //           'Invoice Number: ${apInvoiceData['invoice_number'] ?? ''}, Invoice Date: $date, Vendor: $vendorName';
+
+  //       selectedAvailablePayments.add({
+  //         'is_selected': true,
+  //         'ap_invoice_id': apInvoiceId,
+  //         'invoice_number': apInvoiceData['invoice_number'] ?? '',
+  //         'reference_number': apInvoiceData['reference_number'] ?? '',
+  //         'invoice_date': date,
+  //         'invoice_amount': invoiceAmount.toString(),
+  //         'payment_amount': paymentAmount.toString(),
+  //         'outstanding_amount': outstanding.toString(),
+  //         'notes': note
+  //       });
+  //     }
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
+
+  Future<void> getCurrentVendorInvoices(List apIDs) async {
     try {
-      double totalAmounts = 0.0;
-      var items = await apInvoice.reference.collection('invoices').get();
-      for (var item in items.docs) {
-        var itemData = item.data();
-        totalAmounts += double.tryParse(itemData['amount'] ?? '0') ?? 0.0;
+      // If you have a loading state for this specific function, manage it.
+      // Otherwise, you might want to combine it with a global loading state.
+      // loadingInvoices.value = true;
+      selectedAvailablePayments
+          .clear(); // Clear previous selections before populating
+
+      if (apIDs.isEmpty) {
+        // loadingInvoices.value = false;
+        return;
       }
-      return totalAmounts;
+
+      // === QUERY 1 (Chunked): Get all selected invoices by their IDs ===
+      final List<Future<QuerySnapshot<Map<String, dynamic>>>> invoiceFutures =
+          [];
+      const chunkSize = 10; // Firestore's limit for 'in' query
+
+      for (var i = 0; i < apIDs.length; i += chunkSize) {
+        final chunk = apIDs.sublist(i, min(i + chunkSize, apIDs.length));
+        invoiceFutures.add(FirebaseFirestore.instance
+            .collection('ap_invoices')
+            .where(FieldPath.documentId, whereIn: chunk)
+            .get());
+      }
+
+      final List<QueryDocumentSnapshot<Map<String, dynamic>>> allInvoiceDocs =
+          [];
+      final invoiceSnapshots = await Future.wait(invoiceFutures);
+      for (final snapshot in invoiceSnapshots) {
+        allInvoiceDocs.addAll(snapshot.docs);
+      }
+
+      if (allInvoiceDocs.isEmpty) {
+        // loadingInvoices.value = false;
+        return;
+      }
+
+      final List<String> invoiceIdsToFetchPayments =
+          allInvoiceDocs.map((doc) => doc.id).toList();
+
+      // === QUERY 2 (Chunked): Get all payments for the selected invoices ===
+      // This part is similar to your getVendorInvoices function for consistency.
+      final Map<String, double> paymentsByInvoiceId = {};
+      List<Future<QuerySnapshot<Map<String, dynamic>>>> paymentFutures = [];
+      const paymentChunkSize = 30; // Firestore's limit for 'array-contains-any'
+
+      for (var i = 0;
+          i < invoiceIdsToFetchPayments.length;
+          i += paymentChunkSize) {
+        final chunk = invoiceIdsToFetchPayments.sublist(
+            i, min(i + paymentChunkSize, invoiceIdsToFetchPayments.length));
+        paymentFutures.add(FirebaseFirestore.instance
+            .collection('all_payments')
+            .where('ap_invoices_ids', arrayContainsAny: chunk)
+            .get());
+      }
+
+      final paymentSnapshots = await Future.wait(paymentFutures);
+      for (final snapshot in paymentSnapshots) {
+        for (final paymentDoc in snapshot.docs) {
+          final Map<String, dynamic> apInvoicesMap =
+              paymentDoc.data()['ap_invoices'] ?? {};
+          apInvoicesMap.forEach((invoiceId, paymentAmount) {
+            final double amount =
+                double.tryParse(paymentAmount.toString()) ?? 0.0;
+            paymentsByInvoiceId[invoiceId] =
+                (paymentsByInvoiceId[invoiceId] ?? 0.0) + amount;
+          });
+        }
+      }
+
+      // === PROCESS IN MEMORY: Build the final list with all data present ===
+      for (final apInvoice in allInvoiceDocs) {
+        final apInvoiceData = apInvoice.data();
+        final double invoiceAmount =
+            double.tryParse(apInvoiceData['total_amount'].toString()) ?? 0.0;
+
+        // Get the pre-fetched payment amount from our map
+        final double paymentAmount = paymentsByInvoiceId[apInvoice.id] ?? 0.0;
+        final double outstanding = invoiceAmount - paymentAmount;
+
+        final vendorId = apInvoiceData['vendor'] ?? '';
+        final vendorName =
+            getdataName(vendorId, allVendors, title: 'entity_name');
+        final date = textToDate(apInvoiceData['invoice_date'] ?? '');
+
+        final String note =
+            'Invoice Number: ${apInvoiceData['invoice_number'] ?? ''}, Invoice Date: $date, Vendor: $vendorName';
+
+        selectedAvailablePayments.add({
+          'is_selected': true,
+          'ap_invoice_id': apInvoice.id,
+          'invoice_number': apInvoiceData['invoice_number'] ?? '',
+          'reference_number': apInvoiceData['reference_number'] ?? '',
+          'invoice_date': date,
+          'invoice_amount': invoiceAmount.toString(),
+          'payment_amount': paymentAmount.toString(),
+          'outstanding_amount': outstanding.toString(),
+          'notes': note
+        });
+      }
+
+      // If you have a total outstanding for selected items, calculate it here.
+      // double totalSelectedOutstanding = selectedAvailablePayments.fold(0.0, (sum, item) => sum + (double.tryParse(item['outstanding_amount'].toString()) ?? 0.0));
+      // outstanding.text = totalSelectedOutstanding.toString();
     } catch (e) {
-      return 0.0;
+      // print('Error getting current vendor invoices: $e');
+      // Handle error state appropriately
+    } finally {
+      // loadingInvoices.value = false;
     }
   }
+
+  // Future<double> calculateSumOfAmounts(DocumentSnapshot apInvoice) async {
+  //   try {
+  //     double totalAmounts = 0.0;
+  //     var items = await apInvoice.reference.collection('invoices').get();
+  //     for (var item in items.docs) {
+  //       var itemData = item.data();
+  //       totalAmounts += double.tryParse(itemData['amount'] ?? '0') ?? 0.0;
+  //     }
+  //     return totalAmounts;
+  //   } catch (e) {
+  //     return 0.0;
+  //   }
+  // }
 
   Future<double> calculateTotalPaymentsForAPInvoices(apId) async {
     try {
       double total = 0.0;
       var payments = await FirebaseFirestore.instance
           .collection('all_payments')
-          .where('ap_invoice_ids', arrayContains: apId)
+          .where('ap_invoices_ids', arrayContains: apId)
           .get();
 
       for (var pay in payments.docs) {
@@ -674,6 +981,114 @@ class CashManagementController extends GetxController {
       return total;
     } catch (e) {
       return 0.0;
+    }
+  }
+
+  // getVendorOutstanding(vendorId) async {
+  //   try {
+  //     double totalOutstanding = 0.0;
+  //     double amount = 0.0;
+  //     double currentOutstanding = 0.0;
+  //     var apInvoices = await FirebaseFirestore.instance
+  //         .collection('ap_invoices')
+  //         .where('company_id', isEqualTo: companyId.value)
+  //         .where('vendor', isEqualTo: vendorId)
+  //         .where('status', isEqualTo: 'Posted')
+  //         .get();
+
+  //     for (var apInvoice in apInvoices.docs) {
+  //       var apInvoiceData = apInvoice.data();
+  //       amount =
+  //           double.tryParse(apInvoiceData['total_amount'].toString()) ?? 0.0;
+  //       double paymentAmount =
+  //           await calculateTotalPaymentsForAPInvoices(apInvoice.id);
+  //       currentOutstanding = amount - paymentAmount;
+  //       totalOutstanding += currentOutstanding;
+  //     }
+
+  //     outstanding.text = totalOutstanding.toString();
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
+
+// Assume companyId is accessible
+// final companyId = ...;
+
+  Future<void> getVendorOutstanding(String vendorId) async {
+    try {
+      // === QUERY 1: Get all relevant invoices (same as before) ===
+      final apInvoicesQuery = await FirebaseFirestore.instance
+          .collection('ap_invoices')
+          .where('company_id', isEqualTo: companyId.value)
+          .where('vendor', isEqualTo: vendorId)
+          .where('status', isEqualTo: 'Posted')
+          .get();
+
+      if (apInvoicesQuery.docs.isEmpty) {
+        outstanding.text = '0.0';
+        return;
+      }
+
+      final List<String> invoiceIds =
+          apInvoicesQuery.docs.map((doc) => doc.id).toList();
+
+      // === NEW: PROCESS PAYMENTS IN CHUNKS ===
+      final Map<String, double> paymentsByInvoiceId = {};
+      const chunkSize = 30; // Firestore's limit for 'array-contains-any'
+
+      // Create a list of futures, one for each chunk of invoices
+      List<Future<QuerySnapshot<Map<String, dynamic>>>> paymentFutures = [];
+
+      for (var i = 0; i < invoiceIds.length; i += chunkSize) {
+        // Get a sublist for the current chunk
+        final chunk =
+            invoiceIds.sublist(i, min(i + chunkSize, invoiceIds.length));
+
+        // Add the query for this chunk to our list of futures
+        paymentFutures.add(FirebaseFirestore.instance
+            .collection('all_payments')
+            .where('ap_invoices_ids', arrayContainsAny: chunk)
+            .get());
+      }
+
+      // === Execute all payment queries concurrently ===
+      final List<QuerySnapshot<Map<String, dynamic>>> paymentSnapshots =
+          await Future.wait(paymentFutures);
+
+      // === Process the results from all queries in memory ===
+      for (final snapshot in paymentSnapshots) {
+        // Loop through results from each chunk
+        for (final paymentDoc in snapshot.docs) {
+          // Loop through payments in the result
+          final paymentData = paymentDoc.data();
+          final Map<String, dynamic> apInvoicesMap =
+              paymentData['ap_invoices'] ?? {};
+
+          apInvoicesMap.forEach((invoiceId, paymentAmount) {
+            final double amount =
+                double.tryParse(paymentAmount.toString()) ?? 0.0;
+            paymentsByInvoiceId[invoiceId] =
+                (paymentsByInvoiceId[invoiceId] ?? 0.0) + amount;
+          });
+        }
+      }
+
+      // === CALCULATE FINAL TOTAL (same as before) ===
+      double totalOutstanding = 0.0;
+      for (final apInvoiceDoc in apInvoicesQuery.docs) {
+        final apInvoiceData = apInvoiceDoc.data();
+        final double totalAmount =
+            double.tryParse(apInvoiceData['total_amount'].toString()) ?? 0.0;
+        final double totalPaid = paymentsByInvoiceId[apInvoiceDoc.id] ?? 0.0;
+
+        totalOutstanding += (totalAmount - totalPaid);
+      }
+
+      outstanding.text = totalOutstanding.toString();
+    } catch (e) {
+      // outstanding.text = 'Error';
+      // print('Error calculating outstanding: $e');
     }
   }
 
@@ -951,11 +1366,87 @@ class CashManagementController extends GetxController {
     }
   }
 
+  editPayment(id) async {
+    try {
+      addingNewValue.value = true;
+
+      Map<String, dynamic> apInvoiceMap = {};
+      List<String> apInvoiceIds = [];
+
+      for (final payment in selectedAvailablePayments) {
+        final String? apInvoiceId = payment['ap_invoice_id'];
+        final dynamic amount = payment['payment_amount'];
+
+        if (apInvoiceId != null && amount != null) {
+          apInvoiceMap[apInvoiceId] = amount;
+          apInvoiceIds.add(apInvoiceId);
+        }
+      }
+
+      var newData = {
+        'vendor': vendorNameId.value,
+        'note': note.text,
+        'payment_type': paymentTypeId.value,
+        'cheque_number': chequeNumber.text,
+        'ap_invoices': apInvoiceMap,
+        'ap_invoices_ids': apInvoiceIds,
+        'account': accountId.value,
+        'rate': rate.text,
+      };
+      final rawDate = paymentDate.value.text.trim();
+      final rawDate2 = chequeDate.value.text.trim();
+
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['payment_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+        }
+      }
+
+      if (rawDate2.isNotEmpty) {
+        try {
+          newData['cheque_date'] = Timestamp.fromDate(
+            format.parseStrict(rawDate2),
+          );
+        } catch (e) {
+          showSnackBar('Alert', 'Please Enter Valid Date');
+          return;
+        }
+      }
+
+      await FirebaseFirestore.instance
+          .collection('all_payments')
+          .doc(id)
+          .update(newData);
+      addingNewValue.value = false;
+      showSnackBar('Done', 'Updated Successfully');
+    } catch (e) {
+      addingNewValue.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
+  }
+
   deleteReceipt(id) async {
     try {
       Get.close(2);
       await FirebaseFirestore.instance
           .collection('all_receipts')
+          .doc(id)
+          .delete();
+    } catch (e) {
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
+  }
+
+  deletePayment(id) async {
+    try {
+      Get.close(2);
+      await FirebaseFirestore.instance
+          .collection('all_payments')
           .doc(id)
           .delete();
     } catch (e) {
@@ -1049,7 +1540,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  getCurrencyName(countryId) async {
+  Future<String> getCurrencyName(countryId) async {
     try {
       final HttpsCallable callable =
           FirebaseFunctions.instance.httpsCallable('get_currency_name');
@@ -1067,7 +1558,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  getCurrencyRate(currencyId) async {
+  Future<String> getCurrencyRate(currencyId) async {
     try {
       final HttpsCallable callable =
           FirebaseFunctions.instance.httpsCallable('get_currency_rate');
@@ -1519,6 +2010,7 @@ class CashManagementController extends GetxController {
   clearAllFilters() {
     statusFilter.value.clear();
     allReceipts.clear();
+    allPayements.clear();
     isAllSelected.value = false;
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;

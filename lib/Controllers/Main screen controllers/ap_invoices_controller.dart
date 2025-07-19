@@ -42,7 +42,8 @@ class ApInvoicesController extends GetxController {
 
   RxBool isScreenLoding = RxBool(false);
   final RxList<DocumentSnapshot> allApInvoices = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> allInvoices = RxList<DocumentSnapshot>([]);
+  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allInvoices =
+      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
   final RxList<DocumentSnapshot> allJobCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredJobCards =
       RxList<DocumentSnapshot>([]);
@@ -56,7 +57,7 @@ class ApInvoicesController extends GetxController {
   RxBool loadingInvoices = RxBool(false);
   RxMap allInvoiceTypes = RxMap({});
   RxMap allBrands = RxMap({});
- 
+
   RxMap allTransactionsTypes = RxMap({});
   RxString companyId = RxString('');
   RxMap allVendors = RxMap({});
@@ -70,6 +71,7 @@ class ApInvoicesController extends GetxController {
   DateFormat format = DateFormat("dd-MM-yyyy");
   RxBool postingapInvoice = RxBool(false);
   RxBool cancellingapInvoice = RxBool(false);
+  RxBool deletingapInvoice = RxBool(false);
 
 // for the new invoice item
   final FocusNode focusNode1 = FocusNode();
@@ -171,15 +173,43 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  deleteInvoiceItem(String id, String itemId) {
+  deleteApInvoice(id) async {
+    try {
+      deletingapInvoice.value = true;
+      await FirebaseFirestore.instance
+          .collection('ap_invoices')
+          .doc(id)
+          .delete();
+      deletingapInvoice.value = false;
+    } catch (e) {
+      deletingapInvoice.value = false;
+    }
+  }
+
+  deleteInvoiceItem(String id, String itemId) async {
     try {
       Get.back();
-      FirebaseFirestore.instance
+      await FirebaseFirestore.instance
           .collection('ap_invoices')
           .doc(id)
           .collection('invoices')
           .doc(itemId)
           .delete();
+
+      double allamounts = 0.0;
+      double allVats = 0.0;
+      for (var invoice in allInvoices) {
+        allamounts +=
+            double.tryParse(invoice.data()['amount'].toString()) ?? 0.0;
+        allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
+      }
+      await FirebaseFirestore.instance
+          .collection('ap_invoices')
+          .doc(id)
+          .update({
+        'total_amount': allamounts,
+        'total_vat_amount': allVats,
+      });
     } catch (e) {
       //
     }
@@ -320,26 +350,10 @@ class ApInvoicesController extends GetxController {
         'transaction_type': transactionTypeId.value,
         'amount': amount.text,
         'vat': vat.text,
-        // 'invoice_number': invoiceNumber.text,
-        // 'vendor': vendorForInvoiceId.value,
         'job_number': jobNumber.text,
         'note': invoiceNote.text,
         'report_reference': '',
       };
-
-      // final rawDate = invoiceDate.value.text.trim();
-      // if (rawDate.isNotEmpty) {
-      //   try {
-      //     newData['invoice_date'] = Timestamp.fromDate(
-      //       format.parseStrict(rawDate),
-      //     );
-      //   } catch (e) {
-      //     showSnackBar('Alert', 'Please Enter Valid Date');
-      //     return;
-      //     // إذا حابب تعرض للمستخدم خطأ في التنسيق
-      //     // print('Invalid quotation_date format: $e');
-      //   }
-      // }
 
       await FirebaseFirestore.instance
           .collection('ap_invoices')
@@ -349,29 +363,57 @@ class ApInvoicesController extends GetxController {
 
       addingNewinvoiceItemsValue.value = false;
       Get.back();
+
+      double allamounts = 0.0;
+      double allVats = 0.0;
+      for (var invoice in allInvoices) {
+        allamounts +=
+            double.tryParse(invoice.data()['amount'].toString()) ?? 0.0;
+        allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
+      }
+      await FirebaseFirestore.instance
+          .collection('ap_invoices')
+          .doc(id)
+          .update({
+        'total_amount': allamounts,
+        'total_vat_amount': allVats,
+      });
     } catch (e) {
       addingNewinvoiceItemsValue.value = false;
       showSnackBar('Alert', 'Something Went Wrong Please Try Again');
     }
   }
 
-  editInvoiceItem(String jobId, String itemId) async {
+  editInvoiceItem(String id, String itemId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
           .collection('ap_invoices')
-          .doc(jobId)
+          .doc(id)
           .collection('invoices')
           .doc(itemId)
           .update({
         'transaction_type': transactionTypeId.value,
         'amount': amount.text,
         'vat': vat.text,
-        // 'invoice_number': invoiceNumber.text,
-        // 'vendor': vendorForInvoiceId.value,
         'job_number': jobNumber.text,
         'note': invoiceNote.text,
         'report_reference': '',
+      });
+
+      double allamounts = 0.0;
+      double allVats = 0.0;
+      for (var invoice in allInvoices) {
+        allamounts +=
+            double.tryParse(invoice.data()['amount'].toString()) ?? 0.0;
+        allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
+      }
+      await FirebaseFirestore.instance
+          .collection('ap_invoices')
+          .doc(id)
+          .update({
+        'total_amount': allamounts,
+        'total_vat_amount': allVats,
       });
     } catch (e) {
       //

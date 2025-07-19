@@ -113,18 +113,29 @@ Widget accountInformations(BuildContext context, bool isPayment) {
                   hintText: 'Account',
                   showedSelectedName: 'account_number',
                   items: isAccountsLoading ? {} : controller.allAccounts,
-                  // itemBuilder: (context, key, value) {
-                  //   return ListTile(
-                  //     title: Text(value['account_number']),
-                  //   );
-                  // },
                   onChanged: (key, value) async {
                     controller.account.text = value['account_number'];
                     controller.accountId.value = key;
-                    controller.currency.text =
-                        await controller.getCurrencyName(value['country_id']);
-                    controller.rate.text =
-                        await controller.getCurrencyRate(value['currency']);
+                    // controller.currency.text =
+                    //     await controller.getCurrencyName(value['country_id']);
+                    // controller.rate.text =
+                    //     await controller.getCurrencyRate(value['currency']);
+
+                    // Run both functions in parallel
+
+                    // Explicitly typing the futures
+                    final Future<String> nameFuture =
+                        controller.getCurrencyName(value['country_id']);
+                    final Future<String> rateFuture =
+                        controller.getCurrencyRate(value['currency']);
+
+                    final results = await Future.wait<String>([
+                      nameFuture,
+                      rateFuture,
+                    ]);
+
+                    controller.currency.text = results[0]; // Currency name
+                    controller.rate.text = results[1]; // Currency rate
                   },
                 ),
               ),

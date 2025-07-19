@@ -79,22 +79,39 @@ Widget tableOfScreens({
       ),
     ],
 
-    rows: availableList
-        // filter out already‐selected receipts
-        .where((r) => !selectedAvailableList
-            .any((sel) => sel['invoice_number'] == r['invoice_number']))
-        .toList()
-        // re‐index the filtered list
-        .asMap()
-        .entries
-        .map((entry) {
-      // cast each entry to Map<String,dynamic>
-      final receipt = Map<String, dynamic>.from(entry.value);
-      final originalIndex = availableList
-          .indexWhere((r) => r['invoice_number'] == receipt['invoice_number']);
-      return dataRowForTheTable(
-          receipt, context, constraints, controller, originalIndex, isPayment);
-    }).toList(),
+    rows: isPayment
+        ? availableList
+            // filter out already‐selected receipts
+            .where((r) => !selectedAvailableList
+                .any((sel) => sel['reference_number'] == r['reference_number']))
+            .toList()
+            // re‐index the filtered list
+            .asMap()
+            .entries
+            .map((entry) {
+            // cast each entry to Map<String,dynamic>
+            final receipt = Map<String, dynamic>.from(entry.value);
+            final originalIndex = availableList.indexWhere(
+                (r) => r['reference_number'] == receipt['reference_number']);
+            return dataRowForTheTable(receipt, context, constraints, controller,
+                originalIndex, isPayment);
+          }).toList()
+        : availableList
+            // filter out already‐selected receipts
+            .where((r) => !selectedAvailableList
+                .any((sel) => sel['invoice_number'] == r['invoice_number']))
+            .toList()
+            // re‐index the filtered list
+            .asMap()
+            .entries
+            .map((entry) {
+            // cast each entry to Map<String,dynamic>
+            final receipt = Map<String, dynamic>.from(entry.value);
+            final originalIndex = availableList.indexWhere(
+                (r) => r['invoice_number'] == receipt['invoice_number']);
+            return dataRowForTheTable(receipt, context, constraints, controller,
+                originalIndex, isPayment);
+          }).toList(),
   );
 }
 

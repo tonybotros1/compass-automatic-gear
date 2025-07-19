@@ -214,7 +214,11 @@ Widget deleteSection(
               controller: controller,
               content: 'This will be deleted permanently',
               onPressed: () {
-                controller.deleteInvoiceItem(jobId, invoiceItemsId);
+                controller.deleteInvoiceItem(
+                    controller.curreentJobCardId.value != ''
+                        ? controller.curreentJobCardId.value
+                        : jobId,
+                    invoiceItemsId);
               });
         } else {
           showSnackBar('Alert', 'Only New Jobs Allowed');
@@ -257,7 +261,9 @@ Widget editSection(
               onPressed: controller.addingNewinvoiceItemsValue.value
                   ? null
                   : () {
-                      controller.editInvoiceItem(jobId, invoiceItemsId);
+                      controller.editInvoiceItem(  controller.curreentJobCardId.value != ''
+                        ? controller.curreentJobCardId.value
+                        : jobId, invoiceItemsId);
                     });
         } else {
           showSnackBar('Alert', 'Only New Jobs Allowed');

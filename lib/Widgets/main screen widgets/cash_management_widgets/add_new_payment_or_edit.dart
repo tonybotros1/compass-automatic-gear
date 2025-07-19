@@ -192,9 +192,9 @@ Widget addNewPaymentOrEdit({
                       ),
                       TextSpan(
                         text: NumberFormat("#,##0.00").format(controller
-                            .calculatedAmountForAllSelectedReceipts.value),
+                            .calculatedAmountForAllSelectedPayments.value),
                         style: TextStyle(
-                          color: Colors.green,
+                          color: Colors.red,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

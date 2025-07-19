@@ -404,7 +404,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> typeData, context, constraints,
       ],
     )),
     DataCell(textForDataRowInTable(
-      text: getdataName(typeData['invoice_type'] ?? '', controller.allInvoiceTypes),
+      text: getdataName(
+          typeData['invoice_type'] ?? '', controller.allInvoiceTypes),
     )),
     DataCell(
       statusBox(
@@ -448,16 +449,31 @@ Widget editSection(context, ApInvoicesController controller,
           constraints: constraints,
           controller: controller,
           canEdit: true,
-          onPressedForDelete: null,
+          onPressedForDelete: controller.deletingapInvoice.isTrue
+              ? null
+              : () {
+                  if (controller.status.value != 'New') {
+                    showSnackBar(
+                        'Alert', 'Only New AP Invoices Can be Deleted');
+                  } else {
+                    alertDialog(
+                        context: context,
+                        controller: controller,
+                        content: 'This will be deleted permanently',
+                        onPressed: () {
+                          controller.deleteApInvoice(typeId);
+                        });
+                  }
+                },
           onPressedForCancel: controller.cancellingapInvoice.isFalse
               ? () {
                   if (controller.status.value != 'Cancelled' &&
                       controller.status.value.isNotEmpty) {
                     controller.editCancelForApInvoices(typeId);
                   } else if (controller.status.value == 'Cancelled') {
-                    showSnackBar('Alert', 'Quotation Already Cancelled');
+                    showSnackBar('Alert', 'AP Invoice Already Cancelled');
                   } else if (controller.status.value.isEmpty) {
-                    showSnackBar('Alert', 'Please Save The Quotation First');
+                    showSnackBar('Alert', 'Please Save The AP Invoice First');
                   }
                 }
               : null,
@@ -468,11 +484,11 @@ Widget editSection(context, ApInvoicesController controller,
                       controller.status.value.isNotEmpty) {
                     controller.editPostForApInvoices(typeId);
                   } else if (controller.status.value == 'Posted') {
-                    showSnackBar('Alert', 'Quotation is Already Posted');
+                    showSnackBar('Alert', 'AP Invoice is Already Posted');
                   } else if (controller.status.value == 'Cancelled') {
-                    showSnackBar('Alert', 'Quotation is Cancelled');
+                    showSnackBar('Alert', 'AP Invoice is Cancelled');
                   } else if (controller.status.value.isEmpty) {
-                    showSnackBar('Alert', 'Please Save The Quotation First');
+                    showSnackBar('Alert', 'Please Save The AP Invoice First');
                   }
                 }
               : null,
@@ -511,7 +527,7 @@ ElevatedButton newInvoiceButton(BuildContext context,
           constraints: constraints,
           controller: controller,
           canEdit: true,
-          onPressedForSave: controller.addingNewValue.value
+          onPressedForSave: controller.addingNewValue.isTrue
               ? null
               : () async {
                   await controller.addNewApInvoice();
@@ -525,11 +541,11 @@ ElevatedButton newInvoiceButton(BuildContext context,
                     controller.editPostForApInvoices(
                         controller.currentApInvoiceId.value);
                   } else if (controller.status.value == 'Posted') {
-                    showSnackBar('Alert', 'Quotation is Already Posted');
+                    showSnackBar('Alert', 'AP Invoice is Already Posted');
                   } else if (controller.status.value == 'Cancelled') {
-                    showSnackBar('Alert', 'Quotation is Cancelled');
+                    showSnackBar('Alert', 'AP Invoice is Cancelled');
                   } else if (controller.status.value.isEmpty) {
-                    showSnackBar('Alert', 'Please Save The Quotation First');
+                    showSnackBar('Alert', 'Please Save The AP Invoice First');
                   }
                 }
               : null,

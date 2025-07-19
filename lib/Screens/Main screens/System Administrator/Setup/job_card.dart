@@ -295,7 +295,7 @@ class JobCard extends StatelessWidget {
                                   title: 'TOTALS',
                                   value: textForDataRowInTable(
                                     fontSize: 16,
-                                    color: Colors.red,
+                                    color: Colors.green,
                                     isBold: true,
                                     text: '${controller.allJobsTotals.value}',
                                   )),
@@ -303,7 +303,7 @@ class JobCard extends StatelessWidget {
                                   title: 'VATS',
                                   value: textForDataRowInTable(
                                     fontSize: 16,
-                                    color: Colors.green,
+                                    color: Colors.red,
                                     isBold: true,
                                     text: '${controller.allJobsVATS.value}',
                                   )),
@@ -638,66 +638,45 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
         DataCell(
           Align(
             alignment: Alignment.centerRight,
-            child: StreamBuilder<double>(
-              stream: controller.calculateAllTotals(jobId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text('Loading...');
-                } else if (snapshot.hasError) {
-                  return const Text('Error');
-                } else {
-                  return textForDataRowInTable(
-                    color: Colors.green,
-                    isBold: true,
-                    text: '${snapshot.data}',
-                  );
-                }
-              },
+            child: textForDataRowInTable(
+              color: Colors.green,
+              isBold: true,
+              text: (jobData.containsKey('totals_amount') &&
+                      jobData['totals_amount'] != null &&
+                      jobData['totals_amount'].toString().trim().isNotEmpty)
+                  ? jobData['totals_amount'].toString()
+                  : '0',
             ),
           ),
         ),
         DataCell(
           Align(
             alignment: Alignment.centerRight,
-            child: StreamBuilder<double>(
-              stream: controller.calculateAllVATs(jobId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text('Loading...');
-                } else if (snapshot.hasError) {
-                  return const Text('Error');
-                } else {
-                  return textForDataRowInTable(
-                    color: Colors.red,
-                    isBold: true,
-                    text: '${snapshot.data}',
-                  );
-                }
-              },
+            child: textForDataRowInTable(
+              color: Colors.red,
+              isBold: true,
+              text: (jobData.containsKey('total_vat_amount') &&
+                      jobData['total_vat_amount'] != null &&
+                      jobData['total_vat_amount'].toString().trim().isNotEmpty)
+                  ? jobData['total_vat_amount'].toString()
+                  : '0',
             ),
           ),
         ),
         DataCell(
           Align(
             alignment: Alignment.centerRight,
-            child: StreamBuilder<double>(
-              stream: controller.calculateAllNETs(jobId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text('Loading...');
-                } else if (snapshot.hasError) {
-                  return const Text('Error');
-                } else {
-                  return textForDataRowInTable(
-                    color: Colors.blueGrey,
-                    isBold: true,
-                    text: '${snapshot.data}',
-                  );
-                }
-              },
+            child: textForDataRowInTable(
+              color: Colors.blueGrey,
+              isBold: true,
+              text: (jobData.containsKey('total_net_amount') &&
+                      jobData['total_net_amount'] != null &&
+                      jobData['total_net_amount'].toString().trim().isNotEmpty)
+                  ? jobData['total_net_amount'].toString()
+                  : '0',
             ),
           ),
-        ),
+        )
       ]);
 }
 
