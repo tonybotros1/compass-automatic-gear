@@ -372,7 +372,7 @@ Widget editSectionForPayments(context, CashManagementController controller,
                   onPressedForCancel: controller.cancellingReceipts.isTrue
                       ? null
                       : () {
-                          controller.cancelReceipt(cashManagementId);
+                          controller.cancelPayment(cashManagementId);
                         },
                   context: context,
                   canEdit: true,
@@ -381,7 +381,7 @@ Widget editSectionForPayments(context, CashManagementController controller,
                   onPressedForPost: controller.postingReceipts.isTrue
                       ? null
                       : () {
-                          controller.postReceipt(cashManagementId);
+                          controller.postPayment(cashManagementId);
                         },
                   onPressedForSave: controller.addingNewValue.value
                       ? null

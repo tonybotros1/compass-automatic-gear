@@ -1466,18 +1466,48 @@ class CashManagementController extends GetxController {
         return;
       }
       await getCurrentReceiptCounterNumber();
-      receiptDate.value.text = textToDate(DateTime.now().toString());
+      // receiptDate.value.text = textToDate(DateTime.now().toString());
 
       FirebaseFirestore.instance
           .collection('all_receipts')
           .doc(receiptID)
           .update({
         'status': 'Posted',
-        'receipt_date': receiptDate.value.text,
+        // 'receipt_date': receiptDate.value.text,
         'receipt_number': receiptCounter.value.text
       });
       status.value = 'Posted';
       showSnackBar('Done', 'Receipt Posted');
+      update();
+    } catch (e) {
+      showSnackBar('Something Went Wrong', 'Please try again');
+    }
+  }
+
+  postPayment(paymentID) async {
+    try {
+      if (isPaymentAdded.isFalse) {
+        showSnackBar('Alert', 'Please Save Payment First');
+        return;
+      }
+
+      if (status.value == 'Posted') {
+        showSnackBar('Alert', 'Payment is Already Posted');
+        return;
+      }
+      await getCurrentPaymentCounterNumber();
+      // paymentDate.value.text = textToDate(DateTime.now().toString());
+
+      FirebaseFirestore.instance
+          .collection('all_payments')
+          .doc(paymentID)
+          .update({
+        'status': 'Posted',
+        // 'receipt_date': receiptDate.value.text,
+        'payment_number': receiptCounter.value.text
+      });
+      status.value = 'Posted';
+      showSnackBar('Done', 'Payment Posted');
       update();
     } catch (e) {
       showSnackBar('Something Went Wrong', 'Please try again');
@@ -1510,30 +1540,26 @@ class CashManagementController extends GetxController {
     }
   }
 
-  postPayment(paymentID) async {
+  cancelPayment(paymentID) async {
     try {
       if (isPaymentAdded.isFalse) {
         showSnackBar('Alert', 'Please Save Payment First');
         return;
       }
 
-      if (status.value == 'Posted') {
-        showSnackBar('Alert', 'Payment is Already Posted');
+      if (status.value == 'Cancelled') {
+        showSnackBar('Alert', 'Payment is Already Cancelled');
         return;
       }
-      await getCurrentPaymentCounterNumber();
-      paymentDate.value.text = textToDate(DateTime.now().toString());
 
       FirebaseFirestore.instance
           .collection('all_payments')
           .doc(paymentID)
           .update({
-        'status': 'Posted',
-        'payment_date': paymentDate.value.text,
-        'payment_number': paymentCounter.value.text
+        'status': 'Cancelled',
       });
-      status.value = 'Posted';
-      showSnackBar('Done', 'Payment Posted');
+      status.value = 'Cancelled';
+      showSnackBar('Done', 'Payment Cancelled');
       update();
     } catch (e) {
       showSnackBar('Something Went Wrong', 'Please try again');
