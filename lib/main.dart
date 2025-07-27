@@ -2,7 +2,6 @@ import 'package:datahubai/Middleware/route_middleware.dart';
 import 'package:datahubai/Screens/mobile%20Screens/card_images_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,19 +38,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: kIsWeb ? Size(1920, 1080) : Size(430, 932),
-      minTextAdapt: true,
-      child: GetMaterialApp(
+    return 
+       GetMaterialApp(
         title: 'DataHub AI',
         debugShowCheckedModeBanner: false,
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(textScaler: TextScaler.linear(1)),
-            child: child!,
-          );
-        },
+        
         initialRoute: '/',
         getPages: [
           GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),
@@ -77,7 +68,7 @@ class MyApp extends StatelessWidget {
               page: () => MainScreenForMobile(),
               middlewares: [AuthMiddleware()]),
         ],
-      ),
-    );
+      );
+    
   }
 }

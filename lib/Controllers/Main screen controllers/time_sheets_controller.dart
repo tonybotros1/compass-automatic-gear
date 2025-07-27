@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/consts.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TimeSheetsController extends GetxController {
+  final RxMap<String, Duration> sheetDurations = <String, Duration>{}.obs;
+  Timer? _timer;
   RxString selectedEmployeeName = RxString('');
   RxString selectedEmployeeId = RxString('');
   RxString selectedJob = RxString('');
@@ -13,10 +17,15 @@ class TimeSheetsController extends GetxController {
   RxString companyId = RxString('');
   RxBool isScreenLoding = RxBool(false);
   RxBool isScreenLodingForJobs = RxBool(false);
+  RxBool isScreenLodingForJobTasks = RxBool(false);
+  RxBool isScreenLoadingForTimesheets = RxBool(false);
   RxMap allBrands = RxMap({});
   RxMap allColors = RxMap({});
+  RxBool startSheet = RxBool(false);
 
   final RxList<DocumentSnapshot> allTechnician = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allTasks = RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allTimeSheets = RxList<DocumentSnapshot>([]);
   // final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allJobCards =
   //     RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
   final RxList<Map<String, dynamic>> allJobCards = <Map<String, dynamic>>[].obs;
@@ -31,12 +40,197 @@ class TimeSheetsController extends GetxController {
     await getColors();
     getAllTechnicians();
     getApprovedJobs();
+    getAllJobTasks();
+    getAllTimeSheets();
+    _startRealTimeTimer();
+
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    _timer?.cancel();
+    super.onClose();
   }
 
   getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
+  }
+
+  void _startRealTimeTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (_) {
+      for (var doc in allTimeSheets) {
+        final String sheetId = doc.id;
+        final periods = doc['active_periods'] as List<dynamic>;
+
+        Duration total = Duration();
+
+        // Check if job is paused (i.e. last period is closed)
+        bool isPaused = periods.isNotEmpty && periods.last['to'] != null;
+
+        for (var period in periods) {
+          final from = (period['from'] as Timestamp).toDate();
+          final toRaw = period['to'];
+          // إذا الفترة مغلقة نحسبها
+          if (toRaw != null) {
+            final to = (toRaw as Timestamp).toDate();
+            total += to.difference(from);
+          } else if (!isPaused) {
+            // إذا شغالة حاليا، نحسب الوقت حتى الآن
+            total += DateTime.now().difference(from);
+          }
+        }
+
+        sheetDurations[sheetId] = total;
+      }
+    });
+  }
+
+  DocumentSnapshot<Object?>? getDocumentById(
+      String id, List<DocumentSnapshot<Object?>> list) {
+    try {
+      return list.firstWhere((doc) => doc.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String getjobInfosById(String id) {
+    try {
+      Map<String, dynamic> job =
+          allJobCards.firstWhere((doc) => doc['id'] == id);
+      String jobInformation =
+          '${job['car_brand']} ${job['car_model']} - ${job['plate_number']} - ${job['color']}';
+      return jobInformation;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  startFunction() async {
+    try {
+      startSheet.value = true;
+      final now = Timestamp.now();
+      await FirebaseFirestore.instance.collection('time_sheets').add({
+        'company_id': companyId.value,
+        'job_id': selectedJobId.value,
+        'employee_id': selectedEmployeeId.value,
+        'task_id': selectedTaskId.value,
+        'start_date': now,
+        'end_date': null,
+        'active_periods': [
+          {
+            'from': now,
+            'to': null,
+          }
+        ]
+      }).then((_) {
+        selectedEmployeeId.value = '';
+        selectedEmployeeName.value = '';
+        selectedJob.value = '';
+        selectedJobId.value = '';
+        selectedTask.value = '';
+        selectedTask.value = '';
+        startSheet.value = false;
+      });
+    } catch (e) {
+      startSheet.value = false;
+    }
+  }
+
+  Future<void> pauseFunction(DocumentSnapshot doc) async {
+    final sheetId = doc.id;
+    final List<dynamic> currentPeriods = List.from(doc['active_periods']);
+
+    // إذا في فترة مفتوحة سكّرها
+    if (currentPeriods.isNotEmpty && currentPeriods.last['to'] == null) {
+      currentPeriods[currentPeriods.length - 1]['to'] =
+          Timestamp.fromDate(DateTime.now());
+
+      await FirebaseFirestore.instance
+          .collection('time_sheets')
+          .doc(sheetId)
+          .update({'active_periods': currentPeriods});
+    }
+  }
+
+  Future<void> continueFunction(DocumentSnapshot doc) async {
+    final sheetId = doc.id;
+    final List<dynamic> currentPeriods = List.from(doc['active_periods']);
+
+    final lastPeriod = currentPeriods.isNotEmpty ? currentPeriods.last : null;
+    if (lastPeriod != null && lastPeriod['to'] == null) {
+      return;
+    }
+
+    final newPeriod = {
+      'from': Timestamp.fromDate(DateTime.now()),
+      'to': null,
+    };
+
+    currentPeriods.add(newPeriod);
+
+    await FirebaseFirestore.instance
+        .collection('time_sheets')
+        .doc(sheetId)
+        .update({'active_periods': currentPeriods});
+  }
+
+  Future<void> finishFunction(DocumentSnapshot doc) async {
+    final sheetId = doc.id;
+    final List<dynamic> currentPeriods = List.from(doc['active_periods']);
+
+    if (currentPeriods.isNotEmpty && currentPeriods.last['to'] == null) {
+      currentPeriods[currentPeriods.length - 1]['to'] =
+          Timestamp.fromDate(DateTime.now());
+    }
+
+    await FirebaseFirestore.instance
+        .collection('time_sheets')
+        .doc(sheetId)
+        .update({
+      'active_periods': currentPeriods,
+      'end_date': Timestamp.fromDate(DateTime.now()),
+    });
+  }
+
+  Future<void> pauseAllFunction(List<DocumentSnapshot> allDocs) async {
+    final batch = FirebaseFirestore.instance.batch();
+
+    for (var doc in allDocs) {
+      final docRef = doc.reference;
+      final List<dynamic> periods = List.from(doc['active_periods']);
+
+      // Check if there's an open period
+      if (periods.isNotEmpty && periods.last['to'] == null) {
+        periods[periods.length - 1]['to'] = Timestamp.fromDate(DateTime.now());
+
+        batch.update(docRef, {
+          'active_periods': periods,
+        });
+      }
+    }
+
+    await batch.commit();
+  }
+
+  getAllTimeSheets() {
+    try {
+      isScreenLoadingForTimesheets.value = true;
+      FirebaseFirestore.instance
+          .collection('time_sheets')
+          .where('company_id', isEqualTo: companyId.value)
+          .where('end_date', isNull: true)
+          .orderBy('start_date')
+          .snapshots()
+          .listen((tech) {
+        allTimeSheets.assignAll(List<DocumentSnapshot>.from(tech.docs));
+        isScreenLoadingForTimesheets.value = false;
+      });
+    } catch (e) {
+      isScreenLoadingForTimesheets.value = false;
+    }
   }
 
   getAllTechnicians() {
@@ -53,6 +247,23 @@ class TimeSheetsController extends GetxController {
       });
     } catch (e) {
       isScreenLoding.value = false;
+    }
+  }
+
+  getAllJobTasks() {
+    try {
+      isScreenLodingForJobTasks.value = true;
+      FirebaseFirestore.instance
+          .collection('all_job_tasks')
+          .where('company_id', isEqualTo: companyId.value)
+          .orderBy('name_en', descending: false)
+          .snapshots()
+          .listen((tech) {
+        allTasks.assignAll(List<DocumentSnapshot>.from(tech.docs));
+        isScreenLodingForJobTasks.value = false;
+      });
+    } catch (e) {
+      isScreenLodingForJobTasks.value = false;
     }
   }
 

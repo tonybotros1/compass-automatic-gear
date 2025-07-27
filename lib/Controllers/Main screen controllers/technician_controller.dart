@@ -14,7 +14,6 @@ class TechnicianController extends GetxController {
   final RxList<DocumentSnapshot> allTechnician = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredTechnicians =
       RxList<DocumentSnapshot>([]);
-
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);

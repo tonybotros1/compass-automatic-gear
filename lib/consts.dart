@@ -1,14 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 var fontStyleForAppBar = TextStyle(
-    fontSize: 20.sp, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
-var fontStyleForScreenNameUsedInButtons = TextStyle(
-    color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold);
+    fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
+var fontStyleForScreenNameUsedInButtons =
+    TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
 var fontStyleForTableHeader = TextStyle(
     color: Colors.grey[700], fontWeight: FontWeight.bold, fontSize: 12);
 var iconStyleForTableHeaderDown =
@@ -24,7 +23,7 @@ var userNameStyle = const TextStyle(
     decoration: TextDecoration.underline,
     decorationColor: Colors.blue);
 var footerTextStylr = TextStyle(
-    color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 12.sp);
+    color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 12);
 
 var hintMarkTestStyle =
     TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.bold);
@@ -32,6 +31,8 @@ var hintMarkTestStyle =
 var fontStyleForElevatedButtons = const TextStyle(fontWeight: FontWeight.bold);
 
 var paddingForButtons = EdgeInsets.symmetric(horizontal: 16);
+
+Color colorForNameInCards = const Color(0xFF00695C);
 
 var newButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
@@ -215,7 +216,7 @@ var editButtonStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: Size(100, 40),
 );
 var historyButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blueGrey,
@@ -271,13 +272,13 @@ var deleteButtonStyle = ElevatedButton.styleFrom(
 );
 
 var closeButtonStyle = ElevatedButton.styleFrom(
+  padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.red,
-  padding: EdgeInsets.all(16.w),
   shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5.r),
+    borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: Size(10.w, 40.h),
+  minimumSize: Size(40, 40),
 );
 
 var approveButtonStyle = ElevatedButton.styleFrom(
@@ -311,11 +312,11 @@ var welcomButtonStyle = ElevatedButton.styleFrom(
 var logoutButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xff3A6D8C),
   foregroundColor: Colors.white,
-  padding: EdgeInsets.all(16.w),
+  padding: paddingForButtons,
   shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5.r),
+    borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: Size(60.w, 40.h),
+  minimumSize: Size(60, 40),
 );
 
 var addButtonStyle = ElevatedButton.styleFrom(
@@ -449,7 +450,7 @@ var editIcon = const Icon(
   color: Colors.blue,
 );
 
-var screenPadding = const EdgeInsets.only(
+var screenPadding = EdgeInsets.only(
   left: 14,
   right: 14,
   bottom: 10,
@@ -559,7 +560,7 @@ var closeButton = ElevatedButton(
     },
     child: Text(
       'Close',
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
+      style: TextStyle(fontWeight: FontWeight.bold),
     ));
 
 // snack bar
@@ -628,48 +629,47 @@ Future<dynamic> alertDialog(
   );
 }
 
-String textToDate(dynamic inputDate) {
-  // 1) Null or empty
+String textToDate(dynamic inputDate, {bool withTime = false}) {
   if (inputDate == null) return '';
 
-  // 2) Firestore Timestamp
+  final dateFormat =
+      withTime ? DateFormat('dd-MM-yyyy HH:mm:ss') : DateFormat('dd-MM-yyyy');
+
+  // Firestore Timestamp
   if (inputDate is Timestamp) {
     final dt = inputDate.toDate();
-    return DateFormat('dd-MM-yyyy').format(dt);
+    return dateFormat.format(dt);
   }
 
-  // 3) Dart DateTime
+  // Dart DateTime
   if (inputDate is DateTime) {
-    return DateFormat('dd-MM-yyyy').format(inputDate);
+    return dateFormat.format(inputDate);
   }
 
-  // 4) String
+  // String
   if (inputDate is String) {
     final raw = inputDate.trim();
     if (raw.isEmpty) return '';
 
-    // Already in dd-MM-yyyy?
     final ddMMyyyy = RegExp(r'^\d{2}-\d{2}-\d{4}$');
     if (ddMMyyyy.hasMatch(raw)) {
+      if (withTime) return '$raw 00:00:00';
       return raw;
     }
 
-    // Try parsing (e.g. "yyyy-MM-dd", ISO, etc.)
     try {
       final parsed = DateTime.parse(raw);
-      return DateFormat('dd-MM-yyyy').format(parsed);
+      return dateFormat.format(parsed);
     } catch (_) {
-      // Fallback: try strict yyyy-MM-dd
       try {
         final parsedStrict = DateFormat('yyyy-MM-dd').parseStrict(raw);
-        return DateFormat('dd-MM-yyyy').format(parsedStrict);
+        return dateFormat.format(parsedStrict);
       } catch (e) {
         return '';
       }
     }
   }
 
-  // Unsupported type
   return '';
 }
 

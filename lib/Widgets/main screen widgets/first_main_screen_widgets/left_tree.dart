@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/main_screen_contro.dart';
@@ -21,7 +20,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
             child: Column(
               children: [
                 Padding(
-                  padding: EdgeInsets.only(top: 16.h, bottom: 10.h),
+                  padding: EdgeInsets.only(top: 16, bottom: 10),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -31,17 +30,17 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                                   .companyImageURL.value.isNotEmpty
                               ? Image.network(
                                   mainScreenController.companyImageURL.value,
-                                  width: 100.w,
+                                  width: 100,
                                 )
                               : SizedBox(
-                                  height: 100.h,
-                                  width: 100.w,
+                                  height: 100,
+                                  width: 100,
                                 ),
                         ),
                       ),
                       Positioned(
-                        bottom: 0.h,
-                        right: 10.w,
+                        bottom: 0,
+                        right: 10,
                         child: Obx(
                           () => mainScreenController.isLoading.value == false
                               ? InkWell(
@@ -60,11 +59,11 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                                   child: Icon(
                                     color: Colors.grey,
                                     Icons.account_tree,
-                                    size: 20.sp,
+                                    size: 20,
                                   ),
                                 )
                               : SizedBox(
-                                  width: 20.w,
+                                  width: 20,
                                 ),
                         ),
                       ),
@@ -83,7 +82,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                               child: Text('Network error please try again'))),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(8.0.w),
+                  padding: EdgeInsets.all(8.0),
                   child: Obx(
                     () => Text(
                       textAlign: TextAlign.center,
@@ -106,10 +105,10 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                   mainScreenController.menuWidth.value += details.delta.dx;
                   mainScreenController.menuWidth.value = mainScreenController
                       .menuWidth.value
-                      .clamp(200.0.w, 400.0.w);
+                      .clamp(200.0, 400.0);
                 },
                 child: Container(
-                  width: 5.w,
+                  width: 5,
                   color: Colors.transparent,
                 ),
               ),
@@ -122,7 +121,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
 AnimatedTreeView<MyTreeNode> leftTree(
     MainScreenController mainScreenController) {
   return AnimatedTreeView<MyTreeNode>(
-    padding: EdgeInsets.only(left: 5.w),
+    padding: EdgeInsets.only(left: 5),
     treeController: mainScreenController.treeController,
     nodeBuilder: (context, entry) {
       return TreeDragTarget<MyTreeNode>(
@@ -135,12 +134,12 @@ AnimatedTreeView<MyTreeNode> leftTree(
         },
         builder: (context, details) {
           Widget myTreeNodeTile = Padding(
-            padding: EdgeInsets.all(8.0.w),
+            padding: EdgeInsets.all(8.0),
             child: Container(
-              padding: EdgeInsets.all(5.w),
+              padding: EdgeInsets.all(5),
               decoration: BoxDecoration(
                 color: entry.node.isMenu == true ? mainColor : secColor,
-                borderRadius: BorderRadius.circular(5.r),
+                borderRadius: BorderRadius.circular(5),
               ),
               child: Row(
                 children: [
@@ -151,7 +150,7 @@ AnimatedTreeView<MyTreeNode> leftTree(
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12.sp),
+                          fontSize: 12),
                       constraints: const BoxConstraints(),
                     ),
                   ),

@@ -1,6 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/main_screen_contro.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import '../../../consts.dart';
@@ -18,11 +17,11 @@ class FirstMainScreen extends StatelessWidget {
             ? Center(child: Text('No Favorites', style: fontStyleForAppBar))
             : GridView.count(
                 crossAxisCount:
-                    (MediaQuery.of(context).size.width ~/ 250.w).clamp(1, 5),
+                    (MediaQuery.of(context).size.width ~/ 250).clamp(1, 5),
                 childAspectRatio: 1.5,
-                padding: EdgeInsets.all(20.w),
-                crossAxisSpacing: 40.w,
-                mainAxisSpacing: 40.h,
+                padding: EdgeInsets.all(20),
+                crossAxisSpacing: 40,
+                mainAxisSpacing: 40,
                 children:
                     List.generate(controller.favoriteScreens.length, (index) {
                   final fav = controller.favoriteScreens[index];
@@ -91,37 +90,36 @@ class _HoverCardState extends State<HoverCard> {
         duration: const Duration(milliseconds: 200),
         child: InkWell(
           onTap: widget.onTap,
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(10),
           child: Material(
             shadowColor: Colors.black,
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(10),
             elevation: 4,
             child: Container(
               decoration: BoxDecoration(
                 color: widget.color,
-                borderRadius: BorderRadius.circular(10.r),
+                borderRadius: BorderRadius.circular(10),
               ),
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  FittedBox(
-                    child: Text(
-                      widget.emoji,
-                      style: TextStyle(
-                          fontSize: 25.sp,
-                          color: Colors.grey.shade700,
-                          fontWeight: FontWeight.bold),
-                    ),
+                  Text(
+                    textAlign: TextAlign.center,
+                    widget.emoji,
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey.shade700,
+                        fontWeight: FontWeight.bold),
                   ),
                   AutoSizeText(
                     widget.name,
                     maxLines: 1,
                     textAlign: TextAlign.center,
                     style: textStyleForFavoritesCards.copyWith(
-                      color: const Color(0xFF00695C),
+                      color: colorForNameInCards,
                       fontWeight: FontWeight.w600,
-                      fontSize: 16.sp,
+                      fontSize: 16,
                     ),
                   ),
                   Divider(),
@@ -131,8 +129,9 @@ class _HoverCardState extends State<HoverCard> {
                         : 'Click To Start Working',
                     textAlign: TextAlign.center,
                     maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey.shade700),
                   ),

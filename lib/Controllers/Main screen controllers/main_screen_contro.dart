@@ -4,6 +4,7 @@ import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/co
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/currency.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/invoice_items.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_card.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_tasks.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/list_of_values.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/sales_man.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/technician.dart';
@@ -64,7 +65,6 @@ class MainScreenController extends GetxController {
   RxString userId = RxString('');
   MyTreeNode? previouslySelectedNode;
   RxBool isHovered = RxBool(false);
-  
 
   @override
   void onInit() async {
@@ -154,6 +154,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: TradingDashboard());
       case '/timeSheets':
         return const SizedBox(child: TimeSheets());
+      case '/jobTasks':
+        return const SizedBox(child: JobTasks());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

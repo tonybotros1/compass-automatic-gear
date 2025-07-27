@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/main_screen_contro.dart';
@@ -15,12 +14,12 @@ SmartInfoOverlay personalDetailsSection(
       onTap: showOverlay,
       child: CircleAvatar(
         backgroundColor: mainColor,
-        radius: 25.r,
+        radius: 25,
         child: Center(
           child: Text(
             mainScreenController
                 .getFirstCharacter(mainScreenController.userName.value),
-            style: TextStyle(fontSize: 20.sp, color: Colors.white),
+            style: TextStyle(fontSize: 20, color: Colors.white),
           ),
         ),
       ),
@@ -30,37 +29,35 @@ SmartInfoOverlay personalDetailsSection(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(mainScreenController.userEmail.value,
-            style: TextStyle(color: Colors.white, fontSize: 18.sp)),
+            style: TextStyle(color: Colors.white, fontSize: 14)),
         SizedBox(
-          height: 25.h,
+          height: 25,
         ),
         CircleAvatar(
           backgroundColor: mainColor,
-          radius: 35.r,
+          radius: 30,
           child: Text(
             mainScreenController
                 .getFirstCharacter(mainScreenController.userName.value),
-            style: TextStyle(fontSize: 30.sp, color: Colors.white),
+            style: TextStyle(fontSize: 25, color: Colors.white),
           ),
         ),
         FittedBox(
           child: Text(
             'Hi, ${mainScreenController.userName.value}!',
             style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 30.sp),
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           ),
         ),
         SizedBox(
-          height: 30.h,
+          height: 30,
         ),
         Container(
-          padding: EdgeInsets.all(16.w),
+          padding: EdgeInsets.all(16),
           width: double.infinity,
           decoration: BoxDecoration(
               color: Colors.blue.shade400,
-              borderRadius: BorderRadius.circular(15.r)),
+              borderRadius: BorderRadius.circular(15)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -70,43 +67,43 @@ SmartInfoOverlay personalDetailsSection(
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 20.sp),
+                      fontSize: 16),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.h),
+                padding: EdgeInsets.symmetric(vertical: 14),
                 child: Row(
                   children: [
                     Text(
                       'Joining Date:',
-                      style: TextStyle(color: Colors.white, fontSize: 18.sp),
+                      style: TextStyle(color: Colors.white, fontSize:  14),
                     ),
                     SizedBox(
-                      width: 5.w,
+                      width: 5,
                     ),
                     Text(
                       textToDate(mainScreenController.userJoiningDate.value),
-                      style: TextStyle(
-                          color: Colors.grey.shade800, fontSize: 18.sp),
+                      style:
+                          TextStyle(color: Colors.grey.shade800, fontSize:  14),
                     ),
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.h),
+                padding: EdgeInsets.symmetric(vertical: 16),
                 child: Row(
                   children: [
                     Text(
                       'Expiry Date:',
-                      style: TextStyle(color: Colors.white, fontSize: 18.sp),
+                      style: TextStyle(color: Colors.white, fontSize:  14),
                     ),
                     SizedBox(
-                      width: 5.w,
+                      width: 5,
                     ),
                     Text(
                       textToDate(mainScreenController.userExpiryDate.value),
-                      style: TextStyle(
-                          color: Colors.grey.shade800, fontSize: 18.sp),
+                      style:
+                          TextStyle(color: Colors.grey.shade800, fontSize:  14),
                     ),
                   ],
                 ),
@@ -130,7 +127,7 @@ SmartInfoOverlay personalDetailsSection(
                       },
                       child: Text(
                         'Logout',
-                        style: TextStyle(fontSize: 18.sp),
+                        style: TextStyle(fontSize:  14),
                       )),
                 ],
               )

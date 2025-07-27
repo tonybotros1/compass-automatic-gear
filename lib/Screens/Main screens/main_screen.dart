@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Main screen controllers/main_screen_contro.dart';
 import '../../Widgets/main screen widgets/first_main_screen_widgets/left_tree.dart';
@@ -27,7 +26,7 @@ class MainScreen extends StatelessWidget {
                 Container(
                   width: Get.width,
                   color: Colors.white,
-                  height: 80.h,
+                  height: 80,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -39,18 +38,18 @@ class MainScreen extends StatelessWidget {
                             },
                             icon: Icon(
                               Icons.menu,
-                              size: 25.sp,
+                              size: 25,
                             )),
                       ),
                       Padding(
-                        padding: EdgeInsets.only(left: 15.w),
+                        padding: EdgeInsets.only(left: 15),
                         child: Obx(() => Text(
                               mainScreenController.selectedScreenName.value,
                               style: fontStyleForAppBar,
                             )),
                       ),
                       Row(
-                        spacing: 20.w,
+                        spacing: 20,
                         children: [
                           Obx(() {
                             final currentRoute =
@@ -63,7 +62,7 @@ class MainScreen extends StatelessWidget {
                             return currentRoute != '/home'
                                 ? CircleAvatar(
                                     backgroundColor: Colors.pink.shade400,
-                                    radius: 25.r,
+                                    radius: 25,
                                     child: IconButton(
                                       tooltip: isFavorite
                                           ? 'Remove from favorites'
@@ -83,7 +82,7 @@ class MainScreen extends StatelessWidget {
                                         color: isFavorite
                                             ? Colors.yellow
                                             : Colors.white,
-                                        size: 20.sp,
+                                        size: 20,
                                       ),
                                     ),
                                   )
@@ -91,7 +90,7 @@ class MainScreen extends StatelessWidget {
                           }),
                           CircleAvatar(
                             backgroundColor: Colors.teal,
-                            radius: 25.r,
+                            radius: 25,
                             child: IconButton(
                                 tooltip: 'Home',
                                 onPressed: () {
@@ -105,12 +104,12 @@ class MainScreen extends StatelessWidget {
                                 },
                                 icon: Icon(
                                   Icons.home,
-                                  size: 20.sp,
+                                  size: 20,
                                   color: Colors.white,
                                 )),
                           ),
                           Padding(
-                              padding: EdgeInsets.only(right: 16.w),
+                              padding: EdgeInsets.only(right: 16),
                               child: Obx(() =>
                                   mainScreenController.isLoading.isFalse
                                       ? personalDetailsSection(

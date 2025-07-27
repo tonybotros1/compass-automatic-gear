@@ -15,7 +15,7 @@ Row searchBar({
   return Row(
     children: [
       Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(8.0),
         child: Container(
           width: constraints.maxWidth / 2.5,
           decoration: BoxDecoration(
@@ -25,13 +25,14 @@ Row searchBar({
           ),
           child: Row(
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(8.0),
                 child: FittedBox(
                   // flex: 1,
                   child: Icon(
                     Icons.search,
                     color: iconColor,
+                    size: 25,
                   ),
                 ),
               ),
@@ -44,10 +45,10 @@ Row searchBar({
                     controller: search.value,
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintStyle: const TextStyle(color: iconColor),
+                      hintStyle: TextStyle(color: iconColor),
                       hintText: title,
                     ),
-                    style: const TextStyle(color: iconColor),
+                    style: TextStyle(color: iconColor),
                   ),
                 ),
               ),
@@ -56,9 +57,10 @@ Row searchBar({
                   onPressed: () {
                     search.value.clear();
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.close,
                     color: iconColor,
+                    size: 25,
                   ),
                 ),
               )
@@ -68,7 +70,7 @@ Row searchBar({
       ),
       const Expanded(flex: 1, child: SizedBox()),
       Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: button),
       // Padding(
       //   padding: const EdgeInsets.all(8.0),
@@ -84,6 +86,3 @@ Row searchBar({
     ],
   );
 }
-
-
-

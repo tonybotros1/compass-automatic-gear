@@ -17,7 +17,7 @@ class AutoSizedText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double fontSize = style?.fontSize ?? 14; // Default font size
-    const double minFontSize = 10; // Minimum font size
+     double minFontSize = 10; // Minimum font size
     final TextStyle effectiveStyle = style ?? const TextStyle();
     return Builder(
       builder: (context) {
