@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/main_screen_contro.dart';
@@ -20,7 +21,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 16, bottom: 10),
+                  padding: EdgeInsets.only(top: 16.h, bottom: 10.h),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -30,17 +31,17 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                                   .companyImageURL.value.isNotEmpty
                               ? Image.network(
                                   mainScreenController.companyImageURL.value,
-                                  width: 100,
+                                  width: 100.w,
                                 )
-                              : const SizedBox(
-                                  height: 100,
-                                  width: 100,
+                              : SizedBox(
+                                  height: 100.h,
+                                  width: 100.w,
                                 ),
                         ),
                       ),
                       Positioned(
-                        bottom: 0,
-                        right: 10,
+                        bottom: 0.h,
+                        right: 10.w,
                         child: Obx(
                           () => mainScreenController.isLoading.value == false
                               ? InkWell(
@@ -56,14 +57,14 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                                   },
                                   splashColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
-                                  child: const Icon(
+                                  child: Icon(
                                     color: Colors.grey,
                                     Icons.account_tree,
-                                    size: 20,
+                                    size: 20.sp,
                                   ),
                                 )
-                              : const SizedBox(
-                                  width: 20,
+                              : SizedBox(
+                                  width: 20.w,
                                 ),
                         ),
                       ),
@@ -82,7 +83,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                               child: Text('Network error please try again'))),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(8.0.w),
                   child: Obx(
                     () => Text(
                       textAlign: TextAlign.center,
@@ -103,11 +104,12 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
               child: GestureDetector(
                 onHorizontalDragUpdate: (details) {
                   mainScreenController.menuWidth.value += details.delta.dx;
-                  mainScreenController.menuWidth.value =
-                      mainScreenController.menuWidth.value.clamp(200.0, 400.0);
+                  mainScreenController.menuWidth.value = mainScreenController
+                      .menuWidth.value
+                      .clamp(200.0.w, 400.0.w);
                 },
                 child: Container(
-                  width: 5,
+                  width: 5.w,
                   color: Colors.transparent,
                 ),
               ),
@@ -120,7 +122,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
 AnimatedTreeView<MyTreeNode> leftTree(
     MainScreenController mainScreenController) {
   return AnimatedTreeView<MyTreeNode>(
-    padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+    padding: EdgeInsets.only(left: 5.w),
     treeController: mainScreenController.treeController,
     nodeBuilder: (context, entry) {
       return TreeDragTarget<MyTreeNode>(
@@ -133,12 +135,12 @@ AnimatedTreeView<MyTreeNode> leftTree(
         },
         builder: (context, details) {
           Widget myTreeNodeTile = Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8.0.w),
             child: Container(
-              padding: const EdgeInsets.all(5),
+              padding: EdgeInsets.all(5.w),
               decoration: BoxDecoration(
                 color: entry.node.isMenu == true ? mainColor : secColor,
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(5.r),
               ),
               child: Row(
                 children: [
@@ -146,10 +148,10 @@ AnimatedTreeView<MyTreeNode> leftTree(
                     flex: 4,
                     child: AutoSizedText(
                       text: entry.node.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12),
+                          fontSize: 12.sp),
                       constraints: const BoxConstraints(),
                     ),
                   ),

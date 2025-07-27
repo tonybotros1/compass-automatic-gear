@@ -1,5 +1,6 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/main_screen_contro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import '../../../consts.dart';
@@ -17,11 +18,11 @@ class FirstMainScreen extends StatelessWidget {
             ? Center(child: Text('No Favorites', style: fontStyleForAppBar))
             : GridView.count(
                 crossAxisCount:
-                    (MediaQuery.of(context).size.width ~/ 250).clamp(1, 5),
+                    (MediaQuery.of(context).size.width ~/ 250.w).clamp(1, 5),
                 childAspectRatio: 1.5,
-                padding: const EdgeInsets.all(20),
-                crossAxisSpacing: 40,
-                mainAxisSpacing: 40,
+                padding: EdgeInsets.all(20.w),
+                crossAxisSpacing: 40.w,
+                mainAxisSpacing: 40.h,
                 children:
                     List.generate(controller.favoriteScreens.length, (index) {
                   final fav = controller.favoriteScreens[index];
@@ -34,10 +35,9 @@ class FirstMainScreen extends StatelessWidget {
                       : '';
 
                   // توزيع اللون حسب الفهرس
-                  final cardColor = controller
-                      .cardColors[index % controller.cardColors.length];
+                  final cardColor = cardColors[index % cardColors.length];
 
-                  return _HoverCard(
+                  return HoverCard(
                     emoji: emoji,
                     name: name,
                     description: description,
@@ -57,14 +57,15 @@ class FirstMainScreen extends StatelessWidget {
   }
 }
 
-class _HoverCard extends StatefulWidget {
+class HoverCard extends StatefulWidget {
   final String emoji;
   final String name;
   final String description;
   final VoidCallback onTap;
   final Color color;
 
-  const _HoverCard({
+  const HoverCard({
+    super.key,
     required this.emoji,
     required this.name,
     required this.description,
@@ -73,10 +74,10 @@ class _HoverCard extends StatefulWidget {
   });
 
   @override
-  State<_HoverCard> createState() => _HoverCardState();
+  State<HoverCard> createState() => _HoverCardState();
 }
 
-class _HoverCardState extends State<_HoverCard> {
+class _HoverCardState extends State<HoverCard> {
   bool _isHovered = false;
 
   @override
@@ -90,23 +91,28 @@ class _HoverCardState extends State<_HoverCard> {
         duration: const Duration(milliseconds: 200),
         child: InkWell(
           onTap: widget.onTap,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r),
           child: Material(
             shadowColor: Colors.black,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10.r),
             elevation: 4,
             child: Container(
               decoration: BoxDecoration(
                 color: widget.color,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10.r),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Text(
-                    widget.emoji,
-                    style: const TextStyle(fontSize: 25),
+                  FittedBox(
+                    child: Text(
+                      widget.emoji,
+                      style: TextStyle(
+                          fontSize: 25.sp,
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.bold),
+                    ),
                   ),
                   AutoSizeText(
                     widget.name,
@@ -115,7 +121,7 @@ class _HoverCardState extends State<_HoverCard> {
                     style: textStyleForFavoritesCards.copyWith(
                       color: const Color(0xFF00695C),
                       fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      fontSize: 16.sp,
                     ),
                   ),
                   Divider(),
@@ -126,7 +132,7 @@ class _HoverCardState extends State<_HoverCard> {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey.shade700),
                   ),

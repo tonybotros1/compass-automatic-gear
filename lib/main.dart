@@ -2,6 +2,7 @@ import 'package:datahubai/Middleware/route_middleware.dart';
 import 'package:datahubai/Screens/mobile%20Screens/card_images_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,40 +39,45 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'DataHub AI',
-      debugShowCheckedModeBanner: false,
-      // builder: (context, child) {
-      //   return MediaQuery(
-      //     data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(0.8)), // Fix font size
-      //     child: child!,
-      //   );
-      // },
-      initialRoute: '/',
-      getPages: [
-        GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),
-        GetPage(
-            name: '/',
-            page: () => const LoadingScreen(),
-            middlewares: [InitialRedirectMiddleware()]),
-        GetPage(name: '/loginScreen', page: () => LoginScreen()),
-        GetPage(
-          name: '/registerScreen',
-          page: () => const RegisterScreen(),
-        ),
-        GetPage(
-            name: '/imageViewer',
-            page: () => ImageGalleryViewer(),
-            middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
-        GetPage(
-            name: '/mainScreen',
-            page: () => MainScreen(),
-            middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
-        GetPage(
-            name: '/mainScreenForMobile',
-            page: () => MainScreenForMobile(),
-            middlewares: [AuthMiddleware()]),
-      ],
+    return ScreenUtilInit(
+      designSize: kIsWeb ? Size(1920, 1080) : Size(430, 932),
+      minTextAdapt: true,
+      child: GetMaterialApp(
+        title: 'DataHub AI',
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(1)),
+            child: child!,
+          );
+        },
+        initialRoute: '/',
+        getPages: [
+          GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),
+          GetPage(
+              name: '/',
+              page: () => const LoadingScreen(),
+              middlewares: [InitialRedirectMiddleware()]),
+          GetPage(name: '/loginScreen', page: () => LoginScreen()),
+          GetPage(
+            name: '/registerScreen',
+            page: () => const RegisterScreen(),
+          ),
+          GetPage(
+              name: '/imageViewer',
+              page: () => ImageGalleryViewer(),
+              middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
+          GetPage(
+              name: '/mainScreen',
+              page: () => MainScreen(),
+              middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
+          GetPage(
+              name: '/mainScreenForMobile',
+              page: () => MainScreenForMobile(),
+              middlewares: [AuthMiddleware()]),
+        ],
+      ),
     );
   }
 }

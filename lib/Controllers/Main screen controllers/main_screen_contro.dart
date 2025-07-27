@@ -26,6 +26,7 @@ import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../Screens/Main screens/System Administrator/Setup/system_variables.dart';
+import '../../Screens/Main screens/System Administrator/Setup/time_sheets.dart';
 import '../../Screens/Main screens/System Administrator/User Management/menus.dart';
 import '../../Screens/Main screens/System Administrator/User Management/responsibilities.dart';
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
@@ -63,23 +64,7 @@ class MainScreenController extends GetxController {
   RxString userId = RxString('');
   MyTreeNode? previouslySelectedNode;
   RxBool isHovered = RxBool(false);
-  final List<Color> cardColors = [
-    Color(0xFFFFF3E0), // Light orange
-    Color(0xFFFFF9C4), // Light yellow
-    Color(0xFFE1F5FE), // Light blue
-    Color(0xFFE8F5E9), // Light green
-    Color(0xFFF3E5F5), // Light purple
-    Color(0xFFFFEBEE), // Light red
-    Color(0xFFFFFDE7), // Cream
-    Color(0xFFE0F7FA), // Light cyan
-    Color(0xFFF1F8E9), // Mint
-    Color(0xFFEDE7F6), // Lavender
-    Color(0xFFFFF8E1), // Peach
-    Color(0xFFE3F2FD), // Sky blue
-    Color(0xFFFFF0F0), // Pinkish white
-    Color(0xFFFBE9E7), // Light coral
-    Color(0xFFF9FBE7), // Lemon chiffon
-  ];
+  
 
   @override
   void onInit() async {
@@ -166,9 +151,9 @@ class MainScreenController extends GetxController {
       case '/apInvoices':
         return const SizedBox(child: ApInvoices());
       case '/trading':
-        return const SizedBox(
-          child: TradingDashboard(),
-        );
+        return const SizedBox(child: TradingDashboard());
+      case '/timeSheets':
+        return const SizedBox(child: TimeSheets());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

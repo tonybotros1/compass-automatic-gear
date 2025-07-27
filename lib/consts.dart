@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 var fontStyleForAppBar = TextStyle(
-    fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
-var fontStyleForScreenNameUsedInButtons = const TextStyle(
-    color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
+    fontSize: 20.sp, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
+var fontStyleForScreenNameUsedInButtons = TextStyle(
+    color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold);
 var fontStyleForTableHeader = TextStyle(
     color: Colors.grey[700], fontWeight: FontWeight.bold, fontSize: 12);
 var iconStyleForTableHeaderDown =
@@ -23,7 +24,7 @@ var userNameStyle = const TextStyle(
     decoration: TextDecoration.underline,
     decorationColor: Colors.blue);
 var footerTextStylr = TextStyle(
-    color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 12);
+    color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 12.sp);
 
 var hintMarkTestStyle =
     TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.bold);
@@ -38,7 +39,7 @@ var newButtonStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(5),
   ),
-  minimumSize: const Size(100, 40),
+  minimumSize: Size(100, 40),
 );
 
 var capitalButtonStyle = ElevatedButton.styleFrom(
@@ -272,10 +273,11 @@ var deleteButtonStyle = ElevatedButton.styleFrom(
 var closeButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.red,
+  padding: EdgeInsets.all(16.w),
   shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
+    borderRadius: BorderRadius.circular(5.r),
   ),
-  minimumSize: const Size(10, 40),
+  minimumSize: Size(10.w, 40.h),
 );
 
 var approveButtonStyle = ElevatedButton.styleFrom(
@@ -309,10 +311,11 @@ var welcomButtonStyle = ElevatedButton.styleFrom(
 var logoutButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xff3A6D8C),
   foregroundColor: Colors.white,
+  padding: EdgeInsets.all(16.w),
   shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
+    borderRadius: BorderRadius.circular(5.r),
   ),
-  minimumSize: const Size(60, 40),
+  minimumSize: Size(60.w, 40.h),
 );
 
 var addButtonStyle = ElevatedButton.styleFrom(
@@ -406,6 +409,35 @@ var homeButtonStyle = ElevatedButton.styleFrom(
   ),
   minimumSize: const Size(100, 40),
 );
+final List<Color> cardColors = [
+  Color(0xFFFFF3E0), // Light orange
+  Color(0xFFFFF9C4), // Light yellow
+  Color(0xFFE1F5FE), // Light blue
+  Color(0xFFE8F5E9), // Light green
+  Color(0xFFF3E5F5), // Light purple
+  Color(0xFFFFEBEE), // Light red
+  Color(0xFFFFFDE7), // Cream
+  Color(0xFFE0F7FA), // Light cyan
+  Color(0xFFF1F8E9), // Mint
+  Color(0xFFEDE7F6), // Lavender
+  Color(0xFFFFF8E1), // Peach
+  Color(0xFFE3F2FD), // Sky blue
+  Color(0xFFFFF0F0), // Pinkish white
+  Color(0xFFFBE9E7), // Light coral
+  Color(0xFFF9FBE7), // Lemon chiffon
+
+  // 🔽 Additional colors
+  Color(0xFFE0F2F1), // Aqua green
+  Color(0xFFFCE4EC), // Soft pink
+  Color(0xFFD1C4E9), // Pale violet
+  Color(0xFFF8BBD0), // Pastel rose
+  Color(0xFFDCEDC8), // Pale lime
+  Color(0xFFFFF9E6), // Light vanilla
+  Color(0xFFE3FCEC), // Light mint
+  Color(0xFFF0F4C3), // Light lime
+  Color(0xFFFAFAFA), // Almost white
+  Color(0xFFEFEBE9), // Warm beige
+];
 
 var deleteIcon = const Icon(
   Icons.delete_forever,
@@ -525,9 +557,9 @@ var closeButton = ElevatedButton(
     onPressed: () {
       Get.back();
     },
-    child: const Text(
+    child: Text(
       'Close',
-      style: TextStyle(fontWeight: FontWeight.bold),
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
     ));
 
 // snack bar
@@ -887,7 +919,6 @@ RxMap allStatus = RxMap({
   '2': {'name': 'Posted'},
   '3': {'name': 'Cancelled'}
 });
-
 
 normalizeDate(String input, TextEditingController date) {
   final raw = input.trim();
