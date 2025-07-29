@@ -440,6 +440,49 @@ final List<Color> cardColors = [
   Color(0xFFEFEBE9), // Warm beige
 ];
 
+List<String> months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
+
+int? monthNameToNumber(String monthName) {
+  const monthMap = {
+    'january': 1,
+    'february': 2,
+    'march': 3,
+    'april': 4,
+    'may': 5,
+    'june': 6,
+    'july': 7,
+    'august': 8,
+    'september': 9,
+    'october': 10,
+    'november': 11,
+    'december': 12,
+  };
+
+  return monthMap[monthName.toLowerCase()];
+}
+
+DocumentSnapshot<Object?>? getDocumentById(
+    String id, List<DocumentSnapshot<Object?>> list) {
+  try {
+    return list.firstWhere((doc) => doc.id == id);
+  } catch (e) {
+    return null;
+  }
+}
+
 var deleteIcon = const Icon(
   Icons.delete_forever,
   color: Colors.red,
@@ -629,24 +672,31 @@ Future<dynamic> alertDialog(
   );
 }
 
-String textToDate(dynamic inputDate, {bool withTime = false}) {
+String textToDate(
+  dynamic inputDate, {
+  bool withTime = false,
+  bool monthNameFirst = false,
+}) {
   if (inputDate == null) return '';
 
-  final dateFormat =
-      withTime ? DateFormat('dd-MM-yyyy HH:mm:ss') : DateFormat('dd-MM-yyyy');
+  // Define the format based on the flags
+  String format = monthNameFirst
+      ? (withTime ? 'MMMM d, yyyy HH:mm:ss' : 'MMMM d, yyyy')
+      : (withTime ? 'dd-MM-yyyy HH:mm:ss' : 'dd-MM-yyyy');
 
-  // Firestore Timestamp
+  final dateFormat = DateFormat(format);
+
+  // Handle Firestore Timestamp
   if (inputDate is Timestamp) {
-    final dt = inputDate.toDate();
-    return dateFormat.format(dt);
+    return dateFormat.format(inputDate.toDate());
   }
 
-  // Dart DateTime
+  // Handle Dart DateTime
   if (inputDate is DateTime) {
     return dateFormat.format(inputDate);
   }
 
-  // String
+  // Handle String
   if (inputDate is String) {
     final raw = inputDate.trim();
     if (raw.isEmpty) return '';
@@ -850,20 +900,26 @@ var loadingProcess = const SizedBox(
     strokeWidth: 2,
   ),
 );
-
-Container carLogo(String logo) {
+Container carLogo(String? logo) {
   return Container(
     height: 40,
     width: 40,
     decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey, width: 2)),
-    child: logo != ''
-        ? Image.network(logo)
-        : SizedBox(
-            height: 40,
-            width: 40,
-          ),
+      shape: BoxShape.circle,
+      border: Border.all(color: Colors.grey, width: 2),
+    ),
+    child: (logo != null && logo.isNotEmpty)
+        ? ClipOval(
+            child: Image.network(
+              logo,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.image_not_supported,
+                    size: 24, color: Colors.grey);
+              },
+            ),
+          )
+        : const Icon(Icons.image, size: 24, color: Colors.grey),
   );
 }
 
@@ -910,6 +966,24 @@ Map getDaysInMonth(String monthName) {
     for (var day = 1; day <= lastDay; day++)
       day.toString(): {'name': day.toString()},
   };
+}
+
+String monthNumberToName(int month) {
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
+  return monthNames[month - 1];
 }
 
 DateFormat format = DateFormat("dd-MM-yyyy");

@@ -75,20 +75,7 @@ class TradingDashboardController extends GetxController {
   RxBool isYearSelected = RxBool(false);
   RxBool isMonthSelected = RxBool(false);
   RxBool isDaySelected = RxBool(false);
-  List<String> months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
+ 
 
   @override
   void onInit() async {
@@ -122,12 +109,12 @@ class TradingDashboardController extends GetxController {
     var currentDate = DateTime.now();
     if (dateType == 'today') {
       day.text = currentDate.day.toString();
-      month.text = _monthNumberToName(currentDate.month);
+      month.text = monthNumberToName(currentDate.month);
       year.value.text = currentDate.year.toString();
       allDays.assignAll(getDaysInMonth(month.text));
     } else if (dateType == 'month') {
       day.clear();
-      month.text = _monthNumberToName(currentDate.month);
+      month.text = monthNumberToName(currentDate.month);
       year.value.text = currentDate.year.toString();
       allDays.assignAll(getDaysInMonth(month.text));
     } else if (dateType == 'year') {
@@ -504,7 +491,7 @@ class TradingDashboardController extends GetxController {
       int? selectedYear =
           year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
       int? selectedMonth = month.value.text.isNotEmpty
-          ? _monthNameToNumber(month.value.text)
+          ? monthNameToNumber(month.value.text)
           : null;
       int? selectedDay =
           day.value.text.isNotEmpty ? int.tryParse(day.value.text) : null;
@@ -605,7 +592,7 @@ class TradingDashboardController extends GetxController {
     final int? selectedYear =
         year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
     final int? selectedMonth = month.value.text.isNotEmpty
-        ? _monthNameToNumber(month.value.text)
+        ? monthNameToNumber(month.value.text)
         : null;
     final int? selectedDay =
         day.value.text.isNotEmpty ? int.tryParse(day.value.text) : null;
@@ -748,40 +735,7 @@ class TradingDashboardController extends GetxController {
   //   numberOfCars.value = filteredTrades.length;
   // }
 
-  int? _monthNameToNumber(String monthName) {
-    const monthMap = {
-      'january': 1,
-      'february': 2,
-      'march': 3,
-      'april': 4,
-      'may': 5,
-      'june': 6,
-      'july': 7,
-      'august': 8,
-      'september': 9,
-      'october': 10,
-      'november': 11,
-      'december': 12,
-    };
+  
 
-    return monthMap[monthName.toLowerCase()];
-  }
-
-  String _monthNumberToName(int month) {
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-    return monthNames[month - 1];
-  }
+ 
 }

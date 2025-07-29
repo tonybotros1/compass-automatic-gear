@@ -12,8 +12,7 @@ Future<dynamic> nameDialog(
       barrierDismissible: false,
       Dialog(
         backgroundColor: Colors.white,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         insetPadding: EdgeInsets.all(8),
         child: SizedBox(
           // height: constraints.maxHeight,
@@ -52,46 +51,46 @@ Future<dynamic> nameDialog(
                           ? Center(
                               child: loadingProcess,
                             )
-                          : LayoutBuilder(
-                            builder: (context,constraints) {
+                          : LayoutBuilder(builder: (context, constraints) {
                               return GridView.count(
-                                  crossAxisCount:
-                                      (constraints.maxWidth ~/ 250).clamp(1, 5)
-                                         ,
-                                  childAspectRatio: 1.5,
-                                  padding: EdgeInsets.all(20),
-                                  crossAxisSpacing: 40,
-                                  mainAxisSpacing: 40,
-                                  children: List.generate(
-                                      controller.allTechnician.length, (index) {
-                                    final tec = controller.allTechnician[index];
-                                    final data =
-                                        tec.data() as Map<String, dynamic>? ?? {};
-                                    String tecName = data['name'] ?? '';
-                                    String tecJob = data.containsKey('job')
-                                        ? data['job'] ?? ''
-                                        : '';
-                              
-                                    final cardColor =
-                                        cardColors[index % cardColors.length];
-                              
-                                    return HoverCard(
-                                      emoji: tecName,
-                                      name: tecJob,
-                                      description: '',
-                                      color: cardColor,
-                                      onTap: () {
+                                crossAxisCount:
+                                    (constraints.maxWidth ~/ 250).clamp(1, 5),
+                                childAspectRatio: 1.5,
+                                padding: EdgeInsets.all(20),
+                                crossAxisSpacing: 40,
+                                mainAxisSpacing: 40,
+                                children: List.generate(
+                                    controller.allTechnician.length, (index) {
+                                  final tec = controller.allTechnician[index];
+                                  final data =
+                                      tec.data() as Map<String, dynamic>? ?? {};
+                                  String tecName = data['name'] ?? '';
+                                  String tecJob = data.containsKey('job')
+                                      ? data['job'] ?? ''
+                                      : '';
+
+                                  final cardColor =
+                                      cardColors[index % cardColors.length];
+
+                                  return HoverCard(
+                                    emoji: tecName,
+                                    name: tecJob,
+                                    description: '',
+                                    color: cardColor,
+                                    onTap: () {
+                                      if (controller.hasActiveTask(tec.id) ==
+                                          false) {
                                         controller.selectedEmployeeName.value =
                                             tecName;
                                         controller.selectedEmployeeId.value =
                                             tec.id;
                                         Get.back();
-                                      },
-                                    );
-                                  }),
-                                );
-                            }
-                          ),
+                                      }
+                                    },
+                                  );
+                                }),
+                              );
+                            }),
                 );
               }))
             ],

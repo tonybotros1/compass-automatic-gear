@@ -22,7 +22,6 @@ class TimeSheetsController extends GetxController {
   RxMap allBrands = RxMap({});
   RxMap allColors = RxMap({});
   RxBool startSheet = RxBool(false);
-
   final RxList<DocumentSnapshot> allTechnician = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allTasks = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allTimeSheets = RxList<DocumentSnapshot>([]);
@@ -58,6 +57,22 @@ class TimeSheetsController extends GetxController {
     companyId.value = prefs.getString('companyId')!;
   }
 
+  bool hasActiveTask(employeeId) {
+    final hasActiveJob = allTimeSheets.any((doc) {
+      if (doc['employee_id'] != employeeId) return false;
+
+      final List<dynamic> periods = doc['active_periods'];
+      return periods.isNotEmpty && periods.last['to'] == null;
+    });
+
+    if (hasActiveJob) {
+      // Show warning (you can use your custom snackbar/dialog here)
+      showSnackBar('Alert', 'This employee is already working on another job!');
+      return true;
+    }
+    return false;
+  }
+
   void _startRealTimeTimer() {
     _timer = Timer.periodic(Duration(seconds: 1), (_) {
       for (var doc in allTimeSheets) {
@@ -87,24 +102,22 @@ class TimeSheetsController extends GetxController {
     });
   }
 
-  DocumentSnapshot<Object?>? getDocumentById(
-      String id, List<DocumentSnapshot<Object?>> list) {
-    try {
-      return list.firstWhere((doc) => doc.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
+  
 
-  String getjobInfosById(String id) {
+  Map<String, String> getjobInfosById(String id) {
     try {
       Map<String, dynamic> job =
           allJobCards.firstWhere((doc) => doc['id'] == id);
-      String jobInformation =
-          '${job['car_brand']} ${job['car_model']} - ${job['plate_number']} - ${job['color']}';
-      return jobInformation;
+
+      return {
+        'brand': job['car_brand'],
+        'model': job['car_model'],
+        'plate_number': job['plate_number'],
+        'color': job['color'],
+        'logo': job['car_brand_logo']
+      };
     } catch (e) {
-      return '';
+      return {};
     }
   }
 

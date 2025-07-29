@@ -507,14 +507,14 @@ class TradingDashboard extends StatelessWidget {
                       GetX<TradingDashboardController>(builder: (controller) {
                     return SyncfusionMultiBarChart(
                       labels: controller.isYearSelected.isTrue
-                          ? controller.months
+                          ? months
                           : controller.isMonthSelected.isTrue
                               ? controller.allDays.values
                                   .map((e) => e['name'].toString())
                                   .toList()
                               : controller.isDaySelected.isTrue
                                   ? ['Today']
-                                  : controller.months,
+                                  : months,
                       expenses: controller.expenses,
                       net: controller.net,
                       revenue: controller.revenue,
