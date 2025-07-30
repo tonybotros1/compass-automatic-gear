@@ -27,6 +27,7 @@ class EmployeesPerformanceController extends GetxController {
   RxString companyId = RxString('');
   final RxList<DocumentSnapshot> allTimeSheets = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allTechnician = RxList<DocumentSnapshot>([]);
+  final RxMap<String, int> employeePointsMap = <String, int>{}.obs;
 
   @override
   void onInit() async {
@@ -40,6 +41,19 @@ class EmployeesPerformanceController extends GetxController {
   getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
+  }
+
+  Future<void> loadAllEmployeePoints() async {
+    final futures = allTechnician.map((tech) async {
+      final id = tech.id;
+      final points = await getEmployeePoints(id);
+      return MapEntry(id, points);
+    });
+
+    final results = await Future.wait(futures);
+    final pointMap = Map<String, int>.fromEntries(results);
+
+    employeePointsMap.assignAll(pointMap);
   }
 
   int getEmployeeMins(String id) {
@@ -238,6 +252,7 @@ class EmployeesPerformanceController extends GetxController {
 
       query.snapshots().listen((snapshot) {
         allTimeSheets.assignAll(List<DocumentSnapshot>.from(snapshot.docs));
+        loadAllEmployeePoints();
       });
     } catch (e) {
       //

@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/employee_performance_model.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -250,21 +251,29 @@ Widget tableOfScreens(
         final taskData = task.data() as Map<String, dynamic>;
         final taskId = task.id;
         final isEven = i % 2 == 0;
+        final name = taskData['name'] ?? '';
+        final mins = controller.getEmployeeMins(taskId);
+        final tasks = controller.getEmployeeTasks(taskId);
+        final points = controller.employeePointsMap[taskId] ?? 0;
+        final model = EmployeePerformanceModel(
+          employeeName: name,
+          mins: mins,
+          points: points,
+          tasks: tasks,
+        );
         return dataRowForTheTable(
-            taskData, context, constraints, taskId, controller, isEven);
+            taskData, context, constraints, taskId, controller, isEven, model);
       }));
-
-  // controller.allTechnician.map<DataRow>((task) {
-  //   final taskData = task.data() as Map<String, dynamic>;
-  //   final taskId = task.id;
-
-  //   return dataRowForTheTable(
-  //       taskData, context, constraints, taskId, controller);
-  // }).toList());
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> taskData, context, constraints,
-    taskId, EmployeesPerformanceController controller, bool isEven) {
+DataRow dataRowForTheTable(
+    Map<String, dynamic> taskData,
+    context,
+    constraints,
+    taskId,
+    EmployeesPerformanceController controller,
+    bool isEven,
+    EmployeePerformanceModel model) {
   return DataRow(
       color: WidgetStateProperty.resolveWith<Color?>(
         (Set<WidgetState> states) {
@@ -275,37 +284,28 @@ DataRow dataRowForTheTable(Map<String, dynamic> taskData, context, constraints,
         },
       ),
       cells: [
-        DataCell(Text(taskData['name'])),
+        DataCell((Text(model.employeeName.toString()))),
         DataCell(textForDataRowInTable(
             formatDouble: false,
-            text: '${controller.getEmployeeMins(taskId)}',
+            text: model.mins.toString(),
             color: Colors.red,
             isBold: true)),
-        DataCell(
-          FutureBuilder<int>(
-            future: controller.getEmployeePoints(taskId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                    text: '${snapshot.data}',
-                    formatDouble: false,
-                    isBold: true,
-                    color: Colors.green);
-              }
-            },
-          ),
-        ),
+        DataCell(textForDataRowInTable(
+            formatDouble: false,
+            text: model.points.toString(),
+            color: Colors.green,
+            isBold: true)),
         DataCell(
           textForDataRowInTable(
               formatDouble: false,
               isBold: true,
               color: Colors.blueGrey,
-              text: controller.getEmployeeTasks(taskId).toString()),
+              text: model.tasks.toString()),
         ),
-        DataCell(SizedBox()),
+        DataCell(textForDataRowInTable(
+            text: model.amt.toString(),
+            formatDouble: false,
+            isBold: true,
+            color: Colors.orange)),
       ]);
 }
