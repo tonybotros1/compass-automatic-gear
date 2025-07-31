@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/Models/employee_performance_model.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/employees_performance_controller.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
+import '../../../../Widgets/main screen widgets/employee_performance_widgets/employee_information.dart';
 import '../../../../consts.dart';
 
 class EmployeePerformance extends StatelessWidget {
@@ -160,7 +162,6 @@ class EmployeePerformance extends StatelessWidget {
                         width: constraints.maxWidth,
                         child: tableOfScreens(
                           constraints: constraints,
-                          context: context,
                           controller: controller,
                         ),
                       ),
@@ -178,12 +179,11 @@ class EmployeePerformance extends StatelessWidget {
 
 Widget tableOfScreens(
     {required constraints,
-    required context,
     required EmployeesPerformanceController controller}) {
   return DataTable(
       clipBehavior: Clip.hardEdge,
       border: TableBorder.all(
-          // style: BorderStyle.none,
+          style: BorderStyle.none,
           color: Colors.grey,
           borderRadius: BorderRadius.circular(5)),
       dataRowMaxHeight: 40,
@@ -197,6 +197,8 @@ Widget tableOfScreens(
       sortAscending: controller.isAscending.value,
       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
       columns: [
+        DataColumn(
+            columnWidth: IntrinsicColumnWidth(flex: 0.2), label: SizedBox()),
         DataColumn(
           columnWidth: IntrinsicColumnWidth(flex: 2),
 
@@ -254,6 +256,7 @@ Widget tableOfScreens(
         final name = taskData['name'] ?? '';
         final mins = controller.getEmployeeMins(taskId);
         final tasks = controller.getEmployeeTasks(taskId);
+        final employeeSheets = controller.getEmployeeSheets(taskId);
         final points = controller.employeePointsMap[taskId] ?? 0;
         final model = EmployeePerformanceModel(
           employeeName: name,
@@ -261,19 +264,19 @@ Widget tableOfScreens(
           points: points,
           tasks: tasks,
         );
-        return dataRowForTheTable(
-            taskData, context, constraints, taskId, controller, isEven, model);
+        return dataRowForTheTable(taskData, constraints, taskId, controller,
+            isEven, model, employeeSheets);
       }));
 }
 
 DataRow dataRowForTheTable(
     Map<String, dynamic> taskData,
-    context,
     constraints,
     taskId,
     EmployeesPerformanceController controller,
     bool isEven,
-    EmployeePerformanceModel model) {
+    EmployeePerformanceModel model,
+    List<DocumentSnapshot<Object?>> employeeSheets) {
   return DataRow(
       color: WidgetStateProperty.resolveWith<Color?>(
         (Set<WidgetState> states) {
@@ -284,6 +287,7 @@ DataRow dataRowForTheTable(
         },
       ),
       cells: [
+        DataCell(infosSection(controller, constraints, employeeSheets)),
         DataCell((Text(model.employeeName.toString()))),
         DataCell(textForDataRowInTable(
             formatDouble: false,
@@ -308,4 +312,21 @@ DataRow dataRowForTheTable(
             isBold: true,
             color: Colors.orange)),
       ]);
+}
+
+IconButton infosSection(EmployeesPerformanceController controller, constraints,
+    List<DocumentSnapshot<Object?>> employeeSheets) {
+  return IconButton(
+      onPressed: () {
+        controller.getSheetTasksAndPoints(employeeSheets);
+        controller.getSheetsCar(employeeSheets);
+        infosDialog(
+            constraints: constraints,
+            controller: controller,
+            employeeSheets: employeeSheets);
+      },
+      icon: const Icon(
+        Icons.list_alt,
+        color: Colors.blueAccent,
+      ));
 }

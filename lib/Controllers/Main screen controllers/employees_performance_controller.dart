@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../consts.dart';
+import 'main_screen_contro.dart';
 
 class EmployeesPerformanceController extends GetxController {
   TextEditingController year = TextEditingController();
@@ -24,23 +25,125 @@ class EmployeesPerformanceController extends GetxController {
 
   double dropDownWidth = 150;
   RxBool isScreenLoadingForTimesheets = RxBool(false);
+  RxBool isScreenLoadingForEmployeeTasks = RxBool(false);
   RxString companyId = RxString('');
   final RxList<DocumentSnapshot> allTimeSheets = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allTechnician = RxList<DocumentSnapshot>([]);
   final RxMap<String, int> employeePointsMap = <String, int>{}.obs;
+  RxMap pointsAndNames = {}.obs;
+  RxMap cars = {}.obs;
+  RxMap allBrands = RxMap({});
 
   @override
   void onInit() async {
     await getCompanyId();
     getYears();
+    getCarBrands();
     getAllTechnicians();
     getMonths();
     super.onInit();
   }
 
+  getScreenName() {
+    MainScreenController mainScreenController =
+        Get.find<MainScreenController>();
+    return mainScreenController.selectedScreenName.value;
+  }
+
   getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
+  }
+
+  getCarBrands() {
+    try {
+      FirebaseFirestore.instance
+          .collection('all_brands')
+          .orderBy('name')
+          .snapshots()
+          .listen((brands) {
+        allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
+      });
+    } catch (e) {
+      //
+    }
+  }
+
+  getSheetTasksAndPoints(List<DocumentSnapshot<Object?>> employeeSheets) async {
+    try {
+      // isScreenLoadingForEmployeeTasks.value = true;
+      List tasksIDs = employeeSheets
+          .map((sheet) {
+            return sheet['task_id'];
+          })
+          .toSet()
+          .toList();
+      // Fetch all task documents concurrently
+      final tasksCollection =
+          FirebaseFirestore.instance.collection('all_job_tasks');
+      final List<DocumentSnapshot> taskDocs = await Future.wait(
+        tasksIDs.map((id) => tasksCollection.doc(id).get()),
+      );
+
+      pointsAndNames.value = {
+        for (var element in taskDocs)
+          if (element.exists)
+            element.id: {
+              'name': '${element.get('name_en')} ${element.get('name_ar')}',
+              'points': element.get('points') ?? 0,
+            }
+      };
+      // isScreenLoadingForEmployeeTasks.value = false;
+    } catch (e) {
+      // isScreenLoadingForEmployeeTasks.value = false;
+
+      return {};
+    }
+  }
+
+  getSheetsCar(List<DocumentSnapshot<Object?>> employeeSheets) async {
+    final jobIds = employeeSheets
+        .map((sheet) => sheet['job_id'])
+        .toSet()
+        .where((id) => id != null)
+        .toList();
+
+    final jobsCollection = FirebaseFirestore.instance.collection('job_cards');
+
+    final List<DocumentSnapshot<Map<String, dynamic>>> jobDocs =
+        await Future.wait(
+      jobIds.map((id) => jobsCollection.doc(id).get()),
+    );
+
+    for (final job in jobDocs) {
+      final data = job.data();
+      if (data != null) {
+        cars[job.id] = {
+          'brand': getdataName(data['car_brand'], allBrands),
+          'model': await getModelName(data['car_brand'], data['car_model'])
+        };
+        // brandsId.add(data['car_brand']?.toString() ?? '');
+      }
+    }
+  }
+
+  Future<String> getModelName(String brandId, String modelId) async {
+    try {
+      var cities = await FirebaseFirestore.instance
+          .collection('all_brands')
+          .doc(brandId)
+          .collection('values')
+          .doc(modelId)
+          .get();
+
+      if (cities.exists) {
+        return cities.data()!['name'];
+      } else {
+        return '';
+      }
+    } catch (e) {
+      return ''; // Return empty string on error
+    }
   }
 
   Future<void> loadAllEmployeePoints() async {
@@ -75,6 +178,28 @@ class EmployeesPerformanceController extends GetxController {
         // Sum all durations together
         .fold(initialValue, (total, duration) => total + duration)
         .inMinutes;
+  }
+
+  int getSheetMins(Map<String, dynamic> sheet) {
+    final List<dynamic> activePeriods = sheet['active_periods'] ?? [];
+
+    final totalDuration = activePeriods.fold<Duration>(
+      Duration.zero,
+      (sum1, period) {
+        final from = (period['from'] as Timestamp).toDate();
+        final to = (period['to'] as Timestamp).toDate();
+        return sum1 + to.difference(from);
+      },
+    );
+
+    return totalDuration.inMinutes;
+  }
+
+  List<DocumentSnapshot<Object?>> getEmployeeSheets(id) {
+    return allTimeSheets
+        .where(
+            (sheet) => sheet['employee_id'] == id && sheet['end_date'] != null)
+        .toList();
   }
 
   int getEmployeeTasks(id) {
