@@ -89,7 +89,7 @@ class EmployeesPerformanceController extends GetxController {
         for (var element in taskDocs)
           if (element.exists)
             element.id: {
-              'name': '${element.get('name_en')} ${element.get('name_ar')}',
+              'name': '${element.get('name_en')} - ${element.get('name_ar')}',
               'points': element.get('points') ?? 0,
             }
       };
@@ -159,28 +159,26 @@ class EmployeesPerformanceController extends GetxController {
     employeePointsMap.assignAll(pointMap);
   }
 
-  int getEmployeeMins(String id) {
-    // Using const for an immutable zero duration
+  String getEmployeeMins(String id) {
     const Duration initialValue = Duration.zero;
 
-    return allTimeSheets
-        // Filter for the relevant timesheets
+    final Duration totalDuration = allTimeSheets
         .where(
             (sheet) => sheet['employee_id'] == id && sheet['end_date'] != null)
-        // Flatten the list of lists of 'active_periods' into a single iterable
         .expand((sheet) => sheet['active_periods'] as List<dynamic>)
-        // Convert each period map into a Duration
         .map((period) {
-          final DateTime from = (period['from'] as Timestamp).toDate();
-          final DateTime to = (period['to'] as Timestamp).toDate();
-          return to.difference(from);
-        })
-        // Sum all durations together
-        .fold(initialValue, (total, duration) => total + duration)
-        .inMinutes;
+      final DateTime from = (period['from'] as Timestamp).toDate();
+      final DateTime to = (period['to'] as Timestamp).toDate();
+      return to.difference(from);
+    }).fold(initialValue, (total, duration) => total + duration);
+
+    final int minutes = totalDuration.inMinutes;
+    final int seconds = totalDuration.inSeconds % 60;
+
+    return "$minutes mins $seconds sec";
   }
 
-  int getSheetMins(Map<String, dynamic> sheet) {
+  String getSheetMins(Map<String, dynamic> sheet) {
     final List<dynamic> activePeriods = sheet['active_periods'] ?? [];
 
     final totalDuration = activePeriods.fold<Duration>(
@@ -192,7 +190,18 @@ class EmployeesPerformanceController extends GetxController {
       },
     );
 
-    return totalDuration.inMinutes;
+    final int minutes = totalDuration.inMinutes;
+    final int seconds = totalDuration.inSeconds % 60;
+
+    return "$minutes mins $seconds sec";
+  }
+
+  Map<String, dynamic> getSheetStartEndDate(Map<String, dynamic> sheet) {
+    return {
+      'start_date':
+          textToDate(sheet['start_date'], monthNameFirst: true, withTime: true),
+      'end_date': textToDate(sheet['end_date'],monthNameFirst: true,withTime: true)
+    };
   }
 
   List<DocumentSnapshot<Object?>> getEmployeeSheets(id) {

@@ -307,7 +307,7 @@ DataRow dataRowForTheTable(
               text: model.tasks.toString()),
         ),
         DataCell(textForDataRowInTable(
-            text: model.amt.toString(),
+            text: '',
             formatDouble: false,
             isBold: true,
             color: Colors.orange)),

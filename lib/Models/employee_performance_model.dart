@@ -1,7 +1,7 @@
 class EmployeePerformanceModel {
 
   String? employeeName;
-  int? mins;
+  String? mins;
   int? points;
   int? tasks;
 
@@ -9,6 +9,6 @@ class EmployeePerformanceModel {
    this.employeeName,this.mins,this.points,this.tasks
   });
 
-  int get amt => (mins ?? 0) + (points ?? 0) + (tasks ?? 0);
+  // int get amt => (mins ?? 0) + (points ?? 0) + (tasks ?? 0);
 
 }

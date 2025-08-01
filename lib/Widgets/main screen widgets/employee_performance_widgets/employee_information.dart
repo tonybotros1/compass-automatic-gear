@@ -104,6 +104,22 @@ Widget tableOfScreens(
           // onSort: controller.onSort,
         ),
         DataColumn(
+          columnWidth: IntrinsicColumnWidth(flex: 2),
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'Start Date',
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          columnWidth: IntrinsicColumnWidth(flex: 2),
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'End Date',
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn(
           numeric: true,
           columnWidth: IntrinsicColumnWidth(flex: 1),
 
@@ -172,7 +188,9 @@ DataRow dataRowForTheTable(
       ? taskData['points'].toString()
       : '0';
 
-  final sheetMins = controller.getSheetMins(sheetData).toString();
+  final sheetMins = controller.getSheetMins(sheetData);
+
+  final date = controller.getSheetStartEndDate(sheetData);
 
   return DataRow(
     color: WidgetStateProperty.resolveWith<Color?>(
@@ -193,6 +211,20 @@ DataRow dataRowForTheTable(
       )),
       DataCell(textForDataRowInTable(
         formatDouble: false,
+        maxWidth: null,
+        text: date['start_date'],
+        color: Color(0xffBE5B50),
+        isBold: true,
+      )),
+      DataCell(textForDataRowInTable(
+        formatDouble: false,
+        maxWidth: null,
+        text: date['end_date'],
+        color: Color(0xff73946B),
+        isBold: true,
+      )),
+      DataCell(textForDataRowInTable(
+        formatDouble: false,
         isBold: true,
         color: Colors.blueGrey,
         text: sheetMins,
@@ -206,4 +238,3 @@ DataRow dataRowForTheTable(
     ],
   );
 }
-
