@@ -1,3 +1,4 @@
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/company_variables.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/car_brands.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/countries.dart';
@@ -159,6 +160,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: JobTasks());
       case '/employeePerformance':
         return const SizedBox(child: EmployeePerformance());
+      case '/companyVariables':
+        return const SizedBox(child: CompanyVariables());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }
