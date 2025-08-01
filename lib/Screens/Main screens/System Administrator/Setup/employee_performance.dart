@@ -307,7 +307,7 @@ DataRow dataRowForTheTable(
               text: model.tasks.toString()),
         ),
         DataCell(textForDataRowInTable(
-            text: '',
+            text: controller.totalsForJobs.value.toString(),
             formatDouble: false,
             isBold: true,
             color: Colors.orange)),

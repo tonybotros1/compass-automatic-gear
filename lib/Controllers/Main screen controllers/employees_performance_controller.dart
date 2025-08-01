@@ -33,6 +33,7 @@ class EmployeesPerformanceController extends GetxController {
   RxMap pointsAndNames = {}.obs;
   RxMap cars = {}.obs;
   RxMap allBrands = RxMap({});
+  RxDouble totalsForJobs = RxDouble(0.0);
 
   @override
   void onInit() async {
@@ -200,7 +201,8 @@ class EmployeesPerformanceController extends GetxController {
     return {
       'start_date':
           textToDate(sheet['start_date'], monthNameFirst: true, withTime: true),
-      'end_date': textToDate(sheet['end_date'],monthNameFirst: true,withTime: true)
+      'end_date':
+          textToDate(sheet['end_date'], monthNameFirst: true, withTime: true)
     };
   }
 
@@ -313,7 +315,42 @@ class EmployeesPerformanceController extends GetxController {
     }
   }
 
-  void filterTimeSheets({String? preset}) {
+  getTotalAmount(DateTime? start, DateTime? end) async {
+    totalsForJobs.value = 0.0;
+    Query query = FirebaseFirestore.instance
+        .collection('job_cards')
+        .where('company_id', isEqualTo: companyId.value)
+        .where('job_status_1', isEqualTo: 'Posted');
+
+    if (start != null && end != null) {
+      query = query
+          .where('job_date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .where('job_date', isLessThan: Timestamp.fromDate(end));
+    }
+
+    var data = await query.get();
+
+    for (var job in data.docs) {
+      var jobId = job.id;
+      print(jobId);
+      totalsForJobs.value +=await calculateTotals(jobId);
+    }
+  }
+
+  calculateTotals(id) async {
+    double totals = 0.0;
+    var values = await FirebaseFirestore.instance
+        .collection('job_cards')
+        .doc(id)
+        .collection('invoice_items')
+        .get();
+    for (var value in values.docs) {
+      totals += value['total'];
+    }
+    return totals;
+  }
+
+  void filterTimeSheets({String? preset}) async {
     try {
       DateTime now = DateTime.now();
       DateTime? start;
@@ -335,6 +372,7 @@ class EmployeesPerformanceController extends GetxController {
             year.text = start.year.toString();
             month.text = monthNumberToName(start.month);
             day.clear();
+             getTotalAmount(start, end);
             break;
           case 'thisYear':
             start = DateTime(now.year, 1, 1);
@@ -365,9 +403,16 @@ class EmployeesPerformanceController extends GetxController {
         } else if (yearVal != null && monthVal != null) {
           start = DateTime(yearVal, monthVal, 1);
           end = DateTime(yearVal, monthVal + 1, 1);
+          getTotalAmount(start, end);
         } else if (yearVal != null) {
           start = DateTime(yearVal, 1, 1);
           end = DateTime(yearVal + 1, 1, 1);
+        } else if (monthVal != null) {
+          yearVal = now.year;
+          start = DateTime(yearVal, monthVal, 1);
+          end = DateTime(yearVal, monthVal + 1, 1);
+          year.text = yearVal.toString();
+          getTotalAmount(start, end);
         }
       }
 

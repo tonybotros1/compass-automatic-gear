@@ -3,7 +3,7 @@ class EmployeePerformanceModel {
   String? employeeName;
   String? mins;
   int? points;
-  int? tasks;
+  int? tasks; 
 
   EmployeePerformanceModel({
    this.employeeName,this.mins,this.points,this.tasks
