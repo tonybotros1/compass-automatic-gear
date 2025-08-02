@@ -19,6 +19,7 @@ class CompanyVariables extends StatelessWidget {
                 init: CompanyVariablesController(),
                 builder: (controller) {
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 10,
                     children: [
                       Row(
@@ -30,13 +31,18 @@ class CompanyVariables extends StatelessWidget {
                               spacing: 10,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Company Information',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade700,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
+                                Row(
+                                  spacing: 20,
+                                  children: [
+                                    labelBox(label: 'Company Information'),
+                                    IconButton(
+                                      iconSize: 20,
+                                      tooltip: 'Edit',
+                                      color: Colors.grey.shade700,
+                                      onPressed: () {},
+                                      icon: Icon(Icons.edit),
+                                    ),
+                                  ],
                                 ),
                                 controller.companyLogo.value.isNotEmpty
                                     ? logoBox(
@@ -63,7 +69,7 @@ class CompanyVariables extends StatelessWidget {
                                         index: index,
                                         constraints: constraints,
                                         title: key,
-                                        value: val,
+                                        value: '$val',
                                       );
                                     },
                                   ),
@@ -76,14 +82,8 @@ class CompanyVariables extends StatelessWidget {
                               spacing: 20,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Owner\'s Information',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade700,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
-                                ),
+                                labelBox(label: 'Owner\'s Information'),
+
                                 Column(
                                   spacing: 2,
                                   children: List.generate(
@@ -99,7 +99,7 @@ class CompanyVariables extends StatelessWidget {
                                         index: index,
                                         constraints: constraints,
                                         title: key,
-                                        value: val,
+                                        value: val.toString(),
                                       );
                                     },
                                   ),
@@ -110,46 +110,49 @@ class CompanyVariables extends StatelessWidget {
                         ],
                       ),
                       Divider(),
-                      Row(
-                        children: [
-                          Column(
-                            spacing: 20,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Responsibilities',
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              Column(
-                                spacing: 2,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: List.generate(
-                                  controller.userRoles.length,
-                                  (i) {
-                                    return dataLine(
-                                      title: controller.userRoles[i],
-                                      value: '',
-                                      index: i,
-                                      constraints: constraints,
-                                      titleColor: Colors.grey.shade800,
-                                    );
-                                    //  Text(
-                                    //   controller.userRoles[i],
-                                    //   style: TextStyle(
-                                    //     color: Colors.blueGrey,
-                                    //     fontWeight: FontWeight.bold,
-                                    //   ),
-                                    // );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                      labelBox(label: 'Responsibilities'),
+
+                      Wrap(
+                        spacing: 20,
+                        children: List.generate(controller.userRoles.length, (
+                          i,
+                        ) {
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: Colors.grey.shade200,
+                            ),
+                            child: textForDataRowInTable(
+                              text: controller.userRoles[i],
+                              isBold: true,
+                              color: Colors.grey.shade700,
+                              maxWidth: null,
+                            ),
+                          );
+                        }),
+                      ),
+                      Divider(),
+                      labelBox(label: 'Variables'),
+                      Column(
+                        spacing: 2,
+                        children: List.generate(
+                          controller.companyVariables.length,
+                          (i) {
+                            final key = controller.companyVariables.keys
+                                .elementAt(i);
+                            final val = controller.companyVariables[key];
+                            return dataLine(
+                              constraints: constraints,
+                              index: i,
+                              title: key,
+                              value: val.toString(),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   );
@@ -162,6 +165,24 @@ class CompanyVariables extends StatelessWidget {
     );
   }
 
+  Container labelBox({required String label}) {
+    return Container(
+      // padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      // decoration: BoxDecoration(
+      //   color: Color(0xff7E99A3),
+      //   borderRadius: BorderRadius.circular(5),
+      // ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: Colors.grey.shade700,
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+    );
+  }
+
   Container dataLine({
     required BoxConstraints constraints,
     required String title,
@@ -169,7 +190,7 @@ class CompanyVariables extends StatelessWidget {
     required int index,
     Color? titleColor,
   }) {
-    Color color = index % 2 == 0 ? Colors.grey.shade300 : Colors.grey.shade200;
+    Color color = index % 2 == 0 ? Colors.grey.shade200 : Colors.grey.shade100;
     return Container(
       width: constraints.maxWidth / 3,
       padding: EdgeInsets.all(8),
@@ -178,6 +199,7 @@ class CompanyVariables extends StatelessWidget {
         color: color,
       ),
       child: Row(
+        spacing: 20,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
         children: [
@@ -189,11 +211,15 @@ class CompanyVariables extends StatelessWidget {
             ),
           ),
           value != ''
-              ? Text(
-                  value,
-                  style: TextStyle(
-                    color: Colors.grey.shade800,
-                    fontWeight: FontWeight.bold,
+              ? Expanded(
+                  child: Text(
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                    value,
+                    style: TextStyle(
+                      color: Colors.grey.shade800,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 )
               : SizedBox(),
@@ -212,31 +238,3 @@ class CompanyVariables extends StatelessWidget {
     );
   }
 }
-
-
-// Row(spacing: 10,
-//                         mainAxisAlignment: MainAxisAlignment.start,
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           controller.companyLogo.value.isNotEmpty
-//                               ? logoBox(
-//                                   controller.logoSize,
-//                                   child: Image.network(
-//                                     fit: BoxFit.fitWidth,
-//                                     controller.companyLogo.value,
-//                                   ),
-//                                 )
-//                               : logoBox(controller.logoSize),
-
-//                               Column(
-//                                 mainAxisAlignment: MainAxisAlignment.start,
-//                                 children: [
-//                                   Text(controller.companyName.value,style: TextStyle(
-//                                     color: Colors.grey.shade700,
-//                                     fontWeight: FontWeight.bold,
-//                                     fontSize: 25
-//                                   ),)
-//                                 ],
-//                               )
-//                         ],
-//                       ),

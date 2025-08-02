@@ -11,8 +11,16 @@ class CompanyVariablesController extends GetxController {
   double logoSize = 150;
   RxList<String> userRoles = RxList([]);
 
-  RxMap companyInformation = RxMap({'Company Name': '', 'Industry': ''});
-  RxMap ownerInformation = RxMap({
+  RxMap<String, String> companyInformation = RxMap({
+    'Company Name': '',
+    'Industry': '',
+  });
+  RxMap<String, String> companyVariables = RxMap({
+    'Incentive Percentage': '',
+    'VAT Percentage': '',
+    'TAX Number': '',
+  });
+  RxMap<String, String> ownerInformation = RxMap({
     'Name': '',
     'Phone Number': '',
     'Email': '',
