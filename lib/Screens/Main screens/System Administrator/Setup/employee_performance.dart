@@ -16,13 +16,14 @@ class EmployeePerformance extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: LayoutBuilder(builder: (context, constraints) {
-        return Padding(
-          padding: screenPadding,
-          child: Column(
-            spacing: 10,
-            children: [
-              GetX<EmployeesPerformanceController>(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Padding(
+            padding: screenPadding,
+            child: Column(
+              spacing: 10,
+              children: [
+                GetX<EmployeesPerformanceController>(
                   init: EmployeesPerformanceController(),
                   builder: (controller) {
                     bool isYearsLoading = controller.allYears.isEmpty;
@@ -59,8 +60,9 @@ class EmployeePerformance extends StatelessWidget {
                             showedSelectedName: 'name',
                             items: isMonthsLoading ? {} : controller.allMonths,
                             onChanged: (key, value) {
-                              controller.allDays
-                                  .assignAll(getDaysInMonth(value['name']));
+                              controller.allDays.assignAll(
+                                getDaysInMonth(value['name']),
+                              );
                               controller.month.text = value['name'];
                               controller.day.clear();
                               // controller.isMonthSelected.value = true;
@@ -87,246 +89,268 @@ class EmployeePerformance extends StatelessWidget {
                           ),
                         ),
                         ElevatedButton(
-                            style: allButtonStyle,
-                            onPressed: () {
-                              controller.filterTimeSheets(preset: 'all');
-                              controller.isTodaySelected.value = false;
-                              controller.isThisMonthSelected.value = false;
-                              controller.isThisYearSelected.value = false;
-                              controller.year.clear();
-                              controller.month.clear();
-                              controller.day.clear();
-                              controller.allDays.clear();
-                            },
-                            child: Text('All')),
-                        ElevatedButton(
-                            style: todayButtonStyle,
-                            onPressed: controller.isTodaySelected.isFalse
-                                ? () {
-                                    controller.filterTimeSheets(
-                                        preset: 'today');
-                                    controller.isTodaySelected.value = true;
-                                    controller.isThisMonthSelected.value =
-                                        false;
-                                    controller.isThisYearSelected.value = false;
-                                    // controller.isYearSelected.value = false;
-                                    // controller.isMonthSelected.value = false;
-                                    // controller.isDaySelected.value = true;
-                                  }
-                                : null,
-                            child: Text('Today')),
-                        ElevatedButton(
-                            style: thisMonthButtonStyle,
-                            onPressed: controller.isThisMonthSelected.isFalse
-                                ? () {
-                                    controller.filterTimeSheets(
-                                        preset: 'thisMonth');
-                                    controller.isTodaySelected.value = false;
-                                    controller.isThisMonthSelected.value = true;
-                                    controller.isThisYearSelected.value = false;
-                                    // controller.isYearSelected.value = false;
-                                    // controller.isMonthSelected.value = true;
-                                    // controller.isDaySelected.value = false;
-                                  }
-                                : null,
-                            child: Text('This Month')),
-                        ElevatedButton(
-                            style: thisYearButtonStyle,
-                            onPressed: controller.isThisYearSelected.isFalse
-                                ? () {
-                                    controller.filterTimeSheets(
-                                        preset: 'thisYear');
-                                    controller.isTodaySelected.value = false;
-                                    controller.isThisMonthSelected.value =
-                                        false;
-                                    controller.isThisYearSelected.value = true;
-                                    // controller.isYearSelected.value = true;
-                                    // controller.isMonthSelected.value = false;
-                                    // controller.isDaySelected.value = false;
-                                  }
-                                : null,
-                            child: Text('This Year')),
-                      ],
-                    );
-                  }),
-              Expanded(
-                child: GetX<EmployeesPerformanceController>(
-                  builder: (controller) {
-                    if (controller.isScreenLoadingForTimesheets.value) {
-                      return Center(child: loadingProcess);
-                    }
-
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: SizedBox(
-                        width: constraints.maxWidth,
-                        child: tableOfScreens(
-                          constraints: constraints,
-                          controller: controller,
+                          style: allButtonStyle,
+                          onPressed: () {
+                            controller.filterTimeSheets(preset: 'all');
+                            controller.isTodaySelected.value = false;
+                            controller.isThisMonthSelected.value = false;
+                            controller.isThisYearSelected.value = false;
+                            controller.year.clear();
+                            controller.month.clear();
+                            controller.day.clear();
+                            controller.allDays.clear();
+                          },
+                          child: Text('All'),
                         ),
-                      ),
+                        ElevatedButton(
+                          style: todayButtonStyle,
+                          onPressed: controller.isTodaySelected.isFalse
+                              ? () {
+                                  controller.filterTimeSheets(preset: 'today');
+                                  controller.isTodaySelected.value = true;
+                                  controller.isThisMonthSelected.value = false;
+                                  controller.isThisYearSelected.value = false;
+                                  // controller.isYearSelected.value = false;
+                                  // controller.isMonthSelected.value = false;
+                                  // controller.isDaySelected.value = true;
+                                }
+                              : null,
+                          child: Text('Today'),
+                        ),
+                        ElevatedButton(
+                          style: thisMonthButtonStyle,
+                          onPressed: controller.isThisMonthSelected.isFalse
+                              ? () {
+                                  controller.filterTimeSheets(
+                                    preset: 'thisMonth',
+                                  );
+                                  controller.isTodaySelected.value = false;
+                                  controller.isThisMonthSelected.value = true;
+                                  controller.isThisYearSelected.value = false;
+                                  // controller.isYearSelected.value = false;
+                                  // controller.isMonthSelected.value = true;
+                                  // controller.isDaySelected.value = false;
+                                }
+                              : null,
+                          child: Text('This Month'),
+                        ),
+                        ElevatedButton(
+                          style: thisYearButtonStyle,
+                          onPressed: controller.isThisYearSelected.isFalse
+                              ? () {
+                                  controller.filterTimeSheets(
+                                    preset: 'thisYear',
+                                  );
+                                  controller.isTodaySelected.value = false;
+                                  controller.isThisMonthSelected.value = false;
+                                  controller.isThisYearSelected.value = true;
+                                  // controller.isYearSelected.value = true;
+                                  // controller.isMonthSelected.value = false;
+                                  // controller.isDaySelected.value = false;
+                                }
+                              : null,
+                          child: Text('This Year'),
+                        ),
+                      ],
                     );
                   },
                 ),
-              ),
-            ],
-          ),
-        );
-      }),
+                Expanded(
+                  child: GetX<EmployeesPerformanceController>(
+                    builder: (controller) {
+                      if (controller.isScreenLoadingForTimesheets.value) {
+                        return Center(child: loadingProcess);
+                      }
+
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            constraints: constraints,
+                            controller: controller,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
 
-Widget tableOfScreens(
-    {required constraints,
-    required EmployeesPerformanceController controller}) {
+Widget tableOfScreens({
+  required constraints,
+  required EmployeesPerformanceController controller,
+}) {
   return DataTable(
-      clipBehavior: Clip.hardEdge,
-      border: TableBorder.all(
-          style: BorderStyle.none,
-          color: Colors.grey,
-          borderRadius: BorderRadius.circular(5)),
-      dataRowMaxHeight: 40,
-      dataRowMinHeight: 30,
-      columnSpacing: 5,
-      horizontalMargin: horizontalMarginForTable,
-      // showBottomBorder: true,
-      dataTextStyle: regTextStyle,
-      headingTextStyle: fontStyleForTableHeader,
-      sortColumnIndex: controller.sortColumnIndex.value,
-      sortAscending: controller.isAscending.value,
-      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-      columns: [
-        DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 0.2), label: SizedBox()),
-        DataColumn(
-          columnWidth: IntrinsicColumnWidth(flex: 2),
+    clipBehavior: Clip.hardEdge,
+    border: TableBorder.all(
+      style: BorderStyle.none,
+      color: Colors.grey,
+      borderRadius: BorderRadius.circular(5),
+    ),
+    dataRowMaxHeight: 40,
+    dataRowMinHeight: 30,
+    columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
+    // showBottomBorder: true,
+    dataTextStyle: regTextStyle,
+    headingTextStyle: fontStyleForTableHeader,
+    sortColumnIndex: controller.sortColumnIndex.value,
+    sortAscending: controller.isAscending.value,
+    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    columns: [
+      DataColumn(
+        columnWidth: IntrinsicColumnWidth(flex: 0.2),
+        label: SizedBox(),
+      ),
+      DataColumn(
+        columnWidth: IntrinsicColumnWidth(flex: 2),
 
-          label: AutoSizedText(
-            text: 'Employee',
-            constraints: constraints,
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          numeric: true,
-          columnWidth: IntrinsicColumnWidth(flex: 1),
+        label: AutoSizedText(text: 'Employee', constraints: constraints),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        numeric: true,
+        columnWidth: IntrinsicColumnWidth(flex: 1),
 
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Minutes',
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          numeric: true,
-          columnWidth: IntrinsicColumnWidth(flex: 1),
+        label: AutoSizedText(constraints: constraints, text: 'Minutes'),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        numeric: true,
+        columnWidth: IntrinsicColumnWidth(flex: 1),
 
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Points',
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          numeric: true,
-          columnWidth: IntrinsicColumnWidth(flex: 1),
+        label: AutoSizedText(constraints: constraints, text: 'Points'),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        numeric: true,
+        columnWidth: IntrinsicColumnWidth(flex: 1),
 
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Tasks',
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          numeric: true,
-          columnWidth: IntrinsicColumnWidth(flex: 1),
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'AMT',
-          ),
-          // onSort: controller.onSort,
-        ),
-      ],
-      rows: List.generate(controller.allTechnician.length, (i) {
-        final task = controller.allTechnician[i];
-        final taskData = task.data() as Map<String, dynamic>;
-        final taskId = task.id;
-        final isEven = i % 2 == 0;
-        final name = taskData['name'] ?? '';
-        final mins = controller.getEmployeeMins(taskId);
-        final tasks = controller.getEmployeeTasks(taskId);
-        final employeeSheets = controller.getEmployeeSheets(taskId);
-        final points = controller.employeePointsMap[taskId] ?? 0;
-        final model = EmployeePerformanceModel(
-          employeeName: name,
-          mins: mins,
-          points: points,
-          tasks: tasks,
-        );
-        return dataRowForTheTable(taskData, constraints, taskId, controller,
-            isEven, model, employeeSheets);
-      }));
+        label: AutoSizedText(constraints: constraints, text: 'Tasks'),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        numeric: true,
+        columnWidth: IntrinsicColumnWidth(flex: 1),
+        label: AutoSizedText(constraints: constraints, text: 'AMT'),
+        // onSort: controller.onSort,
+      ),
+    ],
+    rows: List.generate(controller.allTechnician.length, (i) {
+      final task = controller.allTechnician[i];
+      final taskData = task.data() as Map<String, dynamic>;
+      final taskId = task.id;
+      final isEven = i % 2 == 0;
+      final name = taskData['name'] ?? '';
+      final mins = controller.getEmployeeMins(taskId);
+      final tasks = controller.getEmployeeTasks(taskId);
+      final employeeSheets = controller.getEmployeeSheets(taskId);
+      final points = controller.employeePointsMap[taskId] ?? 0;
+
+      final totalForJobs = controller.totalsForJobs.value;
+      final allPoints = controller.employeePointsMap.values.fold(
+        0.0,
+        (a, b) => a + b,
+      );
+
+      final model = EmployeePerformanceModel(
+        employeeName: name,
+        mins: mins,
+        points: points,
+        tasks: tasks,
+        allPoints: allPoints,
+        jobsTotal: totalForJobs,
+      );
+      return dataRowForTheTable(
+        taskData,
+        constraints,
+        taskId,
+        controller,
+        isEven,
+        model,
+        employeeSheets,
+      );
+    }),
+  );
 }
 
 DataRow dataRowForTheTable(
-    Map<String, dynamic> taskData,
-    constraints,
-    taskId,
-    EmployeesPerformanceController controller,
-    bool isEven,
-    EmployeePerformanceModel model,
-    List<DocumentSnapshot<Object?>> employeeSheets) {
+  Map<String, dynamic> taskData,
+  constraints,
+  taskId,
+  EmployeesPerformanceController controller,
+  bool isEven,
+  EmployeePerformanceModel model,
+  List<DocumentSnapshot<Object?>> employeeSheets,
+) {
   return DataRow(
-      color: WidgetStateProperty.resolveWith<Color?>(
-        (Set<WidgetState> states) {
-          if (!isEven) {
-            return Colors.grey.shade200;
-          }
-          return Colors.white; // Normal row color
-        },
-      ),
-      cells: [
-        DataCell(infosSection(controller, constraints, employeeSheets)),
-        DataCell((Text(model.employeeName.toString()))),
-        DataCell(textForDataRowInTable(
-            formatDouble: false,
-            text: model.mins.toString(),
-            color: Colors.red,
-            isBold: true)),
-        DataCell(textForDataRowInTable(
-            formatDouble: false,
-            text: model.points.toString(),
-            color: Colors.green,
-            isBold: true)),
-        DataCell(
-          textForDataRowInTable(
-              formatDouble: false,
-              isBold: true,
-              color: Colors.blueGrey,
-              text: model.tasks.toString()),
+    color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      if (!isEven) {
+        return Colors.grey.shade200;
+      }
+      return Colors.white; // Normal row color
+    }),
+    cells: [
+      DataCell(infosSection(controller, constraints, employeeSheets)),
+      DataCell((Text(model.employeeName.toString()))),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          text: model.mins.toString(),
+          color: Colors.red,
+          isBold: true,
         ),
-        DataCell(textForDataRowInTable(
-            text: controller.totalsForJobs.value.toString(),
-            formatDouble: false,
-            isBold: true,
-            color: Colors.orange)),
-      ]);
+      ),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          text: model.points.toString(),
+          color: Colors.green,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          isBold: true,
+          color: Colors.blueGrey,
+          text: model.tasks.toString(),
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: model.amt.toString(),
+          isBold: true,
+          color: Colors.orange,
+        ),
+      ),
+    ],
+  );
 }
 
-IconButton infosSection(EmployeesPerformanceController controller, constraints,
-    List<DocumentSnapshot<Object?>> employeeSheets) {
+IconButton infosSection(
+  EmployeesPerformanceController controller,
+  constraints,
+  List<DocumentSnapshot<Object?>> employeeSheets,
+) {
   return IconButton(
-      onPressed: () {
-        controller.getSheetTasksAndPoints(employeeSheets);
-        controller.getSheetsCar(employeeSheets);
-        infosDialog(
-            constraints: constraints,
-            controller: controller,
-            employeeSheets: employeeSheets);
-      },
-      icon: const Icon(
-        Icons.list_alt,
-        color: Colors.blueAccent,
-      ));
+    onPressed: () {
+      controller.getSheetTasksAndPoints(employeeSheets);
+      controller.getSheetsCar(employeeSheets);
+      infosDialog(
+        constraints: constraints,
+        controller: controller,
+        employeeSheets: employeeSheets,
+      );
+    },
+    icon: const Icon(Icons.list_alt, color: Colors.blueAccent),
+  );
 }

@@ -63,8 +63,8 @@ class EmployeesPerformanceController extends GetxController {
           .orderBy('name')
           .snapshots()
           .listen((brands) {
-        allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
-      });
+            allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
+          });
     } catch (e) {
       //
     }
@@ -80,8 +80,9 @@ class EmployeesPerformanceController extends GetxController {
           .toSet()
           .toList();
       // Fetch all task documents concurrently
-      final tasksCollection =
-          FirebaseFirestore.instance.collection('all_job_tasks');
+      final tasksCollection = FirebaseFirestore.instance.collection(
+        'all_job_tasks',
+      );
       final List<DocumentSnapshot> taskDocs = await Future.wait(
         tasksIDs.map((id) => tasksCollection.doc(id).get()),
       );
@@ -92,7 +93,7 @@ class EmployeesPerformanceController extends GetxController {
             element.id: {
               'name': '${element.get('name_en')} - ${element.get('name_ar')}',
               'points': element.get('points') ?? 0,
-            }
+            },
       };
       // isScreenLoadingForEmployeeTasks.value = false;
     } catch (e) {
@@ -112,16 +113,14 @@ class EmployeesPerformanceController extends GetxController {
     final jobsCollection = FirebaseFirestore.instance.collection('job_cards');
 
     final List<DocumentSnapshot<Map<String, dynamic>>> jobDocs =
-        await Future.wait(
-      jobIds.map((id) => jobsCollection.doc(id).get()),
-    );
+        await Future.wait(jobIds.map((id) => jobsCollection.doc(id).get()));
 
     for (final job in jobDocs) {
       final data = job.data();
       if (data != null) {
         cars[job.id] = {
           'brand': getdataName(data['car_brand'], allBrands),
-          'model': await getModelName(data['car_brand'], data['car_model'])
+          'model': await getModelName(data['car_brand'], data['car_model']),
         };
         // brandsId.add(data['car_brand']?.toString() ?? '');
       }
@@ -165,13 +164,15 @@ class EmployeesPerformanceController extends GetxController {
 
     final Duration totalDuration = allTimeSheets
         .where(
-            (sheet) => sheet['employee_id'] == id && sheet['end_date'] != null)
+          (sheet) => sheet['employee_id'] == id && sheet['end_date'] != null,
+        )
         .expand((sheet) => sheet['active_periods'] as List<dynamic>)
         .map((period) {
-      final DateTime from = (period['from'] as Timestamp).toDate();
-      final DateTime to = (period['to'] as Timestamp).toDate();
-      return to.difference(from);
-    }).fold(initialValue, (total, duration) => total + duration);
+          final DateTime from = (period['from'] as Timestamp).toDate();
+          final DateTime to = (period['to'] as Timestamp).toDate();
+          return to.difference(from);
+        })
+        .fold(initialValue, (total, duration) => total + duration);
 
     final int minutes = totalDuration.inMinutes;
     final int seconds = totalDuration.inSeconds % 60;
@@ -182,14 +183,14 @@ class EmployeesPerformanceController extends GetxController {
   String getSheetMins(Map<String, dynamic> sheet) {
     final List<dynamic> activePeriods = sheet['active_periods'] ?? [];
 
-    final totalDuration = activePeriods.fold<Duration>(
-      Duration.zero,
-      (sum1, period) {
-        final from = (period['from'] as Timestamp).toDate();
-        final to = (period['to'] as Timestamp).toDate();
-        return sum1 + to.difference(from);
-      },
-    );
+    final totalDuration = activePeriods.fold<Duration>(Duration.zero, (
+      sum1,
+      period,
+    ) {
+      final from = (period['from'] as Timestamp).toDate();
+      final to = (period['to'] as Timestamp).toDate();
+      return sum1 + to.difference(from);
+    });
 
     final int minutes = totalDuration.inMinutes;
     final int seconds = totalDuration.inSeconds % 60;
@@ -199,17 +200,24 @@ class EmployeesPerformanceController extends GetxController {
 
   Map<String, dynamic> getSheetStartEndDate(Map<String, dynamic> sheet) {
     return {
-      'start_date':
-          textToDate(sheet['start_date'], monthNameFirst: true, withTime: true),
-      'end_date':
-          textToDate(sheet['end_date'], monthNameFirst: true, withTime: true)
+      'start_date': textToDate(
+        sheet['start_date'],
+        monthNameFirst: true,
+        withTime: true,
+      ),
+      'end_date': textToDate(
+        sheet['end_date'],
+        monthNameFirst: true,
+        withTime: true,
+      ),
     };
   }
 
   List<DocumentSnapshot<Object?>> getEmployeeSheets(id) {
     return allTimeSheets
         .where(
-            (sheet) => sheet['employee_id'] == id && sheet['end_date'] != null)
+          (sheet) => sheet['employee_id'] == id && sheet['end_date'] != null,
+        )
         .toList();
   }
 
@@ -221,8 +229,10 @@ class EmployeesPerformanceController extends GetxController {
 
   Future<int> getEmployeePoints(String employeeId) async {
     final taskIds = allTimeSheets
-        .where((sheet) =>
-            sheet['employee_id'] == employeeId && sheet['end_date'] != null)
+        .where(
+          (sheet) =>
+              sheet['employee_id'] == employeeId && sheet['end_date'] != null,
+        )
         .map((sheet) => sheet['task_id'] as String)
         .toList();
 
@@ -236,10 +246,11 @@ class EmployeesPerformanceController extends GetxController {
 
     for (int i = 0; i < uniqueTaskIds.length; i += batchSize) {
       final batch = uniqueTaskIds.sublist(
-          i,
-          (i + batchSize > uniqueTaskIds.length)
-              ? uniqueTaskIds.length
-              : i + batchSize);
+        i,
+        (i + batchSize > uniqueTaskIds.length)
+            ? uniqueTaskIds.length
+            : i + batchSize,
+      );
 
       final querySnapshot = await FirebaseFirestore.instance
           .collection('all_job_tasks')
@@ -274,8 +285,8 @@ class EmployeesPerformanceController extends GetxController {
         .orderBy('name', descending: true)
         .snapshots()
         .listen((year) {
-      allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
-    });
+          allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
+        });
   }
 
   // this function is to get years
@@ -294,8 +305,8 @@ class EmployeesPerformanceController extends GetxController {
         .orderBy('added_date')
         .snapshots()
         .listen((year) {
-      allMonths.value = {for (var doc in year.docs) doc.id: doc.data()};
-    });
+          allMonths.value = {for (var doc in year.docs) doc.id: doc.data()};
+        });
   }
 
   getAllTechnicians() {
@@ -307,9 +318,9 @@ class EmployeesPerformanceController extends GetxController {
           .orderBy('name', descending: false)
           .snapshots()
           .listen((tech) {
-        allTechnician.assignAll(List<DocumentSnapshot>.from(tech.docs));
-        isScreenLoadingForTimesheets.value = false;
-      });
+            allTechnician.assignAll(List<DocumentSnapshot>.from(tech.docs));
+            isScreenLoadingForTimesheets.value = false;
+          });
     } catch (e) {
       isScreenLoadingForTimesheets.value = false;
     }
@@ -332,8 +343,7 @@ class EmployeesPerformanceController extends GetxController {
 
     for (var job in data.docs) {
       var jobId = job.id;
-      print(jobId);
-      totalsForJobs.value +=await calculateTotals(jobId);
+      totalsForJobs.value += await calculateTotals(jobId);
     }
   }
 
@@ -345,7 +355,12 @@ class EmployeesPerformanceController extends GetxController {
         .collection('invoice_items')
         .get();
     for (var value in values.docs) {
-      totals += value['total'];
+      var raw = value.data()['total'];
+      if (raw is num) {
+        totals += raw.toDouble();
+      } else if (raw is String) {
+        totals += double.tryParse(raw) ?? 0.0;
+      }
     }
     return totals;
   }
@@ -355,10 +370,11 @@ class EmployeesPerformanceController extends GetxController {
       DateTime now = DateTime.now();
       DateTime? start;
       DateTime? end;
-
       if (preset != null) {
         switch (preset) {
           case 'today':
+            totalsForJobs.value = 0.0;
+
             start = DateTime(now.year, now.month, now.day);
             end = start.add(Duration(days: 1));
             year.text = start.year.toString();
@@ -372,9 +388,11 @@ class EmployeesPerformanceController extends GetxController {
             year.text = start.year.toString();
             month.text = monthNumberToName(start.month);
             day.clear();
-             getTotalAmount(start, end);
+            getTotalAmount(start, end);
             break;
           case 'thisYear':
+            totalsForJobs.value = 0.0;
+
             start = DateTime(now.year, 1, 1);
             end = DateTime(now.year + 1, 1, 1);
             year.text = start.year.toString();
@@ -383,6 +401,8 @@ class EmployeesPerformanceController extends GetxController {
 
             break;
           case 'all':
+            totalsForJobs.value = 0.0;
+
           default:
             start = null;
             end = null;
@@ -398,6 +418,8 @@ class EmployeesPerformanceController extends GetxController {
         int? dayVal = int.tryParse(dayStr);
 
         if (yearVal != null && monthVal != null && dayVal != null) {
+          totalsForJobs.value = 0.0;
+
           start = DateTime(yearVal, monthVal, dayVal);
           end = start.add(Duration(days: 1));
         } else if (yearVal != null && monthVal != null) {
@@ -405,6 +427,8 @@ class EmployeesPerformanceController extends GetxController {
           end = DateTime(yearVal, monthVal + 1, 1);
           getTotalAmount(start, end);
         } else if (yearVal != null) {
+          totalsForJobs.value = 0.0;
+
           start = DateTime(yearVal, 1, 1);
           end = DateTime(yearVal + 1, 1, 1);
         } else if (monthVal != null) {
@@ -422,8 +446,10 @@ class EmployeesPerformanceController extends GetxController {
 
       if (start != null && end != null) {
         query = query
-            .where('end_date',
-                isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+            .where(
+              'end_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(start),
+            )
             .where('end_date', isLessThan: Timestamp.fromDate(end));
       }
 

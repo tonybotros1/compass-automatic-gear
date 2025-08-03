@@ -1,14 +1,27 @@
 class EmployeePerformanceModel {
-
   String? employeeName;
   String? mins;
   int? points;
-  int? tasks; 
+  int? tasks;
+  double? allPoints;
+  double? jobsTotal;
 
   EmployeePerformanceModel({
-   this.employeeName,this.mins,this.points,this.tasks
+    this.employeeName,
+    this.mins,
+    this.points,
+    this.tasks,
+    this.allPoints,
+    this.jobsTotal,
   });
 
-  // int get amt => (mins ?? 0) + (points ?? 0) + (tasks ?? 0);
-
+  double get amt {
+    if (points == null ||
+        jobsTotal == null ||
+        allPoints == null ||
+        allPoints == 0) {
+      return 0;
+    }
+    return (points! * jobsTotal! * 0.1) / allPoints!;
+  }
 }
