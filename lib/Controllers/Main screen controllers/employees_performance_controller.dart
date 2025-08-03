@@ -174,10 +174,10 @@ class EmployeesPerformanceController extends GetxController {
         })
         .fold(initialValue, (total, duration) => total + duration);
 
-    final int minutes = totalDuration.inMinutes;
+    final int minutes = totalDuration.inMinutes % 60;
     final int seconds = totalDuration.inSeconds % 60;
-
-    return "$minutes mins $seconds sec";
+    final int hours = totalDuration.inHours;
+    return "${hours}H : ${minutes}M : ${seconds}S";
   }
 
   String getSheetMins(Map<String, dynamic> sheet) {

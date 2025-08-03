@@ -217,10 +217,10 @@ Widget tableOfScreens({
         // onSort: controller.onSort,
       ),
       DataColumn(
-        numeric: true,
+        // numeric: true,
         columnWidth: IntrinsicColumnWidth(flex: 1),
 
-        label: AutoSizedText(constraints: constraints, text: 'Minutes'),
+        label: AutoSizedText(constraints: constraints, text: 'Duration'),
         // onSort: controller.onSort,
       ),
       DataColumn(
@@ -240,7 +240,7 @@ Widget tableOfScreens({
       DataColumn(
         numeric: true,
         columnWidth: IntrinsicColumnWidth(flex: 1),
-        label: AutoSizedText(constraints: constraints, text: 'AMT'),
+        label: AutoSizedText(constraints: constraints, text: 'Amount'),
         // onSort: controller.onSort,
       ),
     ],

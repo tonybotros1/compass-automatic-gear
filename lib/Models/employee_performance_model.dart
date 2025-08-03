@@ -22,6 +22,6 @@ class EmployeePerformanceModel {
         allPoints == 0) {
       return 0;
     }
-    return (points! * jobsTotal! * 0.1) / allPoints!;
+    return (points! * jobsTotal! * 0.005) / allPoints!;
   }
 }
