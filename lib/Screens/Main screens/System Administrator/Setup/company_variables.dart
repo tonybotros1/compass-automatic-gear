@@ -34,13 +34,9 @@ class CompanyVariables extends StatelessWidget {
                                 Row(
                                   spacing: 20,
                                   children: [
-                                    labelBox(label: 'Company Information'),
-                                    IconButton(
-                                      iconSize: 20,
-                                      tooltip: 'Edit',
-                                      color: Colors.grey.shade700,
+                                    labelBox(
+                                      label: 'Company Information',
                                       onPressed: () {},
-                                      icon: Icon(Icons.edit),
                                     ),
                                   ],
                                 ),
@@ -82,7 +78,10 @@ class CompanyVariables extends StatelessWidget {
                               spacing: 20,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                labelBox(label: 'Owner\'s Information'),
+                                labelBox(
+                                  label: 'Owner\'s Information',
+                                  onPressed: () {},
+                                ),
 
                                 Column(
                                   spacing: 2,
@@ -110,7 +109,7 @@ class CompanyVariables extends StatelessWidget {
                         ],
                       ),
                       Divider(),
-                      labelBox(label: 'Responsibilities'),
+                      labelBox(label: 'Responsibilities', onPressed: () {}),
 
                       Wrap(
                         spacing: 20,
@@ -136,7 +135,7 @@ class CompanyVariables extends StatelessWidget {
                         }),
                       ),
                       Divider(),
-                      labelBox(label: 'Variables'),
+                      labelBox(label: 'Variables', onPressed: () {}),
                       Column(
                         spacing: 2,
                         children: List.generate(
@@ -165,21 +164,26 @@ class CompanyVariables extends StatelessWidget {
     );
   }
 
-  Container labelBox({required String label}) {
-    return Container(
-      // padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      // decoration: BoxDecoration(
-      //   color: Color(0xff7E99A3),
-      //   borderRadius: BorderRadius.circular(5),
-      // ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: Colors.grey.shade700,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
+  Row labelBox({required String label, required void Function()? onPressed}) {
+    return Row(
+      spacing: 20,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey.shade700,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
-      ),
+        IconButton(
+          iconSize: 20,
+          tooltip: 'Edit',
+          color: Colors.grey.shade700,
+          onPressed: onPressed,
+          icon: Icon(Icons.edit),
+        ),
+      ],
     );
   }
 
