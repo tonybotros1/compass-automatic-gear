@@ -28,6 +28,7 @@ import '../../Screens/Main screens/System Administrator/Setup/cash_management_re
 import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
+import '../../Screens/Main screens/System Administrator/Setup/receiving.dart';
 import '../../Screens/Main screens/System Administrator/Setup/system_variables.dart';
 import '../../Screens/Main screens/System Administrator/Setup/time_sheets.dart';
 import '../../Screens/Main screens/System Administrator/User Management/menus.dart';
@@ -47,9 +48,7 @@ class MainScreenController extends GetxController {
   RxList<String> roleMenus = RxList([]);
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
-  Rx<Widget> selectedScreen = const SizedBox(
-    child: FirstMainScreen(),
-  ).obs;
+  Rx<Widget> selectedScreen = const SizedBox(child: FirstMainScreen()).obs;
   Rx<String> selectedScreenName = RxString('🏡 Home');
   Rx<String> selectedScreenRoute = RxString('/home');
   Rx<String> selectedScreenDescription = RxString('');
@@ -94,12 +93,12 @@ class MainScreenController extends GetxController {
     }
   }
 
-// this function is to get the fisrt letter of the name of current user
+  // this function is to get the fisrt letter of the name of current user
   String getFirstCharacter(String word) {
     return word.characters.isNotEmpty ? word.characters.first : '';
   }
 
-// this function is to get the screen and show it on the right side of the main screen
+  // this function is to get the screen and show it on the right side of the main screen
   Widget getScreenFromRoute(String? routeName) {
     switch (routeName) {
       case '/home':
@@ -162,6 +161,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: EmployeePerformance());
       case '/companyVariables':
         return const SizedBox(child: CompanyVariables());
+      case '/receiving':
+        return const SizedBox(child: Receiving());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }
@@ -169,10 +170,7 @@ class MainScreenController extends GetxController {
 
   // this function is to get the name of the screen of the right side of the main screen
   Text getScreenName(name) {
-    return Text(
-      name,
-      style: fontStyleForAppBar,
-    );
+    return Text(name, style: fontStyleForAppBar);
   }
 
   Future<void> getScreens() async {
@@ -194,8 +192,9 @@ class MainScreenController extends GetxController {
 
       if (!userSnapshot.exists) return;
 
-      final fetchedRoles =
-          List<String>.from(userSnapshot.data()?['roles'] ?? []);
+      final fetchedRoles = List<String>.from(
+        userSnapshot.data()?['roles'] ?? [],
+      );
       userName.value = userSnapshot.data()?['user_name'] ?? '';
       userEmail.value = userSnapshot.data()?['email'] ?? '';
       userJoiningDate.value = userSnapshot.data()?['added_date'] ?? '';
@@ -226,10 +225,10 @@ class MainScreenController extends GetxController {
       ]);
 
       allMenus.value = {
-        for (var menu in collections[0].docs) menu.id: menu.data()
+        for (var menu in collections[0].docs) menu.id: menu.data(),
       };
       allScreens.value = {
-        for (var screen in collections[1].docs) screen.id: screen.data()
+        for (var screen in collections[1].docs) screen.id: screen.data(),
       };
 
       // Filter menus based on role menus
@@ -238,15 +237,17 @@ class MainScreenController extends GetxController {
           .toList();
 
       // Build tree structure
-      final roots = await Future.wait(menuSnapshot.map((menuDoc) async {
-        final children = await buildMenus(menuDoc.value);
-        return MyTreeNode(
-          isMenu: true,
-          title: menuDoc.value['name'],
-          children: children,
-          routeName: menuDoc.value['routeName'],
-        );
-      }));
+      final roots = await Future.wait(
+        menuSnapshot.map((menuDoc) async {
+          final children = await buildMenus(menuDoc.value);
+          return MyTreeNode(
+            isMenu: true,
+            title: menuDoc.value['name'],
+            children: children,
+            routeName: menuDoc.value['routeName'],
+          );
+        }),
+      );
 
       // Initialize tree controller
       treeController = TreeController<MyTreeNode>(
@@ -278,29 +279,32 @@ class MainScreenController extends GetxController {
         .toList();
 
     // Build nodes for menus and screens
-    final menuNodes = await Future.wait(menuSnapshot.map((menuDoc) async {
-      final children = await buildMenus(menuDoc.value);
-      return MyTreeNode(
-        isMenu: true,
-        title: menuDoc.value['name'],
-        children: children,
-        routeName: menuDoc.value['routeName'],
-      );
-    }));
+    final menuNodes = await Future.wait(
+      menuSnapshot.map((menuDoc) async {
+        final children = await buildMenus(menuDoc.value);
+        return MyTreeNode(
+          isMenu: true,
+          title: menuDoc.value['name'],
+          children: children,
+          routeName: menuDoc.value['routeName'],
+        );
+      }),
+    );
 
     final screenNodes = screenSnapshot.map((screenDoc) {
       return MyTreeNode(
-          isMenu: false,
-          title: screenDoc.value['name'],
-          children: [],
-          routeName: screenDoc.value['routeName'],
-          description: screenDoc.value['description'] ?? '');
+        isMenu: false,
+        title: screenDoc.value['name'],
+        children: [],
+        routeName: screenDoc.value['routeName'],
+        description: screenDoc.value['description'] ?? '',
+      );
     }).toList();
 
     return [...menuNodes, ...screenNodes];
   }
 
-// init the tree
+  // init the tree
   init() {
     final List<MyTreeNode> roots = [
       MyTreeNode(
@@ -358,12 +362,15 @@ class MainScreenController extends GetxController {
         .orderBy('added_date', descending: true)
         .limit(15)
         .snapshots()
-        .listen((fav) {
-      favoriteScreens.assignAll(fav.docs);
-    }, onError: (e) {
-      // print(e);
-      // Handle errors here
-    });
+        .listen(
+          (fav) {
+            favoriteScreens.assignAll(fav.docs);
+          },
+          onError: (e) {
+            // print(e);
+            // Handle errors here
+          },
+        );
   }
 
   addScreenToFavorite() {
@@ -374,7 +381,7 @@ class MainScreenController extends GetxController {
         'added_date': DateTime.now(),
         'company_id': companyId.value,
         'user_id': userId.value,
-        'description': selectedScreenDescription.value
+        'description': selectedScreenDescription.value,
       });
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try agian');
@@ -387,9 +394,9 @@ class MainScreenController extends GetxController {
         .where('screen_route', isEqualTo: route)
         .get()
         .then((snap) {
-      for (var doc in snap.docs) {
-        doc.reference.delete();
-      }
-    });
+          for (var doc in snap.docs) {
+            doc.reference.delete();
+          }
+        });
   }
 }
