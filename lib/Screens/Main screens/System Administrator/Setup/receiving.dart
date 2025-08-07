@@ -38,7 +38,7 @@ class Receiving extends StatelessWidget {
                               width: 150,
                               child: myTextFormFieldWithBorder(
                                 labelText: 'Number',
-                                controller: controller.receivingNumber.value,
+                                controller: controller.receivingNumberFilter.value,
                               ),
                             ),
                             SizedBox(
@@ -46,7 +46,7 @@ class Receiving extends StatelessWidget {
 
                               child: myTextFormFieldWithBorder(
                                 labelText: 'Reverence NO.',
-                                controller: controller.referenceNumber.value,
+                                controller: controller.referenceNumberFilter.value,
                               ),
                             ),
 
