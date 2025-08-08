@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
 import '../auto_size_box.dart';
+import 'items_dialog.dart';
 
 Widget itemsSection({
   required BuildContext context,
@@ -300,7 +301,7 @@ Widget editSection(
   );
 }
 
-ElevatedButton newinvoiceItemsButton(
+ElevatedButton newItemButton(
   BuildContext context,
   BoxConstraints constraints,
   ReceivingController controller,
@@ -308,33 +309,30 @@ ElevatedButton newinvoiceItemsButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      // if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
-      //   if (controller.jobStatus1.value == 'New') {
-      //     controller.clearInvoiceItemsVariables();
+      if (controller.canAddItems.isTrue) {
+        if (controller.status.value == 'New') {
+          controller.clearItemsValues();
 
-      //     invoiceItemsForJobDialog(
-      //       jobId: jobId,
-      //       controller: controller,
-      //       constraints: constraints,
-      //       onPressed: controller.addingNewinvoiceItemsValue.value
-      //           ? null
-      //           : () async {
-      //               controller.addNewInvoiceItem(
-      //                 jobId != '' ? jobId : controller.curreentJobCardId.value,
-      //               );
-      //             },
-      //     );
-      //   } else {
-      //     showSnackBar('Alert', 'Only New Jobs Allowed');
-      //   }
-      // } else {
-      //   showSnackBar('Alert', 'Please Save Job First');
-      // }
+          itemsDialog(
+            jobId: jobId,
+            controller: controller,
+            constraints: constraints,
+            onPressed: controller.addingNewItemsValue.isTrue
+                ? null
+                : () async {
+                    // controller.addNewInvoiceItem(
+                    //   jobId != '' ? jobId : controller.curreentJobCardId.value,
+                    // );
+                  },
+          );
+        } else {
+          showSnackBar('Alert', 'Only New Docs Allowed');
+        }
+      } else {
+        showSnackBar('Alert', 'Please Save Docs First');
+      }
     },
     style: new2ButtonStyle,
-    child: const Text(
-      'New item',
-      style: TextStyle(fontWeight: FontWeight.bold),
-    ),
+    child: const Text('New item'),
   );
 }

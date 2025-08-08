@@ -795,7 +795,7 @@ class JobCardController extends GetxController {
     try {
       showSnackBar('Adding', 'Please Wait');
       addingNewValue.value = true;
-      Map<String, dynamic> newData = {
+      Map<String, dynamic> newData = { 
         'label': '',
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,

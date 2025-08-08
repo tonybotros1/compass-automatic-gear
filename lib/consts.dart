@@ -5,28 +5,49 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 var fontStyleForAppBar = TextStyle(
-    fontSize: 20, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
-var fontStyleForScreenNameUsedInButtons =
-    TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
+  fontSize: 20,
+  color: Colors.grey.shade700,
+  fontWeight: FontWeight.bold,
+);
+var fontStyleForScreenNameUsedInButtons = TextStyle(
+  color: Colors.white,
+  fontSize: 20,
+  fontWeight: FontWeight.bold,
+);
 var fontStyleForTableHeader = TextStyle(
-    color: Colors.grey[700], fontWeight: FontWeight.bold, fontSize: 12);
-var iconStyleForTableHeaderDown =
-    Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade700);
-var iconStyleForTableHeaderUp =
-    Icon(Icons.keyboard_arrow_up, color: Colors.grey.shade700);
-var regTextStyle =
-    TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w500);
+  color: Colors.grey[700],
+  fontWeight: FontWeight.bold,
+  fontSize: 12,
+);
+var iconStyleForTableHeaderDown = Icon(
+  Icons.keyboard_arrow_down,
+  color: Colors.grey.shade700,
+);
+var iconStyleForTableHeaderUp = Icon(
+  Icons.keyboard_arrow_up,
+  color: Colors.grey.shade700,
+);
+var regTextStyle = TextStyle(
+  color: Colors.grey.shade700,
+  fontWeight: FontWeight.w500,
+);
 var userNameStyle = const TextStyle(
-    color: Colors.blue,
-    fontWeight: FontWeight.bold,
-    fontSize: 16,
-    decoration: TextDecoration.underline,
-    decorationColor: Colors.blue);
+  color: Colors.blue,
+  fontWeight: FontWeight.bold,
+  fontSize: 16,
+  decoration: TextDecoration.underline,
+  decorationColor: Colors.blue,
+);
 var footerTextStylr = TextStyle(
-    color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 12);
+  color: Colors.grey.shade700,
+  fontWeight: FontWeight.bold,
+  fontSize: 12,
+);
 
-var hintMarkTestStyle =
-    TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.bold);
+var hintMarkTestStyle = TextStyle(
+  color: Colors.grey.shade700,
+  fontWeight: FontWeight.bold,
+);
 
 var fontStyleForElevatedButtons = const TextStyle(fontWeight: FontWeight.bold);
 
@@ -37,62 +58,49 @@ Color colorForNameInCards = const Color(0xFF00695C);
 var newButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: Size(100, 40),
 );
 
 var capitalButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff3D365C),
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 var coutstandingButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff7C4585),
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 var cgeneralExpensesButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xffC95792),
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var soldButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blueGrey,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var isNotPressedButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.white,
   foregroundColor: Colors.black,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var new2ButtonStyle = ElevatedButton.styleFrom(
+  textStyle: fontStyleForElevatedButtons,
   padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.green,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
@@ -100,36 +108,28 @@ var postButtonStyle = ElevatedButton.styleFrom(
   padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.teal,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
 var saveButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var clearVariablesButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.brown,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var cancelButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.red,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
@@ -137,9 +137,7 @@ var cancelJobButtonStyle = ElevatedButton.styleFrom(
   padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.red,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
@@ -147,9 +145,7 @@ var internalNotesButtonStyle = ElevatedButton.styleFrom(
   padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xffFA812F),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
@@ -157,9 +153,7 @@ var inspectionFormButtonStyle = ElevatedButton.styleFrom(
   padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff034C53),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
@@ -167,9 +161,7 @@ var copyJobButtonStyle = ElevatedButton.styleFrom(
   padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff7D1C4A),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
@@ -177,97 +169,75 @@ var creatJobOrQuotationButtonStyle = ElevatedButton.styleFrom(
   padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff393E46),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
 var innvoiceItemsButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.teal,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var openPDFButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var viewButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blue,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var editButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.deepPurple,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: Size(100, 40),
 );
 var historyButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blueGrey,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 var activeButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xff9ACBD0),
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var inActiveButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xff09122C),
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var publicButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xff16C47F),
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var privateButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xff123524),
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var deleteButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.red,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
@@ -275,9 +245,7 @@ var closeButtonStyle = ElevatedButton.styleFrom(
   padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.red,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: Size(40, 40),
 );
 
@@ -285,9 +253,7 @@ var approveButtonStyle = ElevatedButton.styleFrom(
   padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xffD2665A),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
@@ -295,72 +261,56 @@ var readyButtonStyle = ElevatedButton.styleFrom(
   padding: EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff7886C7),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
 var welcomButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: mainColor,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 var logoutButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xff3A6D8C),
   foregroundColor: Colors.white,
   padding: paddingForButtons,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: Size(60, 40),
 );
 
 var addButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var nextButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blue[300],
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var selectButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.deepPurple[200],
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var loginButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: mainColor,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
 var newCompannyButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: secColor,
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 
@@ -368,9 +318,7 @@ var allButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff328E6E),
   foregroundColor: Colors.white,
   padding: EdgeInsets.all(8),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
@@ -378,36 +326,28 @@ var todayButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff94B4C1),
   foregroundColor: Colors.white,
   padding: EdgeInsets.all(8),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 var thisMonthButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff547792),
   foregroundColor: Colors.white,
   padding: EdgeInsets.all(8),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 var thisYearButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xff213448),
   foregroundColor: Colors.white,
   padding: EdgeInsets.all(8),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
 var homeButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Color(0xffFA812F),
   foregroundColor: Colors.white,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(5),
-  ),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 final List<Color> cardColors = [
@@ -426,7 +366,6 @@ final List<Color> cardColors = [
   Color(0xFFFFF0F0), // Pinkish white
   Color(0xFFFBE9E7), // Light coral
   Color(0xFFF9FBE7), // Lemon chiffon
-
   // 🔽 Additional colors
   Color(0xFFE0F2F1), // Aqua green
   Color(0xFFFCE4EC), // Soft pink
@@ -452,7 +391,7 @@ List<String> months = [
   'September',
   'October',
   'November',
-  'December'
+  'December',
 ];
 
 int? monthNameToNumber(String monthName) {
@@ -475,7 +414,9 @@ int? monthNameToNumber(String monthName) {
 }
 
 DocumentSnapshot<Object?>? getDocumentById(
-    String id, List<DocumentSnapshot<Object?>> list) {
+  String id,
+  List<DocumentSnapshot<Object?>> list,
+) {
   try {
     return list.firstWhere((doc) => doc.id == id);
   } catch (e) {
@@ -483,22 +424,11 @@ DocumentSnapshot<Object?>? getDocumentById(
   }
 }
 
-var deleteIcon = const Icon(
-  Icons.delete_forever,
-  color: Colors.red,
-);
+var deleteIcon = const Icon(Icons.delete_forever, color: Colors.red);
 
-var editIcon = const Icon(
-  Icons.edit_note_rounded,
-  color: Colors.blue,
-);
+var editIcon = const Icon(Icons.edit_note_rounded, color: Colors.blue);
 
-var screenPadding = EdgeInsets.only(
-  left: 14,
-  right: 14,
-  bottom: 10,
-  top: 0,
-);
+var screenPadding = EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 0);
 
 String formatPhrase(String phrase) {
   return phrase.replaceAll(' ', '_');
@@ -507,24 +437,34 @@ String formatPhrase(String phrase) {
 Text separator() => Text('|', style: TextStyle(color: Colors.white));
 
 Text point() {
-  return Text('•',
-      style:
-          TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.bold));
+  return Text(
+    '•',
+    style: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.bold),
+  );
 }
 
 double horizontalMarginForTable = 8;
 
-var fontStyle1 =
-    const TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
-var fontStyle2 =
-    TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold);
+var fontStyle1 = const TextStyle(
+  color: Colors.white,
+  fontWeight: FontWeight.bold,
+);
+var fontStyle2 = TextStyle(
+  color: Colors.grey[700],
+  fontWeight: FontWeight.bold,
+);
 // var mainColor = const Color.fromARGB(255, 228, 200, 233);
 
 double textFieldHeight = 35;
-TextStyle textFieldFontStyle =
-    const TextStyle(fontSize: 14, color: Colors.black);
+TextStyle textFieldFontStyle = const TextStyle(
+  fontSize: 14,
+  color: Colors.black,
+);
 TextStyle textFieldLabelStyle = TextStyle(
-    color: Colors.grey.shade700, fontSize: 12, fontWeight: FontWeight.bold);
+  color: Colors.grey.shade700,
+  fontSize: 12,
+  fontWeight: FontWeight.bold,
+);
 
 var textStyleForCardsLabels = TextStyle(
   fontSize: 19,
@@ -549,7 +489,10 @@ var textStyleForFavoritesCards = const TextStyle(
 );
 
 var textStyleForInspectionHints = TextStyle(
-    fontSize: 14, color: Colors.grey.shade700, fontWeight: FontWeight.bold);
+  fontSize: 14,
+  color: Colors.grey.shade700,
+  fontWeight: FontWeight.bold,
+);
 
 var mainColor = const Color(0xff005f95);
 // var mainColor = const Color(0xff27374D);
@@ -574,37 +517,26 @@ const menuSelectionColor = Color(0xffEA2027);
 const backgroundColor2 = Color(0xFFFFFFFF);
 
 Widget verticalSpace({int space = 20}) {
-  return SizedBox(
-    height: Get.height / space,
-  );
+  return SizedBox(height: Get.height / space);
 }
 
 Row hintSection({required String hint, required Color color}) {
   return Row(
     spacing: 10,
     children: [
-      Container(
-        width: 15,
-        height: 15,
-        color: color,
-      ),
-      Text(
-        hint,
-        style: textStyleForInspectionHints,
-      )
+      Container(width: 15, height: 15, color: color),
+      Text(hint, style: textStyleForInspectionHints),
     ],
   );
 }
 
 var closeButton = ElevatedButton(
-    style: closeButtonStyle,
-    onPressed: () {
-      Get.back();
-    },
-    child: Text(
-      'Close',
-      style: TextStyle(fontWeight: FontWeight.bold),
-    ));
+  style: closeButtonStyle,
+  onPressed: () {
+    Get.back();
+  },
+  child: Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
+);
 
 // snack bar
 void showSnackBar(title, body) {
@@ -625,25 +557,24 @@ void showSnackBar(title, body) {
   );
 }
 
-Future<dynamic> alertMessage(
-    {required context,
-    required String content,
-    required void Function() onPressed}) {
+Future<dynamic> alertMessage({
+  required context,
+  required String content,
+  required void Function() onPressed,
+}) {
   return Get.defaultDialog(
     title: 'Alert',
     middleText: 'This is an alert message!',
-    confirm: ElevatedButton(
-      onPressed: () => Get.back(),
-      child: Text('OK'),
-    ),
+    confirm: ElevatedButton(onPressed: () => Get.back(), child: Text('OK')),
   );
 }
 
-Future<dynamic> alertDialog(
-    {required context,
-    controller,
-    required String content,
-    required void Function() onPressed}) {
+Future<dynamic> alertDialog({
+  required context,
+  controller,
+  required String content,
+  required void Function() onPressed,
+}) {
   return showCupertinoDialog(
     context: context,
     builder: (BuildContext context) {
@@ -661,10 +592,7 @@ Future<dynamic> alertDialog(
             isDestructiveAction: true,
             isDefaultAction: true,
             onPressed: onPressed,
-            child: const Text(
-              'Ok',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Ok', style: TextStyle(color: Colors.red)),
           ),
         ],
       );
@@ -723,29 +651,34 @@ String textToDate(
   return '';
 }
 
-Container labelContainer({
-  required Widget lable,
-}) {
+Container labelContainer({required Widget lable}) {
   return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      alignment: Alignment.centerLeft,
-      height: 50,
-      width: double.infinity,
-      decoration: BoxDecoration(
-          borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(5), topLeft: Radius.circular(5)),
-          color: secColor),
-      child: lable);
+    padding: const EdgeInsets.symmetric(horizontal: 15),
+    alignment: Alignment.centerLeft,
+    height: 50,
+    width: double.infinity,
+    decoration: BoxDecoration(
+      borderRadius: const BorderRadius.only(
+        topRight: Radius.circular(5),
+        topLeft: Radius.circular(5),
+      ),
+      color: secColor,
+    ),
+    child: lable,
+  );
 }
 
 Decoration containerDecor = BoxDecoration(
-    border: Border(
-      left: BorderSide(color: secColor),
-      right: BorderSide(color: secColor),
-      bottom: BorderSide(color: secColor),
-    ),
-    borderRadius: const BorderRadius.only(
-        bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5)));
+  border: Border(
+    left: BorderSide(color: secColor),
+    right: BorderSide(color: secColor),
+    bottom: BorderSide(color: secColor),
+  ),
+  borderRadius: const BorderRadius.only(
+    bottomLeft: Radius.circular(5),
+    bottomRight: Radius.circular(5),
+  ),
+);
 
 Widget textForDataRowInTable({
   required String text,
@@ -791,35 +724,35 @@ Widget textForDataRowInTable({
   );
 }
 
-Container statusBox(String status,
-    {hieght = 30.0,
-    width,
-    EdgeInsetsGeometry? padding = const EdgeInsets.symmetric(horizontal: 16)}) {
+Container statusBox(
+  String status, {
+  hieght = 30.0,
+  width,
+  EdgeInsetsGeometry? padding = const EdgeInsets.symmetric(horizontal: 16),
+}) {
   return Container(
     alignment: Alignment.center,
     decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 2),
-        borderRadius: BorderRadius.circular(5),
-        color: status == 'New'
-            ? Colors.green
-            : status == 'Posted' || status == 'Sold'
-                ? Colors.teal
-                : status == 'Cancelled' || status == 'R'
-                    ? Colors.red
-                    : status == 'Approved'
-                        ? const Color(0xffD2665A)
-                        : status == 'Ready' || status == 'D'
-                            ? const Color(0xff7886C7)
-                            : status == 'Closed' || status == 'Warranty'
-                                ? Colors.black
-                                : Colors.brown),
+      border: Border.all(color: Colors.white, width: 2),
+      borderRadius: BorderRadius.circular(5),
+      color: status == 'New'
+          ? Colors.green
+          : status == 'Posted' || status == 'Sold'
+          ? Colors.teal
+          : status == 'Cancelled' || status == 'R'
+          ? Colors.red
+          : status == 'Approved'
+          ? const Color(0xffD2665A)
+          : status == 'Ready' || status == 'D'
+          ? const Color(0xff7886C7)
+          : status == 'Closed' || status == 'Warranty'
+          ? Colors.black
+          : Colors.brown,
+    ),
     height: hieght,
     width: width,
     padding: padding,
-    child: Text(
-      status,
-      style: const TextStyle(color: Colors.white),
-    ),
+    child: Text(status, style: const TextStyle(color: Colors.white)),
   );
 }
 
@@ -868,13 +801,11 @@ String? getMimeTypeFromExtension(String extension) {
 
 Widget closeIcon() {
   return IconButton(
-      onPressed: () {
-        Get.back();
-      },
-      icon: const Icon(
-        Icons.close,
-        color: Colors.white,
-      ));
+    onPressed: () {
+      Get.back();
+    },
+    icon: const Icon(Icons.close, color: Colors.white),
+  );
 }
 
 // this function is to see if the warrant date is end or not
@@ -896,9 +827,7 @@ bool isBeforeToday(String dateStr) {
 var loadingProcess = const SizedBox(
   height: 20,
   width: 20,
-  child: CircularProgressIndicator(
-    strokeWidth: 2,
-  ),
+  child: CircularProgressIndicator(strokeWidth: 2),
 );
 Container carLogo(String? logo) {
   return Container(
@@ -914,8 +843,11 @@ Container carLogo(String? logo) {
               logo,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.image_not_supported,
-                    size: 24, color: Colors.grey);
+                return const Icon(
+                  Icons.image_not_supported,
+                  size: 24,
+                  color: Colors.grey,
+                );
               },
             ),
           )
@@ -925,9 +857,7 @@ Container carLogo(String? logo) {
 
 String getdataName(String id, Map allData, {title = 'name'}) {
   try {
-    final data = allData.entries.firstWhere(
-      (data) => data.key == id,
-    );
+    final data = allData.entries.firstWhere((data) => data.key == id);
     return data.value[title];
   } catch (e) {
     return '';
@@ -981,7 +911,7 @@ String monthNumberToName(int month) {
     'September',
     'October',
     'November',
-    'December'
+    'December',
   ];
   return monthNames[month - 1];
 }
@@ -991,7 +921,7 @@ DateFormat format = DateFormat("dd-MM-yyyy");
 RxMap allStatus = RxMap({
   '1': {'name': 'New'},
   '2': {'name': 'Posted'},
-  '3': {'name': 'Cancelled'}
+  '3': {'name': 'Cancelled'},
 });
 
 normalizeDate(String input, TextEditingController date) {
@@ -1044,7 +974,9 @@ String _formatIfValid(int day, int month, int year) {
 }
 
 Future<void> selectDateContext(
-    BuildContext context, TextEditingController date) async {
+  BuildContext context,
+  TextEditingController date,
+) async {
   final DateTime? picked = await showDatePicker(
     context: context,
     initialDate: DateTime.now(),

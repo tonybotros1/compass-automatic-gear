@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../consts.dart';
 import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
 
@@ -22,6 +23,17 @@ class ReceivingController extends GetxController {
   Rx<TextEditingController> handling = TextEditingController().obs;
   Rx<TextEditingController> other = TextEditingController().obs;
   Rx<TextEditingController> amount = TextEditingController().obs;
+  Rx<TextEditingController> itemCode = TextEditingController().obs;
+  Rx<TextEditingController> itemName = TextEditingController().obs;
+  Rx<TextEditingController> quantity = TextEditingController().obs;
+  Rx<TextEditingController> addCost = TextEditingController().obs;
+  Rx<TextEditingController> orginalPrice = TextEditingController().obs;
+  Rx<TextEditingController> addDisc = TextEditingController().obs;
+  Rx<TextEditingController> discount = TextEditingController().obs;
+  Rx<TextEditingController> localPrice = TextEditingController().obs;
+  Rx<TextEditingController> vat = TextEditingController().obs;
+  Rx<TextEditingController> total = TextEditingController().obs;
+  Rx<TextEditingController> net = TextEditingController().obs;
   RxString branchId = RxString('');
   RxString vendorId = RxString('');
   RxString currencyId = RxString('');
@@ -31,7 +43,7 @@ class ReceivingController extends GetxController {
   ListOfValuesController listOfValuesController = Get.put(
     ListOfValuesController(),
   );
-  RxString status = RxString('');
+  RxString status = RxString('New'); // change to empty
   Rx<TextEditingController> receivingNumberFilter = TextEditingController().obs;
   Rx<TextEditingController> referenceNumberFilter = TextEditingController().obs;
   Rx<TextEditingController> vendorNameIdFilterName =
@@ -75,8 +87,15 @@ class ReceivingController extends GetxController {
   RxString purchasedByMasterId = RxString('');
 
   RxBool loadingItems = RxBool(false);
-final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems =
+  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
+
+  RxBool canAddItems = RxBool(true); // change to false
+  RxBool addingNewItemsValue = RxBool(false);
+  RxBool addingNewValue = RxBool(false);
+  RxBool receivingDocAdded = RxBool(false);
+  RxBool postingReceivingDoc = RxBool(false);
+
   @override
   void onInit() async {
     await getCompanyId();
@@ -248,5 +267,227 @@ final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems =
             for (var doc in colors.docs) doc.id: doc.data(),
           };
         });
+  }
+
+  clearItemsValues() {
+    itemCode.value.clear();
+    itemName.value.clear();
+    quantity.value.text = '1';
+    addCost.value.text = '0';
+    orginalPrice.value.text = '0';
+    addDisc.value.text = '0';
+    discount.value.text = '0';
+    localPrice.value.text = '0';
+    vat.value.text = '0';
+    total.value.text = '0';
+    net.value.text = '0';
+  }
+
+  // calculationForItemsValues() {
+  //   total.value.text =
+  //       ((int.tryParse(quantity.value.text) ?? 1) *
+  //                   (int.tryParse(orginalPrice.value.text) ?? 0) -
+  //               (int.tryParse(discount.value.text) ?? 0))
+  //           .toString();
+
+  //   net.value.text =
+  //       ((int.tryParse(vat.value.text) ?? 0) +
+  //               (int.tryParse(total.value.text) ?? 0))
+  //           .toString();
+  // }
+
+  addNewReceivingDoc() async {
+    try {
+      showSnackBar('Adding', 'Please Wait');
+      addingNewValue.value = true;
+
+      Map<String, dynamic> newData = {
+        'company_id': companyId.value,
+        // 'date'
+        'number': '',
+        'status': 'New',
+        'branch': branchId.value,
+        'reference_number': referenceNumber.value.text,
+        'vendor': vendorId.value,
+        'note': note.value.text,
+        'currency': currencyId.value,
+        'rate': double.tryParse(rate.value.text) ?? 1,
+        'approved_by': approvedById.value,
+        'ordered_by': orderedById.value,
+        'purchased_by': purchasedById.value,
+        'shipping': double.tryParse(shipping.value.text) ?? 0,
+        'handling': double.tryParse(handling.value.text) ?? 0,
+        'other': double.tryParse(other.value.text) ?? 0,
+        'amount': double.tryParse(amount.value.text) ?? 0,
+      };
+
+      final rawDate = date.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['date'] = Timestamp.fromDate(format.parseStrict(rawDate));
+        } catch (e) {
+          showSnackBar('Alert', 'Please enter valid date');
+        }
+      }
+
+      if (receivingDocAdded.isFalse) {
+        newData['added_date'] = DateTime.now().toString();
+        var newJob = await FirebaseFirestore.instance
+            .collection('receiving')
+            .add(newData);
+        receivingDocAdded.value = true;
+        curreentReceivingId.value = newJob.id;
+        getAllItems(newJob.id);
+        showSnackBar('Done', 'Job Added Successfully');
+      } else {
+        newData.remove('added_date');
+        await FirebaseFirestore.instance
+            .collection('receiving')
+            .doc(curreentReceivingId.value)
+            .update(newData);
+        showSnackBar('Done', 'Updated Successfully');
+      }
+      canAddItems.value = true;
+      addingNewValue.value = false;
+    } catch (e) {
+      canAddItems.value = false;
+      addingNewValue.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
+  }
+
+  editPostForReceiving(id) async {
+    try {
+      if (status.value.isEmpty) {
+        showSnackBar('Alert', 'Please save doc first');
+        return;
+      }
+      postingReceivingDoc.value = true;
+      if (status.value == 'Posted') {
+        showSnackBar('Alert', 'Doc is already posted');
+        return;
+      }
+      if (status.value == 'Cancelled') {
+        showSnackBar('Alert', 'Doc is cancelled');
+        return;
+      }
+
+      await getCurrentReceivingCounterNumber();
+      await FirebaseFirestore.instance.collection('receiving').doc(id).update({
+        'number': receivingNumber.value.text,
+        'status': 'Posted',
+      });
+
+      status.value = 'Posted';
+      postingReceivingDoc.value = false;
+      showSnackBar('Done', 'Status is Posted Now');
+    } catch (e) {
+      postingReceivingDoc.value = false;
+    }
+  }
+
+  getAllItems(id) {
+    try {
+      loadingItems.value = true;
+      FirebaseFirestore.instance
+          .collection('receiving')
+          .doc(id)
+          .collection('items')
+          .snapshots()
+          .listen((QuerySnapshot<Map<String, dynamic>> items) {
+            allItems.assignAll(items.docs);
+            loadingItems.value = false;
+          });
+    } catch (e) {
+      loadingItems.value = false;
+    }
+  }
+
+  // addNewItem(String id) async {
+  //   try {
+  //     addingNewItemsValue.value = true;
+  //     await FirebaseFirestore.instance
+  //         .collection('receiving')
+  //         .doc(id)
+  //         .collection('items')
+  //         .add({
+  //       'company_id': companyId.value,
+  //       'added_date': DateTime.now().toString(),
+  //       'item_code': item
+  //     });
+  //     addingNewinvoiceItemsValue.value = false;
+  //     Get.back();
+  //     double allNets = 0.0;
+  //     double allVats = 0.0;
+  //     double alltotals = 0.0;
+  //     for (var invoice in allInvoiceItems) {
+  //       allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
+  //       allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
+  //       alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
+  //     }
+  //     await FirebaseFirestore.instance
+  //         .collection('job_cards')
+  //         .doc(id)
+  //         .update({
+  //       'total_net_amount': allNets,
+  //       'total_vat_amount': allVats,
+  //       'totals_amount': alltotals
+  //     });
+  //   } catch (e) {
+  //     addingNewinvoiceItemsValue.value = false;
+  //   }
+  // }
+
+  // this function is to generate a new receiving number
+  Future<void> getCurrentReceivingCounterNumber() async {
+    try {
+      var rnId = '';
+      var updateReceiveDoc = '';
+      var rnDoc = await FirebaseFirestore.instance
+          .collection('counters')
+          .where('code', isEqualTo: 'RN')
+          .where('company_id', isEqualTo: companyId.value)
+          .get();
+
+      if (rnDoc.docs.isEmpty) {
+        // Define constants for the new counter values
+        const prefix = 'R';
+        const separator = '-';
+        const initialValue = 1;
+
+        var newCounter = await FirebaseFirestore.instance
+            .collection('counters')
+            .add({
+              'code': 'RN',
+              'description': 'Receiving Number',
+              'prefix': prefix,
+              'value': initialValue,
+              'length': 0,
+              'separator': separator,
+              'added_date': DateTime.now().toString(),
+              'company_id': companyId.value,
+              'status': true,
+            });
+        rnId = newCounter.id;
+        // Set the counter text with prefix and separator
+        receivingNumber.value.text = '$prefix$separator$initialValue';
+        updateReceiveDoc = initialValue.toString();
+      } else {
+        var firstDoc = rnDoc.docs.first;
+        rnId = firstDoc.id;
+        var currentValue = firstDoc.data()['value'] ?? 0;
+        // Use the existing prefix and separator from the document
+        referenceNumber.value.text =
+            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
+        updateReceiveDoc = (currentValue + 1).toString();
+      }
+
+      await FirebaseFirestore.instance.collection('counters').doc(rnId).update({
+        'value': int.parse(updateReceiveDoc),
+      });
+    } catch (e) {
+      // Optionally handle errors here
+      // print("Error in getCurrentJobCardCounterNumber: $e");
+    }
   }
 }

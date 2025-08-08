@@ -38,7 +38,8 @@ class Receiving extends StatelessWidget {
                               width: 150,
                               child: myTextFormFieldWithBorder(
                                 labelText: 'Number',
-                                controller: controller.receivingNumberFilter.value,
+                                controller:
+                                    controller.receivingNumberFilter.value,
                               ),
                             ),
                             SizedBox(
@@ -46,7 +47,8 @@ class Receiving extends StatelessWidget {
 
                               child: myTextFormFieldWithBorder(
                                 labelText: 'Reverence NO.',
-                                controller: controller.referenceNumberFilter.value,
+                                controller:
+                                    controller.referenceNumberFilter.value,
                               ),
                             ),
 
@@ -568,8 +570,18 @@ ElevatedButton newReceivingButton(
   ReceivingController controller,
 ) {
   return ElevatedButton(
-    onPressed: () {
-      receivigDialog(controller: controller);
+    onPressed: () async {
+      receivigDialog(
+        controller: controller,
+        onTapForPost: () async {
+          await controller.editPostForReceiving(
+            controller.curreentReceivingId.value,
+          );
+        },
+        onTapForSave: () async {
+          await controller.addNewReceivingDoc();
+        },
+      );
     },
     style: newButtonStyle,
     child: const Text('New Receiving Doc'),

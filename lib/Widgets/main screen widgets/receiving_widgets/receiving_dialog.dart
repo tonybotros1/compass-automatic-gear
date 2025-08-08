@@ -8,7 +8,7 @@ import '../../text_button.dart';
 import 'add_new_receiving_or_edit.dart';
 
 Future<dynamic> receivigDialog({
-  void Function()? onTapForSave,
+ required void Function()? onTapForSave,
   void Function()? onTapForDelete,
   void Function()? onTapForPost,
   required ReceivingController controller,
@@ -102,7 +102,7 @@ Future<dynamic> receivigDialog({
                   child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: addNewReceiveOrEdit(
-                  jobId: controller.curreentReceivingId.value,
+                  id: controller.curreentReceivingId.value,
                   controller: controller,
                   constraints: constraints,
                   context: context,

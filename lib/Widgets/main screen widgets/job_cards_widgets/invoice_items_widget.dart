@@ -287,7 +287,7 @@ ElevatedButton newinvoiceItemsButton(BuildContext context,
               jobId: jobId,
               controller: controller,
               constraints: constraints,
-              onPressed: controller.addingNewinvoiceItemsValue.value
+              onPressed: controller.addingNewinvoiceItemsValue.isTrue
                   ? null
                   : () async {
                       controller.addNewInvoiceItem(jobId != ''
