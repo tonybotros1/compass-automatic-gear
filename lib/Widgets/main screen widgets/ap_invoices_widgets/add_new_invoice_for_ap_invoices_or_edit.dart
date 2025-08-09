@@ -18,52 +18,58 @@ Widget addNewinvoiceForApInvoicesOrEdit({
           spacing: 10,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GetX<ApInvoicesController>(builder: (controller) {
-              bool isTransactionTypesLoading =
-                  controller.allTransactionsTypes.isEmpty;
-              return CustomDropdown(
-                focusNode: controller.focusNode1,
-                nextFocusNode: controller.focusNode2,
-                showedSelectedName: 'type',
-                textcontroller: controller.transactionType.text,
-                hintText: 'Transaction Type',
-                items: isTransactionTypesLoading
-                    ? {}
-                    : controller.allTransactionsTypes,
-                onChanged: (key, value) {
-                  controller.transactionType.text = value['type'];
-                  controller.transactionTypeId.value = key;
-                },
-              );
-            }),
+            GetX<ApInvoicesController>(
+              builder: (controller) {
+                bool isTransactionTypesLoading =
+                    controller.allTransactionsTypes.isEmpty;
+                return CustomDropdown(
+                  focusNode: controller.focusNode1,
+                  nextFocusNode: controller.focusNode2,
+                  showedSelectedName: 'type',
+                  textcontroller: controller.transactionType.text,
+                  hintText: 'Transaction Type',
+                  items: isTransactionTypesLoading
+                      ? {}
+                      : controller.allTransactionsTypes,
+                  onChanged: (key, value) {
+                    controller.transactionType.text = value['type'];
+                    controller.transactionTypeId.value = key;
+                  },
+                );
+              },
+            ),
             Row(
               spacing: 10,
               children: [
                 Expanded(
                   child: myTextFormFieldWithBorder(
-                      focusNode: controller.focusNode2,
-                      onEditingComplete: () {
-                        FocusScope.of(context)
-                            .requestFocus(controller.focusNode3);
-                      },
-                      textInputAction: TextInputAction.next,
-                      labelText: 'Amount',
-                      isDouble: true,
-                      controller: controller.amount),
+                    focusNode: controller.focusNode2,
+                    onEditingComplete: () {
+                      FocusScope.of(
+                        context,
+                      ).requestFocus(controller.focusNode3);
+                    },
+                    textInputAction: TextInputAction.next,
+                    labelText: 'Amount',
+                    isDouble: true,
+                    controller: controller.amount,
+                  ),
                 ),
                 Expanded(
                   child: myTextFormFieldWithBorder(
-                      focusNode: controller.focusNode3,
-                      onEditingComplete: () {
-                        FocusScope.of(context)
-                            .requestFocus(controller.focusNode4);
-                      },
-                      textInputAction: TextInputAction.next,
-                      labelText: 'VAT',
-                      isDouble: true,
-                      controller: controller.vat),
+                    focusNode: controller.focusNode3,
+                    onEditingComplete: () {
+                      FocusScope.of(
+                        context,
+                      ).requestFocus(controller.focusNode4);
+                    },
+                    textInputAction: TextInputAction.next,
+                    labelText: 'VAT',
+                    isDouble: true,
+                    controller: controller.vat,
+                  ),
                 ),
-                Expanded(child: SizedBox())
+                Expanded(child: SizedBox()),
               ],
             ),
             // Row(
@@ -131,291 +137,301 @@ Widget addNewinvoiceForApInvoicesOrEdit({
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
-                    child: myTextFormFieldWithBorder(
-                        focusNode: controller.focusNode7,
-                        onEditingComplete: () {
-                          FocusScope.of(context)
-                              .requestFocus(controller.focusNode8);
-                        },
-                        labelText: 'Job Number',
-                        controller: controller.jobNumber)),
+                  child: myTextFormFieldWithBorder(
+                    focusNode: controller.focusNode7,
+                    onEditingComplete: () {
+                      FocusScope.of(
+                        context,
+                      ).requestFocus(controller.focusNode8);
+                    },
+                    labelText: 'Job Number',
+                    controller: controller.jobNumber,
+                  ),
+                ),
                 IconButton(
-                    focusNode: FocusNode(skipTraversal: true),
-                    onPressed: () {
-                      controller.searchForJobCards.clear();
-                      controller.getAllJobCards();
-                      Get.dialog(
-                        barrierDismissible: false,
-                        Dialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15)),
-                          child: SizedBox(
-                            width: constraints.maxWidth / 1.5,
-                            height: 500,
-                            child: Column(
-                              children: [
-                                // Header
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                    color: mainColor,
+                  focusNode: FocusNode(skipTraversal: true),
+                  onPressed: () {
+                    controller.searchForJobCards.clear();
+                    controller.getAllJobCards();
+                    Get.dialog(
+                      barrierDismissible: false,
+                      Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: SizedBox(
+                          width: constraints.maxWidth / 1.5,
+                          height: 500,
+                          child: Column(
+                            children: [
+                              // Header
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
                                   ),
-                                  padding: const EdgeInsets.all(16),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        '💳 Job Cards',
-                                        style:
-                                            fontStyleForScreenNameUsedInButtons,
-                                      ),
-                                      const Spacer(),
-                                      closeButton,
-                                    ],
-                                  ),
+                                  color: mainColor,
                                 ),
-                                // Content
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16, horizontal: 10),
-                                    child: GetX<ApInvoicesController>(
-                                      builder: (controller) {
-                                        return Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Full-width Search Bar
-                                            SizedBox(
-                                              width: 400,
-                                              height: 50,
-                                              child: SearchBar(
-                                                // elevation: WidgetStateProperty.all(0),
-                                                trailing: [
-                                                  IconButton(
-                                                    onPressed: () {
-                                                      controller
-                                                          .searchForJobCards
-                                                          .clear();
-                                                    },
-                                                    icon: const Icon(
-                                                        Icons.close,
-                                                        color: Colors.grey),
-                                                  ),
-                                                ],
-                                                leading: const Icon(
-                                                    Icons.search,
-                                                    color: Colors.grey),
-                                                shape: WidgetStateProperty.all(
-                                                  RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                  ),
-                                                ),
-                                                hintText: 'Search for jobs',
-                                                hintStyle:
-                                                    WidgetStateProperty.all(
-                                                  const TextStyle(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      '💳 Job Cards',
+                                      style:
+                                          fontStyleForScreenNameUsedInButtons,
+                                    ),
+                                    const Spacer(),
+                                    closeButton,
+                                  ],
+                                ),
+                              ),
+                              // Content
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                    horizontal: 10,
+                                  ),
+                                  child: GetX<ApInvoicesController>(
+                                    builder: (controller) {
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Full-width Search Bar
+                                          SizedBox(
+                                            width: 400,
+                                            height: 50,
+                                            child: SearchBar(
+                                              // elevation: WidgetStateProperty.all(0),
+                                              trailing: [
+                                                IconButton(
+                                                  onPressed: () {
+                                                    controller.searchForJobCards
+                                                        .clear();
+                                                    controller
+                                                        .searchEngineForJobCards();
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.close,
                                                     color: Colors.grey,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w400,
                                                   ),
                                                 ),
-                                                controller: controller
-                                                    .searchForJobCards,
-                                                onChanged: (_) {
-                                                  controller
-                                                      .searchEngineForJobCards();
-                                                },
+                                              ],
+                                              leading: const Icon(
+                                                Icons.search,
+                                                color: Colors.grey,
                                               ),
+                                              shape: WidgetStateProperty.all(
+                                                RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                              ),
+                                              hintText: 'Search for jobs',
+                                              hintStyle:
+                                                  WidgetStateProperty.all(
+                                                    const TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                              controller:
+                                                  controller.searchForJobCards,
+                                              onChanged: (_) {
+                                                controller
+                                                    .searchEngineForJobCards();
+                                              },
                                             ),
-                                            const SizedBox(height: 16),
-                                            // Full-width Scrollable Table
-                                            Expanded(
-                                              child: controller
-                                                      .loadingJobCards.value
-                                                  ? Center(
-                                                      child: loadingProcess)
-                                                  : controller.loadingJobCards
-                                                              .isFalse &&
-                                                          controller.allJobCards
-                                                              .isEmpty
-                                                      ? const Center(
-                                                          child:
-                                                              Text('No Data'))
-                                                      : SingleChildScrollView(
-                                                          scrollDirection:
-                                                              Axis.vertical,
-                                                          child:
-                                                              SingleChildScrollView(
-                                                            scrollDirection:
-                                                                Axis.horizontal,
-                                                            child:
-                                                                ConstrainedBox(
-                                                              constraints:
-                                                                  BoxConstraints(
-                                                                minWidth:
-                                                                    constraints
-                                                                            .maxWidth /
-                                                                        1.5,
+                                          ),
+                                          const SizedBox(height: 16),
+                                          // Full-width Scrollable Table
+                                          Expanded(
+                                            child:
+                                                controller.loadingJobCards.value
+                                                ? Center(child: loadingProcess)
+                                                : controller
+                                                          .loadingJobCards
+                                                          .isFalse &&
+                                                      controller
+                                                          .allJobCards
+                                                          .isEmpty
+                                                ? const Center(
+                                                    child: Text('No Data'),
+                                                  )
+                                                : SingleChildScrollView(
+                                                    scrollDirection:
+                                                        Axis.vertical,
+                                                    child: SingleChildScrollView(
+                                                      scrollDirection:
+                                                          Axis.horizontal,
+                                                      child: ConstrainedBox(
+                                                        constraints: BoxConstraints(
+                                                          minWidth:
+                                                              constraints
+                                                                      .maxWidth /
+                                                                  1.5 -
+                                                              20,
+                                                        ),
+                                                        child: DataTable(
+                                                          showCheckboxColumn:
+                                                              false,
+                                                          horizontalMargin:
+                                                              horizontalMarginForTable,
+                                                          dataRowMaxHeight: 40,
+                                                          dataRowMinHeight: 30,
+                                                          columnSpacing: 5,
+                                                          showBottomBorder:
+                                                              true,
+                                                          dataTextStyle:
+                                                              regTextStyle,
+                                                          headingTextStyle:
+                                                              fontStyleForTableHeader,
+                                                          headingRowColor:
+                                                              WidgetStatePropertyAll(
+                                                                Colors
+                                                                    .grey[300],
                                                               ),
-                                                              child: DataTable(
-                                                                showCheckboxColumn:
-                                                                    false,
-                                                                horizontalMargin:
-                                                                    horizontalMarginForTable,
-                                                                dataRowMaxHeight:
-                                                                    40,
-                                                                dataRowMinHeight:
-                                                                    30,
-                                                                columnSpacing:
-                                                                    5,
-                                                                showBottomBorder:
-                                                                    true,
-                                                                dataTextStyle:
-                                                                    regTextStyle,
-                                                                headingTextStyle:
-                                                                    fontStyleForTableHeader,
-                                                                headingRowColor:
-                                                                    WidgetStatePropertyAll(
-                                                                        Colors.grey[
-                                                                            300]),
-                                                                columns: [
-                                                                  DataColumn(
-                                                                    label:
-                                                                        AutoSizedText(
-                                                                      constraints:
-                                                                          constraints,
-                                                                      text:
-                                                                          'Job Number',
-                                                                    ),
-                                                                  ),
-                                                                  DataColumn(
-                                                                    label:
-                                                                        AutoSizedText(
-                                                                      constraints:
-                                                                          constraints,
-                                                                      text:
-                                                                          'Car Brand',
-                                                                    ),
-                                                                  ),
-                                                                  DataColumn(
-                                                                    label:
-                                                                        AutoSizedText(
-                                                                      constraints:
-                                                                          constraints,
-                                                                      text:
-                                                                          'Plate Number',
-                                                                    ),
-                                                                  ),
-                                                                  DataColumn(
-                                                                    label:
-                                                                        AutoSizedText(
-                                                                      constraints:
-                                                                          constraints,
-                                                                      text:
-                                                                          'VIN',
-                                                                    ),
-                                                                  ),
-                                                                  DataColumn(
-                                                                    label:
-                                                                        AutoSizedText(
-                                                                      constraints:
-                                                                          constraints,
-                                                                      text:
-                                                                          'Customer',
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                                rows: (controller
-                                                                            .filteredJobCards
-                                                                            .isEmpty &&
-                                                                        controller
-                                                                            .searchForJobCards
-                                                                            .value
-                                                                            .text
-                                                                            .isEmpty)
-                                                                    ? List<
-                                                                        DataRow>.generate(
-                                                                        controller
-                                                                            .allJobCards
-                                                                            .length,
-                                                                        (index) {
-                                                                          final job =
-                                                                              controller.allJobCards[index];
-                                                                          final jobData = job.data() as Map<
-                                                                              String,
-                                                                              dynamic>;
-                                                                          final jobId =
-                                                                              job.id;
-
-                                                                          return dataRowForTheTable(
-                                                                            jobData,
-                                                                            context,
-                                                                            constraints,
-                                                                            jobId,
-                                                                            controller,
-                                                                            index,
-                                                                          );
-                                                                        },
-                                                                      )
-                                                                    : List<
-                                                                        DataRow>.generate(
-                                                                        controller
-                                                                            .filteredJobCards
-                                                                            .length,
-                                                                        (index) {
-                                                                          final job =
-                                                                              controller.filteredJobCards[index];
-                                                                          final jobData = job.data() as Map<
-                                                                              String,
-                                                                              dynamic>;
-                                                                          final jobId =
-                                                                              job.id;
-
-                                                                          return dataRowForTheTable(
-                                                                            jobData,
-                                                                            context,
-                                                                            constraints,
-                                                                            jobId,
-                                                                            controller,
-                                                                            index,
-                                                                          );
-                                                                        },
-                                                                      ),
+                                                          columns: [
+                                                            DataColumn(
+                                                              label: AutoSizedText(
+                                                                constraints:
+                                                                    constraints,
+                                                                text:
+                                                                    'Job Number',
                                                               ),
                                                             ),
-                                                          ),
+                                                            DataColumn(
+                                                              label: AutoSizedText(
+                                                                constraints:
+                                                                    constraints,
+                                                                text:
+                                                                    'Car Brand',
+                                                              ),
+                                                            ),
+                                                            DataColumn(
+                                                              label: AutoSizedText(
+                                                                constraints:
+                                                                    constraints,
+                                                                text:
+                                                                    'Plate Number',
+                                                              ),
+                                                            ),
+                                                            DataColumn(
+                                                              label: AutoSizedText(
+                                                                constraints:
+                                                                    constraints,
+                                                                text: 'VIN',
+                                                              ),
+                                                            ),
+                                                            DataColumn(
+                                                              label: AutoSizedText(
+                                                                constraints:
+                                                                    constraints,
+                                                                text:
+                                                                    'Customer',
+                                                              ),
+                                                            ),
+                                                          ],
+                                                          rows:
+                                                              (controller
+                                                                      .filteredJobCards
+                                                                      .isEmpty &&
+                                                                  controller
+                                                                      .searchForJobCards
+                                                                      .value
+                                                                      .text
+                                                                      .isEmpty)
+                                                              ? List<
+                                                                  DataRow
+                                                                >.generate(
+                                                                  controller
+                                                                      .allJobCards
+                                                                      .length,
+                                                                  (index) {
+                                                                    final job =
+                                                                        controller
+                                                                            .allJobCards[index];
+                                                                    final jobData =
+                                                                        job.data()
+                                                                            as Map<
+                                                                              String,
+                                                                              dynamic
+                                                                            >;
+                                                                    final jobId =
+                                                                        job.id;
+
+                                                                    return dataRowForTheTable(
+                                                                      jobData,
+                                                                      context,
+                                                                      constraints,
+                                                                      jobId,
+                                                                      controller,
+                                                                      index,
+                                                                    );
+                                                                  },
+                                                                )
+                                                              : List<
+                                                                  DataRow
+                                                                >.generate(
+                                                                  controller
+                                                                      .filteredJobCards
+                                                                      .length,
+                                                                  (index) {
+                                                                    final job =
+                                                                        controller
+                                                                            .filteredJobCards[index];
+                                                                    final jobData =
+                                                                        job.data()
+                                                                            as Map<
+                                                                              String,
+                                                                              dynamic
+                                                                            >;
+                                                                    final jobId =
+                                                                        job.id;
+
+                                                                    return dataRowForTheTable(
+                                                                      jobData,
+                                                                      context,
+                                                                      constraints,
+                                                                      jobId,
+                                                                      controller,
+                                                                      index,
+                                                                    );
+                                                                  },
+                                                                ),
                                                         ),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                      );
-                    },
-                    icon: Icon(
-                      Icons.more_vert_rounded,
-                      color: mainColor,
-                    )),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.more_vert_rounded, color: mainColor),
+                ),
                 Expanded(flex: 1, child: SizedBox()),
-                Expanded(flex: 1, child: SizedBox())
+                Expanded(flex: 1, child: SizedBox()),
               ],
             ),
             myTextFormFieldWithBorder(
-                focusNode: controller.focusNode8,
-                maxLines: 6,
-                labelText: 'Note',
-                controller: controller.invoiceNote)
+              focusNode: controller.focusNode8,
+              maxLines: 6,
+              labelText: 'Note',
+              controller: controller.invoiceNote,
+            ),
           ],
         ),
       ),
@@ -423,35 +439,37 @@ Widget addNewinvoiceForApInvoicesOrEdit({
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
-    jobId, ApInvoicesController controller, int index) {
+DataRow dataRowForTheTable(
+  Map<String, dynamic> jobData,
+  context,
+  constraints,
+  jobId,
+  ApInvoicesController controller,
+  int index,
+) {
   return DataRow(
-      onSelectChanged: (_) {
-        Get.back();
-        controller.jobNumber.text = jobData['job_number'];
-      },
-      color: WidgetStateProperty.resolveWith<Color?>(
-        (Set<WidgetState> states) {
-          // Alternate row colors
-          return index % 2 == 0 ? Colors.grey[200] : Colors.white;
-        },
+    onSelectChanged: (_) {
+      Get.back();
+      controller.jobNumber.text = jobData['job_number'];
+    },
+    color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      // Alternate row colors
+      return index % 2 == 0 ? Colors.grey[200] : Colors.white;
+    }),
+    cells: [
+      DataCell(Text(jobData['job_number'] ?? '')),
+      DataCell(Text((getdataName(jobData['car_brand'], controller.allBrands)))),
+      DataCell(Text(jobData['plate_number'] ?? '')),
+      DataCell(Text(jobData['vehicle_identification_number'] ?? '')),
+      DataCell(
+        Text(
+          getdataName(
+            jobData['customer'],
+            controller.allCustomers,
+            title: 'entity_name',
+          ),
+        ),
       ),
-      cells: [
-        DataCell(Text(
-          jobData['job_number'] ?? '',
-        )),
-        DataCell(Text(
-          (getdataName(jobData['car_brand'], controller.allBrands)),
-        )),
-        DataCell(Text(
-          jobData['plate_number'] ?? '',
-        )),
-        DataCell(Text(
-          jobData['vehicle_identification_number'] ?? '',
-        )),
-        DataCell(Text(
-          getdataName(jobData['customer'], controller.allCustomers,
-              title: 'entity_name'),
-        )),
-      ]);
+    ],
+  );
 }

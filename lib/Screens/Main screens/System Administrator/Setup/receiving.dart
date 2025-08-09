@@ -119,9 +119,7 @@ class Receiving extends StatelessWidget {
                                           controller.fromDate.value.text,
                                           controller.fromDate.value,
                                         );
-                                        // if (nor) {
-                                        //   controller.searchEngine();
-                                        // }
+                                       
                                       },
                                     ),
                                   ),
@@ -136,9 +134,7 @@ class Receiving extends StatelessWidget {
                                           controller.toDate.value.text,
                                           controller.toDate.value,
                                         );
-                                        // if (nor) {
-                                        //   controller.searchEngine();
-                                        // }
+                                     
                                       },
                                     ),
                                   ),
@@ -152,7 +148,7 @@ class Receiving extends StatelessWidget {
                                           false;
                                       controller.isThisYearSelected.value =
                                           false;
-                                      // controller.searchEngine();
+                                      controller.searchEngine();
                                     },
                                     child: Text('All'),
                                   ),
@@ -179,7 +175,7 @@ class Receiving extends StatelessWidget {
                                                 false;
                                             controller.isDaySelected.value =
                                                 true;
-                                            // controller.searchEngine();
+                                            controller.searchEngine();
                                           }
                                         : null,
                                     child: Text('Today'),
@@ -207,7 +203,7 @@ class Receiving extends StatelessWidget {
                                                 true;
                                             controller.isDaySelected.value =
                                                 false;
-                                            // controller.searchEngine();
+                                            controller.searchEngine();
                                           }
                                         : null,
                                     child: Text('This Month'),
@@ -233,7 +229,7 @@ class Receiving extends StatelessWidget {
                                                 false;
                                             controller.isDaySelected.value =
                                                 false;
-                                            // controller.searchEngine();
+                                            controller.searchEngine();
                                           }
                                         : null,
                                     child: Text('This Year'),
@@ -243,8 +239,8 @@ class Receiving extends StatelessWidget {
                                     onPressed:
                                         controller.isThisYearSelected.isFalse
                                         ? () async {
-                                            // await controller.removeFilters();
-                                            // controller.searchEngine();
+                                            await controller.removeFilters();
+                                            controller.searchEngine();
                                           }
                                         : null,
                                     child: Text(
@@ -257,7 +253,7 @@ class Receiving extends StatelessWidget {
                                     onPressed:
                                         controller.isThisYearSelected.isFalse
                                         ? () {
-                                            // controller.clearAllFilters();
+                                            controller.clearAllFilters();
                                           }
                                         : null,
                                     child: Text(

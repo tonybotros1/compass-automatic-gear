@@ -122,10 +122,14 @@ Widget tableOfScreens({
         ],
         rows: [
           ...controller.allItems.map<DataRow>((invoiceItems) {
-            final invoiceItemsData = invoiceItems.data();
+            final receivingItemsData = invoiceItems.data();
             final invoiceItemsId = invoiceItems.id;
+            final itemsData = controller.getInventeryItemsData(
+              id: receivingItemsData['code'],
+            );
+            print(itemsData);
             return dataRowForTheTable(
-              invoiceItemsData,
+              receivingItemsData,
               context,
               constraints,
               invoiceItemsId,
@@ -183,23 +187,23 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> invoiceItemsData,
+  Map<String, dynamic> receivingItemsData,
   context,
   constraints,
   String invoiceItemsId,
   ReceivingController controller,
-  String jobId,
+  String id,
 ) {
   return DataRow(
     cells: [
       DataCell(
         Row(
           children: [
-            deleteSection(jobId, context, controller, invoiceItemsId),
+            deleteSection(id, context, controller, invoiceItemsId),
             editSection(
-              jobId,
+              id,
               controller,
-              invoiceItemsData,
+              receivingItemsData,
               context,
               constraints,
               invoiceItemsId,
@@ -207,23 +211,35 @@ DataRow dataRowForTheTable(
           ],
         ),
       ),
-      DataCell(Text('${invoiceItemsData['line_number'] ?? ''}')),
-      DataCell(Text('${invoiceItemsData['line_number'] ?? ''}')),
-      DataCell(Text('${invoiceItemsData['line_number'] ?? ''}')),
+      DataCell(textForDataRowInTable(text: '')),
+      DataCell(
+        textForDataRowInTable(
+          text: '${receivingItemsData['line_number'] ?? ''}',
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: '${receivingItemsData['line_number'] ?? ''}',
+        ),
+      ),
       DataCell(textForDataRowInTable(text: '', maxWidth: null)),
-      DataCell(textForDataRowInTable(text: '${invoiceItemsData['quantity']}')),
-      DataCell(textForDataRowInTable(text: '${invoiceItemsData['price']}')),
-      DataCell(textForDataRowInTable(text: '${invoiceItemsData['amount']}')),
-      DataCell(textForDataRowInTable(text: '${invoiceItemsData['discount']}')),
-      DataCell(textForDataRowInTable(text: '${invoiceItemsData['total']}')),
-      DataCell(textForDataRowInTable(text: '${invoiceItemsData['vat']}')),
-      DataCell(textForDataRowInTable(text: '${invoiceItemsData['net']}')),
+      DataCell(
+        textForDataRowInTable(text: '${receivingItemsData['quantity']}'),
+      ),
+      DataCell(textForDataRowInTable(text: '${receivingItemsData['price']}')),
+      DataCell(textForDataRowInTable(text: '${receivingItemsData['amount']}')),
+      DataCell(
+        textForDataRowInTable(text: '${receivingItemsData['discount']}'),
+      ),
+      DataCell(textForDataRowInTable(text: '${receivingItemsData['total']}')),
+      DataCell(textForDataRowInTable(text: '${receivingItemsData['vat']}')),
+      DataCell(textForDataRowInTable(text: '${receivingItemsData['net']}')),
     ],
   );
 }
 
 Widget deleteSection(
-  String jobId,
+  String id,
   context,
   ReceivingController controller,
   invoiceItemsId,
@@ -239,7 +255,7 @@ Widget deleteSection(
       //       controller.deleteInvoiceItem(
       //         controller.curreentJobCardId.value != ''
       //             ? controller.curreentJobCardId.value
-      //             : jobId,
+      //             : id,
       //         invoiceItemsId,
       //       );
       //     },
@@ -253,9 +269,9 @@ Widget deleteSection(
 }
 
 Widget editSection(
-  String jobId,
+  String id,
   ReceivingController controller,
-  Map<String, dynamic> invoiceItemsData,
+  Map<String, dynamic> receivingItemsData,
   context,
   constraints,
   String invoiceItemsId,
@@ -263,23 +279,23 @@ Widget editSection(
   return IconButton(
     onPressed: () {
       // if (controller.jobStatus1.value == 'New') {
-      //   controller.invoiceItemNameId.value = invoiceItemsData['name'];
+      //   controller.invoiceItemNameId.value = receivingItemsData['name'];
       //   controller.invoiceItemName.text = controller.getdataName(
-      //     invoiceItemsData['name'],
+      //     receivingItemsData['name'],
       //     controller.allInvoiceItemsFromCollection,
       //   );
-      //   controller.lineNumber.text = (invoiceItemsData['line_number'] ?? '')
+      //   controller.lineNumber.text = (receivingItemsData['line_number'] ?? '')
       //       .toString();
-      //   controller.description.text = invoiceItemsData['description'];
-      //   controller.quantity.text = invoiceItemsData['quantity'];
-      //   controller.price.text = invoiceItemsData['price'];
-      //   controller.amount.text = invoiceItemsData['amount'];
-      //   controller.discount.text = invoiceItemsData['discount'];
-      //   controller.total.text = invoiceItemsData['total'];
-      //   controller.vat.text = invoiceItemsData['vat'];
-      //   controller.net.text = invoiceItemsData['net'];
+      //   controller.description.text = receivingItemsData['description'];
+      //   controller.quantity.text = receivingItemsData['quantity'];
+      //   controller.price.text = receivingItemsData['price'];
+      //   controller.amount.text = receivingItemsData['amount'];
+      //   controller.discount.text = receivingItemsData['discount'];
+      //   controller.total.text = receivingItemsData['total'];
+      //   controller.vat.text = receivingItemsData['vat'];
+      //   controller.net.text = receivingItemsData['net'];
       //   invoiceItemsForJobDialog(
-      //     jobId: jobId,
+      //     id: id,
       //     controller: controller,
       //     constraints: constraints,
       //     onPressed: controller.addingNewinvoiceItemsValue.value
@@ -288,7 +304,7 @@ Widget editSection(
       //             controller.editInvoiceItem(
       //               controller.curreentJobCardId.value != ''
       //                   ? controller.curreentJobCardId.value
-      //                   : jobId,
+      //                   : id,
       //               invoiceItemsId,
       //             );
       //           },
@@ -305,7 +321,7 @@ ElevatedButton newItemButton(
   BuildContext context,
   BoxConstraints constraints,
   ReceivingController controller,
-  String jobId,
+  String id,
 ) {
   return ElevatedButton(
     onPressed: () {
@@ -314,15 +330,15 @@ ElevatedButton newItemButton(
           controller.clearItemsValues();
 
           itemsDialog(
-            jobId: jobId,
+            id: id,
             controller: controller,
             constraints: constraints,
             onPressed: controller.addingNewItemsValue.isTrue
                 ? null
                 : () async {
-                    // controller.addNewInvoiceItem(
-                    //   jobId != '' ? jobId : controller.curreentJobCardId.value,
-                    // );
+                    controller.addNewItem(
+                      id != '' ? id : controller.curreentReceivingId.value,
+                    );
                   },
           );
         } else {

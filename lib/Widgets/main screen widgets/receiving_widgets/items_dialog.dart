@@ -5,7 +5,7 @@ import '../../../consts.dart';
 import 'add_new_itms_or_edit.dart';
 
 Future<dynamic> itemsDialog({
-  required String jobId,
+  required String id,
   required ReceivingController controller,
   required BoxConstraints constraints,
   required void Function()? onPressed,
@@ -59,7 +59,10 @@ Future<dynamic> itemsDialog({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: addNewitemsOrEdit(controller: controller),
+                child: addNewitemsOrEdit(
+                  controller: controller,
+                  constraints: constraints,
+                ),
               ),
             ),
           ],

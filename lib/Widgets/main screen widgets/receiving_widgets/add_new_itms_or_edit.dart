@@ -1,9 +1,12 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_controller.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/inventery_items.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
+import 'add_new_value_for_screen_button.dart';
+import 'showing_available_items.dart';
 
-Widget addNewitemsOrEdit({required ReceivingController controller}) {
+Widget addNewitemsOrEdit({required ReceivingController controller,required BoxConstraints constraints}) {
   return SingleChildScrollView(
     child: SizedBox(
       width: double.infinity,
@@ -35,13 +38,22 @@ Widget addNewitemsOrEdit({required ReceivingController controller}) {
                 ),
                 IconButton(
                   tooltip: 'Selecet Value',
-                  onPressed: () {},
+                  onPressed: () {
+                    controller.searchForInventeryItems.clear();
+                    controller.getAllInventeryItems();
+                    showingAvailableItemsDialog(screenName: '📜 Inventery Items',constraints: constraints);
+                  },
                   icon: Icon(Icons.more_vert_rounded, color: mainColor),
                 ),
                 IconButton(
                   tooltip: 'Add New Value',
 
-                  onPressed: () {},
+                  onPressed: () {
+                    addNewValueToScreenButtonDialog(
+                      screenName: '📜 Inventery Items',
+                      widget: InventeryItems(),
+                    );
+                  },
                   icon: Icon(Icons.add),
                 ),
               ],
@@ -53,8 +65,7 @@ Widget addNewitemsOrEdit({required ReceivingController controller}) {
               labelText: 'Quantity',
               controller: controller.quantity.value,
               isnumber: true,
-              onChanged: (_) {
-              },
+              onChanged: (_) {},
             ),
           ),
           SizedBox(
@@ -63,8 +74,7 @@ Widget addNewitemsOrEdit({required ReceivingController controller}) {
               labelText: 'Orginal Price',
               controller: controller.orginalPrice.value,
               isDouble: true,
-              onChanged: (_) {
-              },
+              onChanged: (_) {},
             ),
           ),
           SizedBox(
@@ -73,8 +83,7 @@ Widget addNewitemsOrEdit({required ReceivingController controller}) {
               labelText: 'Discount',
               controller: controller.discount.value,
               isDouble: true,
-              onChanged: (_) {
-              },
+              onChanged: (_) {},
             ),
           ),
           SizedBox(
@@ -83,8 +92,7 @@ Widget addNewitemsOrEdit({required ReceivingController controller}) {
               labelText: 'VAT',
               controller: controller.vat.value,
               isDouble: true,
-              onChanged: (_) {
-              },
+              onChanged: (_) {},
             ),
           ),
         ],
@@ -92,3 +100,4 @@ Widget addNewitemsOrEdit({required ReceivingController controller}) {
     ),
   );
 }
+

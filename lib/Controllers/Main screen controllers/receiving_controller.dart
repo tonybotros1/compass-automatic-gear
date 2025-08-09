@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Models/inventry_items_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,7 +44,7 @@ class ReceivingController extends GetxController {
   ListOfValuesController listOfValuesController = Get.put(
     ListOfValuesController(),
   );
-  RxString status = RxString('New'); // change to empty
+  RxString status = RxString(''); // change to empty
   Rx<TextEditingController> receivingNumberFilter = TextEditingController().obs;
   Rx<TextEditingController> referenceNumberFilter = TextEditingController().obs;
   Rx<TextEditingController> vendorNameIdFilterName =
@@ -90,12 +91,20 @@ class ReceivingController extends GetxController {
   final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
 
-  RxBool canAddItems = RxBool(true); // change to false
+  RxBool canAddItems = RxBool(false); // change to false
   RxBool addingNewItemsValue = RxBool(false);
   RxBool addingNewValue = RxBool(false);
   RxBool receivingDocAdded = RxBool(false);
   RxBool postingReceivingDoc = RxBool(false);
-
+  TextEditingController searchForInventeryItems = TextEditingController();
+  RxBool loadingInventeryItems = RxBool(false);
+  final RxList<DocumentSnapshot> allInventeryItems = RxList<DocumentSnapshot>(
+    [],
+  );
+  final RxList<DocumentSnapshot> filteredInventeryItems =
+      RxList<DocumentSnapshot>([]);
+  RxString selectedInventeryItemID = RxString('');
+  RxString query = RxString('');
   @override
   void onInit() async {
     await getCompanyId();
@@ -118,6 +127,50 @@ class ReceivingController extends GetxController {
   getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
+  }
+
+  getAllInventeryItems() async {
+    try {
+      loadingInventeryItems.value = true;
+      allInventeryItems.clear();
+      var items = await FirebaseFirestore.instance
+          .collection('inventery_items')
+          .where('company_id', isEqualTo: companyId.value)
+          .get();
+      for (var item in items.docs) {
+        allInventeryItems.add(item);
+      }
+      loadingInventeryItems.value = false;
+    } catch (e) {
+      loadingInventeryItems.value = false;
+    }
+  }
+
+  Future<InventryItemsModel> getInventeryItemsData({required String id}) async {
+    var data = await FirebaseFirestore.instance
+        .collection('inventery_items')
+        .doc(id)
+        .get();
+    return InventryItemsModel(
+      code: data.data()?['code'] ?? '',
+      name: data.data()?['name'] ?? '',
+    );
+  }
+
+  // this function is to filter the search results for inventery items
+  void filterInventeryItems() {
+    query.value = searchForInventeryItems.value.text.toLowerCase();
+    if (query.value.isEmpty) {
+      filteredInventeryItems.clear();
+    } else {
+      filteredInventeryItems.assignAll(
+        allInventeryItems.where((item) {
+          return item['code'].toString().toLowerCase().contains(query) ||
+              item['name'].toString().toLowerCase().contains(query) ||
+              item['min_quantity'].toString().toLowerCase().contains(query);
+        }).toList(),
+      );
+    }
   }
 
   getAllBranches() {
@@ -403,40 +456,41 @@ class ReceivingController extends GetxController {
     }
   }
 
-  // addNewItem(String id) async {
-  //   try {
-  //     addingNewItemsValue.value = true;
-  //     await FirebaseFirestore.instance
-  //         .collection('receiving')
-  //         .doc(id)
-  //         .collection('items')
-  //         .add({
-  //       'company_id': companyId.value,
-  //       'added_date': DateTime.now().toString(),
-  //       'item_code': item
-  //     });
-  //     addingNewinvoiceItemsValue.value = false;
-  //     Get.back();
-  //     double allNets = 0.0;
-  //     double allVats = 0.0;
-  //     double alltotals = 0.0;
-  //     for (var invoice in allInvoiceItems) {
-  //       allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
-  //       allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
-  //       alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
-  //     }
-  //     await FirebaseFirestore.instance
-  //         .collection('job_cards')
-  //         .doc(id)
-  //         .update({
-  //       'total_net_amount': allNets,
-  //       'total_vat_amount': allVats,
-  //       'totals_amount': alltotals
-  //     });
-  //   } catch (e) {
-  //     addingNewinvoiceItemsValue.value = false;
-  //   }
-  // }
+  addNewItem(String id) async {
+    try {
+      addingNewItemsValue.value = true;
+      await FirebaseFirestore.instance
+          .collection('receiving')
+          .doc(id)
+          .collection('items')
+          .add({
+            'company_id': companyId.value,
+            'added_date': DateTime.now().toString(),
+            'code': selectedInventeryItemID.value,
+            'quantity': int.tryParse(quantity.value.text) ?? 1,
+            'orginal_price': double.tryParse(orginalPrice.value.text) ?? 0,
+            'discount': double.tryParse(discount.value.text) ?? 0,
+            'vat': double.tryParse(vat.value.text) ?? 0,
+          });
+      addingNewItemsValue.value = false;
+      Get.back();
+      // double allNets = 0.0;
+      // double allVats = 0.0;
+      // double alltotals = 0.0;
+      // for (var invoice in allItems) {
+      //   allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
+      //   allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
+      //   alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
+      // }
+      // await FirebaseFirestore.instance.collection('job_cards').doc(id).update({
+      //   'total_net_amount': allNets,
+      //   'total_vat_amount': allVats,
+      //   'totals_amount': alltotals,
+      // });
+    } catch (e) {
+      addingNewItemsValue.value = false;
+    }
+  }
 
   // this function is to generate a new receiving number
   Future<void> getCurrentReceivingCounterNumber() async {
@@ -490,4 +544,135 @@ class ReceivingController extends GetxController {
       // print("Error in getCurrentJobCardCounterNumber: $e");
     }
   }
+
+  Future<void> searchEngine() async {
+    isScreenLoding.value = true;
+
+    Query<Map<String, dynamic>> query = FirebaseFirestore.instance
+        .collection('receiving')
+        .where('company_id', isEqualTo: companyId.value);
+
+    if (isAllSelected.value) {
+    } else if (isTodaySelected.value) {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(Duration(days: 1));
+      fromDate.value.text = textToDate(startOfDay);
+      toDate.value.text = textToDate(endOfDay);
+      query = query
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('date', isLessThan: Timestamp.fromDate(endOfDay));
+    } else if (isThisMonthSelected.value) {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      final endOfMonth = (now.month < 12)
+          ? DateTime(now.year, now.month + 1, 1)
+          : DateTime(now.year + 1, 1, 1);
+      fromDate.value.text = textToDate(startOfMonth);
+      toDate.value.text = textToDate(endOfMonth);
+      query = query
+          .where(
+            'date',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+          )
+          .where('date', isLessThan: Timestamp.fromDate(endOfMonth));
+    } else if (isThisYearSelected.value) {
+      final now = DateTime.now();
+      final startOfYear = DateTime(now.year, 1, 1);
+      final endOfYear = DateTime(now.year + 1, 1, 1);
+      fromDate.value.text = textToDate(startOfYear);
+      toDate.value.text = textToDate(endOfYear);
+      query = query
+          .where(
+            'date',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
+          )
+          .where('date', isLessThan: Timestamp.fromDate(endOfYear));
+    } else {
+      if (fromDate.value.text.trim().isNotEmpty) {
+        try {
+          final dtFrom = format.parseStrict(fromDate.value.text.trim());
+          query = query.where(
+            'date',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
+          );
+        } catch (_) {}
+      }
+      if (toDate.value.text.trim().isNotEmpty) {
+        try {
+          final dtTo = format
+              .parseStrict(toDate.value.text.trim())
+              .add(const Duration(days: 1));
+          query = query.where('date', isLessThan: Timestamp.fromDate(dtTo));
+        } catch (_) {}
+      }
+    }
+
+    final snapshot = await query.get();
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedData =
+        snapshot.docs;
+
+    // 3. APPLY ALL OTHER FILTERS ON THE CLIENT-SIDE
+    // Filter the 'fetchedJobCards' list in memory.
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredJobCards =
+        fetchedData.where((doc) {
+          final data = doc.data();
+
+          if (receivingNumberFilter.value.text.trim().isNotEmpty &&
+              data['number'] != receivingNumberFilter.value.text.trim()) {
+            return false;
+          }
+          if (statusFilter.value.text.trim().isNotEmpty &&
+              data['status'] != statusFilter.value.text.trim()) {
+            return false;
+          }
+          if (vendorNameIdFilter.value.isNotEmpty &&
+              data['vendor'] != vendorNameIdFilter.value) {
+            return false;
+          }
+
+          if (referenceNumberFilter.value.text.trim().isNotEmpty &&
+              data['reference_number'] !=
+                  referenceNumberFilter.value.text.trim()) {
+            return false;
+          }
+
+          return true;
+        }).toList();
+
+    // 4. UPDATE THE UI
+    allReceivingDocs.assignAll(filteredJobCards);
+    numberOfReceivingDocs.value = allReceivingDocs.length;
+    // calculateMoneyForAllJobs(); // Make sure this function iterates over the final list
+    isScreenLoding.value = false;
+  }
+
+  removeFilters() {
+    isAllSelected.value = false;
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+  }
+
+  
+  clearAllFilters() {
+    statusFilter.value.clear();
+    allReceivingDocs.clear();
+    numberOfReceivingDocs.value = 0;
+    allReceivingTotals.value = 0;
+    allReceivingVATS.value = 0;
+    allReceivingNET.value = 0;
+    isAllSelected.value = false;
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+    receivingNumberFilter.value.clear();
+    referenceNumberFilter.value.clear();
+    vendorNameIdFilter = RxString('');
+    vendorNameIdFilterName.value = TextEditingController();
+    fromDate.value.clear();
+    toDate.value.clear();
+    isScreenLoding.value = false;
+  }
+
 }
