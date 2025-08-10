@@ -54,8 +54,9 @@ class QuotationCardController extends GetxController {
   final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allQuotationCards =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
   final RxList<QueryDocumentSnapshot<Map<String, dynamic>>>
-      filteredQuotationCards =
-      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
+  filteredQuotationCards = RxList<QueryDocumentSnapshot<Map<String, dynamic>>>(
+    [],
+  );
   final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allInvoiceItems =
       RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
   final ScrollController scrollControllerFotTable1 = ScrollController();
@@ -197,8 +198,8 @@ class QuotationCardController extends GetxController {
         .orderBy('name', descending: true)
         .snapshots()
         .listen((year) {
-      allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
-    });
+          allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
+        });
   }
 
   // calculateMoneyForAllQuotations() async {
@@ -252,7 +253,8 @@ class QuotationCardController extends GetxController {
             .collection('quotation_cards')
             .doc(quotation.id)
             .collection(
-                'invoice_items') // Assuming the subcollection is named this
+              'invoice_items',
+            ) // Assuming the subcollection is named this
             .get();
         futures.add(future);
       }
@@ -295,8 +297,13 @@ class QuotationCardController extends GetxController {
       JobCardController jobCardController = Get.put(JobCardController());
       jobCardController.getAllInvoiceItems(id);
       await jobCardController.loadValues(data);
-      editJobCardDialog(jobCardController, data, id,
-          screenName: '💳 Job Card', headerColor: Colors.deepPurple);
+      editJobCardDialog(
+        jobCardController,
+        data,
+        id,
+        screenName: '💳 Job Card',
+        headerColor: Colors.deepPurple,
+      );
       openingJobCardScreen.value = false;
       showSnackBar('Done', 'Opened Successfully');
     } catch (e) {
@@ -428,10 +435,16 @@ class QuotationCardController extends GetxController {
     final currencyId = data['currency'] as String? ?? '';
     customerCurrencyId.value = currencyId;
     if (currencyId.isNotEmpty) {
-      final countryForCurr =
-          getdataName(currencyId, allCurrencies, title: 'country_id');
-      customerCurrency.text =
-          getdataName(countryForCurr, allCountries, title: 'currency_code');
+      final countryForCurr = getdataName(
+        currencyId,
+        allCurrencies,
+        title: 'country_id',
+      );
+      customerCurrency.text = getdataName(
+        countryForCurr,
+        allCountries,
+        title: 'currency_code',
+      );
     } else {
       customerCurrency.text = '';
     }
@@ -481,17 +494,18 @@ class QuotationCardController extends GetxController {
             : (originalFileName, '');
 
         // Create timestamped filename
-        final timestamp = DateTime.now()
-            .toIso8601String()
-            .replaceAll(RegExp(r'[^0-9T-]'), '_');
+        final timestamp = DateTime.now().toIso8601String().replaceAll(
+          RegExp(r'[^0-9T-]'),
+          '_',
+        );
         final storageFileName = extension.isNotEmpty
             ? '${fileName}_$timestamp.$extension'
             : '${fileName}_$timestamp';
 
         // Create storage reference
-        final Reference storageRef = FirebaseStorage.instance
-            .ref()
-            .child('internal_notes/$storageFileName');
+        final Reference storageRef = FirebaseStorage.instance.ref().child(
+          'internal_notes/$storageFileName',
+        );
 
         // Determine MIME type
         final mimeType =
@@ -535,21 +549,22 @@ class QuotationCardController extends GetxController {
         .orderBy('time')
         .snapshots()
         .map((querySnapshot) {
-      if (querySnapshot.docs.isNotEmpty) {
-        return querySnapshot.docs.map((doc) {
-          return {
-            'id': doc.id,
-            ...doc.data(),
-          };
-        }).toList();
-      } else {
-        return [];
-      }
-    });
+          if (querySnapshot.docs.isNotEmpty) {
+            return querySnapshot.docs.map((doc) {
+              return {'id': doc.id, ...doc.data()};
+            }).toList();
+          } else {
+            return [];
+          }
+        });
   }
 
   Future<void> addNewQuotationCard() async {
     try {
+      if (quotationStatus.value != 'New' && quotationStatus.value != '') {
+        showSnackBar('Alert', 'Only new quotations can be edited');
+        return;
+      }
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'job_number': '',
@@ -708,13 +723,14 @@ class QuotationCardController extends GetxController {
           .doc(id)
           .update(updatedData)
           .then((_) {
-        addingNewValue.value = false;
-        showSnackBar('Done', 'Updated Successfully');
-      }).catchError((e) {
-        addingNewValue.value = false;
-        showSnackBar('Alert', 'Something Went Wrong');
-        // print('Error updating quotation_card $id: $e');
-      });
+            addingNewValue.value = false;
+            showSnackBar('Done', 'Updated Successfully');
+          })
+          .catchError((e) {
+            addingNewValue.value = false;
+            showSnackBar('Alert', 'Something Went Wrong');
+            // print('Error updating quotation_card $id: $e');
+          });
     } catch (e) {
       addingNewValue.value = false;
       showSnackBar('Alert', 'Something Went Wrong');
@@ -782,18 +798,19 @@ class QuotationCardController extends GetxController {
         const separator = '-';
         const initialValue = 1;
 
-        var newCounter =
-            await FirebaseFirestore.instance.collection('counters').add({
-          'code': 'JCN',
-          'description': 'Job Card Number',
-          'prefix': prefix,
-          'value': initialValue,
-          'length': 0,
-          'separator': separator,
-          'added_date': DateTime.now().toString(),
-          'company_id': companyId.value,
-          'status': true,
-        });
+        var newCounter = await FirebaseFirestore.instance
+            .collection('counters')
+            .add({
+              'code': 'JCN',
+              'description': 'Job Card Number',
+              'prefix': prefix,
+              'value': initialValue,
+              'length': 0,
+              'separator': separator,
+              'added_date': DateTime.now().toString(),
+              'company_id': companyId.value,
+              'status': true,
+            });
         jcnId = newCounter.id;
         // Set the counter text with prefix and separator
         jobCardCounter.value = '$prefix$separator$initialValue';
@@ -808,12 +825,9 @@ class QuotationCardController extends GetxController {
         updateJobCard = (currentValue + 1).toString();
       }
 
-      await FirebaseFirestore.instance
-          .collection('counters')
-          .doc(jcnId)
-          .update({
-        'value': int.parse(updateJobCard),
-      });
+      await FirebaseFirestore.instance.collection('counters').doc(jcnId).update(
+        {'value': int.parse(updateJobCard)},
+      );
     } catch (e) {
       // Optionally handle errors here
       // print("Error in getCurrentJobCardCounterNumber: $e");
@@ -894,8 +908,9 @@ class QuotationCardController extends GetxController {
       newData['job_number'] = jobCardCounter.value;
       newData['added_date'] = DateTime.now().toString();
 
-      var newJob =
-          await FirebaseFirestore.instance.collection('job_cards').add(newData);
+      var newJob = await FirebaseFirestore.instance
+          .collection('job_cards')
+          .add(newData);
 
       for (var element in allInvoiceItems) {
         var data = element.data();
@@ -951,18 +966,17 @@ class QuotationCardController extends GetxController {
         }
 
         loadingCopyQuotation.value = false;
-        return {
-          'newId': newCopiedQuotation.id,
-          'data': data,
-        };
+        return {'newId': newCopiedQuotation.id, 'data': data};
       } else {
         loadingCopyQuotation.value = false;
         showSnackBar('Alert', 'Quotation has no data');
         throw Exception('Job data is empty');
       }
     } catch (e) {
-      showSnackBar('Alert',
-          'Something went wrong while copying the quotation. Please try again');
+      showSnackBar(
+        'Alert',
+        'Something went wrong while copying the quotation. Please try again',
+      );
       loadingCopyQuotation.value = false;
       rethrow;
     }
@@ -984,18 +998,19 @@ class QuotationCardController extends GetxController {
         const separator = '-';
         const initialValue = 1;
 
-        var newCounter =
-            await FirebaseFirestore.instance.collection('counters').add({
-          'code': 'QN',
-          'description': 'Quotation Number',
-          'prefix': prefix,
-          'value': initialValue,
-          'length': 0,
-          'separator': separator,
-          'added_date': DateTime.now().toString(),
-          'company_id': companyId.value,
-          'status': true,
-        });
+        var newCounter = await FirebaseFirestore.instance
+            .collection('counters')
+            .add({
+              'code': 'QN',
+              'description': 'Quotation Number',
+              'prefix': prefix,
+              'value': initialValue,
+              'length': 0,
+              'separator': separator,
+              'added_date': DateTime.now().toString(),
+              'company_id': companyId.value,
+              'status': true,
+            });
         qnId = newCounter.id;
         // Set the counter text with prefix and separator
         quotationCounter.value.text = '$prefix$separator$initialValue';
@@ -1040,17 +1055,17 @@ class QuotationCardController extends GetxController {
           .collection('invoice_items')
           .doc(itemId)
           .update({
-        'name': invoiceItemNameId.value,
-        'line_number': int.tryParse(lineNumber.text),
-        'description': description.text,
-        'quantity': quantity.text,
-        'price': price.text,
-        'amount': amount.text,
-        'discount': discount.text,
-        'total': total.text,
-        'vat': vat.text,
-        'net': net.text,
-      });
+            'name': invoiceItemNameId.value,
+            'line_number': int.tryParse(lineNumber.text),
+            'description': description.text,
+            'quantity': quantity.text,
+            'price': price.text,
+            'amount': amount.text,
+            'discount': discount.text,
+            'total': total.text,
+            'vat': vat.text,
+            'net': net.text,
+          });
     } catch (e) {
       //
     }
@@ -1064,19 +1079,19 @@ class QuotationCardController extends GetxController {
           .doc(id)
           .collection('invoice_items')
           .add({
-        'company_id': companyId.value,
-        'name': invoiceItemNameId.value,
-        'line_number': int.tryParse(lineNumber.text),
-        'description': description.text,
-        'quantity': quantity.text,
-        'price': price.text,
-        'amount': amount.text,
-        'discount': discount.text,
-        'total': total.text,
-        'vat': vat.text,
-        'net': net.text,
-        'added_date': DateTime.now().toString(),
-      });
+            'company_id': companyId.value,
+            'name': invoiceItemNameId.value,
+            'line_number': int.tryParse(lineNumber.text),
+            'description': description.text,
+            'quantity': quantity.text,
+            'price': price.text,
+            'amount': amount.text,
+            'discount': discount.text,
+            'total': total.text,
+            'vat': vat.text,
+            'net': net.text,
+            'added_date': DateTime.now().toString(),
+          });
       addingNewinvoiceItemsValue.value = false;
       Get.back();
     } catch (e) {
@@ -1087,19 +1102,21 @@ class QuotationCardController extends GetxController {
   void updateAmount() {
     if (net.text.isEmpty) net.text = '0';
     if (net.text != '0') {
-      total.text = (double.tryParse(net.text)! /
-              (1 + double.tryParse(currentCountryVAT.value)! / 100))
-          .toStringAsFixed(2);
+      total.text =
+          (double.tryParse(net.text)! /
+                  (1 + double.tryParse(currentCountryVAT.value)! / 100))
+              .toStringAsFixed(2);
       amount.text =
           (double.tryParse(total.text)! + double.tryParse(discount.text)!)
               .toStringAsFixed(2);
       price.text =
           (double.tryParse(amount.text)! / double.tryParse(quantity.text)!)
               .toStringAsFixed(2);
-      vat.text = ((double.tryParse(total.text))! *
-              (double.parse(currentCountryVAT.value)) /
-              100)
-          .toStringAsFixed(2);
+      vat.text =
+          ((double.tryParse(total.text))! *
+                  (double.parse(currentCountryVAT.value)) /
+                  100)
+              .toStringAsFixed(2);
     }
 
     // vat.text =
@@ -1115,12 +1132,13 @@ class QuotationCardController extends GetxController {
     final currentPrice = double.tryParse(price.text) ?? 0.0;
     final currentDiscount = double.tryParse(discount.text) ?? 0.0;
     amount.text = (currwnQquanity * currentPrice).toStringAsFixed(2);
-    total.text =
-        (double.tryParse(amount.text)! - currentDiscount).toStringAsFixed(2);
-    vat.text = ((double.tryParse(total.text))! *
-            (double.parse(currentCountryVAT.value)) /
-            100)
+    total.text = (double.tryParse(amount.text)! - currentDiscount)
         .toStringAsFixed(2);
+    vat.text =
+        ((double.tryParse(total.text))! *
+                (double.parse(currentCountryVAT.value)) /
+                100)
+            .toStringAsFixed(2);
     net.text = (double.tryParse(total.text)! + double.tryParse(vat.text)!)
         .toStringAsFixed(2);
   }
@@ -1146,10 +1164,10 @@ class QuotationCardController extends GetxController {
         .orderBy('name')
         .snapshots()
         .listen((items) {
-      allInvoiceItemsFromCollection.value = {
-        for (var doc in items.docs) doc.id: doc.data()
-      };
-    });
+          allInvoiceItemsFromCollection.value = {
+            for (var doc in items.docs) doc.id: doc.data(),
+          };
+        });
   }
 
   getAllInvoiceItems(quotationId) {
@@ -1162,9 +1180,9 @@ class QuotationCardController extends GetxController {
           .orderBy('line_number')
           .snapshots()
           .listen((QuerySnapshot<Map<String, dynamic>> items) {
-        allInvoiceItems.assignAll(items.docs);
-        loadingInvoiceItems.value = false;
-      });
+            allInvoiceItems.assignAll(items.docs);
+            loadingInvoiceItems.value = false;
+          });
     } catch (e) {
       loadingInvoiceItems.value = false;
     }
@@ -1186,7 +1204,7 @@ class QuotationCardController extends GetxController {
     return [sumofTotal, sumofVAT, sumofNET];
   }
 
-// this function is to get engine types
+  // this function is to get engine types
   getEngineTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
@@ -1203,11 +1221,13 @@ class QuotationCardController extends GetxController {
         .orderBy('name')
         .snapshots()
         .listen((types) {
-      allEngineType.value = {for (var doc in types.docs) doc.id: doc.data()};
-    });
+          allEngineType.value = {
+            for (var doc in types.docs) doc.id: doc.data(),
+          };
+        });
   }
 
-// this function is to get colors
+  // this function is to get colors
   getColors() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
@@ -1224,8 +1244,8 @@ class QuotationCardController extends GetxController {
         .orderBy('name')
         .snapshots()
         .listen((colors) {
-      allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
-    });
+          allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
+        });
   }
 
   getBranches() {
@@ -1235,8 +1255,10 @@ class QuotationCardController extends GetxController {
         .orderBy('name')
         .snapshots()
         .listen((branches) {
-      allBranches.value = {for (var doc in branches.docs) doc.id: doc.data()};
-    });
+          allBranches.value = {
+            for (var doc in branches.docs) doc.id: doc.data(),
+          };
+        });
   }
 
   getCurrencies() {
@@ -1245,8 +1267,10 @@ class QuotationCardController extends GetxController {
         .where('company_id', isEqualTo: companyId.value)
         .snapshots()
         .listen((branches) {
-      allCurrencies.value = {for (var doc in branches.docs) doc.id: doc.data()};
-    });
+          allCurrencies.value = {
+            for (var doc in branches.docs) doc.id: doc.data(),
+          };
+        });
   }
 
   getSalesMan() {
@@ -1256,8 +1280,10 @@ class QuotationCardController extends GetxController {
         .orderBy('name')
         .snapshots()
         .listen((branches) {
-      salesManMap.value = {for (var doc in branches.docs) doc.id: doc.data()};
-    });
+          salesManMap.value = {
+            for (var doc in branches.docs) doc.id: doc.data(),
+          };
+        });
   }
 
   getAllUsers() {
@@ -1267,8 +1293,8 @@ class QuotationCardController extends GetxController {
           .where('company_id', isEqualTo: companyId.value)
           .snapshots()
           .listen((users) {
-        allUsers.value = {for (var doc in users.docs) doc.id: doc.data()};
-      });
+            allUsers.value = {for (var doc in users.docs) doc.id: doc.data()};
+          });
     } catch (e) {
       //
     }
@@ -1286,9 +1312,10 @@ class QuotationCardController extends GetxController {
           .where(FieldPath.documentId, isEqualTo: companyId.value)
           .snapshots()
           .listen((company) {
-        companyDetails.assignAll(
-            Map<String, dynamic>.from(company.docs.first.data() as Map));
-      });
+            companyDetails.assignAll(
+              Map<String, dynamic>.from(company.docs.first.data() as Map),
+            );
+          });
     } catch (e) {
       //
     }
@@ -1301,10 +1328,10 @@ class QuotationCardController extends GetxController {
           .orderBy('name')
           .snapshots()
           .listen((countries) {
-        allCountries.value = {
-          for (var doc in countries.docs) doc.id: doc.data()
-        };
-      });
+            allCountries.value = {
+              for (var doc in countries.docs) doc.id: doc.data(),
+            };
+          });
     } catch (e) {
       //
     }
@@ -1317,8 +1344,8 @@ class QuotationCardController extends GetxController {
           .orderBy('name')
           .snapshots()
           .listen((brands) {
-        allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
-      });
+            allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
+          });
     } catch (e) {
       //
     }
@@ -1333,10 +1360,10 @@ class QuotationCardController extends GetxController {
           .orderBy('entity_name')
           .snapshots()
           .listen((customers) {
-        allCustomers.value = {
-          for (var doc in customers.docs) doc.id: doc.data()
-        };
-      });
+            allCustomers.value = {
+              for (var doc in customers.docs) doc.id: doc.data(),
+            };
+          });
     } catch (e) {
       //
     }
@@ -1356,7 +1383,9 @@ class QuotationCardController extends GetxController {
   }
 
   Future<void> selectDateContext(
-      BuildContext context, TextEditingController date) async {
+    BuildContext context,
+    TextEditingController date,
+  ) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -1371,8 +1400,9 @@ class QuotationCardController extends GetxController {
 
   changeQuotationEndDateDependingOnDays() {
     DateTime date = format.parse(quotationDate.value.text);
-    DateTime newDate =
-        date.add(Duration(days: int.parse(quotationDays.value.text)));
+    DateTime newDate = date.add(
+      Duration(days: int.parse(quotationDays.value.text)),
+    );
     validityEndDate.value.text = format.format(newDate);
   }
 
@@ -1386,10 +1416,9 @@ class QuotationCardController extends GetxController {
 
   void onSelectForCustomers(String selectedId) {
     var currentUserDetails = allCustomers.entries.firstWhere((entry) {
-      return entry.key
-          .toString()
-          .toLowerCase()
-          .contains(selectedId.toLowerCase());
+      return entry.key.toString().toLowerCase().contains(
+        selectedId.toLowerCase(),
+      );
     });
 
     var phoneDetails = currentUserDetails.value['entity_phone'].firstWhere(
@@ -1404,8 +1433,10 @@ class QuotationCardController extends GetxController {
     customerCreditNumber.text =
         (currentUserDetails.value['credit_limit'] ?? '0').toString();
     customerSaleManId.value = currentUserDetails.value['sales_man'] ?? '';
-    customerSaleMan.value =
-        getdataName(currentUserDetails.value['sales_man'], salesManMap);
+    customerSaleMan.value = getdataName(
+      currentUserDetails.value['sales_man'],
+      salesManMap,
+    );
   }
 
   getCitiesByCountryID(countryID) {
@@ -1416,8 +1447,8 @@ class QuotationCardController extends GetxController {
           .collection('values')
           .snapshots()
           .listen((cities) {
-        allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
-      });
+            allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
+          });
     } catch (e) {
       //
     }
@@ -1431,11 +1462,11 @@ class QuotationCardController extends GetxController {
           .collection('values')
           .snapshots()
           .listen((snapshot) {
-        final Map<String, Map<String, dynamic>> mapped = {
-          for (var doc in snapshot.docs) doc.id: doc.data()
-        };
-        allModels.value = mapped;
-      }, onError: (e) {});
+            final Map<String, Map<String, dynamic>> mapped = {
+              for (var doc in snapshot.docs) doc.id: doc.data(),
+            };
+            allModels.value = mapped;
+          }, onError: (e) {});
     } catch (e) {
       //
     }
@@ -1448,14 +1479,15 @@ class QuotationCardController extends GetxController {
         .collection('invoice_items')
         .snapshots()
         .map((snapshot) {
-      double sumOfTotal = 0.0;
+          double sumOfTotal = 0.0;
 
-      for (var job in snapshot.docs) {
-        var data = job.data() as Map<String, dynamic>?;
-        sumOfTotal += double.tryParse(data?['total']?.toString() ?? '0') ?? 0;
-      }
-      return sumOfTotal;
-    });
+          for (var job in snapshot.docs) {
+            var data = job.data() as Map<String, dynamic>?;
+            sumOfTotal +=
+                double.tryParse(data?['total']?.toString() ?? '0') ?? 0;
+          }
+          return sumOfTotal;
+        });
   }
 
   Stream<double> calculateAllVATs(String jobId) {
@@ -1465,14 +1497,14 @@ class QuotationCardController extends GetxController {
         .collection('invoice_items')
         .snapshots()
         .map((snapshot) {
-      double sumOfVAT = 0.0;
+          double sumOfVAT = 0.0;
 
-      for (var job in snapshot.docs) {
-        var data = job.data() as Map<String, dynamic>?;
-        sumOfVAT += double.tryParse(data?['vat']?.toString() ?? '0') ?? 0;
-      }
-      return sumOfVAT;
-    });
+          for (var job in snapshot.docs) {
+            var data = job.data() as Map<String, dynamic>?;
+            sumOfVAT += double.tryParse(data?['vat']?.toString() ?? '0') ?? 0;
+          }
+          return sumOfVAT;
+        });
   }
 
   Stream<double> calculateAllNETs(String jobId) {
@@ -1482,14 +1514,14 @@ class QuotationCardController extends GetxController {
         .collection('invoice_items')
         .snapshots()
         .map((snapshot) {
-      double sumOfNET = 0.0;
+          double sumOfNET = 0.0;
 
-      for (var job in snapshot.docs) {
-        var data = job.data() as Map<String, dynamic>?;
-        sumOfNET += double.tryParse(data?['net']?.toString() ?? '0') ?? 0;
-      }
-      return sumOfNET;
-    });
+          for (var job in snapshot.docs) {
+            var data = job.data() as Map<String, dynamic>?;
+            sumOfNET += double.tryParse(data?['net']?.toString() ?? '0') ?? 0;
+          }
+          return sumOfNET;
+        });
   }
 
   getScreenName() {
@@ -1500,9 +1532,7 @@ class QuotationCardController extends GetxController {
 
   String getdataName(String id, Map allData, {title = 'name'}) {
     try {
-      final data = allData.entries.firstWhere(
-        (data) => data.key == id,
-      );
+      final data = allData.entries.firstWhere((data) => data.key == id);
       return data.value[title];
     } catch (e) {
       return '';
@@ -1702,8 +1732,10 @@ class QuotationCardController extends GetxController {
       fromDate.value.text = textToDate(startOfDay);
       toDate.value.text = textToDate(endOfDay);
       query = query
-          .where('quotation_date',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where(
+            'quotation_date',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+          )
           .where('quotation_date', isLessThan: Timestamp.fromDate(endOfDay));
     } else if (isThisMonthSelected.value) {
       final now = DateTime.now();
@@ -1714,8 +1746,10 @@ class QuotationCardController extends GetxController {
       fromDate.value.text = textToDate(startOfMonth);
       toDate.value.text = textToDate(endOfMonth);
       query = query
-          .where('quotation_date',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where(
+            'quotation_date',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+          )
           .where('quotation_date', isLessThan: Timestamp.fromDate(endOfMonth));
     } else if (isThisYearSelected.value) {
       final now = DateTime.now();
@@ -1724,16 +1758,20 @@ class QuotationCardController extends GetxController {
       fromDate.value.text = textToDate(startOfYear);
       toDate.value.text = textToDate(endOfYear);
       query = query
-          .where('quotation_date',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
+          .where(
+            'quotation_date',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
+          )
           .where('quotation_date', isLessThan: Timestamp.fromDate(endOfYear));
     } else {
       // Manual date range
       if (fromDate.value.text.trim().isNotEmpty) {
         try {
           final dtFrom = format.parseStrict(fromDate.value.text.trim());
-          query = query.where('quotation_date',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom));
+          query = query.where(
+            'quotation_date',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
+          );
         } catch (_) {}
       }
       if (toDate.value.text.trim().isNotEmpty) {
@@ -1741,8 +1779,10 @@ class QuotationCardController extends GetxController {
           final dtTo = format
               .parseStrict(toDate.value.text.trim())
               .add(const Duration(days: 1));
-          query = query.where('quotation_date',
-              isLessThan: Timestamp.fromDate(dtTo));
+          query = query.where(
+            'quotation_date',
+            isLessThan: Timestamp.fromDate(dtTo),
+          );
         } catch (_) {}
       }
     }
@@ -1755,48 +1795,49 @@ class QuotationCardController extends GetxController {
     // 3. APPLY ALL OTHER FILTERS ON THE CLIENT-SIDE
     List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredQuotations =
         fetchedQuotations.where((doc) {
-      final data = doc.data();
+          final data = doc.data();
 
-      // Quotation Number Filter
-      if (quotaionNumberFilter.value.text.trim().isNotEmpty &&
-          data['quotation_number'] != quotaionNumberFilter.value.text.trim()) {
-        return false;
-      }
-      // Status Filter
-      if (statusFilter.value.text.trim().isNotEmpty &&
-          data['quotation_status'] != statusFilter.value.text.trim()) {
-        return false;
-      }
-      // Car Brand Filter
-      if (carBrandIdFilter.value.isNotEmpty &&
-          data['car_brand'] != carBrandIdFilter.value) {
-        return false;
-      }
-      // Car Model Filter
-      if (carModelIdFilter.value.isNotEmpty &&
-          data['car_model'] != carModelIdFilter.value) {
-        return false;
-      }
-      // Plate Number Filter
-      if (plateNumberFilter.value.text.trim().isNotEmpty &&
-          data['plate_number'] != plateNumberFilter.value.text.trim()) {
-        return false;
-      }
-      // VIN Filter
-      if (vinFilter.value.text.trim().isNotEmpty &&
-          data['vehicle_identification_number'] !=
-              vinFilter.value.text.trim()) {
-        return false;
-      }
-      // Customer Filter
-      if (customerNameIdFilter.value.isNotEmpty &&
-          data['customer'] != customerNameIdFilter.value) {
-        return false;
-      }
+          // Quotation Number Filter
+          if (quotaionNumberFilter.value.text.trim().isNotEmpty &&
+              data['quotation_number'] !=
+                  quotaionNumberFilter.value.text.trim()) {
+            return false;
+          }
+          // Status Filter
+          if (statusFilter.value.text.trim().isNotEmpty &&
+              data['quotation_status'] != statusFilter.value.text.trim()) {
+            return false;
+          }
+          // Car Brand Filter
+          if (carBrandIdFilter.value.isNotEmpty &&
+              data['car_brand'] != carBrandIdFilter.value) {
+            return false;
+          }
+          // Car Model Filter
+          if (carModelIdFilter.value.isNotEmpty &&
+              data['car_model'] != carModelIdFilter.value) {
+            return false;
+          }
+          // Plate Number Filter
+          if (plateNumberFilter.value.text.trim().isNotEmpty &&
+              data['plate_number'] != plateNumberFilter.value.text.trim()) {
+            return false;
+          }
+          // VIN Filter
+          if (vinFilter.value.text.trim().isNotEmpty &&
+              data['vehicle_identification_number'] !=
+                  vinFilter.value.text.trim()) {
+            return false;
+          }
+          // Customer Filter
+          if (customerNameIdFilter.value.isNotEmpty &&
+              data['customer'] != customerNameIdFilter.value) {
+            return false;
+          }
 
-      // If the document passed all filters, keep it.
-      return true;
-    }).toList();
+          // If the document passed all filters, keep it.
+          return true;
+        }).toList();
 
     // 4. UPDATE THE UI
     allQuotationCards.assignAll(filteredQuotations);

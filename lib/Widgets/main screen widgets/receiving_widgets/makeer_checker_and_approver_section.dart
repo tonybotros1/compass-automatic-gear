@@ -29,6 +29,7 @@ Container makerCheckerAndApproverSection(
               children: [
                 Expanded(
                   child: CustomDropdown(
+                    textcontroller: controller.approvedBy.value.text,
                     showedSelectedName: 'name',
                     hintText: 'Approved By',
                     items: isallApprovedByLoading
@@ -57,6 +58,8 @@ Container makerCheckerAndApproverSection(
               children: [
                 Expanded(
                   child: CustomDropdown(
+                    textcontroller: controller.orderedBy.value.text,
+
                     showedSelectedName: 'name',
                     items: isallOrderedByLoading ? {} : controller.allOrderedBy,
                     hintText: 'Ordered By',
@@ -84,6 +87,7 @@ Container makerCheckerAndApproverSection(
                 Expanded(
                   child: CustomDropdown(
                     showedSelectedName: 'name',
+                    textcontroller: controller.purchasedBy.value.text,
 
                     hintText: 'Purchased By',
                     items: isallPurchasedByLoading

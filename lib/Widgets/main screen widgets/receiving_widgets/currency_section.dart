@@ -28,6 +28,7 @@ Container currencySection(
                 builder: (controller) {
                   bool isCurrenciesLoading = controller.allCurrencies.isEmpty;
                   return CustomDropdown(
+                    
                     showedResult: (key, value) {
                       return Text(
                         getdataName(

@@ -60,6 +60,7 @@ Container mainInfosSection(
                 return SizedBox(
                   width: 300,
                   child: CustomDropdown(
+                    textcontroller: controller.branch.value.text,
                     showedSelectedName: 'name',
                     hintText: 'Branch',
                     items: isAllBranchesLoading ? {} : controller.allBranches,
@@ -98,6 +99,7 @@ Container mainInfosSection(
                 builder: (controller) {
                   bool isAllVendorsLoading = controller.allVendors.isEmpty;
                   return CustomDropdown(
+                    textcontroller: controller.vendor.value.text,
                     hintText: 'Vendor',
                     showedSelectedName: 'entity_name',
                     items: isAllVendorsLoading ? {} : controller.allVendors,

@@ -119,7 +119,6 @@ class Receiving extends StatelessWidget {
                                           controller.fromDate.value.text,
                                           controller.fromDate.value,
                                         );
-                                       
                                       },
                                     ),
                                   ),
@@ -134,7 +133,6 @@ class Receiving extends StatelessWidget {
                                           controller.toDate.value.text,
                                           controller.toDate.value,
                                         );
-                                     
                                       },
                                     ),
                                   ),
@@ -467,10 +465,10 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> jobData,
+  Map<String, dynamic> docData,
   context,
   constraints,
-  jobId,
+  docId,
   ReceivingController controller,
   int index,
 ) {
@@ -486,34 +484,60 @@ DataRow dataRowForTheTable(
       DataCell(
         Row(
           children: [
-            // editSection(context, jobData, constraints, jobId),
+            editReceivingButton(
+              controller: controller,
+              id: docId,
+              docData: docData,
+            ),
           ],
         ),
       ),
 
-      DataCell(textForDataRowInTable(text: '')),
-      DataCell(textForDataRowInTable(text: '')),
+      DataCell(
+        textForDataRowInTable(
+          text: '${docData['number']}',
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: '${docData['reference_number']}',
+          formatDouble: false,
+        ),
+      ),
       DataCell(
         statusBox(
-          jobData['status'],
+          docData['status'],
           hieght: 35,
           padding: EdgeInsets.symmetric(horizontal: 5),
         ),
       ),
 
-      DataCell(textForDataRowInTable(text: '')),
-      DataCell(textForDataRowInTable(text: '')),
-      DataCell(textForDataRowInTable(text: '')),
+      DataCell(
+        textForDataRowInTable(
+          text: getdataName(docData['vendor'], controller.allVendors),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: docData['date'] != null && docData['date'] != ''
+              ? textToDate(docData['date'])
+              : 'N/A',
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: getdataName(docData['branch'], controller.allBranches),
+          formatDouble: false,
+        ),
+      ),
 
+      DataCell(
+        textForDataRowInTable(text: '${docData['note']}', formatDouble: false),
+      ),
       DataCell(textForDataRowInTable(text: '')),
       DataCell(textForDataRowInTable(text: '')),
-      DataCell(textForDataRowInTable(text: '')),
-      DataCell(textForDataRowInTable(text: '')),
-      DataCell(textForDataRowInTable(text: '')),
-      DataCell(textForDataRowInTable(text: '')),
-
-      DataCell(textForDataRowInTable(text: '')),
-
       DataCell(textForDataRowInTable(text: '')),
     ],
   );
@@ -567,6 +591,7 @@ ElevatedButton newReceivingButton(
 ) {
   return ElevatedButton(
     onPressed: () async {
+      controller.clearValues();
       receivigDialog(
         controller: controller,
         onTapForPost: () async {
@@ -580,6 +605,32 @@ ElevatedButton newReceivingButton(
       );
     },
     style: newButtonStyle,
-    child: const Text('New Receiving Doc'),
+    child: const Text('New Receiving Doc.'),
+  );
+}
+
+IconButton editReceivingButton({
+  required ReceivingController controller,
+  required String id,
+  required Map<String, dynamic> docData,
+}) {
+  return IconButton(
+    onPressed: () async {
+      controller.loadValues(docData,id);
+      receivigDialog(
+        id: id,
+        controller: controller,
+        onTapForPost: () async {
+          await controller.editPostForReceiving(id);
+        },
+        onTapForSave: () async {
+          await controller.editReceivingDoc(id);
+        },
+        onTapForDelete: () {
+          controller.deleteReceivingDoc(id);
+        },
+      );
+    },
+    icon: const Icon(Icons.edit_note_rounded,color: Colors.blue,),
   );
 }

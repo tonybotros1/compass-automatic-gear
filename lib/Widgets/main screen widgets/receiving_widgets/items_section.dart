@@ -1,6 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../Models/receiving_items_model.dart';
 import '../../../consts.dart';
 import '../auto_size_box.dart';
 import 'items_dialog.dart';
@@ -124,11 +125,25 @@ Widget tableOfScreens({
           ...controller.allItems.map<DataRow>((invoiceItems) {
             final receivingItemsData = invoiceItems.data();
             final invoiceItemsId = invoiceItems.id;
-            final itemsData = controller.getInventeryItemsData(
-              id: receivingItemsData['code'],
+            // final itemsData = controller.getInventeryItemsData(
+            //   id: receivingItemsData['code'],
+            // );
+            // print(itemsData);
+
+            ReceivingItemsModel data = ReceivingItemsModel(
+              handling: double.tryParse(controller.handling.value.text) ?? 0,
+              shipping: double.tryParse(controller.shipping.value.text) ?? 0,
+              other: double.tryParse(controller.other.value.text) ?? 0,
+              discount: receivingItemsData['discount'] ?? 0,
+              orginalPrice: receivingItemsData['orginal_price'] ?? 0,
+              quantity: receivingItemsData['quantity'] ?? 1,
+              rate: double.tryParse(controller.rate.value.text) ?? 1,
+              totalForAllItems: controller.itemsTotal.value,
+              vat: receivingItemsData['vat'] ?? 0,
+              amount: double.tryParse(controller.amount.value.text) ?? 0,
             );
-            print(itemsData);
             return dataRowForTheTable(
+              data,
               receivingItemsData,
               context,
               constraints,
@@ -187,6 +202,7 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
+  ReceivingItemsModel data,
   Map<String, dynamic> receivingItemsData,
   context,
   constraints,
@@ -199,41 +215,59 @@ DataRow dataRowForTheTable(
       DataCell(
         Row(
           children: [
-            deleteSection(id, context, controller, invoiceItemsId),
-            editSection(
-              id,
-              controller,
-              receivingItemsData,
-              context,
-              constraints,
-              invoiceItemsId,
-            ),
+            // deleteSection(id, context, controller, invoiceItemsId),
+            // editSection(
+            //   id,
+            //   controller,
+            //   receivingItemsData,
+            //   context,
+            //   constraints,
+            //   invoiceItemsId,
+            // ),
           ],
         ),
       ),
-      DataCell(textForDataRowInTable(text: '')),
       DataCell(
-        textForDataRowInTable(
-          text: '${receivingItemsData['line_number'] ?? ''}',
+        FutureBuilder<String>(
+          future: controller.getInventeryItemsCode(
+            id: receivingItemsData['code'],
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(text: '${snapshot.data}');
+            }
+          },
         ),
       ),
       DataCell(
-        textForDataRowInTable(
-          text: '${receivingItemsData['line_number'] ?? ''}',
+        FutureBuilder<String>(
+          future: controller.getInventeryItemsName(
+            id: receivingItemsData['code'],
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(text: '${snapshot.data}');
+            }
+          },
         ),
       ),
-      DataCell(textForDataRowInTable(text: '', maxWidth: null)),
-      DataCell(
-        textForDataRowInTable(text: '${receivingItemsData['quantity']}'),
-      ),
-      DataCell(textForDataRowInTable(text: '${receivingItemsData['price']}')),
-      DataCell(textForDataRowInTable(text: '${receivingItemsData['amount']}')),
-      DataCell(
-        textForDataRowInTable(text: '${receivingItemsData['discount']}'),
-      ),
-      DataCell(textForDataRowInTable(text: '${receivingItemsData['total']}')),
-      DataCell(textForDataRowInTable(text: '${receivingItemsData['vat']}')),
-      DataCell(textForDataRowInTable(text: '${receivingItemsData['net']}')),
+      DataCell(textForDataRowInTable(text: '${data.quantity}')),
+      DataCell(textForDataRowInTable(text: '${data.orginalPrice}')),
+      DataCell(textForDataRowInTable(text: '${data.discount}')),
+      DataCell(textForDataRowInTable(text: '${data.addCost}')),
+      DataCell(textForDataRowInTable(text: '${data.addDisc}')),
+      DataCell(textForDataRowInTable(text: '${data.localPrice}')),
+      DataCell(textForDataRowInTable(text: '${data.total}')),
+      DataCell(textForDataRowInTable(text: '${data.vat}')),
+      DataCell(textForDataRowInTable(text: '${data.net}')),
     ],
   );
 }

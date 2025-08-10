@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:datahubai/Models/inventry_items_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../consts.dart';
 import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
@@ -105,6 +103,8 @@ class ReceivingController extends GetxController {
       RxList<DocumentSnapshot>([]);
   RxString selectedInventeryItemID = RxString('');
   RxString query = RxString('');
+  RxDouble itemsTotal = RxDouble(0.0);
+
   @override
   void onInit() async {
     await getCompanyId();
@@ -129,6 +129,72 @@ class ReceivingController extends GetxController {
     companyId.value = prefs.getString('companyId')!;
   }
 
+  clearValues() {
+    canAddItems.value = false;
+    receivingNumber.value.clear();
+    date.value.text = textToDate(DateTime.now());
+    branch.value.clear();
+    branchId.value = '';
+    referenceNumber.value.clear();
+    vendor.value.clear();
+    vendorId.value = '';
+    note.value.clear();
+    curreentReceivingId.value = '';
+    currency.value.clear();
+    currencyId.value = '';
+    rate.value.clear();
+    approvedBy.value.clear();
+    orderedBy.value.clear();
+    purchasedBy.value.clear();
+    approvedById.value = '';
+    orderedById.value = '';
+    purchasedById.value = '';
+    shipping.value.clear();
+    handling.value.clear();
+    other.value.clear();
+    amount.value.clear();
+    allItems.clear();
+    status.value = '';
+  }
+
+  loadValues(Map<String, dynamic> data, String id) {
+    getAllItems(id);
+
+    canAddItems.value = true;
+    status.value = data['status'];
+    receivingNumber.value.text = data['number'];
+    date.value.text = textToDate(data['date']);
+    branch.value.text = getdataName(data['branch'], allBranches);
+    branchId.value = data['branch'];
+    referenceNumber.value.text = data['reference_number'];
+    vendor.value.text = getdataName(
+      data['vendor'],
+      allVendors,
+      title: 'entity_name',
+    );
+    vendorId.value = data['vendor'];
+    note.value.text = data['note'];
+    currencyId.value = data['currency'];
+    currency.value.text = data['currency'] != ''
+        ? getdataName(
+            getdataName(data['currency'], allCurrencies, title: 'country_id'),
+            allCountries,
+            title: 'currency_code',
+          )
+        : '';
+    rate.value.text = data['rate'].toString();
+    approvedBy.value.text = getdataName(data['approved_by'], allApprovedBy);
+    orderedBy.value.text = getdataName(data['ordered_by'], allOrderedBy);
+    purchasedBy.value.text = getdataName(data['purchased_by'], allPurchasedBy);
+    approvedById.value = data['approved_by'];
+    orderedById.value = data['ordered_by'];
+    purchasedById.value = data['purchased_by'];
+    shipping.value.text = data['shipping'].toString();
+    handling.value.text = data['handling'].toString();
+    other.value.text = data['other'].toString();
+    amount.value.text = data['amount'].toString();
+  }
+
   getAllInventeryItems() async {
     try {
       loadingInventeryItems.value = true;
@@ -146,16 +212,21 @@ class ReceivingController extends GetxController {
     }
   }
 
-  Future<InventryItemsModel> getInventeryItemsData({required String id}) async {
+  Future<String> getInventeryItemsCode({required String id}) async {
     var data = await FirebaseFirestore.instance
         .collection('inventery_items')
         .doc(id)
         .get();
-    return InventryItemsModel(
-      code: data.data()?['code'] ?? '',
-      name: data.data()?['name'] ?? '',
-    );
+    return data.data()?['code'] ?? '';
   }
+  Future<String> getInventeryItemsName({required String id}) async {
+    var data = await FirebaseFirestore.instance
+        .collection('inventery_items')
+        .doc(id)
+        .get();
+    return data.data()?['name'] ?? '';
+  }
+
 
   // this function is to filter the search results for inventery items
   void filterInventeryItems() {
@@ -351,6 +422,10 @@ class ReceivingController extends GetxController {
 
   addNewReceivingDoc() async {
     try {
+      if (status.value != 'New' && status.value != '') {
+        showSnackBar('Alert', 'Only new docs can be edited');
+        return;
+      }
       showSnackBar('Adding', 'Please Wait');
       addingNewValue.value = true;
 
@@ -359,6 +434,69 @@ class ReceivingController extends GetxController {
         // 'date'
         'number': '',
         'status': 'New',
+        'branch': branchId.value,
+        'reference_number': referenceNumber.value.text,
+        'vendor': vendorId.value,
+        'note': note.value.text,
+        'currency': currencyId.value,
+        'rate': double.tryParse(rate.value.text) ?? 1,
+        'approved_by': approvedById.value,
+        'ordered_by': orderedById.value,
+        'purchased_by': purchasedById.value,
+        'shipping': double.tryParse(shipping.value.text) ?? 0,
+        'handling': double.tryParse(handling.value.text) ?? 0,
+        'other': double.tryParse(other.value.text) ?? 0,
+        'amount': double.tryParse(amount.value.text) ?? 0,
+        'added_date': DateTime.now().toString(),
+      };
+
+      final rawDate = date.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['date'] = Timestamp.fromDate(format.parseStrict(rawDate));
+        } catch (e) {
+          showSnackBar('Alert', 'Please enter valid date');
+        }
+      }
+
+      if (receivingDocAdded.isFalse) {
+        newData['added_date'] = DateTime.now().toString();
+        var newJob = await FirebaseFirestore.instance
+            .collection('receiving')
+            .add(newData);
+        receivingDocAdded.value = true;
+        curreentReceivingId.value = newJob.id;
+        getAllItems(newJob.id);
+        showSnackBar('Done', 'Doc. Added Successfully');
+        status.value = 'New';
+      } else {
+        newData.remove('added_date');
+        newData.remove('status');
+        await FirebaseFirestore.instance
+            .collection('receiving')
+            .doc(curreentReceivingId.value)
+            .update(newData);
+        showSnackBar('Done', 'Updated Successfully');
+      }
+      canAddItems.value = true;
+      addingNewValue.value = false;
+    } catch (e) {
+      canAddItems.value = false;
+      addingNewValue.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
+  }
+
+  editReceivingDoc(id) async {
+    try {
+      if (status.value != 'New' && status.value != '') {
+        showSnackBar('Alert', 'Only new docs can be edited');
+        return;
+      }
+      showSnackBar('Editing', 'Please Wait');
+      addingNewValue.value = true;
+
+      Map<String, dynamic> newData = {
         'branch': branchId.value,
         'reference_number': referenceNumber.value.text,
         'vendor': vendorId.value,
@@ -383,29 +521,24 @@ class ReceivingController extends GetxController {
         }
       }
 
-      if (receivingDocAdded.isFalse) {
-        newData['added_date'] = DateTime.now().toString();
-        var newJob = await FirebaseFirestore.instance
-            .collection('receiving')
-            .add(newData);
-        receivingDocAdded.value = true;
-        curreentReceivingId.value = newJob.id;
-        getAllItems(newJob.id);
-        showSnackBar('Done', 'Job Added Successfully');
-      } else {
-        newData.remove('added_date');
-        await FirebaseFirestore.instance
-            .collection('receiving')
-            .doc(curreentReceivingId.value)
-            .update(newData);
-        showSnackBar('Done', 'Updated Successfully');
-      }
-      canAddItems.value = true;
+      await FirebaseFirestore.instance
+          .collection('receiving')
+          .doc(id)
+          .update(newData);
+      showSnackBar('Done', 'Updated Successfully');
       addingNewValue.value = false;
     } catch (e) {
-      canAddItems.value = false;
       addingNewValue.value = false;
       showSnackBar('Alert', 'Something Went Wrong');
+    }
+  }
+
+  deleteReceivingDoc(id) {
+    try {
+      FirebaseFirestore.instance.collection('receiving').doc(id).delete();
+      Get.back();
+    } catch (e) {
+      //
     }
   }
 
@@ -450,9 +583,21 @@ class ReceivingController extends GetxController {
           .listen((QuerySnapshot<Map<String, dynamic>> items) {
             allItems.assignAll(items.docs);
             loadingItems.value = false;
+            calculateAllItemsTotal(allItems);
           });
     } catch (e) {
       loadingItems.value = false;
+    }
+  }
+
+  calculateAllItemsTotal(
+    RxList<QueryDocumentSnapshot<Map<String, dynamic>>> items,
+  ) {
+    itemsTotal.value = 0.0;
+    for (var item in items) {
+      itemsTotal.value +=
+          ((item['orginal_price'] ?? 0.0) - (item['discount'] ?? 0.0)) *
+          (item['quantity'] ?? 1);
     }
   }
 
@@ -654,7 +799,6 @@ class ReceivingController extends GetxController {
     isThisYearSelected.value = false;
   }
 
-  
   clearAllFilters() {
     statusFilter.value.clear();
     allReceivingDocs.clear();
@@ -674,5 +818,4 @@ class ReceivingController extends GetxController {
     toDate.value.clear();
     isScreenLoding.value = false;
   }
-
 }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -8,10 +7,11 @@ import '../../text_button.dart';
 import 'add_new_receiving_or_edit.dart';
 
 Future<dynamic> receivigDialog({
- required void Function()? onTapForSave,
+  required void Function()? onTapForSave,
   void Function()? onTapForDelete,
   void Function()? onTapForPost,
   required ReceivingController controller,
+  String? id,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -99,15 +99,16 @@ Future<dynamic> receivigDialog({
                 },
               ),
               Expanded(
-                  child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: addNewReceiveOrEdit(
-                  id: controller.curreentReceivingId.value,
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: addNewReceiveOrEdit(
+                    id: id ?? '',
+                    controller: controller,
+                    constraints: constraints,
+                    context: context,
+                  ),
                 ),
-              ))
+              ),
             ],
           );
         },
