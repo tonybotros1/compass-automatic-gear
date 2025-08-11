@@ -104,6 +104,9 @@ class ReceivingController extends GetxController {
   RxString selectedInventeryItemID = RxString('');
   RxString query = RxString('');
   RxDouble itemsTotal = RxDouble(0.0);
+  RxDouble finalItemsTotal = RxDouble(0.0);
+  RxDouble finalItemsVAT = RxDouble(0.0);
+  RxDouble finalItemsNet = RxDouble(0.0);
 
   @override
   void onInit() async {
@@ -219,6 +222,7 @@ class ReceivingController extends GetxController {
         .get();
     return data.data()?['code'] ?? '';
   }
+
   Future<String> getInventeryItemsName({required String id}) async {
     var data = await FirebaseFirestore.instance
         .collection('inventery_items')
@@ -226,7 +230,6 @@ class ReceivingController extends GetxController {
         .get();
     return data.data()?['name'] ?? '';
   }
-
 
   // this function is to filter the search results for inventery items
   void filterInventeryItems() {
@@ -407,19 +410,6 @@ class ReceivingController extends GetxController {
     net.value.text = '0';
   }
 
-  // calculationForItemsValues() {
-  //   total.value.text =
-  //       ((int.tryParse(quantity.value.text) ?? 1) *
-  //                   (int.tryParse(orginalPrice.value.text) ?? 0) -
-  //               (int.tryParse(discount.value.text) ?? 0))
-  //           .toString();
-
-  //   net.value.text =
-  //       ((int.tryParse(vat.value.text) ?? 0) +
-  //               (int.tryParse(total.value.text) ?? 0))
-  //           .toString();
-  // }
-
   addNewReceivingDoc() async {
     try {
       if (status.value != 'New' && status.value != '') {
@@ -590,16 +580,172 @@ class ReceivingController extends GetxController {
     }
   }
 
-  calculateAllItemsTotal(
-    RxList<QueryDocumentSnapshot<Map<String, dynamic>>> items,
-  ) {
-    itemsTotal.value = 0.0;
-    for (var item in items) {
-      itemsTotal.value +=
-          ((item['orginal_price'] ?? 0.0) - (item['discount'] ?? 0.0)) *
-          (item['quantity'] ?? 1);
-    }
+
+void calculateAllItemsTotal(
+  RxList<QueryDocumentSnapshot<Map<String, dynamic>>> items,
+) {
+  // reset
+  itemsTotal.value = 0.0;
+  finalItemsTotal.value = 0.0;
+  finalItemsVAT.value = 0.0;
+  finalItemsNet.value = 0.0;
+
+  // converters
+  double toDouble(dynamic v) =>
+      v is double ? v : v is int ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0.0;
+  int toInt(dynamic v) =>
+      v is int ? v : v is double ? v.toInt() : int.tryParse(v?.toString() ?? '') ?? 0;
+
+  // ===== Pass 1: compute total base (totalForAllItems) =====
+  for (var item in items) {
+    final d = item.data();
+    final double orgPrice = toDouble(d['orginal_price']);
+    final double discountVal = toDouble(d['discount']);
+    final int qty = toInt(d['quantity']);
+    itemsTotal.value += (orgPrice - discountVal) * qty;
   }
+
+  // parse shared UI values ONCE
+  final double amountVal = double.tryParse(amount.value.text) ?? 0.0;
+  final double handlingVal = double.tryParse(handling.value.text) ?? 0.0;
+  final double otherVal = double.tryParse(other.value.text) ?? 0.0;
+  final double shippingVal = double.tryParse(shipping.value.text) ?? 0.0;
+  final double rateVal = double.tryParse(rate.value.text) ?? 1.0; // ← from rate controller
+
+  final double totalForAll = itemsTotal.value;
+  final double extraCosts = handlingVal + shippingVal + otherVal;
+
+  // ===== Pass 2: per-item calculations using per-unit addCost/addDisc =====
+  for (var item in items) {
+    final d = item.data();
+    final double orgPrice = toDouble(d['orginal_price']);
+    final double discountVal = toDouble(d['discount']);
+    final int qty = toInt(d['quantity']);
+    final double vatRaw = toDouble(d['vat']); // assumed percent, e.g. 15 => 15%
+
+    // per-unit base price (before extras)
+    final double unitBase = orgPrice - discountVal;
+
+    // per-unit extras (matches original getters)
+    final double addCostPerUnit = totalForAll > 0
+        ? (unitBase / totalForAll) * extraCosts
+        : 0.0;
+
+    final double addDiscPerUnit = totalForAll > 0
+        ? (unitBase / totalForAll) * amountVal
+        : 0.0;
+
+    // local price per unit then line total
+    final double localPricePerUnit =
+        (unitBase + addCostPerUnit - addDiscPerUnit) * rateVal;
+
+    final double lineTotal = localPricePerUnit * qty;
+
+    // VAT handling (here assumed vatRaw is percentage)
+    final double vatAmount = lineTotal * (vatRaw / 100.0);
+
+    // accumulate
+    finalItemsTotal.value += lineTotal;
+    finalItemsVAT.value += vatAmount;
+    finalItemsNet.value += lineTotal + vatAmount;
+  }
+}
+
+
+  // void calculateAllItemsTotal(
+  //   RxList<QueryDocumentSnapshot<Map<String, dynamic>>> items,
+  // ) {
+  //   // reset
+  //   itemsTotal.value = 0.0;
+  //   finalItemsTotal.value = 0.0;
+  //   finalItemsVAT.value = 0.0;
+  //   finalItemsNet.value = 0.0;
+
+  //   // helper converters
+  //   double toDouble(dynamic v) {
+  //     if (v == null) return 0.0;
+  //     if (v is double) return v;
+  //     if (v is int) return v.toDouble();
+  //     if (v is String) return double.tryParse(v) ?? 0.0;
+  //     return 0.0;
+  //   }
+
+  //   int toInt(dynamic v) {
+  //     if (v == null) return 0;
+  //     if (v is int) return v;
+  //     if (v is double) return v.toInt();
+  //     if (v is String) {
+  //       return int.tryParse(v) ?? (double.tryParse(v)?.toInt() ?? 0);
+  //     }
+  //     return 0;
+  //   }
+
+  //   // ===== Pass 1: compute itemsTotal (base sum) =====
+  //   for (var item in items) {
+  //     final data = item.data();
+  //     final double orgPrice = toDouble(data['orginal_price']);
+  //     final double discountVal = toDouble(data['discount']);
+  //     final int qty = toInt(data['quantity']);
+
+  //     final double baseLine = (orgPrice - discountVal) * qty;
+  //     itemsTotal.value += baseLine;
+  //   }
+
+  //   // parse shared UI extras ONCE
+  //   final double amountVal = double.tryParse(amount.value.text) ?? 0.0;
+  //   final double handlingVal = double.tryParse(handling.value.text) ?? 0.0;
+  //   final double otherVal = double.tryParse(other.value.text) ?? 0.0;
+  //   final double shippingVal = double.tryParse(shipping.value.text) ?? 0.0;
+  //   final double rateVal = double.tryParse(rate.value.text) ?? 1.0; // <-- fixed
+
+  //   // ===== Pass 2: build model per item and accumulate totals =====
+  //   for (var item in items) {
+  //     final data = item.data();
+  //     final double orgPrice = toDouble(data['orginal_price']);
+  //     final double discountVal = toDouble(data['discount']);
+  //     final int qty = toInt(data['quantity']);
+  //     final double vatRaw = toDouble(data['vat']); // what DB holds for VAT
+
+  //     final model = ReceivingItemsModel(
+  //       amount: amountVal,
+  //       handling: handlingVal,
+  //       other: otherVal,
+  //       shipping: shippingVal,
+  //       quantity: qty,
+  //       orginalPrice: orgPrice,
+  //       discount: discountVal,
+  //       vat: vatRaw,
+  //       rate: rateVal,
+  //       totalForAllItems: itemsTotal.value, // full total from pass1
+  //     );
+
+  //     // model.total is the line total (localPrice * qty) — depends on your model implementation
+  //     finalItemsTotal.value += model.total;
+
+  //     // ===== VAT handling: choose method depending what 'vat' means in your DB =====
+  //     // Option A: vat in DB is percentage (e.g. 15 => 15%)
+  //     final double vatAmountAsPercent = model.total * (vatRaw / 100.0);
+
+  //     // Option B: vat in DB is decimal (e.g. 0.15)
+  //     final double vatAmountAsDecimal = model.total * vatRaw;
+
+  //     // Option C: vat in DB is absolute amount PER LINE (already amount)
+  //     final double vatAmountAsAbsolute = vatRaw;
+
+  //     // pick the correct one for your case — here I use Option A by default:
+  //     final double vatAmount = vatAmountAsPercent;
+
+  //     finalItemsVAT.value += vatAmount;
+  //     finalItemsNet.value += model.total + vatAmount;
+
+  //     // -- debug prints (temporary, remove later) --
+  //     // print('item ${item.id}: org=$orgPrice disc=$discountVal qty=$qty base=${(orgPrice-discountVal)*qty}');
+  //     // print(' model.total=${model.total} vatRaw=$vatRaw vatAmount=$vatAmount');
+  //   }
+
+  //   // final debug
+  //   // print('itemsTotal=${itemsTotal.value}, finalTotal=${finalItemsTotal.value}, finalVAT=${finalItemsVAT.value}, finalNet=${finalItemsNet.value}');
+  // }
 
   addNewItem(String id) async {
     try {

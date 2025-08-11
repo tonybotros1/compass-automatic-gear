@@ -81,7 +81,7 @@ Widget tableOfScreens({
             numeric: true,
             label: AutoSizedText(
               constraints: constraints,
-              text: 'Orginal Price',
+              text: 'Price',
             ),
           ),
           DataColumn(
@@ -167,30 +167,24 @@ Widget tableOfScreens({
                 Align(alignment: Alignment.centerRight, child: Text('Totals')),
               ),
               DataCell(
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: textForDataRowInTable(
-                    text: '', // '${data[0]}',
-                    color: Colors.blue,
-                  ),
+                textForDataRowInTable(
+                  text: '${controller.finalItemsTotal.value}', // '${data[0]}',
+                  color: Colors.blue,
+                  isBold: true,
                 ),
               ),
               DataCell(
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: textForDataRowInTable(
-                    text: '', //'${data[1]}',
-                    color: Colors.green,
-                  ),
+                textForDataRowInTable(
+                  text: '${controller.finalItemsVAT.value}', //'${data[1]}',
+                  color: Colors.green,
+                  isBold: true,
                 ),
               ),
               DataCell(
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: textForDataRowInTable(
-                    text: '', //'${data[2]}',
-                    color: Colors.red,
-                  ),
+                textForDataRowInTable(
+                  text: '${controller.finalItemsNet.value}', //'${data[2]}',
+                  color: Colors.red,
+                  isBold: true,
                 ),
               ),
             ],

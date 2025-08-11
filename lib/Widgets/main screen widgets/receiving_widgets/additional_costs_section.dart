@@ -22,9 +22,7 @@ Container additionalCostsSection(
             labelText: 'Shipping',
             controller: controller.shipping.value,
             isDouble: true,
-            onChanged: (value){
-              controller.shipping.value.text = value;
-            }
+           
           ),
         ),
         SizedBox(
