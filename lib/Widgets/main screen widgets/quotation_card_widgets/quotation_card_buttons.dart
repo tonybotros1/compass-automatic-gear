@@ -15,7 +15,6 @@ Widget deleteButton(
             controller.quotationStatus.value == '') {
           alertDialog(
               context: context,
-              controller: controller,
               content: "This will be deleted permanently",
               onPressed: () {
                 controller.deleteQuotationCard(quotationId);

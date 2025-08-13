@@ -265,7 +265,6 @@ ElevatedButton deleteSection(controller, listId, context) {
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The list will be deleted permanently",
             onPressed: () {
               controller.deleteList(listId);

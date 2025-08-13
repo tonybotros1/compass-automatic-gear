@@ -211,7 +211,6 @@ Widget deleteSection(String quotationId, context,
         if (controller.quotationStatus.value == 'New') {
           alertDialog(
               context: context,
-              controller: controller,
               content: 'This will be deleted permanently',
               onPressed: () {
                 controller.deleteInvoiceItem(quotationId, invoiceItemsId);

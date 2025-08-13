@@ -211,7 +211,6 @@ Widget deleteSection(
         if (controller.jobStatus1.value == 'New') {
           alertDialog(
               context: context,
-              controller: controller,
               content: 'This will be deleted permanently',
               onPressed: () {
                 controller.deleteInvoiceItem(

@@ -2,6 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_cont
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Models/receiving_items_model.dart';
+import '../../../Models/receiving_items_model_for_table.dart';
 import '../../../consts.dart';
 import '../auto_size_box.dart';
 import 'items_dialog.dart';
@@ -79,10 +80,7 @@ Widget tableOfScreens({
             columnWidth: IntrinsicColumnWidth(flex: 1),
 
             numeric: true,
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Price',
-            ),
+            label: AutoSizedText(constraints: constraints, text: 'Price'),
           ),
           DataColumn(
             columnWidth: IntrinsicColumnWidth(flex: 1),
@@ -123,7 +121,7 @@ Widget tableOfScreens({
         ],
         rows: [
           ...controller.allItems.map<DataRow>((invoiceItems) {
-            final receivingItemsData = invoiceItems.data();
+            // final receivingItemsData = invoiceItems.data();
             final invoiceItemsId = invoiceItems.id;
             // final itemsData = controller.getInventeryItemsData(
             //   id: receivingItemsData['code'],
@@ -134,17 +132,17 @@ Widget tableOfScreens({
               handling: double.tryParse(controller.handling.value.text) ?? 0,
               shipping: double.tryParse(controller.shipping.value.text) ?? 0,
               other: double.tryParse(controller.other.value.text) ?? 0,
-              discount: receivingItemsData['discount'] ?? 0,
-              orginalPrice: receivingItemsData['orginal_price'] ?? 0,
-              quantity: receivingItemsData['quantity'] ?? 1,
+              discount: invoiceItems.discount,
+              orginalPrice: invoiceItems.originalPrice,
+              quantity: invoiceItems.quantity,
               rate: double.tryParse(controller.rate.value.text) ?? 1,
               totalForAllItems: controller.itemsTotal.value,
-              vat: receivingItemsData['vat'] ?? 0,
+              vat: invoiceItems.vat,
               amount: double.tryParse(controller.amount.value.text) ?? 0,
             );
             return dataRowForTheTable(
               data,
-              receivingItemsData,
+              invoiceItems,
               context,
               constraints,
               invoiceItemsId,
@@ -163,20 +161,20 @@ Widget tableOfScreens({
               const DataCell(Text('')),
               const DataCell(Text('')),
               const DataCell(Text('')),
-              const DataCell(
-                Align(alignment: Alignment.centerRight, child: Text('Totals')),
+               DataCell(
+                textForDataRowInTable(text:  'Totals',isBold: true),
               ),
               DataCell(
                 textForDataRowInTable(
                   text: '${controller.finalItemsTotal.value}', // '${data[0]}',
-                  color: Colors.blue,
+                  color: Colors.green,
                   isBold: true,
                 ),
               ),
               DataCell(
                 textForDataRowInTable(
                   text: '${controller.finalItemsVAT.value}', //'${data[1]}',
-                  color: Colors.green,
+                  color: Colors.blue,
                   isBold: true,
                 ),
               ),
@@ -197,7 +195,7 @@ Widget tableOfScreens({
 
 DataRow dataRowForTheTable(
   ReceivingItemsModel data,
-  Map<String, dynamic> receivingItemsData,
+  ItemModel receivingItemsData,
   context,
   constraints,
   String invoiceItemsId,
@@ -209,28 +207,28 @@ DataRow dataRowForTheTable(
       DataCell(
         Row(
           children: [
-            // deleteSection(id, context, controller, invoiceItemsId),
-            // editSection(
-            //   id,
-            //   controller,
-            //   receivingItemsData,
-            //   context,
-            //   constraints,
-            //   invoiceItemsId,
-            // ),
+            deleteSection(id, context, controller, invoiceItemsId),
+            editSection(
+              id,
+              controller,
+              receivingItemsData,
+              context,
+              constraints,
+              invoiceItemsId,
+            ),
           ],
         ),
       ),
       DataCell(
         FutureBuilder<String>(
           future: controller.getInventeryItemsCode(
-            id: receivingItemsData['code'],
+            id: receivingItemsData.code,
           ),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text('Loading...');
             } else if (snapshot.hasError) {
-              return const Text('Error');
+              return const Text('');
             } else {
               return textForDataRowInTable(text: '${snapshot.data}');
             }
@@ -240,27 +238,51 @@ DataRow dataRowForTheTable(
       DataCell(
         FutureBuilder<String>(
           future: controller.getInventeryItemsName(
-            id: receivingItemsData['code'],
+            id: receivingItemsData.code,
           ),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text('Loading...');
             } else if (snapshot.hasError) {
-              return const Text('Error');
+              return const Text('');
             } else {
               return textForDataRowInTable(text: '${snapshot.data}');
             }
           },
         ),
       ),
-      DataCell(textForDataRowInTable(text: '${data.quantity}')),
-      DataCell(textForDataRowInTable(text: '${data.orginalPrice}')),
-      DataCell(textForDataRowInTable(text: '${data.discount}')),
+      DataCell(
+        textForDataRowInTable(
+          text: '${data.quantity}',
+          color: Colors.deepOrangeAccent,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: '${data.orginalPrice}',
+          color: Colors.deepPurpleAccent,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: '${data.discount}',
+          color: Colors.redAccent,
+          isBold: true,
+        ),
+      ),
       DataCell(textForDataRowInTable(text: '${data.addCost}')),
       DataCell(textForDataRowInTable(text: '${data.addDisc}')),
       DataCell(textForDataRowInTable(text: '${data.localPrice}')),
       DataCell(textForDataRowInTable(text: '${data.total}')),
-      DataCell(textForDataRowInTable(text: '${data.vat}')),
+      DataCell(
+        textForDataRowInTable(
+          text: '${data.vat}',
+          color: Colors.blueGrey,
+          isBold: true,
+        ),
+      ),
       DataCell(textForDataRowInTable(text: '${data.net}')),
     ],
   );
@@ -274,23 +296,23 @@ Widget deleteSection(
 ) {
   return IconButton(
     onPressed: () {
-      // if (controller.jobStatus1.value == 'New') {
-      //   alertDialog(
-      //     context: context,
-      //     controller: controller,
-      //     content: 'This will be deleted permanently',
-      //     onPressed: () {
-      //       controller.deleteInvoiceItem(
-      //         controller.curreentJobCardId.value != ''
-      //             ? controller.curreentJobCardId.value
-      //             : id,
-      //         invoiceItemsId,
-      //       );
-      //     },
-      //   );
-      // } else {
-      //   showSnackBar('Alert', 'Only New Jobs Allowed');
-      // }
+      if (controller.status.value == 'New') {
+        alertDialog(
+          context: context,
+
+          content: 'This will be deleted permanently',
+          onPressed: () {
+            controller.deleteItem(
+              controller.curreentReceivingId.value != ''
+                  ? controller.curreentReceivingId.value
+                  : id,
+              invoiceItemsId,
+            );
+          },
+        );
+      } else {
+        showSnackBar('Alert', 'Only New Jobs Allowed');
+      }
     },
     icon: const Icon(Icons.delete, color: Colors.red),
   );
@@ -299,47 +321,50 @@ Widget deleteSection(
 Widget editSection(
   String id,
   ReceivingController controller,
-  Map<String, dynamic> receivingItemsData,
+  ItemModel receivingItemsData,
   context,
   constraints,
-  String invoiceItemsId,
+  String itemsId,
 ) {
   return IconButton(
-    onPressed: () {
-      // if (controller.jobStatus1.value == 'New') {
-      //   controller.invoiceItemNameId.value = receivingItemsData['name'];
-      //   controller.invoiceItemName.text = controller.getdataName(
-      //     receivingItemsData['name'],
-      //     controller.allInvoiceItemsFromCollection,
-      //   );
-      //   controller.lineNumber.text = (receivingItemsData['line_number'] ?? '')
-      //       .toString();
-      //   controller.description.text = receivingItemsData['description'];
-      //   controller.quantity.text = receivingItemsData['quantity'];
-      //   controller.price.text = receivingItemsData['price'];
-      //   controller.amount.text = receivingItemsData['amount'];
-      //   controller.discount.text = receivingItemsData['discount'];
-      //   controller.total.text = receivingItemsData['total'];
-      //   controller.vat.text = receivingItemsData['vat'];
-      //   controller.net.text = receivingItemsData['net'];
-      //   invoiceItemsForJobDialog(
-      //     id: id,
-      //     controller: controller,
-      //     constraints: constraints,
-      //     onPressed: controller.addingNewinvoiceItemsValue.value
-      //         ? null
-      //         : () {
-      //             controller.editInvoiceItem(
-      //               controller.curreentJobCardId.value != ''
-      //                   ? controller.curreentJobCardId.value
-      //                   : id,
-      //               invoiceItemsId,
-      //             );
-      //           },
-      //   );
-      // } else {
-      //   showSnackBar('Alert', 'Only New Jobs Allowed');
-      // }
+    onPressed: () async {
+      if (controller.status.value == 'New') {
+        controller.getInventeryItemsCode(id: receivingItemsData.code).then((
+          value,
+        ) {
+          controller.itemCode.value.text = value;
+        });
+        controller.getInventeryItemsName(id: receivingItemsData.code).then((
+          value,
+        ) {
+          controller.itemName.value.text = value;
+        });
+        controller.quantity.value.text = receivingItemsData.quantity
+            .toString();
+        controller.orginalPrice.value.text = receivingItemsData.originalPrice
+            .toString();
+        controller.discount.value.text = receivingItemsData.discount
+            .toString();
+        controller.vat.value.text = receivingItemsData.vat.toString();
+        itemsDialog(
+          id: id,
+          controller: controller,
+          constraints: constraints,
+          onPressed: controller.addingNewItemsValue.value
+              ? null
+              : () {
+                  controller.editItem(
+                    controller.curreentReceivingId.value != ''
+                        ? controller.curreentReceivingId.value
+                        : id,
+                    itemsId,
+                    // mode: 'edit',
+                  );
+                },
+        );
+      } else {
+        showSnackBar('Alert', 'Only New Jobs Allowed');
+      }
     },
     icon: const Icon(Icons.edit_note_rounded, color: Colors.blue),
   );
@@ -364,7 +389,7 @@ ElevatedButton newItemButton(
             onPressed: controller.addingNewItemsValue.isTrue
                 ? null
                 : () async {
-                    controller.addNewItem(
+                    await controller.addNewItem(
                       id != '' ? id : controller.curreentReceivingId.value,
                     );
                   },

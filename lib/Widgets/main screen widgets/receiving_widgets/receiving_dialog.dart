@@ -10,6 +10,7 @@ Future<dynamic> receivigDialog({
   required void Function()? onTapForSave,
   void Function()? onTapForDelete,
   void Function()? onTapForPost,
+  void Function()? onTapForCancel,
   required ReceivingController controller,
   String? id,
 }) {
@@ -67,7 +68,9 @@ Future<dynamic> receivigDialog({
                               children: [
                                 separator(),
                                 ClickableHoverText(
-                                  onTap: onTapForSave,
+                                  onTap: controller.addingNewValue.isFalse
+                                      ? onTapForSave
+                                      : null,
                                   text: 'Save',
                                 ),
                                 if (onTapForDelete != null)
@@ -77,16 +80,39 @@ Future<dynamic> receivigDialog({
                                       point(),
 
                                       ClickableHoverText(
-                                        onTap: onTapForDelete,
+                                        onTap:
+                                            controller
+                                                .deletingReceivingDoc
+                                                .isFalse
+                                            ? onTapForDelete
+                                            : null,
                                         text: 'Delete',
                                       ),
                                     ],
                                   ),
                                 separator(),
                                 ClickableHoverText(
-                                  onTap: onTapForPost,
+                                  onTap: controller.postingReceivingDoc.isFalse
+                                      ? onTapForPost
+                                      : null,
                                   text: 'Post',
                                 ),
+                                if (onTapForCancel != null)
+                                  Row(
+                                    spacing: 10,
+                                    children: [
+                                      point(),
+                                      ClickableHoverText(
+                                        onTap:
+                                            controller
+                                                .cancellingReceivingDoc
+                                                .isFalse
+                                            ? onTapForCancel
+                                            : null,
+                                        text: 'Cancel',
+                                      ),
+                                    ],
+                                  ),
                                 separator(),
                                 closeIcon(),
                               ],

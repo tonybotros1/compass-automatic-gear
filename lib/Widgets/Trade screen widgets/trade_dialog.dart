@@ -48,7 +48,6 @@ Future<dynamic> tradesDialog(
                               onPressed: () {
                                 alertDialog(
                                     context: context,
-                                    controller: controller,
                                     content:
                                         "The trade will be deleted permanently",
                                     onPressed: () {

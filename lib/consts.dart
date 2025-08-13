@@ -571,7 +571,6 @@ Future<dynamic> alertMessage({
 
 Future<dynamic> alertDialog({
   required context,
-  controller,
   required String content,
   required void Function() onPressed,
 }) {

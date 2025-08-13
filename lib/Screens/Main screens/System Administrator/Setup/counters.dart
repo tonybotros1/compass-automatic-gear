@@ -217,7 +217,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The counter will be deleted permanently",
             onPressed: () {
               controller.deleteCounter(variableId);

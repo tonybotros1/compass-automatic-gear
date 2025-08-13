@@ -191,7 +191,6 @@ ElevatedButton deleteSection(JobTasksController controller, taskId, context) {
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The task will be deleted permanently",
             onPressed: () {
               controller.deleteTask(taskId);

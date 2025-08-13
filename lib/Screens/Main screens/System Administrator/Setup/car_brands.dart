@@ -249,7 +249,6 @@ ElevatedButton deleteSection(CarBrandsController controller, brandId, context) {
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The brand will be deleted permanently",
             onPressed: () {
               controller.deletebrand(brandId);

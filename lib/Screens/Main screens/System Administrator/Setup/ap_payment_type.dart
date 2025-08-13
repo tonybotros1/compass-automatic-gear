@@ -162,7 +162,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The type will be deleted permanently",
             onPressed: () {
               controller.deleteType(typeId);

@@ -185,7 +185,6 @@ Widget deleteSection(String apInvoiceID, context,
         if (controller.status.value == 'New') {
           alertDialog(
               context: context,
-              controller: controller,
               content: 'This will be deleted permanently',
               onPressed: () {
                 controller.deleteInvoiceItem(

@@ -164,7 +164,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: 'The value will be deleted permanently',
             onPressed: () {
               controller.deleteValue(

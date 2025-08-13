@@ -229,7 +229,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: 'The responsibility will be deleted permanently',
             onPressed: () {
               controller.deleteResponsibility(roleId);

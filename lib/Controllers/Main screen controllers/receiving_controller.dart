@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../Models/receiving_items_model.dart';
 import '../../consts.dart';
 import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
@@ -86,14 +87,17 @@ class ReceivingController extends GetxController {
   RxString purchasedByMasterId = RxString('');
 
   RxBool loadingItems = RxBool(false);
-  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems =
-      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
+  // final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems =
+  //     RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
+  RxList<ItemModel> allItems = RxList<ItemModel>();
 
   RxBool canAddItems = RxBool(false); // change to false
   RxBool addingNewItemsValue = RxBool(false);
   RxBool addingNewValue = RxBool(false);
   RxBool receivingDocAdded = RxBool(false);
   RxBool postingReceivingDoc = RxBool(false);
+  RxBool deletingReceivingDoc = RxBool(false);
+  RxBool cancellingReceivingDoc = RxBool(false);
   TextEditingController searchForInventeryItems = TextEditingController();
   RxBool loadingInventeryItems = RxBool(false);
   final RxList<DocumentSnapshot> allInventeryItems = RxList<DocumentSnapshot>(
@@ -158,6 +162,7 @@ class ReceivingController extends GetxController {
     amount.value.clear();
     allItems.clear();
     status.value = '';
+    receivingDocAdded.value = false;
   }
 
   loadValues(Map<String, dynamic> data, String id) {
@@ -216,19 +221,27 @@ class ReceivingController extends GetxController {
   }
 
   Future<String> getInventeryItemsCode({required String id}) async {
-    var data = await FirebaseFirestore.instance
-        .collection('inventery_items')
-        .doc(id)
-        .get();
-    return data.data()?['code'] ?? '';
+    try {
+      var data = await FirebaseFirestore.instance
+          .collection('inventery_items')
+          .doc(id)
+          .get();
+      return data.data()?['code'] ?? '';
+    } catch (e) {
+      return '';
+    }
   }
 
   Future<String> getInventeryItemsName({required String id}) async {
-    var data = await FirebaseFirestore.instance
-        .collection('inventery_items')
-        .doc(id)
-        .get();
-    return data.data()?['name'] ?? '';
+    try {
+      var data = await FirebaseFirestore.instance
+          .collection('inventery_items')
+          .doc(id)
+          .get();
+      return data.data()?['name'] ?? '';
+    } catch (e) {
+      return '';
+    }
   }
 
   // this function is to filter the search results for inventery items
@@ -399,6 +412,7 @@ class ReceivingController extends GetxController {
   clearItemsValues() {
     itemCode.value.clear();
     itemName.value.clear();
+    selectedInventeryItemID.value = '';
     quantity.value.text = '1';
     addCost.value.text = '0';
     orginalPrice.value.text = '0';
@@ -410,24 +424,24 @@ class ReceivingController extends GetxController {
     net.value.text = '0';
   }
 
-  addNewReceivingDoc() async {
+  Future<void> addNewReceivingDoc() async {
     try {
-      if (status.value != 'New' && status.value != '') {
+      // Prevent editing if status is not allowed
+      if (status.value != 'New' && status.value.isNotEmpty) {
         showSnackBar('Alert', 'Only new docs can be edited');
         return;
       }
+
       showSnackBar('Adding', 'Please Wait');
       addingNewValue.value = true;
 
-      Map<String, dynamic> newData = {
+      // Base data
+      final Map<String, dynamic> newData = {
         'company_id': companyId.value,
-        // 'date'
-        'number': '',
-        'status': 'New',
         'branch': branchId.value,
-        'reference_number': referenceNumber.value.text,
+        'reference_number': referenceNumber.value.text.trim(),
         'vendor': vendorId.value,
-        'note': note.value.text,
+        'note': note.value.text.trim(),
         'currency': currencyId.value,
         'rate': double.tryParse(rate.value.text) ?? 1,
         'approved_by': approvedById.value,
@@ -437,43 +451,59 @@ class ReceivingController extends GetxController {
         'handling': double.tryParse(handling.value.text) ?? 0,
         'other': double.tryParse(other.value.text) ?? 0,
         'amount': double.tryParse(amount.value.text) ?? 0,
-        'added_date': DateTime.now().toString(),
       };
 
+      // Handle date parsing safely
       final rawDate = date.value.text.trim();
       if (rawDate.isNotEmpty) {
         try {
           newData['date'] = Timestamp.fromDate(format.parseStrict(rawDate));
         } catch (e) {
-          showSnackBar('Alert', 'Please enter valid date');
+          showSnackBar('Alert', 'Please enter a valid date');
+          addingNewValue.value = false;
+          return; // Stop execution if date is invalid
         }
       }
 
+      // If creating a new doc
       if (receivingDocAdded.isFalse) {
-        newData['added_date'] = DateTime.now().toString();
-        var newJob = await FirebaseFirestore.instance
+        if (receivingNumber.value.text.isEmpty) {
+          await getCurrentReceivingCounterNumber();
+        }
+
+        newData['number'] = receivingNumber.value.text;
+        newData['status'] = 'New';
+        newData['added_date'] = DateTime.now().toIso8601String();
+
+        final newDocRef = await FirebaseFirestore.instance
             .collection('receiving')
             .add(newData);
+
         receivingDocAdded.value = true;
-        curreentReceivingId.value = newJob.id;
-        getAllItems(newJob.id);
+        curreentReceivingId.value = newDocRef.id;
+
+        await getAllItems(newDocRef.id);
+
         showSnackBar('Done', 'Doc. Added Successfully');
         status.value = 'New';
-      } else {
-        newData.remove('added_date');
-        newData.remove('status');
+      }
+      // If updating existing doc
+      else {
+        newData.remove('status'); // Don't overwrite status
         await FirebaseFirestore.instance
             .collection('receiving')
             .doc(curreentReceivingId.value)
             .update(newData);
+
         showSnackBar('Done', 'Updated Successfully');
       }
+
       canAddItems.value = true;
-      addingNewValue.value = false;
     } catch (e) {
       canAddItems.value = false;
-      addingNewValue.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
+      showSnackBar('Alert', 'Something went wrong: $e');
+    } finally {
+      addingNewValue.value = false; // Ensure loading flag is reset
     }
   }
 
@@ -523,12 +553,25 @@ class ReceivingController extends GetxController {
     }
   }
 
-  deleteReceivingDoc(id) {
+  deleteReceivingDoc(id, context) {
     try {
-      FirebaseFirestore.instance.collection('receiving').doc(id).delete();
-      Get.back();
+      if (status.value == 'New' || status.value == '') {
+        deletingReceivingDoc.value = true;
+
+        alertDialog(
+          context: context,
+          content: "This will be deleted permanently",
+          onPressed: () {
+            FirebaseFirestore.instance.collection('receiving').doc(id).delete();
+            Get.close(2);
+            deletingReceivingDoc.value = false;
+          },
+        );
+      } else {
+        showSnackBar('Can Not Delete', 'Only New Docs Can be Deleted');
+      }
     } catch (e) {
-      //
+      deletingReceivingDoc.value = false;
     }
   }
 
@@ -548,9 +591,8 @@ class ReceivingController extends GetxController {
         return;
       }
 
-      await getCurrentReceivingCounterNumber();
       await FirebaseFirestore.instance.collection('receiving').doc(id).update({
-        'number': receivingNumber.value.text,
+        // 'number': receivingNumber.value.text,
         'status': 'Posted',
       });
 
@@ -562,6 +604,53 @@ class ReceivingController extends GetxController {
     }
   }
 
+  editCancelForReceiving(id) async {
+    try {
+      if (status.value.isEmpty) {
+        showSnackBar('Alert', 'Please save doc first');
+        return;
+      }
+
+      if (status.value == 'Cancelled') {
+        showSnackBar('Alert', 'Doc is already cancelled');
+        return;
+      }
+      cancellingReceivingDoc.value = true;
+
+      await FirebaseFirestore.instance.collection('receiving').doc(id).update({
+        // 'number': receivingNumber.value.text,
+        'status': 'Cancelled',
+      });
+
+      status.value = 'Cancelled';
+      cancellingReceivingDoc.value = false;
+      showSnackBar('Done', 'Status is Cancelled Now');
+    } catch (e) {
+      cancellingReceivingDoc.value = false;
+    }
+  }
+
+  // getAllItems(id) {
+  //   try {
+  //     loadingItems.value = true;
+  //     FirebaseFirestore.instance
+  //         .collection('receiving')
+  //         .doc(id)
+  //         .collection('items')
+  //         .snapshots()
+  //         .listen((QuerySnapshot<Map<String, dynamic>> items) {
+  //           allItems.assignAll(
+  //             items.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>(),
+  //           );
+
+  //           loadingItems.value = false;
+  //           calculateAllItemsTotal(allItems);
+  //         });
+  //   } catch (e) {
+  //     loadingItems.value = false;
+  //   }
+  // }
+
   getAllItems(id) {
     try {
       loadingItems.value = true;
@@ -571,181 +660,105 @@ class ReceivingController extends GetxController {
           .collection('items')
           .snapshots()
           .listen((QuerySnapshot<Map<String, dynamic>> items) {
-            allItems.assignAll(items.docs);
-            loadingItems.value = false;
+            // Map the documents to your ItemModel before assigning
+            final mappedItems = items.docs
+                .map((doc) => ItemModel.fromFirestore(doc))
+                .toList();
+            allItems.assignAll(mappedItems);
             calculateAllItemsTotal(allItems);
+            loadingItems.value = false;
           });
     } catch (e) {
       loadingItems.value = false;
+      // Consider logging the error for debugging.
     }
   }
 
+  calculateAllItemsTotal(List<ItemModel> items) {
+    // reset
+    itemsTotal.value = 0.0;
+    finalItemsTotal.value = 0.0;
+    finalItemsVAT.value = 0.0;
+    finalItemsNet.value = 0.0;
 
-void calculateAllItemsTotal(
-  RxList<QueryDocumentSnapshot<Map<String, dynamic>>> items,
-) {
-  // reset
-  itemsTotal.value = 0.0;
-  finalItemsTotal.value = 0.0;
-  finalItemsVAT.value = 0.0;
-  finalItemsNet.value = 0.0;
+    double toDouble(dynamic v) => v is double
+        ? v
+        : v is int
+        ? v.toDouble()
+        : double.tryParse(v?.toString() ?? '') ?? 0.0;
+    int toInt(dynamic v) => v is int
+        ? v
+        : v is double
+        ? v.toInt()
+        : int.tryParse(v?.toString() ?? '') ?? 0;
 
-  // converters
-  double toDouble(dynamic v) =>
-      v is double ? v : v is int ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0.0;
-  int toInt(dynamic v) =>
-      v is int ? v : v is double ? v.toInt() : int.tryParse(v?.toString() ?? '') ?? 0;
+    for (var item in items) {
+      final double orgPrice = toDouble(item.originalPrice);
+      final double discountVal = toDouble(item.discount);
+      final int qty = toInt(item.quantity);
+      itemsTotal.value += (orgPrice - discountVal) * qty;
+    }
 
-  // ===== Pass 1: compute total base (totalForAllItems) =====
-  for (var item in items) {
-    final d = item.data();
-    final double orgPrice = toDouble(d['orginal_price']);
-    final double discountVal = toDouble(d['discount']);
-    final int qty = toInt(d['quantity']);
-    itemsTotal.value += (orgPrice - discountVal) * qty;
+    final double amountVal = double.tryParse(amount.value.text) ?? 0.0;
+    final double handlingVal = double.tryParse(handling.value.text) ?? 0.0;
+    final double otherVal = double.tryParse(other.value.text) ?? 0.0;
+    final double shippingVal = double.tryParse(shipping.value.text) ?? 0.0;
+    final double rateVal = double.tryParse(rate.value.text) ?? 1.0;
+
+    final double totalForAll = itemsTotal.value;
+    final double extraCosts = handlingVal + shippingVal + otherVal;
+
+    for (var item in items) {
+      final double orgPrice = toDouble(item.originalPrice);
+      final double discountVal = toDouble(item.discount);
+      final int qty = toInt(item.quantity);
+      final double vatRaw = toDouble(item.vat);
+
+      final double unitBase = orgPrice - discountVal;
+
+      final double addCostPerUnit = totalForAll > 0
+          ? (unitBase / totalForAll) * extraCosts
+          : 0.0;
+
+      final double addDiscPerUnit = totalForAll > 0
+          ? (unitBase / totalForAll) * amountVal
+          : 0.0;
+
+      final double localPricePerUnit =
+          (unitBase + addCostPerUnit - addDiscPerUnit) * rateVal;
+
+      final double lineTotal = localPricePerUnit * qty;
+
+      // final double vatAmount = lineTotal * (vatRaw / 100.0);
+
+      finalItemsTotal.value += lineTotal;
+      finalItemsVAT.value += vatRaw;
+      finalItemsNet.value += lineTotal + vatRaw;
+    }
+    return {
+      'total': finalItemsTotal.value,
+      'vat': finalItemsVAT.value,
+      'net': finalItemsNet.value,
+    };
   }
 
-  // parse shared UI values ONCE
-  final double amountVal = double.tryParse(amount.value.text) ?? 0.0;
-  final double handlingVal = double.tryParse(handling.value.text) ?? 0.0;
-  final double otherVal = double.tryParse(other.value.text) ?? 0.0;
-  final double shippingVal = double.tryParse(shipping.value.text) ?? 0.0;
-  final double rateVal = double.tryParse(rate.value.text) ?? 1.0; // ← from rate controller
-
-  final double totalForAll = itemsTotal.value;
-  final double extraCosts = handlingVal + shippingVal + otherVal;
-
-  // ===== Pass 2: per-item calculations using per-unit addCost/addDisc =====
-  for (var item in items) {
-    final d = item.data();
-    final double orgPrice = toDouble(d['orginal_price']);
-    final double discountVal = toDouble(d['discount']);
-    final int qty = toInt(d['quantity']);
-    final double vatRaw = toDouble(d['vat']); // assumed percent, e.g. 15 => 15%
-
-    // per-unit base price (before extras)
-    final double unitBase = orgPrice - discountVal;
-
-    // per-unit extras (matches original getters)
-    final double addCostPerUnit = totalForAll > 0
-        ? (unitBase / totalForAll) * extraCosts
-        : 0.0;
-
-    final double addDiscPerUnit = totalForAll > 0
-        ? (unitBase / totalForAll) * amountVal
-        : 0.0;
-
-    // local price per unit then line total
-    final double localPricePerUnit =
-        (unitBase + addCostPerUnit - addDiscPerUnit) * rateVal;
-
-    final double lineTotal = localPricePerUnit * qty;
-
-    // VAT handling (here assumed vatRaw is percentage)
-    final double vatAmount = lineTotal * (vatRaw / 100.0);
-
-    // accumulate
-    finalItemsTotal.value += lineTotal;
-    finalItemsVAT.value += vatAmount;
-    finalItemsNet.value += lineTotal + vatAmount;
+  Future<Map<String, double>> calculateTotalsForTable(String docId) async {
+    try {
+      var data = await FirebaseFirestore.instance
+          .collection('receiving')
+          .doc(docId)
+          .collection('items')
+          .get();
+      // Map the documents to your ItemModel before assigning
+      final mappedItems = data.docs
+          .map((doc) => ItemModel.fromFirestore(doc))
+          .toList();
+      Map<String, double> calulated = calculateAllItemsTotal(mappedItems);
+      return calulated;
+    } catch (e) {
+      return {};
+    }
   }
-}
-
-
-  // void calculateAllItemsTotal(
-  //   RxList<QueryDocumentSnapshot<Map<String, dynamic>>> items,
-  // ) {
-  //   // reset
-  //   itemsTotal.value = 0.0;
-  //   finalItemsTotal.value = 0.0;
-  //   finalItemsVAT.value = 0.0;
-  //   finalItemsNet.value = 0.0;
-
-  //   // helper converters
-  //   double toDouble(dynamic v) {
-  //     if (v == null) return 0.0;
-  //     if (v is double) return v;
-  //     if (v is int) return v.toDouble();
-  //     if (v is String) return double.tryParse(v) ?? 0.0;
-  //     return 0.0;
-  //   }
-
-  //   int toInt(dynamic v) {
-  //     if (v == null) return 0;
-  //     if (v is int) return v;
-  //     if (v is double) return v.toInt();
-  //     if (v is String) {
-  //       return int.tryParse(v) ?? (double.tryParse(v)?.toInt() ?? 0);
-  //     }
-  //     return 0;
-  //   }
-
-  //   // ===== Pass 1: compute itemsTotal (base sum) =====
-  //   for (var item in items) {
-  //     final data = item.data();
-  //     final double orgPrice = toDouble(data['orginal_price']);
-  //     final double discountVal = toDouble(data['discount']);
-  //     final int qty = toInt(data['quantity']);
-
-  //     final double baseLine = (orgPrice - discountVal) * qty;
-  //     itemsTotal.value += baseLine;
-  //   }
-
-  //   // parse shared UI extras ONCE
-  //   final double amountVal = double.tryParse(amount.value.text) ?? 0.0;
-  //   final double handlingVal = double.tryParse(handling.value.text) ?? 0.0;
-  //   final double otherVal = double.tryParse(other.value.text) ?? 0.0;
-  //   final double shippingVal = double.tryParse(shipping.value.text) ?? 0.0;
-  //   final double rateVal = double.tryParse(rate.value.text) ?? 1.0; // <-- fixed
-
-  //   // ===== Pass 2: build model per item and accumulate totals =====
-  //   for (var item in items) {
-  //     final data = item.data();
-  //     final double orgPrice = toDouble(data['orginal_price']);
-  //     final double discountVal = toDouble(data['discount']);
-  //     final int qty = toInt(data['quantity']);
-  //     final double vatRaw = toDouble(data['vat']); // what DB holds for VAT
-
-  //     final model = ReceivingItemsModel(
-  //       amount: amountVal,
-  //       handling: handlingVal,
-  //       other: otherVal,
-  //       shipping: shippingVal,
-  //       quantity: qty,
-  //       orginalPrice: orgPrice,
-  //       discount: discountVal,
-  //       vat: vatRaw,
-  //       rate: rateVal,
-  //       totalForAllItems: itemsTotal.value, // full total from pass1
-  //     );
-
-  //     // model.total is the line total (localPrice * qty) — depends on your model implementation
-  //     finalItemsTotal.value += model.total;
-
-  //     // ===== VAT handling: choose method depending what 'vat' means in your DB =====
-  //     // Option A: vat in DB is percentage (e.g. 15 => 15%)
-  //     final double vatAmountAsPercent = model.total * (vatRaw / 100.0);
-
-  //     // Option B: vat in DB is decimal (e.g. 0.15)
-  //     final double vatAmountAsDecimal = model.total * vatRaw;
-
-  //     // Option C: vat in DB is absolute amount PER LINE (already amount)
-  //     final double vatAmountAsAbsolute = vatRaw;
-
-  //     // pick the correct one for your case — here I use Option A by default:
-  //     final double vatAmount = vatAmountAsPercent;
-
-  //     finalItemsVAT.value += vatAmount;
-  //     finalItemsNet.value += model.total + vatAmount;
-
-  //     // -- debug prints (temporary, remove later) --
-  //     // print('item ${item.id}: org=$orgPrice disc=$discountVal qty=$qty base=${(orgPrice-discountVal)*qty}');
-  //     // print(' model.total=${model.total} vatRaw=$vatRaw vatAmount=$vatAmount');
-  //   }
-
-  //   // final debug
-  //   // print('itemsTotal=${itemsTotal.value}, finalTotal=${finalItemsTotal.value}, finalVAT=${finalItemsVAT.value}, finalNet=${finalItemsNet.value}');
-  // }
 
   addNewItem(String id) async {
     try {
@@ -765,21 +778,44 @@ void calculateAllItemsTotal(
           });
       addingNewItemsValue.value = false;
       Get.back();
-      // double allNets = 0.0;
-      // double allVats = 0.0;
-      // double alltotals = 0.0;
-      // for (var invoice in allItems) {
-      //   allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
-      //   allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
-      //   alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
-      // }
-      // await FirebaseFirestore.instance.collection('job_cards').doc(id).update({
-      //   'total_net_amount': allNets,
-      //   'total_vat_amount': allVats,
-      //   'totals_amount': alltotals,
-      // });
     } catch (e) {
       addingNewItemsValue.value = false;
+    }
+  }
+
+  editItem(String docId, String itemId) async {
+    try {
+      addingNewItemsValue.value = true;
+      await FirebaseFirestore.instance
+          .collection('receiving')
+          .doc(docId)
+          .collection('items')
+          .doc(itemId)
+          .update({
+            'code': selectedInventeryItemID.value,
+            'quantity': int.tryParse(quantity.value.text) ?? 1,
+            'orginal_price': double.tryParse(orginalPrice.value.text) ?? 0,
+            'discount': double.tryParse(discount.value.text) ?? 0,
+            'vat': double.tryParse(vat.value.text) ?? 0,
+          });
+      addingNewItemsValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewItemsValue.value = false;
+    }
+  }
+
+  deleteItem(String docId, String itemId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('receiving')
+          .doc(docId)
+          .collection('items')
+          .doc(itemId)
+          .delete();
+      Get.back();
+    } catch (e) {
+      //
     }
   }
 
@@ -822,7 +858,7 @@ void calculateAllItemsTotal(
         rnId = firstDoc.id;
         var currentValue = firstDoc.data()['value'] ?? 0;
         // Use the existing prefix and separator from the document
-        referenceNumber.value.text =
+        receivingNumber.value.text =
             '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
         updateReceiveDoc = (currentValue + 1).toString();
       }
@@ -836,106 +872,107 @@ void calculateAllItemsTotal(
     }
   }
 
-  Future<void> searchEngine() async {
+  void searchEngine() {
     isScreenLoding.value = true;
 
     Query<Map<String, dynamic>> query = FirebaseFirestore.instance
         .collection('receiving')
         .where('company_id', isEqualTo: companyId.value);
 
-    if (isAllSelected.value) {
-    } else if (isTodaySelected.value) {
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay.add(Duration(days: 1));
-      fromDate.value.text = textToDate(startOfDay);
-      toDate.value.text = textToDate(endOfDay);
-      query = query
-          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-          .where('date', isLessThan: Timestamp.fromDate(endOfDay));
-    } else if (isThisMonthSelected.value) {
-      final now = DateTime.now();
-      final startOfMonth = DateTime(now.year, now.month, 1);
-      final endOfMonth = (now.month < 12)
-          ? DateTime(now.year, now.month + 1, 1)
-          : DateTime(now.year + 1, 1, 1);
-      fromDate.value.text = textToDate(startOfMonth);
-      toDate.value.text = textToDate(endOfMonth);
-      query = query
-          .where(
-            'date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
-          )
-          .where('date', isLessThan: Timestamp.fromDate(endOfMonth));
-    } else if (isThisYearSelected.value) {
-      final now = DateTime.now();
-      final startOfYear = DateTime(now.year, 1, 1);
-      final endOfYear = DateTime(now.year + 1, 1, 1);
-      fromDate.value.text = textToDate(startOfYear);
-      toDate.value.text = textToDate(endOfYear);
-      query = query
-          .where(
-            'date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
-          )
-          .where('date', isLessThan: Timestamp.fromDate(endOfYear));
-    } else {
-      if (fromDate.value.text.trim().isNotEmpty) {
-        try {
-          final dtFrom = format.parseStrict(fromDate.value.text.trim());
-          query = query.where(
-            'date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
-          );
-        } catch (_) {}
-      }
-      if (toDate.value.text.trim().isNotEmpty) {
-        try {
-          final dtTo = format
-              .parseStrict(toDate.value.text.trim())
-              .add(const Duration(days: 1));
-          query = query.where('date', isLessThan: Timestamp.fromDate(dtTo));
-        } catch (_) {}
+    if (!isAllSelected.value) {
+      if (isTodaySelected.value) {
+        final now = DateTime.now();
+        final startOfDay = DateTime(now.year, now.month, now.day);
+        final endOfDay = startOfDay.add(Duration(days: 1));
+        fromDate.value.text = textToDate(startOfDay);
+        toDate.value.text = textToDate(endOfDay);
+        query = query
+            .where(
+              'date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+            )
+            .where('date', isLessThan: Timestamp.fromDate(endOfDay));
+      } else if (isThisMonthSelected.value) {
+        final now = DateTime.now();
+        final startOfMonth = DateTime(now.year, now.month, 1);
+        final endOfMonth = (now.month < 12)
+            ? DateTime(now.year, now.month + 1, 1)
+            : DateTime(now.year + 1, 1, 1);
+        fromDate.value.text = textToDate(startOfMonth);
+        toDate.value.text = textToDate(endOfMonth);
+        query = query
+            .where(
+              'date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+            )
+            .where('date', isLessThan: Timestamp.fromDate(endOfMonth));
+      } else if (isThisYearSelected.value) {
+        final now = DateTime.now();
+        final startOfYear = DateTime(now.year, 1, 1);
+        final endOfYear = DateTime(now.year + 1, 1, 1);
+        fromDate.value.text = textToDate(startOfYear);
+        toDate.value.text = textToDate(endOfYear);
+        query = query
+            .where(
+              'date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
+            )
+            .where('date', isLessThan: Timestamp.fromDate(endOfYear));
+      } else {
+        if (fromDate.value.text.trim().isNotEmpty) {
+          try {
+            final dtFrom = format.parseStrict(fromDate.value.text.trim());
+            query = query.where(
+              'date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
+            );
+          } catch (_) {}
+        }
+        if (toDate.value.text.trim().isNotEmpty) {
+          try {
+            final dtTo = format
+                .parseStrict(toDate.value.text.trim())
+                .add(const Duration(days: 1));
+            query = query.where('date', isLessThan: Timestamp.fromDate(dtTo));
+          } catch (_) {}
+        }
       }
     }
 
-    final snapshot = await query.get();
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedData =
-        snapshot.docs;
+    // Listen to changes in real-time
+    query.snapshots().listen((snapshot) {
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedData =
+          snapshot.docs;
 
-    // 3. APPLY ALL OTHER FILTERS ON THE CLIENT-SIDE
-    // Filter the 'fetchedJobCards' list in memory.
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredJobCards =
-        fetchedData.where((doc) {
-          final data = doc.data();
+      // Apply client-side filters
+      final filteredReceivingDocs = fetchedData.where((doc) {
+        final data = doc.data();
 
-          if (receivingNumberFilter.value.text.trim().isNotEmpty &&
-              data['number'] != receivingNumberFilter.value.text.trim()) {
-            return false;
-          }
-          if (statusFilter.value.text.trim().isNotEmpty &&
-              data['status'] != statusFilter.value.text.trim()) {
-            return false;
-          }
-          if (vendorNameIdFilter.value.isNotEmpty &&
-              data['vendor'] != vendorNameIdFilter.value) {
-            return false;
-          }
+        if (receivingNumberFilter.value.text.trim().isNotEmpty &&
+            data['number'] != receivingNumberFilter.value.text.trim()) {
+          return false;
+        }
+        if (statusFilter.value.text.trim().isNotEmpty &&
+            data['status'] != statusFilter.value.text.trim()) {
+          return false;
+        }
+        if (vendorNameIdFilter.value.isNotEmpty &&
+            data['vendor'] != vendorNameIdFilter.value) {
+          return false;
+        }
+        if (referenceNumberFilter.value.text.trim().isNotEmpty &&
+            data['reference_number'] !=
+                referenceNumberFilter.value.text.trim()) {
+          return false;
+        }
+        return true;
+      }).toList();
 
-          if (referenceNumberFilter.value.text.trim().isNotEmpty &&
-              data['reference_number'] !=
-                  referenceNumberFilter.value.text.trim()) {
-            return false;
-          }
-
-          return true;
-        }).toList();
-
-    // 4. UPDATE THE UI
-    allReceivingDocs.assignAll(filteredJobCards);
-    numberOfReceivingDocs.value = allReceivingDocs.length;
-    // calculateMoneyForAllJobs(); // Make sure this function iterates over the final list
-    isScreenLoding.value = false;
+      // Update UI instantly
+      allReceivingDocs.assignAll(filteredReceivingDocs);
+      numberOfReceivingDocs.value = allReceivingDocs.length;
+      isScreenLoding.value = false;
+    });
   }
 
   removeFilters() {

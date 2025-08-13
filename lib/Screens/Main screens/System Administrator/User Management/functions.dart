@@ -194,7 +194,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: 'The user will be deleted permanently',
             onPressed: () {
               controller.deleteScreen(screenId);

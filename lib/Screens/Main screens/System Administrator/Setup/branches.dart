@@ -195,7 +195,6 @@ ElevatedButton deleteSection(BranchesController controller, branchId, context) {
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The branch will be deleted permanently",
             onPressed: () {
               controller.deleteBranch(branchId);

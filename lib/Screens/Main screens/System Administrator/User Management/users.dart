@@ -220,7 +220,6 @@ class Users extends StatelessWidget {
         onPressed: () {
           alertDialog(
               context: context,
-              controller: usersController,
               content: 'The user will be deleted permanently',
               onPressed: () {
                 usersController.deleteUser(uid);

@@ -458,7 +458,6 @@ Widget editSection(context, ApInvoicesController controller,
                   } else {
                     alertDialog(
                         context: context,
-                        controller: controller,
                         content: 'This will be deleted permanently',
                         onPressed: () {
                           controller.deleteApInvoice(typeId);

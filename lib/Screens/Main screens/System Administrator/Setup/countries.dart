@@ -272,7 +272,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The country will be deleted permanently",
             onPressed: () {
               controller.deleteCountry(countryId);

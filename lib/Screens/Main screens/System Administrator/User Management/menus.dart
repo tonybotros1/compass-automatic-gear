@@ -185,7 +185,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: 'The menu will be deleted permanently',
             onPressed: () {
               controller.deleteMenuAndUpdateChildren(menuId);

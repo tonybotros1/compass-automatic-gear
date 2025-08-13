@@ -176,7 +176,6 @@ IconButton deleteSection(InventeryItemsController controller, itemId, context) {
     onPressed: () {
       alertDialog(
         context: context,
-        controller: controller,
         content: "The item will be deleted permanently",
         onPressed: () {
           controller.deleteItem(itemId);

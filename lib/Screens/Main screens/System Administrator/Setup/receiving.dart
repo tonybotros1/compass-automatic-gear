@@ -139,7 +139,7 @@ class Receiving extends StatelessWidget {
                                   ElevatedButton(
                                     style: allButtonStyle,
                                     onPressed: () {
-                                      // controller.clearAllFilters();
+                                      controller.clearAllFilters();
                                       controller.isAllSelected.value = true;
                                       controller.isTodaySelected.value = false;
                                       controller.isThisMonthSelected.value =
@@ -488,6 +488,7 @@ DataRow dataRowForTheTable(
               controller: controller,
               id: docId,
               docData: docData,
+              context: context,
             ),
           ],
         ),
@@ -512,10 +513,13 @@ DataRow dataRowForTheTable(
           padding: EdgeInsets.symmetric(horizontal: 5),
         ),
       ),
-
       DataCell(
         textForDataRowInTable(
-          text: getdataName(docData['vendor'], controller.allVendors),
+          text: getdataName(
+            docData['vendor'],
+            controller.allVendors,
+            title: 'entity_name',
+          ),
           formatDouble: false,
         ),
       ),
@@ -536,9 +540,48 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(text: '${docData['note']}', formatDouble: false),
       ),
-      DataCell(textForDataRowInTable(text: '')),
-      DataCell(textForDataRowInTable(text: '')),
-      DataCell(textForDataRowInTable(text: '')),
+      DataCell(
+        FutureBuilder<Map<String, double>>(
+          future: controller.calculateTotalsForTable(docId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(text: '${snapshot.data?['total']}');
+            }
+          },
+        ),
+      ),
+      DataCell(
+        FutureBuilder<Map<String, double>>(
+          future: controller.calculateTotalsForTable(docId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(text: '${snapshot.data?['vat']}');
+            }
+          },
+        ),
+      ),
+      DataCell(
+        FutureBuilder<Map<String, double>>(
+          future: controller.calculateTotalsForTable(docId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(text: '${snapshot.data?['net']}');
+            }
+          },
+        ),
+      ),
     ],
   );
 }
@@ -613,10 +656,11 @@ IconButton editReceivingButton({
   required ReceivingController controller,
   required String id,
   required Map<String, dynamic> docData,
+  required BuildContext context,
 }) {
   return IconButton(
     onPressed: () async {
-      controller.loadValues(docData,id);
+      controller.loadValues(docData, id);
       receivigDialog(
         id: id,
         controller: controller,
@@ -627,10 +671,13 @@ IconButton editReceivingButton({
           await controller.editReceivingDoc(id);
         },
         onTapForDelete: () {
-          controller.deleteReceivingDoc(id);
+          controller.deleteReceivingDoc(id, context);
+        },
+        onTapForCancel: () {
+          controller.editCancelForReceiving(id);
         },
       );
     },
-    icon: const Icon(Icons.edit_note_rounded,color: Colors.blue,),
+    icon: const Icon(Icons.edit_note_rounded, color: Colors.blue),
   );
 }

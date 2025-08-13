@@ -211,7 +211,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The currency will be deleted permanently",
             onPressed: () {
               controller.deleteCurrency(currencyId);

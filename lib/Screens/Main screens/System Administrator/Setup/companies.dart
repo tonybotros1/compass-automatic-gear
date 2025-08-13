@@ -193,7 +193,6 @@ ElevatedButton deleteSection(CompanyController controller, companyId, context) {
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The Company and its users will be deleted permanently",
             onPressed: () {
               controller.deletCompany(companyId);

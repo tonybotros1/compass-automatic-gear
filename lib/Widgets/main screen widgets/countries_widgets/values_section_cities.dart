@@ -160,7 +160,6 @@ ElevatedButton deleteSection(context, CountriesController controller, cityId) {
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: 'The city will be deleted permanently',
             onPressed: () {
               controller.deleteCity(

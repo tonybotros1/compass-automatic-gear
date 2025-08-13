@@ -249,7 +249,6 @@ ElevatedButton deleteSection(CarTradingController controller, context,
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "Theis will be deleted permanently",
             onPressed: () {
               controller.deleteCapitalOrOutstandingOrGeneralExpenses(

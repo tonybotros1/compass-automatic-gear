@@ -18,8 +18,7 @@ Widget deleteJobButton(
             controller.jobStatus1.value == '') {
           alertDialog(
               context: context,
-              controller: controller,
-              content: "This will be deleted permanently",
+              content: "This will be deleted permanently", 
               onPressed: () {
                 controller.deleteJobCard(jobId);
               });

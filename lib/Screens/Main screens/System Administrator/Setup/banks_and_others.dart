@@ -197,7 +197,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The bank will be deleted permanently",
             onPressed: () {
               controller.deleteBank(bankId);

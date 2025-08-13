@@ -175,7 +175,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The entity will be deleted permanently",
             onPressed: () {
               controller.deleteEntity(entityId);

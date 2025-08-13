@@ -396,7 +396,6 @@ Widget editSectionForPayments(context, CashManagementController controller,
                   onPressedForDelete: () {
                     alertDialog(
                         context: context,
-                        controller: controller,
                         content: "This will be deleted permanently",
                         onPressed: () {
                           controller.deletePayment(cashManagementId);

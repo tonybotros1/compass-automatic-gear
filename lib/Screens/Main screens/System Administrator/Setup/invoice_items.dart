@@ -165,7 +165,6 @@ ElevatedButton deleteSection(
       onPressed: () {
         alertDialog(
             context: context,
-            controller: controller,
             content: "The invoiceItems will be deleted permanently",
             onPressed: () {
               controller.deleteInvoiceItem(invoiceItemsId);
