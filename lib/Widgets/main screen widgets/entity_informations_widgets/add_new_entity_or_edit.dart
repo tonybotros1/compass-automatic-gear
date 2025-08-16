@@ -16,123 +16,113 @@ Widget addNewEntityOrEdit({
   return SingleChildScrollView(
     child: Column(
       children: [
-        const SizedBox(
-          height: 5,
-        ),
+        const SizedBox(height: 5),
         labelContainer(
           lable: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  GetX<EntityInformationsController>(builder: (controller) {
-                    return CupertinoCheckbox(
+                  GetX<EntityInformationsController>(
+                    builder: (controller) {
+                      return CupertinoCheckbox(
                         checkColor: mainColor,
                         activeColor: Colors.white,
                         value: controller.isCustomerSelected.value,
                         onChanged: (value) {
                           controller.selectCustomer(value!);
-                        });
-                  }),
-                  Text(
-                    'Customer',
-                    style: fontStyle1,
-                  )
+                        },
+                      );
+                    },
+                  ),
+                  Text('Customer', style: fontStyle1),
                 ],
               ),
               Row(
                 children: [
-                  GetX<EntityInformationsController>(builder: (controller) {
-                    return CupertinoCheckbox(
+                  GetX<EntityInformationsController>(
+                    builder: (controller) {
+                      return CupertinoCheckbox(
                         checkColor: mainColor,
                         activeColor: Colors.white,
                         value: controller.isVendorSelected.value,
                         onChanged: (value) {
                           controller.selectVendor(value!);
-                        });
-                  }),
-                  Text(
-                    'Vendor',
-                    style: fontStyle1,
-                  )
+                        },
+                      );
+                    },
+                  ),
+                  Text('Vendor', style: fontStyle1),
                 ],
-              )
+              ),
             ],
           ),
         ),
         customerSection(),
-        const SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
         labelContainer(
           lable: Row(
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(
-                width: 4,
-              ),
-              Row(
-                spacing: 10,
-                children: [
-                  GetX<EntityInformationsController>(builder: (controller) {
-                    return CupertinoRadio<bool>(
-                      fillColor: mainColor,
-                      activeColor: Colors.white,
-                      value: true,
-                      groupValue: controller.isCompanySelected.value,
-                      onChanged: (value) {
-                        if (value != null) {
+              const SizedBox(width: 4),
+
+              // Wrap both radios in a RadioGroup
+              GetX<EntityInformationsController>(
+                builder: (controller) {
+                  return RadioGroup<bool>(
+                    groupValue: controller.isCompanySelected.value,
+                    onChanged: (bool? newValue) {
+                      if (newValue != null) {
+                        if (newValue) {
+                          controller.selectCompanyOrIndividual('company', true);
+                        } else {
                           controller.selectCompanyOrIndividual(
-                              'company', value);
+                            'individual',
+                            false,
+                          );
                         }
-                      },
-                    );
-                  }),
-                  Text(
-                    'Company',
-                    style: fontStyle1,
-                  )
-                ],
+                      }
+                    },
+                    child: Row(
+                      spacing: 20,
+                      children: [
+                        Row(
+                          spacing: 10,
+                          children: [
+                            CupertinoRadio<bool>(
+                              value: true,
+                              fillColor: mainColor,
+                              activeColor: Colors.white,
+                            ),
+                            Text('Company', style: fontStyle1),
+                          ],
+                        ),
+                        Row(
+                          spacing: 10,
+                          children: [
+                            CupertinoRadio<bool>(
+                              value: false,
+                              fillColor: mainColor,
+                              activeColor: Colors.white,
+                            ),
+                            Text('Individual', style: fontStyle1),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-              Row(
-                spacing: 10,
-                children: [
-                  GetX<EntityInformationsController>(builder: (controller) {
-                    return CupertinoRadio<bool>(
-                      fillColor: mainColor,
-                      activeColor: Colors.white,
-                      value: true,
-                      groupValue: controller.isIndividualSelected.value,
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.selectCompanyOrIndividual(
-                              'individual', value);
-                        }
-                      },
-                    );
-                  }),
-                  Text(
-                    'Individual',
-                    style: fontStyle1,
-                  )
-                ],
-              )
             ],
           ),
         ),
         companySection(),
-        const SizedBox(
-          height: 15,
-        ),
+        const SizedBox(height: 15),
         addressCardSection(controller),
-        const SizedBox(
-          height: 15,
-        ),
+        const SizedBox(height: 15),
         contactsCardSection(controller),
-        const SizedBox(
-          height: 15,
-        ),
+        const SizedBox(height: 15),
         socialCardSection(controller),
       ],
     ),

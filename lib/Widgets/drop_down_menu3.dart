@@ -391,6 +391,7 @@ class CustomDropdown extends StatelessWidget {
   final TextStyle? enabledTextStyle;
   final TextStyle? disabledTextStyle;
   final String showedSelectedName;
+  final double width;
   final bool? validator;
   final Widget Function(String, dynamic)? showedResult;
   final FocusNode? focusNode;
@@ -407,6 +408,7 @@ class CustomDropdown extends StatelessWidget {
     this.hintText = "Select an option",
     this.dropdownDecoration,
     this.disabledDecoration,
+    this.width = 150,
     this.enabled = true,
     this.enabledTextStyle,
     this.disabledTextStyle,
@@ -444,92 +446,39 @@ class CustomDropdown extends StatelessWidget {
     controller.nextFocusNode = nextFocusNode;
     bool isEnabled = items.isEmpty ? false : enabled ?? true;
 
-    return FormField<dynamic>(
-      validator: (value) {
-        if (validator == true) {
-          if (value == null || value.isEmpty) {
-            return "    Please Select an Option";
+    return SizedBox(
+      width: width,
+      child: FormField<dynamic>(
+        validator: (value) {
+          if (validator == true) {
+            if (value == null || value.isEmpty) {
+              return "    Please Select an Option";
+            }
           }
-        }
-        return null;
-      },
-      builder: (FormFieldState<dynamic> state) {
-        if (state.hasError) {
-          controller.isValid.value = false;
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Wrap the dropdown button with CompositedTransformTarget.
-            CompositedTransformTarget(
-              link: _layerLink,
-              child: FocusableActionDetector(
-                focusNode: focusNode,
-                autofocus: false,
-                shortcuts: {
-                  LogicalKeySet(LogicalKeyboardKey.tab): const ActivateIntent(),
-                  LogicalKeySet(LogicalKeyboardKey.enter):
-                      const ActivateIntent(),
-                },
-                actions: {
-                  ActivateIntent: CallbackAction<ActivateIntent>(
-                    onInvoke: (intent) {
-                      if (isEnabled) {
-                        if (controller.isDropdownOpen.isFalse) {
-                          // إذا المينيو مسكر افتحو
-                          controller.showDropdown(
-                            context,
-                            buttonKey,
-                            items,
-                            itemBuilder: itemBuilder == null
-                                ? (context, key, value) {
-                                    return Container(
-                                        alignment: Alignment.centerLeft,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 4),
-                                        child: Text(value[showedSelectedName]));
-                                  }
-                                : itemBuilder!,
-                            onChanged: (key, value) {
-                              textControllerValue.value = '';
-                              controller.selectedKey.value = key;
-                              controller.selectedValue.value = value;
-                              controller.isValid.value = true;
-                              controller.hideDropdown();
-                              state.didChange(value);
-                              onChanged?.call(key, value);
-                              if (nextFocusNode != null) {
-                                FocusScope.of(context).requestFocus(
-                                    nextFocusNode); // ينتقل للي بعدو
-                              }
-
-                              // FocusScope.of(context).nextFocus();
-                            },
-                            layerLink: _layerLink,
-                          );
-                        } else {
-                          // إذا المينيو مفتوح سكروا وانتقل
-                          controller.hideDropdown();
-                          if (nextFocusNode != null) {
-                            FocusScope.of(context)
-                                .requestFocus(nextFocusNode); // ينتقل للي بعدو
-                          }
-                        }
-                      } else {
-                        if (nextFocusNode != null) {
-                          FocusScope.of(context)
-                              .requestFocus(nextFocusNode); // ينتقل للي بعدو
-                        }
-                      }
-
-                      return null;
-                    },
-                  ),
-                },
-                child: GestureDetector(
-                  key: buttonKey,
-                  onTap: isEnabled
-                      ? () {
+          return null;
+        },
+        builder: (FormFieldState<dynamic> state) {
+          if (state.hasError) {
+            controller.isValid.value = false;
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Wrap the dropdown button with CompositedTransformTarget.
+              CompositedTransformTarget(
+                link: _layerLink,
+                child: FocusableActionDetector(
+                  focusNode: focusNode,
+                  autofocus: false,
+                  shortcuts: {
+                    LogicalKeySet(LogicalKeyboardKey.tab): const ActivateIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.enter):
+                        const ActivateIntent(),
+                  },
+                  actions: {
+                    ActivateIntent: CallbackAction<ActivateIntent>(
+                      onInvoke: (intent) {
+                        if (isEnabled) {
                           if (controller.isDropdownOpen.isFalse) {
                             // إذا المينيو مسكر افتحو
                             controller.showDropdown(
@@ -542,8 +491,7 @@ class CustomDropdown extends StatelessWidget {
                                           alignment: Alignment.centerLeft,
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 12, vertical: 4),
-                                          child:
-                                              Text(value[showedSelectedName]));
+                                          child: Text(value[showedSelectedName]));
                                     }
                                   : itemBuilder!,
                               onChanged: (key, value) {
@@ -558,6 +506,8 @@ class CustomDropdown extends StatelessWidget {
                                   FocusScope.of(context).requestFocus(
                                       nextFocusNode); // ينتقل للي بعدو
                                 }
+      
+                                // FocusScope.of(context).nextFocus();
                               },
                               layerLink: _layerLink,
                             );
@@ -565,93 +515,148 @@ class CustomDropdown extends StatelessWidget {
                             // إذا المينيو مفتوح سكروا وانتقل
                             controller.hideDropdown();
                             if (nextFocusNode != null) {
-                              FocusScope.of(context).requestFocus(
-                                  nextFocusNode); // ينتقل للي بعدو
+                              FocusScope.of(context)
+                                  .requestFocus(nextFocusNode); // ينتقل للي بعدو
                             }
                           }
+                        } else {
+                          if (nextFocusNode != null) {
+                            FocusScope.of(context)
+                                .requestFocus(nextFocusNode); // ينتقل للي بعدو
+                          }
                         }
-                      : null,
-                  child: Obx(() {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 2),
-                          child: Text(
-                            hintText,
-                            style: textFieldLabelStyle,
-                            overflow: TextOverflow.ellipsis,
+      
+                        return null;
+                      },
+                    ),
+                  },
+                  child: GestureDetector(
+                    key: buttonKey,
+                    onTap: isEnabled
+                        ? () {
+                            if (controller.isDropdownOpen.isFalse) {
+                              // إذا المينيو مسكر افتحو
+                              controller.showDropdown(
+                                context,
+                                buttonKey,
+                                items,
+                                itemBuilder: itemBuilder == null
+                                    ? (context, key, value) {
+                                        return Container(
+                                            alignment: Alignment.centerLeft,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 4),
+                                            child:
+                                                Text(value[showedSelectedName]));
+                                      }
+                                    : itemBuilder!,
+                                onChanged: (key, value) {
+                                  textControllerValue.value = '';
+                                  controller.selectedKey.value = key;
+                                  controller.selectedValue.value = value;
+                                  controller.isValid.value = true;
+                                  controller.hideDropdown();
+                                  state.didChange(value);
+                                  onChanged?.call(key, value);
+                                  if (nextFocusNode != null) {
+                                    FocusScope.of(context).requestFocus(
+                                        nextFocusNode); // ينتقل للي بعدو
+                                  }
+                                },
+                                layerLink: _layerLink,
+                              );
+                            } else {
+                              // إذا المينيو مفتوح سكروا وانتقل
+                              controller.hideDropdown();
+                              if (nextFocusNode != null) {
+                                FocusScope.of(context).requestFocus(
+                                    nextFocusNode); // ينتقل للي بعدو
+                              }
+                            }
+                          }
+                        : null,
+                    child: Obx(() {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 2),
+                            child: Text(
+                              hintText,
+                              style: textFieldLabelStyle,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                        Container(
-                          height: textFieldHeight,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: controller.isValid.isFalse
-                              ? BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  border: Border.all(color: Colors.red),
-                                  borderRadius: BorderRadius.circular(5),
-                                )
-                              : isEnabled
-                                  ? (dropdownDecoration ??
-                                      (defaultEnabledDecoration))
-                                  : (disabledDecoration ??
-                                      defaultDisabledDecoration),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: showedResult != null &&
-                                        controller.selectedKey.isNotEmpty
-                                    ? showedResult!(
-                                        controller.selectedKey.value,
-                                        controller.selectedValue)
-                                    : Text(
-                                        textControllerValue.isEmpty
-                                            ? controller.selectedKey.isEmpty
-                                                ? ''
-                                                : showedSelectedName.isNotEmpty
-                                                    ? controller.selectedValue[
-                                                            showedSelectedName]
-                                                        .toString()
-                                                    : ''
-                                            : textControllerValue.value,
-                                        style: isEnabled
-                                            ? (enabledTextStyle ??
-                                                (textControllerValue
-                                                            .value.isEmpty &&
-                                                        controller
-                                                            .selectedKey.isEmpty
-                                                    ? TextStyle(
-                                                        fontSize: 14,
-                                                        color: Colors
-                                                            .grey.shade700)
-                                                    : textFieldFontStyle))
-                                            : (disabledTextStyle ??
-                                                defaultDisabledTextStyle),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                              ),
-                              Icon(Icons.arrow_drop_down,
-                                  color:
-                                      isEnabled ? Colors.black : Colors.grey),
-                            ],
+                          Container(
+                            height: textFieldHeight,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            decoration: controller.isValid.isFalse
+                                ? BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    border: Border.all(color: Colors.red),
+                                    borderRadius: BorderRadius.circular(5),
+                                  )
+                                : isEnabled
+                                    ? (dropdownDecoration ??
+                                        (defaultEnabledDecoration))
+                                    : (disabledDecoration ??
+                                        defaultDisabledDecoration),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: showedResult != null &&
+                                          controller.selectedKey.isNotEmpty
+                                      ? showedResult!(
+                                          controller.selectedKey.value,
+                                          controller.selectedValue)
+                                      : Text(
+                                          textControllerValue.isEmpty
+                                              ? controller.selectedKey.isEmpty
+                                                  ? ''
+                                                  : showedSelectedName.isNotEmpty
+                                                      ? controller.selectedValue[
+                                                              showedSelectedName]
+                                                          .toString()
+                                                      : ''
+                                              : textControllerValue.value,
+                                          style: isEnabled
+                                              ? (enabledTextStyle ??
+                                                  (textControllerValue
+                                                              .value.isEmpty &&
+                                                          controller
+                                                              .selectedKey.isEmpty
+                                                      ? TextStyle(
+                                                          fontSize: 14,
+                                                          color: Colors
+                                                              .grey.shade700)
+                                                      : textFieldFontStyle))
+                                              : (disabledTextStyle ??
+                                                  defaultDisabledTextStyle),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                ),
+                                Icon(Icons.arrow_drop_down,
+                                    color:
+                                        isEnabled ? Colors.black : Colors.grey),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
+                        ],
+                      );
+                    }),
+                  ),
                 ),
               ),
-            ),
-            if (state.hasError)
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Text(state.errorText ?? "",
-                    style: TextStyle(color: Colors.red[900], fontSize: 13)),
-              ),
-          ],
-        );
-      },
+              if (state.hasError)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(state.errorText ?? "",
+                      style: TextStyle(color: Colors.red[900], fontSize: 13)),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

@@ -28,6 +28,7 @@ import '../../Screens/Main screens/System Administrator/Setup/cash_management_pa
 import '../../Screens/Main screens/System Administrator/Setup/cash_management_receipts.dart';
 import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
+import '../../Screens/Main screens/System Administrator/Setup/issue_items.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../Screens/Main screens/System Administrator/Setup/receiving.dart';
 import '../../Screens/Main screens/System Administrator/Setup/system_variables.dart';
@@ -166,6 +167,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Receiving());
       case '/inventeryItems':
         return const SizedBox(child: InventeryItems());
+      case '/issueItems':
+        return const SizedBox(child: IssueItems());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }
