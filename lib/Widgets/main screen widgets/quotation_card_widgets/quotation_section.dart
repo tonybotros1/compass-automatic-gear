@@ -33,7 +33,7 @@ Container quotationsSection(context, QuotationCardController controller) {
                   labelText: 'Quotation Date',
                   hintText: 'Enter Quotation Date',
                 )),
-            Expanded(flex: 2, child: SizedBox())
+            const Expanded(flex: 2, child: SizedBox())
           ],
         ),
         Row(
@@ -71,7 +71,7 @@ Container quotationsSection(context, QuotationCardController controller) {
                   labelText: 'Expiry Date',
                   hintText: 'Enter Expiry Date',
                 )),
-            Expanded(flex: 2, child: SizedBox())
+            const Expanded(flex: 2, child: SizedBox())
           ],
         ),
         Row(
@@ -82,7 +82,7 @@ Container quotationsSection(context, QuotationCardController controller) {
               labelText: 'Reference No.',
               hintText: 'Enter Reference No.',
             )),
-            Expanded(flex: 2, child: SizedBox())
+            const Expanded(flex: 2, child: SizedBox())
           ],
         ),
         Row(
@@ -93,7 +93,7 @@ Container quotationsSection(context, QuotationCardController controller) {
               labelText: 'Delivery Time',
               hintText: 'Enter Delivery Time',
             )),
-            Expanded(flex: 2, child: SizedBox())
+            const Expanded(flex: 2, child: SizedBox())
           ],
         ),
         Row(
@@ -113,7 +113,7 @@ Container quotationsSection(context, QuotationCardController controller) {
               labelText: 'Warrenty KM',
               hintText: 'Enter Warrenty KM',
             )),
-            Expanded(flex: 2, child: SizedBox())
+            const Expanded(flex: 2, child: SizedBox())
           ],
         ),
         myTextFormFieldWithBorder(

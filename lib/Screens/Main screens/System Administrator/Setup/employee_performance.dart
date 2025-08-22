@@ -100,7 +100,7 @@ class EmployeePerformance extends StatelessWidget {
                             controller.day.clear();
                             controller.allDays.clear();
                           },
-                          child: Text('All'),
+                          child: const Text('All'),
                         ),
                         ElevatedButton(
                           style: todayButtonStyle,
@@ -115,7 +115,7 @@ class EmployeePerformance extends StatelessWidget {
                                   // controller.isDaySelected.value = true;
                                 }
                               : null,
-                          child: Text('Today'),
+                          child: const Text('Today'),
                         ),
                         ElevatedButton(
                           style: thisMonthButtonStyle,
@@ -132,7 +132,7 @@ class EmployeePerformance extends StatelessWidget {
                                   // controller.isDaySelected.value = false;
                                 }
                               : null,
-                          child: Text('This Month'),
+                          child: const Text('This Month'),
                         ),
                         ElevatedButton(
                           style: thisYearButtonStyle,
@@ -149,7 +149,7 @@ class EmployeePerformance extends StatelessWidget {
                                   // controller.isDaySelected.value = false;
                                 }
                               : null,
-                          child: Text('This Year'),
+                          child: const Text('This Year'),
                         ),
                       ],
                     );
@@ -206,40 +206,40 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
-      DataColumn(
+      const DataColumn(
         columnWidth: IntrinsicColumnWidth(flex: 0.2),
         label: SizedBox(),
       ),
       DataColumn(
-        columnWidth: IntrinsicColumnWidth(flex: 2),
+        columnWidth: const IntrinsicColumnWidth(flex: 2),
 
         label: AutoSizedText(text: 'Employee', constraints: constraints),
         // onSort: controller.onSort,
       ),
       DataColumn(
         // numeric: true,
-        columnWidth: IntrinsicColumnWidth(flex: 1),
+        columnWidth: const IntrinsicColumnWidth(flex: 1),
 
         label: AutoSizedText(constraints: constraints, text: 'Duration'),
         // onSort: controller.onSort,
       ),
       DataColumn(
         numeric: true,
-        columnWidth: IntrinsicColumnWidth(flex: 1),
+        columnWidth: const IntrinsicColumnWidth(flex: 1),
 
         label: AutoSizedText(constraints: constraints, text: 'Points'),
         // onSort: controller.onSort,
       ),
       DataColumn(
         numeric: true,
-        columnWidth: IntrinsicColumnWidth(flex: 1),
+        columnWidth: const IntrinsicColumnWidth(flex: 1),
 
         label: AutoSizedText(constraints: constraints, text: 'Tasks'),
         // onSort: controller.onSort,
       ),
       DataColumn(
         numeric: true,
-        columnWidth: IntrinsicColumnWidth(flex: 1),
+        columnWidth: const IntrinsicColumnWidth(flex: 1),
         label: AutoSizedText(constraints: constraints, text: 'Amount'),
         // onSort: controller.onSort,
       ),

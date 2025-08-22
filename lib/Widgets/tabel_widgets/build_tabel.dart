@@ -16,7 +16,7 @@ Widget buildCustomRow({
   List<Widget> children = [];
 
   // Add the prefix widget if provided; otherwise, add a default spacer.
-  children.add(prefix ?? SizedBox());
+  children.add(prefix ?? const SizedBox());
 
   // Loop through each configuration to build the corresponding cell.
   for (var cell in cellConfigs) {
@@ -36,7 +36,7 @@ Widget buildCustomRow({
 
   // Add the suffix widget if provided; otherwise, add a default TextButton.
   children.add(
-    suffix ?? SizedBox(),
+    suffix ?? const SizedBox(),
   );
 
   return Row(
@@ -54,7 +54,7 @@ Widget buildCustomTableHeader({
   List<Widget> children = [];
 
   // Add the prefix widget (or a default spacer)
-  children.add(prefix ?? SizedBox());
+  children.add(prefix ?? const SizedBox());
 
   // Generate header cells
   for (var cell in cellConfigs) {
@@ -68,7 +68,7 @@ Widget buildCustomTableHeader({
                     border: Border.all(color: Colors.grey),
                   )
                 : null,
-            padding: EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             alignment: Alignment.bottomLeft,
             height: textFieldHeight,
             child: RichText(
@@ -88,7 +88,7 @@ Widget buildCustomTableHeader({
   }
 
   // Add the suffix widget (or a default placeholder)
-  children.add(suffix ?? SizedBox());
+  children.add(suffix ?? const SizedBox());
 
   return Container(
       decoration: BoxDecoration(
@@ -106,7 +106,7 @@ Widget buildCustomTableFooter({
   List<Widget> children = [];
 
   // Add the prefix widget (or a default spacer)
-  children.add(prefix ?? SizedBox());
+  children.add(prefix ?? const SizedBox());
 
   // Generate footer cells
   for (var cell in cellConfigs) {
@@ -120,7 +120,7 @@ Widget buildCustomTableFooter({
                     border: Border.all(color: Colors.grey),
                   )
                 : null,
-            padding: EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             alignment: cell.textAlignment,
             height: textFieldHeight,
             child: RichText(
@@ -134,7 +134,7 @@ Widget buildCustomTableFooter({
   }
 
   // Add the suffix widget (or a default placeholder)
-  children.add(suffix ?? SizedBox());
+  children.add(suffix ?? const SizedBox());
 
   return Row(children: children);
 }

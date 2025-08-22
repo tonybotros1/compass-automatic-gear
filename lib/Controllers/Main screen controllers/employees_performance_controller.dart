@@ -376,7 +376,7 @@ class EmployeesPerformanceController extends GetxController {
             totalsForJobs.value = 0.0;
 
             start = DateTime(now.year, now.month, now.day);
-            end = start.add(Duration(days: 1));
+            end = start.add(const Duration(days: 1));
             year.text = start.year.toString();
             month.text = monthNumberToName(start.month);
             allDays.assignAll(getDaysInMonth(month.text));
@@ -421,7 +421,7 @@ class EmployeesPerformanceController extends GetxController {
           totalsForJobs.value = 0.0;
 
           start = DateTime(yearVal, monthVal, dayVal);
-          end = start.add(Duration(days: 1));
+          end = start.add(const Duration(days: 1));
         } else if (yearVal != null && monthVal != null) {
           start = DateTime(yearVal, monthVal, 1);
           end = DateTime(yearVal, monthVal + 1, 1);

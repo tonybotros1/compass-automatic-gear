@@ -18,7 +18,7 @@ Future<dynamic> apInvoiceDialog(
   return Get.dialog(
       barrierDismissible: false,
       Dialog(
-        insetPadding: EdgeInsets.all(8),
+        insetPadding: const EdgeInsets.all(8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         child: LayoutBuilder(builder: (context, constraints) {
           return Column(
@@ -42,7 +42,7 @@ Future<dynamic> apInvoiceDialog(
                     GetX<ApInvoicesController>(builder: (controller) {
                       return controller.status.value != ''
                           ? statusBox(controller.status.value)
-                          : SizedBox();
+                          : const SizedBox();
                     }),
                     const Spacer(),
                     separator(),

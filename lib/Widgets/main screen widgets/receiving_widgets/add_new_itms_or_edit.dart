@@ -51,10 +51,10 @@ Widget addNewitemsOrEdit({required ReceivingController controller,required BoxCo
                   onPressed: () {
                     addNewValueToScreenButtonDialog(
                       screenName: '📜 Inventery Items',
-                      widget: InventeryItems(),
+                      widget: const InventeryItems(),
                     );
                   },
-                  icon: Icon(Icons.add),
+                  icon: const Icon(Icons.add),
                 ),
               ],
             ),

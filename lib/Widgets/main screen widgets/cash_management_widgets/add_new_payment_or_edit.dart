@@ -164,7 +164,7 @@ Widget addNewPaymentOrEdit({
                             decoration: containerDecor,
                             child: invoicesTable(
                                 context: context,
-                                constraints: BoxConstraints(),
+                                constraints: const BoxConstraints(),
                                 isPayment: true,
                                 list: controller.selectedAvailablePayments),
                           ),
@@ -183,7 +183,7 @@ Widget addNewPaymentOrEdit({
                 child: Text.rich(
                   TextSpan(
                     children: [
-                      TextSpan(
+                      const TextSpan(
                         text: 'Total Amount Paid: ',
                         style: TextStyle(
                           color: Colors.black,
@@ -193,7 +193,7 @@ Widget addNewPaymentOrEdit({
                       TextSpan(
                         text: NumberFormat("#,##0.00").format(controller
                             .calculatedAmountForAllSelectedPayments.value),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,
                         ),

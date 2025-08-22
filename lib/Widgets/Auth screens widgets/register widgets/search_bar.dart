@@ -15,7 +15,7 @@ Row searchBar({
   return Row(
     children: [
       Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: Container(
           width: constraints.maxWidth / 2.5,
           decoration: BoxDecoration(
@@ -25,7 +25,7 @@ Row searchBar({
           ),
           child: Row(
             children: [
-              Padding(
+              const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: FittedBox(
                   // flex: 1,
@@ -45,10 +45,10 @@ Row searchBar({
                     controller: search.value,
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintStyle: TextStyle(color: iconColor),
+                      hintStyle: const TextStyle(color: iconColor),
                       hintText: title,
                     ),
-                    style: TextStyle(color: iconColor),
+                    style: const TextStyle(color: iconColor),
                   ),
                 ),
               ),
@@ -57,7 +57,7 @@ Row searchBar({
                   onPressed: () {
                     search.value.clear();
                   },
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.close,
                     color: iconColor,
                     size: 25,
@@ -70,7 +70,7 @@ Row searchBar({
       ),
       const Expanded(flex: 1, child: SizedBox()),
       Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: button),
       // Padding(
       //   padding: const EdgeInsets.all(8.0),

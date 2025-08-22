@@ -47,7 +47,7 @@ Widget myTextFormFieldWithBorder({
                   style: textFieldLabelStyle,
                 ),
               )
-            : SizedBox(),
+            : const SizedBox(),
         SizedBox(
           height: maxLines == 1 ? textFieldHeight : null,
           child: TextFormField(
@@ -100,11 +100,11 @@ Widget myTextFormFieldWithBorder({
               ),
               filled: isEnabled == true,
               fillColor: Colors.grey.shade200,
-              focusedBorder: OutlineInputBorder(
+              focusedBorder: const OutlineInputBorder(
                 // borderRadius: BorderRadius.circular(borderRadius!),
                 borderSide: BorderSide(color: Colors.grey, width: 2.0),
               ),
-              enabledBorder: OutlineInputBorder(
+              enabledBorder: const OutlineInputBorder(
                 // borderRadius: BorderRadius.circular(borderRadius),
                 borderSide: BorderSide(color: Colors.grey, width: 1.0),
               ),

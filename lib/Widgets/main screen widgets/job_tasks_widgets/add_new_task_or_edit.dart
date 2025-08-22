@@ -8,21 +8,21 @@ Widget addNewTaskOrEdit({
 }) {
   return ListView(
     children: [
-      SizedBox(
+      const SizedBox(
         height: 5,
       ),
       myTextFormFieldWithBorder(
         controller: controller.nameEN,
         labelText: 'English Name',
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(
         controller: controller.nameAR,
         labelText: 'Arabic Name',
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(
@@ -30,7 +30,7 @@ Widget addNewTaskOrEdit({
         controller: controller.points,
         labelText: 'Points',
       ),
-      SizedBox(
+      const SizedBox(
         height: 10,
       ),
       myTextFormFieldWithBorder(

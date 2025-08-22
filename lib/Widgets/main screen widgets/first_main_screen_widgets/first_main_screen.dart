@@ -19,7 +19,7 @@ class FirstMainScreen extends StatelessWidget {
                 crossAxisCount:
                     (MediaQuery.of(context).size.width ~/ 250).clamp(1, 5),
                 childAspectRatio: 1.5,
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
                 crossAxisSpacing: 40,
                 mainAxisSpacing: 40,
                 children:
@@ -100,7 +100,7 @@ class _HoverCardState extends State<HoverCard> {
                 color: widget.color,
                 borderRadius: BorderRadius.circular(10),
               ),
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -122,7 +122,7 @@ class _HoverCardState extends State<HoverCard> {
                       fontSize: 16,
                     ),
                   ),
-                  Divider(),
+                  const Divider(),
                   AutoSizeText(
                     widget.description.isNotEmpty
                         ? widget.description

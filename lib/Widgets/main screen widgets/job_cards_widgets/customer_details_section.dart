@@ -25,7 +25,7 @@ Widget customerDetailsSection() {
               children: [
                 Expanded(
                   child: FocusTraversalOrder(
-                    order: NumericFocusOrder(1),
+                    order: const NumericFocusOrder(1),
                     child: Focus(
                       child: CustomDropdown(
                         showedSelectedName: 'entity_name',
@@ -74,44 +74,44 @@ Widget customerDetailsSection() {
                                         const Spacer(),
                                         closeIcon()
                                       ])),
-                                  Expanded(
+                                  const Expanded(
                                       child: Padding(
-                                          padding: const EdgeInsets.all(8),
+                                          padding: EdgeInsets.all(8),
                                           child: EntityInformations()))
                                 ],
                               );
                             }),
                           ));
                     },
-                    icon: Icon(Icons.add))
+                    icon: const Icon(Icons.add))
               ],
             ),
             Row(
               children: [
                 Expanded(
                     child: FocusTraversalOrder(
-                  order: NumericFocusOrder(2),
+                  order: const NumericFocusOrder(2),
                   child: myTextFormFieldWithBorder(
                     controller: controller.customerEntityName,
                     labelText: 'Contact Name',
                     hintText: 'Enter Contact Name',
                   ),
                 )),
-                Expanded(child: SizedBox())
+                const Expanded(child: SizedBox())
               ],
             ),
             Row(
               children: [
                 Expanded(
                     child: FocusTraversalOrder(
-                  order: NumericFocusOrder(3),
+                  order: const NumericFocusOrder(3),
                   child: myTextFormFieldWithBorder(
                     controller: controller.customerEntityPhoneNumber,
                     labelText: 'Contact Number',
                     hintText: 'Enter Contact Number',
                   ),
                 )),
-                Expanded(child: SizedBox())
+                const Expanded(child: SizedBox())
               ],
             ),
             Row(
@@ -122,7 +122,7 @@ Widget customerDetailsSection() {
                   labelText: 'Contact Email',
                   hintText: 'Enter Contact Email',
                 )),
-                Expanded(child: SizedBox())
+                const Expanded(child: SizedBox())
               ],
             ),
             Row(
@@ -130,7 +130,7 @@ Widget customerDetailsSection() {
               children: [
                 Expanded(
                     child: FocusTraversalOrder(
-                  order: NumericFocusOrder(4),
+                  order: const NumericFocusOrder(4),
                   child: myTextFormFieldWithBorder(
                     isEnabled: false,
                     isnumber: true,
@@ -141,7 +141,7 @@ Widget customerDetailsSection() {
                 )),
                 Expanded(
                     child: FocusTraversalOrder(
-                  order: NumericFocusOrder(5),
+                  order: const NumericFocusOrder(5),
                   child: myTextFormFieldWithBorder(
                     isEnabled: false,
                     isnumber: true,
@@ -150,7 +150,7 @@ Widget customerDetailsSection() {
                     hintText: 'Enter Outstanding',
                   ),
                 )),
-                Expanded(flex: 2, child: SizedBox())
+                const Expanded(flex: 2, child: SizedBox())
               ],
             ),
             Row(
@@ -158,7 +158,7 @@ Widget customerDetailsSection() {
                 Expanded(
                   flex: 2,
                   child: FocusTraversalOrder(
-                    order: NumericFocusOrder(6),
+                    order: const NumericFocusOrder(6),
                     child: Focus(
                       child: CustomDropdown(
                         showedSelectedName: 'name',
@@ -173,7 +173,7 @@ Widget customerDetailsSection() {
                     ),
                   ),
                 ),
-                Expanded(child: SizedBox())
+                const Expanded(child: SizedBox())
               ],
             ),
             Row(
@@ -190,7 +190,7 @@ Widget customerDetailsSection() {
                     },
                   ),
                 ),
-                Expanded(flex: 2, child: SizedBox())
+                const Expanded(flex: 2, child: SizedBox())
               ],
             ),
             Row(
@@ -234,7 +234,7 @@ Widget customerDetailsSection() {
                   labelText: 'Rate',
                   hintText: 'Enter Rate',
                 )),
-                Expanded(flex: 2, child: SizedBox())
+                const Expanded(flex: 2, child: SizedBox())
               ],
             ),
           ],

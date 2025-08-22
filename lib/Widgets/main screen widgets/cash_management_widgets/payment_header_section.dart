@@ -40,7 +40,7 @@ Widget paymentHeader(BuildContext context) {
                   },
                 ),
               ),
-              Expanded(flex: 2, child: SizedBox()),
+              const Expanded(flex: 2, child: SizedBox()),
             ],
           ),
           Row(
@@ -77,7 +77,7 @@ Widget paymentHeader(BuildContext context) {
                   flex: 4,
                   child: myTextFormFieldWithBorder(
                       labelText: 'Note', maxLines: 4)),
-              Expanded(child: SizedBox())
+              const Expanded(child: SizedBox())
             ],
           )
         ],

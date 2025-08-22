@@ -22,11 +22,11 @@ Widget addNewinvoiceItemsOrEdit({
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Item Information',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -38,10 +38,10 @@ Widget addNewinvoiceItemsOrEdit({
                           validate: true,
                         ),
                       ),
-                      Expanded(flex: 4, child: SizedBox())
+                      const Expanded(flex: 4, child: SizedBox())
                     ],
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   GetX<QuotationCardController>(builder: (context) {
                     bool isLoading =
                         controller.allInvoiceItemsFromCollection.isEmpty;
@@ -100,21 +100,21 @@ Widget addNewinvoiceItemsOrEdit({
                                                 const Spacer(),
                                                 closeIcon()
                                               ])),
-                                          Expanded(
+                                          const Expanded(
                                               child: Padding(
                                                   padding:
-                                                      const EdgeInsets.all(8),
+                                                      EdgeInsets.all(8),
                                                   child: InvoiceItems()))
                                         ],
                                       );
                                     }),
                                   ));
                             },
-                            icon: Icon(Icons.add))
+                            icon: const Icon(Icons.add))
                       ],
                     );
                   }),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
                     maxLines: 13,
                     controller: controller.description,
@@ -126,7 +126,7 @@ Widget addNewinvoiceItemsOrEdit({
               ),
             ),
 
-            SizedBox(width: 24),
+            const SizedBox(width: 24),
 
             // Right Column (25%)
             Expanded(
@@ -134,11 +134,11 @@ Widget addNewinvoiceItemsOrEdit({
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Pricing Details',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
                     onChanged: (_) => controller.updateCalculating(),
                     isnumber: true,
@@ -147,7 +147,7 @@ Widget addNewinvoiceItemsOrEdit({
                     hintText: 'Enter Quantity',
                     validate: true,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
                     onChanged: (_) => controller.updateCalculating(), 
                     isDouble: true,
@@ -156,7 +156,7 @@ Widget addNewinvoiceItemsOrEdit({
                     hintText: 'Enter Price',
                     validate: true,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
                     onChanged: (_) => controller.updateCalculating(),
                     isEnabled: false,
@@ -165,7 +165,7 @@ Widget addNewinvoiceItemsOrEdit({
                     hintText: 'Auto-calculated',
                     validate: true,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
                     onChanged: (_) => controller.updateCalculating(),
                     isDouble: true,
@@ -174,7 +174,7 @@ Widget addNewinvoiceItemsOrEdit({
                     hintText: 'Enter Discount',
                     validate: true,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
                     isEnabled: false,
                     controller: controller.total,
@@ -182,7 +182,7 @@ Widget addNewinvoiceItemsOrEdit({
                     hintText: 'Auto-calculated',
                     validate: true,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
                     isEnabled: false,
                     onChanged: (_) => controller.updateCalculating(),
@@ -192,7 +192,7 @@ Widget addNewinvoiceItemsOrEdit({
                     hintText: 'Auto-calculated',
                     validate: true,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
                     onChanged: (_) => controller.updateAmount(),
                     isDouble: true,

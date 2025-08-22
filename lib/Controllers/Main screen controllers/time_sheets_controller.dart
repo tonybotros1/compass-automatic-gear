@@ -74,12 +74,12 @@ class TimeSheetsController extends GetxController {
   }
 
   void _startRealTimeTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (_) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       for (var doc in allTimeSheets) {
         final String sheetId = doc.id;
         final periods = doc['active_periods'] as List<dynamic>;
 
-        Duration total = Duration();
+        Duration total = const Duration();
 
         // Check if job is paused (i.e. last period is closed)
         bool isPaused = periods.isNotEmpty && periods.last['to'] != null;

@@ -53,7 +53,7 @@ Widget addNewReceiveOrEdit({
                               ),
                               currencySection(context, controller),
 
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               labelContainer(
                                 lable: Text(
                                   'Maker, Checker & Approver',
@@ -99,7 +99,7 @@ Widget addNewReceiveOrEdit({
             ),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         labelContainer(
           lable: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -108,7 +108,7 @@ class CompanyVariables extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Divider(),
+                      const Divider(),
                       labelBox(label: 'Responsibilities', onPressed: () {}),
 
                       Wrap(
@@ -117,7 +117,7 @@ class CompanyVariables extends StatelessWidget {
                           i,
                         ) {
                           return Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 4,
                             ),
@@ -134,7 +134,7 @@ class CompanyVariables extends StatelessWidget {
                           );
                         }),
                       ),
-                      Divider(),
+                      const Divider(),
                       labelBox(label: 'Variables', onPressed: () {}),
                       Column(
                         spacing: 2,
@@ -181,7 +181,7 @@ class CompanyVariables extends StatelessWidget {
           tooltip: 'Edit',
           color: Colors.grey.shade700,
           onPressed: onPressed,
-          icon: Icon(Icons.edit),
+          icon: const Icon(Icons.edit),
         ),
       ],
     );
@@ -197,7 +197,7 @@ class CompanyVariables extends StatelessWidget {
     Color color = index % 2 == 0 ? Colors.grey.shade200 : Colors.grey.shade100;
     return Container(
       width: constraints.maxWidth / 3,
-      padding: EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
         color: color,
@@ -226,7 +226,7 @@ class CompanyVariables extends StatelessWidget {
                     ),
                   ),
                 )
-              : SizedBox(),
+              : const SizedBox(),
         ],
       ),
     );
@@ -236,9 +236,9 @@ class CompanyVariables extends StatelessWidget {
     return Container(
       height: size,
       width: size,
-      padding: EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
 
-      child: child ?? SizedBox(),
+      child: child ?? const SizedBox(),
     );
   }
 }

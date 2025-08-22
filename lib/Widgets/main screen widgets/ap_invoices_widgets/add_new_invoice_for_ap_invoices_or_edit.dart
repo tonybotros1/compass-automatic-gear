@@ -69,7 +69,7 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                     controller: controller.vat,
                   ),
                 ),
-                Expanded(child: SizedBox()),
+                const Expanded(child: SizedBox()),
               ],
             ),
             // Row(
@@ -422,8 +422,8 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                   },
                   icon: Icon(Icons.more_vert_rounded, color: mainColor),
                 ),
-                Expanded(flex: 1, child: SizedBox()),
-                Expanded(flex: 1, child: SizedBox()),
+                const Expanded(flex: 1, child: SizedBox()),
+                const Expanded(flex: 1, child: SizedBox()),
               ],
             ),
             myTextFormFieldWithBorder(

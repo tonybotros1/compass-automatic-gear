@@ -55,11 +55,11 @@ Future<dynamic> issueDialog({
                                     ? statusBox(
                                         controller.status.value,
                                         hieght: 35,
-                                        padding: EdgeInsets.symmetric(
+                                        padding: const EdgeInsets.symmetric(
                                           horizontal: 5,
                                         ),
                                       )
-                                    : SizedBox(),
+                                    : const SizedBox(),
                               ],
                             ),
                             Row(

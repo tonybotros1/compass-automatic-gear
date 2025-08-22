@@ -222,7 +222,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                           Expanded(
                             flex: 1,
                             child: myTextFormFieldWithBorder(
-                                suffixIcon: IconButton(
+                                suffixIcon: const IconButton(
                                     onPressed: null, icon: Icon(Icons.percent_rounded,size: 15,)),
                                 keyboardType: TextInputType.number,
                                 isnumber: true,
@@ -550,7 +550,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                           controller.selectedCheckBoxIndicesForInteriorExterior,
                     );
                   } else {
-                    return Divider();
+                    return const Divider();
                   }
                 },
               ),
@@ -579,7 +579,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                           controller.selectedCheckBoxIndicesForUnderVehicle,
                     );
                   } else {
-                    return Divider();
+                    return const Divider();
                   }
                 },
               ),
@@ -607,7 +607,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                       dataMap: controller.selectedCheckBoxIndicesForUnderHood,
                     );
                   } else {
-                    return Divider();
+                    return const Divider();
                   }
                 },
               ),
@@ -640,12 +640,12 @@ Padding buildInspectionReportBody(BuildContext context) {
                               .selectedCheckBoxIndicesForBatteryPerformance,
                         );
                       } else {
-                        return Divider();
+                        return const Divider();
                       }
                     },
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 Text('Battery Cold Cranking Amps',
@@ -938,7 +938,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                               .selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
                         );
                       } else {
-                        return Divider();
+                        return const Divider();
                       }
                     },
                   ),

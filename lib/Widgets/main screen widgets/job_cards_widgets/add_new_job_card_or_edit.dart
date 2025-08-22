@@ -78,7 +78,7 @@ Widget addNewJobCardOrEdit(
                                         }
                                       : null,
                             )
-                          : SizedBox();
+                          : const SizedBox();
                     })
                   ],
                 )),

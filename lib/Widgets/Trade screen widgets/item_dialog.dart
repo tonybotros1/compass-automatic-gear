@@ -15,7 +15,7 @@ Future<dynamic> itemDialog(
       barrierDismissible: false,
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        insetPadding: EdgeInsets.all(8),
+        insetPadding: const EdgeInsets.all(8),
         child: LayoutBuilder(builder: (context, constraints) {
           return SizedBox(
             height: 550,
@@ -48,7 +48,7 @@ Future<dynamic> itemDialog(
                                 child: controller.addingNewValue.value == false
                                     ? Text(
                                         isTrade == true ? 'Ok' : 'Save',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontWeight: FontWeight.bold),
                                       )
                                     : const SizedBox(

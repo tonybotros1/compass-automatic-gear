@@ -27,7 +27,7 @@ Widget paymentHeader(BuildContext context) {
                   spacing: 10,
                   children: [
                     FocusTraversalOrder(
-                      order: NumericFocusOrder(1),
+                      order: const NumericFocusOrder(1),
                       child: Expanded(
                         flex: 3,
                         child: CustomDropdown(
@@ -55,7 +55,7 @@ Widget paymentHeader(BuildContext context) {
                     Expanded(
                         flex: 3,
                         child: FocusTraversalOrder(
-                          order: NumericFocusOrder(2),
+                          order: const NumericFocusOrder(2),
                           child: myTextFormFieldWithBorder(
                               textInputAction: TextInputAction.next,
                               focusNode: controller.focusNodePayementHeader2,
@@ -81,7 +81,7 @@ Widget paymentHeader(BuildContext context) {
                               },
                               labelText: 'Transaction Date'),
                         )),
-                    Expanded(flex: 5, child: SizedBox())
+                    const Expanded(flex: 5, child: SizedBox())
                   ],
                 ),
                 Row(
@@ -121,8 +121,8 @@ Widget paymentHeader(BuildContext context) {
                                   controller.invoiceDate);
                             },
                             labelText: 'Invoice Date')),
-                    SizedBox(),
-                    Expanded(flex: 7, child: SizedBox())
+                    const SizedBox(),
+                    const Expanded(flex: 7, child: SizedBox())
                   ],
                 ),
                 Row(
@@ -130,7 +130,7 @@ Widget paymentHeader(BuildContext context) {
                   children: [
                     Expanded(
                       child: FocusTraversalOrder(
-                        order: NumericFocusOrder(3),
+                        order: const NumericFocusOrder(3),
                         child: CustomDropdown(
                           focusNode: controller.focusNodePayementHeader3,
                           nextFocusNode: controller.focusNodePayementHeader4,
@@ -153,7 +153,7 @@ Widget paymentHeader(BuildContext context) {
           ),
           Expanded(
               child: FocusTraversalOrder(
-            order: NumericFocusOrder(4),
+            order: const NumericFocusOrder(4),
             child: myTextFormFieldWithBorder(
                 // focusNode: FocusNode(skipTraversal: true),
                 focusNode: controller.focusNodePayementHeader4,
@@ -198,14 +198,14 @@ IconButton addNewEntityButton() {
                           const Spacer(),
                           closeIcon()
                         ])),
-                    Expanded(
+                    const Expanded(
                         child: Padding(
-                            padding: const EdgeInsets.all(8),
+                            padding: EdgeInsets.all(8),
                             child: EntityInformations()))
                   ],
                 );
               }),
             ));
       },
-      icon: Icon(Icons.add));
+      icon: const Icon(Icons.add));
 }

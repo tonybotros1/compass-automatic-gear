@@ -2403,7 +2403,7 @@ class JobCardController extends GetxController {
     } else if (isTodaySelected.value) {
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay.add(Duration(days: 1));
+      final endOfDay = startOfDay.add(const Duration(days: 1));
       fromDate.value.text = textToDate(startOfDay);
       toDate.value.text = textToDate(endOfDay);
       query = query

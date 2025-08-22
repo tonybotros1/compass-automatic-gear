@@ -13,16 +13,16 @@ Future<dynamic> taskDialog(
       Dialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        insetPadding: EdgeInsets.all(8),
+        insetPadding: const EdgeInsets.all(8),
         child: SizedBox(
           // height: constraints.maxHeight,
           width: constraints.maxWidth,
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
@@ -41,10 +41,10 @@ Future<dynamic> taskDialog(
               ),
               Expanded(child: GetX<TimeSheetsController>(builder: (controller) {
                 return Padding(
-                  padding: EdgeInsetsGeometry.all(16),
+                  padding: const EdgeInsetsGeometry.all(16),
                   child: controller.isScreenLoding.isFalse &&
                           controller.allTechnician.isEmpty
-                      ? Center(
+                      ? const Center(
                           child: Text('Empty'),
                         )
                       : controller.isScreenLoding.isTrue
@@ -57,7 +57,7 @@ Future<dynamic> taskDialog(
                                     .clamp(1, 5)
                                   ,
                                 childAspectRatio: 1.5,
-                                padding: EdgeInsets.all(20),
+                                padding: const EdgeInsets.all(20),
                                 crossAxisSpacing: 40,
                                 mainAxisSpacing: 40,
                                 children: List.generate(

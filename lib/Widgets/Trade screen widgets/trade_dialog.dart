@@ -14,7 +14,7 @@ Future<dynamic> tradesDialog(
       barrierDismissible: false,
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        insetPadding: EdgeInsets.all(8),
+        insetPadding: const EdgeInsets.all(8),
         child: LayoutBuilder(builder: (context, constraints) {
           return SizedBox(
             height: constraints.maxHeight,
@@ -39,7 +39,7 @@ Future<dynamic> tradesDialog(
                       GetX<CarTradingController>(builder: (controller) {
                         return controller.status.value != ''
                             ? statusBox(controller.status.value)
-                            : SizedBox();
+                            : const SizedBox();
                       }),
                       const Spacer(),
                       tradeID != ''
@@ -58,7 +58,7 @@ Future<dynamic> tradesDialog(
                                 "Delete",
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ))
-                          : SizedBox(),
+                          : const SizedBox(),
                       GetX<CarTradingController>(builder: (controller) {
                         return controller.currentTradId.value != ''
                             ? ElevatedButton(
@@ -68,10 +68,10 @@ Future<dynamic> tradesDialog(
                                       controller.currentTradId.value, 'Sold');
                                   controller.status.value = 'Sold';
                                 },
-                                child: Text('Sold',
+                                child: const Text('Sold',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)))
-                            : SizedBox();
+                            : const SizedBox();
                       }),
                       GetX<CarTradingController>(
                           builder: (controller) => ElevatedButton(

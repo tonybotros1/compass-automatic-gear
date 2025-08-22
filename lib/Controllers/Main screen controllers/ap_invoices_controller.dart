@@ -646,7 +646,7 @@ class ApInvoicesController extends GetxController {
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay =
-          startOfDay.add(Duration(days: 1)).subtract(Duration(milliseconds: 1));
+          startOfDay.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
       fromDate.value.text = textToDate(startOfDay);
       toDate.value.text = textToDate(endOfDay);
       query = query
@@ -663,7 +663,7 @@ class ApInvoicesController extends GetxController {
       final startOfNextMonth = (now.month < 12)
           ? DateTime(now.year, now.month + 1, 1)
           : DateTime(now.year + 1, 1, 1);
-      final endOfMonth = startOfNextMonth.subtract(Duration(milliseconds: 1));
+      final endOfMonth = startOfNextMonth.subtract(const Duration(milliseconds: 1));
       fromDate.value.text = textToDate(startOfMonth);
       toDate.value.text = textToDate(endOfMonth);
       query = query
@@ -678,7 +678,7 @@ class ApInvoicesController extends GetxController {
       final now = DateTime.now();
       final startOfYear = DateTime(now.year, 1, 1);
       final startOfNextYear = DateTime(now.year + 1, 1, 1);
-      final endOfYear = startOfNextYear.subtract(Duration(milliseconds: 1));
+      final endOfYear = startOfNextYear.subtract(const Duration(milliseconds: 1));
       fromDate.value.text = textToDate(startOfYear);
       toDate.value.text = textToDate(endOfYear);
       query = query

@@ -43,7 +43,7 @@ Widget receiptHeader(BuildContext context) {
                   },
                 ),
               ),
-              Expanded(
+              const Expanded(
                 flex: 2,
                 child: SizedBox(),
               ),
@@ -92,7 +92,7 @@ Widget receiptHeader(BuildContext context) {
                   maxLines: 4,
                 ),
               ),
-              Expanded(child: SizedBox())
+              const Expanded(child: SizedBox())
             ],
           ),
         ],

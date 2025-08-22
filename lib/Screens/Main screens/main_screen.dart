@@ -36,13 +36,13 @@ class MainScreen extends StatelessWidget {
                             onPressed: () {
                               Scaffold.of(context).openDrawer();
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.menu,
                               size: 25,
                             )),
                       ),
                       Padding(
-                        padding: EdgeInsets.only(left: 15),
+                        padding: const EdgeInsets.only(left: 15),
                         child: Obx(() => Text(
                               mainScreenController.selectedScreenName.value,
                               style: fontStyleForAppBar,
@@ -86,7 +86,7 @@ class MainScreen extends StatelessWidget {
                                       ),
                                     ),
                                   )
-                                : SizedBox();
+                                : const SizedBox();
                           }),
                           CircleAvatar(
                             backgroundColor: Colors.teal,
@@ -102,14 +102,14 @@ class MainScreen extends StatelessWidget {
                                   mainScreenController
                                       .selectedScreenRoute.value = '/home';
                                 },
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.home,
                                   size: 20,
                                   color: Colors.white,
                                 )),
                           ),
                           Padding(
-                              padding: EdgeInsets.only(right: 16),
+                              padding: const EdgeInsets.only(right: 16),
                               child: Obx(() =>
                                   mainScreenController.isLoading.isFalse
                                       ? personalDetailsSection(

@@ -100,7 +100,7 @@ class TradingDashboard extends StatelessWidget {
                                   controller.carModelId.value = '';
                                   controller.allModels.clear();
                                 },
-                                child: Text('All')),
+                                child: const Text('All')),
                             ElevatedButton(
                                 style: todayButtonStyle,
                                 onPressed: controller.isTodaySelected.isFalse
@@ -118,7 +118,7 @@ class TradingDashboard extends StatelessWidget {
                                         controller.isDaySelected.value = true;
                                       }
                                     : null,
-                                child: Text('Today')),
+                                child: const Text('Today')),
                             ElevatedButton(
                                 style: thisMonthButtonStyle,
                                 onPressed: controller
@@ -138,7 +138,7 @@ class TradingDashboard extends StatelessWidget {
                                         controller.isDaySelected.value = false;
                                       }
                                     : null,
-                                child: Text('This Month')),
+                                child: const Text('This Month')),
                             ElevatedButton(
                                 style: thisYearButtonStyle,
                                 onPressed: controller.isThisYearSelected.isFalse
@@ -158,7 +158,7 @@ class TradingDashboard extends StatelessWidget {
                                         controller.isDaySelected.value = false;
                                       }
                                     : null,
-                                child: Text('This Year')),
+                                child: const Text('This Year')),
                             ElevatedButton(
                                 style: controller.isNewStatusSelected.isFalse
                                     ? isNotPressedButtonStyle
@@ -174,7 +174,7 @@ class TradingDashboard extends StatelessWidget {
                                   }
                                   controller.filterTradesByDate();
                                 },
-                                child: Text('New')),
+                                child: const Text('New')),
                             ElevatedButton(
                                 style: controller.isSoldStatusSelected.isFalse
                                     ? isNotPressedButtonStyle
@@ -191,7 +191,7 @@ class TradingDashboard extends StatelessWidget {
                                   }
                                   controller.filterTradesByDate();
                                 },
-                                child: Text('Sold')),
+                                child: const Text('Sold')),
                             Expanded(
                               child: CustomDropdown(
                                 showedSelectedName: 'name',
@@ -229,7 +229,7 @@ class TradingDashboard extends StatelessWidget {
                         );
                       }),
                 ),
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: SizedBox(
                     height: 10,
                   ),
@@ -282,7 +282,7 @@ class TradingDashboard extends StatelessWidget {
                                   value: textForDataRowInTable(
                                       text:
                                           '${controller.totalNETsForAll.value}',
-                                      color: Color(0xffFF7D29),
+                                      color: const Color(0xffFF7D29),
                                       fontSize: 16,
                                       isBold: true))
                             ],
@@ -292,7 +292,7 @@ class TradingDashboard extends StatelessWidget {
                     );
                   }),
                 ),
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: SizedBox(
                     height: 2,
                   ),
@@ -317,7 +317,7 @@ class TradingDashboard extends StatelessWidget {
                             value: textForDataRowInTable(
                                 text:
                                     '${controller.totalPaysForAllCapitals.value}',
-                                color: Color(0xff3D365C),
+                                color: const Color(0xff3D365C),
                                 fontSize: 16,
                                 isBold: true)),
                         customBox(
@@ -325,7 +325,7 @@ class TradingDashboard extends StatelessWidget {
                             value: textForDataRowInTable(
                                 text:
                                     '${controller.totalReceivesForAllCapitals.value}',
-                                color: Color(0xff7C4585),
+                                color: const Color(0xff7C4585),
                                 fontSize: 16,
                                 isBold: true)),
                         customBox(
@@ -333,14 +333,14 @@ class TradingDashboard extends StatelessWidget {
                             value: textForDataRowInTable(
                                 text:
                                     '${controller.totalNETsForAllCapitals.value}',
-                                color: Color(0xffC95792),
+                                color: const Color(0xffC95792),
                                 fontSize: 16,
                                 isBold: true)),
                       ],
                     );
                   }),
                 ),
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: SizedBox(
                     height: 2,
                   ),
@@ -365,7 +365,7 @@ class TradingDashboard extends StatelessWidget {
                             value: textForDataRowInTable(
                                 text:
                                     '${controller.totalPaysForAllOutstanding.value}',
-                                color: Color(0xff4A102A),
+                                color: const Color(0xff4A102A),
                                 fontSize: 16,
                                 isBold: true)),
                         customBox(
@@ -373,7 +373,7 @@ class TradingDashboard extends StatelessWidget {
                             value: textForDataRowInTable(
                                 text:
                                     '${controller.totalReceivesForAllOutstanding.value}',
-                                color: Color(0xff85193C),
+                                color: const Color(0xff85193C),
                                 fontSize: 16,
                                 isBold: true)),
                         customBox(
@@ -381,14 +381,14 @@ class TradingDashboard extends StatelessWidget {
                             value: textForDataRowInTable(
                                 text:
                                     '${controller.totalNETsForAllOutstanding.value}',
-                                color: Color(0xffC5172E),
+                                color: const Color(0xffC5172E),
                                 fontSize: 16,
                                 isBold: true)),
                       ],
                     );
                   }),
                 ),
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: SizedBox(
                     height: 2,
                   ),
@@ -413,7 +413,7 @@ class TradingDashboard extends StatelessWidget {
                             value: textForDataRowInTable(
                                 text:
                                     '${controller.totalPaysForAllGeneralExpenses.value}',
-                                color: Color(0xffBF9264),
+                                color: const Color(0xffBF9264),
                                 fontSize: 16,
                                 isBold: true)),
                         customBox(
@@ -421,7 +421,7 @@ class TradingDashboard extends StatelessWidget {
                             value: textForDataRowInTable(
                                 text:
                                     '${controller.totalReceivesForAllGeneralExpenses.value}',
-                                color: Color(0xff6F826A),
+                                color: const Color(0xff6F826A),
                                 fontSize: 16,
                                 isBold: true)),
                         Expanded(
@@ -433,7 +433,7 @@ class TradingDashboard extends StatelessWidget {
                                   value: textForDataRowInTable(
                                       text:
                                           '${controller.totalNETsForAllGeneralExpenses.value}',
-                                      color: Color(0xff328E6E),
+                                      color: const Color(0xff328E6E),
                                       fontSize: 16,
                                       isBold: true)),
                               customBox(
@@ -441,7 +441,7 @@ class TradingDashboard extends StatelessWidget {
                                   value: textForDataRowInTable(
                                       text:
                                           '${controller.totalNetProfit.value}',
-                                      color: Color(0xff004030),
+                                      color: const Color(0xff004030),
                                       fontSize: 16,
                                       isBold: true))
                             ],
@@ -451,18 +451,18 @@ class TradingDashboard extends StatelessWidget {
                     );
                   }),
                 ),
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: SizedBox(
                     height: 10,
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: Container(
-                    constraints: BoxConstraints(minHeight: 300),
-                    padding: EdgeInsets.all(5),
+                    constraints: const BoxConstraints(minHeight: 300),
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(15),
                           bottomRight: Radius.circular(15)),
                     ),
@@ -488,16 +488,16 @@ class TradingDashboard extends StatelessWidget {
                                     ),
                                   ),
                                 )
-                              : Center(
+                              : const Center(
                                   child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
+                                    padding: EdgeInsets.all(8.0),
                                     child: Text('No Data'),
                                   ),
                                 );
                     }),
                   ),
                 ),
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: SizedBox(
                     height: 10,
                   ),

@@ -116,7 +116,7 @@ class QuotationCard extends StatelessWidget {
                       ],
                     );
                   }),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   GetBuilder<QuotationCardController>(builder: (controller) {
@@ -171,7 +171,7 @@ class QuotationCard extends StatelessWidget {
                                     controller.allModels.clear();
                                     controller.searchEngine();
                                   },
-                                  child: Text('All')),
+                                  child: const Text('All')),
                               ElevatedButton(
                                   style: todayButtonStyle,
                                   onPressed: controller.isTodaySelected.isFalse
@@ -192,7 +192,7 @@ class QuotationCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: Text('Today')),
+                                  child: const Text('Today')),
                               ElevatedButton(
                                   style: thisMonthButtonStyle,
                                   onPressed: controller
@@ -215,7 +215,7 @@ class QuotationCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: Text('This Month')),
+                                  child: const Text('This Month')),
                               ElevatedButton(
                                   style: thisYearButtonStyle,
                                   onPressed: controller
@@ -236,7 +236,7 @@ class QuotationCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: Text('This Year')),
+                                  child: const Text('This Year')),
                               ElevatedButton(
                                   style: saveButtonStyle,
                                   onPressed:
@@ -266,7 +266,7 @@ class QuotationCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Expanded(flex: 2, child: SizedBox()),
+                        const Expanded(flex: 2, child: SizedBox()),
                         newQuotationCardButton(context, constraints, controller)
                       ],
                     );
@@ -321,10 +321,10 @@ class QuotationCard extends StatelessWidget {
                         }),
                   ),
                   Container(
-                    padding: EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(10),
                           bottomRight: Radius.circular(10)),
                     ),
@@ -427,7 +427,7 @@ Widget tableOfScreens({
         sortAscending: controller.isAscending.value,
         headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
-          DataColumn(label: SizedBox()),
+          const DataColumn(label: SizedBox()),
           DataColumn(
             label: Column(
               spacing: 5,
@@ -630,7 +630,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> cardData, context, constraints,
                 : '')),
         DataCell(cardData['quotation_status'] != ''
             ? statusBox('${cardData['quotation_status']}',
-                hieght: 35, padding: EdgeInsets.symmetric(horizontal: 5))
+                hieght: 35, padding: const EdgeInsets.symmetric(horizontal: 5))
             : const SizedBox()),
         DataCell(textForDataRowInTable(
             text: controller.getdataName(
@@ -962,7 +962,7 @@ ElevatedButton newQuotationCardButton(BuildContext context,
                                           ? statusBox(
                                               controller.quotationStatus.value,
                                             )
-                                          : SizedBox(),
+                                          : const SizedBox(),
                                     ],
                                   ),
                                   Row(

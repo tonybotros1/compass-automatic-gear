@@ -341,8 +341,8 @@ class SyncfusionMultiBarChart extends StatelessWidget {
     final NumberFormat compactFormat = NumberFormat.compact(locale: 'en');
 
     return SfCartesianChart(
-      primaryXAxis: CategoryAxis(
-        title: const AxisTitle(text: ''),
+      primaryXAxis: const CategoryAxis(
+        title: AxisTitle(text: ''),
       ),
       primaryYAxis: NumericAxis(
         minimum: paddedMinY,
@@ -356,7 +356,7 @@ class SyncfusionMultiBarChart extends StatelessWidget {
         format: 'point.x : point.y',
         // numberFormat: compactFormat,
       ),
-      legend: Legend(isVisible: true, position: LegendPosition.bottom),
+      legend: const Legend(isVisible: true, position: LegendPosition.bottom),
       series: <CartesianSeries<_ChartData, String>>[
         ColumnSeries<_ChartData, String>(
           name: 'Count',
@@ -365,7 +365,7 @@ class SyncfusionMultiBarChart extends StatelessWidget {
           yValueMapper: (_ChartData data, _) => data.value,
           color: Colors.pink,
           width: 0.6,
-          dataLabelSettings: DataLabelSettings(
+          dataLabelSettings: const DataLabelSettings(
               showZeroValue: false,
               isVisible: true,
               labelAlignment: ChartDataLabelAlignment.auto,
@@ -379,7 +379,7 @@ class SyncfusionMultiBarChart extends StatelessWidget {
           yValueMapper: (_ChartData data, _) => data.value,
           color: Colors.green,
           width: 0.6,
-          dataLabelSettings: DataLabelSettings(
+          dataLabelSettings: const DataLabelSettings(
               showZeroValue: false,
               isVisible: true,
               labelAlignment: ChartDataLabelAlignment.auto,
@@ -393,7 +393,7 @@ class SyncfusionMultiBarChart extends StatelessWidget {
           yValueMapper: (_ChartData data, _) => data.value,
           color: Colors.red,
           width: 0.6,
-          dataLabelSettings: DataLabelSettings(
+          dataLabelSettings: const DataLabelSettings(
               showZeroValue: false,
               isVisible: true,
               labelAlignment: ChartDataLabelAlignment.auto,
@@ -406,7 +406,7 @@ class SyncfusionMultiBarChart extends StatelessWidget {
           yValueMapper: (_ChartData data, _) => data.value,
           color: Colors.blueGrey,
           width: 0.6,
-          dataLabelSettings: DataLabelSettings(
+          dataLabelSettings: const DataLabelSettings(
               showZeroValue: false,
               isVisible: true,
               labelAlignment: ChartDataLabelAlignment.auto,

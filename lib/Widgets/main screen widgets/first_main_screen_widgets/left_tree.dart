@@ -20,7 +20,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
             child: Column(
               children: [
                 Padding(
-                  padding: EdgeInsets.only(top: 16, bottom: 10),
+                  padding: const EdgeInsets.only(top: 16, bottom: 10),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -32,7 +32,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                                   mainScreenController.companyImageURL.value,
                                   width: 100,
                                 )
-                              : SizedBox(
+                              : const SizedBox(
                                   height: 100,
                                   width: 100,
                                 ),
@@ -56,13 +56,13 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                                   },
                                   splashColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
-                                  child: Icon(
+                                  child: const Icon(
                                     color: Colors.grey,
                                     Icons.account_tree,
                                     size: 20,
                                   ),
                                 )
-                              : SizedBox(
+                              : const SizedBox(
                                   width: 20,
                                 ),
                         ),
@@ -82,7 +82,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
                               child: Text('Network error please try again'))),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Obx(
                     () => Text(
                       textAlign: TextAlign.center,
@@ -121,7 +121,7 @@ Widget sideMenuWidget(MainScreenController mainScreenController) {
 AnimatedTreeView<MyTreeNode> leftTree(
     MainScreenController mainScreenController) {
   return AnimatedTreeView<MyTreeNode>(
-    padding: EdgeInsets.only(left: 5),
+    padding: const EdgeInsets.only(left: 5),
     treeController: mainScreenController.treeController,
     nodeBuilder: (context, entry) {
       return TreeDragTarget<MyTreeNode>(
@@ -134,9 +134,9 @@ AnimatedTreeView<MyTreeNode> leftTree(
         },
         builder: (context, details) {
           Widget myTreeNodeTile = Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: Container(
-              padding: EdgeInsets.all(5),
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 color: entry.node.isMenu == true ? mainColor : secColor,
                 borderRadius: BorderRadius.circular(5),
@@ -147,7 +147,7 @@ AnimatedTreeView<MyTreeNode> leftTree(
                     flex: 4,
                     child: AutoSizedText(
                       text: entry.node.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 12),

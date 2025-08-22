@@ -75,10 +75,10 @@ Container currencySection(
               onPressed: () {
                 addNewValueToScreenButtonDialog(
                   screenName: '💴 Currencies',
-                  widget: Currency(),
+                  widget: const Currency(),
                 );
               },
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
             ),
           ],
         ),

@@ -50,9 +50,9 @@ Widget accountInformations(BuildContext context, bool isPayment) {
                   },
                 ),
               ),
-              Expanded(
+              const Expanded(
                 flex: 3,
-                child: const SizedBox(),
+                child: SizedBox(),
               ),
             ],
           ),
@@ -68,7 +68,7 @@ Widget accountInformations(BuildContext context, bool isPayment) {
                 ),
               ),
               isPayment
-                  ? SizedBox()
+                  ? const SizedBox()
                   : Expanded(
                       flex: 2,
                       child: CustomDropdown(
@@ -101,7 +101,7 @@ Widget accountInformations(BuildContext context, bool isPayment) {
                   isDate: true,
                 ),
               ),
-              isPayment ? Expanded(flex: 2, child: SizedBox()) : SizedBox()
+              isPayment ? const Expanded(flex: 2, child: SizedBox()) : const SizedBox()
             ],
           ),
           // const SizedBox(height: 10),
@@ -139,7 +139,7 @@ Widget accountInformations(BuildContext context, bool isPayment) {
                   },
                 ),
               ),
-              Expanded(flex: 2, child: SizedBox())
+              const Expanded(flex: 2, child: SizedBox())
             ],
           ),
           Row(
@@ -165,7 +165,7 @@ Widget accountInformations(BuildContext context, bool isPayment) {
                   ],
                 ),
               ),
-              Expanded(flex: 2, child: SizedBox())
+              const Expanded(flex: 2, child: SizedBox())
             ],
           ),
         ],

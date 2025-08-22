@@ -74,7 +74,7 @@ Widget addNewQuotationCardOrEdit(
                                   }
                                 : null,
                           )
-                        : SizedBox();
+                        : const SizedBox();
                   })
                 ],
               )),

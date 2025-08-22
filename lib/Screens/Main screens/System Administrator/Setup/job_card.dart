@@ -119,7 +119,7 @@ class JobCard extends StatelessWidget {
                       ],
                     );
                   }),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   GetBuilder<JobCardController>(builder: (controller) {
@@ -174,7 +174,7 @@ class JobCard extends StatelessWidget {
                                     controller.allModels.clear();
                                     controller.searchEngine();
                                   },
-                                  child: Text('All')),
+                                  child: const Text('All')),
                               ElevatedButton(
                                   style: todayButtonStyle,
                                   onPressed: controller.isTodaySelected.isFalse
@@ -195,7 +195,7 @@ class JobCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: Text('Today')),
+                                  child: const Text('Today')),
                               ElevatedButton(
                                   style: thisMonthButtonStyle,
                                   onPressed: controller
@@ -218,7 +218,7 @@ class JobCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: Text('This Month')),
+                                  child: const Text('This Month')),
                               ElevatedButton(
                                   style: thisYearButtonStyle,
                                   onPressed: controller
@@ -239,7 +239,7 @@ class JobCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: Text('This Year')),
+                                  child: const Text('This Year')),
                               ElevatedButton(
                                   style: saveButtonStyle,
                                   onPressed:
@@ -269,7 +269,7 @@ class JobCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Expanded(flex: 2, child: SizedBox()),
+                        const Expanded(flex: 2, child: SizedBox()),
                         newJobCardButton(context, constraints, controller)
                       ],
                     );
@@ -544,7 +544,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
             ? statusBox('D')
             : jobData['label'] == 'Returned'
                 ? statusBox('R')
-                : SizedBox()),
+                : const SizedBox()),
 
         DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
         DataCell(textForDataRowInTable(
@@ -559,7 +559,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
                     : 'Warranty')
                 : (jobData['job_status_2'] as String? ?? 'Unknown'),
             hieght: 35,
-            padding: EdgeInsets.symmetric(horizontal: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 5),
           ),
         ),
 
@@ -708,7 +708,7 @@ Widget editSection(BuildContext context, Map<String, dynamic> jobData,
                 }
               },
         icon: isLoading
-            ? SizedBox(
+            ? const SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(strokeWidth: 2),
@@ -934,10 +934,10 @@ ElevatedButton newJobCardButton(BuildContext context,
                                                   : (controller
                                                       .jobStatus2.value),
                                               hieght: 35,
-                                              padding: EdgeInsets.symmetric(
+                                              padding: const EdgeInsets.symmetric(
                                                   horizontal: 5),
                                             )
-                                          : SizedBox(),
+                                          : const SizedBox(),
                                     ],
                                   ),
                                   Row(

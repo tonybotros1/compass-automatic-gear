@@ -88,7 +88,7 @@ Widget tableOfScreens(
       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
       columns: [
         DataColumn(
-          columnWidth: IntrinsicColumnWidth(flex: 1.5),
+          columnWidth: const IntrinsicColumnWidth(flex: 1.5),
           label: AutoSizedText(
             text: 'Car',
             constraints: constraints,
@@ -96,7 +96,7 @@ Widget tableOfScreens(
           // onSort: controller.onSort,
         ),
         DataColumn(
-          columnWidth: IntrinsicColumnWidth(flex: 2),
+          columnWidth: const IntrinsicColumnWidth(flex: 2),
           label: AutoSizedText(
             constraints: constraints,
             text: 'Task',
@@ -104,7 +104,7 @@ Widget tableOfScreens(
           // onSort: controller.onSort,
         ),
         DataColumn(
-          columnWidth: IntrinsicColumnWidth(flex: 2),
+          columnWidth: const IntrinsicColumnWidth(flex: 2),
           label: AutoSizedText(
             constraints: constraints,
             text: 'Start Date',
@@ -112,7 +112,7 @@ Widget tableOfScreens(
           // onSort: controller.onSort,
         ),
         DataColumn(
-          columnWidth: IntrinsicColumnWidth(flex: 2),
+          columnWidth: const IntrinsicColumnWidth(flex: 2),
           label: AutoSizedText(
             constraints: constraints,
             text: 'End Date',
@@ -121,7 +121,7 @@ Widget tableOfScreens(
         ),
         DataColumn(
           numeric: true,
-          columnWidth: IntrinsicColumnWidth(flex: 1),
+          columnWidth: const IntrinsicColumnWidth(flex: 1),
 
           label: AutoSizedText(
             constraints: constraints,
@@ -131,7 +131,7 @@ Widget tableOfScreens(
         ),
         DataColumn(
           numeric: true,
-          columnWidth: IntrinsicColumnWidth(flex: 1),
+          columnWidth: const IntrinsicColumnWidth(flex: 1),
 
           label: AutoSizedText(
             constraints: constraints,
@@ -213,14 +213,14 @@ DataRow dataRowForTheTable(
         formatDouble: false,
         maxWidth: null,
         text: date['start_date'],
-        color: Color(0xffBE5B50),
+        color: const Color(0xffBE5B50),
         isBold: true,
       )),
       DataCell(textForDataRowInTable(
         formatDouble: false,
         maxWidth: null,
         text: date['end_date'],
-        color: Color(0xff73946B),
+        color: const Color(0xff73946B),
         isBold: true,
       )),
       DataCell(textForDataRowInTable(

@@ -9,7 +9,7 @@ var fontStyleForAppBar = TextStyle(
   color: Colors.grey.shade700,
   fontWeight: FontWeight.bold,
 );
-var fontStyleForScreenNameUsedInButtons = TextStyle(
+var fontStyleForScreenNameUsedInButtons = const TextStyle(
   color: Colors.white,
   fontSize: 20,
   fontWeight: FontWeight.bold,
@@ -51,7 +51,7 @@ var hintMarkTestStyle = TextStyle(
 
 var fontStyleForElevatedButtons = const TextStyle(fontWeight: FontWeight.bold);
 
-var paddingForButtons = EdgeInsets.symmetric(horizontal: 16);
+var paddingForButtons = const EdgeInsets.symmetric(horizontal: 16);
 
 Color colorForNameInCards = const Color(0xFF00695C);
 
@@ -59,23 +59,23 @@ var newButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-  minimumSize: Size(100, 40),
+  minimumSize: const Size(100, 40),
 );
 
 var capitalButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xff3D365C),
+  backgroundColor: const Color(0xff3D365C),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 var coutstandingButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xff7C4585),
+  backgroundColor: const Color(0xff7C4585),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 var cgeneralExpensesButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xffC95792),
+  backgroundColor: const Color(0xffC95792),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
@@ -198,7 +198,7 @@ var editButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.deepPurple,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-  minimumSize: Size(100, 40),
+  minimumSize: const Size(100, 40),
 );
 var historyButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blueGrey,
@@ -246,11 +246,11 @@ var closeButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.grey.shade300,
   foregroundColor: Colors.red,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-  minimumSize: Size(40, 40),
+  minimumSize: const Size(40, 40),
 );
 
 var approveButtonStyle = ElevatedButton.styleFrom(
-  padding: EdgeInsets.symmetric(horizontal: 8),
+  padding: const EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xffD2665A),
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
@@ -258,7 +258,7 @@ var approveButtonStyle = ElevatedButton.styleFrom(
 );
 
 var readyButtonStyle = ElevatedButton.styleFrom(
-  padding: EdgeInsets.symmetric(horizontal: 8),
+  padding: const EdgeInsets.symmetric(horizontal: 8),
   backgroundColor: Colors.grey.shade300,
   foregroundColor: const Color(0xff7886C7),
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
@@ -276,7 +276,7 @@ var logoutButtonStyle = ElevatedButton.styleFrom(
   foregroundColor: Colors.white,
   padding: paddingForButtons,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-  minimumSize: Size(60, 40),
+  minimumSize: const Size(60, 40),
 );
 
 var addButtonStyle = ElevatedButton.styleFrom(
@@ -315,68 +315,68 @@ var newCompannyButtonStyle = ElevatedButton.styleFrom(
 );
 
 var allButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xff328E6E),
+  backgroundColor: const Color(0xff328E6E),
   foregroundColor: Colors.white,
-  padding: EdgeInsets.all(8),
+  padding: const EdgeInsets.all(8),
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
 var todayButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xff94B4C1),
+  backgroundColor: const Color(0xff94B4C1),
   foregroundColor: Colors.white,
-  padding: EdgeInsets.all(8),
+  padding: const EdgeInsets.all(8),
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 var thisMonthButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xff547792),
+  backgroundColor: const Color(0xff547792),
   foregroundColor: Colors.white,
-  padding: EdgeInsets.all(8),
+  padding: const EdgeInsets.all(8),
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 var thisYearButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xff213448),
+  backgroundColor: const Color(0xff213448),
   foregroundColor: Colors.white,
-  padding: EdgeInsets.all(8),
+  padding: const EdgeInsets.all(8),
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),
 );
 
 var homeButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Color(0xffFA812F),
+  backgroundColor: const Color(0xffFA812F),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
 );
 final List<Color> cardColors = [
-  Color(0xFFFFF3E0), // Light orange
-  Color(0xFFFFF9C4), // Light yellow
-  Color(0xFFE1F5FE), // Light blue
-  Color(0xFFE8F5E9), // Light green
-  Color(0xFFF3E5F5), // Light purple
-  Color(0xFFFFEBEE), // Light red
-  Color(0xFFFFFDE7), // Cream
-  Color(0xFFE0F7FA), // Light cyan
-  Color(0xFFF1F8E9), // Mint
-  Color(0xFFEDE7F6), // Lavender
-  Color(0xFFFFF8E1), // Peach
-  Color(0xFFE3F2FD), // Sky blue
-  Color(0xFFFFF0F0), // Pinkish white
-  Color(0xFFFBE9E7), // Light coral
-  Color(0xFFF9FBE7), // Lemon chiffon
+  const Color(0xFFFFF3E0), // Light orange
+  const Color(0xFFFFF9C4), // Light yellow
+  const Color(0xFFE1F5FE), // Light blue
+  const Color(0xFFE8F5E9), // Light green
+  const Color(0xFFF3E5F5), // Light purple
+  const Color(0xFFFFEBEE), // Light red
+  const Color(0xFFFFFDE7), // Cream
+  const Color(0xFFE0F7FA), // Light cyan
+  const Color(0xFFF1F8E9), // Mint
+  const Color(0xFFEDE7F6), // Lavender
+  const Color(0xFFFFF8E1), // Peach
+  const Color(0xFFE3F2FD), // Sky blue
+  const Color(0xFFFFF0F0), // Pinkish white
+  const Color(0xFFFBE9E7), // Light coral
+  const Color(0xFFF9FBE7), // Lemon chiffon
   // 🔽 Additional colors
-  Color(0xFFE0F2F1), // Aqua green
-  Color(0xFFFCE4EC), // Soft pink
-  Color(0xFFD1C4E9), // Pale violet
-  Color(0xFFF8BBD0), // Pastel rose
-  Color(0xFFDCEDC8), // Pale lime
-  Color(0xFFFFF9E6), // Light vanilla
-  Color(0xFFE3FCEC), // Light mint
-  Color(0xFFF0F4C3), // Light lime
-  Color(0xFFFAFAFA), // Almost white
-  Color(0xFFEFEBE9), // Warm beige
+  const Color(0xFFE0F2F1), // Aqua green
+  const Color(0xFFFCE4EC), // Soft pink
+  const Color(0xFFD1C4E9), // Pale violet
+  const Color(0xFFF8BBD0), // Pastel rose
+  const Color(0xFFDCEDC8), // Pale lime
+  const Color(0xFFFFF9E6), // Light vanilla
+  const Color(0xFFE3FCEC), // Light mint
+  const Color(0xFFF0F4C3), // Light lime
+  const Color(0xFFFAFAFA), // Almost white
+  const Color(0xFFEFEBE9), // Warm beige
 ];
 
 List<String> months = [
@@ -428,13 +428,13 @@ var deleteIcon = const Icon(Icons.delete_forever, color: Colors.red);
 
 var editIcon = const Icon(Icons.edit_note_rounded, color: Colors.blue);
 
-var screenPadding = EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 0);
+var screenPadding = const EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 0);
 
 String formatPhrase(String phrase) {
   return phrase.replaceAll(' ', '_');
 }
 
-Text separator() => Text('|', style: TextStyle(color: Colors.white));
+Text separator() => const Text('|', style: TextStyle(color: Colors.white));
 
 Text point() {
   return Text(
@@ -499,7 +499,7 @@ var mainColor = const Color(0xff005f95);
 var secColor = const Color(0xff7E99A3);
 // var secColor = const Color(0xff526D82);
 var containerColor = const Color(0xffF5F5F5);
-var textStyleForCardBottomBar = TextStyle(color: Colors.blueGrey);
+var textStyleForCardBottomBar = const TextStyle(color: Colors.blueGrey);
 var iconColorForCardBottomBar = Colors.blueGrey;
 
 // Color headerColor = Colors.blue.shade900;
@@ -535,7 +535,7 @@ var closeButton = ElevatedButton(
   onPressed: () {
     Get.back();
   },
-  child: Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
+  child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
 );
 
 // snack bar
@@ -565,7 +565,7 @@ Future<dynamic> alertMessage({
   return Get.defaultDialog(
     title: 'Alert',
     middleText: 'This is an alert message!',
-    confirm: ElevatedButton(onPressed: () => Get.back(), child: Text('OK')),
+    confirm: ElevatedButton(onPressed: () => Get.back(), child: const Text('OK')),
   );
 }
 

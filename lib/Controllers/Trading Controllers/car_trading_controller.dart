@@ -107,7 +107,7 @@ class CarTradingController extends GetxController {
   RxDouble totalReceivesForAllTrades = RxDouble(0.0);
   RxDouble totalNETsForAllTrades = RxDouble(0.0);
   // final ScrollController scrollController = ScrollController();
-  final Uuid _uuid = Uuid();
+  final Uuid _uuid = const Uuid();
   final Map<String, Future<String>> _paidFutureCache = {};
   final Map<String, Future<String>> _receivedFutureCache = {};
   final Map<String, Future<String>> _netsFutureCache = {};

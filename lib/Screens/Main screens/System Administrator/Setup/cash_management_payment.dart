@@ -155,7 +155,7 @@ class CashManagementPayment extends StatelessWidget {
 
                                       controller.searchEngineForPayments();
                                     },
-                                    child: Text('All')),
+                                    child: const Text('All')),
                                 ElevatedButton(
                                     style: todayButtonStyle,
                                     onPressed: controller
@@ -179,7 +179,7 @@ class CashManagementPayment extends StatelessWidget {
                                                 .searchEngineForPayments();
                                           }
                                         : null,
-                                    child: Text('Today')),
+                                    child: const Text('Today')),
                                 ElevatedButton(
                                     style: thisMonthButtonStyle,
                                     onPressed: controller
@@ -203,7 +203,7 @@ class CashManagementPayment extends StatelessWidget {
                                                 .searchEngineForPayments();
                                           }
                                         : null,
-                                    child: Text('This Month')),
+                                    child: const Text('This Month')),
                                 ElevatedButton(
                                     style: thisYearButtonStyle,
                                     onPressed: controller
@@ -225,7 +225,7 @@ class CashManagementPayment extends StatelessWidget {
                                                 .searchEngineForPayments();
                                           }
                                         : null,
-                                    child: Text('This Year')),
+                                    child: const Text('This Year')),
                                 ElevatedButton(
                                     style: saveButtonStyle,
                                     onPressed: controller
@@ -256,7 +256,7 @@ class CashManagementPayment extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Expanded(flex: 2, child: SizedBox()),
+                          const Expanded(flex: 2, child: SizedBox()),
                           newPaymentButton(context, constraints, controller)
                         ],
                       );
@@ -289,7 +289,7 @@ class CashManagementPayment extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Expanded(child: SizedBox())
+                          const Expanded(child: SizedBox())
                         ],
                       );
                     }),

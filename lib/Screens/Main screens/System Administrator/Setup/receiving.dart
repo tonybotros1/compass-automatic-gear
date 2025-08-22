@@ -92,7 +92,7 @@ class Receiving extends StatelessWidget {
                       );
                     },
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   GetBuilder<ReceivingController>(
                     builder: (controller) {
                       return SingleChildScrollView(
@@ -148,7 +148,7 @@ class Receiving extends StatelessWidget {
                                           false;
                                       controller.searchEngine();
                                     },
-                                    child: Text('All'),
+                                    child: const Text('All'),
                                   ),
                                   ElevatedButton(
                                     style: todayButtonStyle,
@@ -176,7 +176,7 @@ class Receiving extends StatelessWidget {
                                             controller.searchEngine();
                                           }
                                         : null,
-                                    child: Text('Today'),
+                                    child: const Text('Today'),
                                   ),
                                   ElevatedButton(
                                     style: thisMonthButtonStyle,
@@ -204,7 +204,7 @@ class Receiving extends StatelessWidget {
                                             controller.searchEngine();
                                           }
                                         : null,
-                                    child: Text('This Month'),
+                                    child: const Text('This Month'),
                                   ),
                                   ElevatedButton(
                                     style: thisYearButtonStyle,
@@ -230,7 +230,7 @@ class Receiving extends StatelessWidget {
                                             controller.searchEngine();
                                           }
                                         : null,
-                                    child: Text('This Year'),
+                                    child: const Text('This Year'),
                                   ),
                                   ElevatedButton(
                                     style: saveButtonStyle,
@@ -510,7 +510,7 @@ DataRow dataRowForTheTable(
         statusBox(
           docData['status'],
           hieght: 35,
-          padding: EdgeInsets.symmetric(horizontal: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),
       DataCell(

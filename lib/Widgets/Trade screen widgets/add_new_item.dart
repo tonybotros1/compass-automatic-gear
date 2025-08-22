@@ -37,10 +37,10 @@ Widget addNewItemOrEdit({
                 // isDate: true
               ),
             ),
-            Expanded(flex: 3, child: SizedBox())
+            const Expanded(flex: 3, child: SizedBox())
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         isTrade == true || isGeneralExpenses == true
@@ -112,7 +112,7 @@ Widget addNewItemOrEdit({
                   ),
                 ],
               ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Row(
@@ -123,10 +123,10 @@ Widget addNewItemOrEdit({
                     controller: controller.pay,
                     labelText: 'Paid',
                     isDouble: true)),
-            Expanded(flex: 3, child: SizedBox())
+            const Expanded(flex: 3, child: SizedBox())
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Row(
@@ -137,10 +137,10 @@ Widget addNewItemOrEdit({
                     controller: controller.receive,
                     labelText: 'Received',
                     isDouble: true)),
-            Expanded(flex: 3, child: SizedBox())
+            const Expanded(flex: 3, child: SizedBox())
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         myTextFormFieldWithBorder(

@@ -104,7 +104,7 @@ class MainScreenController extends GetxController {
   Widget getScreenFromRoute(String? routeName) {
     switch (routeName) {
       case '/home':
-        return SizedBox(child: FirstMainScreen());
+        return const SizedBox(child: FirstMainScreen());
       case '/users':
         return SizedBox(child: Users());
       case '/functions':

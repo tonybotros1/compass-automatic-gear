@@ -62,59 +62,59 @@ Widget tableOfScreens({
             label: AutoSizedText(constraints: constraints, text: ''),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1.5),
+            columnWidth: const IntrinsicColumnWidth(flex: 1.5),
             label: AutoSizedText(constraints: constraints, text: 'Item Code'),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 2),
+            columnWidth: const IntrinsicColumnWidth(flex: 2),
 
             label: AutoSizedText(constraints: constraints, text: 'Item Name'),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1),
+            columnWidth: const IntrinsicColumnWidth(flex: 1),
 
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Quantity'),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1),
+            columnWidth: const IntrinsicColumnWidth(flex: 1),
 
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Price'),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1),
+            columnWidth: const IntrinsicColumnWidth(flex: 1),
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Discount'),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1),
+            columnWidth: const IntrinsicColumnWidth(flex: 1),
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Add. Cost'),
           ),
 
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1),
+            columnWidth: const IntrinsicColumnWidth(flex: 1),
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Add. Disc.'),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1),
+            columnWidth: const IntrinsicColumnWidth(flex: 1),
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Local Price'),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1),
+            columnWidth: const IntrinsicColumnWidth(flex: 1),
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Total'),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1),
+            columnWidth: const IntrinsicColumnWidth(flex: 1),
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'VAT'),
           ),
           DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 1),
+            columnWidth: const IntrinsicColumnWidth(flex: 1),
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'NET'),
           ),

@@ -75,7 +75,7 @@ Widget cardStyle({
                                           return Flexible(
                                             child: Text(
                                               '${controller.getdataName(carCard['car_brand'], controller.allBrands)} ${snapshot.data}',
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.black),
@@ -90,7 +90,7 @@ Widget cardStyle({
                                         if (carCard['plate_number'] != '')
                                           Text(
                                             carCard['plate_number'],
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.grey,
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 12),
@@ -118,7 +118,7 @@ Widget cardStyle({
                           controller.getdataName(
                               carCard['customer'], controller.allCustomers,
                               title: 'entity_name'),
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                       ],
@@ -162,7 +162,7 @@ Widget cardStyle({
                           ),
                         ),
                       )
-                    : SizedBox(),
+                    : const SizedBox(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

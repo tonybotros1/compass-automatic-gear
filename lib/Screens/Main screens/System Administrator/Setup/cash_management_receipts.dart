@@ -169,7 +169,7 @@ class CashManagementReceipt extends StatelessWidget {
 
                                     controller.searchEngineForReceipts();
                                   },
-                                  child: Text('All')),
+                                  child: const Text('All')),
                               ElevatedButton(
                                   style: todayButtonStyle,
                                   onPressed: controller.isTodaySelected.isFalse
@@ -190,7 +190,7 @@ class CashManagementReceipt extends StatelessWidget {
                                           controller.searchEngineForReceipts();
                                         }
                                       : null,
-                                  child: Text('Today')),
+                                  child: const Text('Today')),
                               ElevatedButton(
                                   style: thisMonthButtonStyle,
                                   onPressed: controller
@@ -213,7 +213,7 @@ class CashManagementReceipt extends StatelessWidget {
                                           controller.searchEngineForReceipts();
                                         }
                                       : null,
-                                  child: Text('This Month')),
+                                  child: const Text('This Month')),
                               ElevatedButton(
                                   style: thisYearButtonStyle,
                                   onPressed: controller
@@ -234,7 +234,7 @@ class CashManagementReceipt extends StatelessWidget {
                                           controller.searchEngineForReceipts();
                                         }
                                       : null,
-                                  child: Text('This Year')),
+                                  child: const Text('This Year')),
                               ElevatedButton(
                                   style: saveButtonStyle,
                                   onPressed: controller
@@ -264,7 +264,7 @@ class CashManagementReceipt extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Expanded(flex: 2, child: SizedBox()),
+                        const Expanded(flex: 2, child: SizedBox()),
                         newReceiptButton(context, constraints, controller)
                       ],
                     );
@@ -297,7 +297,7 @@ class CashManagementReceipt extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Expanded(child: SizedBox())
+                        const Expanded(child: SizedBox())
                       ],
                     );
                   }),
@@ -379,7 +379,7 @@ Widget tableOfScreensForCashManagement({
         sortAscending: controller.isAscending.value,
         headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
-          DataColumn(label: SizedBox()
+          const DataColumn(label: SizedBox()
               // onSort: controller.onSort,
               ),
           DataColumn(
@@ -476,8 +476,8 @@ DataRow dataRowForTheTable(
         formatDouble: false)),
     DataCell(cashManagementData['status'] != ''
         ? statusBox(cashManagementData['status'],
-            hieght: 35, padding: EdgeInsets.all(0))
-        : SizedBox()),
+            hieght: 35, padding: const EdgeInsets.all(0))
+        : const SizedBox()),
     DataCell(isPayment
         ? textForDataRowInTable(
             text: cashManagementData['payment_date'] != null &&

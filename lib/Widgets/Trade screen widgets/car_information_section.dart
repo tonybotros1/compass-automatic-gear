@@ -84,7 +84,7 @@ Container carInformation({
                           },
                         ),
                       ),
-                      IconButton(onPressed: null, icon: SizedBox())
+                      const IconButton(onPressed: null, icon: SizedBox())
                     ],
                   ),
                   Row(
@@ -309,7 +309,7 @@ Container carInformation({
                           },
                         ),
                       ),
-                      IconButton(onPressed: null, icon: SizedBox())
+                      const IconButton(onPressed: null, icon: SizedBox())
                     ],
                   ),
                 ],
@@ -380,7 +380,7 @@ Widget valSectionInTheTable(
               ),
             ));
       },
-      icon: Icon(Icons.add));
+      icon: const Icon(Icons.add));
 }
 
 Widget valSectionInTheTableForBrands(
@@ -443,5 +443,5 @@ Widget valSectionInTheTableForBrands(
           showSnackBar('Alert', 'Please select brand first');
         }
       },
-      icon: Icon(Icons.add));
+      icon: const Icon(Icons.add));
 }

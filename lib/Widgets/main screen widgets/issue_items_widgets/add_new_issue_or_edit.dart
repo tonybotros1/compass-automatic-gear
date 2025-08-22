@@ -52,13 +52,13 @@ Widget addNewIssueOrEdit({
                                 hintText: 'Branch',
                                 showedSelectedName: 'name',
                                 width: 310,
-                                items: {},
+                                items: const {},
                               ),
                               CustomDropdown(
                                 hintText: 'Issue Types',
                                 showedSelectedName: 'name',
                                 width: 150,
-                                items: {},
+                                items: const {},
                               ),
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -80,7 +80,7 @@ Widget addNewIssueOrEdit({
                                 hintText: 'Received By',
                                 showedSelectedName: 'name',
                                 width: 310,
-                                items: {},
+                                items: const {},
                               ),
                             ],
                           ),
@@ -99,7 +99,7 @@ Widget addNewIssueOrEdit({
             ),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         labelContainer(
           lable: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

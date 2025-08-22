@@ -56,7 +56,7 @@ class CarTrading extends StatelessWidget {
                                       ],
                                     ),
                                   )
-                                : SizedBox();
+                                : const SizedBox();
                           },
                         ),
                         Expanded(
@@ -98,7 +98,7 @@ class CarTrading extends StatelessWidget {
                             spacing: 10,
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(
+                              const Text(
                                 'Total Paid:',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
@@ -107,7 +107,7 @@ class CarTrading extends StatelessWidget {
                                       '${controller.totalPaysForAllTrades.value}',
                                   color: Colors.red,
                                   isBold: true),
-                              Text(
+                              const Text(
                                 'Total Received:',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
@@ -116,7 +116,7 @@ class CarTrading extends StatelessWidget {
                                       '${controller.totalReceivesForAllTrades.value}',
                                   color: Colors.green,
                                   isBold: true),
-                              Text(
+                              const Text(
                                 'Net:',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
@@ -127,7 +127,7 @@ class CarTrading extends StatelessWidget {
                                   isBold: true)
                             ],
                           )
-                        : SizedBox();
+                        : const SizedBox();
                   }),
                 )
               ],
@@ -182,7 +182,7 @@ Widget tableOfScreens({
       sortAscending: controller.isAscending.value,
       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
       columns: [
-        DataColumn(label: SizedBox()),
+        const DataColumn(label: SizedBox()),
         DataColumn(
           label: Column(
             spacing: 5,
@@ -201,7 +201,7 @@ Widget tableOfScreens({
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(text: 'Model', constraints: constraints)
             ],
           ),
@@ -213,7 +213,7 @@ Widget tableOfScreens({
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Year'),
             ],
           ),
@@ -225,7 +225,7 @@ Widget tableOfScreens({
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Status'),
             ],
           ),
@@ -237,7 +237,7 @@ Widget tableOfScreens({
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Specification'),
             ],
           ),
@@ -261,7 +261,7 @@ Widget tableOfScreens({
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Inside'),
             ],
           ),
@@ -273,7 +273,7 @@ Widget tableOfScreens({
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Engine Size'),
             ],
           ),
@@ -285,7 +285,7 @@ Widget tableOfScreens({
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Mileage'),
             ],
           ),
@@ -297,7 +297,7 @@ Widget tableOfScreens({
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Date'),
             ],
           ),
@@ -309,7 +309,7 @@ Widget tableOfScreens({
             spacing: 5,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Paid'),
             ],
           ),
@@ -321,7 +321,7 @@ Widget tableOfScreens({
             spacing: 5,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Received'),
             ],
           ),
@@ -333,7 +333,7 @@ Widget tableOfScreens({
             spacing: 5,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              SizedBox(),
+              const SizedBox(),
               AutoSizedText(constraints: constraints, text: 'Net'),
             ],
           ),
@@ -679,7 +679,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
         DataCell(
           Text(
               style:
-                  TextStyle(color: Colors.purple, fontWeight: FontWeight.bold),
+                  const TextStyle(color: Colors.purple, fontWeight: FontWeight.bold),
               tradeData['date'] != null && tradeData['date'] != ''
                   ? textToDate(tradeData['date'])
                   : 'N/A'),
@@ -752,12 +752,12 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
             ? textForDataRowInTable(
                 text: controller.getdataName(
                     tradeData['bought_from'], controller.allBuyersAndSellers))
-            : SizedBox()),
+            : const SizedBox()),
         DataCell(tradeData['sold_to'] != null && tradeData['sold_to'] != ''
             ? textForDataRowInTable(
                 text: controller.getdataName(
                     tradeData['sold_to'], controller.allBuyersAndSellers))
-            : SizedBox()),
+            : const SizedBox()),
       ]);
 }
 
@@ -847,7 +847,7 @@ ElevatedButton capitalButton(
     child: GetX<CarTradingController>(builder: (controller) {
       return controller.isCapitalLoading.isFalse
           ? const Text('Capital')
-          : SizedBox(
+          : const SizedBox(
               height: 20,
               width: 20,
               child: CircularProgressIndicator(
@@ -883,7 +883,7 @@ ElevatedButton outstandingButton(
     child: GetX<CarTradingController>(builder: (controller) {
       return controller.isOutstandinglLoading.isFalse
           ? const Text('Outstanding')
-          : SizedBox(
+          : const SizedBox(
               height: 20,
               width: 20,
               child: CircularProgressIndicator(
@@ -918,7 +918,7 @@ ElevatedButton generalExpensesButton(
     child: GetX<CarTradingController>(builder: (controller) {
       return controller.isgeneralExpenseslLoading.isFalse
           ? const Text('General Expenses')
-          : SizedBox(
+          : const SizedBox(
               height: 20,
               width: 20,
               child: CircularProgressIndicator(

@@ -76,10 +76,10 @@ Container mainInfosSection(
               onPressed: () {
                 addNewValueToScreenButtonDialog(
                   screenName: '🌿 Branches',
-                  widget: Branches(),
+                  widget: const Branches(),
                 );
               },
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
             ),
           ],
         ),
@@ -115,10 +115,10 @@ Container mainInfosSection(
               onPressed: () {
                 addNewValueToScreenButtonDialog(
                   screenName: '📞 Entity Information',
-                  widget: EntityInformations(),
+                  widget: const EntityInformations(),
                 );
               },
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
             ),
           ],
         ),

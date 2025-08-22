@@ -116,7 +116,7 @@ class TimeSheets extends StatelessWidget {
                     }),
                 Expanded(
                   child: Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
                       border: Border.all(
@@ -129,7 +129,7 @@ class TimeSheets extends StatelessWidget {
                               .clamp(1, 5);
                       return controller.isScreenLoadingForTimesheets.isFalse &&
                               controller.allTimeSheets.isEmpty
-                          ? Center(
+                          ? const Center(
                               child: Text('Empty'),
                             )
                           : controller.isScreenLoadingForTimesheets.isTrue
@@ -176,7 +176,7 @@ class TimeSheets extends StatelessWidget {
 
                                     final d =
                                         controller.sheetDurations[sheet.id] ??
-                                            Duration();
+                                            const Duration();
                                     final h = d.inHours;
                                     final m = d.inMinutes % 60;
                                     final s = d.inSeconds % 60;
@@ -246,7 +246,7 @@ class TimeSheets extends StatelessWidget {
               borderRadius: BorderRadius.circular(5),
               onTap: onTapForLabel,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 alignment: Alignment.centerLeft,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
@@ -268,12 +268,12 @@ class TimeSheets extends StatelessWidget {
             borderRadius: BorderRadius.circular(5),
             onTap: onTapForIcon,
             child: Container(
-              padding: EdgeInsets.all(6),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(5),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.close_rounded,
               ),
             ),
@@ -292,7 +292,7 @@ class TimeSheets extends StatelessWidget {
       borderRadius: BorderRadius.circular(5),
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
           color: backgroundcolor ?? Colors.grey.shade300,
@@ -380,7 +380,7 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                 borderRadius: BorderRadius.circular(12.0),
               ),
               child: Padding(
-                padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -426,7 +426,7 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                         fontSize: scaledFont(14),
                       ),
                     ),
-                    Divider(),
+                    const Divider(),
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
@@ -479,7 +479,7 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.grey.shade700),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           TextButton.icon(
                             onPressed: () {
                               setState(() => isPaused = !isPaused);
@@ -501,10 +501,10 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                             style: TextButton.styleFrom(
                               foregroundColor: colorScheme.primary,
                               padding: EdgeInsets.zero,
-                              minimumSize: Size(0, 0),
+                              minimumSize: const Size(0, 0),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 5,
                           ),
                           TextButton.icon(
@@ -519,7 +519,7 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                             ),
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
-                              minimumSize: Size(0, 0),
+                              minimumSize: const Size(0, 0),
                               foregroundColor: Colors.green.shade700,
                             ),
                           ),
@@ -541,14 +541,14 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                           color: Colors.black.withValues(alpha: 200),
                           borderRadius: BorderRadius.circular(12)),
                       alignment: Alignment.center,
-                      child: Icon(
+                      child: const Icon(
                         Icons.pause,
                         size: 30,
                         color: Colors.white,
                       ),
                     ),
                   )
-                : SizedBox()
+                : const SizedBox()
           ],
         ),
       ),

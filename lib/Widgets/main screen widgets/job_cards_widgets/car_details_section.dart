@@ -42,7 +42,7 @@ Widget carDetailsSection() {
                 alignment: Alignment.centerLeft,
                 child: carLogo(controller.carBrandLogo.value),
               )),
-              Expanded(child: SizedBox()),
+              const Expanded(child: SizedBox()),
             ],
           ),
           Row(
@@ -97,7 +97,7 @@ Widget carDetailsSection() {
                 labelText: 'Code',
                 hintText: 'Enter Plate Code',
               )),
-              Expanded(flex: 2, child: SizedBox())
+              const Expanded(flex: 2, child: SizedBox())
             ],
           ),
           Row(
@@ -116,7 +116,7 @@ Widget carDetailsSection() {
                   controller.countryId.value = key;
                 },
               )),
-              Expanded(child: SizedBox())
+              const Expanded(child: SizedBox())
             ],
           ),
           Row(
@@ -134,7 +134,7 @@ Widget carDetailsSection() {
                   controller.cityId.value = key;
                 },
               )),
-              Expanded(child: SizedBox())
+              const Expanded(child: SizedBox())
             ],
           ),
           Row(
@@ -158,7 +158,7 @@ Widget carDetailsSection() {
                   controller.engineTypeId.value = key;
                 },
               )),
-              Expanded(child: SizedBox())
+              const Expanded(child: SizedBox())
             ],
           ),
           Row(
@@ -171,7 +171,7 @@ Widget carDetailsSection() {
                 isCapitaLetters: true,
                 hintText: 'Enter VIN',
               )),
-              Expanded(child: SizedBox())
+              const Expanded(child: SizedBox())
             ],
           ),
           Row(
@@ -211,7 +211,7 @@ Widget carDetailsSection() {
                 controller: controller.inOutDiff.value,
                 labelText: 'In Out Diff',
               )),
-              Expanded(child: SizedBox())
+              const Expanded(child: SizedBox())
             ],
           ),
         ],

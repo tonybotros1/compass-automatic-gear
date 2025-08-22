@@ -92,11 +92,11 @@ class ApInvoices extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Expanded(child: SizedBox())
+                            const Expanded(child: SizedBox())
                           ],
                         );
                       }),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   GetBuilder<ApInvoicesController>(builder: (controller) {
@@ -151,7 +151,7 @@ class ApInvoices extends StatelessWidget {
                                     // controller.allModels.clear();
                                     controller.searchEngine();
                                   },
-                                  child: Text('All')),
+                                  child: const Text('All')),
                               ElevatedButton(
                                   style: todayButtonStyle,
                                   onPressed: controller.isTodaySelected.isFalse
@@ -172,7 +172,7 @@ class ApInvoices extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: Text('Today')),
+                                  child: const Text('Today')),
                               ElevatedButton(
                                   style: thisMonthButtonStyle,
                                   onPressed: controller
@@ -195,7 +195,7 @@ class ApInvoices extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: Text('This Month')),
+                                  child: const Text('This Month')),
                               ElevatedButton(
                                   style: thisYearButtonStyle,
                                   onPressed: controller
@@ -216,7 +216,7 @@ class ApInvoices extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: Text('This Year')),
+                                  child: const Text('This Year')),
                               ElevatedButton(
                                   style: saveButtonStyle,
                                   onPressed:
@@ -246,12 +246,12 @@ class ApInvoices extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Expanded(flex: 2, child: SizedBox()),
+                        const Expanded(flex: 2, child: SizedBox()),
                         newInvoiceButton(context, constraints, controller)
                       ],
                     );
                   }),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   GetX<ApInvoicesController>(builder: (controller) {
@@ -338,7 +338,7 @@ Widget tableOfScreens(
         sortAscending: controller.isAscending.value,
         headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
-          DataColumn(label: SizedBox()),
+          const DataColumn(label: SizedBox()),
           DataColumn(
             label: AutoSizedText(
               text: 'Invoice Type',
@@ -412,7 +412,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> typeData, context, constraints,
         typeData['status'],
         hieght: 35,
         width: 100,
-        padding: EdgeInsets.symmetric(horizontal: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 5),
       ),
     ),
     DataCell(textForDataRowInTable(

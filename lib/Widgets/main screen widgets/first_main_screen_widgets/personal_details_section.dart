@@ -19,7 +19,7 @@ SmartInfoOverlay personalDetailsSection(
           child: Text(
             mainScreenController
                 .getFirstCharacter(mainScreenController.userName.value),
-            style: TextStyle(fontSize: 20, color: Colors.white),
+            style: const TextStyle(fontSize: 20, color: Colors.white),
           ),
         ),
       ),
@@ -29,8 +29,8 @@ SmartInfoOverlay personalDetailsSection(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(mainScreenController.userEmail.value,
-            style: TextStyle(color: Colors.white, fontSize: 14)),
-        SizedBox(
+            style: const TextStyle(color: Colors.white, fontSize: 14)),
+        const SizedBox(
           height: 25,
         ),
         CircleAvatar(
@@ -39,21 +39,21 @@ SmartInfoOverlay personalDetailsSection(
           child: Text(
             mainScreenController
                 .getFirstCharacter(mainScreenController.userName.value),
-            style: TextStyle(fontSize: 25, color: Colors.white),
+            style: const TextStyle(fontSize: 25, color: Colors.white),
           ),
         ),
         FittedBox(
           child: Text(
             'Hi, ${mainScreenController.userName.value}!',
-            style: TextStyle(
+            style: const TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
         Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           width: double.infinity,
           decoration: BoxDecoration(
               color: Colors.blue.shade400,
@@ -64,21 +64,21 @@ SmartInfoOverlay personalDetailsSection(
               Center(
                 child: Text(
                   mainScreenController.companyName.value,
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 16),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(
                   children: [
-                    Text(
+                    const Text(
                       'Joining Date:',
                       style: TextStyle(color: Colors.white, fontSize:  14),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
                     Text(
@@ -90,14 +90,14 @@ SmartInfoOverlay personalDetailsSection(
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Row(
                   children: [
-                    Text(
+                    const Text(
                       'Expiry Date:',
                       style: TextStyle(color: Colors.white, fontSize:  14),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
                     Text(
@@ -125,7 +125,7 @@ SmartInfoOverlay personalDetailsSection(
                               Get.offAllNamed('/');
                             });
                       },
-                      child: Text(
+                      child: const Text(
                         'Logout',
                         style: TextStyle(fontSize:  14),
                       )),

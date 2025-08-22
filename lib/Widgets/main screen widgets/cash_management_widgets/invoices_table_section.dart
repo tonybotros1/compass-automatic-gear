@@ -158,7 +158,7 @@ DataRow dataRowForTheTable(
                       double.parse(receiptData['invoice_amount'] ?? 0.0))
                 ],
                 textAlign: TextAlign.right,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,

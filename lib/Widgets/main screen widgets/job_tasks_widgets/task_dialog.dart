@@ -19,9 +19,9 @@ Future<dynamic> taskDialog(
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15)),
                   color: mainColor,
@@ -39,13 +39,13 @@ Future<dynamic> taskDialog(
                               onPressed: onPressed,
                               style: new2ButtonStyle,
                               child: controller.addingNewValue.value == false
-                                  ? Text(
+                                  ? const Text(
                                       'Save',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     )
-                                  : SizedBox(
+                                  : const SizedBox(
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
@@ -60,7 +60,7 @@ Future<dynamic> taskDialog(
               ),
               Expanded(
                   child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child:
                     addNewTaskOrEdit(controller: controller, canEdit: canEdit),
               ))

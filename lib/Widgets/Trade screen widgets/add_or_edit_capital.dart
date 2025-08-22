@@ -22,12 +22,12 @@ Widget addNewCapitalOrOutstandingOrGeneralExpensesOrEdit({
     children: [
       Expanded(
         child: CustomScrollView(
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           slivers: [
             SliverFillRemaining(
               hasScrollBody: true,
               child: Padding(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 child: Container(
                   width: constraints.maxWidth,
                   decoration: BoxDecoration(
@@ -83,7 +83,7 @@ Widget addNewCapitalOrOutstandingOrGeneralExpensesOrEdit({
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(
+              const Text(
                 'Total Paid:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
@@ -91,7 +91,7 @@ Widget addNewCapitalOrOutstandingOrGeneralExpensesOrEdit({
                   text: '${controller.totalPays.value}',
                   color: Colors.red,
                   isBold: true),
-              Text(
+              const Text(
                 'Total Received:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
@@ -99,7 +99,7 @@ Widget addNewCapitalOrOutstandingOrGeneralExpensesOrEdit({
                   text: '${controller.totalReceives.value}',
                   color: Colors.green,
                   isBold: true),
-              Text(
+              const Text(
                 'Net:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),

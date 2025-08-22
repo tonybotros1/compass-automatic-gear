@@ -100,17 +100,17 @@ Widget tableOfScreens({
         label: Text(''),
       ),
       DataColumn(
-        columnWidth: IntrinsicColumnWidth(flex: 1),
+        columnWidth: const IntrinsicColumnWidth(flex: 1),
         label: AutoSizedText(text: 'Code', constraints: constraints),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        columnWidth: IntrinsicColumnWidth(flex: 2),
+        columnWidth: const IntrinsicColumnWidth(flex: 2),
         label: AutoSizedText(constraints: constraints, text: 'Name'),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        columnWidth: IntrinsicColumnWidth(flex: 1),
+        columnWidth: const IntrinsicColumnWidth(flex: 1),
         numeric: true,
         label: AutoSizedText(constraints: constraints, text: 'Min. Quantity'),
         // onSort: controller.onSort,

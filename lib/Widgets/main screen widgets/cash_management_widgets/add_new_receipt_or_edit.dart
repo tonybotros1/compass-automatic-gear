@@ -166,7 +166,7 @@ Widget addNewReceiptOrEdit({
                             child: invoicesTable(
                                 list: controller.selectedAvailableReceipts,
                                 context: context,
-                                constraints: BoxConstraints(),
+                                constraints: const BoxConstraints(),
                                 isPayment: false),
                           ),
                         ),
@@ -184,7 +184,7 @@ Widget addNewReceiptOrEdit({
                 child: Text.rich(
                   TextSpan(
                     children: [
-                      TextSpan(
+                      const TextSpan(
                         text: 'Total Amount Received: ',
                         style: TextStyle(
                           color: Colors.black,
@@ -194,7 +194,7 @@ Widget addNewReceiptOrEdit({
                       TextSpan(
                         text: NumberFormat("#,##0.00").format(controller
                             .calculatedAmountForAllSelectedReceipts.value),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.green,
                           fontWeight: FontWeight.bold,
                         ),
