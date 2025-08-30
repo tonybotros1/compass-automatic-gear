@@ -775,6 +775,8 @@ class ReceivingController extends GetxController {
             'orginal_price': double.tryParse(orginalPrice.value.text) ?? 0,
             'discount': double.tryParse(discount.value.text) ?? 0,
             'vat': double.tryParse(vat.value.text) ?? 0,
+            'collection_parent': 'receiving',
+            
           });
       addingNewItemsValue.value = false;
       Get.back();
