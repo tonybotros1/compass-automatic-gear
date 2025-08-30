@@ -293,7 +293,7 @@ class QuotationCard extends StatelessWidget {
                                   title: 'TOTALS',
                                   value: textForDataRowInTable(
                                     fontSize: 16,
-                                    color: Colors.red,
+                                    color: Colors.green,
                                     isBold: true,
                                     text:
                                         '${controller.allQuotationsTotals.value}',
@@ -302,7 +302,7 @@ class QuotationCard extends StatelessWidget {
                                   title: 'VATS',
                                   value: textForDataRowInTable(
                                     fontSize: 16,
-                                    color: Colors.green,
+                                    color: Colors.red,
                                     isBold: true,
                                     text:
                                         '${controller.allQuotationsVATS.value}',

@@ -202,78 +202,23 @@ class QuotationCardController extends GetxController {
         });
   }
 
-  // calculateMoneyForAllQuotations() async {
-  //   try {
-  //     allQuotationsVATS.value = 0.0;
-  //     allQuotationsTotals.value = 0.0;
-  //     allQuotationsNET.value = 0.0;
-
-  //     for (var quot in filteredQuotationCards.isEmpty
-  //         ? allQuotationCards
-  //         : filteredQuotationCards) {
-  //       final id = quot.id;
-
-  //       FirebaseFirestore.instance
-  //           .collection('quotation_cards')
-  //           .doc(id)
-  //           .collection('invoice_items')
-  //           .snapshots()
-  //           .listen((invoices) {
-  //         for (var invoice in invoices.docs) {
-  //           var data = invoice.data() as Map<String, dynamic>?;
-  //           allQuotationsVATS.value += double.parse(data?['vat']);
-  //           allQuotationsTotals.value += double.parse(data?['total']);
-  //           allQuotationsNET.value += double.parse(data?['net']);
-  //         }
-  //       });
-  //     }
-  //   } catch (e) {
-  //     // print(e);
-  //   }
-  // }
-
   Future<void> calculateMoneyForAllQuotations() async {
     try {
-      // Reset totals at the beginning.
       double totalVat = 0.0;
       double grandTotal = 0.0;
       double totalNet = 0.0;
 
-      if (allQuotationCards.isEmpty) {
-        allQuotationsVATS.value = 0;
-        allQuotationsTotals.value = 0;
-        allQuotationsNET.value = 0;
-        return;
+      final snapshot = await FirebaseFirestore.instance
+          .collectionGroup('quotation_invoice_items')
+          .get();
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        totalVat += double.tryParse(data['vat'].toString()) ?? 0.0;
+        grandTotal += double.tryParse(data['total'].toString()) ?? 0.0;
+        totalNet += double.tryParse(data['net'].toString()) ?? 0.0;
       }
 
-      // 1. Create a list of Futures for fetching the 'invoice_items' for each quotation.
-      List<Future<QuerySnapshot<Map<String, dynamic>>>> futures = [];
-      for (var quotation in allQuotationCards) {
-        final future = FirebaseFirestore.instance
-            .collection('quotation_cards')
-            .doc(quotation.id)
-            .collection(
-              'invoice_items',
-            ) // Assuming the subcollection is named this
-            .get();
-        futures.add(future);
-      }
-
-      // 2. Execute all the Futures in parallel.
-      final List<QuerySnapshot<Map<String, dynamic>>> snapshots =
-          await Future.wait(futures);
-
-      // 3. Iterate through the results in memory to perform calculations.
-      for (var invoiceListSnapshot in snapshots) {
-        for (var invoiceDoc in invoiceListSnapshot.docs) {
-          var data = invoiceDoc.data();
-          totalVat += double.tryParse(data['vat'].toString()) ?? 0.0;
-          grandTotal += double.tryParse(data['total'].toString()) ?? 0.0;
-          totalNet += double.tryParse(data['net'].toString()) ?? 0.0;
-        }
-      }
-
-      // 4. Update the UI with the final calculated totals.
       allQuotationsVATS.value = totalVat;
       allQuotationsTotals.value = grandTotal;
       allQuotationsNET.value = totalNet;
@@ -953,14 +898,14 @@ class QuotationCardController extends GetxController {
         var quotationInvoices = await FirebaseFirestore.instance
             .collection('quotation_cards')
             .doc(id)
-            .collection('invoice_items')
+            .collection('quotation_invoice_items')
             .get();
         if (quotationInvoices.docs.isNotEmpty) {
           for (var element in quotationInvoices.docs) {
             await FirebaseFirestore.instance
                 .collection('quotation_cards')
                 .doc(newCopiedQuotation.id)
-                .collection('invoice_items')
+                .collection('quotation_invoice_items')
                 .add(element.data());
           }
         }
@@ -1038,7 +983,7 @@ class QuotationCardController extends GetxController {
       FirebaseFirestore.instance
           .collection('quotation_cards')
           .doc(quotationId)
-          .collection('invoice_items')
+          .collection('quotation_invoice_items')
           .doc(itemId)
           .delete();
     } catch (e) {
@@ -1052,7 +997,7 @@ class QuotationCardController extends GetxController {
       await FirebaseFirestore.instance
           .collection('quotation_cards')
           .doc(quotationId)
-          .collection('invoice_items')
+          .collection('quotation_invoice_items')
           .doc(itemId)
           .update({
             'name': invoiceItemNameId.value,
@@ -1077,7 +1022,7 @@ class QuotationCardController extends GetxController {
       await FirebaseFirestore.instance
           .collection('quotation_cards')
           .doc(id)
-          .collection('invoice_items')
+          .collection('quotation_invoice_items')
           .add({
             'company_id': companyId.value,
             'name': invoiceItemNameId.value,
@@ -1091,6 +1036,7 @@ class QuotationCardController extends GetxController {
             'vat': vat.text,
             'net': net.text,
             'added_date': DateTime.now().toString(),
+            'parent_collection': 'quotation_cards',
           });
       addingNewinvoiceItemsValue.value = false;
       Get.back();
@@ -1176,7 +1122,7 @@ class QuotationCardController extends GetxController {
       FirebaseFirestore.instance
           .collection('quotation_cards')
           .doc(quotationId)
-          .collection('invoice_items')
+          .collection('quotation_invoice_items')
           .orderBy('line_number')
           .snapshots()
           .listen((QuerySnapshot<Map<String, dynamic>> items) {
@@ -1476,7 +1422,7 @@ class QuotationCardController extends GetxController {
     return FirebaseFirestore.instance
         .collection('quotation_cards')
         .doc(jobId)
-        .collection('invoice_items')
+        .collection('quotation_invoice_items')
         .snapshots()
         .map((snapshot) {
           double sumOfTotal = 0.0;
@@ -1494,7 +1440,7 @@ class QuotationCardController extends GetxController {
     return FirebaseFirestore.instance
         .collection('quotation_cards')
         .doc(jobId)
-        .collection('invoice_items')
+        .collection('quotation_invoice_items')
         .snapshots()
         .map((snapshot) {
           double sumOfVAT = 0.0;
@@ -1511,7 +1457,7 @@ class QuotationCardController extends GetxController {
     return FirebaseFirestore.instance
         .collection('quotation_cards')
         .doc(jobId)
-        .collection('invoice_items')
+        .collection('quotation_invoice_items')
         .snapshots()
         .map((snapshot) {
           double sumOfNET = 0.0;
@@ -1576,141 +1522,6 @@ class QuotationCardController extends GetxController {
       return ''; // Return empty string on error
     }
   }
-
-  // Future<void> searchEngine() async {
-  //   isScreenLoding.value = true;
-  //   final collection = FirebaseFirestore.instance
-  //       .collection('quotation_cards')
-  //       .where('company_id', isEqualTo: companyId.value);
-  //   Query<Map<String, dynamic>> query = collection;
-
-  //   // 1) زر "All" يجلب كل البيانات فورًا
-  //   if (isAllSelected.value) {
-  //     // لا نضيف أي where، نجلب كل الوثائق
-  //     final snapshot = await query.get();
-  //     allQuotationCards.assignAll(snapshot.docs);
-  //     calculateMoneyForAllQuotations();
-  //     numberOfQuotations.value = allQuotationCards.length;
-
-  //     isScreenLoding.value = false;
-  //     return;
-  //   }
-
-  //   // 2) زر "Today"
-  //   if (isTodaySelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfDay = DateTime(now.year, now.month, now.day);
-  //     final endOfDay =
-  //         startOfDay.add(Duration(days: 1)).subtract(Duration(milliseconds: 1));
-  //     fromDate.value.text = textToDate(startOfDay);
-  //     toDate.value.text = textToDate(endOfDay);
-  //     query = query
-  //         .where('quotation_date',
-  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-  //         .where('quotation_date',
-  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfDay));
-  //   }
-
-  //   // 3) زر "This Month"
-  //   else if (isThisMonthSelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfMonth = DateTime(now.year, now.month, 1);
-  //     final startOfNextMonth = (now.month < 12)
-  //         ? DateTime(now.year, now.month + 1, 1)
-  //         : DateTime(now.year + 1, 1, 1);
-  //     final endOfMonth = startOfNextMonth.subtract(Duration(milliseconds: 1));
-  //     fromDate.value.text = textToDate(startOfMonth);
-  //     toDate.value.text = textToDate(endOfMonth);
-  //     query = query
-  //         .where('quotation_date',
-  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
-  //         .where('quotation_date',
-  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth));
-  //   }
-
-  //   // 4) زر "This Year"
-  //   else if (isThisYearSelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfYear = DateTime(now.year, 1, 1);
-  //     final startOfNextYear = DateTime(now.year + 1, 1, 1);
-  //     final endOfYear = startOfNextYear.subtract(Duration(milliseconds: 1));
-  //     fromDate.value.text = textToDate(startOfYear);
-  //     toDate.value.text = textToDate(endOfYear);
-  //     query = query
-  //         .where('quotation_date',
-  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
-  //         .where('quotation_date',
-  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfYear));
-  //   }
-
-  //   // 5) إذا لم يُختر أي من الأزرار الخاصة بالفترة، نطبق فلتر التواريخ اليدوي
-  //   else {
-  //     if (fromDate.value.text.trim().isNotEmpty) {
-  //       try {
-  //         final dtFrom = format.parseStrict(fromDate.value.text.trim());
-  //         query = query.where(
-  //           'quotation_date',
-  //           isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
-  //         );
-  //       } catch (_) {}
-  //     }
-  //     if (toDate.value.text.trim().isNotEmpty) {
-  //       try {
-  //         final dtTo = format.parseStrict(toDate.value.text.trim());
-  //         query = query.where(
-  //           'quotation_date',
-  //           isLessThanOrEqualTo: Timestamp.fromDate(dtTo),
-  //         );
-  //       } catch (_) {}
-  //     }
-  //   }
-
-  //   // 6) باقي الفلاتر العامة
-  //   if (quotaionNumberFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'quotation_number',
-  //       isEqualTo: quotaionNumberFilter.value.text.trim(),
-  //     );
-  //   }
-
-  //   if (statusFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'quotation_status',
-  //       isEqualTo: statusFilter.value.text.trim(),
-  //     );
-  //   }
-  //   if (carBrandIdFilter.value.isNotEmpty) {
-  //     query = query.where('car_brand', isEqualTo: carBrandIdFilter.value);
-  //   }
-  //   if (carModelIdFilter.value.isNotEmpty) {
-  //     query = query.where('car_model', isEqualTo: carModelIdFilter.value);
-  //   }
-  //   if (plateNumberFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'plate_number',
-  //       isEqualTo: plateNumberFilter.value.text.trim(),
-  //     );
-  //   }
-  //   if (vinFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'vehicle_identification_number',
-  //       isEqualTo: vinFilter.value.text.trim(),
-  //     );
-  //   }
-  //   if (customerNameIdFilter.value.isNotEmpty) {
-  //     query = query.where(
-  //       'customer',
-  //       isEqualTo: customerNameIdFilter.value,
-  //     );
-  //   }
-
-  //   // 7) تنفيذ الاستعلام وجلب النتائج
-  //   final snapshot = await query.get();
-  //   allQuotationCards.assignAll(snapshot.docs);
-  //   numberOfQuotations.value = allQuotationCards.length;
-  //   calculateMoneyForAllQuotations();
-  //   isScreenLoding.value = false;
-  // }
 
   Future<void> searchEngine() async {
     isScreenLoding.value = true;
