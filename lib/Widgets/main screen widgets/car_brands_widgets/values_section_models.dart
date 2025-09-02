@@ -1,4 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/car_brands_controller.dart';
+import 'package:datahubai/Models/brands/brand_nodel_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,6 +23,13 @@ Widget modelsSection({
         GetX<CarBrandsController>(
           builder: (controller) {
             return searchBar(
+              onChanged: (_) {
+                controller.filterModels();
+              },
+              onPressedForClearSearch: () {
+                controller.searchForModels.value.clear();
+                controller.filterModels();
+              },
               search: controller.searchForModels,
               constraints: constraints,
               context: context,
@@ -35,14 +43,10 @@ Widget modelsSection({
           child: GetX<CarBrandsController>(
             builder: (controller) {
               if (controller.loadingModels.value) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
               if (controller.allModels.isEmpty) {
-                return const Center(
-                  child: Text('No Element'),
-                );
+                return const Center(child: Text('No Element'));
               }
               return SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -63,10 +67,11 @@ Widget modelsSection({
   );
 }
 
-Widget tableOfScreens(
-    {required constraints,
-    required context,
-    required CarBrandsController controller}) {
+Widget tableOfScreens({
+  required constraints,
+  required context,
+  required CarBrandsController controller,
+}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -80,145 +85,170 @@ Widget tableOfScreens(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Name',
-        ),
-        onSort: controller.onSortForModels,
+        label: AutoSizedText(constraints: constraints, text: 'Name'),
+        // onSort: controller.onSortForModels,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
-        onSort: controller.onSortForModels,
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
+        // onSort: controller.onSortForModels,
       ),
       const DataColumn(label: Text('')),
     ],
-    rows: controller.filteredModels.isEmpty &&
+    rows:
+        controller.filteredModels.isEmpty &&
             controller.searchForModels.value.text.isEmpty
         ? controller.allModels.map<DataRow>((model) {
-            final modelData = model.data() as Map<String, dynamic>;
+            final modelData = model;
             final modelId = model.id;
             return dataRowForTheTable(
-                modelData, context, constraints, modelId, controller);
+              modelData,
+              context,
+              constraints,
+              modelId,
+              controller,
+            );
           }).toList()
         : controller.filteredModels.map<DataRow>((model) {
-            final modelData = model.data() as Map<String, dynamic>;
+            final modelData = model;
             final modelId = model.id;
             return dataRowForTheTable(
-                modelData, context, constraints, modelId, controller);
+              modelData,
+              context,
+              constraints,
+              modelId,
+              controller,
+            );
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> modelData, context, constraints,
-    String modelId, CarBrandsController controller) {
-  return DataRow(cells: [
-    DataCell(
-      Text(
-        modelData['name'] ?? 'no model',
-      ),
-    ),
-    DataCell(
-      Text(
-        modelData['added_date'] != null
-            ? textToDate(modelData['added_date'])
-            : 'N/A',
-      ),
-    ),
-    DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        activeInActiveSection(modelData, controller, modelId),
-        Padding(
-          padding: const EdgeInsets.only(left: 5, right: 5),
-          child:
-              editSection(controller, modelData, context, constraints, modelId),
+DataRow dataRowForTheTable(
+  Model modelData,
+  context,
+  constraints,
+  String modelId,
+  CarBrandsController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(Text(modelData.name)),
+      DataCell(Text(textToDate(modelData.createdAt))),
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            activeInActiveSection(modelData, controller, modelId),
+            Padding(
+              padding: const EdgeInsets.only(left: 5, right: 5),
+              child: editSection(
+                controller,
+                modelData,
+                context,
+                constraints,
+                modelId,
+              ),
+            ),
+            deleteSection(context, controller, modelId),
+          ],
         ),
-        deleteSection(context, controller, modelId),
-      ],
-    )),
-  ]);
+      ),
+    ],
+  );
 }
 
 ElevatedButton deleteSection(context, CarBrandsController controller, modelId) {
   return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: 'The model will be deleted permanently',
-            onPressed: () {
-              controller.deleteModel(
-                  controller.brandIdToWorkWith.value, modelId);
-            });
-      },
-      child: const Text('Delete'));
+    style: deleteButtonStyle,
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: 'The model will be deleted permanently',
+        onPressed: () {
+          controller.deleteModel(controller.brandIdToWorkWith.value, modelId);
+        },
+      );
+    },
+    child: const Text('Delete'),
+  );
 }
 
-ElevatedButton editSection(CarBrandsController controller,
-    Map<String, dynamic> modelData, context, constraints, String modelId) {
+ElevatedButton editSection(
+  CarBrandsController controller,
+  Model modelData,
+  context,
+  constraints,
+  String modelId,
+) {
   return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () {
-        controller.modelName.text = modelData['name'];
-        carModelsDialog(
-            constraints: constraints,
-            controller: controller,
-            onPressed: controller.addingNewmodelValue.value
-                ? null
-                : () async {
-                    if (!controller.formKeyForAddingNewvalue.currentState!
-                        .validate()) {
-                    } else {
-                      controller.editmodel(
-                          controller.brandIdToWorkWith.value, modelId);
-                    }
-                  });
-      },
-      child: const Text('Edit'));
+    style: editButtonStyle,
+    onPressed: () {
+      controller.modelName.text = modelData.name;
+      carModelsDialog(
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewmodelValue.value
+            ? null
+            : () async {
+                if (!controller.formKeyForAddingNewvalue.currentState!
+                    .validate()) {
+                } else {
+                  controller.editmodel(
+                    controller.brandIdToWorkWith.value,
+                    modelId,
+                  );
+                }
+              },
+      );
+    },
+    child: const Text('Edit'),
+  );
 }
 
-ElevatedButton activeInActiveSection(Map<String, dynamic> modelData,
-    CarBrandsController controller, String modelId) {
+ElevatedButton activeInActiveSection(
+  Model modelData,
+  CarBrandsController controller,
+  String modelId,
+) {
   return ElevatedButton(
-      style: modelData['status'] == false
-          ? inActiveButtonStyle
-          : activeButtonStyle,
-      onPressed: () {
-        bool status;
-        if (modelData['status'] == false) {
-          status = true;
-        } else {
-          status = false;
-        }
-        controller.editHideOrUnhide(
-            controller.brandIdToWorkWith.value, modelId, status);
-      },
-      child: modelData['status'] == true
-          ? const Text('Active')
-          : const Text('Inactive'));
+    style: modelData.status == false ? inActiveButtonStyle : activeButtonStyle,
+    onPressed: () {
+      bool status;
+      if (modelData.status == false) {
+        status = true;
+      } else {
+        status = false;
+      }
+      controller.editActiveOrInActiveStatusForModels(modelId, status);
+    },
+    child: modelData.status == true
+        ? const Text('Active')
+        : const Text('Inactive'),
+  );
 }
 
-ElevatedButton newModelButton(BuildContext context, BoxConstraints constraints,
-    CarBrandsController controller) {
+ElevatedButton newModelButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  CarBrandsController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.modelName.clear();
       carModelsDialog(
-          constraints: constraints,
-          controller: controller,
-          onPressed: controller.addingNewmodelValue.value
-              ? null
-              : () async {
-                  if (!controller.formKeyForAddingNewvalue.currentState!
-                      .validate()) {
-                  } else {
-                    await controller
-                        .addNewModel(controller.brandIdToWorkWith.value);
-                  }
-                });
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewmodelValue.value
+            ? null
+            : () async {
+                if (!controller.formKeyForAddingNewvalue.currentState!
+                    .validate()) {
+                } else {
+                  await controller.addNewModel(
+                    controller.brandIdToWorkWith.value,
+                  );
+                }
+              },
+      );
     },
     style: newButtonStyle,
     child: const Text('New model'),

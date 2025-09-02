@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,9 +6,14 @@ import 'package:datahubai/web_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/request/request.dart';
+import 'package:http/http.dart' as http;
 
+import '../../Models/brands/brand_model.dart';
+import '../../Models/brands/brand_nodel_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class CarBrandsController extends GetxController {
   RxString query = RxString('');
@@ -15,10 +21,14 @@ class CarBrandsController extends GetxController {
   Rx<TextEditingController> search = TextEditingController().obs;
   Rx<TextEditingController> searchForModels = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(true);
-  final RxList<DocumentSnapshot> allBrands = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> allModels = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredBrands = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredModels = RxList<DocumentSnapshot>([]);
+  // final RxList<DocumentSnapshot> allBrands = RxList<DocumentSnapshot>([]);
+  final RxList<Brand> allBrands = RxList<Brand>([]);
+  // final RxList<DocumentSnapshot> allModels = RxList<DocumentSnapshot>([]);
+  final RxList<Model> allModels = RxList<Model>([]);
+  // final RxList<DocumentSnapshot> filteredBrands = RxList<DocumentSnapshot>([]);
+  final RxList<Brand> filteredBrands = RxList<Brand>([]);
+  // final RxList<DocumentSnapshot> filteredModels = RxList<DocumentSnapshot>([]);
+  final RxList<Model> filteredModels = RxList<Model>([]);
   TextEditingController brandName = TextEditingController();
   TextEditingController modelName = TextEditingController();
   RxInt sortColumnIndex = RxInt(0);
@@ -31,214 +41,450 @@ class CarBrandsController extends GetxController {
   RxBool loadingModels = RxBool(false);
   final GlobalKey<FormState> formKeyForAddingNewvalue = GlobalKey<FormState>();
   RxBool logoSelectedError = RxBool(false);
+  WebSocketChannel? channel;
 
   @override
   void onInit() {
+    connectWebSocket();
     getCarBrands();
-    search.value.addListener(() {
-      filterBrands();
-    });
-    searchForModels.value.addListener(() {
-      filterModels();
-    });
+    // search.value.addListener(() {
+    //   filterBrands();
+    // });
+    // searchForModels.value.addListener(() {
+    //   filterModels();
+    // });
     super.onInit();
   }
 
-    getScreenName() {
+  @override
+  void onClose() {
+    channel?.sink.close();
+    super.onClose();
+  }
+
+  getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
+  void connectWebSocket() {
+    channel = WebSocketChannel.connect(
+      Uri.parse("ws://localhost:8000/ws"), // change to wss:// in production
+    );
 
-  // this function is to sort data in table
-  void onSort(int columnIndex, bool ascending) {
-    if (columnIndex == 0) {
-      allBrands.sort((counter1, counter2) {
-        final String? value1 = counter1.get('code');
-        final String? value2 = counter2.get('code');
+    channel!.stream.listen((event) {
+      final message = jsonDecode(event);
 
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
+      switch (message["type"]) {
+        case "brand_created":
+          final newBrand = Brand.fromJson(message["data"]);
+          allBrands.add(newBrand);
+          break;
 
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 1) {
-      allBrands.sort((counter1, counter2) {
-        final String? value1 = counter1.get('name');
-        final String? value2 = counter2.get('name');
+        case "brand_updated":
+          final updated = Brand.fromJson(message["data"]);
+          final index = allBrands.indexWhere((b) => b.id == updated.id);
+          if (index != -1) {
+            allBrands[index] = updated;
+          }
+          break;
 
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
+        case "brand_deleted":
+          final deletedId = message["data"]["_id"];
+          allBrands.removeWhere((b) => b.id == deletedId);
+          break;
 
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 3) {
-      allBrands.sort((counter1, counter2) {
-        final String? value1 = counter1.get('added_date');
-        final String? value2 = counter2.get('added_date');
+        case "model_created":
+          final newModel = Model.fromJson(message["data"]);
+          allModels.add(newModel);
+          break;
 
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    }
-    sortColumnIndex.value = columnIndex;
-    isAscending.value = ascending;
+        case "model_updated":
+          final updated = Model.fromJson(message["data"]);
+          final index = allModels.indexWhere((m) => m.id == updated.id);
+          if (index != -1) {
+            allModels[index] = updated;
+          }
+          break;
+      }
+    });
   }
 
-  void onSortForModels(int columnIndex, bool ascending) {
-    if (columnIndex == 0) {
-      allModels.sort((screen1, screen2) {
-        final String? value1 = screen1.get('name');
-        final String? value2 = screen2.get('name');
+  // ===================================== Brands Section =============================================
 
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 1) {
-      allModels.sort((screen1, screen2) {
-        final String? value1 = screen1.get('added_date');
-        final String? value2 = screen2.get('added_date');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    }
-    sortColumnIndex.value = columnIndex;
-    isAscending.value = ascending;
-  }
-
-  int compareString(bool ascending, String value1, String value2) {
-    int comparison = value1.compareTo(value2);
-    return ascending ? comparison : -comparison; // Reverse if descending
-  }
-
-  getCarBrands() {
+  getCarBrands() async {
     try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .snapshots()
-          .listen((brands) {
-        allBrands.assignAll(List<DocumentSnapshot>.from(brands.docs));
+      final response = await http.get(
+        Uri.parse('$backendTestURI/brands/get_all_brands'),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+
+        // إذا الليست موجودة داخل مفتاح "brands"
+        List<dynamic> jsonData = decoded['brands'];
+
+        // تحويل للـ model
+        allBrands.assignAll(
+          jsonData.map((item) => Brand.fromJson(item)).toList(),
+        );
         isScreenLoding.value = false;
-      });
+      } else {
+        isScreenLoding.value = false;
+      }
     } catch (e) {
       isScreenLoding.value = false;
     }
   }
 
-  String formatPhrase(String phrase) {
-    return phrase.replaceAll(' ', '_');
-  }
-
-// this function is to add new brand
-  addNewbrand() async {
+  addNewBrand() async {
     try {
       addingNewValue.value = true;
-      if (imageBytes.value.isNotEmpty) {
-        final Reference storageRef = FirebaseStorage.instance.ref().child(
-            'brands_logos/${formatPhrase(brandName.text)}_${DateTime.now()}.png');
-        final UploadTask uploadTask = storageRef.putData(
-          imageBytes.value,
-          SettableMetadata(contentType: 'image/png'),
-        );
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("$backendTestURI/brands/add_new_brand"),
+      );
 
-        await uploadTask.then((p0) async {
-          logoUrl.value = await storageRef.getDownloadURL();
-        });
+      // اسم البراند
+      request.fields['name'] = brandName.text;
+
+      if (imageBytes.value.isNotEmpty) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'logo',
+            imageBytes.value,
+            filename: "brand_logo_${brandName.text}.png",
+          ),
+        );
       }
 
-      FirebaseFirestore.instance.collection('all_brands').add({
-        'name': brandName.text,
-        'logo': logoUrl.value,
-        'added_date': DateTime.now().toString(),
-        'status': true,
-      });
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        await response.stream.bytesToString();
+        addingNewValue.value = false;
+        Get.back();
+        showSnackBar('Done', 'New brand added successfully');
+      } else {
+        addingNewValue.value = false;
+        Get.back();
+      }
+    } catch (e) {
+      // print(e);
       addingNewValue.value = false;
       Get.back();
-    } catch (e) {
-      addingNewValue.value = false;
     }
   }
 
-  editBrand(brandId) async {
+  deleteBrand(String id) async {
     try {
-      var newData = {
-        'name': brandName.text,
-      };
-      addingNewValue.value = true;
-      if (imageBytes.value.isNotEmpty) {
-        final Reference storageRef = FirebaseStorage.instance.ref().child(
-            'brands_logos/${formatPhrase(brandName.text)}_${DateTime.now()}.png');
-        final UploadTask uploadTask = storageRef.putData(
-          imageBytes.value,
-          SettableMetadata(contentType: 'image/png'),
-        );
-
-        await uploadTask.then((p0) async {
-          logoUrl.value = await storageRef.getDownloadURL();
-          newData['logo'] = logoUrl.value;
-        });
+      final response = await http.delete(
+        Uri.parse("$backendTestURI/brands/delete_brand/$id"),
+      );
+      if (response.statusCode == 200) {
+        Get.back();
+        showSnackBar('Done', 'Brand deleted Successfully');
+      } else if (response.statusCode == 404) {
+        Get.back();
+        showSnackBar('Alert', 'Brand not found');
+      } else {
+        Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
       }
-
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .update(newData);
-      addingNewValue.value = false;
-      Get.back();
     } catch (e) {
-      addingNewValue.value = false;
+      Get.back();
+      showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
 
-  deletebrand(brandId) async {
+  editActiveOrInActiveStatus(String id, bool status) async {
     try {
+      var url = Uri.parse('$backendTestURI/brands/edit_brand_status/$id');
+      final response = await http.patch(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"status": status}),
+      );
+
+      if (response.statusCode == 200) {
+        // return jsonDecode(response.body);
+      } else {
+        throw Exception("Failed to update status: ${response.body}");
+      }
+    } catch (e) {
+      // print(e);
+    }
+  }
+
+  editBrand(String id) async {
+    try {
+      addingNewValue.value = true;
+
+      var url = Uri.parse('$backendTestURI/brands/edit_brand/$id');
+
+      final request = http.MultipartRequest('PATCH', url);
+      request.fields['name'] = brandName.text;
+      if (imageBytes.value.isNotEmpty) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'logo',
+            imageBytes.value,
+            filename: "brand_logo_${brandName.text}.png",
+          ),
+        );
+      }
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        await response.stream.bytesToString();
+        addingNewValue.value = false;
+        Get.back();
+        showSnackBar('Done', 'Brand updated successfully');
+      } else {
+        addingNewValue.value = false;
+        Get.back();
+      }
+    } catch (e) {
+      // print(e);
+    }
+  }
+
+  // ===================================== Models Section =============================================
+
+  getModelsValues(String brandId) async {
+    try {
+      loadingModels.value = true;
+
+      var url = Uri.parse('$backendTestURI/brands/get_models/$brandId');
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final decode = jsonDecode(response.body);
+        List<dynamic> jsonData = decode['models'];
+
+        allModels.assignAll(jsonData.map((model) => Model.fromJson(model)));
+        loadingModels.value = false;
+      } else {
+        loadingModels.value = false;
+      }
+    } catch (e) {
+      loadingModels.value = false;
+    }
+  }
+
+  addNewModel(String brandId) async {
+    try {
+      addingNewmodelValue.value = true;
+      var url = Uri.parse('$backendTestURI/brands/add_new_model/$brandId');
+      final response = await http.post(url, body: {"name": modelName.text});
+
+      if (response.statusCode == 200) {
+        addingNewmodelValue.value = false;
+        Get.back();
+      }
+    } catch (e) {
+      addingNewmodelValue.value = false;
       Get.back();
-      await FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .delete();
+    }
+  }
+
+  editActiveOrInActiveStatusForModels(String modelId, bool status) async {
+    try {
+      var url = Uri.parse('$backendTestURI/brands/edit_model_status/$modelId');
+      await http.patch(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"status": status}),
+      );
     } catch (e) {
       //
     }
   }
+  // // this function is to sort data in table
+  // void onSort(int columnIndex, bool ascending) {
+  //   if (columnIndex == 0) {
+  //     allBrands.sort((counter1, counter2) {
+  //       final String? value1 = counter1.get('code');
+  //       final String? value2 = counter2.get('code');
 
-  editActiveOrInActiveStatus(companyId, bool status) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(companyId)
-          .update({
-        'status': status,
-      });
-    } catch (e) {
-//
-    }
+  //       // Handle nulls: put nulls at the end
+  //       if (value1 == null && value2 == null) return 0;
+  //       if (value1 == null) return 1;
+  //       if (value2 == null) return -1;
+
+  //       return compareString(ascending, value1, value2);
+  //     });
+  //   } else if (columnIndex == 1) {
+  //     allBrands.sort((counter1, counter2) {
+  //       final String? value1 = counter1.get('name');
+  //       final String? value2 = counter2.get('name');
+
+  //       // Handle nulls: put nulls at the end
+  //       if (value1 == null && value2 == null) return 0;
+  //       if (value1 == null) return 1;
+  //       if (value2 == null) return -1;
+
+  //       return compareString(ascending, value1, value2);
+  //     });
+  //   } else if (columnIndex == 3) {
+  //     allBrands.sort((counter1, counter2) {
+  //       final String? value1 = counter1.get('added_date');
+  //       final String? value2 = counter2.get('added_date');
+
+  //       // Handle nulls: put nulls at the end
+  //       if (value1 == null && value2 == null) return 0;
+  //       if (value1 == null) return 1;
+  //       if (value2 == null) return -1;
+
+  //       return compareString(ascending, value1, value2);
+  //     });
+  //   }
+  //   sortColumnIndex.value = columnIndex;
+  //   isAscending.value = ascending;
+  // }
+
+  // void onSortForModels(int columnIndex, bool ascending) {
+  //   if (columnIndex == 0) {
+  //     allModels.sort((screen1, screen2) {
+  //       final String? value1 = screen1.get('name');
+  //       final String? value2 = screen2.get('name');
+
+  //       // Handle nulls: put nulls at the end
+  //       if (value1 == null && value2 == null) return 0;
+  //       if (value1 == null) return 1;
+  //       if (value2 == null) return -1;
+
+  //       return compareString(ascending, value1, value2);
+  //     });
+  //   } else if (columnIndex == 1) {
+  //     allModels.sort((screen1, screen2) {
+  //       final String? value1 = screen1.get('added_date');
+  //       final String? value2 = screen2.get('added_date');
+
+  //       // Handle nulls: put nulls at the end
+  //       if (value1 == null && value2 == null) return 0;
+  //       if (value1 == null) return 1;
+  //       if (value2 == null) return -1;
+
+  //       return compareString(ascending, value1, value2);
+  //     });
+  //   }
+  //   sortColumnIndex.value = columnIndex;
+  //   isAscending.value = ascending;
+  // }
+
+  // int compareString(bool ascending, String value1, String value2) {
+  //   int comparison = value1.compareTo(value2);
+  //   return ascending ? comparison : -comparison; // Reverse if descending
+  // }
+
+  // getCarBrands() {
+  //   try {
+  //     FirebaseFirestore.instance.collection('all_brands').snapshots().listen((
+  //       brands,
+  //     ) {
+  //       allBrands.assignAll(List<DocumentSnapshot>.from(brands.docs));
+  //       isScreenLoding.value = false;
+  //     });
+  //   } catch (e) {
+  //     isScreenLoding.value = false;
+  //   }
+  // }
+
+  String formatPhrase(String phrase) {
+    return phrase.replaceAll(' ', '_');
   }
 
-   // this function is to select an image for logo
+  // // this function is to add new brand
+  // addNewbrand() async {
+  //   try {
+  //     addingNewValue.value = true;
+  //     if (imageBytes.value.isNotEmpty) {
+  //       final Reference storageRef = FirebaseStorage.instance.ref().child(
+  //         'brands_logos/${formatPhrase(brandName.text)}_${DateTime.now()}.png',
+  //       );
+  //       final UploadTask uploadTask = storageRef.putData(
+  //         imageBytes.value,
+  //         SettableMetadata(contentType: 'image/png'),
+  //       );
+
+  //       await uploadTask.then((p0) async {
+  //         logoUrl.value = await storageRef.getDownloadURL();
+  //       });
+  //     }
+
+  //     FirebaseFirestore.instance.collection('all_brands').add({
+  //       'name': brandName.text,
+  //       'logo': logoUrl.value,
+  //       'added_date': DateTime.now().toString(),
+  //       'status': true,
+  //     });
+  //     addingNewValue.value = false;
+  //     Get.back();
+  //   } catch (e) {
+  //     addingNewValue.value = false;
+  //   }
+  // }
+
+  // editBrand(brandId) async {
+  //   try {
+  //     var newData = {'name': brandName.text};
+  //     addingNewValue.value = true;
+  //     if (imageBytes.value.isNotEmpty) {
+  //       final Reference storageRef = FirebaseStorage.instance.ref().child(
+  //         'brands_logos/${formatPhrase(brandName.text)}_${DateTime.now()}.png',
+  //       );
+  //       final UploadTask uploadTask = storageRef.putData(
+  //         imageBytes.value,
+  //         SettableMetadata(contentType: 'image/png'),
+  //       );
+
+  //       await uploadTask.then((p0) async {
+  //         logoUrl.value = await storageRef.getDownloadURL();
+  //         newData['logo'] = logoUrl.value;
+  //       });
+  //     }
+
+  //     FirebaseFirestore.instance
+  //         .collection('all_brands')
+  //         .doc(brandId)
+  //         .update(newData);
+  //     addingNewValue.value = false;
+  //     Get.back();
+  //   } catch (e) {
+  //     addingNewValue.value = false;
+  //   }
+  // }
+
+  // deletebrand(brandId) async {
+  //   try {
+  //     Get.back();
+  //     await FirebaseFirestore.instance
+  //         .collection('all_brands')
+  //         .doc(brandId)
+  //         .delete();
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
+
+  // editActiveOrInActiveStatus(companyId, bool status) async {
+  //   try {
+  //     await FirebaseFirestore.instance
+  //         .collection('all_brands')
+  //         .doc(companyId)
+  //         .update({'status': status});
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
+
+  // this function is to select an image for logo
   pickImage() async {
     final imagePicker = ImagePickerService();
     imagePicker.pickImage(imageBytes, logoSelectedError);
   }
-
 
   void filterBrands() {
     query.value = search.value.text.toLowerCase();
@@ -247,11 +493,10 @@ class CarBrandsController extends GetxController {
     } else {
       filteredBrands.assignAll(
         allBrands.where((brand) {
-          return brand['name'].toString().toLowerCase().contains(query.value) ||
-              textToDate(brand['added_date'])
-                  .toString()
-                  .toLowerCase()
-                  .contains(query.value);
+          return brand.name.toString().toLowerCase().contains(query.value) ||
+              textToDate(
+                brand.createdAt,
+              ).toString().toLowerCase().contains(query.value);
         }).toList(),
       );
     }
@@ -264,56 +509,54 @@ class CarBrandsController extends GetxController {
     } else {
       filteredModels.assignAll(
         allModels.where((model) {
-          return model['name']
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForModels.value) ||
-              textToDate(model['added_date'])
-                  .toString()
-                  .toLowerCase()
-                  .contains(queryForModels.value);
+          return model.name.toString().toLowerCase().contains(
+                queryForModels.value,
+              ) ||
+              textToDate(
+                model.createdAt,
+              ).toString().toLowerCase().contains(queryForModels.value);
         }).toList(),
       );
     }
   }
 
-  getModelsValues(brandId) {
-    try {
-      loadingModels.value = true;
+  // getModelsValues(brandId) {
+  //   try {
+  //     loadingModels.value = true;
 
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .orderBy('name', descending: false)
-          .snapshots()
-          .listen((values) {
-        allModels.assignAll(values.docs);
-        loadingModels.value = false;
-      });
-    } catch (e) {
-      loadingModels.value = false;
-    }
-  }
+  //     FirebaseFirestore.instance
+  //         .collection('all_brands')
+  //         .doc(brandId)
+  //         .collection('values')
+  //         .orderBy('name', descending: false)
+  //         .snapshots()
+  //         .listen((values) {
+  //           allModels.assignAll(values.docs);
+  //           loadingModels.value = false;
+  //         });
+  //   } catch (e) {
+  //     loadingModels.value = false;
+  //   }
+  // }
 
-  addNewModel(brandId) {
-    try {
-      addingNewmodelValue.value = true;
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .add({
-        'name': modelName.text,
-        'added_date': DateTime.now().toString(),
-        'status': true,
-      });
-      addingNewmodelValue.value = false;
-      Get.back();
-    } catch (e) {
-      addingNewmodelValue.value = false;
-    }
-  }
+  // addNewModel(brandId) {
+  //   try {
+  //     addingNewmodelValue.value = true;
+  //     FirebaseFirestore.instance
+  //         .collection('all_brands')
+  //         .doc(brandId)
+  //         .collection('values')
+  //         .add({
+  //           'name': modelName.text,
+  //           'added_date': DateTime.now().toString(),
+  //           'status': true,
+  //         });
+  //     addingNewmodelValue.value = false;
+  //     Get.back();
+  //   } catch (e) {
+  //     addingNewmodelValue.value = false;
+  //   }
+  // }
 
   deleteModel(brandId, modelId) {
     try {
@@ -336,27 +579,23 @@ class CarBrandsController extends GetxController {
           .doc(brandId)
           .collection('values')
           .doc(modelId)
-          .update({
-        'name': modelName.text,
-      });
+          .update({'name': modelName.text});
       Get.back();
     } catch (e) {
       //
     }
   }
 
-  editHideOrUnhide(brandId, modelId, status) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .doc(modelId)
-          .update({
-        'status': status,
-      });
-    } catch (e) {
-      //
-    }
-  }
+  // editHideOrUnhide(brandId, modelId, status) async {
+  //   try {
+  //     await FirebaseFirestore.instance
+  //         .collection('all_brands')
+  //         .doc(brandId)
+  //         .collection('values')
+  //         .doc(modelId)
+  //         .update({'status': status});
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
 }

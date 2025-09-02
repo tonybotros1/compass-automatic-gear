@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+String backendURI = 'https://datahubai-backend.onrender.com';
+String backendTestURI = 'http://127.0.0.1:8000';
+
 var fontStyleForAppBar = TextStyle(
   fontSize: 20,
   color: Colors.grey.shade700,
@@ -428,7 +431,12 @@ var deleteIcon = const Icon(Icons.delete_forever, color: Colors.red);
 
 var editIcon = const Icon(Icons.edit_note_rounded, color: Colors.blue);
 
-var screenPadding = const EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 0);
+var screenPadding = const EdgeInsets.only(
+  left: 14,
+  right: 14,
+  bottom: 10,
+  top: 0,
+);
 
 String formatPhrase(String phrase) {
   return phrase.replaceAll(' ', '_');
@@ -565,7 +573,10 @@ Future<dynamic> alertMessage({
   return Get.defaultDialog(
     title: 'Alert',
     middleText: 'This is an alert message!',
-    confirm: ElevatedButton(onPressed: () => Get.back(), child: const Text('OK')),
+    confirm: ElevatedButton(
+      onPressed: () => Get.back(),
+      child: const Text('OK'),
+    ),
   );
 }
 
@@ -986,4 +997,23 @@ Future<void> selectDateContext(
   if (picked != null) {
     date.text = textToDate(picked.toString());
   }
+}
+
+String cloudinaryThumbnail(
+  String originalUrl, {
+  int width = 150,
+  int height = 150,
+  bool crop = true,
+  int quality = 80,
+}) {
+  // منتحقق إذا الرابط صحيح
+  if (!originalUrl.contains("/upload/")) {
+    throw ArgumentError("Not a valid Cloudinary URL");
+  }
+
+  final transformation =
+      "w_$width${height > 0 ? ",h_$height" : ""},q_$quality${crop ? ",c_fill" : ""}";
+
+  // منضيف التحويل بعد كلمة upload/
+  return originalUrl.replaceFirst("/upload/", "/upload/$transformation/");
 }
