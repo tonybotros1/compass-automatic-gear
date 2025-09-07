@@ -359,10 +359,10 @@ class IssueItemsController extends GetxController {
         }
       }
 
-      print("quantity: $balance");
-      print("Last Price: $localPrice");
-      print("total: $total");
-      print("Last Date: $lastDate");
+      // print("quantity: $balance");
+      // print("Last Price: $localPrice");
+      // print("total: $total");
+      // print("Last Date: $lastDate");
     } catch (e) {
       // print("Error: $e");
     }

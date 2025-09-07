@@ -131,15 +131,15 @@ Widget tableOfScreens({
     columns: [
       DataColumn(
         label: AutoSizedText(text: 'Screen', constraints: constraints),
-        // onSort: controller.onSort,
+        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Route'),
-        // onSort: controller.onSort,
+        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
-        // onSort: controller.onSort,
+        onSort: controller.onSort,
       ),
       const DataColumn(label: Text('')),
     ],
@@ -244,7 +244,7 @@ ElevatedButton editSection(
         onPressed: controller.addingNewScreenProcess.value
             ? null
             : () {
-                controller.updateScreen(screenId);
+                controller.editScreen(screenId);
               },
       );
     },
