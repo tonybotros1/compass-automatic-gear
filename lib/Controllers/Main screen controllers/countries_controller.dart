@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/Models/countries/cities_model.dart';
 import 'package:datahubai/web_functions.dart';
 import 'package:flutter/material.dart';
@@ -358,95 +357,65 @@ class CountriesController extends GetxController {
     }
   }
 
-  // // this function is to sort data in table
-  // void onSort(int columnIndex, bool ascending) {
-  //   if (columnIndex == 0) {
-  //     allCountries.sort((counter1, counter2) {
-  //       final String? value1 = counter1.get('code');
-  //       final String? value2 = counter2.get('code');
+  // this function is to sort data in table
+  void onSort(int columnIndex, bool ascending) {
+    if (columnIndex == 0) {
+      allCountries.sort((counter1, counter2) {
+        final String value1 = counter1.code;
+        final String value2 = counter2.code;
 
-  //       // Handle nulls: put nulls at the end
-  //       if (value1 == null && value2 == null) return 0;
-  //       if (value1 == null) return 1;
-  //       if (value2 == null) return -1;
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 2) {
+      allCountries.sort((counter1, counter2) {
+        final String value1 = counter1.name;
+        final String value2 = counter2.name;
 
-  //       return compareString(ascending, value1, value2);
-  //     });
-  //   } else if (columnIndex == 2) {
-  //     allCountries.sort((counter1, counter2) {
-  //       final String? value1 = counter1.get('name');
-  //       final String? value2 = counter2.get('name');
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 4) {
+      allCountries.sort((counter1, counter2) {
+        final String value1 = counter1.createdAt.toString();
+        final String value2 = counter2.createdAt.toString();
 
-  //       // Handle nulls: put nulls at the end
-  //       if (value1 == null && value2 == null) return 0;
-  //       if (value1 == null) return 1;
-  //       if (value2 == null) return -1;
+        return compareString(ascending, value1, value2);
+      });
+    }
+    sortColumnIndex.value = columnIndex;
+    isAscending.value = ascending;
+  }
 
-  //       return compareString(ascending, value1, value2);
-  //     });
-  //   } else if (columnIndex == 4) {
-  //     allCountries.sort((counter1, counter2) {
-  //       final String? value1 = counter1.get('added_date');
-  //       final String? value2 = counter2.get('added_date');
+  void onSortForCities(int columnIndex, bool ascending) {
+    if (columnIndex == 0) {
+      allCities.sort((screen1, screen2) {
+        final String value1 = screen1.code;
+        final String value2 = screen2.code;
 
-  //       // Handle nulls: put nulls at the end
-  //       if (value1 == null && value2 == null) return 0;
-  //       if (value1 == null) return 1;
-  //       if (value2 == null) return -1;
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 1) {
+      allCities.sort((screen1, screen2) {
+        final String value1 = screen1.name;
+        final String value2 = screen2.name;
 
-  //       return compareString(ascending, value1, value2);
-  //     });
-  //   }
-  //   sortColumnIndex.value = columnIndex;
-  //   isAscending.value = ascending;
-  // }
+        return compareString(ascending, value1, value2);
+      });
+    } else if (columnIndex == 2) {
+      allCities.sort((screen1, screen2) {
+        final String value1 = screen1.createdAt.toString();
+        final String value2 = screen2.createdAt.toString();
 
-  // void onSortForCities(int columnIndex, bool ascending) {
-  //   if (columnIndex == 0) {
-  //     allCities.sort((screen1, screen2) {
-  //       final String? value1 = screen1.get('code');
-  //       final String? value2 = screen2.get('code');
+        return compareString(ascending, value1, value2);
+      });
+    }
+    sortColumnIndex.value = columnIndex;
+    isAscending.value = ascending;
+  }
 
-  //       // Handle nulls: put nulls at the end
-  //       if (value1 == null && value2 == null) return 0;
-  //       if (value1 == null) return 1;
-  //       if (value2 == null) return -1;
-
-  //       return compareString(ascending, value1, value2);
-  //     });
-  //   } else if (columnIndex == 1) {
-  //     allCities.sort((screen1, screen2) {
-  //       final String? value1 = screen1.get('name');
-  //       final String? value2 = screen2.get('name');
-
-  //       // Handle nulls: put nulls at the end
-  //       if (value1 == null && value2 == null) return 0;
-  //       if (value1 == null) return 1;
-  //       if (value2 == null) return -1;
-
-  //       return compareString(ascending, value1, value2);
-  //     });
-  //   } else if (columnIndex == 2) {
-  //     allCities.sort((screen1, screen2) {
-  //       final String? value1 = screen1.get('added_date');
-  //       final String? value2 = screen2.get('added_date');
-
-  //       // Handle nulls: put nulls at the end
-  //       if (value1 == null && value2 == null) return 0;
-  //       if (value1 == null) return 1;
-  //       if (value2 == null) return -1;
-
-  //       return compareString(ascending, value1, value2);
-  //     });
-  //   }
-  //   sortColumnIndex.value = columnIndex;
-  //   isAscending.value = ascending;
-  // }
-
-  // int compareString(bool ascending, String value1, String value2) {
-  //   int comparison = value1.compareTo(value2);
-  //   return ascending ? comparison : -comparison; // Reverse if descending
-  // }
+  int compareString(bool ascending, String value1, String value2) {
+    int comparison = value1.compareTo(value2);
+    return ascending ? comparison : -comparison; // Reverse if descending
+  }
 
   // this function is to filter the search results for web
   void filterCountries() {

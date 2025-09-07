@@ -108,21 +108,21 @@ Widget tableOfScreens({
     columns: [
       DataColumn(
         label: AutoSizedText(text: 'Code', constraints: constraints),
-        // onSort: controller.onSort,
+        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Flag'),
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Name'),
-        // onSort: controller.onSort,
+        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Calling Code'),
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
-        // onSort: controller.onSort,
+        onSort: controller.onSort,
       ),
       const DataColumn(
         headingRowAlignment: MainAxisAlignment.center,

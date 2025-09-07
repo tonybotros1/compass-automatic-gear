@@ -85,15 +85,15 @@ Widget tableOfScreens({
     columns: [
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Code'),
-        // onSort: controller.onSortForCities,
+        onSort: controller.onSortForCities,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Name'),
-        // onSort: controller.onSortForCities,
+        onSort: controller.onSortForCities,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
-        // onSort: controller.onSortForCities,
+        onSort: controller.onSortForCities,
       ),
       const DataColumn(label: Text('')),
     ],
