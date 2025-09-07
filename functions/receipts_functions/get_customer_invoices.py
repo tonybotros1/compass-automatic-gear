@@ -311,7 +311,7 @@ def get_current_customer_invoices(data: https_fn.CallableRequest) -> dict:
         db = get_db()
 
         job_docs_map = {}
-        job_refs = [db.collection('job_cards').document(job_id)
+        job_refs = [db.collection('job_cards').document(job_id) 
                     for job_id in job_ids]
 
         fetched_job_docs = db.get_all(job_refs)

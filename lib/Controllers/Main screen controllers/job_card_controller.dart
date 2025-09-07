@@ -1,12 +1,13 @@
+// import 'dart:io';
 import 'dart:typed_data';
-
+// import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:datahubai/consts.dart';
+// import 'dart:html' as html;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:datahubai/consts.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../Mobile section controllers/cards_screen_controller.dart';
 import 'main_screen_contro.dart';
@@ -180,6 +181,7 @@ class JobCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    // exportCollectionToJson('job_cards');
     jobWarrentyEndDate.value.addListener(() {
       // Refresh the Rx to notify GetX that something changed
       jobWarrentyEndDate.refresh();
@@ -205,6 +207,46 @@ class JobCardController extends GetxController {
     textFieldFocusNode.dispose();
     super.onClose();
   }
+
+  // Future<void> exportCollectionToJson(String collectionName) async {
+  //   try {
+  //     final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  //     QuerySnapshot snapshot = await firestore
+  //         .collection(collectionName)
+  //         .get();
+
+  //     List<Map<String, dynamic>> data = snapshot.docs.map((doc) {
+  //       Map<String, dynamic> d = doc.data() as Map<String, dynamic>;
+
+  //       // Convert Timestamps
+  //       d = d.map((key, value) {
+  //         if (value is Timestamp) {
+  //           return MapEntry(key, value.toDate().toIso8601String());
+  //         }
+  //         return MapEntry(key, value);
+  //       });
+
+  //       return d;
+  //     }).toList();
+
+  //     String jsonString = const JsonEncoder.withIndent('  ').convert(data);
+
+  //     // ✅ Create download link
+  //     final blob = html.Blob([jsonString], 'application/json');
+  //     final url = html.Url.createObjectUrlFromBlob(blob);
+  //     final anchor = html.AnchorElement(href: url)
+  //       ..setAttribute("download", "$collectionName.json")
+  //       ..click();
+  //     html.Url.revokeObjectUrl(url);
+
+  //     print(
+  //       "✅ Exported ${data.length} docs from '$collectionName' and downloaded",
+  //     );
+  //   } catch (e) {
+  //     print("❌ Error exporting collection: $e");
+  //   }
+  // }
 
   changejobWarrentyEndDateDependingOnWarrentyDays() {
     DateTime date = format.parse(deliveryDate.value.text);

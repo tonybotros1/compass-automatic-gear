@@ -1,4 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/countries_controller.dart';
+import 'package:datahubai/Models/countries/cities_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,10 +23,16 @@ Widget citiesSection({
         GetX<CountriesController>(
           builder: (controller) {
             return searchBar(
+              onChanged: (_) {
+                controller.filterCities();
+              },
+              onPressedForClearSearch: () {
+                controller.searchForCities.value.clear();
+                controller.filterCities();
+              },
               search: controller.searchForCities,
               constraints: constraints,
               context: context,
-              // controller: controller,
               title: 'Search for cities',
               button: newCityButton(context, constraints, controller),
             );
@@ -35,14 +42,10 @@ Widget citiesSection({
           child: GetX<CountriesController>(
             builder: (controller) {
               if (controller.loadingcities.value) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
               if (controller.allCities.isEmpty) {
-                return const Center(
-                  child: Text('No Element'),
-                );
+                return const Center(child: Text('No Element'));
               }
               return SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -63,10 +66,11 @@ Widget citiesSection({
   );
 }
 
-Widget tableOfScreens(
-    {required constraints,
-    required context,
-    required CountriesController controller}) {
+Widget tableOfScreens({
+  required constraints,
+  required context,
+  required CountriesController controller,
+}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -80,161 +84,176 @@ Widget tableOfScreens(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Code',
-        ),
-        onSort: controller.onSortForCities,
+        label: AutoSizedText(constraints: constraints, text: 'Code'),
+        // onSort: controller.onSortForCities,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Name',
-        ),
-        onSort: controller.onSortForCities,
+        label: AutoSizedText(constraints: constraints, text: 'Name'),
+        // onSort: controller.onSortForCities,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
-        onSort: controller.onSortForCities,
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
+        // onSort: controller.onSortForCities,
       ),
       const DataColumn(label: Text('')),
     ],
-    rows: controller.filteredCities.isEmpty &&
+    rows:
+        controller.filteredCities.isEmpty &&
             controller.searchForCities.value.text.isEmpty
         ? controller.allCities.map<DataRow>((city) {
-            final cityData = city.data() as Map<String, dynamic>;
             final cityId = city.id;
             return dataRowForTheTable(
-                cityData, context, constraints, cityId, controller);
+              city,
+              context,
+              constraints,
+              cityId,
+              controller,
+            );
           }).toList()
         : controller.filteredCities.map<DataRow>((city) {
-            final cityData = city.data() as Map<String, dynamic>;
             final cityId = city.id;
             return dataRowForTheTable(
-                cityData, context, constraints, cityId, controller);
+              city,
+              context,
+              constraints,
+              cityId,
+              controller,
+            );
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> cityData, context, constraints,
-    String cityId, CountriesController controller) {
-  return DataRow(cells: [
-    DataCell(
-      Text(
-        cityData['code'] ?? 'no code',
-      ),
-    ),
-    DataCell(
-      Text(
-        cityData['name'] ?? 'no city',
-      ),
-    ),
-    DataCell(
-      Text(
-        cityData['added_date'] != null
-            ? textToDate(cityData['added_date'])
-            : 'N/A',
-      ),
-    ),
-    DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        activeInActiveSection(cityData, controller, cityId),
-        Padding(
-          padding: const EdgeInsets.only(left: 5, right: 5),
-          child:
-              editSection(controller, cityData, context, constraints, cityId),
+DataRow dataRowForTheTable(
+  City cityData,
+  context,
+  constraints,
+  String cityId,
+  CountriesController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(Text(cityData.code)),
+      DataCell(Text(cityData.name)),
+      DataCell(Text(textToDate(cityData.createdAt))),
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            activeInActiveSection(cityData, controller, cityId),
+            Padding(
+              padding: const EdgeInsets.only(left: 5, right: 5),
+              child: editSection(
+                controller,
+                cityData,
+                context,
+                constraints,
+                cityId,
+              ),
+            ),
+            deleteSection(context, controller, cityId),
+          ],
         ),
-        deleteSection(context, controller, cityId),
-      ],
-    )),
-  ]);
+      ),
+    ],
+  );
 }
 
 ElevatedButton deleteSection(context, CountriesController controller, cityId) {
   return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: 'The city will be deleted permanently',
-            onPressed: () {
-              controller.deleteCity(
-                  controller.countryIdToWorkWith.value, cityId);
-            });
-      },
-      child: const Text('Delete'));
+    style: deleteButtonStyle,
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: 'The city will be deleted permanently',
+        onPressed: () {
+          controller.deleteCity(cityId);
+        },
+      );
+    },
+    child: const Text('Delete'),
+  );
 }
 
-ElevatedButton editSection(CountriesController controller,
-    Map<String, dynamic> cityData, context, constraints, String cityId) {
+ElevatedButton editSection(
+  CountriesController controller,
+  City cityData,
+  context,
+  constraints,
+  String cityId,
+) {
   return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () {
-        controller.cityName.text = cityData['name'];
-        controller.cityCode.text = cityData['code'];
-        cititesDialog(
-            constraints: constraints,
-            controller: controller,
-            onPressed: controller.addingNewCityValue.value
-                ? null
-                : () async {
-                    if (!controller.formKeyForAddingNewvalue.currentState!
-                        .validate()) {
-                    } else {
-                      controller.editcity(
-                          controller.countryIdToWorkWith.value, cityId);
-                    }
-                  },
-            isEnabled: false);
-      },
-      child: const Text('Edit'));
+    style: editButtonStyle,
+    onPressed: () {
+      controller.cityName.text = cityData.name;
+      controller.cityCode.text = cityData.code;
+      cititesDialog(
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewCityValue.value
+            ? null
+            : () async {
+                if (!controller.formKeyForAddingNewvalue.currentState!
+                    .validate()) {
+                } else {
+                  controller.editCity(cityId);
+                }
+              },
+        isEnabled: false,
+      );
+    },
+    child: const Text('Edit'),
+  );
 }
 
-ElevatedButton activeInActiveSection(Map<String, dynamic> cityData,
-    CountriesController controller, String cityId) {
+ElevatedButton activeInActiveSection(
+  City cityData,
+  CountriesController controller,
+  String cityId,
+) {
   return ElevatedButton(
-      style: cityData['available'] == false
-          ? inActiveButtonStyle
-          : activeButtonStyle,
-      onPressed: () {
-        bool status;
-        if (cityData['available'] == false) {
-          status = true;
-        } else {
-          status = false;
-        }
-        controller.editHideOrUnhide(
-            controller.countryIdToWorkWith.value, cityId, status);
-      },
-      child: cityData['available'] == true
-          ? const Text('Active')
-          : const Text('Inactive'));
+    style: cityData.available == false
+        ? inActiveButtonStyle
+        : activeButtonStyle,
+    onPressed: () {
+      bool status;
+      if (cityData.available == false) {
+        status = true;
+      } else {
+        status = false;
+      }
+      controller.changeCityStatus(cityId, status);
+    },
+    child: cityData.available == true
+        ? const Text('Active')
+        : const Text('Inactive'),
+  );
 }
 
-ElevatedButton newCityButton(BuildContext context, BoxConstraints constraints,
-    CountriesController controller) {
+ElevatedButton newCityButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  CountriesController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.cityName.clear();
       controller.cityCode.clear();
       cititesDialog(
-          constraints: constraints,
-          controller: controller,
-          onPressed: controller.addingNewCityValue.value
-              ? null
-              : () async {
-                  if (!controller.formKeyForAddingNewvalue.currentState!
-                      .validate()) {
-                  } else {
-                    await controller
-                        .addNewCity(controller.countryIdToWorkWith.value);
-                  }
-                },
-          isEnabled: true);
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewCityValue.value
+            ? null
+            : () async {
+                if (!controller.formKeyForAddingNewvalue.currentState!
+                    .validate()) {
+                } else {
+                  await controller.addNewCity(
+                    controller.countryIdToWorkWith.value,
+                  );
+                }
+              },
+        isEnabled: true,
+      );
     },
     style: newButtonStyle,
     child: const Text('New City'),

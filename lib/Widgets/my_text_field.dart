@@ -48,88 +48,87 @@ Widget myTextFormFieldWithBorder({
                 ),
               )
             : const SizedBox(),
-        SizedBox(
-          height: maxLines == 1 ? textFieldHeight : null,
-          child: TextFormField(
-            onEditingComplete: onEditingComplete,
-            textInputAction: textInputAction,
-            focusNode: focusNode,
-            onFieldSubmitted: onFieldSubmitted,
-            textAlign: textAlign!,
-            initialValue: initialValue,
-            style: textFieldFontStyle,
-            onTap: () {
-              if (controller != null) {
-                controller.selection = TextSelection(
-                  baseOffset: 0,
-                  extentOffset: controller.text.length,
-                );
-              }
-            },
-            minLines: minLines,
-            maxLines: maxLines,
-            onChanged: onChanged,
-            inputFormatters: isnumber == true
-                ? [FilteringTextInputFormatter.digitsOnly]
-                : isDouble == true
-                ? [DecimalTextInputFormatter()]
-                : isDate == true
-                ? [DateTextFormatter()]
-                : isCapitaLetters == true
-                ? [CapitalLettersOnlyFormatter()]
-                : [WordCapitalizationInputFormatter()],
-            enabled: isEnabled,
-            obscureText: obscureText,
-            keyboardType: keyboardType,
-            controller: controller,
-            decoration: InputDecoration(
-              contentPadding: maxLines == 1
-                  ? const EdgeInsets.only(left: 10, right: 10)
-                  : const EdgeInsets.all(10),
-              icon: icon,
-              suffixIcon: suffixIcon,
-              hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-              // labelText: labelText,
-              alignLabelWithHint: true,
-
-              // hintText: hintText,
-              labelStyle: TextStyle(
-                color: isEnabled == false
-                    ? Colors.grey.shade500
-                    : Colors.grey.shade700,
-              ),
-              filled: isEnabled == true,
-              fillColor: Colors.grey.shade200,
-              focusedBorder: const OutlineInputBorder(
-                // borderRadius: BorderRadius.circular(borderRadius!),
-                borderSide: BorderSide(color: Colors.grey, width: 2.0),
-              ),
-              enabledBorder: const OutlineInputBorder(
-                // borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(color: Colors.grey, width: 1.0),
-              ),
-              disabledBorder: OutlineInputBorder(
-                // borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
-              ),
-              errorBorder: const OutlineInputBorder(
-                // borderRadius: BorderRadius.circular(5),
-                borderSide: BorderSide(color: Colors.red, width: 1.0),
-              ),
-              focusedErrorBorder: const OutlineInputBorder(
-                // borderRadius: BorderRadius.circular(5),
-                borderSide: BorderSide(color: Colors.red, width: 2.0),
-              ),
+        TextFormField(
+          onEditingComplete: onEditingComplete,
+          textInputAction: textInputAction,
+          focusNode: focusNode,
+          onFieldSubmitted: onFieldSubmitted,
+          textAlign: textAlign!,
+          initialValue: initialValue,
+          style: textFieldFontStyle,
+          onTap: () {
+            if (controller != null) {
+              controller.selection = TextSelection(
+                baseOffset: 0,
+                extentOffset: controller.text.length,
+              );
+            }
+          },
+          minLines: minLines,
+          maxLines: maxLines,
+          onChanged: onChanged,
+          inputFormatters: isnumber == true
+              ? [FilteringTextInputFormatter.digitsOnly]
+              : isDouble == true
+              ? [DecimalTextInputFormatter()]
+              : isDate == true
+              ? [DateTextFormatter()]
+              : isCapitaLetters == true
+              ? [CapitalLettersOnlyFormatter()]
+              : [WordCapitalizationInputFormatter()],
+          enabled: isEnabled,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          controller: controller,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 10,
             ),
-            validator: validate != false
-                ? (value) {
-                    if (value!.isEmpty) {
-                      return 'Please Enter $labelText';
-                    }
-                    return null;
-                  }
-                : null,
+            isDense: true,
+            icon: icon,
+            suffixIcon: suffixIcon,
+            hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+            // labelText: labelText,
+            alignLabelWithHint: true,
+        
+            // hintText: hintText,
+            labelStyle: TextStyle(
+              color: isEnabled == false
+                  ? Colors.grey.shade500
+                  : Colors.grey.shade700,
+            ),
+            filled: isEnabled == true,
+            fillColor: Colors.grey.shade200,
+            focusedBorder: const OutlineInputBorder(
+              // borderRadius: BorderRadius.circular(borderRadius!),
+              borderSide: BorderSide(color: Colors.grey, width: 2.0),
+            ),
+            enabledBorder: const OutlineInputBorder(
+              // borderRadius: BorderRadius.circular(borderRadius),
+              borderSide: BorderSide(color: Colors.grey, width: 1.0),
+            ),
+            disabledBorder: OutlineInputBorder(
+              // borderRadius: BorderRadius.circular(borderRadius),
+              borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+            ),
+            errorBorder: const OutlineInputBorder(
+              // borderRadius: BorderRadius.circular(5),
+              borderSide: BorderSide(color: Colors.red, width: 1.0),
+            ),
+            focusedErrorBorder: const OutlineInputBorder(
+              // borderRadius: BorderRadius.circular(5),
+              borderSide: BorderSide(color: Colors.red, width: 2.0),
+            ),
           ),
+          validator: validate != false
+              ? (value) {
+                  if (value!.isEmpty) {
+                    return 'Please Enter $labelText';
+                  }
+                  return null;
+                }
+              : null,
         ),
       ],
     ),

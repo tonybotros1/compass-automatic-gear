@@ -156,7 +156,7 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton deleteSection(context, CarBrandsController controller, modelId) {
+ElevatedButton deleteSection(context, CarBrandsController controller,String modelId) {
   return ElevatedButton(
     style: deleteButtonStyle,
     onPressed: () {
@@ -164,7 +164,7 @@ ElevatedButton deleteSection(context, CarBrandsController controller, modelId) {
         context: context,
         content: 'The model will be deleted permanently',
         onPressed: () {
-          controller.deleteModel(controller.brandIdToWorkWith.value, modelId);
+          controller.deleteModel(modelId);
         },
       );
     },
@@ -192,8 +192,7 @@ ElevatedButton editSection(
                 if (!controller.formKeyForAddingNewvalue.currentState!
                     .validate()) {
                 } else {
-                  controller.editmodel(
-                    controller.brandIdToWorkWith.value,
+                  controller.editModel(
                     modelId,
                   );
                 }

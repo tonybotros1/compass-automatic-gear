@@ -1,14 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/web_functions.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:http/http.dart' as http;
-
 import '../../Models/brands/brand_model.dart';
 import '../../Models/brands/brand_nodel_model.dart';
 import '../../consts.dart';
@@ -47,12 +42,7 @@ class CarBrandsController extends GetxController {
   void onInit() {
     connectWebSocket();
     getCarBrands();
-    // search.value.addListener(() {
-    //   filterBrands();
-    // });
-    // searchForModels.value.addListener(() {
-    //   filterModels();
-    // });
+
     super.onInit();
   }
 
@@ -106,6 +96,11 @@ class CarBrandsController extends GetxController {
           if (index != -1) {
             allModels[index] = updated;
           }
+          break;
+
+        case "model_deleted":
+          final deletedId = message["data"]["_id"];
+          allModels.removeWhere((m) => m.id == deletedId);
           break;
       }
     });
@@ -169,11 +164,13 @@ class CarBrandsController extends GetxController {
       } else {
         addingNewValue.value = false;
         Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
       }
     } catch (e) {
       // print(e);
       addingNewValue.value = false;
       Get.back();
+      showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
 
@@ -245,9 +242,10 @@ class CarBrandsController extends GetxController {
       } else {
         addingNewValue.value = false;
         Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
       }
     } catch (e) {
-      // print(e);
+      showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
 
@@ -299,6 +297,47 @@ class CarBrandsController extends GetxController {
       );
     } catch (e) {
       //
+    }
+  }
+
+  deleteModel(String modelId) async {
+    try {
+      var url = Uri.parse('$backendTestURI/brands/delete_model/$modelId');
+      final response = await http.delete(url);
+      if (response.statusCode == 200) {
+        Get.back();
+        showSnackBar('Done', 'Model deleted Successfully');
+      } else if (response.statusCode == 404) {
+        Get.back();
+        showSnackBar('Alert', 'Model not found');
+      } else {
+        Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
+      }
+    } catch (e) {
+      Get.back();
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  editModel(String modelId) async {
+    try {
+      var url = Uri.parse('$backendTestURI/brands/edit_model/$modelId');
+
+      final response = await http.patch(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"name": modelName.text}),
+      );
+      if (response.statusCode == 200) {
+        Get.back();
+        showSnackBar('Done', 'Model updated Successfully');
+      } else {
+        Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
+      }
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
   // // this function is to sort data in table
@@ -558,33 +597,33 @@ class CarBrandsController extends GetxController {
   //   }
   // }
 
-  deleteModel(brandId, modelId) {
-    try {
-      Get.back();
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .doc(modelId)
-          .delete();
-    } catch (e) {
-      //
-    }
-  }
+  // deleteModel(brandId, modelId) {
+  //   try {
+  //     Get.back();
+  //     FirebaseFirestore.instance
+  //         .collection('all_brands')
+  //         .doc(brandId)
+  //         .collection('values')
+  //         .doc(modelId)
+  //         .delete();
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
 
-  editmodel(brandId, modelId) {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .doc(modelId)
-          .update({'name': modelName.text});
-      Get.back();
-    } catch (e) {
-      //
-    }
-  }
+  // editmodel(brandId, modelId) {
+  //   try {
+  //     FirebaseFirestore.instance
+  //         .collection('all_brands')
+  //         .doc(brandId)
+  //         .collection('values')
+  //         .doc(modelId)
+  //         .update({'name': modelName.text});
+  //     Get.back();
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
 
   // editHideOrUnhide(brandId, modelId, status) async {
   //   try {
