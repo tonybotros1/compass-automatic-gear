@@ -109,7 +109,7 @@ class BanksAndOthersController extends GetxController {
     return ascending ? comparison : -comparison;
   }
 
-  clearValues() {
+  void clearValues() {
     accountName.value.clear();
     accountNumber.value.clear();
     currency.value.clear();
@@ -119,7 +119,7 @@ class BanksAndOthersController extends GetxController {
     countryId.value = '';
   }
 
-  loadValues(Map data) {
+  void loadValues(Map data) {
     accountName.value.text = data['account_name'];
     accountNumber.value.text = data['account_number'];
     currency.value.text = currencyNames[data['country_id']]!;
@@ -129,18 +129,18 @@ class BanksAndOthersController extends GetxController {
     accountTypeId.value = data['account_type'];
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  getAllBanks() {
+  void getAllBanks() {
     try {
       FirebaseFirestore.instance
           .collection('all_banks')
@@ -155,7 +155,7 @@ class BanksAndOthersController extends GetxController {
     }
   }
 
-  getCurrencies() {
+  void getCurrencies() {
     FirebaseFirestore.instance
         .collection('currencies')
         .snapshots()
@@ -169,7 +169,7 @@ class BanksAndOthersController extends GetxController {
   }
 
   // this function is to get colors
-  getAccountTypes() async {
+  Future<void> getAccountTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'ACCOUNTS_TYPES')
@@ -190,7 +190,7 @@ class BanksAndOthersController extends GetxController {
     });
   }
 
-  getCurrencyName(countryId) async {
+  Future getCurrencyName(String countryId) async {
     if (currencyNames.containsKey(countryId)) {
       return currencyNames[countryId]!;
     }
@@ -213,7 +213,7 @@ class BanksAndOthersController extends GetxController {
     }
   }
 
-  addNewBank() {
+  void addNewBank() {
     try {
       addingNewValue.value = true;
       FirebaseFirestore.instance.collection('all_banks').add({
@@ -234,7 +234,7 @@ class BanksAndOthersController extends GetxController {
     }
   }
 
-  editBank(bankId) {
+  void editBank(String bankId) {
     try {
       FirebaseFirestore.instance.collection('all_banks').doc(bankId).update({
         'account_name': accountName.value.text,
@@ -250,7 +250,7 @@ class BanksAndOthersController extends GetxController {
     }
   }
 
-  deleteBank(bankId) {
+  void deleteBank(String bankId) {
     try {
       FirebaseFirestore.instance.collection('all_banks').doc(bankId).delete();
       Get.back();

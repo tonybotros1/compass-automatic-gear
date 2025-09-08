@@ -49,7 +49,7 @@ Future<dynamic> receivigDialog({
                               spacing: 20,
                               children: [
                                 Text(
-                                  '${controller.getScreenName()}',
+                                  controller.getScreenName(),
                                   style: fontStyleForScreenNameUsedInButtons,
                                 ),
                                 controller.status.value.isNotEmpty

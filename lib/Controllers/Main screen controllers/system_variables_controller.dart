@@ -26,7 +26,7 @@ class SystemVariablesController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -80,7 +80,7 @@ class SystemVariablesController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  addNewVariable() async {
+  Future<void> addNewVariable() async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance.collection('system_variables').add({
@@ -95,7 +95,7 @@ class SystemVariablesController extends GetxController {
     }
   }
 
-  deleteVariable(variableId) async {
+  Future<void> deleteVariable(String variableId) async {
     try {
       await FirebaseFirestore.instance
           .collection('system_variables')
@@ -108,7 +108,7 @@ class SystemVariablesController extends GetxController {
     }
   }
 
-  editVariable(variableId) async {
+  Future<void> editVariable(String variableId) async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance
@@ -127,7 +127,7 @@ class SystemVariablesController extends GetxController {
   }
 
 // this functions is to get all variables
-  getVariables() {
+  void getVariables() {
     try {
       FirebaseFirestore.instance
           .collection('system_variables')

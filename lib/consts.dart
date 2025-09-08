@@ -549,7 +549,7 @@ var closeButton = ElevatedButton(
 );
 
 // snack bar
-void showSnackBar(title, body) {
+void showSnackBar(String title,String body) {
   Get.snackbar(
     title,
     body,
@@ -568,7 +568,7 @@ void showSnackBar(title, body) {
 }
 
 Future<dynamic> alertMessage({
-  required context,
+  required BuildContext context,
   required String content,
   required void Function() onPressed,
 }) {
@@ -583,7 +583,7 @@ Future<dynamic> alertMessage({
 }
 
 Future<dynamic> alertDialog({
-  required context,
+  required BuildContext context,
   required String content,
   required void Function() onPressed,
 }) {
@@ -936,7 +936,7 @@ RxMap allStatus = RxMap({
   '3': {'name': 'Cancelled'},
 });
 
-normalizeDate(String input, TextEditingController date) {
+bool normalizeDate(String input, TextEditingController date) {
   final raw = input.trim();
   if (raw.isEmpty) return false;
 

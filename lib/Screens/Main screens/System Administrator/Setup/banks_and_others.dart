@@ -79,8 +79,8 @@ class BanksAndOthers extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required BanksAndOthersController controller}) {
   return DataTable(
     horizontalMargin: horizontalMarginForTable,
@@ -205,7 +205,7 @@ ElevatedButton deleteSection(
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, BanksAndOthersController controller,
+ElevatedButton editSection(BuildContext context, BanksAndOthersController controller,
     Map<String, dynamic> bankData, constraints, bankId) {
   return ElevatedButton(
       style: editButtonStyle,
@@ -236,7 +236,7 @@ ElevatedButton newbankesButton(BuildContext context,
           onPressed: controller.addingNewValue.value
               ? null
               : () async {
-                  await controller.addNewBank();
+                  controller.addNewBank();
                 });
     },
     style: newButtonStyle,

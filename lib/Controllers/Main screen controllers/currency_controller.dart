@@ -36,7 +36,7 @@ class CurrencyController extends GetxController {
     super.onInit();
   }
 
-   getScreenName() {
+   String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -102,7 +102,7 @@ class CurrencyController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  getAllCurrencies() {
+  void getAllCurrencies() {
     try {
       FirebaseFirestore.instance
           .collection('currencies')
@@ -117,12 +117,12 @@ class CurrencyController extends GetxController {
     }
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  addNewCurrency() async {
+  Future<void> addNewCurrency() async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance.collection('currencies').add({
@@ -139,7 +139,7 @@ class CurrencyController extends GetxController {
     }
   }
 
-  editCurrency(currencyId) async {
+  Future<void> editCurrency(String currencyId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -155,7 +155,7 @@ class CurrencyController extends GetxController {
   }
 
 // this functions is to change the counter status from active / inactive
-  changeCurrencyStatus(currencyId, status) async {
+  Future<void> changeCurrencyStatus(String currencyId,bool status) async {
     try {
       await FirebaseFirestore.instance
           .collection('currencies')
@@ -166,7 +166,7 @@ class CurrencyController extends GetxController {
     }
   }
 
-  deleteCurrency(currencyId) async {
+  Future<void> deleteCurrency(String currencyId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -178,7 +178,7 @@ class CurrencyController extends GetxController {
     }
   }
 
-  getCurrencyFromCountries() {
+  void getCurrencyFromCountries() {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')

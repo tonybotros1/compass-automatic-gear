@@ -3,7 +3,7 @@ import '../../../Controllers/Main screen controllers/quotation_card_controller.d
 import '../../../consts.dart';
 import '../../my_text_field.dart';
 
-Container quotationsSection(context, QuotationCardController controller) {
+Container quotationsSection(BuildContext context, QuotationCardController controller) {
   return Container(
       padding: const EdgeInsets.all(20),
       decoration: containerDecor,

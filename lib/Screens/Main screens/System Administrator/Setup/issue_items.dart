@@ -121,7 +121,7 @@ class IssueItems extends StatelessWidget {
                                       controller: controller.fromDate.value,
                                       labelText: 'From Date',
                                       onFieldSubmitted: (_) async {
-                                        await normalizeDate(
+                                        normalizeDate(
                                           controller.fromDate.value.text,
                                           controller.fromDate.value,
                                         );
@@ -135,7 +135,7 @@ class IssueItems extends StatelessWidget {
                                       controller: controller.toDate.value,
                                       labelText: 'To Date',
                                       onFieldSubmitted: (_) async {
-                                        await normalizeDate(
+                                        normalizeDate(
                                           controller.toDate.value.text,
                                           controller.toDate.value,
                                         );

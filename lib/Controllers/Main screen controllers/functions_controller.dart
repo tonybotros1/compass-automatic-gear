@@ -31,7 +31,7 @@ class FunctionsController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -67,7 +67,7 @@ class FunctionsController extends GetxController {
     });
   }
 
-  getScreens() async {
+  Future<void> getScreens() async {
     try {
       isScreenLoding.value = true;
       var url = Uri.parse('$backendTestURI/functions/get_screens');
@@ -88,7 +88,7 @@ class FunctionsController extends GetxController {
     }
   }
 
-  addNewScreen() async {
+  Future<void> addNewScreen() async {
     try {
       addingNewScreenProcess.value = true;
 
@@ -119,7 +119,7 @@ class FunctionsController extends GetxController {
     }
   }
 
-  deleteScreen(String screenId) async {
+  Future<void> deleteScreen(String screenId) async {
     try {
       var url = Uri.parse('$backendUrl/functions/delete_screen/$screenId');
       final response = await http.delete(url);
@@ -136,7 +136,7 @@ class FunctionsController extends GetxController {
     }
   }
 
-  editScreen(String screenId) async {
+  Future<void> editScreen(String screenId) async {
     try {
       addingNewScreenProcess.value = true;
 

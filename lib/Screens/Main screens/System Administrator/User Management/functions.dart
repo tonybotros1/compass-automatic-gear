@@ -113,8 +113,8 @@ ElevatedButton newScreenButton(
 }
 
 Widget tableOfScreens({
-  required constraints,
-  required context,
+  required BoxConstraints constraints,
+  required BuildContext context,
   required FunctionsController controller,
 }) {
   return DataTable(
@@ -206,7 +206,7 @@ DataRow dataRowForTheTable(
 }
 
 ElevatedButton deleteSection(
-  context,
+  BuildContext context,
   FunctionsController controller,
   screenId,
 ) {
@@ -226,7 +226,7 @@ ElevatedButton deleteSection(
 }
 
 ElevatedButton editSection(
-  context,
+  BuildContext context,
   FunctionsController controller,
   FunctionsModel screenData,
   constraints,

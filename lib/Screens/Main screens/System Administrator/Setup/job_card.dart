@@ -137,7 +137,7 @@ class JobCard extends StatelessWidget {
                                 controller: controller.fromDate.value,
                                 labelText: 'From Date',
                                 onFieldSubmitted: (_) async {
-                                  await normalizeDate(
+                                  normalizeDate(
                                       controller.fromDate.value.text,
                                       controller.fromDate.value);
                                   // if (nor) {
@@ -150,7 +150,7 @@ class JobCard extends StatelessWidget {
                                 controller: controller.toDate.value,
                                 labelText: 'To Date',
                                 onFieldSubmitted: (_) async {
-                                  await normalizeDate(
+                                  normalizeDate(
                                       controller.toDate.value.text,
                                       controller.toDate.value);
                                   // if (nor) {
@@ -245,7 +245,7 @@ class JobCard extends StatelessWidget {
                                   onPressed:
                                       controller.isThisYearSelected.isFalse
                                           ? () async {
-                                              await controller.removeFilters();
+                                              controller.removeFilters();
                                               controller.searchEngine();
                                             }
                                           : null,
@@ -695,7 +695,7 @@ Widget editSection(BuildContext context, Map<String, dynamic> jobData,
                 controller.setButtonLoading(jobId, true);
 
                 try {
-                  await controller.getAllInvoiceItems(jobId);
+                  controller.getAllInvoiceItems(jobId);
                   controller.currentCountryVAT.value = controller.getdataName(
                     controller.companyDetails['contact_details']['country'],
                     controller.allCountries,
@@ -917,7 +917,7 @@ ElevatedButton newJobCardButton(BuildContext context,
                                     spacing: 10,
                                     children: [
                                       Text(
-                                        '${controller.getScreenName()}',
+                                        controller.getScreenName(),
                                         style:
                                             fontStyleForScreenNameUsedInButtons,
                                       ),

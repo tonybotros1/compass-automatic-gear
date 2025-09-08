@@ -52,12 +52,12 @@ class TimeSheetsController extends GetxController {
     super.onClose();
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  bool hasActiveTask(employeeId) {
+  bool hasActiveTask(String employeeId) {
     final hasActiveJob = allTimeSheets.any((doc) {
       if (doc['employee_id'] != employeeId) return false;
 
@@ -121,7 +121,7 @@ class TimeSheetsController extends GetxController {
     }
   }
 
-  startFunction() async {
+  Future<void> startFunction() async {
     try {
       startSheet.value = true;
       final now = Timestamp.now();
@@ -228,7 +228,7 @@ class TimeSheetsController extends GetxController {
     await batch.commit();
   }
 
-  getAllTimeSheets() {
+  void getAllTimeSheets() {
     try {
       isScreenLoadingForTimesheets.value = true;
       FirebaseFirestore.instance
@@ -246,7 +246,7 @@ class TimeSheetsController extends GetxController {
     }
   }
 
-  getAllTechnicians() {
+  void getAllTechnicians() {
     try {
       isScreenLoding.value = true;
       FirebaseFirestore.instance
@@ -263,7 +263,7 @@ class TimeSheetsController extends GetxController {
     }
   }
 
-  getAllJobTasks() {
+  void getAllJobTasks() {
     try {
       isScreenLodingForJobTasks.value = true;
       FirebaseFirestore.instance
@@ -335,7 +335,7 @@ class TimeSheetsController extends GetxController {
     });
   }
 
-  getCarBrands() {
+  void getCarBrands() {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -366,7 +366,7 @@ class TimeSheetsController extends GetxController {
   }
 
 // this function is to get colors
-  getColors() async {
+  Future<void> getColors() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'COLORS')

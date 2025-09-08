@@ -79,8 +79,8 @@ class EntityInformations extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required EntityInformationsController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
@@ -183,7 +183,7 @@ ElevatedButton deleteSection(
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, EntityInformationsController controller,
+ElevatedButton editSection(BuildContext context, EntityInformationsController controller,
     Map<String, dynamic> entityData, constraints, entityId) {
   return ElevatedButton(
       style: editButtonStyle,

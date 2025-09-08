@@ -42,16 +42,16 @@ class CardDetailsController extends GetxController {
 
   @override
   void onInit() async {
-    await getDetails();
+    getDetails();
     await getImagesGroupedByDate(carImages);
     super.onInit();
   }
 
-  clearVariables() {
+  void clearVariables() {
     controller.clearAllValues();
   }
 
-  loadVariables() {
+  void loadVariables() {
     controller.imagesList.clear();
     controller.currenyJobId.value = id;
     controller.inEditMode.value = true;
@@ -256,7 +256,7 @@ class CardDetailsController extends GetxController {
   final customCachedManeger = CacheManager(
       Config('customCacheKey', stalePeriod: const Duration(days: 3)));
 
-  getDetails() {
+  void getDetails() {
     if (Get.arguments != null) {
       CarCardModel arguments = Get.arguments;
       engineType = arguments.engineType!;

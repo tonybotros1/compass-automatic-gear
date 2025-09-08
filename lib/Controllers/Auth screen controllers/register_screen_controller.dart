@@ -59,7 +59,7 @@ class RegisterScreenController extends GetxController {
     super.onInit();
   }
 
-  getCountries() {
+  void getCountries() {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -75,7 +75,7 @@ class RegisterScreenController extends GetxController {
     }
   }
 
-  getCitiesByCountryID(countryID) {
+  void getCitiesByCountryID(String countryID) {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -92,7 +92,7 @@ class RegisterScreenController extends GetxController {
   }
 
   // this function is to remove a menu from the list
-  removeMenuFromList(index) {
+  void removeMenuFromList(int index) {
     roleIDFromList.removeAt(index);
   }
 
@@ -110,7 +110,7 @@ class RegisterScreenController extends GetxController {
   }
 
 // this function is to get Responsibilities
-  getResponsibilities() async {
+  Future<void> getResponsibilities() async {
     var roles = await FirebaseFirestore.instance
         .collection('sys-roles')
         .where('is_shown_for_users', isEqualTo: true)
@@ -140,7 +140,7 @@ class RegisterScreenController extends GetxController {
     }
   }
 
-  selectFromLeftMenu(i) {
+  void selectFromLeftMenu(int i) {
     selectedMenu.value = i;
     for (int index = 0; index < menu.length; index++) {
       menu[index].isPressed = (index == i);
@@ -148,7 +148,7 @@ class RegisterScreenController extends GetxController {
     update();
   }
 
-  goToNextMenu() {
+  void goToNextMenu() {
     selectedMenu.value += 1;
     selectFromLeftMenu(selectedMenu.value);
     update();
@@ -168,7 +168,7 @@ class RegisterScreenController extends GetxController {
     update();
   }
 
-  addNewCompany() async {
+  Future<void> addNewCompany() async {
     try {
       addingProcess.value = true;
 
@@ -257,7 +257,7 @@ class RegisterScreenController extends GetxController {
   }
 
 // this function is to save user id in shared pref
-  saveUserIdAndCompanyIdInSharedPref(userId, companyId) async {
+  Future<void> saveUserIdAndCompanyIdInSharedPref(String userId,String companyId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
     await prefs.setString('companyId', companyId);
@@ -278,7 +278,7 @@ class RegisterScreenController extends GetxController {
   }
 
 // this function is to get the industries
-  getIndustries() async {
+  Future<void> getIndustries() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'INDUSTRIES')

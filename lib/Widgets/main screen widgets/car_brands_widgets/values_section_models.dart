@@ -68,8 +68,8 @@ Widget modelsSection({
 }
 
 Widget tableOfScreens({
-  required constraints,
-  required context,
+  required BoxConstraints constraints,
+  required BuildContext context,
   required CarBrandsController controller,
 }) {
   return DataTable(
@@ -156,7 +156,7 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton deleteSection(context, CarBrandsController controller,String modelId) {
+ElevatedButton deleteSection(BuildContext context, CarBrandsController controller,String modelId) {
   return ElevatedButton(
     style: deleteButtonStyle,
     onPressed: () {

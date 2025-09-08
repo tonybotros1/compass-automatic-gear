@@ -49,13 +49,13 @@ class ListOfValuesController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  getUserEmail() async {
+  Future<void> getUserEmail() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     userEmail.value = prefs.getString('userEmail')!;
   }
@@ -189,7 +189,7 @@ class ListOfValuesController extends GetxController {
     }
   }
 
-  getLists() {
+  void getLists() {
     try {
       var lists = FirebaseFirestore.instance.collection('all_lists');
 
@@ -223,13 +223,12 @@ class ListOfValuesController extends GetxController {
         : '';
   }
 
-  String getValueNameById(listId) {
-    if (listId == null) return '';
+  String getValueNameById(String listId) {
     final entry = valueMap[listId];
     return entry != null && entry.containsKey('name') ? entry['name'] : '';
   }
 
-  getListValues(listId, masterBtId) {
+  void getListValues(String listId,String masterBtId) {
     try {
       loadingValues.value = true;
       valueMap.clear();
@@ -272,7 +271,7 @@ class ListOfValuesController extends GetxController {
   }
 
 // this function is to add new value to the selected list
-  addNewValue(listId) async {
+  Future<void> addNewValue(String listId) async {
     try {
       addingNewListValue.value = true;
       await FirebaseFirestore.instance
@@ -294,7 +293,7 @@ class ListOfValuesController extends GetxController {
   }
 
 // this function is to delete a value from list
-  deleteValue(listId, valueId) async {
+  Future<void> deleteValue(String listId,String valueId) async {
     try {
       await FirebaseFirestore.instance
           .collection('all_lists')
@@ -308,7 +307,7 @@ class ListOfValuesController extends GetxController {
     }
   }
 
-  editValue(listId, valueId) async {
+  Future<void> editValue(String listId,String valueId) async {
     try {
       await FirebaseFirestore.instance
           .collection('all_lists')
@@ -326,7 +325,7 @@ class ListOfValuesController extends GetxController {
     }
   }
 
-  editHideOrUnhide(listId, valueId, bool status) async {
+  Future<void> editHideOrUnhide(String listId,String valueId, bool status) async {
     try {
       await FirebaseFirestore.instance
           .collection('all_lists')
@@ -341,7 +340,7 @@ class ListOfValuesController extends GetxController {
     }
   }
 
-  editPublicOrPrivate(listId, bool status) async {
+  Future<void> editPublicOrPrivate(String listId, bool status) async {
     try {
       await FirebaseFirestore.instance
           .collection('all_lists')
@@ -355,7 +354,7 @@ class ListOfValuesController extends GetxController {
   }
 
 // this function is to add new list
-  addNewList() async {
+  Future<void> addNewList() async {
     try {
       addingNewListProcess.value = true;
       await FirebaseFirestore.instance.collection('all_lists').add({
@@ -373,7 +372,7 @@ class ListOfValuesController extends GetxController {
   }
 
 // thisfunction is to delete a list
-  deleteList(listId) async {
+  Future<void> deleteList(String listId) async {
     try {
       deletingListProcess.value = true;
       await FirebaseFirestore.instance
@@ -388,7 +387,7 @@ class ListOfValuesController extends GetxController {
     }
   }
 
-  editList(listId) async {
+  Future<void> editList(String listId) async {
     try {
       editingListProcess.value = true;
       await FirebaseFirestore.instance

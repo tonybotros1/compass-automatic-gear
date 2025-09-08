@@ -88,8 +88,8 @@ class CarBrands extends StatelessWidget {
 }
 
 Widget tableOfScreens({
-  required constraints,
-  required context,
+  required BoxConstraints constraints,
+  required BuildContext context,
   required CarBrandsController controller,
 }) {
   return DataTable(
@@ -290,7 +290,7 @@ ElevatedButton deleteSection(CarBrandsController controller, brandId, context) {
 }
 
 ElevatedButton editSection(
-  context,
+  BuildContext context,
   CarBrandsController controller,
   Brand brandData,
   constraints,

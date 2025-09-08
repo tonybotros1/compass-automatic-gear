@@ -56,7 +56,7 @@ class CountriesController extends GetxController {
     super.onClose();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -112,7 +112,7 @@ class CountriesController extends GetxController {
 
   // ===================================== Countries Section =============================================
 
-  getAllCountries() async {
+  Future<void> getAllCountries() async {
     try {
       isScreenLoding.value = true;
 
@@ -135,7 +135,7 @@ class CountriesController extends GetxController {
     }
   }
 
-  addNewCountry() async {
+  Future<void> addNewCountry() async {
     try {
       addingNewValue.value = true;
       var url = Uri.parse('$backendUrl/countries/add_new_country');
@@ -174,7 +174,7 @@ class CountriesController extends GetxController {
     }
   }
 
-  changeCountryStatus(String countryId, bool status) async {
+  Future<void> changeCountryStatus(String countryId, bool status) async {
     try {
       var url = Uri.parse(
         '$backendUrl/countries/change_country_status/$countryId',
@@ -194,7 +194,7 @@ class CountriesController extends GetxController {
     }
   }
 
-  deleteCountry(String countryId) async {
+  Future<void> deleteCountry(String countryId) async {
     try {
       var url = Uri.parse('$backendUrl/countries/delete_country/$countryId');
       final response = await http.delete(url);
@@ -213,7 +213,7 @@ class CountriesController extends GetxController {
     }
   }
 
-  editCountry(String countryId) async {
+  Future<void> editCountry(String countryId) async {
     try {
       addingNewValue.value = true;
       var url = Uri.parse('$backendUrl/countries/update_country/$countryId');
@@ -253,7 +253,7 @@ class CountriesController extends GetxController {
 
   // ===================================== Cities Section =============================================
 
-  getCitiesValues(String countryId) async {
+  Future<void> getCitiesValues(String countryId) async {
     try {
       loadingcities.value = true;
       allCities.clear();
@@ -273,7 +273,7 @@ class CountriesController extends GetxController {
     }
   }
 
-  addNewCity(String countryId) async {
+  Future<void> addNewCity(String countryId) async {
     try {
       addingNewCityValue.value = true;
       var url = Uri.parse('$backendUrl/countries/add_new_city/$countryId');
@@ -298,7 +298,7 @@ class CountriesController extends GetxController {
     }
   }
 
-  changeCityStatus(String cityId, bool status) async {
+  Future<void> changeCityStatus(String cityId, bool status) async {
     try {
       var url = Uri.parse('$backendUrl/countries/change_city_status/$cityId');
       final response = await http.patch(
@@ -316,7 +316,7 @@ class CountriesController extends GetxController {
     }
   }
 
-  editCity(String cityId) async {
+  Future<void> editCity(String cityId) async {
     try {
       addingNewCityValue.value = true;
       var url = Uri.parse('$backendUrl/countries/update_city/$cityId');
@@ -340,7 +340,7 @@ class CountriesController extends GetxController {
     }
   }
 
-  deleteCity(String cityID) async {
+  Future<void> deleteCity(String cityID) async {
     try {
       var url = Uri.parse('$backendUrl/countries/delete_city/$cityID');
       final response = await http.delete(url);
@@ -456,7 +456,7 @@ class CountriesController extends GetxController {
   }
 
   // this function is to select an image for logo
-  pickImage() async {
+  Future<void> pickImage() async {
     final imagePicker = ImagePickerService();
     imagePicker.pickImage(imageBytes, flagSelectedError);
   }

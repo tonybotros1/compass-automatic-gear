@@ -33,7 +33,7 @@ class LoginScreenController extends GetxController {
     }
   }
 
-  saveUserIdAndCompanyIdInSharedPref(userId, companyId, userEmail) async {
+  Future<void> saveUserIdAndCompanyIdInSharedPref(String userId,String companyId,String userEmail) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
     await prefs.setString('companyId', companyId);
@@ -52,7 +52,7 @@ class LoginScreenController extends GetxController {
     return dateTime.isBefore(todayOnly) || dateTime.isAtSameMomentAs(todayOnly);
   }
 
-  singIn() async {
+  Future<void> singIn() async {
     try {
       sigingInProcess.value = true;
 

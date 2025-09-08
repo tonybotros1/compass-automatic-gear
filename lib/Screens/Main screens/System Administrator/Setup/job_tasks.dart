@@ -77,8 +77,8 @@ class JobTasks extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required JobTasksController controller}) {
   return DataTable(
     horizontalMargin: horizontalMarginForTable,
@@ -199,7 +199,7 @@ ElevatedButton deleteSection(JobTasksController controller, taskId, context) {
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, JobTasksController controller,
+ElevatedButton editSection(BuildContext context, JobTasksController controller,
     Map<String, dynamic> taskData, constraints, taskId) {
   return ElevatedButton(
       style: editButtonStyle,

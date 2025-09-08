@@ -41,13 +41,13 @@ class CompanyVariablesController extends GetxController {
     super.onInit();
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
   // this function is to get industries
-  getIndustries() async {
+  Future<void> getIndustries() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'INDUSTRIES')
@@ -68,7 +68,7 @@ class CompanyVariablesController extends GetxController {
         });
   }
 
-  getCurrentCompanyInformation() async {
+  Future<void> getCurrentCompanyInformation() async {
     try {
       final companyInfos = await FirebaseFirestore.instance
           .collection('companies')
@@ -92,7 +92,7 @@ class CompanyVariablesController extends GetxController {
     }
   }
 
-  getOwnerInformation(data) async {
+  Future<void> getOwnerInformation(Map data) async {
     Map<String, dynamic> contactDetails =
         data['contact_details'] as Map<String, dynamic>;
 
@@ -124,7 +124,7 @@ class CompanyVariablesController extends GetxController {
     }
   }
 
-  getCity(country, city) async {
+  Future getCity(String country,String city) async {
     final doc = await FirebaseFirestore.instance
         .collection('all_countries')
         .doc(country)
@@ -140,7 +140,7 @@ class CompanyVariablesController extends GetxController {
     }
   }
 
-  getResponsibilitiess() async {
+  Future<void> getResponsibilitiess() async {
     List roles = mainScreenController.userRoles;
     userRoles.clear();
     final roleSnapshot = await FirebaseFirestore.instance

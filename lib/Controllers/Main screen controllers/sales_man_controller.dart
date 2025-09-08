@@ -28,7 +28,7 @@ class SalesManController extends GetxController {
     super.onInit();
   }
 
-   getScreenName() {
+   String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -82,7 +82,7 @@ class SalesManController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  getSalesMan() async {
+  Future<void> getSalesMan() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final companyId = prefs.getString('companyId');
@@ -100,7 +100,7 @@ class SalesManController extends GetxController {
     }
   }
 
-  deleteSaleman(salemanId) async {
+  Future<void> deleteSaleman(String salemanId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -112,7 +112,7 @@ class SalesManController extends GetxController {
     }
   }
 
-  addNewSaleMan() async {
+  Future<void> addNewSaleMan() async {
     try {
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -131,7 +131,7 @@ class SalesManController extends GetxController {
     }
   }
 
-  editSaleMan(saleManId) async {
+  Future<void> editSaleMan(String saleManId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance

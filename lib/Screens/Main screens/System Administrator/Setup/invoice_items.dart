@@ -79,8 +79,8 @@ class InvoiceItems extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required InvoiceItemsController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
@@ -173,7 +173,7 @@ ElevatedButton deleteSection(
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, InvoiceItemsController controller,
+ElevatedButton editSection(BuildContext context, InvoiceItemsController controller,
     Map<String, dynamic> invoiceItemsData, constraints, invoiceItemsId) {
   return ElevatedButton(
       style: editButtonStyle,

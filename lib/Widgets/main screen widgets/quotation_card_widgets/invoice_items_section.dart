@@ -38,8 +38,8 @@ Widget invoiceItemsSection(
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required QuotationCardController controller,
     required String quotationId}) {
   List data = controller.calculateTotals();

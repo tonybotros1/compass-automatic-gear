@@ -29,7 +29,7 @@ Widget deleteJobButton(
       text: 'Delete');
 }
 
-GetBuilder<JobCardController> changeStatusToCancelledButton(jobId) {
+GetBuilder<JobCardController> changeStatusToCancelledButton(String jobId) {
   return GetBuilder<JobCardController>(builder: (controller) {
     return ClickableHoverText(
 
@@ -76,7 +76,7 @@ GetBuilder<JobCardController> changeStatusToPostedButton(
   });
 }
 
-GetBuilder<JobCardController> changeStatusToReadyButton(jobId) {
+GetBuilder<JobCardController> changeStatusToReadyButton(String jobId) {
   return GetBuilder<JobCardController>(builder: (controller) {
     return ClickableHoverText(
 
@@ -122,7 +122,7 @@ GetBuilder<JobCardController> changeStatusToApproveButton(String jobId) {
   });
 }
 
-GetBuilder<JobCardController> changeStatusToNewButton(jobId) {
+GetBuilder<JobCardController> changeStatusToNewButton(String jobId) {
   return GetBuilder<JobCardController>(builder: (controller) {
     return ClickableHoverText(
 
@@ -230,7 +230,7 @@ Widget inspectionFormButton(JobCardController controller, jobId,
       text: 'Inspection Form');
 }
 
-GetBuilder<JobCardController> copyJobButton(jobId, context) {
+GetBuilder<JobCardController> copyJobButton(String jobId,BuildContext context) {
   return GetBuilder<JobCardController>(builder: (controller) {
     return ClickableHoverText(
         // style: copyJobButtonStyle,
@@ -244,7 +244,7 @@ GetBuilder<JobCardController> copyJobButton(jobId, context) {
             showSnackBar('Copying', 'Please Wait');
 
             var newData = await controller.copyJob(jobId);
-            await controller.getAllInvoiceItems(newData['newId']);
+            controller.getAllInvoiceItems(newData['newId']);
             await controller.loadValues(newData['data']);
             controller.loadingCopyJob.value = false;
             editJobCardDialog(controller, newData['data'], newData['newId']);

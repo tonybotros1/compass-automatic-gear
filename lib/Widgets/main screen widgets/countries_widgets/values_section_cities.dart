@@ -67,8 +67,8 @@ Widget citiesSection({
 }
 
 Widget tableOfScreens({
-  required constraints,
-  required context,
+  required BoxConstraints constraints,
+  required BuildContext context,
   required CountriesController controller,
 }) {
   return DataTable(
@@ -158,7 +158,7 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton deleteSection(context, CountriesController controller, cityId) {
+ElevatedButton deleteSection(BuildContext context, CountriesController controller,String cityId) {
   return ElevatedButton(
     style: deleteButtonStyle,
     onPressed: () {

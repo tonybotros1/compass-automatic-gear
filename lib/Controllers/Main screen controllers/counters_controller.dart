@@ -32,7 +32,7 @@ class CountersController extends GetxController {
     super.onInit();
   }
 
-   getScreenName() {
+   String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -110,7 +110,7 @@ class CountersController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  getAllCounters() async {
+  Future<void> getAllCounters() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final companyId = prefs.getString('companyId');
@@ -128,7 +128,7 @@ class CountersController extends GetxController {
     }
   }
 
-  addNewCounter() async {
+  Future<void> addNewCounter() async {
     try {
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -151,7 +151,7 @@ class CountersController extends GetxController {
     }
   }
 
-  deleteCounter(counterId) async {
+  Future<void> deleteCounter(String counterId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -163,7 +163,7 @@ class CountersController extends GetxController {
     }
   }
 
-  editCounter(counterId) async {
+  Future<void> editCounter(String counterId) async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance
@@ -185,7 +185,7 @@ class CountersController extends GetxController {
   }
 
 // this functions is to change the counter status from active / inactive
-  changeCounterStatus(counterId, status) async {
+  Future<void> changeCounterStatus(String counterId,bool status) async {
     try {
       await FirebaseFirestore.instance
           .collection('counters')

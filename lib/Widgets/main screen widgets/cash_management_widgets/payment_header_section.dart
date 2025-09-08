@@ -35,7 +35,7 @@ Widget paymentHeader(BuildContext context) {
                   isDate: true,
                   labelText: 'Payment Date',
                   onFieldSubmitted: (_) async {
-                    await normalizeDate(controller.paymentDate.value.text,
+                    normalizeDate(controller.paymentDate.value.text,
                         controller.paymentDate.value);
                   },
                 ),

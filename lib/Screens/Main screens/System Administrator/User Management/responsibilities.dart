@@ -36,7 +36,10 @@ class Responsibilities extends StatelessWidget {
                         // controller: controller,
                         title: 'Search for responsibilities',
                         button: newResponsibilityButton(
-                            context, constraints, controller),
+                          context,
+                          constraints,
+                          controller,
+                        ),
                       );
                     },
                   ),
@@ -49,9 +52,7 @@ class Responsibilities extends StatelessWidget {
                           );
                         }
                         if (controller.allResponsibilities.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
+                          return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
                           scrollDirection: Axis
@@ -79,35 +80,39 @@ class Responsibilities extends StatelessWidget {
 }
 
 ElevatedButton newResponsibilityButton(
-    context, constraints, ResponsibilitiesController controller) {
+  BuildContext context,
+  BoxConstraints constraints,
+  ResponsibilitiesController controller,
+) {
   return ElevatedButton(
-      onPressed: () async {
-        controller.responsibilityName.clear();
-        controller.menuName.clear();
-        responsibilitiesDialog(
-            constraints: constraints,
-            controller: controller,
-            onPressed: controller.addingNewResponsibilityProcess.value
-                ? null
-                : () async {
-                    await controller.addNewResponsibility();
-                  });
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-        ),
-        minimumSize: const Size(180, 40),
-      ),
-      child: const Text('New Responsibility'));
+    onPressed: () async {
+      controller.responsibilityName.clear();
+      controller.menuName.clear();
+      responsibilitiesDialog(
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewResponsibilityProcess.value
+            ? null
+            : () async {
+                controller.addNewResponsibility();
+              },
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.green,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      minimumSize: const Size(180, 40),
+    ),
+    child: const Text('New Responsibility'),
+  );
 }
 
-Widget tableOfScreens(
-    {required constraints,
-    required context,
-    required ResponsibilitiesController controller}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required ResponsibilitiesController controller,
+}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -121,66 +126,75 @@ Widget tableOfScreens(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          text: 'Responsibility',
-          constraints: constraints,
-        ),
+        label: AutoSizedText(text: 'Responsibility', constraints: constraints),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Child',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Child'),
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         onSort: controller.onSort,
       ),
       const DataColumn(label: Text('')),
     ],
-    rows: controller.filteredResponsibilities.isEmpty &&
+    rows:
+        controller.filteredResponsibilities.isEmpty &&
             controller.search.value.text.isEmpty
         ? controller.allResponsibilities.entries.map<DataRow>((role) {
             final roleData = role.value;
             final roleId = role.key;
             return dataRowForTheTable(
-                roleData, context, constraints, roleId, controller, role);
+              roleData,
+              context,
+              constraints,
+              roleId,
+              controller,
+              role,
+            );
           }).toList()
         : controller.filteredResponsibilities.entries.map<DataRow>((role) {
             final roleData = role.value;
             final roleId = role.key;
             return dataRowForTheTable(
-                roleData, context, constraints, roleId, controller, role);
+              roleData,
+              context,
+              constraints,
+              roleId,
+              controller,
+              role,
+            );
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
-    roleId, ResponsibilitiesController controller, role) {
+DataRow dataRowForTheTable(
+  Map<String, dynamic> roleData,
+  context,
+  constraints,
+  roleId,
+  ResponsibilitiesController controller,
+  role,
+) {
   return DataRow(
-      cells: [
-        DataCell(Text(
-          roleData['role_name'] ?? 'no name',
-        )),
-        DataCell(
-          Text(
-            roleData['menu'] != null || roleData['menu'].isNotEmpty()
-                ? '${roleData['menu']['name']} (${roleData['menu']['description']})'
-                : 'no menu',
-          ),
+    cells: [
+      DataCell(Text(roleData['role_name'] ?? 'no name')),
+      DataCell(
+        Text(
+          roleData['menu'] != null || roleData['menu'].isNotEmpty()
+              ? '${roleData['menu']['name']} (${roleData['menu']['description']})'
+              : 'no menu',
         ),
-        DataCell(
-          Text(
-            roleData['added_date'] != null
-                ? textToDate(roleData['added_date']) //
-                : 'N/A',
-          ),
+      ),
+      DataCell(
+        Text(
+          roleData['added_date'] != null
+              ? textToDate(roleData['added_date']) //
+              : 'N/A',
         ),
-        DataCell(Align(
+      ),
+      DataCell(
+        Align(
           // alignment: Alignment.center,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -189,74 +203,89 @@ DataRow dataRowForTheTable(Map<String, dynamic> roleData, context, constraints,
               Padding(
                 padding: const EdgeInsets.only(right: 5, left: 5),
                 child: editSection(
-                    constraints: constraints,
-                    context: context,
-                    controller: controller,
-                    roleData: roleData,
-                    roleID: roleId),
+                  constraints: constraints,
+                  context: context,
+                  controller: controller,
+                  roleData: roleData,
+                  roleID: roleId,
+                ),
               ),
-              deleteSection(context, controller, roleId)
+              deleteSection(context, controller, roleId),
             ],
           ),
-        )),
-      ]);
+        ),
+      ),
+    ],
+  );
 }
 
 ElevatedButton publicPrivateSection(
-    roleData, ResponsibilitiesController controller, roleId) {
+  Map roleData,
+  ResponsibilitiesController controller,
+  String roleId,
+) {
   return ElevatedButton(
-      style: roleData['is_shown_for_users'] == false
-          ? privateButtonStyle
-          : publicButtonStyle,
-      onPressed: () {
-        bool status;
-        if (roleData['is_shown_for_users'] == false) {
-          status = true;
-        } else {
-          status = false;
-        }
-        controller.updateRoleStatus(roleId, status);
-      },
-      child: roleData['is_shown_for_users'] == true
-          ? const Text('Public')
-          : const Text('Private'));
+    style: roleData['is_shown_for_users'] == false
+        ? privateButtonStyle
+        : publicButtonStyle,
+    onPressed: () {
+      bool status;
+      if (roleData['is_shown_for_users'] == false) {
+        status = true;
+      } else {
+        status = false;
+      }
+      controller.updateRoleStatus(roleId, status);
+    },
+    child: roleData['is_shown_for_users'] == true
+        ? const Text('Public')
+        : const Text('Private'),
+  );
 }
 
 ElevatedButton deleteSection(
-    context, ResponsibilitiesController controller, roleId) {
+  BuildContext context,
+  ResponsibilitiesController controller,
+  roleId,
+) {
   return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: 'The responsibility will be deleted permanently',
-            onPressed: () {
-              controller.deleteResponsibility(roleId);
-            });
-      },
-      child: const Text('Delete'));
+    style: deleteButtonStyle,
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: 'The responsibility will be deleted permanently',
+        onPressed: () {
+          controller.deleteResponsibility(roleId);
+        },
+      );
+    },
+    child: const Text('Delete'),
+  );
 }
 
-Widget editSection(
-    {required context,
-    required ResponsibilitiesController controller,
-    required roleData,
-    required BoxConstraints constraints,
-    required roleID}) {
+Widget editSection({
+  required BuildContext context,
+  required ResponsibilitiesController controller,
+  required Map roleData,
+  required BoxConstraints constraints,
+  required String roleID,
+}) {
   return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () async {
-        controller.responsibilityName.text = roleData['role_name'] ?? '';
-        controller.menuName.text = roleData['menu']['name'] ?? '';
-        controller.menuIDFromList.value = roleData['menu_id'];
-        responsibilitiesDialog(
-            constraints: constraints,
-            controller: controller,
-            onPressed: controller.addingNewResponsibilityProcess.value
-                ? null
-                : () {
-                    controller.updateResponsibility(roleID);
-                  });
-      },
-      child: const Text('Edit'));
+    style: editButtonStyle,
+    onPressed: () async {
+      controller.responsibilityName.text = roleData['role_name'] ?? '';
+      controller.menuName.text = roleData['menu']['name'] ?? '';
+      controller.menuIDFromList.value = roleData['menu_id'];
+      responsibilitiesDialog(
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewResponsibilityProcess.value
+            ? null
+            : () {
+                controller.updateResponsibility(roleID);
+              },
+      );
+    },
+    child: const Text('Edit'),
+  );
 }

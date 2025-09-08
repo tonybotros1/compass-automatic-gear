@@ -39,8 +39,8 @@ Widget detailsTableSection({
 }
 
 Widget tableOfScreens({
-  required constraints,
-  required context,
+  required BoxConstraints constraints,
+  required BuildContext context,
   required IssueItemsController controller,
   required String id,
   required RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems,

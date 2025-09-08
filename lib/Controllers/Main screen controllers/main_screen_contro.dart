@@ -79,7 +79,7 @@ class MainScreenController extends GetxController {
   }
 
   // this function is to get company details
-  getCompanyDetails() async {
+  Future<void> getCompanyDetails() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = '${prefs.getString('companyId')}';
     userId.value = prefs.getString('userId')!;
@@ -175,7 +175,7 @@ class MainScreenController extends GetxController {
   }
 
   // this function is to get the name of the screen of the right side of the main screen
-  Text getScreenName(name) {
+  Text getScreenName(String name) {
     return Text(name, style: fontStyleForAppBar);
   }
 
@@ -311,7 +311,7 @@ class MainScreenController extends GetxController {
   }
 
   // init the tree
-  init() {
+  void init() {
     final List<MyTreeNode> roots = [
       MyTreeNode(
         title: 'Root Node',
@@ -379,7 +379,7 @@ class MainScreenController extends GetxController {
         );
   }
 
-  addScreenToFavorite() {
+  void addScreenToFavorite() {
     try {
       FirebaseFirestore.instance.collection('favorite_screens').add({
         'screen_name': selectedScreenName.value,

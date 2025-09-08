@@ -79,8 +79,8 @@ class SalesMan extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required SalesManController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
@@ -181,8 +181,8 @@ ElevatedButton deleteSection(
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, SalesManController controller,
-    Map<String, dynamic> salemanData, constraints, salemanId) {
+ElevatedButton editSection(BuildContext context, SalesManController controller,
+    Map<String, dynamic> salemanData,BoxConstraints constraints,String salemanId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {

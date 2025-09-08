@@ -195,7 +195,7 @@ class CardsScreenController extends GetxController {
     super.onInit();
   }
 
-  loadingDetailsVariables(carCard) async {
+  Future<void> loadingDetailsVariables(dynamic carCard) async {
     var carData = carCard.data() as Map<String, dynamic>;
     String carBrandName = carCard['car_brand'] != ''
         ? getdataName(carCard['car_brand'], allBrands)
@@ -352,7 +352,7 @@ class CardsScreenController extends GetxController {
   final customCachedManeger = CacheManager(
       Config('customCacheKey', stalePeriod: const Duration(days: 3)));
 
-  editInspectionCard(BuildContext context, String jobId) async {
+  Future<void> editInspectionCard(BuildContext context, String jobId) async {
     try {
       var myData = {
         'fuel_amount': fuelAmount.text,
@@ -411,7 +411,7 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  addInspectionCard(BuildContext context) async {
+  Future<void> addInspectionCard(BuildContext context) async {
     // List to track all successfully uploaded storage references.
     List<Reference> uploadedStorageRefs = [];
 
@@ -678,7 +678,7 @@ class CardsScreenController extends GetxController {
     exportBackgroundColor: Colors.white,
   );
 
-  removeLastMark() {
+  void removeLastMark() {
     damagePoints.removeLast();
     relativePoints.removeLast();
   }
@@ -762,7 +762,7 @@ class CardsScreenController extends GetxController {
   }
 
 // this function is to get user and company id:
-  getUserAndCompanyId() async {
+  Future<void> getUserAndCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     userId.value = (prefs.getString('userId'))!;
     companyId.value = prefs.getString('companyId')!;
@@ -854,7 +854,7 @@ class CardsScreenController extends GetxController {
     filteredCarCards.assignAll(filteredResults);
   }
 
-  getAllCustomers() {
+  void getAllCustomers() {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
@@ -870,7 +870,7 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  getCarBrands() {
+  void getCarBrands() {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -883,7 +883,7 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  getTechnicians() {
+  void getTechnicians() {
     try {
       FirebaseFirestore.instance
           .collection('all_technicians')
@@ -896,7 +896,7 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  getModelsByCarBrand(brandId) {
+  void getModelsByCarBrand(String brandId) {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -931,7 +931,7 @@ class CardsScreenController extends GetxController {
   }
 
 // this function is to get colors
-  getColors() async {
+  Future<void> getColors() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'COLORS')
@@ -951,7 +951,7 @@ class CardsScreenController extends GetxController {
   }
 
   // this function is to get engine types
-  getEngineTypes() async {
+  Future<void> getEngineTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'ENGINE_TYPES')

@@ -31,14 +31,14 @@ class ResponsibilitiesController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
 // this function is to choose the roles to be shown for the other users or not
-  updateRoleStatus(roleID, status) async {
+  Future<void> updateRoleStatus(String roleID,bool status) async {
     await FirebaseFirestore.instance
         .collection('sys-roles')
         .doc(roleID)
@@ -48,7 +48,7 @@ class ResponsibilitiesController extends GetxController {
   }
 
 // this function is to update the role details
-  updateResponsibility(roleID) async {
+  Future<void> updateResponsibility(String roleID) async {
     addingNewResponsibilityProcess.value = true;
     try {
       await FirebaseFirestore.instance
@@ -113,7 +113,7 @@ class ResponsibilitiesController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  deleteResponsibility(resID) async {
+  Future<void> deleteResponsibility(String resID) async {
     try {
       final firestore = FirebaseFirestore.instance;
 
@@ -138,7 +138,7 @@ class ResponsibilitiesController extends GetxController {
     }
   }
 
-  addNewResponsibility() {
+  void addNewResponsibility() {
     try {
       if (menuIDFromList.isEmpty) {
         showSnackBar('Can not complete', 'please try again later');

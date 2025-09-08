@@ -35,8 +35,8 @@ Widget invoiceItemsSection(
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required JobCardController controller,
     required String jobId}) {
   List data = controller.calculateTotals();

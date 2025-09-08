@@ -81,8 +81,8 @@ class ListOfValues extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required ListOfValuesController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
@@ -186,7 +186,7 @@ DataRow dataRowForTheTable(Map<String, dynamic> listData, context, constraints,
 }
 
 ElevatedButton publicPrivateSection(
-    listData, ListOfValuesController controller, listId) {
+   Map listData, ListOfValuesController controller,String listId) {
   return ElevatedButton(
       style: listData['is_public'] == false
           ? privateButtonStyle
@@ -259,7 +259,7 @@ ElevatedButton valSectionInTheTable(ListOfValuesController controller, listId,
       child: const Text('Values'));
 }
 
-ElevatedButton deleteSection(controller, listId, context) {
+ElevatedButton deleteSection(ListOfValuesController controller,String  listId,BuildContext context) {
   return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {

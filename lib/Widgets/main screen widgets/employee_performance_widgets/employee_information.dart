@@ -5,41 +5,43 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
 
-Future<dynamic> infosDialog(
-    {required BoxConstraints constraints,
-    required EmployeesPerformanceController controller,
-    required List<DocumentSnapshot<Object?>> employeeSheets}) {
+Future<dynamic> infosDialog({
+  required BoxConstraints constraints,
+  required EmployeesPerformanceController controller,
+  required List<DocumentSnapshot<Object?>> employeeSheets,
+}) {
   return Get.dialog(
-      barrierDismissible: false,
-      Dialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: SizedBox(
-          width: constraints.maxWidth,
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(15),
-                      topRight: Radius.circular(15)),
-                  color: mainColor,
+    barrierDismissible: false,
+    Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: SizedBox(
+        width: constraints.maxWidth,
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
                 ),
-                child: Row(
-                  spacing: 10,
-                  children: [
-                    Text(
-                      controller.getScreenName(),
-                      style: fontStyleForScreenNameUsedInButtons,
-                    ),
-                    const Spacer(),
-                    closeButton
-                  ],
-                ),
+                color: mainColor,
               ),
-              Expanded(
-                  child: Padding(
+              child: Row(
+                spacing: 10,
+                children: [
+                  Text(
+                    controller.getScreenName(),
+                    style: fontStyleForScreenNameUsedInButtons,
+                  ),
+                  const Spacer(),
+                  closeButton,
+                ],
+              ),
+            ),
+            Expanded(
+              child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: GetX<EmployeesPerformanceController>(
                   builder: (controller) {
@@ -52,108 +54,96 @@ Future<dynamic> infosDialog(
                       child: SizedBox(
                         width: constraints.maxWidth,
                         child: tableOfScreens(
-                            constraints: constraints,
-                            controller: controller,
-                            employeeSheets: employeeSheets),
+                          constraints: constraints,
+                          controller: controller,
+                          employeeSheets: employeeSheets,
+                        ),
                       ),
                     );
                   },
                 ),
-              ))
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
-      ));
+      ),
+    ),
+  );
 }
 
-Widget tableOfScreens(
-    {required constraints,
-    required EmployeesPerformanceController controller,
-    required List<DocumentSnapshot<Object?>> employeeSheets}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required EmployeesPerformanceController controller,
+  required List<DocumentSnapshot<Object?>> employeeSheets,
+}) {
   return DataTable(
-      clipBehavior: Clip.hardEdge,
-      border: TableBorder.all(
-          style: BorderStyle.none,
-          color: Colors.grey,
-          borderRadius: BorderRadius.circular(5)),
-      dataRowMaxHeight: 40,
-      dataRowMinHeight: 30,
-      columnSpacing: 5,
-      horizontalMargin: horizontalMarginForTable,
-      // showBottomBorder: true,
-      dataTextStyle: regTextStyle,
-      headingTextStyle: fontStyleForTableHeader,
-      sortColumnIndex: controller.sortColumnIndex.value,
-      sortAscending: controller.isAscending.value,
-      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-      columns: [
-        DataColumn(
-          columnWidth: const IntrinsicColumnWidth(flex: 1.5),
-          label: AutoSizedText(
-            text: 'Car',
-            constraints: constraints,
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          columnWidth: const IntrinsicColumnWidth(flex: 2),
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Task',
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          columnWidth: const IntrinsicColumnWidth(flex: 2),
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Start Date',
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          columnWidth: const IntrinsicColumnWidth(flex: 2),
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'End Date',
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          numeric: true,
-          columnWidth: const IntrinsicColumnWidth(flex: 1),
+    clipBehavior: Clip.hardEdge,
+    border: TableBorder.all(
+      style: BorderStyle.none,
+      color: Colors.grey,
+      borderRadius: BorderRadius.circular(5),
+    ),
+    dataRowMaxHeight: 40,
+    dataRowMinHeight: 30,
+    columnSpacing: 5,
+    horizontalMargin: horizontalMarginForTable,
+    // showBottomBorder: true,
+    dataTextStyle: regTextStyle,
+    headingTextStyle: fontStyleForTableHeader,
+    sortColumnIndex: controller.sortColumnIndex.value,
+    sortAscending: controller.isAscending.value,
+    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    columns: [
+      DataColumn(
+        columnWidth: const IntrinsicColumnWidth(flex: 1.5),
+        label: AutoSizedText(text: 'Car', constraints: constraints),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        columnWidth: const IntrinsicColumnWidth(flex: 2),
+        label: AutoSizedText(constraints: constraints, text: 'Task'),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        columnWidth: const IntrinsicColumnWidth(flex: 2),
+        label: AutoSizedText(constraints: constraints, text: 'Start Date'),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        columnWidth: const IntrinsicColumnWidth(flex: 2),
+        label: AutoSizedText(constraints: constraints, text: 'End Date'),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        numeric: true,
+        columnWidth: const IntrinsicColumnWidth(flex: 1),
 
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Minutes',
-          ),
-          // onSort: controller.onSort,
-        ),
-        DataColumn(
-          numeric: true,
-          columnWidth: const IntrinsicColumnWidth(flex: 1),
+        label: AutoSizedText(constraints: constraints, text: 'Minutes'),
+        // onSort: controller.onSort,
+      ),
+      DataColumn(
+        numeric: true,
+        columnWidth: const IntrinsicColumnWidth(flex: 1),
 
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Points',
-          ),
-          // onSort: controller.onSort,
-        ),
-      ],
-      rows: List.generate(employeeSheets.length, (i) {
-        final sheet = employeeSheets[i];
-        final sheetData = sheet.data() as Map<String, dynamic>;
-        final sheetId = sheet.id;
-        final isEven = i % 2 == 0;
+        label: AutoSizedText(constraints: constraints, text: 'Points'),
+        // onSort: controller.onSort,
+      ),
+    ],
+    rows: List.generate(employeeSheets.length, (i) {
+      final sheet = employeeSheets[i];
+      final sheetData = sheet.data() as Map<String, dynamic>;
+      final sheetId = sheet.id;
+      final isEven = i % 2 == 0;
 
-        return dataRowForTheTable(
-          sheetData,
-          constraints,
-          sheetId,
-          controller,
-          isEven,
-        );
-      }));
+      return dataRowForTheTable(
+        sheetData,
+        constraints,
+        sheetId,
+        controller,
+        isEven,
+      );
+    }),
+  );
 }
 
 DataRow dataRowForTheTable(
@@ -179,8 +169,8 @@ DataRow dataRowForTheTable(
 
   final taskData =
       (taskId != null && controller.pointsAndNames.containsKey(taskId))
-          ? controller.pointsAndNames[taskId]
-          : {};
+      ? controller.pointsAndNames[taskId]
+      : {};
   final taskName = taskData != null && taskData.containsKey('name')
       ? taskData['name'].toString()
       : '';
@@ -193,48 +183,58 @@ DataRow dataRowForTheTable(
   final date = controller.getSheetStartEndDate(sheetData);
 
   return DataRow(
-    color: WidgetStateProperty.resolveWith<Color?>(
-      (Set<WidgetState> states) {
-        return isEven ? Colors.white : Colors.grey.shade200;
-      },
-    ),
+    color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      return isEven ? Colors.white : Colors.grey.shade200;
+    }),
     cells: [
-      DataCell(textForDataRowInTable(
-        formatDouble: false,
-        text: '$brand $model',
-        maxWidth: null,
-      )),
-      DataCell(textForDataRowInTable(
-        formatDouble: false,
-        maxWidth: null,
-        text: taskName,
-      )),
-      DataCell(textForDataRowInTable(
-        formatDouble: false,
-        maxWidth: null,
-        text: date['start_date'],
-        color: const Color(0xffBE5B50),
-        isBold: true,
-      )),
-      DataCell(textForDataRowInTable(
-        formatDouble: false,
-        maxWidth: null,
-        text: date['end_date'],
-        color: const Color(0xff73946B),
-        isBold: true,
-      )),
-      DataCell(textForDataRowInTable(
-        formatDouble: false,
-        isBold: true,
-        color: Colors.blueGrey,
-        text: sheetMins,
-      )),
-      DataCell(textForDataRowInTable(
-        formatDouble: false,
-        isBold: true,
-        color: Colors.orange,
-        text: taskPoints,
-      )),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          text: '$brand $model',
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          maxWidth: null,
+          text: taskName,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          maxWidth: null,
+          text: date['start_date'],
+          color: const Color(0xffBE5B50),
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          maxWidth: null,
+          text: date['end_date'],
+          color: const Color(0xff73946B),
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          isBold: true,
+          color: Colors.blueGrey,
+          text: sheetMins,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          isBold: true,
+          color: Colors.orange,
+          text: taskPoints,
+        ),
+      ),
     ],
   );
 }

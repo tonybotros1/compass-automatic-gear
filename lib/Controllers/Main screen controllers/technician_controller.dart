@@ -29,13 +29,13 @@ class TechnicianController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
@@ -88,7 +88,7 @@ class TechnicianController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  getAllTechnicians() {
+  void getAllTechnicians() {
     try {
       FirebaseFirestore.instance
           .collection('all_technicians')
@@ -103,7 +103,7 @@ class TechnicianController extends GetxController {
     }
   }
 
-  addNewTechnicians() async {
+  Future<void> addNewTechnicians() async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance.collection('all_technicians').add({
@@ -119,7 +119,7 @@ class TechnicianController extends GetxController {
     }
   }
 
-  deleteTechnician(techId) async {
+  Future<void> deleteTechnician(String techId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -131,7 +131,7 @@ class TechnicianController extends GetxController {
     }
   }
 
-  editTechnician(techId) async {
+  Future<void> editTechnician(String techId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance

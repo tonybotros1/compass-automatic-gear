@@ -35,8 +35,11 @@ class SystemVariables extends StatelessWidget {
                         context: context,
                         // controller: controller,
                         title: 'Search for variables',
-                        button:
-                            newValueButton(context, constraints, controller),
+                        button: newValueButton(
+                          context,
+                          constraints,
+                          controller,
+                        ),
                       );
                     },
                   ),
@@ -49,9 +52,7 @@ class SystemVariables extends StatelessWidget {
                           );
                         }
                         if (controller.allVariables.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
+                          return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
                           scrollDirection: Axis
@@ -78,31 +79,36 @@ class SystemVariables extends StatelessWidget {
   }
 }
 
-ElevatedButton newValueButton(BuildContext context, BoxConstraints constraints,
-    SystemVariablesController controller) {
+ElevatedButton newValueButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  SystemVariablesController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.code.clear();
       controller.value.clear();
       systemVariablesDialog(
-          canEdit: true,
-          constraints: constraints,
-          controller: controller,
-          onPressed: controller.addingNewValue.value
-              ? null
-              : () async {
-                  await controller.addNewVariable();
-                });
+        canEdit: true,
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                await controller.addNewVariable();
+              },
+      );
     },
     style: newButtonStyle,
     child: const Text('New Variable'),
   );
 }
 
-Widget tableOfScreens(
-    {required constraints,
-    required context,
-    required SystemVariablesController controller}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required SystemVariablesController controller,
+}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -116,108 +122,130 @@ Widget tableOfScreens(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          text: 'Code',
-          constraints: constraints,
-        ),
+        label: AutoSizedText(text: 'Code', constraints: constraints),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Value',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Value'),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         onSort: controller.onSort,
       ),
       const DataColumn(label: Text('')),
     ],
-    rows: controller.filteredVariables.isEmpty &&
+    rows:
+        controller.filteredVariables.isEmpty &&
             controller.search.value.text.isEmpty
         ? controller.allVariables.map<DataRow>((variable) {
             final variableData = variable.data() as Map<String, dynamic>;
             final variableId = variable.id;
             return dataRowForTheTable(
-                variableData, context, constraints, variableId, controller);
+              variableData,
+              context,
+              constraints,
+              variableId,
+              controller,
+            );
           }).toList()
         : controller.filteredVariables.map<DataRow>((variable) {
             final variableData = variable.data() as Map<String, dynamic>;
             final variableId = variable.id;
             return dataRowForTheTable(
-                variableData, context, constraints, variableId, controller);
+              variableData,
+              context,
+              constraints,
+              variableId,
+              controller,
+            );
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> variableData, context,
-    constraints, variableId, SystemVariablesController controller) {
-  return DataRow(cells: [
-    DataCell(Text(
-      variableData['code'] ?? 'no code',
-    )),
-    DataCell(
-      Text(
-        variableData['value'] ?? 'no value',
-      ),
-    ),
-    DataCell(
-      Text(
-        variableData['added_date'] != null && variableData['added_date'] != ''
-            ? textToDate(variableData['added_date']) //
-            : 'N/A',
-      ),
-    ),
-    DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 5),
-          child: editSection(
-              context, controller, variableData, constraints, variableId),
+DataRow dataRowForTheTable(
+  Map<String, dynamic> variableData,
+  context,
+  constraints,
+  variableId,
+  SystemVariablesController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(Text(variableData['code'] ?? 'no code')),
+      DataCell(Text(variableData['value'] ?? 'no value')),
+      DataCell(
+        Text(
+          variableData['added_date'] != null && variableData['added_date'] != ''
+              ? textToDate(variableData['added_date']) //
+              : 'N/A',
         ),
-        deleteSection(controller, variableId, context),
-      ],
-    )),
-  ]);
+      ),
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 5),
+              child: editSection(
+                context,
+                controller,
+                variableData,
+                constraints,
+                variableId,
+              ),
+            ),
+            deleteSection(controller, variableId, context),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 ElevatedButton deleteSection(
-    SystemVariablesController controller, variableId, context) {
+  SystemVariablesController controller,
+  variableId,
+  context,
+) {
   return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: "The list will be deleted permanently",
-            onPressed: () {
-              controller.deleteVariable(variableId);
-            });
-      },
-      child: const Text("Delete"));
+    style: deleteButtonStyle,
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The list will be deleted permanently",
+        onPressed: () {
+          controller.deleteVariable(variableId);
+        },
+      );
+    },
+    child: const Text("Delete"),
+  );
 }
 
-ElevatedButton editSection(context, SystemVariablesController controller,
-    Map<String, dynamic> variableData, BoxConstraints constraints, variableId) {
+ElevatedButton editSection(
+  BuildContext context,
+  SystemVariablesController controller,
+  Map<String, dynamic> variableData,
+  BoxConstraints constraints,
+  String variableId,
+) {
   return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () {
-        controller.code.text = variableData['code'] ?? '';
-        controller.value.text = variableData['value'] ?? '';
-        systemVariablesDialog(
-            canEdit: false,
-            constraints: constraints,
-            controller: controller,
-            onPressed: controller.addingNewValue.value
-                ? null
-                : () {
-                    controller.editVariable(variableId);
-                  });
-      },
-      child: const Text('Edit'));
+    style: editButtonStyle,
+    onPressed: () {
+      controller.code.text = variableData['code'] ?? '';
+      controller.value.text = variableData['value'] ?? '';
+      systemVariablesDialog(
+        canEdit: false,
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () {
+                controller.editVariable(variableId);
+              },
+      );
+    },
+    child: const Text('Edit'),
+  );
 }

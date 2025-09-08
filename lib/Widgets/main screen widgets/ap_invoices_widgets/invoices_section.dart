@@ -35,8 +35,8 @@ Widget invoicesSection(
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required ApInvoicesController controller,
     required String id}) {
   // List data = controller.calculateTotals();

@@ -125,18 +125,18 @@ class ReceivingController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  clearValues() {
+  void clearValues() {
     canAddItems.value = false;
     receivingNumber.value.clear();
     date.value.text = textToDate(DateTime.now());
@@ -165,7 +165,7 @@ class ReceivingController extends GetxController {
     receivingDocAdded.value = false;
   }
 
-  loadValues(Map<String, dynamic> data, String id) {
+  void loadValues(Map<String, dynamic> data, String id) {
     getAllItems(id);
 
     canAddItems.value = true;
@@ -203,7 +203,7 @@ class ReceivingController extends GetxController {
     amount.value.text = data['amount'].toString();
   }
 
-  getAllInventeryItems() async {
+  Future<void> getAllInventeryItems() async {
     try {
       loadingInventeryItems.value = true;
       allInventeryItems.clear();
@@ -260,7 +260,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  getAllBranches() {
+  void getAllBranches() {
     try {
       FirebaseFirestore.instance
           .collection('branches')
@@ -277,7 +277,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  getAllCurrencies() {
+  void getAllCurrencies() {
     try {
       FirebaseFirestore.instance
           .collection('currencies')
@@ -294,7 +294,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  getAllVendors() {
+  void getAllVendors() {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
@@ -312,7 +312,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  getCountries() {
+  void getCountries() {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -328,7 +328,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  getCurrencies() {
+  void getCurrencies() {
     FirebaseFirestore.instance
         .collection('currencies')
         .where('company_id', isEqualTo: companyId.value)
@@ -340,7 +340,7 @@ class ReceivingController extends GetxController {
         });
   }
 
-  getApprovedBy() async {
+  Future<void> getApprovedBy() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'APPROVED_BY')
@@ -363,7 +363,7 @@ class ReceivingController extends GetxController {
         });
   }
 
-  getOrderedBy() async {
+  Future<void> getOrderedBy() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'ORDERED_BY')
@@ -386,7 +386,7 @@ class ReceivingController extends GetxController {
         });
   }
 
-  getPurchasedBy() async {
+  Future<void> getPurchasedBy() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'PURCHASED_BY')
@@ -409,7 +409,7 @@ class ReceivingController extends GetxController {
         });
   }
 
-  clearItemsValues() {
+  void clearItemsValues() {
     itemCode.value.clear();
     itemName.value.clear();
     selectedInventeryItemID.value = '';
@@ -482,7 +482,7 @@ class ReceivingController extends GetxController {
         receivingDocAdded.value = true;
         curreentReceivingId.value = newDocRef.id;
 
-        await getAllItems(newDocRef.id);
+        getAllItems(newDocRef.id);
 
         showSnackBar('Done', 'Doc. Added Successfully');
         status.value = 'New';
@@ -507,7 +507,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  editReceivingDoc(id) async {
+  Future<void> editReceivingDoc(String id) async {
     try {
       if (status.value != 'New' && status.value != '') {
         showSnackBar('Alert', 'Only new docs can be edited');
@@ -553,7 +553,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  deleteReceivingDoc(id, context) {
+  void deleteReceivingDoc(String id,BuildContext context) {
     try {
       if (status.value == 'New' || status.value == '') {
         deletingReceivingDoc.value = true;
@@ -575,7 +575,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  editPostForReceiving(id) async {
+  Future<void> editPostForReceiving(String id) async {
     try {
       if (status.value.isEmpty) {
         showSnackBar('Alert', 'Please save doc first');
@@ -604,7 +604,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  editCancelForReceiving(id) async {
+  Future<void> editCancelForReceiving(String id) async {
     try {
       if (status.value.isEmpty) {
         showSnackBar('Alert', 'Please save doc first');
@@ -651,7 +651,7 @@ class ReceivingController extends GetxController {
   //   }
   // }
 
-  getAllItems(id) {
+  void getAllItems(String id) {
     try {
       loadingItems.value = true;
       FirebaseFirestore.instance
@@ -674,7 +674,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  calculateAllItemsTotal(List<ItemModel> items) {
+  Map<String, double> calculateAllItemsTotal(List<ItemModel> items) {
     // reset
     itemsTotal.value = 0.0;
     finalItemsTotal.value = 0.0;
@@ -760,7 +760,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  addNewItem(String id) async {
+  Future<void> addNewItem(String id) async {
     try {
       addingNewItemsValue.value = true;
       await FirebaseFirestore.instance
@@ -785,7 +785,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  editItem(String docId, String itemId) async {
+  Future<void> editItem(String docId, String itemId) async {
     try {
       addingNewItemsValue.value = true;
       await FirebaseFirestore.instance
@@ -807,7 +807,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  deleteItem(String docId, String itemId) async {
+  Future<void> deleteItem(String docId, String itemId) async {
     try {
       await FirebaseFirestore.instance
           .collection('receiving')
@@ -977,14 +977,14 @@ class ReceivingController extends GetxController {
     });
   }
 
-  removeFilters() {
+  void removeFilters() {
     isAllSelected.value = false;
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;
   }
 
-  clearAllFilters() {
+  void clearAllFilters() {
     statusFilter.value.clear();
     allReceivingDocs.clear();
     numberOfReceivingDocs.value = 0;

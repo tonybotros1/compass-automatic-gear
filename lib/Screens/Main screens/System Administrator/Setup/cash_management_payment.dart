@@ -127,7 +127,7 @@ class CashManagementPayment extends StatelessWidget {
                                   controller: controller.fromDate.value,
                                   labelText: 'From Date',
                                   onFieldSubmitted: (_) async {
-                                    await normalizeDate(
+                                    normalizeDate(
                                         controller.fromDate.value.text,
                                         controller.fromDate.value);
                                   },
@@ -137,7 +137,7 @@ class CashManagementPayment extends StatelessWidget {
                                   controller: controller.toDate.value,
                                   labelText: 'To Date',
                                   onFieldSubmitted: (_) async {
-                                    await normalizeDate(
+                                    normalizeDate(
                                         controller.toDate.value.text,
                                         controller.toDate.value);
                                   },
@@ -231,7 +231,7 @@ class CashManagementPayment extends StatelessWidget {
                                     onPressed: controller
                                             .isThisYearSelected.isFalse
                                         ? () async {
-                                            await controller.removeFilters();
+                                            controller.removeFilters();
                                             controller
                                                 .searchEngineForPayments();
                                           }
@@ -333,7 +333,6 @@ ElevatedButton newPaymentButton(BuildContext context,
       controller.clearValues();
       paymentDialog(
           onPressedForDelete: null,
-          context: context,
           canEdit: true,
           constraints: constraints,
           controller: controller,
@@ -354,7 +353,7 @@ ElevatedButton newPaymentButton(BuildContext context,
   );
 }
 
-Widget editSectionForPayments(context, CashManagementController controller,
+Widget editSectionForPayments(BuildContext context, CashManagementController controller,
     Map<String, dynamic> cashManagementData, constraints, cashManagementId) {
   return GetX<CashManagementController>(builder: (controller) {
     bool isLoading = controller.buttonLoadingStates[cashManagementId] ?? false;
@@ -374,7 +373,6 @@ Widget editSectionForPayments(context, CashManagementController controller,
                       : () {
                           controller.cancelPayment(cashManagementId);
                         },
-                  context: context,
                   canEdit: true,
                   constraints: constraints,
                   controller: controller,

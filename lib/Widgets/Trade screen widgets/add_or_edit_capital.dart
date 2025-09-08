@@ -116,8 +116,8 @@ Widget addNewCapitalOrOutstandingOrGeneralExpensesOrEdit({
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required RxList<DocumentSnapshot<Object?>> allMap,
     required RxList<DocumentSnapshot<Object?>> filteredMap,
     required String collection,
@@ -259,7 +259,7 @@ ElevatedButton deleteSection(CarTradingController controller, context,
 }
 
 ElevatedButton editSection(
-    context,
+    BuildContext context,
     CarTradingController controller,
     Map<String, dynamic> itemData,
     constraints,

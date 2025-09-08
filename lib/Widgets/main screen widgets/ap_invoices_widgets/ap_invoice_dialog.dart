@@ -7,7 +7,6 @@ import 'add_new_invoice_or_edit.dart';
 
 Future<dynamic> apInvoiceDialog(
     {required BoxConstraints constraints,
-    required BuildContext context,
     required String id,
     required ApInvoicesController controller,
     required void Function()? onPressedForSave,

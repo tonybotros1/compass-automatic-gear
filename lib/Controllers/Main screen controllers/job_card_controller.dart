@@ -248,7 +248,7 @@ class JobCardController extends GetxController {
   //   }
   // }
 
-  changejobWarrentyEndDateDependingOnWarrentyDays() {
+  void changejobWarrentyEndDateDependingOnWarrentyDays() {
     DateTime date = format.parse(deliveryDate.value.text);
     DateTime newDate = date.add(
       Duration(days: int.parse(jobWarrentyDays.value.text)),
@@ -333,7 +333,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  openQuotationCardScreenByNumber() async {
+  Future<void> openQuotationCardScreenByNumber() async {
     try {
       openingQuotationCardScreen.value = true;
       QuotationCardController quotationCardController = Get.put(
@@ -369,13 +369,13 @@ class JobCardController extends GetxController {
     buttonLoadingStates.refresh(); // Notify listeners
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  selectForHistory(String vin) {
+  void selectForHistory(String vin) {
     historyJobCards.assignAll(
       allJobCards.where((job) {
         final data = job.data() as Map<String, dynamic>?;
@@ -514,7 +514,7 @@ class JobCardController extends GetxController {
     net.text = '0';
   }
 
-  clearValues() {
+  void clearValues() {
     canAddInternalNotesAndInvoiceItems.value = false;
     quotationCounter.value = '';
     allInvoiceItems.clear();
@@ -565,31 +565,31 @@ class JobCardController extends GetxController {
     deliveryNotes.clear();
   }
 
-  loadInspectionFormValues(id, data) {
+  void loadInspectionFormValues(String id, Map<String, dynamic> data) {
     controller.imagesList.clear();
     controller.currenyJobId.value = id;
     controller.inEditMode.value = true;
     controller.inEditMode.value = true;
-    controller.technicianId.value = data?['technician'] ?? '';
-    controller.date.text = textToDate(data?['added_date']);
+    controller.technicianId.value = data['technician'] ?? '';
+    controller.date.text = textToDate(data['added_date']);
     controller.customer.text = customerName.text;
-    controller.customerId.value = data?['customer'];
+    controller.customerId.value = data['customer'];
     controller.brand.text = carBrand.text;
-    controller.brandId.value = data?['car_brand'];
+    controller.brandId.value = data['car_brand'];
     controller.model.text = carModel.text;
-    controller.modelId.value = data?['car_model'];
+    controller.modelId.value = data['car_model'];
     controller.color.text = color.text;
-    controller.colorId.value = data?['color'];
+    controller.colorId.value = data['color'];
     controller.plateNumber.text = plateNumber.text;
-    controller.code.text = data?['plate_code'];
+    controller.code.text = data['plate_code'];
     controller.engineType.text = engineType.text;
 
-    controller.year.text = data?['year'];
-    controller.mileage.text = data?['mileage_in'];
-    controller.vin.text = data?['vehicle_identification_number'];
-    controller.comments.text = data?['inspection_report_comments'] ?? '';
+    controller.year.text = data['year'];
+    controller.mileage.text = data['mileage_in'];
+    controller.vin.text = data['vehicle_identification_number'];
+    controller.comments.text = data['inspection_report_comments'] ?? '';
     controller.selectedCheckBoxIndicesForLeftFront.assignAll(
-      (data?['left_front_wheel'] as Map<String, dynamic>?)?.map(
+      (data['left_front_wheel'] as Map<String, dynamic>?)?.map(
             (key, value) => MapEntry(
               key,
               Map<String, String>.from(value as Map), // Explicit conversion
@@ -620,7 +620,7 @@ class JobCardController extends GetxController {
         '';
 
     controller.selectedCheckBoxIndicesForRightFront.value =
-        (data?['right_front_wheel'] as Map<String, dynamic>?)?.map(
+        (data['right_front_wheel'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
         ) ??
         {};
@@ -648,7 +648,7 @@ class JobCardController extends GetxController {
         '';
 
     controller.selectedCheckBoxIndicesForLeftRear.value =
-        (data?['left_rear_wheel'] as Map<String, dynamic>?)?.map(
+        (data['left_rear_wheel'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
         ) ??
         {};
@@ -675,7 +675,7 @@ class JobCardController extends GetxController {
         '';
 
     controller.selectedCheckBoxIndicesForRightRear.value =
-        (data?['right_rear_wheel'] as Map<String, dynamic>?)?.map(
+        (data['right_rear_wheel'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
         ) ??
         {};
@@ -703,45 +703,45 @@ class JobCardController extends GetxController {
         '';
 
     controller.selectedCheckBoxIndicesForInteriorExterior.value =
-        (data?['interior_exterior'] as Map<String, dynamic>?)?.map(
+        (data['interior_exterior'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
         ) ??
         {};
 
     controller.selectedCheckBoxIndicesForUnderVehicle.value =
-        (data?['under_vehicle'] as Map<String, dynamic>?)?.map(
+        (data['under_vehicle'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
         ) ??
         {};
 
     controller.selectedCheckBoxIndicesForUnderHood.value =
-        (data?['under_hood'] as Map<String, dynamic>?)?.map(
+        (data['under_hood'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
         ) ??
         {};
 
     controller.selectedCheckBoxIndicesForBatteryPerformance.value =
-        (data?['battery_performance'] as Map<String, dynamic>?)?.map(
+        (data['battery_performance'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
         ) ??
         {};
 
     controller.selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire.value =
-        (data?['extra_checks'] as Map<String, dynamic>?)?.map(
+        (data['extra_checks'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
         ) ??
         {};
 
     controller.carImagesURLs.assignAll(
-      List<String>.from(data?['car_images'] ?? []),
+      List<String>.from(data['car_images'] ?? []),
     );
-    controller.customerSignatureURL.value = data?['customer_signature'] ?? '';
-    controller.advisorSignatureURL.value = data?['advisor_signature'] ?? '';
-    controller.carDialogImageURL.value = data?['car_dialog'] ?? '';
-    controller.carBrandLogo.value = data?['car_brand_logo'] ?? '';
+    controller.customerSignatureURL.value = data['customer_signature'] ?? '';
+    controller.advisorSignatureURL.value = data['advisor_signature'] ?? '';
+    controller.carDialogImageURL.value = data['car_dialog'] ?? '';
+    controller.carBrandLogo.value = data['car_brand_logo'] ?? '';
   }
 
-  loadValues(Map<String, dynamic> data) async {
+  Future<void> loadValues(Map<String, dynamic> data) async {
     var quotationId = data['quotation_id'] ?? '';
     if (quotationId != '') {
       var quotation = await FirebaseFirestore.instance
@@ -764,8 +764,8 @@ class JobCardController extends GetxController {
     carBrandId.value = data['car_brand'] ?? '';
     carBrand.text = getdataName(data['car_brand'], allBrands);
     carModelId.value = data['car_model'] ?? '';
-    getCitiesByCountryID(data['country']) ?? '';
-    getModelsByCarBrand(data['car_brand']) ?? '';
+    getCitiesByCountryID(data['country']);
+    getModelsByCarBrand(data['car_brand']);
     await getModelName(data['car_brand'], data['car_model']).then((value) {
       carModel.text = value;
     });
@@ -1031,7 +1031,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  addNewInvoiceItem(String jobId) async {
+  Future<void> addNewInvoiceItem(String jobId) async {
     try {
       addingNewinvoiceItemsValue.value = true;
       await FirebaseFirestore.instance
@@ -1075,7 +1075,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  editInvoiceItem(String jobId, String itemId) async {
+  Future<void> editInvoiceItem(String jobId, String itemId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -1117,7 +1117,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  void editJobCard(jobId) {
+  void editJobCard(String jobId) {
     try {
       if (jobStatus1.value == 'Posted' || jobStatus1.value == 'Cancelled') {
         showSnackBar('Alert', 'Can\'t Edit For Posted / Cancelled Jobs');
@@ -1264,7 +1264,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  Future<void> createQuotationCard(jobId) async {
+  Future<void> createQuotationCard(String jobId) async {
     try {
       showSnackBar('Creating', 'Please Wait');
       creatingNewQuotation.value = true;
@@ -1396,7 +1396,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  editApproveForJobCard(jobId, status) async {
+  Future<void> editApproveForJobCard(String jobId, String status) async {
     try {
       approvingJob.value = true;
       await FirebaseFirestore.instance
@@ -1415,7 +1415,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  editReadyForJobCard(jobId, status) async {
+  Future<void> editReadyForJobCard(String jobId, String status) async {
     try {
       readingJob.value = true;
       await FirebaseFirestore.instance
@@ -1434,7 +1434,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  editNewForJobCard(jobId, status) async {
+  Future<void> editNewForJobCard(String jobId,String status) async {
     try {
       newingJob.value = true;
       await FirebaseFirestore.instance
@@ -1458,7 +1458,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  editCancelForJobCard(jobId, status) async {
+  Future<void> editCancelForJobCard(String jobId,String status) async {
     try {
       cancellingJob.value = true;
       await FirebaseFirestore.instance
@@ -1479,7 +1479,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  editPostForJobCard(jobId) async {
+  Future<void> editPostForJobCard(String jobId) async {
     try {
       var status2 = '';
       postingJob.value = true;
@@ -1519,7 +1519,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  deleteInvoiceItem(String jobId, String itemId) async {
+  Future<void> deleteInvoiceItem(String jobId, String itemId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -1550,7 +1550,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  deleteJobCard(jobId) async {
+  Future<void> deleteJobCard(String jobId) async {
     try {
       Get.back();
       Get.back();
@@ -1563,7 +1563,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  getAllUsers() {
+  void getAllUsers() {
     try {
       FirebaseFirestore.instance
           .collection('sys-users')
@@ -1595,7 +1595,7 @@ class JobCardController extends GetxController {
     return combinedItems;
   }
 
-  getUserId() async {
+  Future<void> getUserId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     userId.value = prefs.getString('userId')!;
   }
@@ -1636,7 +1636,7 @@ class JobCardController extends GetxController {
     payType.value = isCash ? 'Cash' : 'Credit';
   }
 
-  getCurrencies() {
+  void getCurrencies() {
     FirebaseFirestore.instance
         .collection('currencies')
         .where('company_id', isEqualTo: companyId.value)
@@ -1648,7 +1648,7 @@ class JobCardController extends GetxController {
         });
   }
 
-  getBranches() {
+  void getBranches() {
     FirebaseFirestore.instance
         .collection('branches')
         .where('company_id', isEqualTo: companyId.value)
@@ -1661,7 +1661,7 @@ class JobCardController extends GetxController {
         });
   }
 
-  getInvoiceItemsFromCollection() {
+  void getInvoiceItemsFromCollection() {
     FirebaseFirestore.instance
         .collection('invoice_items')
         .where('company_id', isEqualTo: companyId.value)
@@ -1674,7 +1674,7 @@ class JobCardController extends GetxController {
         });
   }
 
-  getSalesMan() {
+  void getSalesMan() {
     FirebaseFirestore.instance
         .collection('sales_man')
         .where('company_id', isEqualTo: companyId.value)
@@ -1687,12 +1687,12 @@ class JobCardController extends GetxController {
         });
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  getCompanyDetails() {
+  void getCompanyDetails() {
     try {
       FirebaseFirestore.instance
           .collection('companies')
@@ -1746,14 +1746,14 @@ class JobCardController extends GetxController {
     }
   }
 
-  inOutDiffCalculating() {
+  void inOutDiffCalculating() {
     inOutDiff.value.text =
         (int.parse(mileageOut.value.text) - int.parse(mileageIn.value.text))
             .toString();
   }
 
   // this function is to get colors
-  getColors() async {
+  Future<void> getColors() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'COLORS')
@@ -1774,7 +1774,7 @@ class JobCardController extends GetxController {
   }
 
   // this function is to get engine types
-  getEngineTypes() async {
+  Future<void> getEngineTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'ENGINE_TYPES')
@@ -1796,7 +1796,7 @@ class JobCardController extends GetxController {
         });
   }
 
-  getAllCustomers() {
+  void getAllCustomers() {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
@@ -1919,7 +1919,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  getCountries() {
+  void getCountries() {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -1935,7 +1935,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  getCitiesByCountryID(countryID) {
+  void getCitiesByCountryID(String countryID) {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -1950,7 +1950,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  getCarBrands() {
+  void getCarBrands() {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -1964,7 +1964,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  getModelsByCarBrand(brandId) {
+  void getModelsByCarBrand(String brandId) {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -2242,7 +2242,7 @@ class JobCardController extends GetxController {
         });
   }
 
-  getAllInvoiceItems(jobId) {
+  void getAllInvoiceItems(String jobId) {
     try {
       loadingInvoiceItems.value = true;
       FirebaseFirestore.instance
@@ -2561,14 +2561,14 @@ class JobCardController extends GetxController {
     isScreenLoding.value = false;
   }
 
-  removeFilters() {
+  void removeFilters() {
     isAllSelected.value = false;
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;
   }
 
-  clearAllFilters() {
+  void clearAllFilters() {
     statusFilter.value.clear();
     allJobCards.clear();
     numberOfJobs.value = 0;

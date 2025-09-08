@@ -95,18 +95,18 @@ class IssueItemsController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  getAllBranches() {
+  void getAllBranches() {
     try {
       FirebaseFirestore.instance
           .collection('branches')
@@ -123,7 +123,7 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  getIssueTypes() async {
+  Future<void> getIssueTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'ISSUE_TYPES')
@@ -145,7 +145,7 @@ class IssueItemsController extends GetxController {
         });
   }
 
-  selectedJobOrConverter(String selected) {
+  void selectedJobOrConverter(String selected) {
     if (selected != '') {
       if (selected == 'Job Card') {
         getAllJobCards();
@@ -153,7 +153,7 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  getAllJobCards() async {
+  Future<void> getAllJobCards() async {
     try {
       loadingJobCards.value = true;
       var job = await FirebaseFirestore.instance
@@ -168,7 +168,7 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  searchEngineForJobCards() {
+  void searchEngineForJobCards() {
     query.value = searchForJobCards.value.text.toLowerCase();
     if (query.value.isEmpty) {
       filteredJobCards.clear();
@@ -195,7 +195,7 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  getCarBrands() {
+  void getCarBrands() {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -209,7 +209,7 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  getAllTechs() {
+  void getAllTechs() {
     try {
       FirebaseFirestore.instance
           .collection('all_technicians')
@@ -224,7 +224,7 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  getAllEntities() {
+  void getAllEntities() {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
@@ -257,7 +257,7 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  getAllInventeryItems() async {
+  Future<void> getAllInventeryItems() async {
     try {
       loadingItemsTable.value = true;
       allInventeryItems.clear();

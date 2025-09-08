@@ -12,8 +12,9 @@ import '../../../../consts.dart';
 
 class QuotationCard extends StatelessWidget {
   QuotationCard({super.key});
-  final QuotationCardController quotationCardController =
-      Get.put(QuotationCardController());
+  final QuotationCardController quotationCardController = Get.put(
+    QuotationCardController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -28,134 +29,147 @@ class QuotationCard extends StatelessWidget {
               child: ListView(
                 // crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GetX<QuotationCardController>(builder: (controller) {
-                    bool isBrandLoading = controller.allBrands.isEmpty;
-                    bool isModelLoading = controller.allModels.isEmpty;
-                    bool isCustomersLoading = controller.allCustomers.isEmpty;
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      spacing: 10,
-                      children: [
-                        Expanded(
+                  GetX<QuotationCardController>(
+                    builder: (controller) {
+                      bool isBrandLoading = controller.allBrands.isEmpty;
+                      bool isModelLoading = controller.allModels.isEmpty;
+                      bool isCustomersLoading = controller.allCustomers.isEmpty;
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        spacing: 10,
+                        children: [
+                          Expanded(
                             child: myTextFormFieldWithBorder(
-                          labelText: 'Quotation NO.',
-                          controller: controller.quotaionNumberFilter.value,
-                        )),
-                        Expanded(
-                          flex: 2,
-                          child: CustomDropdown(
-                            showedSelectedName: 'name',
-                            textcontroller:
-                                controller.carBrandIdFilterName.value.text,
-                            hintText: 'Car Brand',
-                            items: isBrandLoading ? {} : controller.allBrands,
-                            onChanged: (key, value) async {
-                              controller.carModel.clear();
-                              controller.getModelsByCarBrand(key);
-                              controller.carBrandIdFilter.value = key;
-                              controller.carBrandIdFilterName.value.text =
-                                  value['name'];
-                              controller.carModelIdFilter.value = '';
-                              controller.carModelIdFilterName.value.text = '';
-                            },
+                              labelText: 'Quotation NO.',
+                              controller: controller.quotaionNumberFilter.value,
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: CustomDropdown(
-                            showedSelectedName: 'name',
-                            textcontroller:
-                                controller.carModelIdFilterName.value.text,
-                            hintText: 'Car Model',
-                            items: isModelLoading ? {} : controller.allModels,
-                            onChanged: (key, value) async {
-                              controller.carModelIdFilter.value = key;
-                              controller.carModelIdFilterName.value.text =
-                                  value['name'];
-                            },
+                          Expanded(
+                            flex: 2,
+                            child: CustomDropdown(
+                              showedSelectedName: 'name',
+                              textcontroller:
+                                  controller.carBrandIdFilterName.value.text,
+                              hintText: 'Car Brand',
+                              items: isBrandLoading ? {} : controller.allBrands,
+                              onChanged: (key, value) async {
+                                controller.carModel.clear();
+                                controller.getModelsByCarBrand(key);
+                                controller.carBrandIdFilter.value = key;
+                                controller.carBrandIdFilterName.value.text =
+                                    value['name'];
+                                controller.carModelIdFilter.value = '';
+                                controller.carModelIdFilterName.value.text = '';
+                              },
+                            ),
                           ),
-                        ),
-                        Expanded(
+                          Expanded(
+                            flex: 2,
+                            child: CustomDropdown(
+                              showedSelectedName: 'name',
+                              textcontroller:
+                                  controller.carModelIdFilterName.value.text,
+                              hintText: 'Car Model',
+                              items: isModelLoading ? {} : controller.allModels,
+                              onChanged: (key, value) async {
+                                controller.carModelIdFilter.value = key;
+                                controller.carModelIdFilterName.value.text =
+                                    value['name'];
+                              },
+                            ),
+                          ),
+                          Expanded(
                             child: myTextFormFieldWithBorder(
-                          labelText: 'Plate NO.',
-                          controller: controller.plateNumberFilter.value,
-                        )),
-                        Expanded(
+                              labelText: 'Plate NO.',
+                              controller: controller.plateNumberFilter.value,
+                            ),
+                          ),
+                          Expanded(
                             flex: 2,
                             child: myTextFormFieldWithBorder(
                               labelText: 'VIN',
                               controller: controller.vinFilter.value,
-                            )),
-                        Expanded(
+                            ),
+                          ),
+                          Expanded(
                             flex: 3,
                             child: CustomDropdown(
-                                textcontroller: controller
-                                    .customerNameIdFilterName.value.text,
-                                showedSelectedName: 'entity_name',
-                                hintText: 'Customer Name',
-                                onChanged: (key, value) async {
-                                  controller.customerNameIdFilterName.value
-                                      .text = value['entity_name'];
-                                  controller.customerNameIdFilter.value = key;
-                                },
-                                items: isCustomersLoading
-                                    ? {}
-                                    : controller.allCustomers)),
-                        Expanded(
-                          child: CustomDropdown(
-                            textcontroller: controller.statusFilter.value.text,
-                            showedSelectedName: 'name',
-                            hintText: 'Status',
-                            items: allStatus,
-                            onChanged: (key, value) async {
-                              controller.statusFilter.value.text =
-                                  value['name'];
-                            },
+                              textcontroller: controller
+                                  .customerNameIdFilterName
+                                  .value
+                                  .text,
+                              showedSelectedName: 'entity_name',
+                              hintText: 'Customer Name',
+                              onChanged: (key, value) async {
+                                controller.customerNameIdFilterName.value.text =
+                                    value['entity_name'];
+                                controller.customerNameIdFilter.value = key;
+                              },
+                              items: isCustomersLoading
+                                  ? {}
+                                  : controller.allCustomers,
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
-                  const SizedBox(
-                    height: 10,
+                          Expanded(
+                            child: CustomDropdown(
+                              textcontroller:
+                                  controller.statusFilter.value.text,
+                              showedSelectedName: 'name',
+                              hintText: 'Status',
+                              items: allStatus,
+                              onChanged: (key, value) async {
+                                controller.statusFilter.value.text =
+                                    value['name'];
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                  GetBuilder<QuotationCardController>(builder: (controller) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Row(
-                            spacing: 10,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Expanded(
+                  const SizedBox(height: 10),
+                  GetBuilder<QuotationCardController>(
+                    builder: (controller) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Row(
+                              spacing: 10,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
                                   child: myTextFormFieldWithBorder(
-                                controller: controller.fromDate.value,
-                                labelText: 'From Date',
-                                onFieldSubmitted: (_) async {
-                                  await normalizeDate(
-                                      controller.fromDate.value.text,
-                                      controller.fromDate.value);
-                                  // if (nor) {
-                                  //   controller.searchEngine();
-                                  // }
-                                },
-                              )),
-                              Expanded(
+                                    controller: controller.fromDate.value,
+                                    labelText: 'From Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.fromDate.value.text,
+                                        controller.fromDate.value,
+                                      );
+                                      // if (nor) {
+                                      //   controller.searchEngine();
+                                      // }
+                                    },
+                                  ),
+                                ),
+                                Expanded(
                                   child: myTextFormFieldWithBorder(
-                                controller: controller.toDate.value,
-                                labelText: 'To Date',
-                                onFieldSubmitted: (_) async {
-                                  await normalizeDate(
-                                      controller.toDate.value.text,
-                                      controller.toDate.value);
-                                  // if (nor) {
-                                  //   controller.searchEngine();
-                                  // }
-                                },
-                              )),
-                              ElevatedButton(
+                                    controller: controller.toDate.value,
+                                    labelText: 'To Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.toDate.value.text,
+                                        controller.toDate.value,
+                                      );
+                                      // if (nor) {
+                                      //   controller.searchEngine();
+                                      // }
+                                    },
+                                  ),
+                                ),
+                                ElevatedButton(
                                   style: allButtonStyle,
                                   onPressed: () {
                                     controller.clearAllFilters();
@@ -171,8 +185,9 @@ class QuotationCard extends StatelessWidget {
                                     controller.allModels.clear();
                                     controller.searchEngine();
                                   },
-                                  child: const Text('All')),
-                              ElevatedButton(
+                                  child: const Text('All'),
+                                ),
+                                ElevatedButton(
                                   style: todayButtonStyle,
                                   onPressed: controller.isTodaySelected.isFalse
                                       ? () {
@@ -192,11 +207,12 @@ class QuotationCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: const Text('Today')),
-                              ElevatedButton(
+                                  child: const Text('Today'),
+                                ),
+                                ElevatedButton(
                                   style: thisMonthButtonStyle,
-                                  onPressed: controller
-                                          .isThisMonthSelected.isFalse
+                                  onPressed:
+                                      controller.isThisMonthSelected.isFalse
                                       ? () {
                                           controller.isAllSelected.value =
                                               false;
@@ -215,11 +231,12 @@ class QuotationCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: const Text('This Month')),
-                              ElevatedButton(
+                                  child: const Text('This Month'),
+                                ),
+                                ElevatedButton(
                                   style: thisYearButtonStyle,
-                                  onPressed: controller
-                                          .isThisYearSelected.isFalse
+                                  onPressed:
+                                      controller.isThisYearSelected.isFalse
                                       ? () {
                                           controller.isTodaySelected.value =
                                               false;
@@ -236,97 +253,109 @@ class QuotationCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: const Text('This Year')),
-                              ElevatedButton(
+                                  child: const Text('This Year'),
+                                ),
+                                ElevatedButton(
                                   style: saveButtonStyle,
                                   onPressed:
                                       controller.isThisYearSelected.isFalse
-                                          ? () async {
-                                              await controller.removeFilters();
-                                              controller.searchEngine();
-                                            }
-                                          : null,
+                                      ? () async {
+                                          controller.removeFilters();
+                                          controller.searchEngine();
+                                        }
+                                      : null,
                                   child: Text(
                                     'Find',
                                     style: fontStyleForElevatedButtons,
-                                  )),
-                              ElevatedButton(
+                                  ),
+                                ),
+                                ElevatedButton(
                                   style: clearVariablesButtonStyle,
                                   onPressed:
                                       controller.isThisYearSelected.isFalse
-                                          ? () {
-                                              controller.clearAllFilters();
-                                              controller.update();
-                                            }
-                                          : null,
+                                      ? () {
+                                          controller.clearAllFilters();
+                                          controller.update();
+                                        }
+                                      : null,
                                   child: Text(
                                     'Clear Filters',
                                     style: fontStyleForElevatedButtons,
-                                  )),
-                            ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const Expanded(flex: 2, child: SizedBox()),
-                        newQuotationCardButton(context, constraints, controller)
-                      ],
-                    );
-                  }),
+                          const Expanded(flex: 2, child: SizedBox()),
+                          newQuotationCardButton(
+                            context,
+                            constraints,
+                            controller,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<QuotationCardController>(
-                        init: QuotationCardController(),
-                        builder: (controller) {
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            spacing: 10,
-                            children: [
-                              customBox(
-                                  title: 'NUMBER OF QUOTATIONS',
-                                  value: Text(
-                                    '${controller.numberOfQuotations.value}',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: mainColor,
-                                        fontSize: 16),
-                                  )),
-                              customBox(
-                                  title: 'TOTALS',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.green,
-                                    isBold: true,
-                                    text:
-                                        '${controller.allQuotationsTotals.value}',
-                                  )),
-                              customBox(
-                                  title: 'VATS',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.red,
-                                    isBold: true,
-                                    text:
-                                        '${controller.allQuotationsVATS.value}',
-                                  )),
-                              customBox(
-                                  title: 'NETS',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.blueGrey,
-                                    isBold: true,
-                                    text:
-                                        '${controller.allQuotationsNET.value}',
-                                  )),
-                            ],
-                          );
-                        }),
+                      init: QuotationCardController(),
+                      builder: (controller) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          spacing: 10,
+                          children: [
+                            customBox(
+                              title: 'NUMBER OF QUOTATIONS',
+                              value: Text(
+                                '${controller.numberOfQuotations.value}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: mainColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            customBox(
+                              title: 'TOTALS',
+                              value: textForDataRowInTable(
+                                fontSize: 16,
+                                color: Colors.green,
+                                isBold: true,
+                                text: '${controller.allQuotationsTotals.value}',
+                              ),
+                            ),
+                            customBox(
+                              title: 'VATS',
+                              value: textForDataRowInTable(
+                                fontSize: 16,
+                                color: Colors.red,
+                                isBold: true,
+                                text: '${controller.allQuotationsVATS.value}',
+                              ),
+                            ),
+                            customBox(
+                              title: 'NETS',
+                              value: textForDataRowInTable(
+                                fontSize: 16,
+                                color: Colors.blueGrey,
+                                isBold: true,
+                                text: '${controller.allQuotationsNET.value}',
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                   Container(
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                       borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(10)),
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
+                      ),
                     ),
                     child: Column(
                       children: [
@@ -355,25 +384,24 @@ class QuotationCard extends StatelessWidget {
                             return SizedBox(
                               width: constraints.maxWidth,
                               child: tableOfScreens(
-                                  scrollController:
-                                      controller.scrollControllerFotTable1,
-                                  constraints: constraints,
-                                  context: context,
-                                  controller: controller,
-                                  data: controller
-                                              .filteredQuotationCards.isEmpty &&
-                                          controller.search.value.text.isEmpty
-                                      ? controller.allQuotationCards
-                                      : controller.filteredQuotationCards),
+                                scrollController:
+                                    controller.scrollControllerFotTable1,
+                                constraints: constraints,
+                                context: context,
+                                controller: controller,
+                                data:
+                                    controller.filteredQuotationCards.isEmpty &&
+                                        controller.search.value.text.isEmpty
+                                    ? controller.allQuotationCards
+                                    : controller.filteredQuotationCards,
+                              ),
                             );
                           },
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),
@@ -606,39 +634,115 @@ Widget tableOfScreens({
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> cardData, context, constraints,
-    cardId, QuotationCardController controller, int index) {
+DataRow dataRowForTheTable(
+  Map<String, dynamic> cardData,
+  context,
+  constraints,
+  cardId,
+  QuotationCardController controller,
+  int index,
+) {
   final isEvenRow = index % 2 == 0;
   return DataRow(
-      color: WidgetStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(WidgetState.selected)) {
-          return Colors.grey.shade400;
-        }
-        return isEvenRow ? Colors.grey.shade200 : Colors.white;
-      }),
-      cells: [
-        DataCell(Row(
+    color: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.grey.shade400;
+      }
+      return isEvenRow ? Colors.grey.shade200 : Colors.white;
+    }),
+    cells: [
+      DataCell(
+        Row(
           children: [
-            editSection(context, controller, cardData, constraints, cardId)
+            editSection(context, controller, cardData, constraints, cardId),
           ],
-        )),
-        DataCell(
-            textForDataRowInTable(text: '${cardData['quotation_number']}')),
-        DataCell(textForDataRowInTable(
-            text: cardData['quotation_number'] != ''
-                ? textToDate(cardData['quotation_date'])
-                : '')),
-        DataCell(cardData['quotation_status'] != ''
-            ? statusBox('${cardData['quotation_status']}',
-                hieght: 35, padding: const EdgeInsets.symmetric(horizontal: 5))
-            : const SizedBox()),
-        DataCell(textForDataRowInTable(
-            text: controller.getdataName(
-                cardData['car_brand'], controller.allBrands))),
-        DataCell(
-          FutureBuilder<String>(
-            future: controller.getModelName(
-                cardData['car_brand'], cardData['car_model']),
+        ),
+      ),
+      DataCell(textForDataRowInTable(text: '${cardData['quotation_number']}')),
+      DataCell(
+        textForDataRowInTable(
+          text: cardData['quotation_number'] != ''
+              ? textToDate(cardData['quotation_date'])
+              : '',
+        ),
+      ),
+      DataCell(
+        cardData['quotation_status'] != ''
+            ? statusBox(
+                '${cardData['quotation_status']}',
+                hieght: 35,
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+              )
+            : const SizedBox(),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: controller.getdataName(
+            cardData['car_brand'],
+            controller.allBrands,
+          ),
+        ),
+      ),
+      DataCell(
+        FutureBuilder<String>(
+          future: controller.getModelName(
+            cardData['car_brand'],
+            cardData['car_model'],
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(text: '${snapshot.data}');
+            }
+          },
+        ),
+      ),
+      DataCell(
+        Text(controller.getdataName(cardData['color'], controller.allColors)),
+      ),
+      DataCell(SelectableText(cardData['plate_number'], maxLines: 1)),
+      // DataCell(SelectableText(
+      //   cardData['plate_code'],
+      //   maxLines: 1,
+      // )),
+      // DataCell(
+      //   FutureBuilder<String>(
+      //     future:
+      //         controller.getCityName(cardData['country'], cardData['city']),
+      //     builder: (context, snapshot) {
+      //       if (snapshot.connectionState == ConnectionState.waiting) {
+      //         return const Text('Loading...');
+      //       } else if (snapshot.hasError) {
+      //         return const Text('Error');
+      //       } else {
+      //         return textForDataRowInTable(
+      //           text: '${snapshot.data}',
+      //         );
+      //       }
+      //     },
+      //   ),
+      // ),
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: null,
+          text: controller.getdataName(
+            cardData['customer'],
+            controller.allCustomers,
+            title: 'entity_name',
+          ),
+        ),
+      ),
+      DataCell(
+        SelectableText(cardData['vehicle_identification_number'], maxLines: 1),
+      ),
+      DataCell(
+        Align(
+          alignment: Alignment.centerRight,
+          child: StreamBuilder<double>(
+            stream: controller.calculateAllTotals(cardId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Text('Loading...');
@@ -646,296 +750,279 @@ DataRow dataRowForTheTable(Map<String, dynamic> cardData, context, constraints,
                 return const Text('Error');
               } else {
                 return textForDataRowInTable(
+                  color: Colors.green,
+                  isBold: true,
                   text: '${snapshot.data}',
                 );
               }
             },
           ),
         ),
-        DataCell(Text(
-          controller.getdataName(cardData['color'], controller.allColors),
-        )),
-        DataCell(SelectableText(
-          cardData['plate_number'],
-          maxLines: 1,
-        )),
-        // DataCell(SelectableText(
-        //   cardData['plate_code'],
-        //   maxLines: 1,
-        // )),
-        // DataCell(
-        //   FutureBuilder<String>(
-        //     future:
-        //         controller.getCityName(cardData['country'], cardData['city']),
-        //     builder: (context, snapshot) {
-        //       if (snapshot.connectionState == ConnectionState.waiting) {
-        //         return const Text('Loading...');
-        //       } else if (snapshot.hasError) {
-        //         return const Text('Error');
-        //       } else {
-        //         return textForDataRowInTable(
-        //           text: '${snapshot.data}',
-        //         );
-        //       }
-        //     },
-        //   ),
-        // ),
-        DataCell(
-          textForDataRowInTable(
-            maxWidth: null,
-            text: controller.getdataName(
-                cardData['customer'], controller.allCustomers,
-                title: 'entity_name'),
+      ),
+      DataCell(
+        Align(
+          alignment: Alignment.centerRight,
+          child: StreamBuilder<double>(
+            stream: controller.calculateAllVATs(cardId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('Loading...');
+              } else if (snapshot.hasError) {
+                return const Text('Error');
+              } else {
+                return textForDataRowInTable(
+                  color: Colors.red,
+                  isBold: true,
+                  text: '${snapshot.data}',
+                );
+              }
+            },
           ),
         ),
-        DataCell(SelectableText(
-          cardData['vehicle_identification_number'],
-          maxLines: 1,
-        )),
-        DataCell(
-          Align(
-            alignment: Alignment.centerRight,
-            child: StreamBuilder<double>(
-              stream: controller.calculateAllTotals(cardId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text('Loading...');
-                } else if (snapshot.hasError) {
-                  return const Text('Error');
-                } else {
-                  return textForDataRowInTable(
-                    color: Colors.green,
-                    isBold: true,
-                    text: '${snapshot.data}',
-                  );
-                }
-              },
-            ),
+      ),
+      DataCell(
+        Align(
+          alignment: Alignment.centerRight,
+          child: StreamBuilder<double>(
+            stream: controller.calculateAllNETs(cardId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('Loading...');
+              } else if (snapshot.hasError) {
+                return const Text('Error');
+              } else {
+                return textForDataRowInTable(
+                  color: Colors.blueGrey,
+                  isBold: true,
+                  text: '${snapshot.data}',
+                );
+              }
+            },
           ),
         ),
-        DataCell(
-          Align(
-            alignment: Alignment.centerRight,
-            child: StreamBuilder<double>(
-              stream: controller.calculateAllVATs(cardId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text('Loading...');
-                } else if (snapshot.hasError) {
-                  return const Text('Error');
-                } else {
-                  return textForDataRowInTable(
-                    color: Colors.red,
-                    isBold: true,
-                    text: '${snapshot.data}',
-                  );
-                }
-              },
-            ),
-          ),
-        ),
-        DataCell(
-          Align(
-            alignment: Alignment.centerRight,
-            child: StreamBuilder<double>(
-              stream: controller.calculateAllNETs(cardId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text('Loading...');
-                } else if (snapshot.hasError) {
-                  return const Text('Error');
-                } else {
-                  return textForDataRowInTable(
-                    color: Colors.blueGrey,
-                    isBold: true,
-                    text: '${snapshot.data}',
-                  );
-                }
-              },
-            ),
-          ),
-        ),
-      ]);
+      ),
+    ],
+  );
 }
 
-Widget editSection(context, QuotationCardController controller,
-    Map<String, dynamic> cardData, constraints, cardId) {
-  return GetX<QuotationCardController>(builder: (controller) {
-    bool isLoading = controller.buttonLoadingStates[cardId] ?? false;
+Widget editSection(
+  BuildContext context,
+  QuotationCardController controller,
+  Map<String, dynamic> cardData,
+  BoxConstraints constraints,
+  String cardId,
+) {
+  return GetX<QuotationCardController>(
+    builder: (controller) {
+      bool isLoading = controller.buttonLoadingStates[cardId] ?? false;
 
-    return IconButton(
+      return IconButton(
         tooltip: 'Edit',
         onPressed:
             controller.buttonLoadingStates[cardId] == null || isLoading == false
-                ? () async {
-                    controller.setButtonLoading(cardId, true);
+            ? () async {
+                controller.setButtonLoading(cardId, true);
 
-                    controller.getAllInvoiceItems(cardId);
-                    controller.currentCountryVAT.value = controller.getdataName(
-                        controller.companyDetails['contact_details']['country'],
-                        controller.allCountries,
-                        title: 'vat');
-                    await controller.loadValues(cardData, cardId);
-                    editQuotationCardDialog(controller, cardData, cardId);
-                    controller.setButtonLoading(cardId, false);
-                  }
-                : null,
-        icon: isLoading ? loadingProcess : editIcon);
-  });
+                controller.getAllInvoiceItems(cardId);
+                controller.currentCountryVAT.value = controller.getdataName(
+                  controller.companyDetails['contact_details']['country'],
+                  controller.allCountries,
+                  title: 'vat',
+                );
+                await controller.loadValues(cardData, cardId);
+                editQuotationCardDialog(controller, cardData, cardId);
+                controller.setButtonLoading(cardId, false);
+              }
+            : null,
+        icon: isLoading ? loadingProcess : editIcon,
+      );
+    },
+  );
 }
 
 ElevatedButton historySection(
-    QuotationCardController controller, Map<String, dynamic> cardData) {
+  QuotationCardController controller,
+  Map<String, dynamic> cardData,
+) {
   return ElevatedButton(
-      style: historyButtonStyle,
-      onPressed: () async {
-        // controller.selectForHistory(cardData['vehicle_identification_number']);
-      },
-      child: const Text('History'));
+    style: historyButtonStyle,
+    onPressed: () async {
+      // controller.selectForHistory(cardData['vehicle_identification_number']);
+    },
+    child: const Text('History'),
+  );
 }
 
-Future<dynamic> editQuotationCardDialog(QuotationCardController controller,
-    Map<String, dynamic> cardData, String quotationId,
-    {String screenName = '', headerColor = ''}) {
+Future<dynamic> editQuotationCardDialog(
+  QuotationCardController controller,
+  Map<String, dynamic> cardData,
+  String quotationId, {
+  String screenName = '',
+  headerColor = '',
+}) {
   return Get.dialog(
-      barrierDismissible: false,
-      Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          insetPadding: const EdgeInsets.all(8),
-          child: LayoutBuilder(builder: (context, constraints) {
-            return Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(5),
-                        topRight: Radius.circular(5)),
-                    color: headerColor == '' ? mainColor : headerColor,
+    barrierDismissible: false,
+    Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      insetPadding: const EdgeInsets.all(8),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(5),
+                    topRight: Radius.circular(5),
                   ),
-                  padding: const EdgeInsets.all(16),
-                  width: constraints.maxWidth,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints:
-                          BoxConstraints(minWidth: constraints.maxWidth - 40),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            spacing: 10,
-                            children: [
-                              Text(
-                                screenName == ''
-                                    ? '${controller.getScreenName()}'
-                                    : screenName,
-                                style: fontStyleForScreenNameUsedInButtons,
-                              ),
-                              GetX<QuotationCardController>(
-                                  builder: (controller) {
+                  color: headerColor == '' ? mainColor : headerColor,
+                ),
+                padding: const EdgeInsets.all(16),
+                width: constraints.maxWidth,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: constraints.maxWidth - 40,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          spacing: 10,
+                          children: [
+                            Text(
+                              screenName == ''
+                                  ? controller.getScreenName()
+                                  : screenName,
+                              style: fontStyleForScreenNameUsedInButtons,
+                            ),
+                            GetX<QuotationCardController>(
+                              builder: (controller) {
                                 if (controller
-                                    .quotationStatus.value.isNotEmpty) {
+                                    .quotationStatus
+                                    .value
+                                    .isNotEmpty) {
                                   return statusBox(
                                     controller.quotationStatus.value,
                                   );
                                 } else {
                                   return const SizedBox();
                                 }
-                              }),
-                            ],
-                          ),
-                          Row(
-                            spacing: 10,
-                            children: [
-                              separator(),
-                              creatJobButton(quotationId),
-                              point(),
-                              internalNotesButton(
-                                  controller, constraints, quotationId),
-                              separator(),
-                              saveQuotationButton(() =>
-                                  controller.editQuotationCard(quotationId)),
-                              point(),
-                              copyQuotationButton(quotationId),
-                              point(),
-                              deleteButton(controller, context, quotationId),
-                              separator(),
-                              changeStatusToPostedButton(quotationId),
-                              point(),
-                              changeStatusToCanceledButton(quotationId),
-                              separator(),
-                              closeIcon()
-                            ],
-                          ),
-                        ],
-                      ),
+                              },
+                            ),
+                          ],
+                        ),
+                        Row(
+                          spacing: 10,
+                          children: [
+                            separator(),
+                            creatJobButton(quotationId),
+                            point(),
+                            internalNotesButton(
+                              controller,
+                              constraints,
+                              quotationId,
+                            ),
+                            separator(),
+                            saveQuotationButton(
+                              () => controller.editQuotationCard(quotationId),
+                            ),
+                            point(),
+                            copyQuotationButton(quotationId),
+                            point(),
+                            deleteButton(controller, context, quotationId),
+                            separator(),
+                            changeStatusToPostedButton(quotationId),
+                            point(),
+                            changeStatusToCanceledButton(quotationId),
+                            separator(),
+                            closeIcon(),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: addNewQuotationCardOrEdit(
-                      quotaionId: quotationId,
-                      controller: controller,
-                      constraints: constraints,
-                      context: context,
-                    ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: addNewQuotationCardOrEdit(
+                    quotaionId: quotationId,
+                    controller: controller,
+                    constraints: constraints,
+                    context: context,
                   ),
                 ),
-              ],
-            );
-          })));
+              ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
 }
 
-ElevatedButton newQuotationCardButton(BuildContext context,
-    BoxConstraints constraints, QuotationCardController controller) {
+ElevatedButton newQuotationCardButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  QuotationCardController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.quotationDate.value.text = textToDate(DateTime.now());
       controller.currentCountryVAT.value = controller.getdataName(
-          controller.companyDetails['contact_details']['country'],
-          controller.allCountries,
-          title: 'vat');
+        controller.companyDetails['contact_details']['country'],
+        controller.allCountries,
+        title: 'vat',
+      );
       controller.country.text = controller.getdataName(
-          controller.companyDetails['contact_details']['country'],
-          controller.allCountries);
+        controller.companyDetails['contact_details']['country'],
+        controller.allCountries,
+      );
       controller.countryId.value =
           controller.companyDetails['contact_details']['country'];
       controller.getCitiesByCountryID(
-          controller.companyDetails['contact_details']['country']);
+        controller.companyDetails['contact_details']['country'],
+      );
       controller.mileageIn.value.text = '0';
       controller.customerCreditNumber.text = '0';
       controller.customerOutstanding.text = '0';
       controller.isCashSelected.value = true;
       controller.payType.value = 'Cash';
       var entry = controller.allCurrencies.entries.firstWhere(
-          (entry) =>
-              entry.value['country_id'] ==
-              controller.companyDetails['contact_details']['country'],
-          orElse: () => const MapEntry('', {}));
+        (entry) =>
+            entry.value['country_id'] ==
+            controller.companyDetails['contact_details']['country'],
+        orElse: () => const MapEntry('', {}),
+      );
       controller.customerCurrencyId.value = entry.key ?? '';
-      controller.customerCurrencyRate.text =
-          (entry.value['rate'] ?? '1').toString();
+      controller.customerCurrencyRate.text = (entry.value['rate'] ?? '1')
+          .toString();
       controller.customerCurrency.text = controller.getdataName(
-          controller.companyDetails['contact_details']['country'],
-          controller.allCountries,
-          title: 'currency_code');
+        controller.companyDetails['contact_details']['country'],
+        controller.allCountries,
+        title: 'currency_code',
+      );
       controller.clearValues();
       Get.dialog(
-          barrierDismissible: false,
-          Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5)),
-              insetPadding: const EdgeInsets.all(8),
-              child: LayoutBuilder(builder: (context, constraints) {
-                return Column(children: [
-                  GetX<QuotationCardController>(builder: (controller) {
-                    return Container(
+        barrierDismissible: false,
+        Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          insetPadding: const EdgeInsets.all(8),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  GetX<QuotationCardController>(
+                    builder: (controller) {
+                      return Container(
                         decoration: BoxDecoration(
                           borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(5),
-                              topRight: Radius.circular(5)),
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5),
+                          ),
                           color: mainColor,
                         ),
                         padding: const EdgeInsets.all(16),
@@ -944,68 +1031,79 @@ ElevatedButton newQuotationCardButton(BuildContext context,
                           scrollDirection: Axis.horizontal,
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                                minWidth: constraints.maxWidth - 40),
+                              minWidth: constraints.maxWidth - 40,
+                            ),
                             child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    spacing: 10,
-                                    children: [
-                                      Text(
-                                        '${controller.getScreenName()}',
-                                        style:
-                                            fontStyleForScreenNameUsedInButtons,
-                                      ),
-                                      controller
-                                              .quotationStatus.value.isNotEmpty
-                                          ? statusBox(
-                                              controller.quotationStatus.value,
-                                            )
-                                          : const SizedBox(),
-                                    ],
-                                  ),
-                                  Row(
-                                    spacing: 10,
-                                    children: [
-                                      separator(),
-                                      creatJobButton(controller
-                                          .curreentQuotationCardId.value),
-                                      point(),
-                                      internalNotesButton(
-                                          controller,
-                                          constraints,
-                                          controller
-                                              .curreentQuotationCardId.value),
-                                      separator(),
-                                      saveQuotationButton(() =>
-                                          controller.addNewQuotationCard()),
-                                      separator(),
-                                      changeStatusToPostedButton(controller
-                                          .curreentQuotationCardId.value),
-                                      point(),
-                                      changeStatusToCanceledButton(controller
-                                          .curreentQuotationCardId.value),
-                                      separator(),
-                                      closeIcon()
-                                    ],
-                                  ),
-                                ]),
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    Text(
+                                      controller.getScreenName(),
+                                      style:
+                                          fontStyleForScreenNameUsedInButtons,
+                                    ),
+                                    controller.quotationStatus.value.isNotEmpty
+                                        ? statusBox(
+                                            controller.quotationStatus.value,
+                                          )
+                                        : const SizedBox(),
+                                  ],
+                                ),
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    separator(),
+                                    creatJobButton(
+                                      controller.curreentQuotationCardId.value,
+                                    ),
+                                    point(),
+                                    internalNotesButton(
+                                      controller,
+                                      constraints,
+                                      controller.curreentQuotationCardId.value,
+                                    ),
+                                    separator(),
+                                    saveQuotationButton(
+                                      () => controller.addNewQuotationCard(),
+                                    ),
+                                    separator(),
+                                    changeStatusToPostedButton(
+                                      controller.curreentQuotationCardId.value,
+                                    ),
+                                    point(),
+                                    changeStatusToCanceledButton(
+                                      controller.curreentQuotationCardId.value,
+                                    ),
+                                    separator(),
+                                    closeIcon(),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ));
-                  }),
+                        ),
+                      );
+                    },
+                  ),
                   Expanded(
-                      child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: addNewQuotationCardOrEdit(
-                      quotaionId: controller.curreentQuotationCardId.value,
-                      controller: controller,
-                      constraints: constraints,
-                      context: context,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: addNewQuotationCardOrEdit(
+                        quotaionId: controller.curreentQuotationCardId.value,
+                        controller: controller,
+                        constraints: constraints,
+                        context: context,
+                      ),
                     ),
-                  ))
-                ]);
-              })));
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
     },
     style: newButtonStyle,
     child: const Text('New Card'),
@@ -1050,6 +1148,5 @@ class CardDataSource extends DataTableSource {
   int get rowCount => cards.length;
 
   @override
-  int get selectedRowCount =>
-      0; //controller.selectedcardId.value!.isEmpty ? 0 : 1;
+  int get selectedRowCount => 0; //controller.selectedcardId.value!.isEmpty ? 0 : 1;
 }

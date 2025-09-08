@@ -183,7 +183,7 @@ class QuotationCardController extends GetxController {
   }
 
   // this function is to get years
-  getYears() async {
+  Future<void> getYears() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'YEARS')
@@ -312,7 +312,7 @@ class QuotationCardController extends GetxController {
   //   }
   // }
 
-  openJobCardScreenByNumber() async {
+  Future<void> openJobCardScreenByNumber() async {
     try {
       openingJobCardScreen.value = true;
       var job = await FirebaseFirestore.instance
@@ -340,7 +340,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  clearValues() {
+  void clearValues() {
     jobCardCounter.value = '';
     allInvoiceItems.clear();
     canAddInternalNotesAndInvoiceItems.value = false;
@@ -422,8 +422,8 @@ class QuotationCardController extends GetxController {
     country.text = getdataName(countryIdVal, allCountries);
 
     // If you need these lists populated before setting city name:
-    await getCitiesByCountryID(countryIdVal);
-    await getModelsByCarBrand(brandId);
+    getCitiesByCountryID(countryIdVal);
+    getModelsByCarBrand(brandId);
 
     final cityIdVal = data['city'] as String? ?? '';
     cityId.value = cityIdVal;
@@ -766,7 +766,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  deleteQuotationCard(id) async {
+  Future<void> deleteQuotationCard(String id) async {
     try {
       Get.back();
       Get.back();
@@ -780,7 +780,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  editPostForQuotation(id) async {
+  Future<void> editPostForQuotation(String id) async {
     try {
       postingQuotation.value = true;
       await FirebaseFirestore.instance
@@ -795,7 +795,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  editCancelForQuotation(id) async {
+  Future<void> editCancelForQuotation(String id) async {
     try {
       cancelingQuotation.value = true;
       await FirebaseFirestore.instance
@@ -862,7 +862,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  Future<void> createNewJobCard(quotationID) async {
+  Future<void> createNewJobCard(String quotationID) async {
     try {
       creatingNewJob.value = true;
 
@@ -1060,7 +1060,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  deleteInvoiceItem(String quotationId, String itemId) {
+  void deleteInvoiceItem(String quotationId, String itemId) {
     try {
       Get.back();
       FirebaseFirestore.instance
@@ -1074,7 +1074,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  editInvoiceItem(String quotationId, String itemId) async {
+  Future<void> editInvoiceItem(String quotationId, String itemId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -1099,7 +1099,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  addNewInvoiceItem(String id) async {
+  Future<void> addNewInvoiceItem(String id) async {
     try {
       addingNewinvoiceItemsValue.value = true;
       await FirebaseFirestore.instance
@@ -1186,7 +1186,7 @@ class QuotationCardController extends GetxController {
     net.text = '0';
   }
 
-  getInvoiceItemsFromCollection() {
+  void getInvoiceItemsFromCollection() {
     FirebaseFirestore.instance
         .collection('invoice_items')
         .where('company_id', isEqualTo: companyId.value)
@@ -1199,7 +1199,7 @@ class QuotationCardController extends GetxController {
         });
   }
 
-  getAllInvoiceItems(quotationId) {
+  void getAllInvoiceItems(String quotationId) {
     try {
       loadingInvoiceItems.value = true;
       FirebaseFirestore.instance
@@ -1234,7 +1234,7 @@ class QuotationCardController extends GetxController {
   }
 
   // this function is to get engine types
-  getEngineTypes() async {
+  Future<void> getEngineTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'ENGINE_TYPES')
@@ -1257,7 +1257,7 @@ class QuotationCardController extends GetxController {
   }
 
   // this function is to get colors
-  getColors() async {
+  Future<void> getColors() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'COLORS')
@@ -1277,7 +1277,7 @@ class QuotationCardController extends GetxController {
         });
   }
 
-  getBranches() {
+  void getBranches() {
     FirebaseFirestore.instance
         .collection('branches')
         .where('company_id', isEqualTo: companyId.value)
@@ -1290,7 +1290,7 @@ class QuotationCardController extends GetxController {
         });
   }
 
-  getCurrencies() {
+  void getCurrencies() {
     FirebaseFirestore.instance
         .collection('currencies')
         .where('company_id', isEqualTo: companyId.value)
@@ -1302,7 +1302,7 @@ class QuotationCardController extends GetxController {
         });
   }
 
-  getSalesMan() {
+  void getSalesMan() {
     FirebaseFirestore.instance
         .collection('sales_man')
         .where('company_id', isEqualTo: companyId.value)
@@ -1315,7 +1315,7 @@ class QuotationCardController extends GetxController {
         });
   }
 
-  getAllUsers() {
+  void getAllUsers() {
     try {
       FirebaseFirestore.instance
           .collection('sys-users')
@@ -1329,12 +1329,12 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  getUserId() async {
+  Future<void> getUserId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     userId.value = prefs.getString('userId')!;
   }
 
-  getCompanyDetails() {
+  void getCompanyDetails() {
     try {
       FirebaseFirestore.instance
           .collection('companies')
@@ -1350,7 +1350,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  getCountries() {
+  void getCountries() {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -1366,7 +1366,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  getCarBrands() {
+  void getCarBrands() {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -1380,7 +1380,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  getAllCustomers() {
+  void getAllCustomers() {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
@@ -1398,7 +1398,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
@@ -1427,7 +1427,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  changeQuotationEndDateDependingOnDays() {
+  void changeQuotationEndDateDependingOnDays() {
     DateTime date = format.parse(quotationDate.value.text);
     DateTime newDate = date.add(
       Duration(days: int.parse(quotationDays.value.text)),
@@ -1435,7 +1435,7 @@ class QuotationCardController extends GetxController {
     validityEndDate.value.text = format.format(newDate);
   }
 
-  changingDaysDependingOnQuotationEndDate() {
+  void changingDaysDependingOnQuotationEndDate() {
     DateTime specificDate = format.parse(validityEndDate.value.text);
 
     quotationDays.value.text =
@@ -1468,7 +1468,7 @@ class QuotationCardController extends GetxController {
     );
   }
 
-  getCitiesByCountryID(countryID) {
+  void getCitiesByCountryID(String countryID) {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -1483,7 +1483,7 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  getModelsByCarBrand(String brandId) {
+  void getModelsByCarBrand(String brandId) {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -1553,7 +1553,7 @@ class QuotationCardController extends GetxController {
         });
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -1875,14 +1875,14 @@ class QuotationCardController extends GetxController {
     isScreenLoding.value = false;
   }
 
-  removeFilters() {
+  void removeFilters() {
     isAllSelected.value = false;
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;
   }
 
-  clearAllFilters() {
+  void clearAllFilters() {
     statusFilter.value.clear();
     numberOfQuotations.value = 0;
     allQuotationsTotals.value = 0;

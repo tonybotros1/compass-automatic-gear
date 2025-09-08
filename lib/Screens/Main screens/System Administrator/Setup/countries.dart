@@ -90,8 +90,8 @@ class Countries extends StatelessWidget {
 }
 
 Widget tableOfScreens({
-  required constraints,
-  required context,
+  required BoxConstraints constraints,
+  required BuildContext context,
   required CountriesController controller,
 }) {
   return DataTable(
@@ -314,7 +314,7 @@ ElevatedButton deleteSection(
 }
 
 ElevatedButton editSection(
-  context,
+  BuildContext context,
   CountriesController controller,
   Country countryData,
   constraints,

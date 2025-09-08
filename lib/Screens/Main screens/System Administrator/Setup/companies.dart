@@ -79,8 +79,8 @@ class Companies extends StatelessWidget {
 }
 
 Widget tableOfCompanies(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required CompanyController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
@@ -221,7 +221,7 @@ ElevatedButton activeInActiveSection(Map<String, dynamic> companyData,
           : const Text('Inactive'));
 }
 
-ElevatedButton editEction(context, CompanyController controller,
+ElevatedButton editEction(BuildContext context, CompanyController controller,
     Map<String, dynamic> companyData, constraints, companyID) {
   return ElevatedButton(
       style: editButtonStyle,

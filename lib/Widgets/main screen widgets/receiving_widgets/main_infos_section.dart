@@ -32,7 +32,7 @@ Container mainInfosSection(
           width: 150,
           child: myTextFormFieldWithBorder(
             onFieldSubmitted: (_) async {
-              await normalizeDate(
+              normalizeDate(
                 controller.date.value.text,
                 controller.date.value,
               );

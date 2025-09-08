@@ -31,18 +31,18 @@ class JobTasksController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  getAllTasks() {
+  void getAllTasks() {
     try {
       FirebaseFirestore.instance
           .collection('all_job_tasks')
@@ -57,7 +57,7 @@ class JobTasksController extends GetxController {
     }
   }
 
-  addNewTask() async {
+  Future<void> addNewTask() async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance.collection('all_job_tasks').add({
@@ -75,7 +75,7 @@ class JobTasksController extends GetxController {
     }
   }
 
-  editTask(id) async {
+  Future<void> editTask(String id) async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance
@@ -94,7 +94,7 @@ class JobTasksController extends GetxController {
     }
   }
 
-  deleteTask(id) async {
+  Future<void> deleteTask(String id) async {
     try {
       await FirebaseFirestore.instance
           .collection('all_job_tasks')

@@ -78,8 +78,8 @@ class Counters extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required CountersController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
@@ -225,7 +225,7 @@ ElevatedButton deleteSection(
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, CountersController controller,
+ElevatedButton editSection(BuildContext context, CountersController controller,
     Map<String, dynamic> counterData, constraints, counterId) {
   return ElevatedButton(
       style: editButtonStyle,

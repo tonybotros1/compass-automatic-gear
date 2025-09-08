@@ -115,7 +115,7 @@ class Receiving extends StatelessWidget {
                                       controller: controller.fromDate.value,
                                       labelText: 'From Date',
                                       onFieldSubmitted: (_) async {
-                                        await normalizeDate(
+                                        normalizeDate(
                                           controller.fromDate.value.text,
                                           controller.fromDate.value,
                                         );
@@ -129,7 +129,7 @@ class Receiving extends StatelessWidget {
                                       controller: controller.toDate.value,
                                       labelText: 'To Date',
                                       onFieldSubmitted: (_) async {
-                                        await normalizeDate(
+                                        normalizeDate(
                                           controller.toDate.value.text,
                                           controller.toDate.value,
                                         );
@@ -237,7 +237,7 @@ class Receiving extends StatelessWidget {
                                     onPressed:
                                         controller.isThisYearSelected.isFalse
                                         ? () async {
-                                            await controller.removeFilters();
+                                            controller.removeFilters();
                                             controller.searchEngine();
                                           }
                                         : null,

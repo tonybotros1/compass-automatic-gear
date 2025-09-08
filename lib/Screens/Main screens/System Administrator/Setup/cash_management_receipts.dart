@@ -142,7 +142,7 @@ class CashManagementReceipt extends StatelessWidget {
                                 controller: controller.fromDate.value,
                                 labelText: 'From Date',
                                 onFieldSubmitted: (_) async {
-                                  await normalizeDate(
+                                  normalizeDate(
                                       controller.fromDate.value.text,
                                       controller.fromDate.value);
                                 },
@@ -152,7 +152,7 @@ class CashManagementReceipt extends StatelessWidget {
                                 controller: controller.toDate.value,
                                 labelText: 'To Date',
                                 onFieldSubmitted: (_) async {
-                                  await normalizeDate(
+                                  normalizeDate(
                                       controller.toDate.value.text,
                                       controller.toDate.value);
                                 },
@@ -240,7 +240,7 @@ class CashManagementReceipt extends StatelessWidget {
                                   onPressed: controller
                                           .isThisYearSelected.isFalse
                                       ? () async {
-                                          await controller.removeFilters();
+                                          controller.removeFilters();
                                           controller.searchEngineForReceipts();
                                         }
                                       : null,
@@ -340,8 +340,8 @@ class CashManagementReceipt extends StatelessWidget {
 }
 
 Widget tableOfScreensForCashManagement({
-  required constraints,
-  required context,
+  required BoxConstraints constraints,
+  required BuildContext context,
   required CashManagementController controller,
   required RxList<DocumentSnapshot> data,
   required ScrollController scrollController,
@@ -564,7 +564,7 @@ DataRow dataRowForTheTable(
   ]);
 }
 
-Widget editSection(context, CashManagementController controller,
+Widget editSection(BuildContext context, CashManagementController controller,
     Map<String, dynamic> cashManagementData, constraints, cashManagementId) {
   return GetX<CashManagementController>(builder: (controller) {
     bool isLoading = controller.buttonLoadingStates[cashManagementId] ?? false;
@@ -584,7 +584,6 @@ Widget editSection(context, CashManagementController controller,
                       : () {
                           controller.cancelReceipt(cashManagementId);
                         },
-                  context: context,
                   canEdit: true,
                   constraints: constraints,
                   controller: controller,
@@ -626,7 +625,6 @@ ElevatedButton newReceiptButton(BuildContext context,
       receiptDialog(
           onPressedForcancel: null,
           onPressedForDelete: null,
-          context: context,
           canEdit: true,
           constraints: constraints,
           controller: controller,

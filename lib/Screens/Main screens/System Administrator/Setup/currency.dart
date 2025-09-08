@@ -79,8 +79,8 @@ class Currency extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required CurrencyController controller}) {
   return DataTable(
     dataRowMaxHeight: 40,
@@ -219,7 +219,7 @@ ElevatedButton deleteSection(
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, CurrencyController controller,
+ElevatedButton editSection(BuildContext context, CurrencyController controller,
     Map<String, dynamic> currencyData, constraints, currencyId) {
   return ElevatedButton(
       style: editButtonStyle,

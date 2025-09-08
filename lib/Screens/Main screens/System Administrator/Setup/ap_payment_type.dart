@@ -43,14 +43,10 @@ class ApPaymentType extends StatelessWidget {
                     child: GetX<ApPaymentTypeController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return Center(
-                            child: loadingProcess,
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allApPaymentTypes.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
+                          return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
                           scrollDirection: Axis
@@ -77,10 +73,11 @@ class ApPaymentType extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens(
-    {required constraints,
-    required context,
-    required ApPaymentTypeController controller}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required ApPaymentTypeController controller,
+}) {
   return DataTable(
     horizontalMargin: horizontalMarginForTable,
     dataRowMaxHeight: 40,
@@ -94,117 +91,146 @@ Widget tableOfScreens(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          text: 'Type',
-          constraints: constraints,
-        ),
+        label: AutoSizedText(text: 'Type', constraints: constraints),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         // onSort: controller.onS ort,
       ),
-      const DataColumn(
-        label: Text(''),
-      ),
+      const DataColumn(label: Text('')),
     ],
-    rows: controller.filteredApPaymentTypes.isEmpty &&
+    rows:
+        controller.filteredApPaymentTypes.isEmpty &&
             controller.search.value.text.isEmpty
         ? controller.allApPaymentTypes.map<DataRow>((type) {
             final typeData = type.data() as Map<String, dynamic>;
             final typeId = type.id;
             return dataRowForTheTable(
-                typeData, context, constraints, typeId, controller);
+              typeData,
+              context,
+              constraints,
+              typeId,
+              controller,
+            );
           }).toList()
         : controller.filteredApPaymentTypes.map<DataRow>((type) {
             final typeData = type.data() as Map<String, dynamic>;
             final typeId = type.id;
             return dataRowForTheTable(
-                typeData, context, constraints, typeId, controller);
+              typeData,
+              context,
+              constraints,
+              typeId,
+              controller,
+            );
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> typeData, context,
-    constraints, typeId, ApPaymentTypeController controller) {
-  return DataRow(cells: [
-    DataCell(Text(
-      typeData['type'] ?? 'no type',
-    )),
-    DataCell(
-      Text(
-        typeData['added_date'] != null && typeData['added_date'] != ''
-            ? textToDate(typeData['added_date']) //
-            : 'N/A',
-      ),
-    ),
-    DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 5, left: 5),
-          child: editSection(
-              context, controller, typeData, constraints, typeId),
+DataRow dataRowForTheTable(
+  Map<String, dynamic> typeData,
+  context,
+  constraints,
+  typeId,
+  ApPaymentTypeController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(Text(typeData['type'] ?? 'no type')),
+      DataCell(
+        Text(
+          typeData['added_date'] != null && typeData['added_date'] != ''
+              ? textToDate(typeData['added_date']) //
+              : 'N/A',
         ),
-        deleteSection(controller, typeId, context),
-      ],
-    )),
-  ]);
+      ),
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 5, left: 5),
+              child: editSection(
+                context,
+                controller,
+                typeData,
+                constraints,
+                typeId,
+              ),
+            ),
+            deleteSection(controller, typeId, context),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 ElevatedButton deleteSection(
-    ApPaymentTypeController controller, typeId, context) {
+  ApPaymentTypeController controller,
+  typeId,
+  context,
+) {
   return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: "The type will be deleted permanently",
-            onPressed: () {
-              controller.deleteType(typeId);
-            });
-      },
-      child: const Text("Delete"));
+    style: deleteButtonStyle,
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The type will be deleted permanently",
+        onPressed: () {
+          controller.deleteType(typeId);
+        },
+      );
+    },
+    child: const Text("Delete"),
+  );
 }
 
-ElevatedButton editSection(context, ApPaymentTypeController controller,
-    Map<String, dynamic> typeData, constraints, typeId) {
+ElevatedButton editSection(
+  BuildContext context,
+  ApPaymentTypeController controller,
+  Map<String, dynamic> typeData,
+  constraints,
+  typeId,
+) {
   return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () async {
-       
-        controller.type.text = typeData['type'];
-        apPaymentTypeDialog(
-            constraints: constraints,
-            controller: controller,
-            canEdit: true,
-            onPressed: controller.addingNewValue.value
-                ? null
-                : () {
-                    controller.editType(typeId);
-                  });
-      },
-      child: const Text('Edit'));
+    style: editButtonStyle,
+    onPressed: () async {
+      controller.type.text = typeData['type'];
+      apPaymentTypeDialog(
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () {
+                controller.editType(typeId);
+              },
+      );
+    },
+    child: const Text('Edit'),
+  );
 }
 
-ElevatedButton newTypeButton(BuildContext context, BoxConstraints constraints,
-    ApPaymentTypeController controller) {
+ElevatedButton newTypeButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  ApPaymentTypeController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.type.clear();
       apPaymentTypeDialog(
-          constraints: constraints,
-          controller: controller,
-          canEdit: true,
-          onPressed:
-       controller.addingNewValue.value
-          ? null
-          : () async {
-              await controller.addNewType();
-            });
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                controller.addNewType();
+              },
+      );
     },
     style: newButtonStyle,
     child: const Text('New Type'),

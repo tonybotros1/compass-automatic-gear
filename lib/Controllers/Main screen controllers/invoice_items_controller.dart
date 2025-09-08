@@ -41,12 +41,12 @@ class InvoiceItemsController extends GetxController {
     super.onClose();
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-    getScreenName() {
+    String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -112,7 +112,7 @@ class InvoiceItemsController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  getAllInvoiceItems() {
+  void getAllInvoiceItems() {
     try {
       FirebaseFirestore.instance
           .collection('invoice_items')
@@ -126,7 +126,7 @@ class InvoiceItemsController extends GetxController {
     }
   }
 
-  addNewInvoiceItem() async {
+  Future<void> addNewInvoiceItem() async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance.collection('invoice_items').add({
@@ -143,7 +143,7 @@ class InvoiceItemsController extends GetxController {
     }
   }
 
-  editInvoiceItem(itemId) async {
+  Future<void> editInvoiceItem(String itemId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -159,7 +159,7 @@ class InvoiceItemsController extends GetxController {
     }
   }
 
-  deleteInvoiceItem(itemId) {
+  void deleteInvoiceItem(String itemId) {
     try {
       Get.back();
       FirebaseFirestore.instance

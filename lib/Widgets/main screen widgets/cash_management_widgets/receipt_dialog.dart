@@ -8,7 +8,6 @@ import 'add_new_receipt_or_edit.dart';
 
 Future<dynamic> receiptDialog(
     {required BoxConstraints constraints,
-    required BuildContext context,
     required CashManagementController controller,
     required void Function()? onPressedForSave,
     required void Function()? onPressedForPost,

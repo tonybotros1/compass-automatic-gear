@@ -117,7 +117,7 @@ class UsersController extends GetxController {
   }
 
 // this functions is to change the user status from active / inactive
-  changeUserStatus(userId, status) async {
+  Future<void> changeUserStatus(String userId,bool status) async {
     try {
       await FirebaseFirestore.instance
           .collection('sys-users')
@@ -160,13 +160,13 @@ class UsersController extends GetxController {
     }
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  register() async {
+  Future<void> register() async {
     try {
       if (name.text.isEmpty ||
           email.text.isEmpty ||
@@ -224,7 +224,7 @@ class UsersController extends GetxController {
   }
 
   // this function is to update user details
-  updateUserDetails(String userId) async {
+  Future<void> updateUserDetails(String userId) async {
     try {
       sigupgInProcess.value = true;
       // Prepare the update data
@@ -271,7 +271,7 @@ class UsersController extends GetxController {
   }
 
 // this function is to delete user from the DB
-  deleteUser(userID) async {
+  Future<void> deleteUser(String userID) async {
     Get.back();
     await FirebaseFirestore.instance
         .collection('sys-users')
@@ -280,7 +280,7 @@ class UsersController extends GetxController {
   }
 
   // this function is to get roles from DB
-  getRoles() async {
+  void getRoles() async {
     try {
       isLoading.value = true;
       // Fetch roles from the 'sys-roles' collection
@@ -299,12 +299,11 @@ class UsersController extends GetxController {
       isLoading.value = false;
     } catch (e) {
       isLoading.value = false;
-      return [];
     }
   }
 
   // this function is to get all users in the system
-  getAllUsers() async {
+  Future<void> getAllUsers() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final companyId = prefs.getString('companyId');

@@ -45,18 +45,18 @@ class EmployeesPerformanceController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  getCarBrands() {
+  void getCarBrands() {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -70,7 +70,9 @@ class EmployeesPerformanceController extends GetxController {
     }
   }
 
-  getSheetTasksAndPoints(List<DocumentSnapshot<Object?>> employeeSheets) async {
+  void getSheetTasksAndPoints(
+    List<DocumentSnapshot<Object?>> employeeSheets,
+  ) async {
     try {
       // isScreenLoadingForEmployeeTasks.value = true;
       List tasksIDs = employeeSheets
@@ -99,11 +101,13 @@ class EmployeesPerformanceController extends GetxController {
     } catch (e) {
       // isScreenLoadingForEmployeeTasks.value = false;
 
-      return {};
+      // return {};
     }
   }
 
-  getSheetsCar(List<DocumentSnapshot<Object?>> employeeSheets) async {
+  Future<void> getSheetsCar(
+    List<DocumentSnapshot<Object?>> employeeSheets,
+  ) async {
     final jobIds = employeeSheets
         .map((sheet) => sheet['job_id'])
         .toSet()
@@ -213,7 +217,7 @@ class EmployeesPerformanceController extends GetxController {
     };
   }
 
-  List<DocumentSnapshot<Object?>> getEmployeeSheets(id) {
+  List<DocumentSnapshot<Object?>> getEmployeeSheets(String id) {
     return allTimeSheets
         .where(
           (sheet) => sheet['employee_id'] == id && sheet['end_date'] != null,
@@ -221,7 +225,7 @@ class EmployeesPerformanceController extends GetxController {
         .toList();
   }
 
-  int getEmployeeTasks(id) {
+  int getEmployeeTasks(String id) {
     return allTimeSheets.where((sheet) {
       return sheet['employee_id'] == id && sheet['end_date'] != null;
     }).length;
@@ -270,7 +274,7 @@ class EmployeesPerformanceController extends GetxController {
     return taskIds.fold<int>(0, (sum1, id) => sum1 + (pointsMap[id] ?? 0));
   }
 
-  getYears() async {
+  Future<void> getYears() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'YEARS')
@@ -290,7 +294,7 @@ class EmployeesPerformanceController extends GetxController {
   }
 
   // this function is to get years
-  getMonths() async {
+  Future<void> getMonths() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'MONTHS')
@@ -309,7 +313,7 @@ class EmployeesPerformanceController extends GetxController {
         });
   }
 
-  getAllTechnicians() {
+  void getAllTechnicians() {
     try {
       isScreenLoadingForTimesheets.value = true;
       FirebaseFirestore.instance
@@ -326,7 +330,7 @@ class EmployeesPerformanceController extends GetxController {
     }
   }
 
-  getTotalAmount(DateTime? start, DateTime? end) async {
+  Future<void> getTotalAmount(DateTime? start, DateTime? end) async {
     totalsForJobs.value = 0.0;
     Query query = FirebaseFirestore.instance
         .collection('job_cards')
@@ -347,7 +351,7 @@ class EmployeesPerformanceController extends GetxController {
     }
   }
 
-  calculateTotals(id) async {
+  Future<double> calculateTotals(String id) async {
     double totals = 0.0;
     var values = await FirebaseFirestore.instance
         .collection('job_cards')

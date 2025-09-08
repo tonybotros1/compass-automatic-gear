@@ -48,7 +48,7 @@ Future<dynamic> issueDialog({
                               spacing: 20,
                               children: [
                                 Text(
-                                  '${controller.getScreenName()}',
+                                  controller.getScreenName(),
                                   style: fontStyleForScreenNameUsedInButtons,
                                 ),
                                 controller.status.value.isNotEmpty

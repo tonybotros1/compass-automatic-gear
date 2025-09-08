@@ -79,8 +79,8 @@ class Branches extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required BranchesController controller}) {
   return DataTable(
     horizontalMargin: horizontalMarginForTable,
@@ -203,7 +203,7 @@ ElevatedButton deleteSection(BranchesController controller, branchId, context) {
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, BranchesController controller,
+ElevatedButton editSection(BuildContext context, BranchesController controller,
     Map<String, dynamic> branchData, constraints, branchId) {
   return ElevatedButton(
       style: editButtonStyle,

@@ -91,7 +91,7 @@ class EntityInformationsController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -133,7 +133,7 @@ class EntityInformationsController extends GetxController {
     updateEntitySocial(entityData.entitySocial ?? []);
   }
 
-  clearAllVariables() {
+  void clearAllVariables() {
     entityName.clear();
     entityCode.assign('Customer');
     isVendorSelected.value = false;
@@ -164,7 +164,7 @@ class EntityInformationsController extends GetxController {
     return phrase.replaceAll(' ', '_');
   }
 
-  addNewEntity() async {
+  Future<void> addNewEntity() async {
     try {
       addingNewEntity.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -207,7 +207,7 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  editEntity(entityId) async {
+  Future<void> editEntity(String entityId) async {
     try {
       addingNewEntity.value = true;
 
@@ -252,7 +252,7 @@ class EntityInformationsController extends GetxController {
   }
 
 // this functions is to change the user status from active / inactive
-  changeEntityStatus(String entityId, bool status) async {
+  Future<void> changeEntityStatus(String entityId, bool status) async {
     try {
       await FirebaseFirestore.instance
           .collection('entity_informations')
@@ -263,7 +263,7 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  deleteEntity(entityId) async {
+  Future<void> deleteEntity(String entityId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -319,7 +319,7 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  Future<String?> getCityName(countryId, cityId) async {
+  Future<String?> getCityName(String countryId,String cityId) async {
     try {
       // final city = allCities.entries.firstWhere(
       //   (city) => city.key == cityId,
@@ -361,7 +361,7 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  selectVendor(bool value) {
+  void selectVendor(bool value) {
     isVendorSelected.value = value;
     if (value == true) {
       entityCode.add('Vendor');
@@ -370,7 +370,7 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  selectCustomer(bool value) {
+  void selectCustomer(bool value) {
     isCustomerSelected.value = value;
     if (value == true) {
       entityCode.add('Customer');
@@ -397,13 +397,13 @@ class EntityInformationsController extends GetxController {
 
   void updateEntityAddress(List<EntityAddress> entityAddressFromData) async {
     contactAddress.assignAll(entityAddressFromData);
-    await generateControllerForAdressCountriesAndCities();
+    generateControllerForAdressCountriesAndCities();
 
     final length = contactAddress.length;
     for (var i = 0; i < length; i++) {
       final address = contactAddress[i];
 
-      getCitiesByCountryID(address.country, i);
+      getCitiesByCountryID(address.country.toString(), i);
 
       countriesControllers[i].controller?.text =
           getCountryName('${address.country}') ?? '';
@@ -498,7 +498,7 @@ class EntityInformationsController extends GetxController {
     update();
   }
 
-  getCountries() {
+  void getCountries() {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -514,7 +514,7 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  getCitiesByCountryID(countryID, index) {
+  void getCitiesByCountryID(String countryID,int index) {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -532,7 +532,7 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  generateControllerForPhoneTypes() {
+  void generateControllerForPhoneTypes() {
     final length = contactPhone.length + 1;
 
     phoneTypesControllers.value = List.generate(
@@ -554,7 +554,7 @@ class EntityInformationsController extends GetxController {
         List.generate(length, (index) => PrimaryModel(isPrimary: index == 0));
   }
 
-  generateControllerForSocialTypes() {
+  void generateControllerForSocialTypes() {
     final length = contactSocial.length + 1;
 
     // Generate separate controller lists for social types and links
@@ -565,7 +565,7 @@ class EntityInformationsController extends GetxController {
         length, (index) => TypeModel(controller: TextEditingController())));
   }
 
-  generateControllerForAdressCountriesAndCities() {
+  void generateControllerForAdressCountriesAndCities() {
     final length = contactAddress.length + 1;
 
     countriesControllers.assignAll(List.generate(
@@ -605,7 +605,7 @@ class EntityInformationsController extends GetxController {
   }
 
 // this function is to get the business types
-  getIndustries() async {
+  Future<void> getIndustries() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'INDUSTRIES')
@@ -625,7 +625,7 @@ class EntityInformationsController extends GetxController {
   }
 
 // this function is to get the entity types
-  getEntityType() async {
+  Future<void> getEntityType() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'ENTITY_TYPES')
@@ -645,7 +645,7 @@ class EntityInformationsController extends GetxController {
   }
 
 // this function is to get all sales man in the system
-  getSalesMan() {
+  void getSalesMan() {
     FirebaseFirestore.instance
         .collection('sales_man')
         .snapshots()
@@ -655,7 +655,7 @@ class EntityInformationsController extends GetxController {
   }
 
 // this function is to generate a new phone field
-  addPhoneLine() {
+  void addPhoneLine() {
     final index = contactPhone.length;
 
     contactPhone.add(EntityPhone());
@@ -671,7 +671,7 @@ class EntityInformationsController extends GetxController {
   }
 
   // this function is to generate a new social field
-  addSocialLine() {
+  void addSocialLine() {
     final index = contactSocial.length;
 
     contactSocial.add(EntitySocial());
@@ -682,7 +682,7 @@ class EntityInformationsController extends GetxController {
   }
 
   // this function is to generate a new address field
-  addAdressLine() {
+  void addAdressLine() {
     final index = contactAddress.length;
     allCities.add(RxMap());
     contactAddress.add(EntityAddress());
@@ -764,7 +764,7 @@ class EntityInformationsController extends GetxController {
   }
 
 // this functions is to get all contacts in the current company
-  getEntities() async {
+  Future<void> getEntities() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final companyId = prefs.getString('companyId');
@@ -834,7 +834,7 @@ class EntityInformationsController extends GetxController {
   }
 
 // this function is to get the business types
-  getTypeOfSocial() async {
+  Future<void> getTypeOfSocial() async {
     try {
       var typeDoc = await FirebaseFirestore.instance
           .collection('all_lists')

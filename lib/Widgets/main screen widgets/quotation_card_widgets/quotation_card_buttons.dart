@@ -26,7 +26,7 @@ Widget deleteButton(
       text: 'Delete');
 }
 
-GetBuilder<QuotationCardController> changeStatusToCanceledButton(quotationId) {
+GetBuilder<QuotationCardController> changeStatusToCanceledButton(String quotationId) {
   return GetBuilder<QuotationCardController>(builder: (controller) {
     return ClickableHoverText(
         onTap: controller.cancelingQuotation.isFalse
@@ -45,7 +45,7 @@ GetBuilder<QuotationCardController> changeStatusToCanceledButton(quotationId) {
   });
 }
 
-GetBuilder<QuotationCardController> changeStatusToPostedButton(quotationId) {
+GetBuilder<QuotationCardController> changeStatusToPostedButton(String quotationId) {
   return GetBuilder<QuotationCardController>(builder: (controller) {
     return ClickableHoverText(
         onTap: controller.postingQuotation.isFalse
@@ -81,7 +81,7 @@ GetBuilder<QuotationCardController> saveQuotationButton(
   });
 }
 
-GetBuilder<QuotationCardController> copyQuotationButton(quotationId) {
+GetBuilder<QuotationCardController> copyQuotationButton(String quotationId) {
   return GetBuilder<QuotationCardController>(builder: (controller) {
     return ClickableHoverText(
         onTap: controller.loadingCopyQuotation.isFalse
@@ -92,7 +92,7 @@ GetBuilder<QuotationCardController> copyQuotationButton(quotationId) {
                 } else {
                   Get.back();
                   var newData = await controller.copyQuotation(quotationId);
-                  await controller.getAllInvoiceItems(newData['newId']);
+                  controller.getAllInvoiceItems(newData['newId']);
                   await controller.loadValues(newData['data'], quotationId);
                   editQuotationCardDialog(
                       controller, newData['data'], newData['newId']);
@@ -120,7 +120,7 @@ Widget internalNotesButton(QuotationCardController controller,
   );
 }
 
-GetBuilder<QuotationCardController> creatJobButton(quotationID) {
+GetBuilder<QuotationCardController> creatJobButton(String quotationID) {
   return GetBuilder<QuotationCardController>(builder: (controller) {
     return ClickableHoverText(
         // style: creatJobOrQuotationButtonStyle,

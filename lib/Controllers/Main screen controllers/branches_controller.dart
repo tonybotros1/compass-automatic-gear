@@ -39,13 +39,13 @@ class BranchesController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
@@ -141,7 +141,7 @@ class BranchesController extends GetxController {
   //   }
   // }
 
-  getCountries() {
+  void getCountries() {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -156,7 +156,7 @@ class BranchesController extends GetxController {
     }
   }
 
-  getCitiesByCountryID(countryID) {
+  void getCitiesByCountryID(String countryID) {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -182,7 +182,7 @@ class BranchesController extends GetxController {
     }
   }
 
-  Future<String?> getCityName(countryId, cityId) async {
+  Future<String?> getCityName(String countryId, String cityId) async {
     try {
       var cities = await FirebaseFirestore.instance
           .collection('all_countries')
@@ -198,7 +198,7 @@ class BranchesController extends GetxController {
     }
   }
 
-  getAllBranches() {
+  void getAllBranches() {
     try {
       FirebaseFirestore.instance
           .collection('branches')
@@ -213,7 +213,7 @@ class BranchesController extends GetxController {
     }
   }
 
-  addNewBranch() async {
+  Future<void> addNewBranch() async {
     try {
       addingNewValue.value = true;
       await FirebaseFirestore.instance.collection('branches').add({
@@ -233,7 +233,7 @@ class BranchesController extends GetxController {
     }
   }
 
-  deleteBranch(branchId) async {
+  Future<void> deleteBranch(String branchId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -246,7 +246,7 @@ class BranchesController extends GetxController {
   }
 
 // this functions is to change the counter status from active / inactive
-  changeBranchStatus(branchId, status) async {
+  Future<void> changeBranchStatus(String branchId,bool status) async {
     try {
       await FirebaseFirestore.instance
           .collection('branches')
@@ -257,7 +257,7 @@ class BranchesController extends GetxController {
     }
   }
 
-  editBranch(branchId) async {
+  Future<void> editBranch(String branchId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance

@@ -52,7 +52,7 @@ class CarBrandsController extends GetxController {
     super.onClose();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -108,7 +108,7 @@ class CarBrandsController extends GetxController {
 
   // ===================================== Brands Section =============================================
 
-  getCarBrands() async {
+  Future<void> getCarBrands() async {
     try {
       final response = await http.get(
         Uri.parse('$backendTestURI/brands/get_all_brands'),
@@ -133,7 +133,7 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  addNewBrand() async {
+  Future<void> addNewBrand() async {
     try {
       addingNewValue.value = true;
       var request = http.MultipartRequest(
@@ -174,7 +174,7 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  deleteBrand(String id) async {
+  Future<void> deleteBrand(String id) async {
     try {
       final response = await http.delete(
         Uri.parse("$backendTestURI/brands/delete_brand/$id"),
@@ -195,7 +195,7 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  editActiveOrInActiveStatus(String id, bool status) async {
+  Future<void> editActiveOrInActiveStatus(String id, bool status) async {
     try {
       var url = Uri.parse('$backendTestURI/brands/edit_brand_status/$id');
       final response = await http.patch(
@@ -214,7 +214,7 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  editBrand(String id) async {
+  Future<void> editBrand(String id) async {
     try {
       addingNewValue.value = true;
 
@@ -251,7 +251,7 @@ class CarBrandsController extends GetxController {
 
   // ===================================== Models Section =============================================
 
-  getModelsValues(String brandId) async {
+  Future<void> getModelsValues(String brandId) async {
     try {
       loadingModels.value = true;
 
@@ -271,7 +271,7 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  addNewModel(String brandId) async {
+  Future<void> addNewModel(String brandId) async {
     try {
       addingNewmodelValue.value = true;
       var url = Uri.parse('$backendTestURI/brands/add_new_model/$brandId');
@@ -287,7 +287,7 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  editActiveOrInActiveStatusForModels(String modelId, bool status) async {
+  Future<void> editActiveOrInActiveStatusForModels(String modelId, bool status) async {
     try {
       var url = Uri.parse('$backendTestURI/brands/edit_model_status/$modelId');
       await http.patch(
@@ -300,7 +300,7 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  deleteModel(String modelId) async {
+  Future<void> deleteModel(String modelId) async {
     try {
       var url = Uri.parse('$backendTestURI/brands/delete_model/$modelId');
       final response = await http.delete(url);
@@ -320,7 +320,7 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  editModel(String modelId) async {
+  Future<void> editModel(String modelId) async {
     try {
       var url = Uri.parse('$backendTestURI/brands/edit_model/$modelId');
 
@@ -520,7 +520,7 @@ class CarBrandsController extends GetxController {
   // }
 
   // this function is to select an image for logo
-  pickImage() async {
+  Future<void> pickImage() async {
     final imagePicker = ImagePickerService();
     imagePicker.pickImage(imageBytes, logoSelectedError);
   }

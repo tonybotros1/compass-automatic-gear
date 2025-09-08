@@ -78,8 +78,8 @@ class Technician extends StatelessWidget {
 }
 
 Widget tableOfScreens(
-    {required constraints,
-    required context,
+    {required BoxConstraints constraints,
+    required BuildContext context,
     required TechnicianController controller}) {
   return DataTable(
     horizontalMargin: horizontalMarginForTable,
@@ -181,8 +181,8 @@ ElevatedButton deleteSection(
       child: const Text("Delete"));
 }
 
-ElevatedButton editSection(context, TechnicianController controller,
-    Map<String, dynamic> techniciansData, constraints, techniciansId) {
+ElevatedButton editSection(BuildContext context, TechnicianController controller,
+    Map<String, dynamic> techniciansData,BoxConstraints constraints,String techniciansId) {
   return ElevatedButton(
       style: editButtonStyle,
       onPressed: () async {

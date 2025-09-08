@@ -30,18 +30,18 @@ class ApPaymentTypeController extends GetxController {
     super.onInit();
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  getAllApPayementTypes() {
+  void getAllApPayementTypes() {
     try {
       FirebaseFirestore.instance
           .collection('ap_payment_types')
@@ -56,7 +56,7 @@ class ApPaymentTypeController extends GetxController {
     }
   }
 
-  addNewType() {
+  void addNewType() {
     try {
       addingNewValue.value = true;
       FirebaseFirestore.instance.collection('ap_payment_types').add({
@@ -71,7 +71,7 @@ class ApPaymentTypeController extends GetxController {
     }
   }
 
-  editType(id) {
+  void editType(String id) {
     try {
       Get.back();
 
@@ -84,7 +84,7 @@ class ApPaymentTypeController extends GetxController {
     }
   }
 
-  deleteType(id) {
+  void deleteType(String id) {
     try {
       Get.back();
 

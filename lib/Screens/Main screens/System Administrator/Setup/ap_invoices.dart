@@ -25,117 +25,121 @@ class ApInvoices extends StatelessWidget {
               child: ListView(
                 children: [
                   GetX<ApInvoicesController>(
-                      init: ApInvoicesController(),
-                      builder: (controller) {
-                        bool isInvoiceTypesLoading =
-                            controller.allInvoiceTypes.isEmpty;
-                        bool isVendorsLoading = controller.allVendors.isEmpty;
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                spacing: 10,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Expanded(
-                                    child: CustomDropdown(
-                                      textcontroller:
-                                          controller.invoiceTypeFilter.text,
-                                      showedSelectedName: 'name',
-                                      hintText: 'Invoice Type',
-                                      items: isInvoiceTypesLoading
-                                          ? {}
-                                          : controller.allInvoiceTypes,
-                                      onChanged: (key, value) {
-                                        controller.invoiceTypeFilter.text =
-                                            value['name'];
-                                        controller.invoiceTypeFilterId.value =
-                                            key;
-                                      },
-                                    ),
+                    init: ApInvoicesController(),
+                    builder: (controller) {
+                      bool isInvoiceTypesLoading =
+                          controller.allInvoiceTypes.isEmpty;
+                      bool isVendorsLoading = controller.allVendors.isEmpty;
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              spacing: 10,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: CustomDropdown(
+                                    textcontroller:
+                                        controller.invoiceTypeFilter.text,
+                                    showedSelectedName: 'name',
+                                    hintText: 'Invoice Type',
+                                    items: isInvoiceTypesLoading
+                                        ? {}
+                                        : controller.allInvoiceTypes,
+                                    onChanged: (key, value) {
+                                      controller.invoiceTypeFilter.text =
+                                          value['name'];
+                                      controller.invoiceTypeFilterId.value =
+                                          key;
+                                    },
                                   ),
-                                  Expanded(
-                                      child: myTextFormFieldWithBorder(
+                                ),
+                                Expanded(
+                                  child: myTextFormFieldWithBorder(
                                     labelText: 'Reference NO.',
                                     controller:
                                         controller.referenceNumberFilter,
-                                  )),
-                                  Expanded(
-                                    flex: 2,
-                                    child: CustomDropdown(
-                                      textcontroller:
-                                          controller.vendorFilter.value.text,
-                                      showedSelectedName: 'entity_name',
-                                      hintText: 'Vendor',
-                                      items: isVendorsLoading
-                                          ? {}
-                                          : controller.allVendors,
-                                      onChanged: (key, value) async {
-                                        controller.vendorFilter.value.text =
-                                            key;
-                                      },
-                                    ),
                                   ),
-                                  Expanded(
-                                    child: CustomDropdown(
-                                      textcontroller:
-                                          controller.statusFilter.value.text,
-                                      showedSelectedName: 'name',
-                                      hintText: 'Status',
-                                      items: allStatus,
-                                      onChanged: (key, value) async {
-                                        controller.statusFilter.value.text =
-                                            value['name'];
-                                      },
-                                    ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: CustomDropdown(
+                                    textcontroller:
+                                        controller.vendorFilter.value.text,
+                                    showedSelectedName: 'entity_name',
+                                    hintText: 'Vendor',
+                                    items: isVendorsLoading
+                                        ? {}
+                                        : controller.allVendors,
+                                    onChanged: (key, value) async {
+                                      controller.vendorFilter.value.text = key;
+                                    },
                                   ),
-                                ],
-                              ),
+                                ),
+                                Expanded(
+                                  child: CustomDropdown(
+                                    textcontroller:
+                                        controller.statusFilter.value.text,
+                                    showedSelectedName: 'name',
+                                    hintText: 'Status',
+                                    items: allStatus,
+                                    onChanged: (key, value) async {
+                                      controller.statusFilter.value.text =
+                                          value['name'];
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
-                            const Expanded(child: SizedBox())
-                          ],
-                        );
-                      }),
-                  const SizedBox(
-                    height: 10,
+                          ),
+                          const Expanded(child: SizedBox()),
+                        ],
+                      );
+                    },
                   ),
-                  GetBuilder<ApInvoicesController>(builder: (controller) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Row(
-                            spacing: 10,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Expanded(
+                  const SizedBox(height: 10),
+                  GetBuilder<ApInvoicesController>(
+                    builder: (controller) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Row(
+                              spacing: 10,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
                                   child: myTextFormFieldWithBorder(
-                                controller: controller.fromDate.value,
-                                labelText: 'From Date',
-                                onFieldSubmitted: (_) async {
-                                  await normalizeDate(
-                                      controller.fromDate.value.text,
-                                      controller.fromDate.value);
-                                  // if (nor) {
-                                  //   controller.searchEngine();
-                                  // }
-                                },
-                              )),
-                              Expanded(
+                                    controller: controller.fromDate.value,
+                                    labelText: 'From Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.fromDate.value.text,
+                                        controller.fromDate.value,
+                                      );
+                                      // if (nor) {
+                                      //   controller.searchEngine();
+                                      // }
+                                    },
+                                  ),
+                                ),
+                                Expanded(
                                   child: myTextFormFieldWithBorder(
-                                controller: controller.toDate.value,
-                                labelText: 'To Date',
-                                onFieldSubmitted: (_) async {
-                                  await normalizeDate(
-                                      controller.toDate.value.text,
-                                      controller.toDate.value);
-                                  // if (nor) {
-                                  //   controller.searchEngine();
-                                  // }
-                                },
-                              )),
-                              ElevatedButton(
+                                    controller: controller.toDate.value,
+                                    labelText: 'To Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.toDate.value.text,
+                                        controller.toDate.value,
+                                      );
+                                      // if (nor) {
+                                      //   controller.searchEngine();
+                                      // }
+                                    },
+                                  ),
+                                ),
+                                ElevatedButton(
                                   style: allButtonStyle,
                                   onPressed: () {
                                     controller.clearAllFilters();
@@ -151,8 +155,9 @@ class ApInvoices extends StatelessWidget {
                                     // controller.allModels.clear();
                                     controller.searchEngine();
                                   },
-                                  child: const Text('All')),
-                              ElevatedButton(
+                                  child: const Text('All'),
+                                ),
+                                ElevatedButton(
                                   style: todayButtonStyle,
                                   onPressed: controller.isTodaySelected.isFalse
                                       ? () {
@@ -172,11 +177,12 @@ class ApInvoices extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: const Text('Today')),
-                              ElevatedButton(
+                                  child: const Text('Today'),
+                                ),
+                                ElevatedButton(
                                   style: thisMonthButtonStyle,
-                                  onPressed: controller
-                                          .isThisMonthSelected.isFalse
+                                  onPressed:
+                                      controller.isThisMonthSelected.isFalse
                                       ? () {
                                           controller.isAllSelected.value =
                                               false;
@@ -195,11 +201,12 @@ class ApInvoices extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: const Text('This Month')),
-                              ElevatedButton(
+                                  child: const Text('This Month'),
+                                ),
+                                ElevatedButton(
                                   style: thisYearButtonStyle,
-                                  onPressed: controller
-                                          .isThisYearSelected.isFalse
+                                  onPressed:
+                                      controller.isThisYearSelected.isFalse
                                       ? () {
                                           controller.isTodaySelected.value =
                                               false;
@@ -216,64 +223,68 @@ class ApInvoices extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: const Text('This Year')),
-                              ElevatedButton(
+                                  child: const Text('This Year'),
+                                ),
+                                ElevatedButton(
                                   style: saveButtonStyle,
                                   onPressed:
                                       controller.isThisYearSelected.isFalse
-                                          ? () async {
-                                              await controller.removeFilters();
-                                              controller.searchEngine();
-                                            }
-                                          : null,
+                                      ? () async {
+                                          controller.removeFilters();
+                                          controller.searchEngine();
+                                        }
+                                      : null,
                                   child: Text(
                                     'Find',
                                     style: fontStyleForElevatedButtons,
-                                  )),
-                              ElevatedButton(
+                                  ),
+                                ),
+                                ElevatedButton(
                                   style: clearVariablesButtonStyle,
                                   onPressed:
                                       controller.isThisYearSelected.isFalse
-                                          ? () {
-                                              controller.clearAllFilters();
-                                              controller.update();
-                                            }
-                                          : null,
+                                      ? () {
+                                          controller.clearAllFilters();
+                                          controller.update();
+                                        }
+                                      : null,
                                   child: Text(
                                     'Clear Filters',
                                     style: fontStyleForElevatedButtons,
-                                  )),
-                            ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const Expanded(flex: 2, child: SizedBox()),
-                        newInvoiceButton(context, constraints, controller)
-                      ],
-                    );
-                  }),
-                  const SizedBox(
-                    height: 10,
+                          const Expanded(flex: 2, child: SizedBox()),
+                          newInvoiceButton(context, constraints, controller),
+                        ],
+                      );
+                    },
                   ),
-                  GetX<ApInvoicesController>(builder: (controller) {
-                    return Container(
-                      width: constraints.maxWidth,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        children: [
-                          controller.isScreenLoding.value
-                              ? Center(
-                                  child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: loadingProcess,
-                                ))
-                              : SingleChildScrollView(
-                                  scrollDirection: Axis.vertical,
-                                  child: SizedBox(
-                                    width: constraints.maxWidth,
-                                    child: tableOfScreens(
+                  const SizedBox(height: 10),
+                  GetX<ApInvoicesController>(
+                    builder: (controller) {
+                      return Container(
+                        width: constraints.maxWidth,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          children: [
+                            controller.isScreenLoding.value
+                                ? Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: loadingProcess,
+                                    ),
+                                  )
+                                : SingleChildScrollView(
+                                    scrollDirection: Axis.vertical,
+                                    child: SizedBox(
+                                      width: constraints.maxWidth,
+                                      child: tableOfScreens(
                                         scrollController: controller
                                             .scrollControllerFotTable1,
                                         constraints: constraints,
@@ -281,13 +292,15 @@ class ApInvoices extends StatelessWidget {
                                         controller: controller,
                                         data: controller.allApInvoices.isEmpty
                                             ? RxList()
-                                            : controller.allApInvoices),
+                                            : controller.allApInvoices,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                        ],
-                      ),
-                    );
-                  }),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -298,12 +311,13 @@ class ApInvoices extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens(
-    {required constraints,
-    required context,
-    required RxList<DocumentSnapshot> data,
-    required ScrollController scrollController,
-    required ApInvoicesController controller}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required RxList<DocumentSnapshot> data,
+  required ScrollController scrollController,
+  required ApInvoicesController controller,
+}) {
   final dataSource = CardDataSource(
     cards: data,
     context: context,
@@ -347,10 +361,7 @@ Widget tableOfScreens(
             // onSort: controller.onSort,
           ),
           DataColumn(
-            label: AutoSizedText(
-              text: 'Status',
-              constraints: constraints,
-            ),
+            label: AutoSizedText(text: 'Status', constraints: constraints),
             // onSort: controller.onSort,
           ),
           DataColumn(
@@ -368,17 +379,11 @@ Widget tableOfScreens(
             // onSort: controller.onS ort,
           ),
           DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Vendor',
-            ),
+            label: AutoSizedText(constraints: constraints, text: 'Vendor'),
             // onSort: controller.onS ort,
           ),
           DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Description',
-            ),
+            label: AutoSizedText(constraints: constraints, text: 'Description'),
             // onSort: controller.onS ort,
           ),
         ],
@@ -394,118 +399,143 @@ Widget tableOfScreens(
   // }).toList());
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> typeData, context, constraints,
-    typeId, ApInvoicesController controller, int index) {
-  return DataRow(cells: [
-    DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        editSection(context, controller, typeData, constraints, typeId),
-      ],
-    )),
-    DataCell(textForDataRowInTable(
-      text: getdataName(
-          typeData['invoice_type'] ?? '', controller.allInvoiceTypes),
-    )),
-    DataCell(
-      statusBox(
-        typeData['status'],
-        hieght: 35,
-        width: 100,
-        padding: const EdgeInsets.symmetric(horizontal: 5),
+DataRow dataRowForTheTable(
+  Map<String, dynamic> typeData,
+  context,
+  constraints,
+  typeId,
+  ApInvoicesController controller,
+  int index,
+) {
+  return DataRow(
+    cells: [
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            editSection(context, controller, typeData, constraints, typeId),
+          ],
+        ),
       ),
-    ),
-    DataCell(textForDataRowInTable(
-      text: typeData['reference_number'] ?? '',
-    )),
-    DataCell(
-      textForDataRowInTable(
-        text: typeData['transaction_date'] != null &&
-                typeData['transaction_date'] != ''
-            ? textToDate(typeData['transaction_date'])
-            : 'N/A',
+      DataCell(
+        textForDataRowInTable(
+          text: getdataName(
+            typeData['invoice_type'] ?? '',
+            controller.allInvoiceTypes,
+          ),
+        ),
       ),
-    ),
-    DataCell(textForDataRowInTable(
-      text: getdataName(typeData['vendor'] ?? '', controller.allVendors,
-          title: 'entity_name'),
-    )),
-    DataCell(textForDataRowInTable(
-      formatDouble: false,
-      text: typeData['note'] ?? '',
-    )),
-  ]);
+      DataCell(
+        statusBox(
+          typeData['status'],
+          hieght: 35,
+          width: 100,
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+        ),
+      ),
+      DataCell(textForDataRowInTable(text: typeData['reference_number'] ?? '')),
+      DataCell(
+        textForDataRowInTable(
+          text:
+              typeData['transaction_date'] != null &&
+                  typeData['transaction_date'] != ''
+              ? textToDate(typeData['transaction_date'])
+              : 'N/A',
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: getdataName(
+            typeData['vendor'] ?? '',
+            controller.allVendors,
+            title: 'entity_name',
+          ),
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          text: typeData['note'] ?? '',
+        ),
+      ),
+    ],
+  );
 }
 
-Widget editSection(context, ApInvoicesController controller,
-    Map<String, dynamic> typeData, constraints, typeId) {
+Widget editSection(
+  BuildContext context,
+  ApInvoicesController controller,
+  Map<String, dynamic> typeData,
+  constraints,
+  typeId,
+) {
   return IconButton(
     tooltip: 'Edit',
     onPressed: () async {
       await controller.loadValues(typeId, typeData);
       apInvoiceDialog(
-          id: typeId,
-          context: context,
-          constraints: constraints,
-          controller: controller,
-          canEdit: true,
-          onPressedForDelete: controller.deletingapInvoice.isTrue
-              ? null
-              : () {
-                  if (controller.status.value != 'New') {
-                    showSnackBar(
-                        'Alert', 'Only New AP Invoices Can be Deleted');
-                  } else {
-                    alertDialog(
-                        context: context,
-                        content: 'This will be deleted permanently',
-                        onPressed: () {
-                          controller.deleteApInvoice(typeId);
-                        });
-                  }
-                },
-          onPressedForCancel: controller.cancellingapInvoice.isFalse
-              ? () {
-                  if (controller.status.value != 'Cancelled' &&
-                      controller.status.value.isNotEmpty) {
-                    controller.editCancelForApInvoices(typeId);
-                  } else if (controller.status.value == 'Cancelled') {
-                    showSnackBar('Alert', 'AP Invoice Already Cancelled');
-                  } else if (controller.status.value.isEmpty) {
-                    showSnackBar('Alert', 'Please Save The AP Invoice First');
-                  }
+        id: typeId,
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressedForDelete: controller.deletingapInvoice.isTrue
+            ? null
+            : () {
+                if (controller.status.value != 'New') {
+                  showSnackBar('Alert', 'Only New AP Invoices Can be Deleted');
+                } else {
+                  alertDialog(
+                    context: context,
+                    content: 'This will be deleted permanently',
+                    onPressed: () {
+                      controller.deleteApInvoice(typeId);
+                    },
+                  );
                 }
-              : null,
-          onPressedForPost: controller.postingapInvoice.isFalse
-              ? () {
-                  if (controller.status.value != 'Posted' &&
-                      controller.status.value != 'Cancelled' &&
-                      controller.status.value.isNotEmpty) {
-                    controller.editPostForApInvoices(typeId);
-                  } else if (controller.status.value == 'Posted') {
-                    showSnackBar('Alert', 'AP Invoice is Already Posted');
-                  } else if (controller.status.value == 'Cancelled') {
-                    showSnackBar('Alert', 'AP Invoice is Cancelled');
-                  } else if (controller.status.value.isEmpty) {
-                    showSnackBar('Alert', 'Please Save The AP Invoice First');
-                  }
+              },
+        onPressedForCancel: controller.cancellingapInvoice.isFalse
+            ? () {
+                if (controller.status.value != 'Cancelled' &&
+                    controller.status.value.isNotEmpty) {
+                  controller.editCancelForApInvoices(typeId);
+                } else if (controller.status.value == 'Cancelled') {
+                  showSnackBar('Alert', 'AP Invoice Already Cancelled');
+                } else if (controller.status.value.isEmpty) {
+                  showSnackBar('Alert', 'Please Save The AP Invoice First');
                 }
-              : null,
-          onPressedForSave: controller.addingNewValue.value
-              ? null
-              : () {
-                  controller.editApInvoice(typeId);
-                });
+              }
+            : null,
+        onPressedForPost: controller.postingapInvoice.isFalse
+            ? () {
+                if (controller.status.value != 'Posted' &&
+                    controller.status.value != 'Cancelled' &&
+                    controller.status.value.isNotEmpty) {
+                  controller.editPostForApInvoices(typeId);
+                } else if (controller.status.value == 'Posted') {
+                  showSnackBar('Alert', 'AP Invoice is Already Posted');
+                } else if (controller.status.value == 'Cancelled') {
+                  showSnackBar('Alert', 'AP Invoice is Cancelled');
+                } else if (controller.status.value.isEmpty) {
+                  showSnackBar('Alert', 'Please Save The AP Invoice First');
+                }
+              }
+            : null,
+        onPressedForSave: controller.addingNewValue.value
+            ? null
+            : () {
+                controller.editApInvoice(typeId);
+              },
+      );
     },
-    icon: const Icon(
-      Icons.edit_note_rounded,
-      color: Colors.blue,
-    ),
+    icon: const Icon(Icons.edit_note_rounded, color: Colors.blue),
   );
 }
 
-ElevatedButton newInvoiceButton(BuildContext context,
-    BoxConstraints constraints, ApInvoicesController controller) {
+ElevatedButton newInvoiceButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  ApInvoicesController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.invoiceNumber.clear();
@@ -521,34 +551,35 @@ ElevatedButton newInvoiceButton(BuildContext context,
       controller.status.value = '';
       controller.canAddInvoice.value = false;
       apInvoiceDialog(
-          onPressedForCancel: null,
-          id: controller.currentApInvoiceId.value,
-          constraints: constraints,
-          controller: controller,
-          canEdit: true,
-          onPressedForSave: controller.addingNewValue.isTrue
-              ? null
-              : () async {
-                  await controller.addNewApInvoice();
-                },
-          onPressedForDelete: null,
-          onPressedForPost: controller.postingapInvoice.isFalse
-              ? () {
-                  if (controller.status.value != 'Posted' &&
-                      controller.status.value != 'Cancelled' &&
-                      controller.status.value.isNotEmpty) {
-                    controller.editPostForApInvoices(
-                        controller.currentApInvoiceId.value);
-                  } else if (controller.status.value == 'Posted') {
-                    showSnackBar('Alert', 'AP Invoice is Already Posted');
-                  } else if (controller.status.value == 'Cancelled') {
-                    showSnackBar('Alert', 'AP Invoice is Cancelled');
-                  } else if (controller.status.value.isEmpty) {
-                    showSnackBar('Alert', 'Please Save The AP Invoice First');
-                  }
+        onPressedForCancel: null,
+        id: controller.currentApInvoiceId.value,
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressedForSave: controller.addingNewValue.isTrue
+            ? null
+            : () async {
+                await controller.addNewApInvoice();
+              },
+        onPressedForDelete: null,
+        onPressedForPost: controller.postingapInvoice.isFalse
+            ? () {
+                if (controller.status.value != 'Posted' &&
+                    controller.status.value != 'Cancelled' &&
+                    controller.status.value.isNotEmpty) {
+                  controller.editPostForApInvoices(
+                    controller.currentApInvoiceId.value,
+                  );
+                } else if (controller.status.value == 'Posted') {
+                  showSnackBar('Alert', 'AP Invoice is Already Posted');
+                } else if (controller.status.value == 'Cancelled') {
+                  showSnackBar('Alert', 'AP Invoice is Cancelled');
+                } else if (controller.status.value.isEmpty) {
+                  showSnackBar('Alert', 'Please Save The AP Invoice First');
                 }
-              : null,
-          context: context);
+              }
+            : null,
+      );
     },
     style: newButtonStyle,
     child: const Text('New Invoice'),

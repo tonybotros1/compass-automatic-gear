@@ -79,8 +79,8 @@ class InventeryItems extends StatelessWidget {
 }
 
 Widget tableOfScreens({
-  required constraints,
-  required context,
+  required BoxConstraints constraints,
+  required BuildContext context,
   required InventeryItemsController controller,
 }) {
   return DataTable(
@@ -187,7 +187,7 @@ IconButton deleteSection(InventeryItemsController controller, itemId, context) {
 }
 
 IconButton editSection(
-  context,
+  BuildContext context,
   InventeryItemsController controller,
   Map<String, dynamic> itemData,
   constraints,
@@ -230,7 +230,7 @@ ElevatedButton newCurrencyButton(
         onPressed: controller.addingNewValue.value
             ? null
             : () async {
-                await controller.addNewItem();
+                controller.addNewItem();
               },
       );
     },

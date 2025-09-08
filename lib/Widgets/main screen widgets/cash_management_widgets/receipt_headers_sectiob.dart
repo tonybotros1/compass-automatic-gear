@@ -38,7 +38,7 @@ Widget receiptHeader(BuildContext context) {
                   isDate: true,
                   labelText: 'Receipt Date',
                    onFieldSubmitted: (_) async {
-                    await normalizeDate(controller.receiptDate.value.text,
+                    normalizeDate(controller.receiptDate.value.text,
                         controller.receiptDate.value);
                   },
                 ),

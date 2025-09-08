@@ -100,15 +100,15 @@ class ApInvoicesController extends GetxController {
     super.onInit();
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  loadValues(typeId, typeData) async {
+  Future<void> loadValues(String typeId, typeData) async {
     invoiceNumber.text = typeData['invoice_number'] ?? '';
     invoiceDate.text = textToDate(typeData['invoice_date'] ?? '');
-    await getAllInvoices(typeId);
+    getAllInvoices(typeId);
     invoiceType.text =
         getdataName(typeData['invoice_type'] ?? '', allInvoiceTypes);
     invoiceTypeId.value = typeData['invoice_type'] ?? '';
@@ -123,7 +123,7 @@ class ApInvoicesController extends GetxController {
     canAddInvoice.value = true;
   }
 
-  editApInvoice(id) async {
+  Future<void> editApInvoice(String id) async {
     try {
       if (status.value == 'Posted' || status.value == 'Cancelled') {
         showSnackBar('Alert', 'Can\'t Edit For Posted / Cancelled AP Invoices');
@@ -173,7 +173,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  deleteApInvoice(id) async {
+  Future<void> deleteApInvoice(String id) async {
     try {
       deletingapInvoice.value = true;
       await FirebaseFirestore.instance
@@ -186,7 +186,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  deleteInvoiceItem(String id, String itemId) async {
+  Future<void> deleteInvoiceItem(String id, String itemId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -215,7 +215,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  addNewApInvoice() async {
+  Future<void> addNewApInvoice() async {
     try {
       showSnackBar('Adding', 'Please Wait');
       addingNewValue.value = true;
@@ -290,7 +290,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  editPostForApInvoices(id) async {
+  Future<void> editPostForApInvoices(String id) async {
     try {
       postingapInvoice.value = true;
       await FirebaseFirestore.instance
@@ -306,7 +306,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  editCancelForApInvoices(id) async {
+  Future<void> editCancelForApInvoices(String id) async {
     try {
       cancellingapInvoice.value = true;
       await FirebaseFirestore.instance
@@ -322,7 +322,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  getAllInvoices(jobId) {
+  void getAllInvoices(String jobId) {
     try {
       loadingInvoices.value = true;
       FirebaseFirestore.instance
@@ -340,7 +340,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  addNewInvoiceItem(id) async {
+  Future<void> addNewInvoiceItem(String id) async {
     try {
       addingNewinvoiceItemsValue.value = true;
 
@@ -384,7 +384,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  editInvoiceItem(String id, String itemId) async {
+  Future<void> editInvoiceItem(String id, String itemId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -474,7 +474,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  getAllJobCards() async {
+  Future<void> getAllJobCards() async {
     try {
       loadingJobCards.value = true;
       var job = await FirebaseFirestore.instance
@@ -490,7 +490,7 @@ class ApInvoicesController extends GetxController {
   }
 
 // this function is to get colors
-  getInvoiceTypes() async {
+  Future<void> getInvoiceTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'MISC_TYPE')
@@ -510,7 +510,7 @@ class ApInvoicesController extends GetxController {
     });
   }
 
-  getAllVendors() {
+  void getAllVendors() {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
@@ -526,7 +526,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  getAllEntities() {
+  void getAllEntities() {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
@@ -566,7 +566,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  getCarBrands() {
+  void getCarBrands() {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -580,7 +580,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  getTransactionTypes() {
+  void getTransactionTypes() {
     try {
       FirebaseFirestore.instance
           .collection('ap_payment_types')
@@ -596,7 +596,7 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  searchEngineForJobCards() {
+  void searchEngineForJobCards() {
     query.value = searchForJobCards.value.text.toLowerCase();
     if (query.value.isEmpty) {
       filteredJobCards.clear();
@@ -736,14 +736,14 @@ class ApInvoicesController extends GetxController {
     isScreenLoding.value = false;
   }
 
-  removeFilters() {
+  void removeFilters() {
     isAllSelected.value = false;
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;
   }
 
-  clearAllFilters() {
+  void clearAllFilters() {
     allApInvoices.clear();
     // numberOfJobs.value = 0;
     // allJobsTotals.value = 0;

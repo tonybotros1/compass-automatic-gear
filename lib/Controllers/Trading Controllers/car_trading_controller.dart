@@ -121,7 +121,7 @@ class CarTradingController extends GetxController {
     getBuyersAndSellers();
     getColors();
     getCarSpecifications();
-    await getCarBrands();
+    getCarBrands();
     getEngineSizes();
     getNamesOfPeople();
     getYears();
@@ -149,7 +149,7 @@ class CarTradingController extends GetxController {
     super.onInit();
   }
 
-  changeRowsPerPage(rows) {
+  void changeRowsPerPage(int rows) {
     pagesPerPage.value = rows;
   }
 
@@ -208,12 +208,12 @@ class CarTradingController extends GetxController {
     filteredTrades.refresh();
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -245,7 +245,7 @@ class CarTradingController extends GetxController {
   //   totalNETs.value = totalReceives.value - totalPays.value;
   // }
 
-  calculateTotals() {
+  void calculateTotals() {
     totalNETs.value = 0.0;
     totalPays.value = 0.0;
     totalReceives.value = 0.0;
@@ -261,7 +261,7 @@ class CarTradingController extends GetxController {
     totalNETs.value = totalReceives.value - totalPays.value;
   }
 
-  calculateTotalsForCapitals(RxList<DocumentSnapshot<Object?>> map) {
+  void calculateTotalsForCapitals(RxList<DocumentSnapshot<Object?>> map) {
     totalNETs.value = 0.0;
     totalPays.value = 0.0;
     totalReceives.value = 0.0;
@@ -297,7 +297,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  clearValues() {
+  void clearValues() {
     boughtFrom.value.clear();
     boughtFromId.value = '';
     soldTo.value.clear();
@@ -332,7 +332,7 @@ class CarTradingController extends GetxController {
     currentTradId.value = '';
   }
 
-  loadValues(Map data) async {
+  Future<void> loadValues(Map data) async {
     if (data['bought_from'] != null && data['bought_from'] != '') {
       boughtFrom.value.text =
           getdataName(data['bought_from'], allBuyersAndSellers);
@@ -394,7 +394,7 @@ class CarTradingController extends GetxController {
     Get.back();
   }
 
-  addNewTrade() async {
+  Future<void> addNewTrade() async {
     try {
       addingNewValue.value = true;
       DateFormat format = DateFormat('dd-MM-yyyy');
@@ -449,7 +449,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  editTrade(tradeId) async {
+  Future<void> editTrade(String tradeId) async {
     addingNewValue.value = true;
     try {
       DateFormat format = DateFormat('dd-MM-yyyy');
@@ -480,7 +480,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  deleteTrade(tradeId) {
+  void deleteTrade(String tradeId) {
     try {
       Get.back();
       Get.back();
@@ -490,7 +490,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  changeStatus(String tradeId, String status) {
+  void changeStatus(String tradeId, String status) {
     try {
       FirebaseFirestore.instance
           .collection('all_trades')
@@ -501,7 +501,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  getAllTrades() {
+  void getAllTrades() {
     try {
       FirebaseFirestore.instance
           .collection('all_trades')
@@ -520,7 +520,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  getAllCapitals() {
+  void getAllCapitals() {
     try {
       isCapitalLoading.value = true;
       FirebaseFirestore.instance
@@ -539,7 +539,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  getAllOutstanding() {
+  void getAllOutstanding() {
     try {
       isOutstandinglLoading.value = true;
       FirebaseFirestore.instance
@@ -558,7 +558,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  getAllGeneralExpenses() {
+  void getAllGeneralExpenses() {
     try {
       isgeneralExpenseslLoading.value = true;
       FirebaseFirestore.instance
@@ -578,7 +578,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  addNewCapitalsOrOutstandingOrGeneralExpenses(
+  Future<void> addNewCapitalsOrOutstandingOrGeneralExpenses(
       String collection, bool isGeneral) async {
     try {
       addingNewValue.value = true;
@@ -603,7 +603,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  updateCapitalsOrOutstandingOrGeneralExpenses(
+  Future<void> updateCapitalsOrOutstandingOrGeneralExpenses(
       String collection, String id, bool isGeneral) async {
     try {
       Get.back();
@@ -630,7 +630,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  deleteCapitalOrOutstandingOrGeneralExpenses(String collection, String id) {
+  void deleteCapitalOrOutstandingOrGeneralExpenses(String collection, String id) {
     try {
       FirebaseFirestore.instance.collection(collection).doc(id).delete();
       Get.back();
@@ -640,7 +640,7 @@ class CarTradingController extends GetxController {
   }
 
   // this function is to get colors
-  getColors() async {
+  Future<void> getColors() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'COLORS')
@@ -661,7 +661,7 @@ class CarTradingController extends GetxController {
   }
 
   // this function is to get Car Specifications
-  getCarSpecifications() async {
+  Future<void> getCarSpecifications() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'CAR_SPECIFICATIONS')
@@ -685,7 +685,7 @@ class CarTradingController extends GetxController {
   }
 
   // this function is to get engine sizes
-  getEngineSizes() async {
+  Future<void> getEngineSizes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'ENGINE_TYPES')
@@ -706,7 +706,7 @@ class CarTradingController extends GetxController {
   }
 
   // this function is to get years
-  getYears() async {
+  Future<void> getYears() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'YEARS')
@@ -728,7 +728,7 @@ class CarTradingController extends GetxController {
   }
 
   // this function is to get years
-  getBuyersAndSellers() async {
+  Future<void> getBuyersAndSellers() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'BUYERS_AND_SELLERS')
@@ -753,7 +753,7 @@ class CarTradingController extends GetxController {
   }
 
   // this function is to get names of people
-  getNamesOfPeople() async {
+  Future<void> getNamesOfPeople() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'NAMES_OF_PEOPLE')
@@ -775,7 +775,7 @@ class CarTradingController extends GetxController {
   }
 
   // this function is to get items
-  getItems() async {
+  Future<void> getItems() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'ITEMS')
@@ -796,7 +796,7 @@ class CarTradingController extends GetxController {
     });
   }
 
-  getCarBrands() {
+  void getCarBrands() {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -809,7 +809,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  getModelsByCarBrand(brandId) {
+  void getModelsByCarBrand(String brandId) {
     try {
       FirebaseFirestore.instance
           .collection('all_brands')
@@ -839,7 +839,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  Future<String> getCarModelName(brandId, modelId) async {
+  Future<String> getCarModelName(String brandId,String modelId) async {
     try {
       var name = await FirebaseFunctions.instance
           .httpsCallable('get_model_name')
@@ -850,7 +850,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  Future<String> gettradePaid(tradeId) async {
+  Future<String> gettradePaid(String tradeId) async {
     try {
       var paid = await FirebaseFunctions.instance
           .httpsCallable('get_trade_total_paid')
@@ -861,7 +861,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  Future<String> gettradeReceived(tradeId) async {
+  Future<String> gettradeReceived(String tradeId) async {
     try {
       var rec = await FirebaseFunctions.instance
           .httpsCallable('get_trade_total_received')
@@ -872,7 +872,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  Future<String> gettradeNETs(tradeId) async {
+  Future<String> gettradeNETs(String tradeId) async {
     try {
       var net = await FirebaseFunctions.instance
           .httpsCallable('get_trade_total_NETs')

@@ -20,12 +20,12 @@ class CardImagesScreenController extends GetxController {
 
   @override
   void onInit() async {
-    await getDetails();
+    getDetails();
     await getImagesGroupedByDate(carImages);
     super.onInit();
   }
 
-  getDetails() {
+  void getDetails() {
     if (Get.arguments != null) {
       var arguments = Get.arguments;
       carImages = arguments.carImages;

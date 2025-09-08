@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../consts.dart';
 import '../../my_text_field.dart';
 
-Container jobCardSection(context, JobCardController controller) {
+Container jobCardSection(BuildContext context, JobCardController controller) {
   return Container(
       padding: const EdgeInsets.all(20),
       decoration: containerDecor,

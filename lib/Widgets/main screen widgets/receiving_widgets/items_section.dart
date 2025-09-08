@@ -35,8 +35,8 @@ Widget itemsSection({
 }
 
 Widget tableOfScreens({
-  required constraints,
-  required context,
+  required BoxConstraints constraints,
+  required BuildContext context,
   required ReceivingController controller,
   required String id,
 }) {

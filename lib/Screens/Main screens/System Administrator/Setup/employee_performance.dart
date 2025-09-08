@@ -185,7 +185,7 @@ class EmployeePerformance extends StatelessWidget {
 }
 
 Widget tableOfScreens({
-  required constraints,
+  required BoxConstraints constraints,
   required EmployeesPerformanceController controller,
 }) {
   return DataTable(

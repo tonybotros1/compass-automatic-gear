@@ -486,8 +486,8 @@ AnimatedTreeView<MyTreeNode> leftTree({required MenusController controller}) {
                                     onPressed: () async {
                                       Get.back();
                                       await controller.removeNodeFromTheTree(
-                                        entry.node.id,
-                                        entry.node.parent!.id,
+                                        entry.node.id ?? '',
+                                        entry.node.parent!.id ?? '',
                                       );
                                     },
                                   ),

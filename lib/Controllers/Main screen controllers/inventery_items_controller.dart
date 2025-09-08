@@ -28,18 +28,18 @@ class InventeryItemsController extends GetxController {
     super.onInit();
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
-  addNewItem() {
+  void addNewItem() {
     try {
       addingNewValue.value = true;
       FirebaseFirestore.instance.collection('inventery_items').add({
@@ -56,7 +56,7 @@ class InventeryItemsController extends GetxController {
     }
   }
 
-  editItem(id) {
+  void editItem(String id) {
     try {
       addingNewValue.value = true;
 
@@ -72,7 +72,7 @@ class InventeryItemsController extends GetxController {
     }
   }
 
-  getAllItems() {
+  void getAllItems() {
     try {
       isScreenLoding.value = true;
       FirebaseFirestore.instance
@@ -88,7 +88,7 @@ class InventeryItemsController extends GetxController {
     }
   }
 
-  deleteItem(id) async {
+  Future<void> deleteItem(String id) async {
     Get.back();
     await FirebaseFirestore.instance
         .collection('inventery_items')

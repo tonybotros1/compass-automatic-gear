@@ -36,12 +36,12 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
  
   # firebase packages:
-  firebase_core: ^3.8.1
-  cloud_firestore: ^5.5.1
-  firebase_storage: ^12.3.7
+  firebase_core: ^4.1.0
+  cloud_firestore: ^6.0.1
+  firebase_storage: ^13.0.1
   # firebase_auth: ^5.3.4
-  firebase_messaging: ^15.1.6
-  cloud_functions: ^5.4.0
+  firebase_messaging: ^16.0.1
+  cloud_functions: ^6.0.1
 
   # flutter packages:
   get: ^4.6.6
@@ -53,7 +53,7 @@ dependencies:
   http: ^1.5.0
   crypto: ^3.0.6
   photo_view: ^0.15.0
-  file_picker: ^9.0.2
+  file_picker: ^10.3.2
   mime: ^2.0.0
   universal_html: ^2.2.4
   persistent_bottom_nav_bar: ^6.2.1
@@ -65,7 +65,7 @@ dependencies:
   percent_indicator: ^4.2.4
   readmore: ^3.0.0
   uuid: ^4.5.1
-  syncfusion_flutter_charts: ^29.1.39
+  syncfusion_flutter_charts: ^31.1.17
   dio: ^5.8.0+1
   characters: ^1.4.0
   auto_size_text: ^3.0.0
@@ -76,7 +76,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_launcher_icons: "^0.14.3"
 
 flutter_launcher_icons:

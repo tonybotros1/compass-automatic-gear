@@ -142,12 +142,12 @@ class CashManagementController extends GetxController {
     editingIndex.value = -1;
   }
 
-  getCompanyId() async {
+  Future<void> getCompanyId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     companyId.value = prefs.getString('companyId')!;
   }
 
-  loadValuesForReceipts(Map data) async {
+  Future<void> loadValuesForReceipts(Map data) async {
     status.value = data['status'] ?? '';
     isReceiptAdded.value = true;
     availableReceipts.clear();
@@ -179,7 +179,7 @@ class CashManagementController extends GetxController {
     rate.text = data['rate'] ?? '';
   }
 
-  loadValuesForPayments(Map data) async {
+  Future<void> loadValuesForPayments(Map data) async {
     status.value = data['status'] ?? '';
     isPaymentAdded.value = true;
     availablePayments.clear();
@@ -212,7 +212,7 @@ class CashManagementController extends GetxController {
     rate.text = data['rate'] ?? '';
   }
 
-  clearValues() {
+  void clearValues() {
     currency.clear();
     rate.clear();
     account.clear();
@@ -362,7 +362,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -408,7 +408,7 @@ class CashManagementController extends GetxController {
     availablePayments.assignAll(newList);
   }
 
-  calculateAmountForSelectedReceipts() {
+  void calculateAmountForSelectedReceipts() {
     calculatedAmountForAllSelectedReceipts.value = 0.0;
     for (var element in selectedAvailableReceipts) {
       calculatedAmountForAllSelectedReceipts.value +=
@@ -416,7 +416,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  calculateAmountForSelectedPayments() {
+  void calculateAmountForSelectedPayments() {
     calculatedAmountForAllSelectedPayments.value = 0.0;
     for (var element in selectedAvailablePayments) {
       calculatedAmountForAllSelectedPayments.value +=
@@ -433,7 +433,7 @@ class CashManagementController extends GetxController {
   // }
 
 // this functions is to add the selected receipts to the table in the new receipts screen
-  addSelectedReceipts() {
+  void addSelectedReceipts() {
     // selectedAvailableReceipts.clear();
     for (var element in availableReceipts) {
       if (element['is_selected'] == true) {
@@ -447,7 +447,7 @@ class CashManagementController extends GetxController {
     Get.back();
   }
 
-  addSelectedPayments() {
+  void addSelectedPayments() {
     // selectedAvailablePayments.clear();
 
     for (var element in availablePayments) {
@@ -504,7 +504,7 @@ class CashManagementController extends GetxController {
   }
 
   // this function is to get colors
-  getReceiptsTypes() async {
+  Future<void> getReceiptsTypes() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'RECEIPT_TYPES')
@@ -523,7 +523,7 @@ class CashManagementController extends GetxController {
     });
   }
 
-  getAllEntities() {
+  void getAllEntities() {
     try {
       FirebaseFirestore.instance
           .collection('entity_informations')
@@ -563,7 +563,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  getAllAccounts() {
+  void getAllAccounts() {
     try {
       FirebaseFirestore.instance
           .collection('all_banks')
@@ -966,7 +966,7 @@ class CashManagementController extends GetxController {
   //   }
   // }
 
-  Future<double> calculateTotalPaymentsForAPInvoices(apId) async {
+  Future<double> calculateTotalPaymentsForAPInvoices(String apId) async {
     try {
       double total = 0.0;
       var payments = await FirebaseFirestore.instance
@@ -1128,7 +1128,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  addNewReceipts() async {
+  Future<void> addNewReceipts() async {
     try {
       addingNewValue.value = true;
 
@@ -1214,7 +1214,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  addNewPayment() async {
+  Future<void> addNewPayment() async {
     try {
       addingNewValue.value = true;
 
@@ -1299,7 +1299,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  editReceipt(id) async {
+  Future<void> editReceipt(String id) async {
     try {
       addingNewValue.value = true;
 
@@ -1366,7 +1366,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  editPayment(id) async {
+  Future<void> editPayment(String id) async {
     try {
       addingNewValue.value = true;
 
@@ -1430,7 +1430,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  deleteReceipt(id) async {
+  Future<void> deleteReceipt(String id) async {
     try {
       Get.close(2);
       await FirebaseFirestore.instance
@@ -1442,7 +1442,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  deletePayment(id) async {
+  Future<void> deletePayment(String id) async {
     try {
       Get.close(2);
       await FirebaseFirestore.instance
@@ -1454,7 +1454,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  postReceipt(receiptID) async {
+  Future<void> postReceipt(String receiptID) async {
     try {
       if (isReceiptAdded.isFalse) {
         showSnackBar('Alert', 'Please Save Receipt First');
@@ -1484,7 +1484,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  postPayment(paymentID) async {
+  Future<void> postPayment(String paymentID) async {
     try {
       if (isPaymentAdded.isFalse) {
         showSnackBar('Alert', 'Please Save Payment First');
@@ -1514,7 +1514,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  cancelReceipt(receiptID) async {
+  Future<void> cancelReceipt(String receiptID) async {
     try {
       if (isReceiptAdded.isFalse) {
         showSnackBar('Alert', 'Please Save Receipt First');
@@ -1540,7 +1540,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  cancelPayment(paymentID) async {
+  Future<void> cancelPayment(String paymentID) async {
     try {
       if (isPaymentAdded.isFalse) {
         showSnackBar('Alert', 'Please Save Payment First');
@@ -1566,7 +1566,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  Future<String> getCurrencyName(countryId) async {
+  Future<String> getCurrencyName(String countryId) async {
     try {
       final HttpsCallable callable =
           FirebaseFunctions.instance.httpsCallable('get_currency_name');
@@ -1584,7 +1584,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  Future<String> getCurrencyRate(currencyId) async {
+  Future<String> getCurrencyRate(String currencyId) async {
     try {
       final HttpsCallable callable =
           FirebaseFunctions.instance.httpsCallable('get_currency_rate');
@@ -1601,7 +1601,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  calculateCustomerOutstanding(customerId) async {
+  Future<String> calculateCustomerOutstanding(String customerId) async {
     try {
       final HttpsCallable callable = FirebaseFunctions.instance
           .httpsCallable('calculate_customer_outstanding');
@@ -1619,7 +1619,7 @@ class CashManagementController extends GetxController {
   }
 
   // this function is to get nabks
-  getBanks() async {
+  Future<void> getBanks() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'BANKS')
@@ -1638,7 +1638,7 @@ class CashManagementController extends GetxController {
     });
   }
 
-  calculateMoneyForAllReceipts() async {
+  Future<void> calculateMoneyForAllReceipts() async {
     try {
       totalReceiptsReceived.value = 0.0;
 
@@ -1654,7 +1654,7 @@ class CashManagementController extends GetxController {
     }
   }
 
-  calculateMoneyForAllPayments() async {
+  Future<void> calculateMoneyForAllPayments() async {
     try {
       totalPaymentPaid.value = 0.0;
 
@@ -2026,14 +2026,14 @@ class CashManagementController extends GetxController {
     isScreenLodingForPayments.value = false;
   }
 
-  removeFilters() {
+  void removeFilters() {
     isAllSelected.value = false;
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;
   }
 
-  clearAllFilters() {
+  void clearAllFilters() {
     statusFilter.value.clear();
     allReceipts.clear();
     allPayements.clear();

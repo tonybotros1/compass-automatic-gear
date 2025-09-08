@@ -62,7 +62,7 @@ class MenusController extends GetxController {
     super.onInit();
   }
 
-  getScreenNameForHeader() {
+  String getScreenNameForHeader() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
@@ -94,7 +94,7 @@ class MenusController extends GetxController {
     });
   }
 
-  getMenus() async {
+  Future<void> getMenus() async {
     try {
       isScreenLoading.value = true;
 
@@ -113,7 +113,7 @@ class MenusController extends GetxController {
     }
   }
 
-  addNewMenu() async {
+  Future<void> addNewMenu() async {
     try {
       addingNewMenuProcess.value = true;
       var url = Uri.parse('$backendUrl/menus/add_new_menu');
@@ -159,7 +159,7 @@ class MenusController extends GetxController {
     }
   }
 
-  editMenu(String menuID) async {
+  Future<void> editMenu(String menuID) async {
     try {
       addingNewMenuProcess.value = true;
       var url = Uri.parse('$backendUrl/menus/update_menu/$menuID');
@@ -189,7 +189,7 @@ class MenusController extends GetxController {
     }
   }
 
-  removeNodeFromTheTree(nodeID, parentID) async {
+  Future<void> removeNodeFromTheTree(String nodeID,String parentID) async {
     try {
       var url = Uri.parse(
         '$backendUrl/menus/remove_node_from_the_tree/$parentID/$nodeID',
@@ -208,12 +208,12 @@ class MenusController extends GetxController {
   // =====================================================================================================================
 
   // this function is to remove a menu from the list
-  removeMenuFromList(index) {
+  void removeMenuFromList(int index) {
     menuIDFromList.removeAt(index);
   }
 
   // this function is to remove a screen from the list
-  removeScreenFromList(index) {
+  void removeScreenFromList(int index) {
     screenIDFromList.removeAt(index);
   }
 
@@ -245,7 +245,7 @@ class MenusController extends GetxController {
   }
 
   // this function is to add the sub menu to DB and to the tree
-  addExistingSubMenuToMenu() async {
+  Future<void> addExistingSubMenuToMenu() async {
     try {
       addingExistingMenuProcess.value = true;
 
@@ -288,7 +288,7 @@ class MenusController extends GetxController {
           if (theSelectedMenu.exists) {
             Map<String, dynamic>? selectedMenuData = theSelectedMenu.data();
 
-            await addChildToNode(
+            addChildToNode(
               roots,
               selectedMenuName.value,
               MyTreeNode(
@@ -343,7 +343,7 @@ class MenusController extends GetxController {
   }
 
   // this function is to add s screen to DB and to the tree
-  addExistingScreenToMenu() async {
+  Future<void> addExistingScreenToMenu() async {
     try {
       addingExistingScreenProcess.value = true;
       var menu = await FirebaseFirestore.instance
@@ -368,7 +368,7 @@ class MenusController extends GetxController {
 
           var selectedScreenData = theSelectedMenu.docs.first.data();
 
-          await addChildToNode(
+          addChildToNode(
             roots,
             selectedMenuName.value,
             MyTreeNode(
@@ -394,7 +394,7 @@ class MenusController extends GetxController {
   }
 
   // this function is to add the new menu to the menus tree
-  addChildToNode(
+  void addChildToNode(
     List<MyTreeNode> nodes, // The current list of nodes to search
     String selectedMenuName, // The title of the node to match
     MyTreeNode newChild, // The new child to add
@@ -509,7 +509,7 @@ class MenusController extends GetxController {
   }
 
   // Function to get main screens in the system
-  getScreens() async {
+  Future<void> getScreens() async {
     try {
       allScreens.clear();
 
@@ -547,7 +547,7 @@ class MenusController extends GetxController {
     );
   }
 
-  getMenuTree(String menuId) async {
+  Future<void> getMenuTree(String menuId) async {
     try {
       var url = Uri.parse('$backendUrl/menus/get_menu_tree/$menuId');
       final response = await http.get(url);

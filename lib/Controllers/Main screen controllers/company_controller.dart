@@ -55,14 +55,14 @@ class CompanyController extends GetxController {
     super.onInit();
   }
 
-  getScreenName() {
+  String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
 
 // this function is to get industries
-  getIndustries() async {
+  Future<void> getIndustries() async {
     var typeDoc = await FirebaseFirestore.instance
         .collection('all_lists')
         .where('code', isEqualTo: 'INDUSTRIES')
@@ -81,7 +81,7 @@ class CompanyController extends GetxController {
     });
   }
 
-  deletCompany(companyId) async {
+  Future<void> deletCompany(String companyId) async {
     try {
       Get.back();
       await FirebaseFirestore.instance
@@ -102,7 +102,7 @@ class CompanyController extends GetxController {
     }
   }
 
-  editActiveOrInActiveStatus(companyId, bool status) async {
+  Future<void> editActiveOrInActiveStatus(String companyId, bool status) async {
     try {
       await FirebaseFirestore.instance
           .collection('companies')
@@ -115,7 +115,7 @@ class CompanyController extends GetxController {
     }
   }
 
-  addNewCompany() async {
+  Future<void> addNewCompany() async {
     try {
       addingNewCompanyProcess.value = true;
 
@@ -197,7 +197,7 @@ class CompanyController extends GetxController {
     }
   }
 
-  updateCompany(companyID, userId) async {
+  Future<void> updateCompany(String companyID,String userId) async {
     try {
       addingNewCompanyProcess.value = true;
 
@@ -261,7 +261,7 @@ class CompanyController extends GetxController {
     return phrase.replaceAll(' ', '_');
   }
 
-  getCountries() {
+  void getCountries() {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -277,7 +277,7 @@ class CompanyController extends GetxController {
     }
   }
 
-  getCitiesByCountryID(countryID) {
+  void getCitiesByCountryID(String countryID) {
     try {
       FirebaseFirestore.instance
           .collection('all_countries')
@@ -293,7 +293,7 @@ class CompanyController extends GetxController {
     }
   }
 
-  Future<String?> getCityName(countryId, cityId) async {
+  Future<String?> getCityName(String countryId,String cityId) async {
     try {
       var cities = await FirebaseFirestore.instance
           .collection('all_countries')
@@ -352,12 +352,12 @@ class CompanyController extends GetxController {
   }
 
   // this function is to remove a menu from the list
-  removeMenuFromList(index) {
+  void removeMenuFromList(int index) {
     roleIDFromList.removeAt(index);
   }
 
   // this function is to get Responsibilities
-  getResponsibilities() {
+  void getResponsibilities() {
     FirebaseFirestore.instance
         .collection('sys-roles')
         .where('is_shown_for_users', isEqualTo: true)
@@ -437,7 +437,7 @@ class CompanyController extends GetxController {
   }
 
 // this function is to get all companies registered in system
-  getCompanies() {
+  void getCompanies() {
     try {
       // Listen to the companies collection changes
       FirebaseFirestore.instance

@@ -8,7 +8,6 @@ import 'add_new_payment_or_edit.dart';
 
 Future<dynamic> paymentDialog(
     {required BoxConstraints constraints,
-    required BuildContext context,
     required CashManagementController controller,
     required void Function()? onPressedForSave,
     required void Function()? onPressedForPost,

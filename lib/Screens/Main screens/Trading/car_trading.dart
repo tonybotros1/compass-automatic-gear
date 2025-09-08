@@ -761,8 +761,8 @@ DataRow dataRowForTheTable(Map<String, dynamic> tradeData, context, constraints,
       ]);
 }
 
-Widget editSection(context, CarTradingController controller,
-    Map<String, dynamic> tradeData, constraints, tradeId) {
+Widget editSection(BuildContext context, CarTradingController controller,
+    Map<String, dynamic> tradeData,BoxConstraints constraints,String tradeId) {
   return GetX<CarTradingController>(builder: (controller) {
     bool isLoading = controller.buttonLoadingStates[tradeId] ?? false;
 
@@ -830,7 +830,7 @@ ElevatedButton capitalButton(
         ? () async {
             controller.searchForCapitals.value.clear();
 
-            await controller.getAllCapitals();
+            controller.getAllCapitals();
             capitalOrOutstandingOrGeneralExpensesDialog(
               isGeneralExpenses: false,
               search: controller.searchForCapitals,
@@ -866,7 +866,7 @@ ElevatedButton outstandingButton(
         ? () async {
             controller.searchForOutstanding.value.clear();
 
-            await controller.getAllOutstanding();
+            controller.getAllOutstanding();
             capitalOrOutstandingOrGeneralExpensesDialog(
               isGeneralExpenses: false,
               search: controller.searchForOutstanding,
@@ -901,7 +901,7 @@ ElevatedButton generalExpensesButton(
     onPressed: controller.isgeneralExpenseslLoading.isFalse
         ? () async {
             controller.searchForGeneralexpenses.value.clear();
-            await controller.getAllGeneralExpenses();
+            controller.getAllGeneralExpenses();
             capitalOrOutstandingOrGeneralExpensesDialog(
               isGeneralExpenses: true,
               search: controller.searchForGeneralexpenses,

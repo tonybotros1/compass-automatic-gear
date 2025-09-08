@@ -28,7 +28,7 @@ class LoadingScreenController extends GetxController {
     return dateTime.isBefore(todayOnly) || dateTime.isAtSameMomentAs(todayOnly);
   }
 
-  Future<bool> checkForExpiryDate(userId) async {
+  Future<bool> checkForExpiryDate(String userId) async {
     try {
       var user = await FirebaseFirestore.instance
           .collection('sys-users')
