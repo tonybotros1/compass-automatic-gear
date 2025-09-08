@@ -61,6 +61,7 @@ Widget viewMenu({
           ),
         ),
         menuSection(controller, constraints),
+        const VerticalDivider(width: 1, thickness: 1, color: Colors.grey),
         screenSection(controller, constraints),
       ],
     ),
@@ -69,316 +70,210 @@ Widget viewMenu({
 
 Obx screenSection(MenusController controller, BoxConstraints constraints) {
   return Obx(() {
-    return Expanded(
-      child: controller.selectedMenuID.value != ''
-          ? Stack(
-              children: [
-                ListView(
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: AutoSizedText(
-                              maxLines: 2,
-                              constraints: constraints,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                              ),
-                              text: controller.selectedMenuName.value,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: CustomDropdown(
-                            validator: true,
-                            hintText: 'Screens',
-                            items: controller.allScreens,
-                            itemBuilder: (context, key, value) {
-                              return Container(
-                                alignment: Alignment.centerLeft,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                child: Text(value['name']),
-                              );
-                            },
-                            onChanged: (key, value) {
-                              if (!controller.screenIDFromList.contains(key)) {
-                                controller.screenIDFromList.add(key);
-                              }
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Wrap(
-                            spacing: 10, // Horizontal spacing between items
-                            runSpacing: 10, // Vertical spacing between rows
-                            children: List.generate(
-                              controller.screenIDFromList.length,
-                              (i) {
-                                return Stack(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                        horizontal: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xffA6AEBF),
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                      child: Text(
-                                        controller.getScreenName(
-                                          controller.screenIDFromList[i],
-                                        ),
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 0,
-                                      right: 0,
-                                      child: InkWell(
-                                        onTap: () {
-                                          controller.removeScreenFromList(i);
-                                        },
-                                        child: const Icon(
-                                          Icons.remove_circle,
-                                          color: Colors.red,
-                                          size: 14,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Positioned(
-                  bottom: 20,
-                  right: 20,
-                  child: ElevatedButton(
-                    style: addButtonStyle,
-                    onPressed:
-                        controller.addingExistingScreenProcess.value == false
-                        ? () async {
-                            if (controller.screenIDFromList.isNotEmpty) {
-                              await controller.addExistingScreenToMenu();
-                              controller.screenIDFromList.clear();
-                            } else {
-                              showSnackBar(
-                                'Alert',
-                                'Please select screen first',
-                              );
-                            }
-                          }
-                        : null,
-                    child: controller.addingExistingScreenProcess.value == false
-                        ? const Text('Add')
-                        : const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                  ),
-                ),
-              ],
-            )
-          : Center(
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text(
-                  'Select menu to start',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
+    return addScreenOrMenu(
+      controller: controller,
+      constraints: constraints,
+      dropDownMenu: CustomDropdown(
+        width: double.infinity,
+        validator: true,
+        hintText: 'Screens',
+        items: controller.allScreens,
+        itemBuilder: (context, key, value) {
+          return Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Text(value['name']),
+          );
+        },
+        onChanged: (key, value) {
+          if (!controller.screenIDFromList.contains(key)) {
+            controller.screenIDFromList.add(key);
+          }
+        },
+      ),
+      onAdd: controller.addingExistingScreenProcess.value == false
+          ? () async {
+              if (controller.screenIDFromList.isNotEmpty) {
+                await controller.addScreenToExistringMenu();
+                controller.screenIDFromList.clear();
+              } else {
+                showSnackBar('Alert', 'Please select screen first');
+              }
+            }
+          : null,
+      dataMap: controller.allScreens,
+      list: controller.screenIDFromList,
+      addingLoading: controller.addingExistingScreenProcess,
     );
   });
 }
 
 Obx menuSection(MenusController controller, BoxConstraints constraints) {
-  return Obx(
-    () => Expanded(
-      child: Container(
-        decoration: const BoxDecoration(
-          border: Border(right: BorderSide(color: Colors.grey)),
-        ),
-        child: controller.selectedMenuID.value != ''
-            ? Stack(
+  return Obx(() {
+    return addScreenOrMenu(
+      controller: controller,
+      constraints: constraints,
+      dropDownMenu: CustomDropdown(
+        width: double.infinity,
+        hintText: 'Menus',
+        validator: true,
+        items: controller.allMenus,
+        itemBuilder: (context, key, value) {
+          return Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Text('${value['name']} ${value['code']}'),
+          );
+        },
+        onChanged: (key, value) {
+          if (!controller.menuIDFromList.contains(key)) {
+            controller.menuIDFromList.add(key);
+          }
+        },
+      ),
+      onAdd: controller.addingExistingMenuProcess.value == false
+          ? () async {
+              if (controller.menuIDFromList.isNotEmpty) {
+                await controller.addSubMenuToExistingMenu();
+                controller.menuIDFromList.clear();
+              } else {
+                showSnackBar('Alert', 'Please select menu first');
+              }
+            }
+          : null,
+      dataMap: controller.allMenus,
+      list: controller.menuIDFromList,
+      addingLoading: controller.addingExistingMenuProcess,
+    );
+  });
+}
+
+Expanded addScreenOrMenu({
+  required MenusController controller,
+  required BoxConstraints constraints,
+  required CustomDropdown dropDownMenu,
+  required void Function()? onAdd,
+  required RxMap<String, dynamic> dataMap,
+  required RxList<dynamic> list,
+  required RxBool addingLoading,
+}) {
+  return Expanded(
+    child: controller.selectedMenuID.value != ''
+        ? Stack(
+            children: [
+              ListView(
                 children: [
-                  ListView(
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: AutoSizedText(
-                                maxLines: 2,
-                                constraints: constraints,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                ),
-                                text: controller.selectedMenuName.value,
-                              ),
-                            ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: CustomDropdown(
-                              hintText: 'Menus',
-                              validator: true,
-                              items: controller.allMenus,
-                              itemBuilder: (context, key, value) {
-                                return Container(
-                                  alignment: Alignment.centerLeft,
+                          child: AutoSizedText(
+                            maxLines: 2,
+                            constraints: constraints,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                            text: controller.selectedMenuName.value,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: dropDownMenu,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: List.generate(list.length, (i) {
+                            return Stack(
+                              children: [
+                                Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
+                                    vertical: 8,
+                                    horizontal: 6,
                                   ),
-                                  child: Text(value['name']),
-                                );
-                              },
-                              onChanged: (key, value) {
-                                if (!controller.menuIDFromList.contains(key)) {
-                                  controller.menuIDFromList.add(key);
-                                }
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Wrap(
-                              spacing: 10,
-                              runSpacing: 10,
-                              children: List.generate(
-                                controller.menuIDFromList.length,
-                                (i) {
-                                  return Stack(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 8,
-                                          horizontal: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xffA6AEBF),
-                                          borderRadius: BorderRadius.circular(
-                                            5,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          controller.getMenuName(
-                                            controller.menuIDFromList[i],
-                                          ),
-                                          style: const TextStyle(fontSize: 14),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 0,
-                                        right: 0,
-                                        child: InkWell(
-                                          onTap: () {
-                                            controller.removeMenuFromList(i);
-                                          },
-                                          child: const Icon(
-                                            Icons.remove_circle,
-                                            color: Colors.red,
-                                            size: 14,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xffA6AEBF),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Text(
+                                    controller.getMenuOrScreenName(
+                                      list[i],
+                                      dataMap,
+                                    ),
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: InkWell(
+                                    onTap: () {
+                                      controller.removeMenuOrScreenFromList(
+                                        i,
+                                        list,
+                                      );
+                                    },
+                                    child: const Icon(
+                                      Icons.remove_circle,
+                                      color: Colors.red,
+                                      size: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                        ),
                       ),
                     ],
                   ),
-                  Positioned(
-                    bottom: 20,
-                    right: 20,
-                    child: ElevatedButton(
-                      style: addButtonStyle,
-                      onPressed:
-                          controller.addingExistingMenuProcess.value == false
-                          ? () async {
-                              if (controller.menuIDFromList.isNotEmpty) {
-                                await controller.addExistingSubMenuToMenu();
-                                controller.menuIDFromList.clear();
-                              } else {
-                                showSnackBar(
-                                  'Alert',
-                                  'Please select menu first',
-                                );
-                              }
-                            }
-                          : null,
-                      child: controller.addingExistingMenuProcess.value == false
-                          ? const Text('Add')
-                          : const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                    ),
-                  ),
                 ],
-              )
-            : Center(
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Text(
-                    'Select menu to start',
-                    style: TextStyle(color: Colors.white),
-                  ),
+              ),
+              Positioned(
+                bottom: 20,
+                right: 20,
+                child: ElevatedButton(
+                  style: addButtonStyle,
+                  onPressed: onAdd,
+                  child: addingLoading.value == false
+                      ? const Text('Add')
+                      : const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        ),
                 ),
               ),
-      ),
-    ),
+            ],
+          )
+        : Center(
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text(
+                'Select menu to start',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
   );
 }
 
@@ -489,6 +384,7 @@ AnimatedTreeView<MyTreeNode> leftTree({required MenusController controller}) {
                                         entry.node.id ?? '',
                                         entry.node.parent!.id ?? '',
                                       );
+                                      controller.selectedMenuID.value = '';
                                     },
                                   ),
                                 ],

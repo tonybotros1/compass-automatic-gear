@@ -220,9 +220,9 @@ ElevatedButton editSection(
   return ElevatedButton(
     style: editButtonStyle,
     onPressed: () {
-      controller.menuName.text = menuData['name'];
-      controller.code.text = menuData['code'];
-      controller.menuRoute.text = menuData['routeName'];
+      controller.menuName.text = menuData['name']??'';
+      controller.code.text = menuData['code']??'';
+      controller.menuRoute.text = menuData['routeName']??'';
       menusDialog(
         constraints: constraints,
         controller: controller,
@@ -249,6 +249,8 @@ ElevatedButton viewSection(
         ? () async {
             controller.menuIDFromList.clear();
              controller.selectedMenuID.value = '';
+             controller.screenIDFromList.clear();
+             controller.getScreens();
             controller.setButtonLoading(menuId, true); // Start loading
             await controller.getMenuTree(menuId);
             controller.setButtonLoading(menuId, false); // Stop loading
