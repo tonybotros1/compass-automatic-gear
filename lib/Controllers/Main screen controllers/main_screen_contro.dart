@@ -38,6 +38,7 @@ import '../../Screens/Main screens/System Administrator/User Management/responsi
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
 import '../../Widgets/main screen widgets/first_main_screen_widgets/first_main_screen.dart';
 import '../../consts.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class MainScreenController extends GetxController {
   final RxList<DocumentSnapshot> favoriteScreens = RxList<DocumentSnapshot>([]);
@@ -68,15 +69,18 @@ class MainScreenController extends GetxController {
   RxString userId = RxString('');
   MyTreeNode? previouslySelectedNode;
   RxBool isHovered = RxBool(false);
+  WebSocketChannel? channel;
 
   @override
   void onInit() async {
     // init();
+ 
     await getCompanyDetails();
     getFavoriteScreens();
     getScreens();
     super.onInit();
   }
+
 
   // this function is to get company details
   Future<void> getCompanyDetails() async {

@@ -59,9 +59,7 @@ class CarBrandsController extends GetxController {
   }
 
   void connectWebSocket() {
-    channel = WebSocketChannel.connect(
-      Uri.parse("ws://localhost:8000/ws"), // change to wss:// in production
-    );
+    channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
 
     channel!.stream.listen((event) {
       final message = jsonDecode(event);
@@ -287,7 +285,10 @@ class CarBrandsController extends GetxController {
     }
   }
 
-  Future<void> editActiveOrInActiveStatusForModels(String modelId, bool status) async {
+  Future<void> editActiveOrInActiveStatusForModels(
+    String modelId,
+    bool status,
+  ) async {
     try {
       var url = Uri.parse('$backendTestURI/brands/edit_model_status/$modelId');
       await http.patch(

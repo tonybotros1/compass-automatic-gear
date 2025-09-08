@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
@@ -65,6 +64,7 @@ class MenusController extends GetxController {
   String getScreenNameForHeader() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
+
     return mainScreenController.selectedScreenName.value;
   }
 
@@ -77,13 +77,13 @@ class MenusController extends GetxController {
       switch (message["type"]) {
         case "menu_created":
           final newMenu = MenuModel.fromJson(message["data"]);
-          allMenus[newMenu.id] = newMenu;
+          allMenus[newMenu.id] = newMenu.toJson();
           break;
 
         case "menu_updated":
           final updated = MenuModel.fromJson(message["data"]);
           if (allMenus.containsKey(updated.id)) {
-            allMenus[updated.id] = updated;
+            allMenus[updated.id] = updated.toJson();
           }
           break;
 
@@ -189,7 +189,7 @@ class MenusController extends GetxController {
     }
   }
 
-  Future<void> removeNodeFromTheTree(String nodeID,String parentID) async {
+  Future<void> removeNodeFromTheTree(String nodeID, String parentID) async {
     try {
       var url = Uri.parse(
         '$backendUrl/menus/remove_node_from_the_tree/$parentID/$nodeID',

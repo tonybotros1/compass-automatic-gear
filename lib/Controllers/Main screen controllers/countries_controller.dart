@@ -63,9 +63,7 @@ class CountriesController extends GetxController {
   }
 
   void connectWebSocket() {
-    channel = WebSocketChannel.connect(
-      Uri.parse("ws://localhost:8000/ws"), // change to wss:// in production
-    );
+    channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
 
     channel!.stream.listen((event) {
       final message = jsonDecode(event);
