@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../Controllers/Main screen controllers/menus_controller.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/menus_widgets/menus_dialog.dart';
@@ -31,6 +30,13 @@ class Menus extends StatelessWidget {
                     init: MenusController(),
                     builder: (controller) {
                       return searchBar(
+                        onChanged: (_) {
+                          controller.filterMenus();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.clear();
+                          controller.filterMenus();
+                        },
                         search: controller.search,
                         constraints: constraints,
                         context: context,
@@ -52,9 +58,7 @@ class Menus extends StatelessWidget {
                         }
                         if (controller.isScreenLoading.value == false &&
                             controller.allMenus.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
+                          return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
                           scrollDirection: Axis
@@ -85,16 +89,15 @@ Widget buildCell(String content) {
   return Container(
     color: Colors.white,
     margin: const EdgeInsets.all(1),
-    child: Center(
-      child: Text(
-        content,
-      ),
-    ),
+    child: Center(child: Text(content)),
   );
 }
 
-Widget tableOfMenus(
-    {required constraints, required context, required controller}) {
+Widget tableOfMenus({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required MenusController controller,
+}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -108,10 +111,7 @@ Widget tableOfMenus(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          text: 'Menu',
-          constraints: constraints,
-        ),
+        label: AutoSizedText(text: 'Menu', constraints: constraints),
         onSort: controller.onSort,
       ),
       DataColumn(
@@ -122,150 +122,183 @@ Widget tableOfMenus(
         ),
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         onSort: controller.onSort,
       ),
       const DataColumn(label: Text('')),
     ],
     rows:
         controller.filteredMenus.isEmpty && controller.search.value.text.isEmpty
-            ? controller.allMenus.entries.map<DataRow>((entry) {
-                final menuData = entry.value;
-                final menuId = entry.key;
-                return dataRowForTheTable(
-                    menuData, context, constraints, menuId, controller);
-              }).toList()
-            : controller.filteredMenus.entries.map<DataRow>((entry) {
-                final menuData = entry.value;
-                final menuId = entry.key;
-                return dataRowForTheTable(
-                    menuData, context, constraints, menuId, controller);
-              }).toList(),
+        ? controller.allMenus.entries.map<DataRow>((entry) {
+            final menuData = entry.value;
+            final menuId = entry.key;
+            return dataRowForTheTable(
+              menuData,
+              context,
+              constraints,
+              menuId,
+              controller,
+            );
+          }).toList()
+        : controller.filteredMenus.entries.map<DataRow>((entry) {
+            final menuData = entry.value;
+            final menuId = entry.key;
+            return dataRowForTheTable(
+              menuData,
+              context,
+              constraints,
+              menuId,
+              controller,
+            );
+          }).toList(),
   );
 }
 
 DataRow dataRowForTheTable(
-    Map<String, dynamic> menuData, context, constraints, menuId, controller) {
-  return DataRow(cells: [
-    DataCell(Text(
-      menuData['name'] ?? 'no name',
-    )),
-    DataCell(Text(
-      menuData['description'] ?? 'no description',
-    )),
-    DataCell(
-      Text(
-        menuData['added_date'] != null
-            ? textToDate(menuData['added_date']) //
-            : 'N/A',
-      ),
-    ),
-    DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        viewSection(controller, menuId, context, constraints),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-          child:
-              editSection(controller, menuId, context, constraints, menuData),
+  Map menuData,
+  context,
+  constraints,
+  menuId,
+  controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(Text(menuData["name"] ?? '')),
+      DataCell(Text(menuData["code"] ?? '')),
+      DataCell(Text(textToDate(menuData["createdAt"] ?? ''))),
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            viewSection(controller, menuId, context, constraints),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+              child: editSection(
+                controller,
+                menuId,
+                context,
+                constraints,
+                menuData,
+              ),
+            ),
+            deleteSection(controller, menuId, context, constraints),
+          ],
         ),
-        deleteSection(controller, menuId, context, constraints)
-      ],
-    )),
-  ]);
+      ),
+    ],
+  );
 }
 
 ElevatedButton deleteSection(
-    MenusController controller, menuId, context, constraints) {
+  MenusController controller,
+  menuId,
+  context,
+  constraints,
+) {
   return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: 'The menu will be deleted permanently',
-            onPressed: () {
-              controller.deleteMenuAndUpdateChildren(menuId);
-            });
-      },
-      child: const Text("Delete"));
+    style: deleteButtonStyle,
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: 'The menu will be deleted permanently',
+        onPressed: () {
+          controller.deleteMenuAndUpdateChildren(menuId);
+        },
+      );
+    },
+    child: const Text("Delete"),
+  );
 }
 
 ElevatedButton editSection(
-    MenusController controller, menuId, context, constraints, menuData) {
+  MenusController controller,
+  menuId,
+  context,
+  constraints,
+  Map menuData,
+) {
   return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () {
-        controller.menuName.text = menuData['name'];
-        controller.description.text = menuData['description'];
-        controller.menuRoute.text = menuData['routeName'] ?? '';
-        menusDialog(
-            constraints: constraints,
-            controller: controller,
-            onPressed: () async {
-              await controller.editMenu(menuId);
-            });
-      },
-      child: const Text("Edit"));
+    style: editButtonStyle,
+    onPressed: () {
+      controller.menuName.text = menuData['name'];
+      controller.code.text = menuData['code'];
+      controller.menuRoute.text = menuData['routeName'];
+      menusDialog(
+        constraints: constraints,
+        controller: controller,
+        onPressed: () async {
+          await controller.editMenu(menuId);
+        },
+      );
+    },
+    child: const Text("Edit"),
+  );
 }
 
 ElevatedButton viewSection(
-    MenusController controller, menuId, context, BoxConstraints constraints) {
+  MenusController controller,
+  menuId,
+  context,
+  BoxConstraints constraints,
+) {
   return ElevatedButton(
     style: viewButtonStyle,
-    onPressed: controller.buttonLoadingStates[menuId] == null ||
+    onPressed:
+        controller.buttonLoadingStates[menuId] == null ||
             controller.buttonLoadingStates[menuId] == false
         ? () async {
             controller.menuIDFromList.clear();
+             controller.selectedMenuID.value = '';
             controller.setButtonLoading(menuId, true); // Start loading
-            // await controller.listOfMenusAndScreen();
-            await controller.getMenusScreens(menuId);
+            await controller.getMenuTree(menuId);
             controller.setButtonLoading(menuId, false); // Stop loading
             Get.dialog(
-                barrierDismissible: false,
-                Dialog(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                  child: SizedBox(
-                    height: constraints.maxHeight,
-                    width: constraints.maxWidth,
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15)),
-                            color: mainColor,
+              barrierDismissible: false,
+              Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: SizedBox(
+                  height: constraints.maxHeight,
+                  width: constraints.maxWidth,
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(15),
+                            topRight: Radius.circular(15),
                           ),
-                          child: Row(
-                            spacing: 10,
-                            children: [
-                              Text(
-                                controller.getScreenNameForHeader(),
-                                style: fontStyleForScreenNameUsedInButtons,
-                              ),
-                              const Spacer(),
-                              closeButton
-                            ],
-                          ),
+                          color: mainColor,
                         ),
-                        Expanded(
-                            child: Padding(
+                        child: Row(
+                          spacing: 10,
+                          children: [
+                            Text(
+                              controller.getScreenNameForHeader(),
+                              style: fontStyleForScreenNameUsedInButtons,
+                            ),
+                            const Spacer(),
+                            closeButton,
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: viewMenu(
                             controller: controller,
                             constraints: constraints,
                             context: context,
                           ),
-                        ))
-                      ],
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ));
+                ),
+              ),
+            );
           }
         : null,
     child: Obx(() {
@@ -288,24 +321,25 @@ ElevatedButton viewSection(
   );
 }
 
-ElevatedButton newMenuButton(BuildContext context, BoxConstraints constraints,
-    MenusController controller) {
+ElevatedButton newMenuButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  MenusController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.menuName.clear();
-      controller.description.clear();
+      controller.code.clear();
       controller.menuRoute.clear();
       menusDialog(
-          constraints: constraints,
-          controller: controller,
-          onPressed: controller.addingNewMenuProcess.value
-              ? null
-              : () async {
-                  await controller.addNewMenu();
-                  if (controller.addingNewMenuProcess.value == false) {
-                    Get.back();
-                  }
-                });
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewMenuProcess.value
+            ? null
+            : () async {
+                await controller.addNewMenu();
+              },
+      );
     },
     style: newButtonStyle,
     child: const Text('New Menu'),

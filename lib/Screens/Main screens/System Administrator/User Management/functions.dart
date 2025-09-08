@@ -2,7 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/functions_cont
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../Models/functions/screens_model.dart';
+import '../../../../Models/menus_functions_roles/screens_model.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/functions_widgets/functions_dialog.dart';

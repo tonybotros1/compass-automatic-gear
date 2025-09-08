@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 // String backendURI = 'https://datahubai-backend.onrender.com';
 // String backendTestURI = 'https://datahubai-backend.onrender.com';
 String backendTestURI = 'http://127.0.0.1:8000';
+String webSocketURL = "ws://localhost:8000/ws";
 
 var fontStyleForAppBar = TextStyle(
   fontSize: 20,

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:datahubai/Models/functions/screens_model.dart';
+import 'package:datahubai/Models/menus_functions_roles/screens_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;

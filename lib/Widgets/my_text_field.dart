@@ -83,7 +83,7 @@ Widget myTextFormFieldWithBorder({
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 10,
-              vertical: 10,
+              vertical: 11,
             ),
             isDense: true,
             icon: icon,
@@ -91,7 +91,7 @@ Widget myTextFormFieldWithBorder({
             hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
             // labelText: labelText,
             alignLabelWithHint: true,
-        
+
             // hintText: hintText,
             labelStyle: TextStyle(
               color: isEnabled == false

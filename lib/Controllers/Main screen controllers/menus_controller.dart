@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/web_socket_channel.dart';
+import '../../Models/menus_functions_roles/menus_model.dart';
 import '../../Models/screen_tree_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
@@ -11,24 +15,24 @@ class MenusController extends GetxController {
   // final RxList<DocumentSnapshot> allMenus = RxList<DocumentSnapshot>([]);
   late TextEditingController menuName =
       TextEditingController(); // new menu name
-  late TextEditingController description = TextEditingController();
+  late TextEditingController code = TextEditingController();
   late TextEditingController menuRoute = TextEditingController();
   RxList menuIDFromList = RxList([]);
   RxList screenIDFromList = RxList([]);
 
-  RxMap allMenus = RxMap();
-  RxMap allScreens = RxMap();
+  // RxList<MenuModel> allMenus = RxList<MenuModel>();
+  RxMap<String, dynamic> allMenus = RxMap<String, dynamic>({});
+  RxMap allScreens = RxMap({});
   RxList menusSubMenusChildren = RxList([]);
   RxList menusSscreensChildren = RxList([]);
-  RxMap<String, Map<String, dynamic>> filteredMenus =
-      RxMap<String, Map<String, dynamic>>();
+  RxMap<String, dynamic> filteredMenus = RxMap<String, dynamic>({});
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
-  RxBool isScreenLoading = RxBool(true);
+  RxBool isScreenLoading = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
 
-// ========== test=================
+  // ========== test=================
   RxDouble containerWidth = RxDouble(300);
   // RxList rolesMenus = RxList([]);
   late TreeController<MyTreeNode> treeController;
@@ -44,14 +48,17 @@ class MenusController extends GetxController {
   RxBool addingExistingScreenProcess = RxBool(false);
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   RxMap<String, String> selectFromScreens = RxMap({});
-
+  WebSocketChannel? channel;
+  String backendUrl = backendTestURI;
   @override
   void onInit() {
+    connectWebSocket();
+
     getMenus();
     getScreens();
-    search.value.addListener(() {
-      filterMenus();
-    });
+    // search.value.addListener(() {
+    //   filterMenus();
+    // });
     super.onInit();
   }
 
@@ -61,22 +68,146 @@ class MenusController extends GetxController {
     return mainScreenController.selectedScreenName.value;
   }
 
-  removeNodeFromTheTree(nodeID, parentID) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('menus ')
-          .doc(parentID)
-          .update({
-        'children': FieldValue.arrayRemove([nodeID])
-      });
+  void connectWebSocket() {
+    channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
 
-      removeNode(roots, nodeID, parentID);
+    channel!.stream.listen((event) {
+      final message = jsonDecode(event);
+
+      switch (message["type"]) {
+        case "menu_created":
+          final newMenu = MenuModel.fromJson(message["data"]);
+          allMenus[newMenu.id] = newMenu;
+          break;
+
+        case "menu_updated":
+          final updated = MenuModel.fromJson(message["data"]);
+          if (allMenus.containsKey(updated.id)) {
+            allMenus[updated.id] = updated;
+          }
+          break;
+
+        case "menu_deleted":
+          final deletedId = message["data"]["_id"];
+          allMenus.remove(deletedId);
+      }
+    });
+  }
+
+  getMenus() async {
+    try {
+      isScreenLoading.value = true;
+
+      var url = Uri.parse('$backendUrl/menus/get_menus');
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final List<MenuModel> menuList = (decoded["menus"] as List)
+            .map((json) => MenuModel.fromJson(json))
+            .toList();
+        allMenus.value = {for (var menu in menuList) menu.id: menu.toJson()};
+        isScreenLoading.value = false;
+      }
     } catch (e) {
-      //
+      isScreenLoading.value = false;
     }
   }
 
-// this function is to remove a menu from the list
+  addNewMenu() async {
+    try {
+      addingNewMenuProcess.value = true;
+      var url = Uri.parse('$backendUrl/menus/add_new_menu');
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "name": menuName.text,
+          "code": code.text,
+          "route": menuRoute.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        addingNewMenuProcess.value = false;
+
+        Get.back();
+        showSnackBar('Done', 'Menu added successfully');
+      } else {
+        Get.back();
+        addingNewMenuProcess.value = false;
+        showSnackBar('Alert', 'Something went wrong please try again');
+      }
+    } catch (e) {
+      Get.back();
+      addingNewMenuProcess.value = false;
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  Future<void> deleteMenuAndUpdateChildren(String menuId) async {
+    try {
+      Get.back();
+      var url = Uri.parse('$backendUrl/menus/delete_menu/$menuId');
+      final response = await http.delete(url);
+
+      if (response.statusCode == 200) {
+        showSnackBar('Done', 'Menu deleted successfully');
+      } else {
+        showSnackBar('Error', 'Failed to delete menu');
+      }
+    } catch (e) {
+      showSnackBar('Error', 'Failed to delete menu');
+    }
+  }
+
+  editMenu(String menuID) async {
+    try {
+      addingNewMenuProcess.value = true;
+      var url = Uri.parse('$backendUrl/menus/update_menu/$menuID');
+      final response = await http.patch(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "name": menuName.text,
+          "code": code.text,
+          "route": menuRoute.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        addingNewMenuProcess.value = false;
+
+        Get.back();
+        showSnackBar('Done', 'Menu updated successfully');
+      } else {
+        Get.back();
+        addingNewMenuProcess.value = false;
+        showSnackBar('Alert', 'Something went wrong please try again');
+      }
+    } catch (e) {
+      Get.back();
+      addingNewMenuProcess.value = false;
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  removeNodeFromTheTree(nodeID, parentID) async {
+    try {
+      var url = Uri.parse(
+        '$backendUrl/menus/remove_node_from_the_tree/$parentID/$nodeID',
+      );
+      final response = await http.patch(url);
+      if (response.statusCode == 200) {
+        removeNode(roots, nodeID, parentID);
+      } else {
+        showSnackBar('Alert', 'Can\'t remove node please try again');
+      }
+    } catch (e) {
+      showSnackBar('Alert', 'Can\'t remove node please try again');
+    }
+  }
+
+  // =====================================================================================================================
+
+  // this function is to remove a menu from the list
   removeMenuFromList(index) {
     menuIDFromList.removeAt(index);
   }
@@ -94,7 +225,7 @@ class MenusController extends GetxController {
       orElse: () =>
           const MapEntry('', 'Unknown'), // Handle cases where no match is found
     );
-    final menuName = matchingEntry.value['name']
+    final menuName = matchingEntry.value["name"]
         .replaceAll(RegExp(r'\s*\(.*?\)'), '')
         .trim();
 
@@ -113,17 +244,7 @@ class MenusController extends GetxController {
     return matchingEntry.value['name'];
   }
 
-  // this function is to edit menu details like name and description
-  editMenu(menuID) async {
-    Get.back();
-    await FirebaseFirestore.instance.collection('menus ').doc(menuID).update({
-      'name': menuName.text,
-      'description': description.text,
-      'routeName': menuRoute.text
-    });
-  }
-
-// this function is to add the sub menu to DB and to the tree
+  // this function is to add the sub menu to DB and to the tree
   addExistingSubMenuToMenu() async {
     try {
       addingExistingMenuProcess.value = true;
@@ -142,7 +263,7 @@ class MenusController extends GetxController {
         for (var childId in menuIDFromList) {
           if (await isLoopDetected(childId, selectedMenuID.value)) {
             // Log or show error message for the user
-            showSnackBar('Pleasr note', 'Cannot add! it creates a loop!');
+            showSnackBar('Please note', 'Cannot add! it creates a loop!');
             addingExistingMenuProcess.value = false;
             return; // Stop the process
           }
@@ -172,7 +293,9 @@ class MenusController extends GetxController {
               selectedMenuName.value,
               MyTreeNode(
                 parent: MyTreeNode(
-                    title: selectedMenuName.value, id: selectedMenuID.value),
+                  title: selectedMenuName.value,
+                  id: selectedMenuID.value,
+                ),
                 title: getMenuName(child),
                 children: await buildMenus(selectedMenuData!),
                 canRemove: true,
@@ -219,7 +342,7 @@ class MenusController extends GetxController {
     return false; // No loop detected
   }
 
-// this function is to add s screen to DB and to the tree
+  // this function is to add s screen to DB and to the tree
   addExistingScreenToMenu() async {
     try {
       addingExistingScreenProcess.value = true;
@@ -246,17 +369,20 @@ class MenusController extends GetxController {
           var selectedScreenData = theSelectedMenu.docs.first.data();
 
           await addChildToNode(
-              roots,
-              selectedMenuName.value,
-              MyTreeNode(
-                parent: MyTreeNode(
-                    title: selectedMenuName.value, id: selectedMenuID.value),
-                title: getScreenName(child),
-                children: await buildMenus(selectedScreenData),
-                canRemove: true,
-                id: child,
-                isMenu: false,
-              ));
+            roots,
+            selectedMenuName.value,
+            MyTreeNode(
+              parent: MyTreeNode(
+                title: selectedMenuName.value,
+                id: selectedMenuID.value,
+              ),
+              title: getScreenName(child),
+              children: await buildMenus(selectedScreenData),
+              canRemove: true,
+              id: child,
+              isMenu: false,
+            ),
+          );
         }
 
         treeController.rebuild();
@@ -267,55 +393,7 @@ class MenusController extends GetxController {
     }
   }
 
-// this function is to delete a menu
-  Future<void> deleteMenuAndUpdateChildren(String menuId) async {
-    try {
-      Get.back();
-      final firestore = FirebaseFirestore.instance;
-
-      QuerySnapshot querySnapshot = await firestore
-          .collection('menus ')
-          .where('children', arrayContains: menuId)
-          .get();
-
-      WriteBatch batch = firestore.batch();
-
-      for (var doc in querySnapshot.docs) {
-        batch.update(doc.reference, {
-          'children': FieldValue.arrayRemove([menuId])
-        });
-      }
-
-      await batch.commit();
-      await firestore.collection('menus ').doc(menuId).delete();
-      getMenus();
-    } catch (e) {
-      //
-    }
-  }
-
-  // this function is to add new menu to the system
-  addNewMenu() async {
-    try {
-      addingNewMenuProcess.value = true;
-
-      await FirebaseFirestore.instance.collection('menus ').add({
-        'name': menuName.text,
-        'description': description.text,
-        'added_date': DateTime.now().toString(),
-        'children': [],
-        'routeName': menuRoute.text
-      });
-
-      addingNewMenuProcess.value = false;
-    } catch (e) {
-      addingNewMenuProcess.value = false;
-
-      //
-    }
-  }
-
-// this function is to add the new menu to the menus tree
+  // this function is to add the new menu to the menus tree
   addChildToNode(
     List<MyTreeNode> nodes, // The current list of nodes to search
     String selectedMenuName, // The title of the node to match
@@ -333,7 +411,7 @@ class MenusController extends GetxController {
     }
   }
 
-// this function is to remove a menu from the tree
+  // this function is to remove a menu from the tree
   void removeNode(
     List<MyTreeNode> nodes, // The list of nodes to search
     String targetID, // The title of the node to remove
@@ -352,7 +430,7 @@ class MenusController extends GetxController {
     treeController.rebuild();
   }
 
-// function to manage loading button
+  // function to manage loading button
   void setButtonLoading(String menuId, bool isLoading) {
     buttonLoadingStates[menuId] = isLoading;
     buttonLoadingStates.refresh(); // Notify listeners
@@ -366,8 +444,8 @@ class MenusController extends GetxController {
     if (columnIndex == 0) {
       // Sort by 'name' field
       entries.sort((entry1, entry2) {
-        final String? value1 = entry1.value['name'] as String?;
-        final String? value2 = entry2.value['name'] as String?;
+        final String? value1 = entry1.value.name as String?;
+        final String? value2 = entry2.value.name as String?;
 
         // Handle nulls: put nulls at the end
         if (value1 == null && value2 == null) return 0;
@@ -379,8 +457,8 @@ class MenusController extends GetxController {
     } else if (columnIndex == 2) {
       // Sort by 'added_date' field
       entries.sort((entry1, entry2) {
-        final String? value1 = entry1.value['added_date'] as String?;
-        final String? value2 = entry2.value['added_date'] as String?;
+        final String? value1 = entry1.value.createdAt as String?;
+        final String? value2 = entry2.value.createdAt as String?;
 
         // Handle nulls: put nulls at the end
         if (value1 == null && value2 == null) return 0;
@@ -415,38 +493,18 @@ class MenusController extends GetxController {
       filteredMenus.assignAll(
         Map.fromEntries(
           allMenus.entries
-              .where((entry) =>
-                  entry.value['name']
-                      .toString()
-                      .toLowerCase()
-                      .contains(query.value) ||
-                  entry.value['description']
-                      .toString()
-                      .toLowerCase()
-                      .contains(query.value))
-              .map((entry) => MapEntry(
-                  entry.key as String, entry.value as Map<String, dynamic>)),
+              .where(
+                (entry) =>
+                    entry.value.name.toString().toLowerCase().contains(
+                      query.value,
+                    ) ||
+                    entry.value.code.toString().toLowerCase().contains(
+                      query.value,
+                    ),
+              )
+              .map((entry) => MapEntry(entry.key, entry.value)),
         ),
       );
-    }
-  }
-
-// Function to get main menus in the system
-  getMenus() async {
-    try {
-      allMenus.clear();
-
-      FirebaseFirestore.instance
-          .collection('menus ')
-          .orderBy('name', descending: false)
-          .snapshots()
-          .listen((menus) {
-        allMenus.value = {for (var doc in menus.docs) doc.id: doc.data()};
-
-        isScreenLoading.value = false;
-      });
-    } catch (e) {
-      isScreenLoading.value = false;
     }
   }
 
@@ -460,47 +518,97 @@ class MenusController extends GetxController {
           .orderBy('name', descending: false)
           .snapshots()
           .listen((screens) {
-        allScreens.value = {for (var doc in screens.docs) doc.id: doc.data()};
-      });
+            allScreens.value = {
+              for (var doc in screens.docs) doc.id: doc.data(),
+            };
+          });
     } catch (e) {
       //
     }
   }
 
-// this function is to get the tree structure of the selected menu
-  Future<void> getMenusScreens(menuID) async {
+  MyTreeNode buildTreeFromJson(
+    Map<String, dynamic> json, {
+    bool isRoot = false,
+  }) {
+    final childrenJson = json['children'] as List<dynamic>? ?? [];
+
+    // تحويل كل طفل recursively
+    final childrenNodes = childrenJson
+        .map<MyTreeNode>((childJson) => buildTreeFromJson(childJson))
+        .toList();
+
+    return MyTreeNode(
+      id: json['_id'],
+      title: json['name'] ?? '',
+      isMenu: json['isMenu'],
+      canRemove: json['can_remove'] ?? !isRoot,
+      children: childrenNodes,
+    );
+  }
+
+  getMenuTree(String menuId) async {
     try {
-      // Build tree structure
-      final menuSnapshot = await FirebaseFirestore.instance
-          .collection('menus ')
-          .where(FieldPath.documentId, isEqualTo: menuID)
-          .get();
+      var url = Uri.parse('$backendUrl/menus/get_menu_tree/$menuId');
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
 
-      roots.value = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
-        final children = await buildMenus(menuDoc.data());
-        return MyTreeNode(
-          canRemove: false,
-          id: menuDoc.id,
-          title: menuDoc.data()['name'],
-          children: children,
-          isMenu: true,
+        roots.value = [buildTreeFromJson(jsonData, isRoot: true)];
+        treeController = TreeController<MyTreeNode>(
+          roots: roots,
+          childrenProvider: (node) => node.children,
+          parentProvider: (node) => node.parent,
         );
-      }));
 
-      treeController = TreeController<MyTreeNode>(
-        roots: roots,
-        childrenProvider: (node) => node.children,
-        parentProvider: (node) => node.parent,
-      );
-      treeController.expandAll();
-
-      isLoading.value = false;
+        treeController.expandAll();
+        isLoading.value = false;
+      } else {
+        isLoading.value = false;
+        errorLoading.value = true;
+      }
     } catch (e) {
-      errorLoading.value = true;
       isLoading.value = false;
-      // print(e);
+      errorLoading.value = true;
     }
   }
+
+  // // this function is to get the tree structure of the selected menu
+  // Future<void> getMenusScreens(menuID) async {
+  //   try {
+  //     // Build tree structure
+  //     final menuSnapshot = await FirebaseFirestore.instance
+  //         .collection('menus ')
+  //         .where(FieldPath.documentId, isEqualTo: menuID)
+  //         .get();
+
+  //     roots.value = await Future.wait(
+  //       menuSnapshot.docs.map((menuDoc) async {
+  //         final children = await buildMenus(menuDoc.data());
+  //         return MyTreeNode(
+  //           canRemove: false,
+  //           id: menuDoc.id,
+  //           title: menuDoc.data()['name'],
+  //           children: children,
+  //           isMenu: true,
+  //         );
+  //       }),
+  //     );
+
+  //     treeController = TreeController<MyTreeNode>(
+  //       roots: roots,
+  //       childrenProvider: (node) => node.children,
+  //       parentProvider: (node) => node.parent,
+  //     );
+  //     treeController.expandAll();
+
+  //     isLoading.value = false;
+  //   } catch (e) {
+  //     errorLoading.value = true;
+  //     isLoading.value = false;
+  //     // print(e);
+  //   }
+  // }
 
   Future<List<MyTreeNode>> buildMenus(Map<String, dynamic> menuDetail) async {
     List<String> childrenIds = List<String>.from(menuDetail['children'] ?? []);
@@ -520,16 +628,18 @@ class MenusController extends GetxController {
         .get();
 
     // Build nodes for menus and screens
-    final menuNodes = await Future.wait(menuSnapshot.docs.map((menuDoc) async {
-      final children = await buildMenus(menuDoc.data());
-      return MyTreeNode(
-        canRemove: true,
-        id: menuDoc.id,
-        title: menuDoc.data()['name'],
-        children: children,
-        isMenu: true,
-      );
-    }));
+    final menuNodes = await Future.wait(
+      menuSnapshot.docs.map((menuDoc) async {
+        final children = await buildMenus(menuDoc.data());
+        return MyTreeNode(
+          canRemove: true,
+          id: menuDoc.id,
+          title: menuDoc.data()['name'],
+          children: children,
+          isMenu: true,
+        );
+      }),
+    );
 
     final screenNodes = screenSnapshot.docs.map((screenDoc) {
       return MyTreeNode(

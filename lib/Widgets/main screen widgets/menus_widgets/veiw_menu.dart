@@ -12,7 +12,7 @@ import '../../../consts.dart';
 Widget viewMenu({
   required BoxConstraints constraints,
   required BuildContext context,
-  required controller,
+  required MenusController controller,
 }) {
   return SizedBox(
     width: constraints.maxWidth,
@@ -25,18 +25,18 @@ Widget viewMenu({
               Container(
                 width: controller.containerWidth.value,
                 decoration: const BoxDecoration(
-                  border: Border(
-                    right: BorderSide(color: Colors.grey),
-                  ),
+                  border: Border(right: BorderSide(color: Colors.grey)),
                 ),
-                child: controller.isLoading.value == false &&
+                child:
+                    controller.isLoading.value == false &&
                         controller.errorLoading.value != true
                     ? leftTree(controller: controller)
                     : controller.isLoading.value == true &&
-                            controller.errorLoading.value != true
-                        ? const Center(child: CircularProgressIndicator())
-                        : const Center(
-                            child: Text('Network error please try again')),
+                          controller.errorLoading.value != true
+                    ? const Center(child: CircularProgressIndicator())
+                    : const Center(
+                        child: Text('Network error please try again'),
+                      ),
               ),
               Positioned(
                 right: 0,
@@ -47,15 +47,13 @@ Widget viewMenu({
                   onHorizontalDragUpdate: (details) {
                     controller.containerWidth.value += details.delta.dx;
                     controller.containerWidth.value = controller
-                        .containerWidth.value
+                        .containerWidth
+                        .value
                         .clamp(200.0, constraints.maxWidth / 2.5);
                   },
                   child: MouseRegion(
                     cursor: SystemMouseCursors.resizeLeftRight,
-                    child: Container(
-                      width: 10,
-                      color: Colors.transparent,
-                    ),
+                    child: Container(width: 10, color: Colors.transparent),
                   ),
                 ),
               ),
@@ -107,8 +105,13 @@ Obx screenSection(MenusController controller, BoxConstraints constraints) {
                             hintText: 'Screens',
                             items: controller.allScreens,
                             itemBuilder: (context, key, value) {
-                              return ListTile(
-                                title: Text(value['name']),
+                              return Container(
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
+                                child: Text(value['name']),
                               );
                             },
                             onChanged: (key, value) {
@@ -124,42 +127,48 @@ Obx screenSection(MenusController controller, BoxConstraints constraints) {
                             spacing: 10, // Horizontal spacing between items
                             runSpacing: 10, // Vertical spacing between rows
                             children: List.generate(
-                                controller.screenIDFromList.length, (i) {
-                              return Stack(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(15),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xffA6AEBF),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Text(
-                                      controller.getScreenName(
-                                          controller.screenIDFromList[i]),
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: InkWell(
-                                      onTap: () {
-                                        controller.removeScreenFromList(i);
-                                      },
-                                      child: const Icon(
-                                        Icons.remove_circle,
-                                        color: Colors.red,
-                                        size: 20,
+                              controller.screenIDFromList.length,
+                              (i) {
+                                return Stack(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                        horizontal: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xffA6AEBF),
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                      child: Text(
+                                        controller.getScreenName(
+                                          controller.screenIDFromList[i],
+                                        ),
+                                        style: const TextStyle(fontSize: 14),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              );
-                            }),
+                                    Positioned(
+                                      top: 0,
+                                      right: 0,
+                                      child: InkWell(
+                                        onTap: () {
+                                          controller.removeScreenFromList(i);
+                                        },
+                                        child: const Icon(
+                                          Icons.remove_circle,
+                                          color: Colors.red,
+                                          size: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
                 Positioned(
@@ -169,16 +178,18 @@ Obx screenSection(MenusController controller, BoxConstraints constraints) {
                     style: addButtonStyle,
                     onPressed:
                         controller.addingExistingScreenProcess.value == false
-                            ? () async {
-                                if (controller.screenIDFromList.isNotEmpty) {
-                                  await controller.addExistingScreenToMenu();
-                                  controller.screenIDFromList.clear();
-                                } else {
-                                  showSnackBar(
-                                      'Alert', 'Please select screen first');
-                                }
-                              }
-                            : null,
+                        ? () async {
+                            if (controller.screenIDFromList.isNotEmpty) {
+                              await controller.addExistingScreenToMenu();
+                              controller.screenIDFromList.clear();
+                            } else {
+                              showSnackBar(
+                                'Alert',
+                                'Please select screen first',
+                              );
+                            }
+                          }
+                        : null,
                     child: controller.addingExistingScreenProcess.value == false
                         ? const Text('Add')
                         : const SizedBox(
@@ -195,14 +206,16 @@ Obx screenSection(MenusController controller, BoxConstraints constraints) {
             )
           : Center(
               child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: const Text(
-                    'Select menu to start',
-                    style: TextStyle(color: Colors.white),
-                  )),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'Select menu to start',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ),
     );
   });
@@ -213,9 +226,7 @@ Obx menuSection(MenusController controller, BoxConstraints constraints) {
     () => Expanded(
       child: Container(
         decoration: const BoxDecoration(
-          border: Border(
-            right: BorderSide(color: Colors.grey),
-          ),
+          border: Border(right: BorderSide(color: Colors.grey)),
         ),
         child: controller.selectedMenuID.value != ''
             ? Stack(
@@ -252,9 +263,13 @@ Obx menuSection(MenusController controller, BoxConstraints constraints) {
                               validator: true,
                               items: controller.allMenus,
                               itemBuilder: (context, key, value) {
-                                return ListTile(
-                                  title: Text(
-                                      '${value['name']} (${value['description']})'),
+                                return Container(
+                                  alignment: Alignment.centerLeft,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
+                                  child: Text(value['name']),
                                 );
                               },
                               onChanged: (key, value) {
@@ -267,41 +282,49 @@ Obx menuSection(MenusController controller, BoxConstraints constraints) {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Wrap(
-                              spacing: 10, // Horizontal spacing between items
-                              runSpacing: 10, // Vertical spacing between rows
+                              spacing: 10,
+                              runSpacing: 10,
                               children: List.generate(
-                                  controller.menuIDFromList.length, (i) {
-                                return Stack(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(15),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xffA6AEBF),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Text(
-                                        controller.getMenuName(
-                                            controller.menuIDFromList[i]),
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 0,
-                                      right: 0,
-                                      child: InkWell(
-                                        onTap: () {
-                                          controller.removeMenuFromList(i);
-                                        },
-                                        child: const Icon(
-                                          Icons.remove_circle,
-                                          color: Colors.red,
-                                          size: 20,
+                                controller.menuIDFromList.length,
+                                (i) {
+                                  return Stack(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                          horizontal: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xffA6AEBF),
+                                          borderRadius: BorderRadius.circular(
+                                            5,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          controller.getMenuName(
+                                            controller.menuIDFromList[i],
+                                          ),
+                                          style: const TextStyle(fontSize: 14),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              }),
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: InkWell(
+                                          onTap: () {
+                                            controller.removeMenuFromList(i);
+                                          },
+                                          child: const Icon(
+                                            Icons.remove_circle,
+                                            color: Colors.red,
+                                            size: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ],
@@ -315,16 +338,18 @@ Obx menuSection(MenusController controller, BoxConstraints constraints) {
                       style: addButtonStyle,
                       onPressed:
                           controller.addingExistingMenuProcess.value == false
-                              ? () async {
-                                  if (controller.menuIDFromList.isNotEmpty) {
-                                    await controller.addExistingSubMenuToMenu();
-                                    controller.menuIDFromList.clear();
-                                  } else {
-                                    showSnackBar(
-                                        'Alert', 'Please select menu first');
-                                  }
-                                }
-                              : null,
+                          ? () async {
+                              if (controller.menuIDFromList.isNotEmpty) {
+                                await controller.addExistingSubMenuToMenu();
+                                controller.menuIDFromList.clear();
+                              } else {
+                                showSnackBar(
+                                  'Alert',
+                                  'Please select menu first',
+                                );
+                              }
+                            }
+                          : null,
                       child: controller.addingExistingMenuProcess.value == false
                           ? const Text('Add')
                           : const SizedBox(
@@ -341,23 +366,23 @@ Obx menuSection(MenusController controller, BoxConstraints constraints) {
               )
             : Center(
                 child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: const Text(
-                      'Select menu to start',
-                      style: TextStyle(color: Colors.white),
-                    )),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    'Select menu to start',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
       ),
     ),
   );
 }
 
-AnimatedTreeView<MyTreeNode> leftTree({
-  required controller,
-}) {
+AnimatedTreeView<MyTreeNode> leftTree({required MenusController controller}) {
   return AnimatedTreeView<MyTreeNode>(
     padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
     treeController: controller.treeController,
@@ -390,9 +415,10 @@ AnimatedTreeView<MyTreeNode> leftTree({
                           child: Text(
                             entry.node.title,
                             style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
                           ),
                         ),
                         entry.node.isMenu == true
@@ -404,7 +430,7 @@ AnimatedTreeView<MyTreeNode> leftTree({
                                 onPressed: (_) => controller.treeController
                                     .toggleExpansion(entry.node),
                               )
-                            : const SizedBox()
+                            : const SizedBox(),
                       ],
                     ),
                   ),
@@ -414,11 +440,11 @@ AnimatedTreeView<MyTreeNode> leftTree({
                   child: entry.node.isMenu == true
                       ? InkWell(
                           onTap: () {
-                            controller.selectedMenuID.value = entry.node.id;
+                            controller.selectedMenuID.value = entry.node.id!;
                             controller.selectedMenuName.value =
                                 entry.node.title;
                             controller.selectedMenuCanDelete.value =
-                                entry.node.canRemove;
+                                entry.node.canRemove!;
                             controller.menuName.clear();
                           },
                           child: const Icon(
@@ -427,15 +453,12 @@ AnimatedTreeView<MyTreeNode> leftTree({
                             color: Colors.green,
                           ),
                         )
-                      : const SizedBox(
-                          height: 25,
-                          width: 25,
-                        ),
+                      : const SizedBox(height: 25, width: 25),
                 ),
-                // entry.node.isMenu == true
-                //     ?
+
                 InkWell(
-                  onTap: entry.node.canRemove == false ||
+                  onTap:
+                      entry.node.canRemove == false ||
                           entry.node.canRemove == null
                       ? null
                       : () {
@@ -444,9 +467,11 @@ AnimatedTreeView<MyTreeNode> leftTree({
                             builder: (BuildContext context) {
                               return CupertinoAlertDialog(
                                 title: const Text("Alert"),
-                                content: Text(entry.node.isMenu == true
-                                    ? "Are you sure you want to remove this sub menu?"
-                                    : "Are you sure you want to remove this screen?"),
+                                content: Text(
+                                  entry.node.isMenu == true
+                                      ? "Are you sure you want to remove this sub menu?"
+                                      : "Are you sure you want to remove this screen?",
+                                ),
                                 actions: [
                                   CupertinoDialogAction(
                                     child: const Text("Cancel"),
@@ -461,7 +486,9 @@ AnimatedTreeView<MyTreeNode> leftTree({
                                     onPressed: () async {
                                       Get.back();
                                       await controller.removeNodeFromTheTree(
-                                          entry.node.id, entry.node.parent!.id);
+                                        entry.node.id,
+                                        entry.node.parent!.id,
+                                      );
                                     },
                                   ),
                                 ],
@@ -472,16 +499,13 @@ AnimatedTreeView<MyTreeNode> leftTree({
                   child: Icon(
                     Icons.remove_circle_outline,
                     size: 25,
-                    color: entry.node.canRemove == false ||
+                    color:
+                        entry.node.canRemove == false ||
                             entry.node.canRemove == null
                         ? Colors.grey
                         : Colors.red,
                   ),
-                )
-                // : const SizedBox(
-                //     height: 25,
-                //     width: 25,
-                //   )
+                ),
               ],
             ),
           );
@@ -490,73 +514,25 @@ AnimatedTreeView<MyTreeNode> leftTree({
           // drag target. Add some decoration to give feedback to the user.
           if (details != null) {
             myTreeNodeTile = ColoredBox(
-              color:
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.3),
               child: myTreeNodeTile,
             );
           }
 
           return TreeDraggable<MyTreeNode>(
-              node: entry.node,
+            node: entry.node,
 
-              // Show some feedback to the user under the dragging pointer,
-              // this can be any widget.
-              feedback: IntrinsicWidth(
-                child: Material(
-                  elevation: 4,
-                  child: myTreeNodeTile,
-                ),
-              ),
-              child: TreeIndentation(
-                entry: entry,
-                child: myTreeNodeTile,
-              ));
+            // Show some feedback to the user under the dragging pointer,
+            // this can be any widget.
+            feedback: IntrinsicWidth(
+              child: Material(elevation: 4, child: myTreeNodeTile),
+            ),
+            child: TreeIndentation(entry: entry, child: myTreeNodeTile),
+          );
         },
       );
     },
-  );
-}
-
-Widget myTextFormField2({
-  required String labelText,
-  required String hintText,
-  required controller,
-  required validate,
-  required obscureText,
-  IconButton? icon,
-  required constraints,
-  keyboardType,
-}) {
-  return TextFormField(
-    obscureText: obscureText,
-    keyboardType: keyboardType,
-    controller: controller,
-    decoration: InputDecoration(
-      suffixIcon: icon,
-      hintStyle: const TextStyle(color: Colors.grey),
-      labelText: labelText,
-      hintText: hintText,
-      labelStyle: TextStyle(color: Colors.grey.shade700),
-      focusedBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.grey, width: 2.0),
-      ),
-      enabledBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.grey, width: 1.0),
-      ),
-      errorBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red, width: 1.0),
-      ),
-      focusedErrorBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red, width: 2.0),
-      ),
-    ),
-    validator: validate != false
-        ? (value) {
-            if (value!.isEmpty) {
-              return 'Please Enter $labelText';
-            }
-            return null;
-          }
-        : null,
   );
 }
