@@ -30,10 +30,16 @@ class Responsibilities extends StatelessWidget {
                     init: ResponsibilitiesController(),
                     builder: (controller) {
                       return searchBar(
+                        onChanged: (_) {
+                          controller.filterResponsibilities();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.text;
+                          controller.filterResponsibilities();
+                        },
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        // controller: controller,
                         title: 'Search for responsibilities',
                         button: newResponsibilityButton(
                           context,
@@ -55,8 +61,7 @@ class Responsibilities extends StatelessWidget {
                           return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
+                          scrollDirection: Axis.vertical,
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
@@ -79,7 +84,7 @@ class Responsibilities extends StatelessWidget {
   }
 }
 
-ElevatedButton newResponsibilityButton(
+Widget newResponsibilityButton(
   BuildContext context,
   BoxConstraints constraints,
   ResponsibilitiesController controller,
@@ -87,6 +92,7 @@ ElevatedButton newResponsibilityButton(
   return ElevatedButton(
     onPressed: () async {
       controller.responsibilityName.clear();
+      controller.menuIDFromList.value = '';
       controller.menuName.clear();
       responsibilitiesDialog(
         constraints: constraints,
@@ -94,7 +100,12 @@ ElevatedButton newResponsibilityButton(
         onPressed: controller.addingNewResponsibilityProcess.value
             ? null
             : () async {
-                controller.addNewResponsibility();
+                if (controller.responsibilityName.text.isEmpty ||
+                    controller.menuIDFromList.value.isEmpty) {
+                  showSnackBar('Alert', 'Please fill all fields');
+                } else {
+                  controller.addNewResponsibility();
+                }
               },
       );
     },
@@ -180,16 +191,12 @@ DataRow dataRowForTheTable(
     cells: [
       DataCell(Text(roleData['role_name'] ?? 'no name')),
       DataCell(
-        Text(
-          roleData['menu'] != null || roleData['menu'].isNotEmpty()
-              ? '${roleData['menu']['name']} (${roleData['menu']['description']})'
-              : 'no menu',
-        ),
+        Text('${roleData['menu_name'] ?? ''} (${roleData['menu_code'] ?? ''})'),
       ),
       DataCell(
         Text(
-          roleData['added_date'] != null
-              ? textToDate(roleData['added_date']) //
+          roleData['createdAt'] != null
+              ? textToDate(roleData['createdAt']) //
               : 'N/A',
         ),
       ),
@@ -219,27 +226,40 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton publicPrivateSection(
+Widget publicPrivateSection(
   Map roleData,
   ResponsibilitiesController controller,
   String roleId,
 ) {
-  return ElevatedButton(
-    style: roleData['is_shown_for_users'] == false
-        ? privateButtonStyle
-        : publicButtonStyle,
-    onPressed: () {
-      bool status;
-      if (roleData['is_shown_for_users'] == false) {
-        status = true;
-      } else {
-        status = false;
-      }
-      controller.updateRoleStatus(roleId, status);
+  return GetX<ResponsibilitiesController>(
+    builder: (controller) {
+      final isLoading = controller.updatingStatus[roleId] ?? false;
+
+      return ElevatedButton(
+        style: roleData['is_shown_for_users'] == false
+            ? privateButtonStyle
+            : publicButtonStyle,
+        onPressed: isLoading == false
+            ? () async {
+                bool status;
+                if (roleData['is_shown_for_users'] == false) {
+                  status = true;
+                } else {
+                  status = false;
+                }
+                controller.setButtonLoading(roleId, true);
+
+                await controller.updateRoleStatus(roleId, status);
+                controller.setButtonLoading(roleId, false);
+              }
+            : null,
+        child: isLoading == false
+            ? roleData['is_shown_for_users'] == true
+                  ? const Text('Public')
+                  : const Text('Private')
+            : loadingProcess,
+      );
     },
-    child: roleData['is_shown_for_users'] == true
-        ? const Text('Public')
-        : const Text('Private'),
   );
 }
 
@@ -274,7 +294,7 @@ Widget editSection({
     style: editButtonStyle,
     onPressed: () async {
       controller.responsibilityName.text = roleData['role_name'] ?? '';
-      controller.menuName.text = roleData['menu']['name'] ?? '';
+      controller.menuName.text = roleData["menu_name"] ?? '';
       controller.menuIDFromList.value = roleData['menu_id'];
       responsibilitiesDialog(
         constraints: constraints,

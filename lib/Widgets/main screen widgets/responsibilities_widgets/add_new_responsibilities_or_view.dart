@@ -16,25 +16,23 @@ Widget addNewResponsibilityOrView({
         keyboardType: TextInputType.name,
         validate: true,
       ),
-      const SizedBox(
-        height: 15,
-      ),
+      const SizedBox(height: 15),
       CustomDropdown(
         textcontroller: controller.menuName.text,
         hintText: 'Menus',
         showedSelectedName: 'name',
-        items: controller.menuMap,
+        items: controller.allMenus,
         itemBuilder: (context, key, value) {
-          return ListTile(
-            title: Text('${value['name']} (${value['description']})'),
+          return Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Text('${value['name']} ${value['code']}'),
           );
         },
         onChanged: (key, value) {
-          
           controller.menuIDFromList.value = key;
         },
-      )
-      
+      ),
     ],
   );
 }

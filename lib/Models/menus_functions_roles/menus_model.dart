@@ -29,19 +29,6 @@ class MenuModel {
     );
   }
 
-  Map toMap() {
-    return {
-      id: {
-        name: name,
-        routeName: routeName,
-        code: code,
-        children: children,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-      },
-    };
-  }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['_id'] = id;
