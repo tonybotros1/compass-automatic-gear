@@ -1,11 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:datahubai/main.dart';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import '../../consts.dart';
 
 class LoadingScreenController extends GetxController {
+  String backendUrl = backendTestURI;
+  final secureStorage = const FlutterSecureStorage();
+
   @override
   void onInit() {
     super.onInit();
@@ -17,25 +21,42 @@ class LoadingScreenController extends GetxController {
     await checkLogStatus();
   }
 
-  bool isDateTodayOrOlder(String selectedDate) {
-    DateFormat dateFormat = DateFormat("yyyy-MM-dd"); // Fix typo in year format
-    DateTime dateTime = dateFormat.parse(selectedDate);
+  Future<void> logout() async {
+    try {
+      final refreshToken = await secureStorage.read(key: "refreshToken");
 
-    final DateTime today = DateTime.now();
-    final DateTime todayOnly = DateTime(today.year, today.month, today.day);
+      var url = Uri.parse('$backendUrl/auth/logout');
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {"refresh_token": refreshToken},
+      );
 
-    // Compare if the selected date is before or equal to today
-    return dateTime.isBefore(todayOnly) || dateTime.isAtSameMomentAs(todayOnly);
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        showSnackBar('Done', responseBody['message']);
+        await secureStorage.delete(key: "refreshToken");
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove("accessToken");
+        await prefs.remove("userEmail");
+        await prefs.remove("companyId");
+        await prefs.remove("userId");
+        Get.offAllNamed('/');
+      } else {
+        showSnackBar('Alert', 'Can\'t logout');
+      }
+    } catch (e) {
+      showSnackBar('Alert', 'Can\'t logout');
+    }
   }
 
-  Future<bool> checkForExpiryDate(String userId) async {
+  Future<bool> isUserValid(String userId) async {
     try {
-      var user = await FirebaseFirestore.instance
-          .collection('sys-users')
-          .doc(userId)
-          .get();
-      if (user.exists) {
-        return !isDateTodayOrOlder(user.data()!['expiry_date']);
+      var url = Uri.parse('$backendUrl/auth/is_user_valid/$userId');
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data["valid"] == true;
       } else {
         return false;
       }
@@ -44,7 +65,7 @@ class LoadingScreenController extends GetxController {
     }
   }
 
-// this function is to know if the user logedin or not
+  // this function is to know if the user logedin or not
   Future<void> checkLogStatus() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -53,7 +74,7 @@ class LoadingScreenController extends GetxController {
       if (userId == null || userId.isEmpty) {
         Get.offAllNamed('/loginScreen');
       } else {
-        checkForExpiryDate(userId).then((value) async {
+        isUserValid(userId).then((value) async {
           if (value) {
             if (kIsWeb) {
               Get.offAllNamed('/mainScreen');
@@ -61,16 +82,12 @@ class LoadingScreenController extends GetxController {
               Get.offAllNamed('/mainScreenForMobile');
             }
           } else {
-            await globalPrefs?.remove('userId');
-            await globalPrefs?.remove('companyId');
-            await globalPrefs?.remove('userEmail');
-            Get.offAllNamed('/loginScreen');
+            await logout();
           }
         });
       }
     } catch (e) {
-      // Handle unexpected errors (e.g., navigation to login screen).
-      Get.offAllNamed('/loginScreen');
+      checkLogStatus();
     }
   }
 }

@@ -1,30 +1,27 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:crypto/crypto.dart';
-
-import '../../consts.dart'; // For password hashing
+import '../../consts.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginScreenController extends GetxController {
   late TextEditingController email = TextEditingController();
   late TextEditingController pass = TextEditingController();
   final FocusNode focusNode = FocusNode(); // To keep track of focus
   final GlobalKey<FormState> formKeyForlogin = GlobalKey<FormState>();
-
   late String currentUserToken = '';
   RxBool obscureText = RxBool(true);
   RxBool sigingInProcess = RxBool(false);
-
   var width = Get.width;
   var height = Get.height;
-
   var isPermissionGranted = false.obs; // حالة الإذن
+  String backendUrl = backendTestURI;
+  final secureStorage = const FlutterSecureStorage();
 
-// this function is to change the obscureText value:
+  // this function is to change the obscureText value:
   void changeObscureTextValue() {
     if (obscureText.value == true) {
       obscureText.value = false;
@@ -33,89 +30,55 @@ class LoginScreenController extends GetxController {
     }
   }
 
-  Future<void> saveUserIdAndCompanyIdInSharedPref(String userId,String companyId,String userEmail) async {
+  Future<void> saveInformation(
+    String userId,
+    String companyId,
+    String userEmail,
+    String accessToken,
+    String refreshToken,
+  ) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
     await prefs.setString('companyId', companyId);
     await prefs.setString('userEmail', userEmail);
-  }
-
-// this functon is to check if the date of the user has been expired or not
-  bool isDateTodayOrOlder(String selectedDate) {
-    DateFormat dateFormat = DateFormat("yyyy-MM-dd"); // Fix typo in year format
-    DateTime dateTime = dateFormat.parse(selectedDate);
-
-    final DateTime today = DateTime.now();
-    final DateTime todayOnly = DateTime(today.year, today.month, today.day);
-
-    // Compare if the selected date is before or equal to today
-    return dateTime.isBefore(todayOnly) || dateTime.isAtSameMomentAs(todayOnly);
+    await prefs.setString('accessToken', accessToken);
+    await secureStorage.write(key: "refreshToken", value: refreshToken);
   }
 
   Future<void> singIn() async {
     try {
       sigingInProcess.value = true;
 
-      // Fetch user data from Firestore by email
-      var userDataSnapshot = await FirebaseFirestore.instance
-          .collection('sys-users')
-          .where('email', isEqualTo: email.text.toLowerCase()) // Search by email
-          .get();
-
-      // Check if the email exists
-      if (userDataSnapshot.docs.isEmpty) {
+      var url = Uri.parse('$backendUrl/auth/login');
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {"email": email.text.toLowerCase(), "password": pass.text},
+      );
+      var responseData = jsonDecode(response.body);
+      if (response.statusCode == 401) {
         sigingInProcess.value = false;
-        showSnackBar('Login failed', 'This email is not registered');
-        return;
-      }
-      // check for company status
-      var userData = userDataSnapshot.docs.first.data();
-      var companyId = userData['company_id'];
-      var company = await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyId)
-          .get();
-
-      if (!company.exists) {
+        showSnackBar('Alert', responseData['detail']);
+      } else if (response.statusCode == 404) {
         sigingInProcess.value = false;
-
-        showSnackBar('Login failed', 'No company found');
-        return;
-      }
-      bool companyStatus = company.data()!['status'];
-
-      if (companyStatus == false) {
+        showSnackBar('Alert', responseData['detail']);
+      } else if (response.statusCode == 403) {
         sigingInProcess.value = false;
+        showSnackBar('Alert', responseData['detail']);
+      } else if (response.statusCode == 200) {
+        String userId = responseData['user_id'];
+        String userEmail = responseData['email'];
+        String companyId = responseData['company_id'];
+        String accessToken = responseData['access_token'];
+        String refreshToken = responseData['refresh_token'];
 
-        showSnackBar('Login failed', 'Your session has been expired');
-        return;
-      }
-
-      var storedHashedPassword = userData['password']; // Stored hashed password
-      var isExpire = userData['expiry_date'];
-      var userActiveStatus = userData['status'];
-
-      // Check if the user's session has expired or if the account is inactive
-      if (userActiveStatus == false || isDateTodayOrOlder(isExpire)) {
-        sigingInProcess.value = false;
-        showSnackBar('Login failed', 'Your session has expired');
-        return;
-      }
-
-      // Hash the entered password
-      var bytes = utf8.encode(pass.text); // Convert entered password to bytes
-      var digest = sha256.convert(bytes); // Hash the entered password
-      String hashedPassword = digest.toString();
-
-      // Compare the entered hashed password with the stored password hash
-      if (hashedPassword == storedHashedPassword) {
-        // Password is correct, proceed with login
-        // await saveToken(userId);
-        await saveUserIdAndCompanyIdInSharedPref(
-            userDataSnapshot.docs.first.id,
-            userDataSnapshot.docs.first.data()['company_id'],
-            userDataSnapshot.docs.first.data()['email']);
-
+        await saveInformation(
+          userId,
+          companyId,
+          userEmail,
+          accessToken,
+          refreshToken,
+        );
         sigingInProcess.value = false;
         showSnackBar('Login Success', 'Welcome');
         if (kIsWeb) {
@@ -125,19 +88,11 @@ class LoginScreenController extends GetxController {
         }
       } else {
         sigingInProcess.value = false;
-        showSnackBar(
-            'Wrong Email or Password', 'Please recheck your credentials');
+        showSnackBar('Unexpected Error', 'Please try again');
       }
     } catch (e) {
       sigingInProcess.value = false;
       showSnackBar('Unexpected Error', 'Please try again');
     }
-  }
-
-  // Log out and clear user session
-  Future<void> logOut() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('userId'); // Clear userId
-    Get.offAllNamed('/loginScreen'); // Navigate to login screen
   }
 }

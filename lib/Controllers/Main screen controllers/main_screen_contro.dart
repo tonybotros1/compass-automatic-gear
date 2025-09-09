@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/company_variables.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/car_brands.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
@@ -39,16 +41,17 @@ import '../../Screens/Main screens/System Administrator/User Management/users.da
 import '../../Widgets/main screen widgets/first_main_screen_widgets/first_main_screen.dart';
 import '../../consts.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../../helpers.dart';
 
 class MainScreenController extends GetxController {
   final RxList<DocumentSnapshot> favoriteScreens = RxList<DocumentSnapshot>([]);
   late TreeController<MyTreeNode> treeController;
   RxList<MyTreeNode> roots = <MyTreeNode>[].obs;
   RxBool isLoading = RxBool(false);
-  RxString uid = RxString('');
   RxList<String> userRoles = RxList([]);
-  // RxString roleMenus = RxString('');
-  RxList<String> roleMenus = RxList([]);
   RxList<MyTreeNode> finalMenu = RxList([]);
   RxBool arrow = RxBool(false);
   Rx<Widget> selectedScreen = const SizedBox(child: FirstMainScreen()).obs;
@@ -61,8 +64,6 @@ class MainScreenController extends GetxController {
   RxString userExpiryDate = RxString('');
   RxString companyId = RxString('');
   RxBool errorLoading = RxBool(false);
-  RxMap allMenus = RxMap({});
-  RxMap allScreens = RxMap({});
   RxString companyImageURL = RxString('');
   RxString companyName = RxString('');
   RxDouble menuWidth = RxDouble(250);
@@ -70,32 +71,53 @@ class MainScreenController extends GetxController {
   MyTreeNode? previouslySelectedNode;
   RxBool isHovered = RxBool(false);
   WebSocketChannel? channel;
+  String backendUrl = backendTestURI;
+  final secureStorage = const FlutterSecureStorage();
+  Helpers helper = Helpers();
 
   @override
   void onInit() async {
-    // init();
- 
     await getCompanyDetails();
     getFavoriteScreens();
     getScreens();
     super.onInit();
   }
 
-
   // this function is to get company details
   Future<void> getCompanyDetails() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    companyId.value = '${prefs.getString('companyId')}';
-    userId.value = prefs.getString('userId')!;
-    if (companyId.value == '' || companyId.isEmpty) return;
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
 
-    var companyDetails = await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(companyId.value)
-        .get();
-    if (companyDetails.exists) {
-      companyImageURL.value = companyDetails.data()!['company_logo'];
-      companyName.value = companyDetails.data()!['company_name'];
+      var url = Uri.parse('$backendUrl/companies/get_user_and_company_details');
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final data = decoded["data"];
+        userName.value = data['user_name'] ?? '';
+        userEmail.value = data['email'] ?? '';
+        userJoiningDate.value = data['createdAt'] ?? '';
+        userExpiryDate.value = data['expiry_date'] ?? '';
+        companyImageURL.value = data['company_logo'] ?? '';
+        companyName.value = data['company_name'] ?? '';
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        // 🔄 جرب تجيب توكن جديد
+        bool refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed) {
+          await getCompanyDetails();
+        }
+      } else {
+        logout();
+      }
+    } catch (e) {
+      getCompanyDetails();
     }
   }
 
@@ -183,135 +205,67 @@ class MainScreenController extends GetxController {
     return Text(name, style: fontStyleForAppBar);
   }
 
+  MyTreeNode buildTreeFromJson(
+    Map<String, dynamic> json, {
+    bool isRoot = false,
+  }) {
+    final childrenJson = json['children'] as List<dynamic>? ?? [];
+
+    // تحويل كل طفل recursively
+    final childrenNodes = childrenJson
+        .map<MyTreeNode>((childJson) => buildTreeFromJson(childJson))
+        .toList();
+
+    return MyTreeNode(
+      id: json['_id'],
+      title: json['name'] ?? '',
+      isMenu: json['isMenu'],
+      children: childrenNodes,
+      routeName: json["route_name"],
+    );
+  }
+
   Future<void> getScreens() async {
     try {
       isLoading.value = true;
-
-      // Fetch user ID from SharedPreferences
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final action = prefs.getString('userId');
-      if (action == null || action.isEmpty) return;
-
-      uid.value = action;
-
-      // Fetch user data from Firestore
-      final userSnapshot = await FirebaseFirestore.instance
-          .collection('sys-users')
-          .doc(uid.value)
-          .get();
-
-      if (!userSnapshot.exists) return;
-
-      final fetchedRoles = List<String>.from(
-        userSnapshot.data()?['roles'] ?? [],
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendUrl/menus/get_user_menu_tree');
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
       );
-      userName.value = userSnapshot.data()?['user_name'] ?? '';
-      userEmail.value = userSnapshot.data()?['email'] ?? '';
-      userJoiningDate.value = userSnapshot.data()?['added_date'] ?? '';
-      userExpiryDate.value = userSnapshot.data()?['expiry_date'] ?? '';
-      // Assign roles directly without checking for cached data
-      userRoles.assignAll(fetchedRoles);
-
-      // Fetch role menus
-      final roleSnapshot = await FirebaseFirestore.instance
-          .collection('sys-roles')
-          .where(FieldPath.documentId, whereIn: userRoles)
-          .get();
-
-      roleMenus.clear();
-      for (var doc in roleSnapshot.docs) {
-        final menuID = doc.data()['menuID'];
-        if (menuID is String) {
-          roleMenus.add(menuID);
-        } else if (menuID is List) {
-          roleMenus.addAll(List<String>.from(menuID));
-        }
-      }
-
-      // Fetch menus and screens
-      final collections = await Future.wait([
-        FirebaseFirestore.instance.collection('menus ').get(),
-        FirebaseFirestore.instance.collection('screens').get(),
-      ]);
-
-      allMenus.value = {
-        for (var menu in collections[0].docs) menu.id: menu.data(),
-      };
-      allScreens.value = {
-        for (var screen in collections[1].docs) screen.id: screen.data(),
-      };
-
-      // Filter menus based on role menus
-      final menuSnapshot = allMenus.entries
-          .where((entry) => roleMenus.contains(entry.key))
-          .toList();
-
-      // Build tree structure
-      final roots = await Future.wait(
-        menuSnapshot.map((menuDoc) async {
-          final children = await buildMenus(menuDoc.value);
-          return MyTreeNode(
-            isMenu: true,
-            title: menuDoc.value['name'],
-            children: children,
-            routeName: menuDoc.value['routeName'],
-          );
-        }),
-      );
-
-      // Initialize tree controller
-      treeController = TreeController<MyTreeNode>(
-        roots: roots,
-        childrenProvider: (node) => node.children,
-        parentProvider: (node) => node.parent,
-      );
-
-      isLoading.value = false;
-    } catch (e) {
-      errorLoading.value = true;
-      isLoading.value = false;
-    }
-  }
-
-  Future<List<MyTreeNode>> buildMenus(Map<String, dynamic> menuDetail) async {
-    List<String> childrenIds = List<String>.from(menuDetail['children'] ?? []);
-
-    if (childrenIds.isEmpty) return [];
-
-    // Fetch child menus
-    final menuSnapshot = allMenus.entries
-        .where((entry) => childrenIds.contains(entry.key))
-        .toList();
-
-    // Fetch child screens
-    final screenSnapshot = allScreens.entries
-        .where((entry) => childrenIds.contains(entry.key))
-        .toList();
-
-    // Build nodes for menus and screens
-    final menuNodes = await Future.wait(
-      menuSnapshot.map((menuDoc) async {
-        final children = await buildMenus(menuDoc.value);
-        return MyTreeNode(
-          isMenu: true,
-          title: menuDoc.value['name'],
-          children: children,
-          routeName: menuDoc.value['routeName'],
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List data = decoded["root"];
+        final roots = data
+            .map<MyTreeNode>((item) => buildTreeFromJson(item, isRoot: true))
+            .toList();
+        treeController = TreeController<MyTreeNode>(
+          roots: roots,
+          childrenProvider: (node) => node.children,
+          parentProvider: (node) => node.parent,
         );
-      }),
-    );
 
-    final screenNodes = screenSnapshot.map((screenDoc) {
-      return MyTreeNode(
-        isMenu: false,
-        title: screenDoc.value['name'],
-        children: [],
-        routeName: screenDoc.value['routeName'],
-        description: screenDoc.value['description'] ?? '',
-      );
-    }).toList();
-
-    return [...menuNodes, ...screenNodes];
+        isLoading.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        // 🔄 جرب تجيب توكن جديد
+        bool refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed) {
+          await getScreens();
+        }
+      } else {
+        isLoading.value = false;
+        logout();
+      }
+    } catch (e) {
+      isLoading.value = false;
+      errorLoading.value = true;
+    }
   }
 
   // init the tree
@@ -408,5 +362,34 @@ class MainScreenController extends GetxController {
             doc.reference.delete();
           }
         });
+  }
+
+  Future<void> logout() async {
+    try {
+      final refreshToken = await secureStorage.read(key: "refreshToken");
+
+      var url = Uri.parse('$backendUrl/auth/logout');
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {"refresh_token": refreshToken},
+      );
+
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        showSnackBar('Done', responseBody['message']);
+        await secureStorage.delete(key: "refreshToken");
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove("accessToken");
+        await prefs.remove("userEmail");
+        await prefs.remove("companyId");
+        await prefs.remove("userId");
+        Get.offAllNamed('/');
+      } else {
+        showSnackBar('Alert', 'Can\'t logout');
+      }
+    } catch (e) {
+      showSnackBar('Alert', 'Can\'t logout');
+    }
   }
 }
