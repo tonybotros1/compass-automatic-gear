@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -208,7 +206,6 @@ class ResponsibilitiesController extends GetxController {
     }
   }
 
-  // ===========================================================================
 
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
@@ -257,49 +254,6 @@ class ResponsibilitiesController extends GetxController {
     int comparison = value1.compareTo(value2);
     return ascending ? comparison : -comparison; // Reverse if descending
   }
-
-  // Future<void> deleteResponsibility(String resID) async {
-  //   try {
-  //     final firestore = FirebaseFirestore.instance;
-
-  //     var users = await FirebaseFirestore.instance
-  //         .collection('sys-users')
-  //         .where('roles', arrayContains: resID)
-  //         .get();
-
-  //     WriteBatch batch = firestore.batch();
-
-  //     for (var doc in users.docs) {
-  //       batch.update(doc.reference, {
-  //         'roles': FieldValue.arrayRemove([resID]),
-  //       });
-  //     }
-  //     await batch.commit();
-  //     await firestore.collection('sys-roles').doc(resID).delete();
-  //     Get.back();
-  //     // await getResponsibilities();
-  //   } catch (e) {
-  //     //
-  //   }
-  // }
-
-  // void addNewResponsibility() {
-  //   try {
-  //     if (menuIDFromList.isEmpty) {
-  //       showSnackBar('Can not complete', 'please try again later');
-  //     } else {
-  //       FirebaseFirestore.instance.collection('sys-roles').add({
-  //         'role_name': responsibilityName.text,
-  //         'menuID': menuIDFromList.value,
-  //         'added_date': DateTime.now().toString(),
-  //         'is_shown_for_users': true,
-  //       });
-  //       Get.back();
-  //     }
-  //   } catch (e) {
-  //     //
-  //   }
-  // }
 
   // this function is to filter the search results for web
   void filterResponsibilities() {
