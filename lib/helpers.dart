@@ -6,30 +6,42 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'consts.dart';
 
+enum RefreshResult {
+  success,
+  invalidToken, // Refresh token is expired/invalid → logout
+  networkError, // No internet / timeout → don't logout
+  serverError, // Backend error (e.g. 500) → don't logout
+}
+
 class Helpers {
   String backendUrl = backendTestURI;
   final secureStorage = const FlutterSecureStorage();
 
-  Future<bool> refreshAccessToken(String refreshToken) async {
+  Future<RefreshResult> refreshAccessToken(String refreshToken) async {
     try {
-      var url = Uri.parse('$backendUrl/auth/refresh_token');
-      var request = http.MultipartRequest('POST', url);
-      request.fields['token'] = refreshToken;
+      final url = Uri.parse('$backendUrl/auth/refresh_token');
+      final request = http.MultipartRequest('POST', url)
+        ..fields['token'] = refreshToken;
 
-      var response = await request.send();
-      var responseData = await http.Response.fromStream(response);
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(responseData.body);
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', decoded['access_token']);
-        await secureStorage.write(key: "refreshToken", value: refreshToken);
+        // ✅ Successfully refreshed
+        final decoded = jsonDecode(response.body);
+        final newAccessToken = decoded['access_token'];
 
-        return true;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', newAccessToken);
+
+        return RefreshResult.success;
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        return RefreshResult.invalidToken;
+      } else {
+        return RefreshResult.serverError;
       }
-      return false;
     } catch (e) {
-      return false;
+      return RefreshResult.networkError;
     }
   }
 }

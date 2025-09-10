@@ -1,8 +1,14 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/helpers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // String backendURI = 'https://datahubai-backend.onrender.com';
 // String backendTestURI = 'https://datahubai-backend.onrender.com';
@@ -549,7 +555,7 @@ var closeButton = ElevatedButton(
 );
 
 // snack bar
-void showSnackBar(String title,String body) {
+void showSnackBar(String title, String body) {
   Get.snackbar(
     title,
     body,
@@ -1018,4 +1024,58 @@ String cloudinaryThumbnail(
 
   // منضيف التحويل بعد كلمة upload/
   return originalUrl.replaceFirst("/upload/", "/upload/$transformation/");
+}
+
+// ///////////////////////////////////////
+final secureStorage = const FlutterSecureStorage();
+Helpers helper = Helpers();
+
+Future<void> logout() async {
+  try {
+    final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+    final prefs = await SharedPreferences.getInstance();
+
+    var url = Uri.parse('$backendTestURI/auth/logout');
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
+      body: {"refresh_token": refreshToken},
+    );
+
+    if (response.statusCode == 200) {
+      var responseBody = jsonDecode(response.body);
+      showSnackBar('Done', responseBody['message']);
+      await secureStorage.delete(key: "refreshToken");
+      await prefs.remove("accessToken");
+      await prefs.remove("userEmail");
+      await prefs.remove("companyId");
+      await prefs.remove("userId");
+      Get.offAllNamed('/');
+    } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      final refreshed = await helper.refreshAccessToken(refreshToken);
+      if (refreshed == RefreshResult.success) {
+        await logout();
+      } else {
+        await prefs.remove("accessToken");
+        await prefs.remove("userEmail");
+        await prefs.remove("companyId");
+        await prefs.remove("userId");
+        Get.offAllNamed('/');
+      }
+    } else if (response.statusCode == 401) {
+      await prefs.remove("accessToken");
+      await prefs.remove("userEmail");
+      await prefs.remove("companyId");
+      await prefs.remove("userId");
+      Get.offAllNamed('/');
+    } else {
+      await prefs.remove("accessToken");
+      await prefs.remove("userEmail");
+      await prefs.remove("companyId");
+      await prefs.remove("userId");
+      Get.offAllNamed('/');
+    }
+  } catch (e) {
+    showSnackBar('Alert', 'Can\'t logout');
+  }
 }

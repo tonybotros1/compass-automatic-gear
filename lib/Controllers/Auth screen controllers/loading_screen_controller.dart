@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:datahubai/helpers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +10,7 @@ import '../../consts.dart';
 class LoadingScreenController extends GetxController {
   String backendUrl = backendTestURI;
   final secureStorage = const FlutterSecureStorage();
+  Helpers helper = Helpers();
 
   @override
   void onInit() {
@@ -21,42 +23,29 @@ class LoadingScreenController extends GetxController {
     await checkLogStatus();
   }
 
-  Future<void> logout() async {
-    try {
-      final refreshToken = await secureStorage.read(key: "refreshToken");
-
-      var url = Uri.parse('$backendUrl/auth/logout');
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: {"refresh_token": refreshToken},
-      );
-
-      if (response.statusCode == 200) {
-        var responseBody = jsonDecode(response.body);
-        showSnackBar('Done', responseBody['message']);
-        await secureStorage.delete(key: "refreshToken");
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove("accessToken");
-        await prefs.remove("userEmail");
-        await prefs.remove("companyId");
-        await prefs.remove("userId");
-        Get.offAllNamed('/');
-      } else {
-        showSnackBar('Alert', 'Can\'t logout');
-      }
-    } catch (e) {
-      showSnackBar('Alert', 'Can\'t logout');
-    }
-  }
-
   Future<bool> isUserValid(String userId) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/auth/is_user_valid/$userId');
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data["valid"] == true;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await isUserValid(userId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          return false;
+        }
+        return false;
+      } else if (response.statusCode == 401) {
+        return false;
       } else {
         return false;
       }

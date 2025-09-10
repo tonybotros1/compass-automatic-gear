@@ -209,7 +209,9 @@ AnimatedTreeView<MyTreeNode> leftTree(
                       ? Colors.grey.withValues(alpha: (0.5))
                       : null,
                   child: InkWell(
-                    onTap: entry.node.routeName != null
+                    onTap:
+                        entry.node.routeName != null &&
+                            entry.node.routeName != ''
                         ? () {
                             if (mainScreenController.previouslySelectedNode !=
                                 null) {

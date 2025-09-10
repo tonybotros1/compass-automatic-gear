@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:datahubai/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../Models/menus_functions_roles/menus_model.dart';
 import '../../Models/menus_functions_roles/roles_model.dart';
@@ -26,6 +28,8 @@ class ResponsibilitiesController extends GetxController {
   RxList selectedRow = RxList([]);
   WebSocketChannel? channel;
   String backendUrl = backendTestURI;
+  Helpers helper = Helpers();
+
   @override
   void onInit() {
     connectWebSocket();
@@ -74,14 +78,33 @@ class ResponsibilitiesController extends GetxController {
 
   Future<void> getMenus() async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/menus/get_menus');
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         final List<MenuModel> menuList = (decoded["menus"] as List)
             .map((json) => MenuModel.fromJson(json))
             .toList();
         allMenus.value = {for (var menu in menuList) menu.id: menu.toJson()};
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getMenus();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        isScreenLoading.value = false;
+        logout();
       }
     } catch (e) {
       //
@@ -92,8 +115,14 @@ class ResponsibilitiesController extends GetxController {
   Future<void> getResponsibilities() async {
     try {
       isScreenLoading.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/responsibilities/get_all_roles');
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         final List<RoleModel> roleList = (decoded["roles"] as List)
@@ -103,6 +132,19 @@ class ResponsibilitiesController extends GetxController {
           for (var role in roleList) role.id: role.toJson(),
         };
         isScreenLoading.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getResponsibilities();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          isScreenLoading.value = false;
+          logout();
+        } else {
+          isScreenLoading.value = false;
+        }
+      } else if (response.statusCode == 401) {
+        isScreenLoading.value = false;
+        logout();
       }
     } catch (e) {
       isScreenLoading.value = false;
@@ -111,36 +153,51 @@ class ResponsibilitiesController extends GetxController {
 
   Future<void> updateRoleStatus(String roleId, bool status) async {
     try {
-      updatingStatus[roleId] = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse(
         '$backendUrl/responsibilities/update_role_status/$roleId',
       );
       final response = await http.patch(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
         body: jsonEncode({"status": status}),
       );
-      if (response.statusCode != 200) {
-        updatingStatus[roleId] = false;
-
-        showSnackBar('Alert', 'Ststus did not change');
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateRoleStatus(roleId, status);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
       } else {
-        updatingStatus[roleId] = false;
+        showSnackBar('Alert', 'Ststus did not change');
       }
     } catch (e) {
-      updatingStatus[roleId] = false;
-
       showSnackBar('Alert', 'Ststus did not change');
     }
   }
 
   Future<void> addNewResponsibility() async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       addingNewResponsibilityProcess.value = true;
       var url = Uri.parse('$backendUrl/responsibilities/add_new_role');
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
         body: jsonEncode({
           "role_name": responsibilityName.text,
           "menu_id": menuIDFromList.value,
@@ -150,6 +207,17 @@ class ResponsibilitiesController extends GetxController {
         addingNewResponsibilityProcess.value = false;
         Get.back();
         showSnackBar('Done', 'Responsibility added successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewResponsibility();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewResponsibilityProcess.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingNewResponsibilityProcess.value = false;
+        logout();
       } else {
         addingNewResponsibilityProcess.value = false;
         Get.back();
@@ -165,10 +233,16 @@ class ResponsibilitiesController extends GetxController {
   Future<void> updateResponsibility(String roleID) async {
     try {
       addingNewResponsibilityProcess.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/responsibilities/update_role/$roleID');
       final response = await http.patch(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
         body: jsonEncode({
           "role_name": responsibilityName.text,
           "menu_id": menuIDFromList.value,
@@ -178,12 +252,22 @@ class ResponsibilitiesController extends GetxController {
         addingNewResponsibilityProcess.value = false;
         Get.back();
         showSnackBar('Done', 'Responsibility updated successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateResponsibility(roleID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewResponsibilityProcess.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingNewResponsibilityProcess.value = false;
+        logout();
       } else {
         addingNewResponsibilityProcess.value = false;
         Get.back();
         showSnackBar('Alert', 'Something went wrong please try again');
       }
-      Get.back();
     } catch (e) {
       addingNewResponsibilityProcess.value = false;
       Get.back();
@@ -193,19 +277,36 @@ class ResponsibilitiesController extends GetxController {
 
   Future<void> deleteResponsibility(String resID) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/responsibilities/delete_role/$resID');
-      final response = await http.delete(url);
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
       if (response.statusCode == 200) {
         Get.back();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteResponsibility(resID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          Get.back();
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        Get.back();
+        logout();
       } else {
         Get.back();
         showSnackBar('Alert', 'Can\'t delete role');
       }
     } catch (e) {
+      Get.back();
       showSnackBar('Alert', 'Can\'t delete role');
     }
   }
-
 
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {

@@ -108,12 +108,13 @@ class MainScreenController extends GetxController {
         companyImageURL.value = data['company_logo'] ?? '';
         companyName.value = data['company_name'] ?? '';
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-        // 🔄 جرب تجيب توكن جديد
-        bool refreshed = await helper.refreshAccessToken(refreshToken);
-        if (refreshed) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
           await getCompanyDetails();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
         }
-      } else {
+      } else if (response.statusCode == 401) {
         logout();
       }
     } catch (e) {
@@ -253,14 +254,21 @@ class MainScreenController extends GetxController {
 
         isLoading.value = false;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-        // 🔄 جرب تجيب توكن جديد
-        bool refreshed = await helper.refreshAccessToken(refreshToken);
-        if (refreshed) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
           await getScreens();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          isLoading.value = false;
+
+          logout();
+        } else {
+          isLoading.value = false;
         }
-      } else {
+      } else if (response.statusCode == 401) {
         isLoading.value = false;
         logout();
+      } else {
+        isLoading.value = false;
       }
     } catch (e) {
       isLoading.value = false;

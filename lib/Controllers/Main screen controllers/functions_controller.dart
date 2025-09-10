@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:datahubai/Models/menus_functions_roles/screens_model.dart';
+import 'package:datahubai/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -23,6 +25,7 @@ class FunctionsController extends GetxController {
   RxBool isAscending = RxBool(true);
   WebSocketChannel? channel;
   String backendUrl = backendTestURI;
+  Helpers helper = Helpers();
 
   @override
   void onInit() {
@@ -68,8 +71,17 @@ class FunctionsController extends GetxController {
   Future<void> getScreens() async {
     try {
       isScreenLoding.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendTestURI/functions/get_screens');
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -78,6 +90,17 @@ class FunctionsController extends GetxController {
           screens.map((screen) => FunctionsModel.fromJson(screen)),
         );
         isScreenLoding.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getScreens();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          isScreenLoding.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        isScreenLoding.value = false;
+        logout();
       } else {
         isScreenLoding.value = false;
       }
@@ -89,11 +112,16 @@ class FunctionsController extends GetxController {
   Future<void> addNewScreen() async {
     try {
       addingNewScreenProcess.value = true;
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendTestURI/functions/add_screen');
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
         body: jsonEncode({
           "name": screenName.text,
           "route_name": route.text,
@@ -102,9 +130,19 @@ class FunctionsController extends GetxController {
       );
       if (response.statusCode == 200) {
         addingNewScreenProcess.value = false;
-
         Get.back();
         showSnackBar('Done', 'Screen added successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewScreen();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewScreenProcess.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingNewScreenProcess.value = false;
+        logout();
       } else {
         Get.back();
         addingNewScreenProcess.value = false;
@@ -119,11 +157,28 @@ class FunctionsController extends GetxController {
 
   Future<void> deleteScreen(String screenId) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/functions/delete_screen/$screenId');
-      final response = await http.delete(url);
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
       if (response.statusCode == 200) {
         Get.back();
         showSnackBar('Done', 'Screen deleted successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteScreen(screenId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          Get.back();
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        Get.back();
+        logout();
       } else {
         Get.back();
         showSnackBar('Alert', 'Something went wrong please try again');
@@ -137,11 +192,16 @@ class FunctionsController extends GetxController {
   Future<void> editScreen(String screenId) async {
     try {
       addingNewScreenProcess.value = true;
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/functions/edit_screen/$screenId');
       final response = await http.patch(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
         body: jsonEncode({
           "name": screenName.text,
           "screen_route": route.text,
@@ -152,6 +212,17 @@ class FunctionsController extends GetxController {
         addingNewScreenProcess.value = false;
         Get.back();
         showSnackBar('Done', 'Screen updated successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await editScreen(screenId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewScreenProcess.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingNewScreenProcess.value = false;
+        logout();
       } else {
         addingNewScreenProcess.value = false;
         Get.back();

@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'package:datahubai/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../Models/menus_functions_roles/menus_model.dart';
 import '../../Models/menus_functions_roles/screens_model.dart';
@@ -49,6 +52,9 @@ class MenusController extends GetxController {
   RxMap<String, String> selectFromScreens = RxMap({});
   WebSocketChannel? channel;
   String backendUrl = backendTestURI;
+  Helpers helper = Helpers();
+  final secureStorage = const FlutterSecureStorage();
+
   @override
   void onInit() {
     connectWebSocket();
@@ -92,15 +98,38 @@ class MenusController extends GetxController {
   Future<void> getMenus() async {
     try {
       isScreenLoading.value = true;
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/menus/get_menus');
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         final List<MenuModel> menuList = (decoded["menus"] as List)
             .map((json) => MenuModel.fromJson(json))
             .toList();
         allMenus.value = {for (var menu in menuList) menu.id: menu.toJson()};
+        isScreenLoading.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getMenus();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          isScreenLoading.value = false;
+          logout();
+        } else {
+          isScreenLoading.value = false;
+        }
+      } else if (response.statusCode == 401) {
+        isScreenLoading.value = false;
+        logout();
+      } else {
         isScreenLoading.value = false;
       }
     } catch (e) {
@@ -111,10 +140,16 @@ class MenusController extends GetxController {
   Future<void> addNewMenu() async {
     try {
       addingNewMenuProcess.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/menus/add_new_menu');
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
         body: jsonEncode({
           "name": menuName.text,
           "code": code.text,
@@ -126,6 +161,19 @@ class MenusController extends GetxController {
 
         Get.back();
         showSnackBar('Done', 'Menu added successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewMenu();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewMenuProcess.value = false;
+          logout();
+        } else {
+          addingNewMenuProcess.value = false;
+        }
+      } else if (response.statusCode == 401) {
+        addingNewMenuProcess.value = false;
+        logout();
       } else {
         Get.back();
         addingNewMenuProcess.value = false;
@@ -140,27 +188,53 @@ class MenusController extends GetxController {
 
   Future<void> deleteMenuAndUpdateChildren(String menuId) async {
     try {
-      Get.back();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/menus/delete_menu/$menuId');
-      final response = await http.delete(url);
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
 
       if (response.statusCode == 200) {
+        Get.back();
+
         // showSnackBar('Done', 'Menu deleted successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteMenuAndUpdateChildren(menuId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          Get.back();
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        Get.back();
+        logout();
       } else {
+        Get.back();
         showSnackBar('Error', 'Failed to delete menu');
       }
     } catch (e) {
+      Get.back();
       showSnackBar('Error', 'Failed to delete menu');
     }
   }
 
   Future<void> editMenu(String menuID) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       addingNewMenuProcess.value = true;
       var url = Uri.parse('$backendUrl/menus/update_menu/$menuID');
       final response = await http.patch(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
         body: jsonEncode({
           "name": menuName.text,
           "code": code.text,
@@ -169,9 +243,21 @@ class MenusController extends GetxController {
       );
       if (response.statusCode == 200) {
         addingNewMenuProcess.value = false;
-
         Get.back();
         showSnackBar('Done', 'Menu updated successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await editMenu(menuID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewMenuProcess.value = false;
+          logout();
+        } else {
+          addingNewMenuProcess.value = false;
+        }
+      } else if (response.statusCode == 401) {
+        addingNewMenuProcess.value = false;
+        logout();
       } else {
         Get.back();
         addingNewMenuProcess.value = false;
@@ -186,12 +272,27 @@ class MenusController extends GetxController {
 
   Future<void> removeNodeFromTheTree(String nodeID, String parentID) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse(
         '$backendUrl/menus/remove_node_from_the_tree/$parentID/$nodeID',
       );
-      final response = await http.patch(url);
+      final response = await http.patch(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
       if (response.statusCode == 200) {
         removeNode(roots, nodeID, parentID);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await removeNodeFromTheTree(nodeID, parentID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
       } else {
         showSnackBar('Alert', 'Can\'t remove node please try again');
       }
@@ -223,12 +324,18 @@ class MenusController extends GetxController {
   Future<void> addSubMenuToExistingMenu() async {
     try {
       addingExistingMenuProcess.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse(
         '$backendUrl/menus/add_sub_menus/${selectedMenuID.value}',
       );
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
         body: jsonEncode({"submenus": menuIDFromList}),
       );
       if (response.statusCode == 200) {
@@ -236,26 +343,39 @@ class MenusController extends GetxController {
         MyTreeNode newTree = buildTreeFromJson(decoded, isRoot: true);
 
         for (var child in newTree.children) {
-          addChildToNode(
-            roots,
-            selectedMenuID.value,
-            MyTreeNode(
-              parent: MyTreeNode(
-                title: selectedMenuName.value,
-                id: selectedMenuID.value,
+          if (menuIDFromList.contains(child.id)) {
+            addChildToNode(
+              roots,
+              selectedMenuID.value,
+              MyTreeNode(
+                parent: MyTreeNode(
+                  title: selectedMenuName.value,
+                  id: selectedMenuID.value,
+                ),
+                title: child.title,
+                children: child.children,
+                canRemove: child.canRemove,
+                id: child.id,
+                isMenu: child.isMenu,
               ),
-              title: child.title,
-              children: child.children,
-              canRemove: child.canRemove,
-              id: child.id,
-              isMenu: child.isMenu,
-            ),
-          );
+            );
+          }
         }
         treeController.expandAll();
         treeController.rebuild();
 
         addingExistingMenuProcess.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addSubMenuToExistingMenu();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingExistingMenuProcess.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingExistingMenuProcess.value = false;
+        logout();
       } else {
         showSnackBar('Alert', 'Can\'t add');
         addingExistingMenuProcess.value = false;
@@ -270,12 +390,18 @@ class MenusController extends GetxController {
   Future<void> addScreenToExistringMenu() async {
     try {
       addingExistingScreenProcess.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse(
         '$backendUrl/menus/add_sub_menus/${selectedMenuID.value}',
       );
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
         body: jsonEncode({"submenus": screenIDFromList, "is_menu": false}),
       );
       if (response.statusCode == 200) {
@@ -283,26 +409,39 @@ class MenusController extends GetxController {
         MyTreeNode newTree = buildTreeFromJson(decoded, isRoot: true);
 
         for (var child in newTree.children) {
-          addChildToNode(
-            roots,
-            selectedMenuID.value,
-            MyTreeNode(
-              parent: MyTreeNode(
-                title: selectedMenuName.value,
-                id: selectedMenuID.value,
+          if (screenIDFromList.contains(child.id)) {
+            addChildToNode(
+              roots,
+              selectedMenuID.value,
+              MyTreeNode(
+                parent: MyTreeNode(
+                  title: selectedMenuName.value,
+                  id: selectedMenuID.value,
+                ),
+                title: child.title,
+                children: child.children,
+                canRemove: child.canRemove,
+                id: child.id,
+                isMenu: child.isMenu,
               ),
-              title: child.title,
-              children: child.children,
-              canRemove: child.canRemove,
-              id: child.id,
-              isMenu: child.isMenu,
-            ),
-          );
+            );
+          }
         }
         treeController.expandAll();
         treeController.rebuild();
 
         addingExistingScreenProcess.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addScreenToExistringMenu();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingExistingScreenProcess.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingExistingScreenProcess.value = false;
+        logout();
       } else {
         showSnackBar('Alert', 'Can\'t add');
         addingExistingScreenProcess.value = false;
@@ -423,8 +562,17 @@ class MenusController extends GetxController {
 
   Future<void> getScreens() async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendTestURI/functions/get_screens');
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -432,7 +580,16 @@ class MenusController extends GetxController {
             .map((json) => FunctionsModel.fromJson(json))
             .toList();
         allScreens.value = {for (var menu in menuList) menu.id: menu.toJson()};
-      } else {}
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getScreens();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
     } catch (e) {
       //
     }
@@ -460,8 +617,17 @@ class MenusController extends GetxController {
 
   Future<void> getMenuTree(String menuId) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/menus/get_menu_tree/$menuId');
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
 
@@ -474,9 +640,22 @@ class MenusController extends GetxController {
 
         treeController.expandAll();
         isLoading.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getMenuTree(menuId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          errorLoading.value = true;
+          isLoading.value = false;
+          logout();
+        } else {
+          errorLoading.value = true;
+          isLoading.value = false;
+        }
       } else {
-        isLoading.value = false;
         errorLoading.value = true;
+        isLoading.value = false;
+        logout();
       }
     } catch (e) {
       isLoading.value = false;
