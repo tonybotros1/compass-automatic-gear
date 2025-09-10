@@ -127,7 +127,7 @@ SmartInfoOverlay personalDetailsSection(
                           // await globalPrefs?.remove('companyId');
                           // await globalPrefs?.remove('userEmail');
                           // Get.offAllNamed('/');
-                          mainScreenController.logout();
+                         logout();
                         },
                       );
                     },

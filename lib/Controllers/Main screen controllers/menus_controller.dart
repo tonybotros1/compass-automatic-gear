@@ -6,12 +6,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../Models/menus_functions_roles/menus_model.dart';
 import '../../Models/menus_functions_roles/screens_model.dart';
 import '../../Models/screen_tree_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
+import 'webSocket_controller.dart';
 
 class MenusController extends GetxController {
   // final RxList<DocumentSnapshot> allMenus = RxList<DocumentSnapshot>([]);
@@ -50,7 +50,7 @@ class MenusController extends GetxController {
   RxBool addingExistingScreenProcess = RxBool(false);
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   RxMap<String, String> selectFromScreens = RxMap({});
-  WebSocketChannel? channel;
+  WebSocketService ws = Get.find<WebSocketService>();
   String backendUrl = backendTestURI;
   Helpers helper = Helpers();
   final secureStorage = const FlutterSecureStorage();
@@ -70,11 +70,7 @@ class MenusController extends GetxController {
   }
 
   void connectWebSocket() {
-    channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
-
-    channel!.stream.listen((event) {
-      final message = jsonDecode(event);
-
+    ws.events.listen((message) {
       switch (message["type"]) {
         case "menu_created":
           final newMenu = MenuModel.fromJson(message["data"]);

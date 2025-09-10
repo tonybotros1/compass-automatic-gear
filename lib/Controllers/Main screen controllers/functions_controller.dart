@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'webSocket_controller.dart';
 
 class FunctionsController extends GetxController {
   late TextEditingController screenName = TextEditingController();
@@ -23,9 +23,9 @@ class FunctionsController extends GetxController {
   RxBool addingNewScreenProcess = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-  WebSocketChannel? channel;
   String backendUrl = backendTestURI;
   Helpers helper = Helpers();
+  WebSocketService ws = Get.find<WebSocketService>();
 
   @override
   void onInit() {
@@ -41,11 +41,7 @@ class FunctionsController extends GetxController {
   }
 
   void connectWebSocket() {
-    channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
-
-    channel!.stream.listen((event) {
-      final message = jsonDecode(event);
-
+    ws.events.listen((message) {
       switch (message["type"]) {
         case "screen_created":
           final newBrand = FunctionsModel.fromJson(message["data"]);

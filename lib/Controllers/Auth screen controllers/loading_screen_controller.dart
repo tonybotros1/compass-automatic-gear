@@ -13,13 +13,8 @@ class LoadingScreenController extends GetxController {
   Helpers helper = Helpers();
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    _initialize();
-  }
-
-  // Wrapper to handle async logic.
-  void _initialize() async {
     await checkLogStatus();
   }
 

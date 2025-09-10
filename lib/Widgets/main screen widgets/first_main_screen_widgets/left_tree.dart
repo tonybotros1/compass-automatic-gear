@@ -233,6 +233,8 @@ AnimatedTreeView<MyTreeNode> leftTree(
                                 '${entry.node.routeName}';
                             mainScreenController.selectedScreenName.value =
                                 entry.node.title;
+                            mainScreenController.selectedScreenId.value =
+                                '${entry.node.id}';
                             mainScreenController
                                     .selectedScreenDescription
                                     .value =

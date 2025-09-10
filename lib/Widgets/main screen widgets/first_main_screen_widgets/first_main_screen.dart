@@ -11,47 +11,49 @@ class FirstMainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: GetX<MainScreenController>(builder: (controller) {
-        bool isFavoriteLoading = controller.favoriteScreens.isEmpty;
-        return isFavoriteLoading
-            ? Center(child: Text('No Favorites', style: fontStyleForAppBar))
-            : GridView.count(
-                crossAxisCount:
-                    (MediaQuery.of(context).size.width ~/ 250).clamp(1, 5),
-                childAspectRatio: 1.5,
-                padding: const EdgeInsets.all(20),
-                crossAxisSpacing: 40,
-                mainAxisSpacing: 40,
-                children:
-                    List.generate(controller.favoriteScreens.length, (index) {
-                  final fav = controller.favoriteScreens[index];
-                  final data = fav.data() as Map<String, dynamic>? ?? {};
-                  String screenName = data['screen_name'] ?? '';
-                  String emoji = screenName.characters.first;
-                  String name = screenName.substring(emoji.length).trim();
-                  String description = data.containsKey('description')
-                      ? data['description'] ?? ''
-                      : '';
+      body: GetX<MainScreenController>(
+        builder: (controller) {
+          bool isFavoriteLoading = controller.favoriteScreens.isEmpty;
+          return isFavoriteLoading
+              ? Center(child: Text('No Favorites', style: fontStyleForAppBar))
+              : GridView.count(
+                  crossAxisCount: (MediaQuery.of(context).size.width ~/ 250)
+                      .clamp(1, 5),
+                  childAspectRatio: 1.5,
+                  padding: const EdgeInsets.all(20),
+                  crossAxisSpacing: 40,
+                  mainAxisSpacing: 40,
+                  children: List.generate(controller.favoriteScreens.length, (
+                    index,
+                  ) {
+                    final fav = controller.favoriteScreens[index];
+                    String screenName = fav.screenName;
+                    String emoji = screenName.characters.first;
+                    String name = screenName.substring(emoji.length).trim();
+                    String description = fav.description;
+                    String screenRoute = fav.routeName;
+                    String screenId = fav.id;
 
-                  // توزيع اللون حسب الفهرس
-                  final cardColor = cardColors[index % cardColors.length];
+                    // توزيع اللون حسب الفهرس
+                    final cardColor = cardColors[index % cardColors.length];
 
-                  return HoverCard(
-                    emoji: emoji,
-                    name: name,
-                    description: description,
-                    color: cardColor,
-                    onTap: () {
-                      controller.selectedScreen.value =
-                          controller.getScreenFromRoute(data['screen_route']);
-                      controller.selectedScreenRoute.value =
-                          data['screen_route'];
-                      controller.selectedScreenName.value = data['screen_name'];
-                    },
-                  );
-                }),
-              );
-      }),
+                    return HoverCard(
+                      emoji: emoji,
+                      name: name,
+                      description: description,
+                      color: cardColor,
+                      onTap: () {
+                        controller.selectedScreen.value = controller
+                            .getScreenFromRoute(screenRoute);
+                        controller.selectedScreenRoute.value = screenRoute;
+                        controller.selectedScreenName.value = screenName;
+                        controller.selectedScreenId.value = screenId;
+                      },
+                    );
+                  }),
+                );
+        },
+      ),
     );
   }
 }
@@ -108,9 +110,10 @@ class _HoverCardState extends State<HoverCard> {
                     textAlign: TextAlign.center,
                     widget.emoji,
                     style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey.shade700,
-                        fontWeight: FontWeight.bold),
+                      fontSize: 18,
+                      color: Colors.grey.shade700,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   AutoSizeText(
                     widget.name,
@@ -131,9 +134,10 @@ class _HoverCardState extends State<HoverCard> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade700),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade700,
+                    ),
                   ),
                 ],
               ),

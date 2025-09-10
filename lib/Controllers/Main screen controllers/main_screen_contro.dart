@@ -19,8 +19,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../Models/menus_functions_roles/favourite_screen_model.dart';
 import '../../Models/screen_tree_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../Screens/Dashboard/trading_dashboard.dart';
 import '../../Screens/Main screens/System Administrator/Setup/AP_payment_type.dart';
 import '../../Screens/Main screens/System Administrator/Setup/ap_invoices.dart';
@@ -40,14 +40,14 @@ import '../../Screens/Main screens/System Administrator/User Management/responsi
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
 import '../../Widgets/main screen widgets/first_main_screen_widgets/first_main_screen.dart';
 import '../../consts.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 import '../../helpers.dart';
+import 'webSocket_controller.dart';
 
 class MainScreenController extends GetxController {
-  final RxList<DocumentSnapshot> favoriteScreens = RxList<DocumentSnapshot>([]);
+  final RxList<FavouriteScreensModel> favoriteScreens =
+      RxList<FavouriteScreensModel>([]);
   late TreeController<MyTreeNode> treeController;
   RxList<MyTreeNode> roots = <MyTreeNode>[].obs;
   RxBool isLoading = RxBool(false);
@@ -56,6 +56,7 @@ class MainScreenController extends GetxController {
   RxBool arrow = RxBool(false);
   Rx<Widget> selectedScreen = const SizedBox(child: FirstMainScreen()).obs;
   Rx<String> selectedScreenName = RxString('🏡 Home');
+  Rx<String> selectedScreenId = RxString('');
   Rx<String> selectedScreenRoute = RxString('/home');
   Rx<String> selectedScreenDescription = RxString('');
   RxString userName = RxString('');
@@ -70,17 +71,36 @@ class MainScreenController extends GetxController {
   RxString userId = RxString('');
   MyTreeNode? previouslySelectedNode;
   RxBool isHovered = RxBool(false);
-  WebSocketChannel? channel;
+  WebSocketService ws = Get.find<WebSocketService>();
   String backendUrl = backendTestURI;
   final secureStorage = const FlutterSecureStorage();
   Helpers helper = Helpers();
 
   @override
   void onInit() async {
-    await getCompanyDetails();
+    connectWebSocket();
+    getCompanyDetails();
     getFavoriteScreens();
     getScreens();
     super.onInit();
+  }
+
+  void connectWebSocket() {
+    // channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
+
+    ws.events.listen((message) {
+      switch (message["type"]) {
+        case "favourite_added":
+          final newfav = FavouriteScreensModel.fromJson(message["data"]);
+          favoriteScreens.add(newfav);
+          break;
+
+        case "favourite_deleted":
+          final deletedId = message["data"]["_id"];
+          favoriteScreens.removeWhere((m) => m.id == deletedId);
+          break;
+      }
+    });
   }
 
   // this function is to get company details
@@ -326,78 +346,98 @@ class MainScreenController extends GetxController {
     isLoading.value = false;
   }
 
-  void getFavoriteScreens() {
-    FirebaseFirestore.instance
-        .collection('favorite_screens')
-        .where('company_id', isEqualTo: companyId.value)
-        .where('user_id', isEqualTo: userId.value)
-        .orderBy('added_date', descending: true)
-        .limit(15)
-        .snapshots()
-        .listen(
-          (fav) {
-            favoriteScreens.assignAll(fav.docs);
-          },
-          onError: (e) {
-            // print(e);
-            // Handle errors here
-          },
+  Future<void> getFavoriteScreens() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendUrl/favourite_screens/get_favourite_screens',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> favs = decoded["favourites"] ?? [];
+        favoriteScreens.assignAll(
+          favs
+              .map((country) => FavouriteScreensModel.fromJson(country))
+              .toList(),
         );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getFavoriteScreens();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      //
+    }
   }
 
-  void addScreenToFavorite() {
+  Future<void> addScreenToFavorite() async {
     try {
-      FirebaseFirestore.instance.collection('favorite_screens').add({
-        'screen_name': selectedScreenName.value,
-        'screen_route': selectedScreenRoute.value,
-        'added_date': DateTime.now(),
-        'company_id': companyId.value,
-        'user_id': userId.value,
-        'description': selectedScreenDescription.value,
-      });
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendUrl/favourite_screens/add_screen_to_favourites',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({"screen_id": selectedScreenId.value}),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addScreenToFavorite();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try agian');
     }
   }
 
-  void removeScreenFromFavorite(String route) {
-    FirebaseFirestore.instance
-        .collection('favorite_screens')
-        .where('screen_route', isEqualTo: route)
-        .get()
-        .then((snap) {
-          for (var doc in snap.docs) {
-            doc.reference.delete();
-          }
-        });
-  }
-
-  Future<void> logout() async {
+  Future<void> removeScreenFromFavorite(String id) async {
     try {
-      final refreshToken = await secureStorage.read(key: "refreshToken");
-
-      var url = Uri.parse('$backendUrl/auth/logout');
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: {"refresh_token": refreshToken},
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendUrl/favourite_screens/remove_screen_from_favourites/$id',
       );
-
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
       if (response.statusCode == 200) {
-        var responseBody = jsonDecode(response.body);
-        showSnackBar('Done', responseBody['message']);
-        await secureStorage.delete(key: "refreshToken");
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove("accessToken");
-        await prefs.remove("userEmail");
-        await prefs.remove("companyId");
-        await prefs.remove("userId");
-        Get.offAllNamed('/');
-      } else {
-        showSnackBar('Alert', 'Can\'t logout');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await removeScreenFromFavorite(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
       }
     } catch (e) {
-      showSnackBar('Alert', 'Can\'t logout');
+      //
     }
   }
 }

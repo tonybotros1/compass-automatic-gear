@@ -3,12 +3,12 @@ import 'package:datahubai/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../Models/menus_functions_roles/menus_model.dart';
 import '../../Models/menus_functions_roles/roles_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
 import 'package:http/http.dart' as http;
+import 'webSocket_controller.dart';
 
 class ResponsibilitiesController extends GetxController {
   final RxMap<String, dynamic> allResponsibilities = RxMap<String, dynamic>({});
@@ -26,7 +26,7 @@ class ResponsibilitiesController extends GetxController {
   RxMap<String, bool> updatingStatus = RxMap<String, bool>({});
   RxMap<String, dynamic> allMenus = RxMap<String, dynamic>({});
   RxList selectedRow = RxList([]);
-  WebSocketChannel? channel;
+  WebSocketService ws = Get.find<WebSocketService>();
   String backendUrl = backendTestURI;
   Helpers helper = Helpers();
 
@@ -51,11 +51,7 @@ class ResponsibilitiesController extends GetxController {
   }
 
   void connectWebSocket() {
-    channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
-
-    channel!.stream.listen((event) {
-      final message = jsonDecode(event);
-
+    ws.events.listen((message) {
       switch (message["type"]) {
         case "role_created":
           final newMenu = RoleModel.fromJson(message["data"]);
@@ -105,6 +101,8 @@ class ResponsibilitiesController extends GetxController {
       } else if (response.statusCode == 401) {
         isScreenLoading.value = false;
         logout();
+      } else {
+        isScreenLoading.value = false;
       }
     } catch (e) {
       //

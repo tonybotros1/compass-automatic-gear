@@ -1,14 +1,16 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:datahubai/Models/countries/cities_model.dart';
+import 'package:datahubai/helpers.dart';
 import 'package:datahubai/web_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/countries/countries_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
 import 'package:http/http.dart' as http;
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'webSocket_controller.dart';
 
 class CountriesController extends GetxController {
   RxString query = RxString('');
@@ -40,7 +42,7 @@ class CountriesController extends GetxController {
   Rx<Uint8List> imageBytes = Uint8List(0).obs;
   RxString flagUrl = RxString('');
   String backendUrl = backendTestURI;
-  WebSocketChannel? channel;
+  WebSocketService ws = Get.find<WebSocketService>();
 
   @override
   void onInit() {
@@ -50,12 +52,6 @@ class CountriesController extends GetxController {
     super.onInit();
   }
 
-  @override
-  void onClose() {
-    channel?.sink.close();
-    super.onClose();
-  }
-
   String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
@@ -63,11 +59,7 @@ class CountriesController extends GetxController {
   }
 
   void connectWebSocket() {
-    channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
-
-    channel!.stream.listen((event) {
-      final message = jsonDecode(event);
-
+    ws.events.listen((message) {
       switch (message["type"]) {
         case "country_added":
           final newBrand = Country.fromJson(message["data"]);
@@ -113,10 +105,15 @@ class CountriesController extends GetxController {
   Future<void> getAllCountries() async {
     try {
       isScreenLoding.value = true;
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/countries/get_countries');
 
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -125,6 +122,16 @@ class CountriesController extends GetxController {
           jsonDate.map((country) => Country.fromJson(country)).toList(),
         );
         isScreenLoding.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllCountries();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        isScreenLoding.value = false;
+        logout();
       } else {
         isScreenLoding.value = false;
       }

@@ -8,7 +8,7 @@ import '../../Models/brands/brand_model.dart';
 import '../../Models/brands/brand_nodel_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'webSocket_controller.dart';
 
 class CarBrandsController extends GetxController {
   RxString query = RxString('');
@@ -36,7 +36,7 @@ class CarBrandsController extends GetxController {
   RxBool loadingModels = RxBool(false);
   final GlobalKey<FormState> formKeyForAddingNewvalue = GlobalKey<FormState>();
   RxBool logoSelectedError = RxBool(false);
-  WebSocketChannel? channel;
+  WebSocketService ws = Get.find<WebSocketService>();
 
   @override
   void onInit() {
@@ -46,12 +46,6 @@ class CarBrandsController extends GetxController {
     super.onInit();
   }
 
-  @override
-  void onClose() {
-    channel?.sink.close();
-    super.onClose();
-  }
-
   String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
@@ -59,11 +53,7 @@ class CarBrandsController extends GetxController {
   }
 
   void connectWebSocket() {
-    channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
-
-    channel!.stream.listen((event) {
-      final message = jsonDecode(event);
-
+    ws.events.listen((message) {
       switch (message["type"]) {
         case "brand_created":
           final newBrand = Brand.fromJson(message["data"]);

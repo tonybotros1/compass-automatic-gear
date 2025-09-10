@@ -8,8 +8,9 @@ import '../../consts.dart';
 class MainScreen extends StatelessWidget {
   MainScreen({super.key});
 
-  final MainScreenController mainScreenController =
-      Get.put(MainScreenController());
+  final MainScreenController mainScreenController = Get.put(
+    MainScreenController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -33,20 +34,20 @@ class MainScreen extends StatelessWidget {
                       // if (!ScreenSize.isWeb(context))
                       Builder(
                         builder: (context) => IconButton(
-                            onPressed: () {
-                              Scaffold.of(context).openDrawer();
-                            },
-                            icon: const Icon(
-                              Icons.menu,
-                              size: 25,
-                            )),
+                          onPressed: () {
+                            Scaffold.of(context).openDrawer();
+                          },
+                          icon: const Icon(Icons.menu, size: 25),
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
-                        child: Obx(() => Text(
-                              mainScreenController.selectedScreenName.value,
-                              style: fontStyleForAppBar,
-                            )),
+                        child: Obx(
+                          () => Text(
+                            mainScreenController.selectedScreenName.value,
+                            style: fontStyleForAppBar,
+                          ),
+                        ),
                       ),
                       Row(
                         spacing: 20,
@@ -56,8 +57,7 @@ class MainScreen extends StatelessWidget {
                                 mainScreenController.selectedScreenRoute.value;
                             final isFavorite = mainScreenController
                                 .favoriteScreens
-                                .any((doc) =>
-                                    doc.get('screen_route') == currentRoute);
+                                .any((doc) => doc.routeName == currentRoute);
 
                             return currentRoute != '/home'
                                 ? CircleAvatar(
@@ -71,7 +71,10 @@ class MainScreen extends StatelessWidget {
                                         if (isFavorite) {
                                           mainScreenController
                                               .removeScreenFromFavorite(
-                                                  currentRoute);
+                                                mainScreenController
+                                                    .selectedScreenId
+                                                    .value,
+                                              );
                                         } else {
                                           mainScreenController
                                               .addScreenToFavorite();
@@ -92,40 +95,46 @@ class MainScreen extends StatelessWidget {
                             backgroundColor: Colors.teal,
                             radius: 25,
                             child: IconButton(
-                                tooltip: 'Home',
-                                onPressed: () {
-                                  mainScreenController.selectedScreen.value =
-                                      mainScreenController
-                                          .getScreenFromRoute('/home');
-                                  mainScreenController
-                                      .selectedScreenName.value = '🏡 Home';
-                                  mainScreenController
-                                      .selectedScreenRoute.value = '/home';
-                                },
-                                icon: const Icon(
-                                  Icons.home,
-                                  size: 20,
-                                  color: Colors.white,
-                                )),
+                              tooltip: 'Home',
+                              onPressed: () {
+                                mainScreenController.selectedScreen.value =
+                                    mainScreenController.getScreenFromRoute(
+                                      '/home',
+                                    );
+                                mainScreenController.selectedScreenName.value =
+                                    '🏡 Home';
+                                mainScreenController.selectedScreenRoute.value =
+                                    '/home';
+                              },
+                              icon: const Icon(
+                                Icons.home,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                           Padding(
-                              padding: const EdgeInsets.only(right: 16),
-                              child: Obx(() =>
-                                  mainScreenController.isLoading.isFalse
-                                      ? personalDetailsSection(
-                                          context, mainScreenController)
-                                      : const SizedBox())),
+                            padding: const EdgeInsets.only(right: 16),
+                            child: Obx(
+                              () => mainScreenController.isLoading.isFalse
+                                  ? personalDetailsSection(
+                                      context,
+                                      mainScreenController,
+                                    )
+                                  : const SizedBox(),
+                            ),
+                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
                 Expanded(
-                    child:
-                        Obx(() => mainScreenController.selectedScreen.value)),
+                  child: Obx(() => mainScreenController.selectedScreen.value),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

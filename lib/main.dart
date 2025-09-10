@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Controllers/Main screen controllers/webSocket_controller.dart';
 import 'Middleware/auth_middleware.dart';
 import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
@@ -29,7 +30,8 @@ void main() async {
   //   // Replace the current URL with '/'
   //   web.window.history.replaceState(null, 'DataHub AI', '/');
   // }
-
+  final ws = Get.put(WebSocketService());
+  ws.connect();
   runApp(const MyApp());
 }
 
@@ -38,37 +40,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return 
-       GetMaterialApp(
-        title: 'DataHub AI',
-        debugShowCheckedModeBanner: false,
-        
-        initialRoute: '/',
-        getPages: [
-          GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),
-          GetPage(
-              name: '/',
-              page: () => const LoadingScreen(),
-              middlewares: [InitialRedirectMiddleware()]),
-          GetPage(name: '/loginScreen', page: () => LoginScreen()),
-          GetPage(
-            name: '/registerScreen',
-            page: () => const RegisterScreen(),
-          ),
-          GetPage(
-              name: '/imageViewer',
-              page: () => ImageGalleryViewer(),
-              middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
-          GetPage(
-              name: '/mainScreen',
-              page: () => MainScreen(),
-              middlewares: [AuthMiddleware(), InitialRedirectMiddleware()]),
-          GetPage(
-              name: '/mainScreenForMobile',
-              page: () => MainScreenForMobile(),
-              middlewares: [AuthMiddleware()]),
-        ],
-      );
-    
+    return GetMaterialApp(
+      title: 'DataHub AI',
+      debugShowCheckedModeBanner: false,
+
+      initialRoute: '/',
+      getPages: [
+        GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),
+        GetPage(
+          name: '/',
+          page: () => const LoadingScreen(),
+          middlewares: [InitialRedirectMiddleware()],
+        ),
+        GetPage(name: '/loginScreen', page: () => LoginScreen()),
+        GetPage(name: '/registerScreen', page: () => const RegisterScreen()),
+        GetPage(
+          name: '/imageViewer',
+          page: () => ImageGalleryViewer(),
+          middlewares: [AuthMiddleware(), InitialRedirectMiddleware()],
+        ),
+        GetPage(
+          name: '/mainScreen',
+          page: () => MainScreen(),
+          middlewares: [AuthMiddleware(), InitialRedirectMiddleware()],
+        ),
+        GetPage(
+          name: '/mainScreenForMobile',
+          page: () => MainScreenForMobile(),
+          middlewares: [AuthMiddleware()],
+        ),
+      ],
+    );
   }
 }
