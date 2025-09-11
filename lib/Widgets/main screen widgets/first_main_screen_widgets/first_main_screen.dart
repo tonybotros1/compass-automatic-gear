@@ -32,7 +32,7 @@ class FirstMainScreen extends StatelessWidget {
                     String name = screenName.substring(emoji.length).trim();
                     String description = fav.description;
                     String screenRoute = fav.routeName;
-                    String screenId = fav.id;
+                    String screenId = fav.screenId;
 
                     // توزيع اللون حسب الفهرس
                     final cardColor = cardColors[index % cardColors.length];

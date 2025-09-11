@@ -143,8 +143,13 @@ class CountriesController extends GetxController {
   Future<void> addNewCountry() async {
     try {
       addingNewValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/countries/add_new_country');
       var request = http.MultipartRequest('POST', url);
+      // 🔹 Add headers here
+      request.headers.addAll({"Authorization": "Bearer $accessToken"});
       request.fields["name"] = countryName.text;
       request.fields["code"] = countryCode.text;
       request.fields["calling_code"] = countryCallingCode.text;
@@ -167,6 +172,17 @@ class CountriesController extends GetxController {
         addingNewValue.value = false;
         Get.back();
         showSnackBar('Done', 'New Country added successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewCountry();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewValue.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingNewValue.value = false;
+        logout();
       } else {
         addingNewValue.value = false;
         Get.back();
@@ -181,16 +197,30 @@ class CountriesController extends GetxController {
 
   Future<void> changeCountryStatus(String countryId, bool status) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse(
         '$backendUrl/countries/change_country_status/$countryId',
       );
       final response = await http.patch(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
         body: jsonEncode({"status": status}),
       );
       if (response.statusCode == 200) {
-        // return jsonDecode(response.body);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await changeCountryStatus(countryId, status);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
       } else {
         throw Exception("Failed to update status: ${response.body}");
       }
@@ -201,11 +231,26 @@ class CountriesController extends GetxController {
 
   Future<void> deleteCountry(String countryId) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/countries/delete_country/$countryId');
-      final response = await http.delete(url);
+      final response = await http.delete(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
       if (response.statusCode == 200) {
         Get.back();
         showSnackBar('Done', 'Country deleted successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteCountry(countryId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
       } else {
         Get.back();
 
@@ -221,8 +266,12 @@ class CountriesController extends GetxController {
   Future<void> editCountry(String countryId) async {
     try {
       addingNewValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/countries/update_country/$countryId');
       final request = http.MultipartRequest('PATCH', url);
+      request.headers.addAll({"Authorization": "Bearer $accessToken"});
       request.fields["name"] = countryName.text;
       request.fields["code"] = countryCode.text;
       request.fields["calling_code"] = countryCallingCode.text;
@@ -244,6 +293,17 @@ class CountriesController extends GetxController {
         addingNewValue.value = false;
         Get.back();
         showSnackBar('Done', 'Country updated successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewCountry();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewValue.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingNewValue.value = false;
+        logout();
       } else {
         addingNewValue.value = false;
         Get.back();
@@ -261,15 +321,32 @@ class CountriesController extends GetxController {
   Future<void> getCitiesValues(String countryId) async {
     try {
       loadingcities.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       allCities.clear();
       filteredCities.clear();
       var url = Uri.parse('$backendUrl/countries/get_cities/$countryId');
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> jsonData = decoded["cities"];
         allCities.assignAll(jsonData.map((city) => City.fromJson(city)));
         loadingcities.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewCountry();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          loadingcities.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        loadingcities.value = false;
+        logout();
       } else {
         loadingcities.value = false;
       }
@@ -281,16 +358,33 @@ class CountriesController extends GetxController {
   Future<void> addNewCity(String countryId) async {
     try {
       addingNewCityValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/countries/add_new_city/$countryId');
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
         body: jsonEncode({"name": cityName.text, "code": cityCode.text}),
       );
       if (response.statusCode == 200) {
         addingNewCityValue.value = false;
         Get.back();
         showSnackBar('Done', 'City added successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewCountry();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewCityValue.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingNewCityValue.value = false;
+        logout();
       } else {
         addingNewCityValue.value = false;
         Get.back();
@@ -305,14 +399,28 @@ class CountriesController extends GetxController {
 
   Future<void> changeCityStatus(String cityId, bool status) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/countries/change_city_status/$cityId');
       final response = await http.patch(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
         body: jsonEncode({"status": status}),
       );
       if (response.statusCode == 200) {
-        // return jsonDecode(response.body);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewCountry();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
       } else {
         throw Exception("Failed to update status: ${response.body}");
       }
@@ -324,15 +432,30 @@ class CountriesController extends GetxController {
   Future<void> editCity(String cityId) async {
     try {
       addingNewCityValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/countries/update_city/$cityId');
       final response = await http.patch(
         url,
+        headers: {"Authorization": "Bearer $accessToken"},
         body: {"name": cityName.text, "code": cityCode.text},
       );
       if (response.statusCode == 200) {
         addingNewCityValue.value = false;
         Get.back();
         showSnackBar('Done', 'City updated successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewCountry();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          addingNewCityValue.value = false;
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        addingNewCityValue.value = false;
+        logout();
       } else {
         addingNewCityValue.value = false;
         Get.back();
@@ -347,11 +470,26 @@ class CountriesController extends GetxController {
 
   Future<void> deleteCity(String cityID) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendUrl/countries/delete_city/$cityID');
-      final response = await http.delete(url);
+      final response = await http.delete(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
       if (response.statusCode == 200) {
         Get.back();
         showSnackBar('Done', 'City deleted successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewCountry();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
       } else {
         Get.back();
         showSnackBar('Alert', 'Something went wrong please try again');

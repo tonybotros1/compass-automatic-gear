@@ -86,13 +86,11 @@ class MainScreenController extends GetxController {
   }
 
   void connectWebSocket() {
-    // channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
-
     ws.events.listen((message) {
       switch (message["type"]) {
         case "favourite_added":
           final newfav = FavouriteScreensModel.fromJson(message["data"]);
-          favoriteScreens.add(newfav);
+          favoriteScreens.insert(0,newfav);
           break;
 
         case "favourite_deleted":
@@ -415,6 +413,7 @@ class MainScreenController extends GetxController {
 
   Future<void> removeScreenFromFavorite(String id) async {
     try {
+      print(id);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
