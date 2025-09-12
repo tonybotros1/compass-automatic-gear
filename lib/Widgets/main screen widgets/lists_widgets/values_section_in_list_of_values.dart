@@ -2,6 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../Models/list_of_values/value_model.dart';
 import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../auto_size_box.dart';
@@ -23,10 +24,16 @@ Widget valuesSection({
           init: ListOfValuesController(),
           builder: (controller) {
             return searchBar(
+              onChanged: (_) {
+                controller.filterValues();
+              },
+              onPressedForClearSearch: () {
+                controller.searchForValues.value.clear();
+                controller.filterValues();
+              },
               search: controller.searchForValues,
               constraints: constraints,
               context: context,
-              // controller: controller,
               title: 'Search for values',
               button: newValueButton(context, constraints, controller),
             );
@@ -95,10 +102,9 @@ Widget tableOfScreens({
         controller.filteredValues.isEmpty &&
             controller.searchForValues.value.text.isEmpty
         ? controller.allValues.map<DataRow>((value) {
-            final valueData = value.data() as Map<String, dynamic>;
             final valueId = value.id;
             return dataRowForTheTable(
-              valueData,
+              value,
               context,
               constraints,
               valueId,
@@ -106,10 +112,9 @@ Widget tableOfScreens({
             );
           }).toList()
         : controller.filteredValues.map<DataRow>((value) {
-            final valueData = value.data() as Map<String, dynamic>;
             final valueId = value.id;
             return dataRowForTheTable(
-              valueData,
+              value,
               context,
               constraints,
               valueId,
@@ -120,7 +125,7 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> valueData,
+  ValueModel valueData,
   context,
   constraints,
   String valueId,
@@ -128,22 +133,14 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(valueData['name'] ?? 'no value')),
-      DataCell(Text(controller.getValueNameById(valueData['restricted_by']))),
-      DataCell(
-        Text(
-          valueData['added_date'] != null
-              ? textToDate(valueData['added_date'])
-              : 'N/A',
-        ),
-      ),
+      DataCell(Text(valueData.name)),
+      DataCell(Text(valueData.restrictedBy)),
+      DataCell(Text(textToDate(valueData.createdAt))),
       DataCell(
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            controller.userEmail.value == 'datahubai@gmail.com'
-                ? activeInActiveSection(valueData, controller, valueId)
-                : const SizedBox(),
+            // activeInActiveSection(valueData, controller, valueId),
             Padding(
               padding: const EdgeInsets.only(left: 5, right: 5),
               child: editSection(
@@ -187,7 +184,7 @@ ElevatedButton deleteSection(
 
 ElevatedButton editSection(
   ListOfValuesController controller,
-  Map<String, dynamic> valueData,
+  ValueModel valueData,
   context,
   constraints,
   String valueId,
@@ -195,10 +192,8 @@ ElevatedButton editSection(
   return ElevatedButton(
     style: editButtonStyle,
     onPressed: () {
-      controller.valueName.text = valueData['name'];
-      controller.restrictedBy.text = controller.getValueNameById(
-        valueData['restricted_by'],
-      );
+      controller.valueName.text = valueData.name;
+      controller.restrictedBy.text = valueData.restrictedBy;
       controller.masteredByIdForValues.value = '';
       valuesDialog(
         constraints: constraints,
@@ -221,33 +216,31 @@ ElevatedButton editSection(
   );
 }
 
-ElevatedButton activeInActiveSection(
-  Map<String, dynamic> valueData,
-  ListOfValuesController controller,
-  String valueId,
-) {
-  return ElevatedButton(
-    style: valueData['available'] == false
-        ? inActiveButtonStyle
-        : activeButtonStyle,
-    onPressed: () {
-      bool status;
-      if (valueData['available'] == false) {
-        status = true;
-      } else {
-        status = false;
-      }
-      controller.editHideOrUnhide(
-        controller.listIDToWorkWithNewValue.value,
-        valueId,
-        status,
-      );
-    },
-    child: valueData['available'] == true
-        ? const Text('Active')
-        : const Text('Inactive'),
-  );
-}
+// ElevatedButton activeInActiveSection(
+//   ValueModel valueData,
+//   ListOfValuesController controller,
+//   String valueId,
+// ) {
+//   return ElevatedButton(
+//     style: valueData.status == false ? inActiveButtonStyle : activeButtonStyle,
+//     onPressed: () {
+//       bool status;
+//       if (valueData.status == false) {
+//         status = true;
+//       } else {
+//         status = false;
+//       }
+//       controller.editHideOrUnhide(
+//         controller.listIDToWorkWithNewValue.value,
+//         valueId,
+//         status,
+//       );
+//     },
+//     child: valueData.status == true
+//         ? const Text('Active')
+//         : const Text('Inactive'),
+//   );
+// }
 
 ElevatedButton newValueButton(
   BuildContext context,

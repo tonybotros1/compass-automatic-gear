@@ -486,7 +486,6 @@ class MenusController extends GetxController {
 
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
-    // Convert allMenus map to a list of entries for sorting
     final entries = allMenus.entries.toList();
 
     if (columnIndex == 0) {

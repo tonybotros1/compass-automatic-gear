@@ -3,9 +3,7 @@ import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import '../../my_text_field.dart';
 
-Widget addNewListOrEdit({
-  required ListOfValuesController controller,
-}) {
+Widget addNewListOrEdit({required ListOfValuesController controller}) {
   return Form(
     key: controller.formKeyForAddingNewList,
     child: ListView(
@@ -17,9 +15,7 @@ Widget addNewListOrEdit({
           hintText: 'Enter List name',
           validate: true,
         ),
-        const SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.code,
@@ -27,25 +23,18 @@ Widget addNewListOrEdit({
           hintText: 'Enter code',
           validate: true,
         ),
-        const SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
         CustomDropdown(
-          showedSelectedName: 'list_name',
+          showedSelectedName: 'name',
           hintText: 'Masterd By',
           items: controller.listMap,
           textcontroller: controller.masteredByForList.text,
-          itemBuilder: (context, key, value) {
-            return ListTile(
-              title: Text(value['list_name']),
-            );
-          },
+
           onChanged: (key, value) {
-            controller.masteredByForList.text = value['list_name'];
+            controller.masteredByForList.text = value['name'];
             controller.masteredByIdForList.value = key;
           },
-        )
-        
+        ),
       ],
     ),
   );
