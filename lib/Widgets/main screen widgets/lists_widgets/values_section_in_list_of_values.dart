@@ -134,7 +134,7 @@ DataRow dataRowForTheTable(
   return DataRow(
     cells: [
       DataCell(Text(valueData.name)),
-      DataCell(Text(valueData.restrictedBy)),
+      DataCell(Text(valueData.masteredBy)),
       DataCell(Text(textToDate(valueData.createdAt))),
       DataCell(
         Row(
@@ -193,7 +193,7 @@ ElevatedButton editSection(
     style: editButtonStyle,
     onPressed: () {
       controller.valueName.text = valueData.name;
-      controller.restrictedBy.text = valueData.restrictedBy;
+      controller.masteredBy.text = valueData.masteredBy;
       controller.masteredByIdForValues.value = '';
       valuesDialog(
         constraints: constraints,
@@ -250,7 +250,7 @@ ElevatedButton newValueButton(
   return ElevatedButton(
     onPressed: () {
       controller.valueName.clear();
-      controller.restrictedBy.clear();
+      controller.masteredBy.clear();
       valuesDialog(
         constraints: constraints,
         controller: controller,

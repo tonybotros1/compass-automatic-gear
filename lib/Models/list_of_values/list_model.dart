@@ -3,6 +3,7 @@ class ListModel {
   final String name;
   final String code;
   final String masterdBy;
+  final String masterdById;
   final bool status;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -12,6 +13,7 @@ class ListModel {
     required this.name,
     required this.code,
     required this.masterdBy,
+    required this.masterdById,
     required this.status,
     required this.createdAt,
     required this.updatedAt,
@@ -22,6 +24,7 @@ class ListModel {
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
       masterdBy: json['mastered_by'] ?? '',
+      masterdById: json['mastered_by_id'] ?? '',
       code: json['code'] ?? '',
       status: json['status'] ?? true,
       createdAt: DateTime.parse(json['createdAt']),
@@ -35,6 +38,7 @@ class ListModel {
     data['name'] = name;
     data['code'] = code;
     data['mastered_by'] = masterdBy;
+    data['mastered_by_id'] = masterdById;
     data['status'] = status;
     data['createdAt'] = createdAt;
     data['updatedAt'] = updatedAt;

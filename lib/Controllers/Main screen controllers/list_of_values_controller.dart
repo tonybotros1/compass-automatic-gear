@@ -17,7 +17,7 @@ class ListOfValuesController extends GetxController {
   late TextEditingController code = TextEditingController();
   late TextEditingController masteredByForList = TextEditingController();
   late TextEditingController valueName = TextEditingController();
-  late TextEditingController restrictedBy = TextEditingController();
+  late TextEditingController masteredBy = TextEditingController();
   RxString queryForLists = RxString('');
   Rx<TextEditingController> searchForLists = TextEditingController().obs;
   RxString queryForValues = RxString('');
@@ -74,23 +74,23 @@ class ListOfValuesController extends GetxController {
           listMap.remove(deletedId);
           break;
 
-        // case "city_added":
-        //   final newModel = City.fromJson(message["data"]);
-        //   allCities.add(newModel);
-        //   break;
+        case "list_value_added":
+          final newModel = ValueModel.fromJson(message["data"]);
+          allValues.add(newModel);
+          break;
 
-        // case "city_updated":
-        //   final updated = City.fromJson(message["data"]);
-        //   final index = allCities.indexWhere((m) => m.id == updated.id);
-        //   if (index != -1) {
-        //     allCities[index] = updated;
-        //   }
-        //   break;
+        case "list_value_updated":
+          final updated = ValueModel.fromJson(message["data"]);
+          final index = allValues.indexWhere((m) => m.id == updated.id);
+          if (index != -1) {
+            allValues[index] = updated;
+          }
+          break;
 
-        // case "city_deleted":
-        //   final deletedId = message["data"]["_id"];
-        //   allCities.removeWhere((m) => m.id == deletedId);
-        //   break;
+        case "list_value_deleted":
+          final deletedId = message["data"]["_id"];
+          allValues.removeWhere((m) => m.id == deletedId);
+          break;
       }
     });
   }
@@ -248,10 +248,13 @@ class ListOfValuesController extends GetxController {
     try {
       loadingValues.value = true;
       valueMap.clear();
+      allValues.clear();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse('$backendUrl/list_of_values/get_list_values/$listId/$masteredBy');
+      var url = Uri.parse(
+        '$backendUrl/list_of_values/get_list_values/$listId?mastered_by_list_id=$masteredBy',
+      );
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -259,7 +262,7 @@ class ListOfValuesController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> listValues = decoded["list_values"];
-        List<dynamic> masterValues = decoded["list_values"];
+        List<dynamic> masterValues = decoded["master_values"];
         allValues.assignAll(
           listValues.map((country) => ValueModel.fromJson(country)).toList(),
         );
@@ -277,6 +280,45 @@ class ListOfValuesController extends GetxController {
       loadingValues.value = false;
     } catch (e) {
       loadingValues.value = false;
+    }
+  }
+
+  Future<void> addNewValue(String listId) async {
+    try {
+      addingNewListValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendUrl/list_of_values/add_new_value/$listId');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "name": valueName.text,
+          "mastered_by_id": masteredByIdForValues.value,
+        }),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewValue(listId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          Get.back();
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        Get.back();
+        logout();
+      }
+      addingNewListValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewListValue.value = false;
+      Get.back();
     }
   }
 
@@ -330,8 +372,8 @@ class ListOfValuesController extends GetxController {
       });
     } else if (columnIndex == 1) {
       allValues.sort((screen1, screen2) {
-        final String value1 = screen1.restrictedBy;
-        final String value2 = screen2.restrictedBy;
+        final String value1 = screen1.masteredBy;
+        final String value2 = screen2.masteredBy;
 
         return compareString(ascending, value1, value2);
       });
@@ -378,7 +420,7 @@ class ListOfValuesController extends GetxController {
       filteredValues.assignAll(
         allValues.where((value) {
           return value.name.toString().toLowerCase().contains(queryForValues) ||
-              value.restrictedBy.toString().toLowerCase().contains(
+              value.masteredBy.toString().toLowerCase().contains(
                 queryForValues,
               );
         }).toList(),
@@ -386,70 +428,6 @@ class ListOfValuesController extends GetxController {
     }
   }
 
-  // void getListValues(String listId, String masterBtId) {
-  //   try {
-  //     loadingValues.value = true;
-  //     valueMap.clear();
-
-  //     // if (userEmail.value == 'datahubai@gmail.com') {
-  //     //   FirebaseFirestore.instance
-  //     //       .collection('all_lists')
-  //     //       .doc(listId)
-  //     //       .collection('values')
-  //     //       .orderBy('name', descending: false)
-  //     //       .snapshots()
-  //     //       .listen((values) {
-  //     //         allValues.assignAll(List<DocumentSnapshot>.from(values.docs));
-  //     //       });
-  //     //   FirebaseFirestore.instance
-  //     //       .collection('all_lists')
-  //     //       .doc(masterBtId)
-  //     //       .collection('values')
-  //     //       .snapshots()
-  //     //       .listen((values) {
-  //     //         valueMap.value = {
-  //     //           for (var doc in values.docs) doc.id: doc.data(),
-  //     //         };
-  //     //         loadingValues.value = false;
-  //     //       });
-  //     // } else {
-  //     //   FirebaseFirestore.instance
-  //     //       .collection('all_lists')
-  //     //       .doc(listId)
-  //     //       .collection('values')
-  //     //       .where('available', isEqualTo: true)
-  //     //       .snapshots()
-  //     //       .listen((values) {
-  //     //         allValues.assignAll(List<DocumentSnapshot>.from(values.docs));
-  //     //         loadingValues.value = false;
-  //     //       });
-  //     // }
-  //   } catch (e) {
-  //     loadingValues.value = false;
-  //   }
-  // }
-
-  // this function is to add new value to the selected list
-  Future<void> addNewValue(String listId) async {
-    try {
-      addingNewListValue.value = true;
-      await FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(listId)
-          .collection('values')
-          .add({
-            'name': valueName.text,
-            'available': true,
-            'restricted_by': masteredByIdForValues.value,
-            'added_date': DateTime.now().toString(),
-          });
-
-      addingNewListValue.value = false;
-      Get.back();
-    } catch (e) {
-      addingNewListValue.value = false;
-    }
-  }
 
   // this function is to delete a value from list
   Future<void> deleteValue(String listId, String valueId) async {

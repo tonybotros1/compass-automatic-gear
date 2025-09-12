@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../Controllers/Main screen controllers/list_of_values_controller.dart';
 import '../../my_text_field.dart';
 
-Widget addNewValueOrEdit({
-  required ListOfValuesController controller,
-}) {
+Widget addNewValueOrEdit({required ListOfValuesController controller}) {
   return Form(
     key: controller.formKeyForAddingNewList,
     child: ListView(
@@ -17,25 +15,18 @@ Widget addNewValueOrEdit({
           hintText: 'Enter Value name',
           validate: true,
         ),
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
         CustomDropdown(
           hintText: 'Masterd By',
           showedSelectedName: 'name',
-          textcontroller: controller.restrictedBy.text,
+          textcontroller: controller.masteredBy.text,
           items: controller.valueMap,
-          itemBuilder: (context, key, value) {
-            return ListTile(
-              title: Text(value['name']),
-            );
-          },
           onChanged: (key, value) {
             // print(value);
-            controller.restrictedBy.text = value['name'];
+            controller.masteredBy.text = value['name'];
             controller.masteredByIdForValues.value = key;
           },
-        )
+        ),
         // dropDownValues(
         //    listValues: controller.valueMap.values
         //           .map((value) => value

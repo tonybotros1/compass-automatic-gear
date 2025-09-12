@@ -214,7 +214,7 @@ ElevatedButton valSectionInTheTable(
       controller.searchForValues.value.clear();
       controller.valueMap.clear();
       controller.listIDToWorkWithNewValue.value = listId;
-      controller.getListValues(listId, listData['mastered_by']);
+      controller.getListValues(listId, listData['mastered_by_id']);
       Get.dialog(
         barrierDismissible: false,
         Dialog(
