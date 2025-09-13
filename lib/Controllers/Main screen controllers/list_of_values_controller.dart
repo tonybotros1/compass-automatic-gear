@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,6 +43,7 @@ class ListOfValuesController extends GetxController {
   void onInit() {
     connectWebSocket();
     getLists();
+
     super.onInit();
   }
 
@@ -322,6 +321,77 @@ class ListOfValuesController extends GetxController {
     }
   }
 
+  // this function is to delete a value from list
+  Future<void> deleteValue(String valueId) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendUrl/list_of_values/delete_value/$valueId');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteValue(valueId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          Get.back();
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        Get.back();
+        logout();
+      }
+      Get.back();
+    } catch (e) {
+      Get.back();
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  Future<void> editValue(String valueId) async {
+    try {
+      addingNewListValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/list_of_values/update_value/$valueId');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "name": valueName.text,
+          "mastered_by_id": masteredByIdForValues.value,
+        }),
+      );
+      if (response.statusCode == 200) {
+        addingNewListValue.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteValue(valueId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          Get.back();
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        Get.back();
+        logout();
+      }
+      addingNewListValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewListValue.value = false;
+      // Get.back();
+    }
+  }
+
   // this function is to sort data in table
   void onSortForLists(int columnIndex, bool ascending) {
     final entries = listMap.entries.toList();
@@ -425,40 +495,6 @@ class ListOfValuesController extends GetxController {
               );
         }).toList(),
       );
-    }
-  }
-
-
-  // this function is to delete a value from list
-  Future<void> deleteValue(String listId, String valueId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(listId)
-          .collection('values')
-          .doc(valueId)
-          .delete();
-      Get.back();
-    } catch (e) {
-      //
-    }
-  }
-
-  Future<void> editValue(String listId, String valueId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('all_lists')
-          .doc(listId)
-          .collection('values')
-          .doc(valueId)
-          .update({
-            'name': valueName.text,
-            'restricted_by': masteredByIdForValues.value,
-          });
-
-      Get.back();
-    } catch (e) {
-      //
     }
   }
 }

@@ -22,7 +22,7 @@ class DropdownController extends GetxController {
   final Map<String, GlobalKey> _itemKeys = {};
   bool _arrowNavStarted = false;
   final FocusNode focusNode = FocusNode();
-   FocusNode? nextFocusNode = FocusNode();
+  FocusNode? nextFocusNode = FocusNode();
   final RxBool isDropdownOpen = false.obs;
 
   @override
@@ -74,8 +74,10 @@ class DropdownController extends GetxController {
     double dropdownMaxHeight = 175;
     final spaceAbove = fieldOffset.dy - margin;
     final showAbove = spaceBelow < dropdownMaxHeight && spaceAbove > spaceBelow;
-    final maxHeight =
-        (showAbove ? spaceAbove : spaceBelow).clamp(0.0, dropdownMaxHeight);
+    final maxHeight = (showAbove ? spaceAbove : spaceBelow).clamp(
+      0.0,
+      dropdownMaxHeight,
+    );
 
     overlayEntry = OverlayEntry(
       builder: (ctx) => Stack(
@@ -93,8 +95,9 @@ class DropdownController extends GetxController {
             link: layerLink,
             showWhenUnlinked: false,
             targetAnchor: showAbove ? Alignment.topLeft : Alignment.bottomLeft,
-            followerAnchor:
-                showAbove ? Alignment.bottomLeft : Alignment.topLeft,
+            followerAnchor: showAbove
+                ? Alignment.bottomLeft
+                : Alignment.topLeft,
 
             // Keyboard listener wraps the dropdown
             child: Focus(
@@ -154,7 +157,9 @@ class DropdownController extends GetxController {
                                 borderRadius: BorderRadius.circular(5),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 10),
+                                vertical: 8,
+                                horizontal: 10,
+                              ),
                             ),
                           ),
                         ),
@@ -200,14 +205,17 @@ class DropdownController extends GetxController {
                                       onChanged?.call(key, val);
                                       if (nextFocusNode != null) {
                                         FocusScope.of(context).requestFocus(
-                                            nextFocusNode); // ينتقل للي بعدو
+                                          nextFocusNode,
+                                        ); // ينتقل للي بعدو
                                       }
                                     },
-                                    child: Obx(() => Container(
-                                          key: itemKey,
-                                          color: _getItemColor(key, val),
-                                          child: itemBuilder(ctx, key, val),
-                                        )),
+                                    child: Obx(
+                                      () => Container(
+                                        key: itemKey,
+                                        color: _getItemColor(key, val),
+                                        child: itemBuilder(ctx, key, val),
+                                      ),
+                                    ),
                                   ),
                                 );
                               },
@@ -324,7 +332,9 @@ class DropdownController extends GetxController {
       textController.value = '';
       isValid.value = true;
       onChanged?.call(
-          highlightedKey.value, filteredItems[highlightedKey.value]);
+        highlightedKey.value,
+        filteredItems[highlightedKey.value],
+      );
       hideDropdown();
     }
   }
@@ -341,15 +351,21 @@ class DropdownController extends GetxController {
     if (searchQuery.value.isEmpty) {
       filteredItems.assignAll(allItems);
     } else {
-      filteredItems.assignAll(Map.fromEntries(
-        allItems.entries.where((entry) {
-          Widget builtItem = itemBuilder(Get.context!, entry.key, entry.value);
-          String searchText = extractSearchableText(builtItem);
-          return searchText
-              .toLowerCase()
-              .contains(searchQuery.value.toLowerCase());
-        }),
-      ));
+      filteredItems.assignAll(
+        Map.fromEntries(
+          allItems.entries.where((entry) {
+            Widget builtItem = itemBuilder(
+              Get.context!,
+              entry.key,
+              entry.value,
+            );
+            String searchText = extractSearchableText(builtItem);
+            return searchText.toLowerCase().contains(
+              searchQuery.value.toLowerCase(),
+            );
+          }),
+        ),
+      );
     }
 
     String? newHighlightKey;
@@ -396,6 +412,7 @@ class CustomDropdown extends StatelessWidget {
   final Widget Function(String, dynamic)? showedResult;
   final FocusNode? focusNode;
   final FocusNode? nextFocusNode;
+  final void Function()? onDelete;
 
   CustomDropdown({
     super.key,
@@ -415,6 +432,7 @@ class CustomDropdown extends StatelessWidget {
     this.showedSelectedName = '',
     this.validator,
     this.showedResult,
+    this.onDelete,
   });
 
   final GlobalKey buttonKey = GlobalKey();
@@ -428,7 +446,8 @@ class CustomDropdown extends StatelessWidget {
     BoxDecoration defaultEnabledDecoration = BoxDecoration(
       color: Colors.grey.shade200,
       border: Border.all(
-          color: controller.isValid.value ? Colors.grey : Colors.red),
+        color: controller.isValid.value ? Colors.grey : Colors.red,
+      ),
       borderRadius: BorderRadius.circular(5),
     );
 
@@ -437,8 +456,10 @@ class CustomDropdown extends StatelessWidget {
       borderRadius: BorderRadius.circular(5),
     );
 
-    TextStyle defaultDisabledTextStyle =
-        const TextStyle(color: Colors.grey, fontSize: 16);
+    TextStyle defaultDisabledTextStyle = const TextStyle(
+      color: Colors.grey,
+      fontSize: 16,
+    );
 
     textControllerValue.value = textcontroller;
     controller.textController.value = textcontroller;
@@ -471,7 +492,8 @@ class CustomDropdown extends StatelessWidget {
                   focusNode: focusNode,
                   autofocus: false,
                   shortcuts: {
-                    LogicalKeySet(LogicalKeyboardKey.tab): const ActivateIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.tab):
+                        const ActivateIntent(),
                     LogicalKeySet(LogicalKeyboardKey.enter):
                         const ActivateIntent(),
                   },
@@ -488,10 +510,13 @@ class CustomDropdown extends StatelessWidget {
                               itemBuilder: itemBuilder == null
                                   ? (context, key, value) {
                                       return Container(
-                                          alignment: Alignment.centerLeft,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 4),
-                                          child: Text(value[showedSelectedName]));
+                                        alignment: Alignment.centerLeft,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 4,
+                                        ),
+                                        child: Text(value[showedSelectedName]),
+                                      );
                                     }
                                   : itemBuilder!,
                               onChanged: (key, value) {
@@ -504,9 +529,10 @@ class CustomDropdown extends StatelessWidget {
                                 onChanged?.call(key, value);
                                 if (nextFocusNode != null) {
                                   FocusScope.of(context).requestFocus(
-                                      nextFocusNode); // ينتقل للي بعدو
+                                    nextFocusNode,
+                                  ); // ينتقل للي بعدو
                                 }
-      
+
                                 // FocusScope.of(context).nextFocus();
                               },
                               layerLink: _layerLink,
@@ -515,17 +541,19 @@ class CustomDropdown extends StatelessWidget {
                             // إذا المينيو مفتوح سكروا وانتقل
                             controller.hideDropdown();
                             if (nextFocusNode != null) {
-                              FocusScope.of(context)
-                                  .requestFocus(nextFocusNode); // ينتقل للي بعدو
+                              FocusScope.of(
+                                context,
+                              ).requestFocus(nextFocusNode); // ينتقل للي بعدو
                             }
                           }
                         } else {
                           if (nextFocusNode != null) {
-                            FocusScope.of(context)
-                                .requestFocus(nextFocusNode); // ينتقل للي بعدو
+                            FocusScope.of(
+                              context,
+                            ).requestFocus(nextFocusNode); // ينتقل للي بعدو
                           }
                         }
-      
+
                         return null;
                       },
                     ),
@@ -543,11 +571,15 @@ class CustomDropdown extends StatelessWidget {
                                 itemBuilder: itemBuilder == null
                                     ? (context, key, value) {
                                         return Container(
-                                            alignment: Alignment.centerLeft,
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 12, vertical: 4),
-                                            child:
-                                                Text(value[showedSelectedName]));
+                                          alignment: Alignment.centerLeft,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 4,
+                                          ),
+                                          child: Text(
+                                            value[showedSelectedName],
+                                          ),
+                                        );
                                       }
                                     : itemBuilder!,
                                 onChanged: (key, value) {
@@ -560,7 +592,8 @@ class CustomDropdown extends StatelessWidget {
                                   onChanged?.call(key, value);
                                   if (nextFocusNode != null) {
                                     FocusScope.of(context).requestFocus(
-                                        nextFocusNode); // ينتقل للي بعدو
+                                      nextFocusNode,
+                                    ); // ينتقل للي بعدو
                                   }
                                 },
                                 layerLink: _layerLink,
@@ -569,8 +602,9 @@ class CustomDropdown extends StatelessWidget {
                               // إذا المينيو مفتوح سكروا وانتقل
                               controller.hideDropdown();
                               if (nextFocusNode != null) {
-                                FocusScope.of(context).requestFocus(
-                                    nextFocusNode); // ينتقل للي بعدو
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(nextFocusNode); // ينتقل للي بعدو
                               }
                             }
                           }
@@ -597,47 +631,72 @@ class CustomDropdown extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(5),
                                   )
                                 : isEnabled
-                                    ? (dropdownDecoration ??
-                                        (defaultEnabledDecoration))
-                                    : (disabledDecoration ??
-                                        defaultDisabledDecoration),
+                                ? (dropdownDecoration ??
+                                      (defaultEnabledDecoration))
+                                : (disabledDecoration ??
+                                      defaultDisabledDecoration),
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: showedResult != null &&
+                                  child:
+                                      showedResult != null &&
                                           controller.selectedKey.isNotEmpty
                                       ? showedResult!(
                                           controller.selectedKey.value,
-                                          controller.selectedValue)
+                                          controller.selectedValue,
+                                        )
                                       : Text(
                                           textControllerValue.isEmpty
                                               ? controller.selectedKey.isEmpty
-                                                  ? ''
-                                                  : showedSelectedName.isNotEmpty
-                                                      ? controller.selectedValue[
-                                                              showedSelectedName]
+                                                    ? ''
+                                                    : showedSelectedName
+                                                          .isNotEmpty
+                                                    ? controller
+                                                          .selectedValue[showedSelectedName]
                                                           .toString()
-                                                      : ''
+                                                    : ''
                                               : textControllerValue.value,
                                           style: isEnabled
                                               ? (enabledTextStyle ??
-                                                  (textControllerValue
-                                                              .value.isEmpty &&
-                                                          controller
-                                                              .selectedKey.isEmpty
-                                                      ? TextStyle(
-                                                          fontSize: 14,
-                                                          color: Colors
-                                                              .grey.shade700)
-                                                      : textFieldFontStyle))
+                                                    (textControllerValue
+                                                                .value
+                                                                .isEmpty &&
+                                                            controller
+                                                                .selectedKey
+                                                                .isEmpty
+                                                        ? TextStyle(
+                                                            fontSize: 14,
+                                                            color: Colors
+                                                                .grey
+                                                                .shade700,
+                                                          )
+                                                        : textFieldFontStyle))
                                               : (disabledTextStyle ??
-                                                  defaultDisabledTextStyle),
+                                                    defaultDisabledTextStyle),
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                 ),
-                                Icon(Icons.arrow_drop_down,
-                                    color:
-                                        isEnabled ? Colors.black : Colors.grey),
+
+                                Icon(
+                                  Icons.arrow_drop_down,
+                                  color: isEnabled ? Colors.black : Colors.grey,
+                                ),
+                                if (controller.selectedKey.isNotEmpty ||
+                                    textcontroller.isNotEmpty)
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.clear,
+                                      size: 18,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () {
+                                      controller.selectedKey.value = '';
+                                      controller.selectedValue.value = {};
+                                      textControllerValue.value = '';
+                                      controller.isValid.value = true;
+                                      onDelete?.call(); // notify parent
+                                    },
+                                  ),
                               ],
                             ),
                           ),
@@ -650,8 +709,10 @@ class CustomDropdown extends StatelessWidget {
               if (state.hasError)
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
-                  child: Text(state.errorText ?? "",
-                      style: TextStyle(color: Colors.red[900], fontSize: 13)),
+                  child: Text(
+                    state.errorText ?? "",
+                    style: TextStyle(color: Colors.red[900], fontSize: 13),
+                  ),
                 ),
             ],
           );

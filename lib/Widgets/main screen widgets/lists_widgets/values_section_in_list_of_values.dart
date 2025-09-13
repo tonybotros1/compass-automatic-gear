@@ -171,10 +171,7 @@ ElevatedButton deleteSection(
         context: context,
         content: 'The value will be deleted permanently',
         onPressed: () {
-          controller.deleteValue(
-            controller.listIDToWorkWithNewValue.value,
-            valueId,
-          );
+          controller.deleteValue(valueId);
         },
       );
     },
@@ -204,10 +201,7 @@ ElevatedButton editSection(
                 if (!controller.formKeyForAddingNewList.currentState!
                     .validate()) {
                 } else {
-                  controller.editValue(
-                    controller.listIDToWorkWithNewValue.value,
-                    valueId,
-                  );
+                  controller.editValue(valueId);
                 }
               },
       );
