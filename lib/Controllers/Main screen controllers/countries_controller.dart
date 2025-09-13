@@ -10,7 +10,7 @@ import '../../Models/countries/countries_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
 import 'package:http/http.dart' as http;
-import 'webSocket_controller.dart';
+import 'websocket_controller.dart';
 
 class CountriesController extends GetxController {
   RxString query = RxString('');

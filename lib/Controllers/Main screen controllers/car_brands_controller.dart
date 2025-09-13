@@ -8,7 +8,7 @@ import '../../Models/brands/brand_model.dart';
 import '../../Models/brands/brand_nodel_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
-import 'webSocket_controller.dart';
+import 'websocket_controller.dart';
 
 class CarBrandsController extends GetxController {
   RxString query = RxString('');

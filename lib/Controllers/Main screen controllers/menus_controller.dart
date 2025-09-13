@@ -11,7 +11,7 @@ import '../../Models/menus_functions_roles/screens_model.dart';
 import '../../Models/screen_tree_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
-import 'webSocket_controller.dart';
+import 'websocket_controller.dart';
 
 class MenusController extends GetxController {
   // final RxList<DocumentSnapshot> allMenus = RxList<DocumentSnapshot>([]);

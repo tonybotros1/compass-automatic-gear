@@ -43,7 +43,7 @@ import '../../consts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../helpers.dart';
-import 'webSocket_controller.dart';
+import 'websocket_controller.dart';
 
 class MainScreenController extends GetxController {
   final RxList<FavouriteScreensModel> favoriteScreens =

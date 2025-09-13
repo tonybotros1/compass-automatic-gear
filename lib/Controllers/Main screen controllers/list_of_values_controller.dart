@@ -8,7 +8,7 @@ import '../../Models/list_of_values/value_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import 'main_screen_contro.dart';
-import 'webSocket_controller.dart';
+import 'websocket_controller.dart';
 
 class ListOfValuesController extends GetxController {
   late TextEditingController listName = TextEditingController();

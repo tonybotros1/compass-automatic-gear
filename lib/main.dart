@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'Controllers/Main screen controllers/webSocket_controller.dart';
+import 'Controllers/Main screen controllers/websocket_controller.dart';
 import 'Middleware/auth_middleware.dart';
 import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';

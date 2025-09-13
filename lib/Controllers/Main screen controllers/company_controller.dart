@@ -36,7 +36,6 @@ class CompanyController extends GetxController {
   RxMap allRoles = RxMap({});
   RxMap allCountries = RxMap({});
   RxMap allCities = RxMap({});
-  // RxMap filterdCitiesByCountry = RxMap({});
   RxString selectedCountryId = RxString('');
   RxString selectedCityId = RxString('');
   RxString logoUrl = RxString('');

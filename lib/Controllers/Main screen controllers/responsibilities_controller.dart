@@ -8,7 +8,7 @@ import '../../Models/menus_functions_roles/roles_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
 import 'package:http/http.dart' as http;
-import 'webSocket_controller.dart';
+import 'websocket_controller.dart';
 
 class ResponsibilitiesController extends GetxController {
   final RxMap<String, dynamic> allResponsibilities = RxMap<String, dynamic>({});

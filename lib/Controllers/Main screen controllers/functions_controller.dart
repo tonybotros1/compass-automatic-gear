@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
-import 'webSocket_controller.dart';
+import 'websocket_controller.dart';
 
 class FunctionsController extends GetxController {
   late TextEditingController screenName = TextEditingController();
