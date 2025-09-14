@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/users_controller.dart';
+import '../../../../Models/users/users_model.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/users_dialog.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../consts.dart';
 
 class Users extends StatelessWidget {
-  Users({super.key});
+  const Users({super.key});
 
-  final UsersController usersController = Get.put(UsersController());
+  // final UsersController controller = Get.put(UsersController());
 
   @override
   Widget build(BuildContext context) {
@@ -27,34 +28,50 @@ class Users extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  searchBar(
-                    search: usersController.search,
-                    constraints: constraints,
-                    context: context,
-                    // controller: usersController,
-                    title: 'Search for users by email',
-                    button: newUserButton(context, constraints),
+                  GetX<UsersController>(
+                    init: UsersController(),
+                    builder: (controller) {
+                      return searchBar(
+                        onChanged: (_) {
+                          controller.filterCards();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.clear();
+                          controller.filterCards();
+                        },
+                        search: controller.search,
+                        constraints: constraints,
+                        context: context,
+                        title: 'Search for users by email',
+                        button: newUserButton(context, constraints, controller),
+                      );
+                    },
                   ),
                   Expanded(
-                    child: Obx(() {
-                      if (usersController.isScreenLoding.value) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (usersController.allUsers.isEmpty) {
-                        return const Center(child: Text('No Element'));
-                      }
-                      return SingleChildScrollView(
-                        scrollDirection: Axis
-                            .vertical, // Allow horizontal scrolling for table
-                        child: SizedBox(
-                          width: constraints.maxWidth,
-                          child: tableOfUsers(
-                            constraints: constraints,
-                            context: context,
+                    child: GetX<UsersController>(
+                      builder: (controller) {
+                        if (controller.isScreenLoding.value) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (controller.allUsers.isEmpty) {
+                          return const Center(child: Text('No Element'));
+                        }
+                        return SingleChildScrollView(
+                          scrollDirection: Axis
+                              .vertical, // Allow horizontal scrolling for table
+                          child: SizedBox(
+                            width: constraints.maxWidth,
+                            child: tableOfUsers(
+                              constraints: constraints,
+                              context: context,
+                              controller: controller,
+                            ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -68,25 +85,24 @@ class Users extends StatelessWidget {
   ElevatedButton newUserButton(
     BuildContext context,
     BoxConstraints constraints,
+    UsersController controller,
   ) {
     return ElevatedButton(
       onPressed: () {
-        usersController.name.clear();
-        usersController.pass.clear();
-        usersController.email.clear();
-        usersController.selectedRoles.updateAll(
-          (key, value) => [value[0], false],
-        );
+        controller.name.clear();
+        controller.pass.clear();
+        controller.email.clear();
+        controller.selectedRoles.updateAll((key, value) => [value[0], false]);
         usersDialog(
           userExpiryDate: '',
           canEdit: true,
-          controller: usersController,
+          controller: controller,
           constraints: constraints,
           context: context,
-          onPressed: usersController.sigupgInProcess.value
+          onPressed: controller.sigupgInProcess.value
               ? null
               : () {
-                  usersController.register();
+                  controller.register();
                 },
         );
       },
@@ -98,6 +114,7 @@ class Users extends StatelessWidget {
   Widget tableOfUsers({
     required BoxConstraints constraints,
     required BuildContext context,
+    required UsersController controller,
   }) {
     return DataTable(
       dataRowMaxHeight: 40,
@@ -107,73 +124,72 @@ class Users extends StatelessWidget {
       horizontalMargin: horizontalMarginForTable,
       dataTextStyle: regTextStyle,
       headingTextStyle: fontStyleForTableHeader,
-      sortColumnIndex: usersController.sortColumnIndex.value,
-      sortAscending: usersController.isAscending.value,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
       headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
       columns: [
         DataColumn(
           label: AutoSizedText(text: 'Name', constraints: constraints),
-          onSort: usersController.onSort,
+          onSort: controller.onSort,
         ),
         DataColumn(
           label: AutoSizedText(text: 'Email', constraints: constraints),
-          onSort: usersController.onSort,
+          onSort: controller.onSort,
         ),
         DataColumn(
           label: AutoSizedText(constraints: constraints, text: 'Added Date'),
-          onSort: usersController.onSort,
+          onSort: controller.onSort,
         ),
         DataColumn(
           label: AutoSizedText(constraints: constraints, text: 'Expiry Date'),
-          onSort: usersController.onSort,
+          onSort: controller.onSort,
         ),
         const DataColumn(label: Text('')),
       ],
       rows:
-          usersController.filteredUsers.isEmpty &&
-              usersController.search.value.text.isEmpty
-          ? usersController.allUsers.map((user) {
-              final userData = user.data() as Map<String, dynamic>;
+          controller.filteredUsers.isEmpty &&
+              controller.search.value.text.isEmpty
+          ? controller.allUsers.map((user) {
               final userId = user.id;
-              return dataRowForTheTable(userData, context, constraints, userId);
+              return dataRowForTheTable(
+                user,
+                context,
+                constraints,
+                userId,
+                controller,
+              );
             }).toList()
-          : usersController.filteredUsers.map((user) {
-              final userData = user.data() as Map<String, dynamic>;
+          : controller.filteredUsers.map((user) {
               final userId = user.id;
-              return dataRowForTheTable(userData, context, constraints, userId);
+              return dataRowForTheTable(
+                user,
+                context,
+                constraints,
+                userId,
+                controller,
+              );
             }).toList(),
     );
   }
 
   DataRow dataRowForTheTable(
-    Map<String, dynamic> userData,
-    context,
-    constraints,
-    uid,
+    UsersModel userData,
+    BuildContext context,
+    BoxConstraints constraints,
+    String uid,
+    UsersController controller,
   ) {
     return DataRow(
       cells: [
-        DataCell(Text('${userData['user_name']}')),
-        DataCell(Text('${userData['email']}')),
-        DataCell(
-          Text(
-            userData['added_date'] != null
-                ? textToDate(userData['added_date']) //
-                : 'N/A',
-          ),
-        ),
-        DataCell(
-          Text(
-            userData['expiry_date'] != null
-                ? textToDate(userData['expiry_date'])
-                : 'N/A',
-          ),
-        ),
+        DataCell(Text(userData.userName)),
+        DataCell(Text(userData.email)),
+        DataCell(Text(textToDate(userData.createdAt))),
+        DataCell(Text(textToDate(userData.expiryDate))),
         DataCell(
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              activeInActiveSection(userData, uid),
+              activeInActiveSection(userData, uid, controller),
               Padding(
                 padding: const EdgeInsets.only(right: 5, left: 5),
                 child: editSection(
@@ -181,10 +197,10 @@ class Users extends StatelessWidget {
                   userData,
                   constraints,
                   uid,
-                  usersController,
+                  controller,
                 ),
               ),
-              deleteSection(context, uid),
+              deleteSection(context, uid, controller),
             ],
           ),
         ),
@@ -193,29 +209,32 @@ class Users extends StatelessWidget {
   }
 
   ElevatedButton activeInActiveSection(
-    Map<String, dynamic> userData,
+    UsersModel userData,
     String userId,
+    UsersController controller,
   ) {
     return ElevatedButton(
-      style: userData['status'] == false
-          ? inActiveButtonStyle
-          : activeButtonStyle,
+      style: userData.status == false ? inActiveButtonStyle : activeButtonStyle,
       onPressed: () {
         bool status;
-        if (userData['status'] == false) {
+        if (userData.status == false) {
           status = true;
         } else {
           status = false;
         }
-        usersController.changeUserStatus(userId, status);
+        controller.changeUserStatus(userId, status);
       },
-      child: userData['status'] == true
+      child: userData.status == true
           ? const Text('Active')
           : const Text('Inactive'),
     );
   }
 
-  ElevatedButton deleteSection(BuildContext context,String uid) {
+  ElevatedButton deleteSection(
+    BuildContext context,
+    String uid,
+    UsersController controller,
+  ) {
     return ElevatedButton(
       style: deleteButtonStyle,
       onPressed: () {
@@ -223,7 +242,7 @@ class Users extends StatelessWidget {
           context: context,
           content: 'The user will be deleted permanently',
           onPressed: () {
-            usersController.deleteUser(uid);
+            controller.deleteUser(uid);
           },
         );
       },
@@ -233,45 +252,39 @@ class Users extends StatelessWidget {
 
   ElevatedButton editSection(
     BuildContext context,
-    Map<String, dynamic> userData,
+    UsersModel userData,
     constraints,
     uid,
-    UsersController usersController,
+    UsersController controller,
   ) {
     return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
-        usersController.email.text = userData['email'];
-        usersController.name.text = userData['user_name'];
-        for (var roleId in userData['roles']) {
-          usersController.selectedRoles.forEach((key, value) {
+        controller.email.text = userData.email;
+        controller.name.text = userData.userName;
+        for (var roleId in userData.roles) {
+          controller.selectedRoles.forEach((key, value) {
             if (value[0] == roleId) {
-              usersController.selectedRoles.update(
-                key,
-                (value) => [value[0], true],
-              );
+              controller.selectedRoles.update(key, (value) => [value[0], true]);
             }
           });
         }
         // Reset roles not in userData['roles'] to false
-        usersController.selectedRoles.forEach((key, value) {
-          if (!userData['roles'].contains(value[0])) {
-            usersController.selectedRoles.update(
-              key,
-              (value) => [value[0], false],
-            );
+        controller.selectedRoles.forEach((key, value) {
+          if (!userData.roles.contains(value[0])) {
+            controller.selectedRoles.update(key, (value) => [value[0], false]);
           }
         });
         usersDialog(
-          userExpiryDate: userData['expiry_date'],
+          userExpiryDate: userData.expiryDate,
           canEdit: false,
-          controller: usersController,
+          controller: controller,
           constraints: constraints,
           context: context,
-          onPressed: usersController.sigupgInProcess.value
+          onPressed: controller.sigupgInProcess.value
               ? null
               : () {
-                  usersController.updateUserDetails(uid);
+                  controller.updateUserDetails(uid);
                 },
         );
       },

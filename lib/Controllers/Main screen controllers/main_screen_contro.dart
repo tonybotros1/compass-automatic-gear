@@ -90,7 +90,7 @@ class MainScreenController extends GetxController {
       switch (message["type"]) {
         case "favourite_added":
           final newfav = FavouriteScreensModel.fromJson(message["data"]);
-          favoriteScreens.insert(0,newfav);
+          favoriteScreens.insert(0, newfav);
           break;
 
         case "favourite_deleted":
@@ -151,7 +151,7 @@ class MainScreenController extends GetxController {
       case '/home':
         return const SizedBox(child: FirstMainScreen());
       case '/users':
-        return SizedBox(child: Users());
+        return const SizedBox(child: Users());
       case '/functions':
         return const SizedBox(child: Functions());
       case '/menus':
@@ -261,7 +261,7 @@ class MainScreenController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List data = decoded["root"];
-        final roots = data
+        roots.value = data
             .map<MyTreeNode>((item) => buildTreeFromJson(item, isRoot: true))
             .toList();
         treeController = TreeController<MyTreeNode>(
@@ -413,7 +413,6 @@ class MainScreenController extends GetxController {
 
   Future<void> removeScreenFromFavorite(String id) async {
     try {
-      print(id);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';

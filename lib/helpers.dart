@@ -127,4 +127,37 @@ class Helpers {
       return {};
     }
   }
+
+  // this function is to ger all roles for drop down menu
+   Future getAllRoles(RxMap map) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendUrl/responsibilities/get_roles_based_on_status');
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> jsonData = decoded["roles"];
+        map.value = {for (var role in jsonData) role['_id']: role};
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllRoles(map);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../Controllers/Main screen controllers/users_controller.dart';
 import '../../../consts.dart';
 import 'expiry_date_and_active_status.dart';
 import 'my_text_form_field.dart';
@@ -8,7 +9,7 @@ import 'my_text_form_field.dart';
 Widget addNewUserAndView(
     {required BoxConstraints constraints,
     required BuildContext context,
-    required controller,
+    required UsersController controller,
    required bool canEdit,
     userExpiryDate,
   }) {

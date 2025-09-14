@@ -1,14 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../Models/users/users_model.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
+import 'package:http/http.dart' as http;
+import 'websocket_controller.dart';
+import '../../helpers.dart';
 
 class UsersController extends GetxController {
   late TextEditingController email = TextEditingController();
@@ -19,76 +20,215 @@ class UsersController extends GetxController {
   RxBool sigupgInProcess = RxBool(false);
   var selectedDate = DateTime.now().obs;
   RxString theDate = RxString('');
-  // RxList sysRoles = RxList([]);
   List<String> areaName = [];
-  RxBool isLoading = RxBool(false);
   RxMap selectedRoles = RxMap({});
-  RxBool isScreenLoding = RxBool(true);
-  final RxList<DocumentSnapshot> allUsers = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredUsers = RxList<DocumentSnapshot>([]);
+  RxBool isScreenLoding = RxBool(false);
+  final RxList<UsersModel> allUsers = RxList<UsersModel>([]);
+  final RxList<UsersModel> filteredUsers = RxList<UsersModel>([]);
   RxString query = RxString('');
   Rx<TextEditingController> search = TextEditingController().obs;
-  // RxBool userStatus = RxBool(true);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
+  WebSocketService ws = Get.find<WebSocketService>();
+  String backendUrl = backendTestURI;
+  RxBool isLoading = RxBool(false);
 
   @override
   void onInit() {
+    connectWebSocket();
     getRoles();
     getAllUsers();
-    search.value.addListener(() {
-      filterCards();
-    });
     super.onInit();
   }
 
-// this function is to sort data in table
+  @override
+  void onClose() {
+    Get.delete<UsersController>();
+    super.onClose();
+  }
+
+  void connectWebSocket() {
+    ws.events.listen((message) {
+      switch (message["type"]) {
+        case "user_added":
+          final newCounter = UsersModel.fromJson(message["data"]);
+          allUsers.add(newCounter);
+          break;
+
+        case "user_status_updated":
+          final branchId = message["data"]['_id'];
+          final branchStatus = message["data"]['status'];
+          final index = allUsers.indexWhere((m) => m.id == branchId);
+          if (index != -1) {
+            allUsers[index].status = branchStatus;
+            allUsers.refresh();
+          }
+          break;
+
+        case "user_updated":
+          final updated = UsersModel.fromJson(message["data"]);
+          final index = allUsers.indexWhere((m) => m.id == updated.id);
+          if (index != -1) {
+            allUsers[index] = updated;
+          }
+          break;
+
+        case "user_deleted":
+          final deletedId = message["data"]["_id"];
+          allUsers.removeWhere((m) => m.id == deletedId);
+          break;
+      }
+    });
+  }
+
+  Future<void> getAllUsers() async {
+    try {
+      isScreenLoding.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/users/get_all_users');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List users = decoded['users'];
+        allUsers.assignAll(users.map((user) => UsersModel.fromJson(user)));
+        isScreenLoding.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllUsers();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        isScreenLoding.value = false;
+        logout();
+      } else {
+        isScreenLoding.value = false;
+      }
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
+  }
+
+  Future<void> register() async {
+    try {
+      if (name.text.isEmpty ||
+          email.text.isEmpty ||
+          pass.text.isEmpty ||
+          selectedRoles.isEmpty) {
+        showSnackBar('Note', 'Please fill all fields');
+        return;
+      }
+      sigupgInProcess.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/users/add_new_user');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "user_name": name.text,
+          "email": email.text.toLowerCase(),
+          "password": pass.text,
+          "roles_ids": selectedRoles.entries
+              .where((entry) => entry.value[1] == true)
+              .map((entry) => entry.value[0])
+              .toList(),
+          "expiry_date": selectedDate.value.toIso8601String(),
+        }),
+      );
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        Get.back();
+        showSnackBar('Done', decoded['message']);
+      } else if (response.statusCode == 400) {
+        showSnackBar('Alert', decoded['detail']);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await register();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      sigupgInProcess.value = false;
+    } catch (e) {
+      sigupgInProcess.value = false;
+      showSnackBar('warning', e.toString());
+    }
+  }
+
+  // this function is to delete user from the DB
+  Future<void> deleteUser(String userID) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/users/remove_user/$userID');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        Get.back();
+        showSnackBar('Done', decoded['message']);
+      } else if (response.statusCode == 404) {
+        showSnackBar('Alert', decoded['detail']);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteUser(userID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      Get.back();
+    }
+  }
+
+  // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
       allUsers.sort((user1, user2) {
-        final String? value1 = user1.get('user_name');
-        final String? value2 = user2.get('user_name');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
+        final String value1 = user1.userName;
+        final String value2 = user2.userName;
 
         return compareString(ascending, value1, value2);
       });
     } else if (columnIndex == 1) {
       allUsers.sort((user1, user2) {
-        final String? value1 = user1.get('email');
-        final String? value2 = user2.get('email');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
+        final String value1 = user1.email;
+        final String value2 = user2.email;
 
         return compareString(ascending, value1, value2);
       });
     } else if (columnIndex == 2) {
       allUsers.sort((user1, user2) {
-        final String? value1 = user1.get('added_date');
-        final String? value2 = user2.get('added_date');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
+        final String value1 = user1.createdAt.toString();
+        final String value2 = user2.createdAt.toString();
 
         return compareString(ascending, value1, value2);
       });
     } else if (columnIndex == 3) {
       allUsers.sort((user1, user2) {
-        final String? value1 = user1.get('expiry_date');
-        final String? value2 = user2.get('expiry_date');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
+        final String value1 = user1.expiryDate.toString();
+        final String value2 = user2.expiryDate.toString();
 
         return compareString(ascending, value1, value2);
       });
@@ -110,14 +250,15 @@ class UsersController extends GetxController {
     } else {
       filteredUsers.assignAll(
         allUsers.where((user) {
-          return user['email'].toString().toLowerCase().contains(query);
+          return user.email.toString().toLowerCase().contains(query) ||
+              user.userName.toString().toLowerCase().contains(query);
         }).toList(),
       );
     }
   }
 
-// this functions is to change the user status from active / inactive
-  Future<void> changeUserStatus(String userId,bool status) async {
+  // this functions is to change the user status from active / inactive
+  Future<void> changeUserStatus(String userId, bool status) async {
     try {
       await FirebaseFirestore.instance
           .collection('sys-users')
@@ -166,63 +307,6 @@ class UsersController extends GetxController {
     return mainScreenController.selectedScreenName.value;
   }
 
-  Future<void> register() async {
-    try {
-      if (name.text.isEmpty ||
-          email.text.isEmpty ||
-          pass.text.isEmpty ||
-          selectedRoles.isEmpty) {
-        showSnackBar('Note', 'Please fill all fields');
-
-        throw Exception('Please fill all fields');
-      }
-      sigupgInProcess.value = true;
-
-      // Hash the password using SHA-256
-      var bytes = utf8.encode(pass.text); // Convert password to bytes
-      var digest = sha256.convert(bytes); // Hash the password
-      String hashedPassword = digest.toString();
-
-      // Check if the email already exists in Firestore
-      var userDataSnapshot = await FirebaseFirestore.instance
-          .collection('sys-users')
-          .where('email', isEqualTo: email.text) // Check for existing email
-          .get();
-
-      if (userDataSnapshot.docs.isNotEmpty) {
-        sigupgInProcess.value = false;
-        showSnackBar(
-            'Email already in use', 'This email is already registered');
-        return;
-      }
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final companyId = prefs.getString('companyId');
-      if (companyId == null || companyId.isEmpty) return;
-
-      // Save the user details in Firestore with an auto-generated document ID
-      await FirebaseFirestore.instance.collection('sys-users').add({
-        "user_name": name.text,
-        "email": email.text.toLowerCase(),
-        "password": hashedPassword, // Store hashed password
-        "roles": selectedRoles.entries
-            .where((entry) => entry.value[1] == true)
-            .map((entry) => entry.value[0])
-            .toList(),
-        "expiry_date": '${selectedDate.value}',
-        "added_date": DateTime.now().toString(),
-        "status": true,
-        "company_id": companyId,
-      });
-
-      sigupgInProcess.value = false;
-      Get.back();
-      showSnackBar('Done', 'New user added successfully');
-    } catch (e) {
-      sigupgInProcess.value = false;
-      showSnackBar('warning', e.toString());
-    }
-  }
-
   // this function is to update user details
   Future<void> updateUserDetails(String userId) async {
     try {
@@ -230,9 +314,9 @@ class UsersController extends GetxController {
       // Prepare the update data
       Map<String, dynamic> updateData = {
         'roles': selectedRoles.entries
-            .where((entry) =>
-                entry.value is List &&
-                entry.value[1] == true) // Check the role status
+            .where(
+              (entry) => entry.value is List && entry.value[1] == true,
+            ) // Check the role status
             .map((entry) => entry.value[0]) // Extract the role name
             .toList(),
         'expiry_date': '${selectedDate.value}',
@@ -243,12 +327,12 @@ class UsersController extends GetxController {
       // Add the hashed password only if pass.text is not empty
       if (pass.text.isNotEmpty) {
         // Hash the password
-        var bytes = utf8.encode(pass.text); // Convert password to bytes
-        var digest = sha256.convert(bytes); // Hash the password
-        String hashedPassword = digest.toString();
+        // var bytes = utf8.encode(pass.text); // Convert password to bytes
+        // var digest = sha256.convert(bytes); // Hash the password
+        // String hashedPassword = digest.toString();
 
         // Add the hashed password to the update data
-        updateData['password'] = hashedPassword;
+        // updateData['password'] = hashedPassword;
       }
 
       // Update the Firestore document
@@ -270,55 +354,28 @@ class UsersController extends GetxController {
     }
   }
 
-// this function is to delete user from the DB
-  Future<void> deleteUser(String userID) async {
-    Get.back();
-    await FirebaseFirestore.instance
-        .collection('sys-users')
-        .doc(userID)
-        .delete();
-  }
+  // // this function is to delete user from the DB
+  // Future<void> deleteUser(String userID) async {
+  //   Get.back();
+  //   await FirebaseFirestore.instance
+  //       .collection('sys-users')
+  //       .doc(userID)
+  //       .delete();
+  // }
 
-  // this function is to get roles from DB
-  void getRoles() async {
+  Future<void> getRoles() async {
     try {
       isLoading.value = true;
-      // Fetch roles from the 'sys-roles' collection
-      FirebaseFirestore.instance
-          .collection('sys-roles')
-          .where('is_shown_for_users', isEqualTo: true)
-          .snapshots()
-          .listen((roles) {
-        for (var role in roles.docs) {
-          selectedRoles.addAll({
-            role.data()['role_name']: [role.id, false]
-          });
-        }
-      });
-
-      isLoading.value = false;
+      RxMap rolesMap = RxMap(await helper.getAllRoles(selectedRoles));
+      Map<String, List<dynamic>> tempSelectedRoles = {};
+      for (var role in rolesMap.values) {
+        tempSelectedRoles[role['role_name']] = [role["_id"], false];
+      }
+      selectedRoles.assignAll(tempSelectedRoles);
     } catch (e) {
       isLoading.value = false;
-    }
-  }
-
-  // this function is to get all users in the system
-  Future<void> getAllUsers() async {
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final companyId = prefs.getString('companyId');
-      if (companyId == null || companyId.isEmpty) return;
-      FirebaseFirestore.instance
-          .collection('sys-users')
-          .where('company_id', isEqualTo: companyId)
-          .snapshots()
-          .listen((event) {
-        allUsers.assignAll(List<DocumentSnapshot>.from(event.docs));
-        isScreenLoding.value = false;
-      });
-    } catch (e) {
-      isScreenLoding.value = false;
-      //
+    } finally {
+      isLoading.value = false;
     }
   }
 }
