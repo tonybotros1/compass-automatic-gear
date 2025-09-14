@@ -11,9 +11,7 @@ Widget addNewBranchOrEdit({
 }) {
   return ListView(
     children: [
-      const SizedBox(
-        height: 5,
-      ),
+      const SizedBox(height: 5),
       myTextFormFieldWithBorder(
         obscureText: false,
         controller: controller.code,
@@ -21,19 +19,15 @@ Widget addNewBranchOrEdit({
         hintText: 'Enter Code',
         validate: true,
       ),
-      const SizedBox(
-        height: 10,
-      ),
+      const SizedBox(height: 10),
       myTextFormFieldWithBorder(
         obscureText: false,
         controller: controller.name,
-        labelText: 'Description',
+        labelText: 'Name',
         hintText: 'Enter Name',
         validate: true,
       ),
-      const SizedBox(
-        height: 10,
-      ),
+      const SizedBox(height: 10),
       myTextFormFieldWithBorder(
         obscureText: false,
         controller: controller.line,
@@ -41,53 +35,41 @@ Widget addNewBranchOrEdit({
         hintText: 'Enter Line',
         validate: true,
       ),
-      const SizedBox(
-        height: 10,
+      const SizedBox(height: 10),
+      GetX<BranchesController>(
+        builder: (controller) {
+          var isCountryLoading = controller.allCountries.isEmpty;
+          return CustomDropdown(
+            hintText: 'Country',
+            textcontroller: controller.country.text,
+            showedSelectedName: 'name',
+            items: isCountryLoading ? {} : controller.allCountries,
+            onChanged: (key, value) {
+              controller.country.text = value['name'];
+              controller.getCitiesByCountryID(key);
+              controller.city.clear();
+              controller.countryId.value = key;
+            },
+          );
+        },
       ),
-      GetX<BranchesController>(builder: (controller) {
-        var isCountryLoading = controller.allCountries.isEmpty;
-        return CustomDropdown(
-          hintText: 'Country',
-          textcontroller: controller.country.text,
-          showedSelectedName: 'name',
-          items: isCountryLoading ? {} : controller.allCountries,
-          itemBuilder: (context, key, value) {
-            return ListTile(
-              title: Text(value['name']),
-            );
-          },
-          onChanged: (key, value) {
-            controller.country.text = value['name'];
-            controller.getCitiesByCountryID(key);
-            controller.city.clear();
-            controller.countryId.value = key;
-          },
-        );
-      
-      }),
-      const SizedBox(
-        height: 10,
-      ),
-      GetX<BranchesController>(builder: (controller) {
-        var isCityLoading = controller.allCities.isEmpty;
+      const SizedBox(height: 10),
+      GetX<BranchesController>(
+        builder: (controller) {
+          var isCityLoading = controller.allCities.isEmpty;
 
-        return CustomDropdown(
-          hintText: 'City',
-          textcontroller: controller.city.text,
-          showedSelectedName: 'name',
-          items: isCityLoading ? {} : controller.allCities,
-          itemBuilder: (context, key, value) {
-            return ListTile(
-              title: Text(value['name']),
-            );
-          },
-          onChanged: (key, value) {
-            controller.city.text = value['name'];
-            controller.cityId.value = key;
-          },
-        );
-       
-      }),
+          return CustomDropdown(
+            hintText: 'City',
+            textcontroller: controller.city.text,
+            showedSelectedName: 'name',
+            items: isCityLoading ? {} : controller.allCities,
+            onChanged: (key, value) {
+              controller.city.text = value['name'];
+              controller.cityId.value = key;
+            },
+          );
+        },
+      ),
     ],
   );
 }

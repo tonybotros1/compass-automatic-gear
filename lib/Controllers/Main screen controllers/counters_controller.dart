@@ -24,7 +24,6 @@ class CountersController extends GetxController {
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
-  RxString companyId = RxString('');
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
 

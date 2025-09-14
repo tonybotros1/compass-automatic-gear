@@ -15,7 +15,7 @@ Future<dynamic> branchesDialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: SizedBox(
-          height: 400,
+          height: 410,
           width: constraints.maxWidth / 2.5,
           child: Column(
             children: [
