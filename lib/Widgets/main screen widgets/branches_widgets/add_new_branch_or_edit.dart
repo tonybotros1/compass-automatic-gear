@@ -50,6 +50,9 @@ Widget addNewBranchOrEdit({
               controller.city.clear();
               controller.countryId.value = key;
             },
+            onDelete: () {
+              controller.allCities.clear();
+            },
           );
         },
       ),

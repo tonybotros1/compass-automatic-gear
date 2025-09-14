@@ -242,7 +242,9 @@ ElevatedButton editSection(
     style: editButtonStyle,
     onPressed: () async {
       controller.city.text = branchData.city;
-      controller.getCitiesByCountryID(branchData.countryId);
+      if (branchData.countryId.isNotEmpty) {
+        controller.getCitiesByCountryID(branchData.countryId);
+      }
       controller.code.text = branchData.code;
       controller.name.text = branchData.name;
       controller.line.text = branchData.line;

@@ -54,6 +54,16 @@ class BranchesController extends GetxController {
           allBranches.add(newCounter);
           break;
 
+        case "branch_status_updated":
+          final branchId = message["data"]['_id'];
+          final branchStatus = message["data"]['status'];
+          final index = allBranches.indexWhere((m) => m.id == branchId);
+          if (index != -1) {
+            allBranches[index].status = branchStatus;
+            allBranches.refresh();
+          }
+          break;
+
         case "branch_updated":
           final updated = BranchesModel.fromJson(message["data"]);
           final index = allBranches.indexWhere((m) => m.id == updated.id);
@@ -106,6 +116,154 @@ class BranchesController extends GetxController {
     }
   }
 
+  Future<void> addNewBranch() async {
+    try {
+      addingNewValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/branches/add_new_branch');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "name": name.text,
+          "code": code.text,
+          "line": line.text,
+          "country_id": countryId.value,
+          "city_id": cityId.value,
+        }),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewBranch();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        isScreenLoding.value = false;
+        logout();
+      } else {
+        isScreenLoding.value = false;
+      }
+      addingNewValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewValue.value = false;
+    }
+  }
+
+  Future<void> editBranch(String branchId) async {
+    try {
+      addingNewValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/branches/update_branch/$branchId');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "name": name.text,
+          "code": code.text,
+          "line": line.text,
+          "country_id": countryId.value,
+          "city_id": cityId.value,
+        }),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await editBranch(branchId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        isScreenLoding.value = false;
+        logout();
+      } else {
+        isScreenLoding.value = false;
+      }
+      addingNewValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewValue.value = false;
+      Get.back();
+    }
+  }
+
+  // this functions is to change the counter status from active / inactive
+  Future<void> changeBranchStatus(String branchId, bool status) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/branches/change_branch_status/$branchId',
+      );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(status),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await changeBranchStatus(branchId, status);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        isScreenLoding.value = false;
+        logout();
+      } else {
+        isScreenLoding.value = false;
+      }
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> deleteBranch(String branchId) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/branches/delete_branch/$branchId');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteBranch(branchId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } 
+      Get.back();
+    } catch (e) {
+      //
+    }
+  }
+
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
@@ -139,49 +297,6 @@ class BranchesController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  // getCountriesAndCities() async {
-  //   try {
-  //     QuerySnapshot<Map<String, dynamic>> countries = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'COUNTRIES')
-  //         .get();
-  //     QuerySnapshot<Map<String, dynamic>> cities = await FirebaseFirestore
-  //         .instance
-  //         .collection('all_lists')
-  //         .where('code', isEqualTo: 'CITIES')
-  //         .get();
-
-  //     var countriesId = countries.docs.first.id;
-  //     var citiesId = cities.docs.first.id;
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(countriesId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((countries) {
-  //       allCountries.value = {
-  //         for (var doc in countries.docs) doc.id: doc.data()
-  //       };
-  //     });
-
-  //     FirebaseFirestore.instance
-  //         .collection('all_lists')
-  //         .doc(citiesId)
-  //         .collection('values')
-  //         .where('available', isEqualTo: true)
-  //         .snapshots()
-  //         .listen((cities) {
-  //       allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
-  //     });
-  //     update();
-  //   } catch (e) {
-  //     // print(e);
-  //   }
-  // }
-
   Future<void> getCountries() async {
     try {
       allCountries.assignAll(await helper.getCountries(allCountries));
@@ -198,83 +313,17 @@ class BranchesController extends GetxController {
     }
   }
 
-  Future<String?> getCityName(String countryId, String cityId) async {
-    try {
-      var cities = await FirebaseFirestore.instance
-          .collection('all_countries')
-          .doc(countryId)
-          .collection('values')
-          .where(FieldPath.documentId, isEqualTo: cityId)
-          .get();
-      String cityName = cities.docs.first.data()['name'];
-
-      return cityName;
-    } catch (e) {
-      return '';
-    }
-  }
-
-  Future<void> addNewBranch() async {
-    try {
-      addingNewValue.value = true;
-      await FirebaseFirestore.instance.collection('branches').add({
-        'code': code.text,
-        'name': name.text,
-        'line': line.text,
-        'country_id': countryId.value,
-        'city_id': cityId.value,
-        'added_date': DateTime.now().toString(),
-        // 'company_id': companyId.value,
-        'status': true,
-      });
-      addingNewValue.value = false;
-      Get.back();
-    } catch (e) {
-      addingNewValue.value = false;
-    }
-  }
-
-  Future<void> deleteBranch(String branchId) async {
-    try {
-      Get.back();
-      await FirebaseFirestore.instance
-          .collection('branches')
-          .doc(branchId)
-          .delete();
-    } catch (e) {
-      //
-    }
-  }
-
-  // this functions is to change the counter status from active / inactive
-  Future<void> changeBranchStatus(String branchId, bool status) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('branches')
-          .doc(branchId)
-          .update({'status': status});
-    } catch (e) {
-      //
-    }
-  }
-
-  Future<void> editBranch(String branchId) async {
-    try {
-      Get.back();
-      await FirebaseFirestore.instance
-          .collection('branches')
-          .doc(branchId)
-          .update({
-            'code': code.text,
-            'name': name.text,
-            'line': line.text,
-            'country_id': countryId.value,
-            'city_id': cityId.value,
-          });
-    } catch (e) {
-      //
-    }
-  }
+  // Future<void> deleteBranch(String branchId) async {
+  //   try {
+  //     Get.back();
+  //     await FirebaseFirestore.instance
+  //         .collection('branches')
+  //         .doc(branchId)
+  //         .delete();
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
 
   // this function is to filter the search results for web
   void filterBranches() {

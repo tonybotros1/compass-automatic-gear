@@ -7,7 +7,7 @@ class BranchesModel {
   final String cityId;
   final String city;
   final String line;
-  final bool status;
+  bool status;
   final DateTime createdAt;
   final DateTime updatedAt;
 
