@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -257,7 +255,7 @@ class BranchesController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
-      } 
+      }
       Get.back();
     } catch (e) {
       //
@@ -312,18 +310,6 @@ class BranchesController extends GetxController {
       //
     }
   }
-
-  // Future<void> deleteBranch(String branchId) async {
-  //   try {
-  //     Get.back();
-  //     await FirebaseFirestore.instance
-  //         .collection('branches')
-  //         .doc(branchId)
-  //         .delete();
-  //   } catch (e) {
-  //     //
-  //   }
-  // }
 
   // this function is to filter the search results for web
   void filterBranches() {

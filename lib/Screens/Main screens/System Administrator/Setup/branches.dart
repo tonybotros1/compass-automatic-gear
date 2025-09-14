@@ -113,15 +113,12 @@ Widget tableOfScreens({
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Country'),
-        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'City'),
-        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Line'),
-        onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
