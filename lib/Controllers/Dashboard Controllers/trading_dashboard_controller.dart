@@ -3,7 +3,6 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../consts.dart';
 
@@ -101,8 +100,9 @@ class TradingDashboardController extends GetxController {
   }
 
   Future<void> getCompanyId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    companyId.value = prefs.getString('companyId')!;
+    // final SharedPreferences prefs = await SharedPreferences.getInstance();
+    // companyId.value = prefs.getString('companyId')!;
+    companyId.value = 'slowXdVvhLdsVQItgO3n';
   }
 
   void filterByCurrentDate(String dateType) {

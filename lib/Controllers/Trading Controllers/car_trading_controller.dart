@@ -5,7 +5,6 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../consts.dart';
 import '../Main screen controllers/main_screen_contro.dart';
 import 'package:uuid/uuid.dart';
@@ -44,15 +43,18 @@ class CarTradingController extends GetxController {
   final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allCapitals = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allOutstanding = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> allGeneralExpenses =
-      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allGeneralExpenses = RxList<DocumentSnapshot>(
+    [],
+  );
   final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> filteredGeneralExpenses =
       RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredOutstanding =
-      RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredCapitals =
-      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredOutstanding = RxList<DocumentSnapshot>(
+    [],
+  );
+  final RxList<DocumentSnapshot> filteredCapitals = RxList<DocumentSnapshot>(
+    [],
+  );
   RxBool isValuesLoading = RxBool(false);
   RxString colorInId = RxString('');
   RxString colorOutId = RxString('');
@@ -82,8 +84,9 @@ class CarTradingController extends GetxController {
   RxMap allItems = RxMap({});
   RxList<Map<String, dynamic>> addedItems = RxList([]);
   RxList<Map> filteredAddedItems = RxList([]);
-  ListOfValuesController listOfValuesController =
-      Get.put(ListOfValuesController());
+  ListOfValuesController listOfValuesController = Get.put(
+    ListOfValuesController(),
+  );
   RxString carSpecificationsListId = RxString('');
   RxString carSpecificationsListMasteredById = RxString('');
   RxString colorsListId = RxString('');
@@ -136,15 +139,27 @@ class CarTradingController extends GetxController {
     });
     searchForCapitals.value.addListener(() {
       filterCapitalsOrOutstandingOrGeneralExpenses(
-          searchForCapitals, allCapitals, filteredCapitals, false);
+        searchForCapitals,
+        allCapitals,
+        filteredCapitals,
+        false,
+      );
     });
     searchForOutstanding.value.addListener(() {
       filterCapitalsOrOutstandingOrGeneralExpenses(
-          searchForOutstanding, allOutstanding, filteredOutstanding, false);
+        searchForOutstanding,
+        allOutstanding,
+        filteredOutstanding,
+        false,
+      );
     });
     searchForGeneralexpenses.value.addListener(() {
-      filterCapitalsOrOutstandingOrGeneralExpenses(searchForGeneralexpenses,
-          allGeneralExpenses, filteredGeneralExpenses, true);
+      filterCapitalsOrOutstandingOrGeneralExpenses(
+        searchForGeneralexpenses,
+        allGeneralExpenses,
+        filteredGeneralExpenses,
+        true,
+      );
     });
     super.onInit();
   }
@@ -159,19 +174,20 @@ class CarTradingController extends GetxController {
     buttonLoadingStates.refresh(); // Notify listeners
   }
 
-  Future<String> gettradePaidCached(String tradeId,
-      {bool forceRefresh = false}) {
+  Future<String> gettradePaidCached(
+    String tradeId, {
+    bool forceRefresh = false,
+  }) {
     if (forceRefresh) {
       _paidFutureCache.remove(tradeId);
     }
-    return _paidFutureCache.putIfAbsent(
-      tradeId,
-      () => gettradePaid(tradeId),
-    );
+    return _paidFutureCache.putIfAbsent(tradeId, () => gettradePaid(tradeId));
   }
 
-  Future<String> gettradeReceivedCached(String tradeId,
-      {bool forceRefresh = false}) {
+  Future<String> gettradeReceivedCached(
+    String tradeId, {
+    bool forceRefresh = false,
+  }) {
     if (forceRefresh) {
       _receivedFutureCache.remove(tradeId);
     }
@@ -181,15 +197,14 @@ class CarTradingController extends GetxController {
     );
   }
 
-  Future<String> gettradeNETsCached(String tradeId,
-      {bool forceRefresh = false}) {
+  Future<String> gettradeNETsCached(
+    String tradeId, {
+    bool forceRefresh = false,
+  }) {
     if (forceRefresh) {
       _netsFutureCache.remove(tradeId);
     }
-    return _netsFutureCache.putIfAbsent(
-      tradeId,
-      () => gettradeNETs(tradeId),
-    );
+    return _netsFutureCache.putIfAbsent(tradeId, () => gettradeNETs(tradeId));
   }
 
   Future<void> initTotalsCache() async {
@@ -209,8 +224,9 @@ class CarTradingController extends GetxController {
   }
 
   Future<void> getCompanyId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    companyId.value = prefs.getString('companyId')!;
+    // final SharedPreferences prefs = await SharedPreferences.getInstance();
+    // companyId.value = prefs.getString('companyId')!;
+    companyId.value = 'slowXdVvhLdsVQItgO3n'; //slowXdVvhLdsVQItgO3n
   }
 
   String getScreenName() {
@@ -220,7 +236,9 @@ class CarTradingController extends GetxController {
   }
 
   Future<void> selectDateContext(
-      BuildContext context, TextEditingController date) async {
+    BuildContext context,
+    TextEditingController date,
+  ) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -334,8 +352,10 @@ class CarTradingController extends GetxController {
 
   Future<void> loadValues(Map data) async {
     if (data['bought_from'] != null && data['bought_from'] != '') {
-      boughtFrom.value.text =
-          getdataName(data['bought_from'], allBuyersAndSellers);
+      boughtFrom.value.text = getdataName(
+        data['bought_from'],
+        allBuyersAndSellers,
+      );
       boughtFromId.value = data['bought_from'];
     } else {
       boughtFrom.value.clear();
@@ -357,21 +377,25 @@ class CarTradingController extends GetxController {
     colorOutId.value = data['color_out'] ?? '';
     carBrand.value.text = getdataName(data['car_brand'], allBrands);
     carBrandId.value = data['car_brand'] ?? '';
-    carSpecification.value.text =
-        getdataName(data['specification'], allCarSpecifications);
+    carSpecification.value.text = getdataName(
+      data['specification'],
+      allCarSpecifications,
+    );
     carSpecificationId.value = data['specification'] ?? '';
     engineSize.value.text = getdataName(data['engine_size'], allEngineSizes);
     engineSizeId.value = data['engine_size'] ?? '';
     year.value.text = getdataName(data['year'], allYears);
     yearId.value = data['year'] ?? '';
     note.text = data['note'] ?? '';
-    addedItems.assignAll((data['items'] as List)
-        .map((e) => Map<String, dynamic>.from(e))
-        .toList());
+    addedItems.assignAll(
+      (data['items'] as List).map((e) => Map<String, dynamic>.from(e)).toList(),
+    );
 
     status.value = data['status'] ?? '';
-    carModel.value.text =
-        await getCarModelName(data['car_brand'], data['car_model']);
+    carModel.value.text = await getCarModelName(
+      data['car_brand'],
+      data['car_model'],
+    );
     carModelId.value = data['car_model'] ?? '';
     getModelsByCarBrand(data['car_brand']);
     calculateTotals();
@@ -418,7 +442,7 @@ class CarTradingController extends GetxController {
           'items': addedItems,
           'company_id': companyId.value,
           'status': 'New',
-          'added_date': DateTime.now()
+          'added_date': DateTime.now(),
         });
         status.value = 'New';
         currentTradId.value = addedTrade.id;
@@ -458,20 +482,20 @@ class CarTradingController extends GetxController {
           .collection('all_trades')
           .doc(tradeId)
           .update({
-        'bought_from': boughtFromId.value,
-        'sold_to': soldToId.value,
-        'date': parsedDate.toString(),
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'mileage': mileage.value.text,
-        'specification': carSpecificationId.value,
-        'engine_size': engineSizeId.value,
-        'color_in': colorInId.value,
-        'color_out': colorOutId.value,
-        'year': yearId.value,
-        'note': note.text,
-        'items': addedItems,
-      });
+            'bought_from': boughtFromId.value,
+            'sold_to': soldToId.value,
+            'date': parsedDate.toString(),
+            'car_brand': carBrandId.value,
+            'car_model': carModelId.value,
+            'mileage': mileage.value.text,
+            'specification': carSpecificationId.value,
+            'engine_size': engineSizeId.value,
+            'color_in': colorInId.value,
+            'color_out': colorOutId.value,
+            'year': yearId.value,
+            'note': note.text,
+            'items': addedItems,
+          });
       refreshTradePaid(tradeId);
       showSnackBar('Success', 'Updated Successfully');
       addingNewValue.value = false;
@@ -492,10 +516,9 @@ class CarTradingController extends GetxController {
 
   void changeStatus(String tradeId, String status) {
     try {
-      FirebaseFirestore.instance
-          .collection('all_trades')
-          .doc(tradeId)
-          .update({'status': status});
+      FirebaseFirestore.instance.collection('all_trades').doc(tradeId).update({
+        'status': status,
+      });
     } catch (e) {
       showSnackBar('Something went wrong', 'Please try again');
     }
@@ -509,12 +532,12 @@ class CarTradingController extends GetxController {
           .orderBy('date', descending: true)
           .snapshots()
           .listen((trade) {
-        allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
-        initTradeSearchIndex();
-        initTotalsCache();
-        calculateTotalsForAllTrades();
-        isScreenLoding.value = false;
-      });
+            allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
+            initTradeSearchIndex();
+            initTotalsCache();
+            calculateTotalsForAllTrades();
+            isScreenLoding.value = false;
+          });
     } catch (e) {
       isScreenLoding.value = false;
     }
@@ -529,11 +552,11 @@ class CarTradingController extends GetxController {
           .orderBy('date', descending: true)
           .snapshots()
           .listen((capitals) {
-        allCapitals.assignAll(List<DocumentSnapshot>.from(capitals.docs));
+            allCapitals.assignAll(List<DocumentSnapshot>.from(capitals.docs));
 
-        calculateTotalsForCapitals(allCapitals);
-        isCapitalLoading.value = false;
-      });
+            calculateTotalsForCapitals(allCapitals);
+            isCapitalLoading.value = false;
+          });
     } catch (e) {
       isCapitalLoading.value = false;
     }
@@ -548,11 +571,13 @@ class CarTradingController extends GetxController {
           .orderBy('date', descending: true)
           .snapshots()
           .listen((outstanding) {
-        allOutstanding.assignAll(List<DocumentSnapshot>.from(outstanding.docs));
+            allOutstanding.assignAll(
+              List<DocumentSnapshot>.from(outstanding.docs),
+            );
 
-        calculateTotalsForCapitals(allOutstanding);
-        isOutstandinglLoading.value = false;
-      });
+            calculateTotalsForCapitals(allOutstanding);
+            isOutstandinglLoading.value = false;
+          });
     } catch (e) {
       isOutstandinglLoading.value = false;
     }
@@ -567,19 +592,22 @@ class CarTradingController extends GetxController {
           .orderBy('date', descending: true)
           .snapshots()
           .listen((outstanding) {
-        allGeneralExpenses
-            .assignAll(List<DocumentSnapshot>.from(outstanding.docs));
+            allGeneralExpenses.assignAll(
+              List<DocumentSnapshot>.from(outstanding.docs),
+            );
 
-        calculateTotalsForCapitals(allGeneralExpenses);
-        isgeneralExpenseslLoading.value = false;
-      });
+            calculateTotalsForCapitals(allGeneralExpenses);
+            isgeneralExpenseslLoading.value = false;
+          });
     } catch (e) {
       isgeneralExpenseslLoading.value = false;
     }
   }
 
   Future<void> addNewCapitalsOrOutstandingOrGeneralExpenses(
-      String collection, bool isGeneral) async {
+    String collection,
+    bool isGeneral,
+  ) async {
     try {
       addingNewValue.value = true;
       var data = {
@@ -604,7 +632,10 @@ class CarTradingController extends GetxController {
   }
 
   Future<void> updateCapitalsOrOutstandingOrGeneralExpenses(
-      String collection, String id, bool isGeneral) async {
+    String collection,
+    String id,
+    bool isGeneral,
+  ) async {
     try {
       Get.back();
       var data = {
@@ -630,7 +661,10 @@ class CarTradingController extends GetxController {
     }
   }
 
-  void deleteCapitalOrOutstandingOrGeneralExpenses(String collection, String id) {
+  void deleteCapitalOrOutstandingOrGeneralExpenses(
+    String collection,
+    String id,
+  ) {
     try {
       FirebaseFirestore.instance.collection(collection).doc(id).delete();
       Get.back();
@@ -656,8 +690,8 @@ class CarTradingController extends GetxController {
         .where('available', isEqualTo: true)
         .snapshots()
         .listen((colors) {
-      allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
-    });
+          allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
+        });
   }
 
   // this function is to get Car Specifications
@@ -669,8 +703,8 @@ class CarTradingController extends GetxController {
 
     var typeId = typeDoc.docs.first.id;
     carSpecificationsListId.value = typeId;
-    carSpecificationsListMasteredById.value =
-        typeDoc.docs.first.data()['mastered_by'];
+    carSpecificationsListMasteredById.value = typeDoc.docs.first
+        .data()['mastered_by'];
     FirebaseFirestore.instance
         .collection('all_lists')
         .doc(typeId)
@@ -678,10 +712,10 @@ class CarTradingController extends GetxController {
         .where('available', isEqualTo: true)
         .snapshots()
         .listen((car) {
-      allCarSpecifications.value = {
-        for (var doc in car.docs) doc.id: doc.data()
-      };
-    });
+          allCarSpecifications.value = {
+            for (var doc in car.docs) doc.id: doc.data(),
+          };
+        });
   }
 
   // this function is to get engine sizes
@@ -701,8 +735,10 @@ class CarTradingController extends GetxController {
         .where('available', isEqualTo: true)
         .snapshots()
         .listen((engine) {
-      allEngineSizes.value = {for (var doc in engine.docs) doc.id: doc.data()};
-    });
+          allEngineSizes.value = {
+            for (var doc in engine.docs) doc.id: doc.data(),
+          };
+        });
   }
 
   // this function is to get years
@@ -723,8 +759,8 @@ class CarTradingController extends GetxController {
         .orderBy('added_date')
         .snapshots()
         .listen((year) {
-      allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
-    });
+          allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
+        });
   }
 
   // this function is to get years
@@ -736,8 +772,8 @@ class CarTradingController extends GetxController {
 
     var typeId = typeDoc.docs.first.id;
     buyersAndSellersListId.value = typeId;
-    buyersAndSellersMasterdById.value =
-        typeDoc.docs.first.data()['mastered_by'];
+    buyersAndSellersMasterdById.value = typeDoc.docs.first
+        .data()['mastered_by'];
     FirebaseFirestore.instance
         .collection('all_lists')
         .doc(typeId)
@@ -746,10 +782,10 @@ class CarTradingController extends GetxController {
         .orderBy('added_date')
         .snapshots()
         .listen((year) {
-      allBuyersAndSellers.value = {
-        for (var doc in year.docs) doc.id: doc.data()
-      };
-    });
+          allBuyersAndSellers.value = {
+            for (var doc in year.docs) doc.id: doc.data(),
+          };
+        });
   }
 
   // this function is to get names of people
@@ -770,8 +806,8 @@ class CarTradingController extends GetxController {
         .orderBy('added_date')
         .snapshots()
         .listen((year) {
-      allNames.value = {for (var doc in year.docs) doc.id: doc.data()};
-    });
+          allNames.value = {for (var doc in year.docs) doc.id: doc.data()};
+        });
   }
 
   // this function is to get items
@@ -792,16 +828,15 @@ class CarTradingController extends GetxController {
         .orderBy('added_date')
         .snapshots()
         .listen((item) {
-      allItems.value = {for (var doc in item.docs) doc.id: doc.data()};
-    });
+          allItems.value = {for (var doc in item.docs) doc.id: doc.data()};
+        });
   }
 
   void getCarBrands() {
     try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .snapshots()
-          .listen((brands) {
+      FirebaseFirestore.instance.collection('all_brands').snapshots().listen((
+        brands,
+      ) {
         allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
       });
     } catch (e) {
@@ -817,8 +852,8 @@ class CarTradingController extends GetxController {
           .collection('values')
           .snapshots()
           .listen((models) {
-        allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
-      });
+            allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
+          });
     } catch (e) {
       //
     }
@@ -827,9 +862,7 @@ class CarTradingController extends GetxController {
   String getdataName(String id, Map allData, {title = 'name'}) {
     try {
       if (id != '') {
-        final data = allData.entries.firstWhere(
-          (data) => data.key == id,
-        );
+        final data = allData.entries.firstWhere((data) => data.key == id);
         return data.value[title];
       } else {
         return '';
@@ -839,7 +872,7 @@ class CarTradingController extends GetxController {
     }
   }
 
-  Future<String> getCarModelName(String brandId,String modelId) async {
+  Future<String> getCarModelName(String brandId, String modelId) async {
     try {
       var name = await FirebaseFunctions.instance
           .httpsCallable('get_model_name')
@@ -891,8 +924,10 @@ class CarTradingController extends GetxController {
       filteredAddedItems.assignAll(
         addedItems.where((item) {
           final dateStr = item['date']?.toString().toLowerCase() ?? '';
-          final itemName =
-              getdataName(item['item'], allItems).toString().toLowerCase();
+          final itemName = getdataName(
+            item['item'],
+            allItems,
+          ).toString().toLowerCase();
           final payStr = item['pay']?.toString().toLowerCase() ?? '';
           final nameStr = item['name']?.toString().toLowerCase() ?? '';
           final receiveStr = item['receive']?.toString().toLowerCase() ?? '';
@@ -959,10 +994,11 @@ class CarTradingController extends GetxController {
 
   // this function is to filter the search results for web
   void filterCapitalsOrOutstandingOrGeneralExpenses(
-      Rx<TextEditingController> mapQuery,
-      RxList<DocumentSnapshot<Object?>> allMap,
-      RxList<DocumentSnapshot<Object?>> filteredMap,
-      bool isGeneral) {
+    Rx<TextEditingController> mapQuery,
+    RxList<DocumentSnapshot<Object?>> allMap,
+    RxList<DocumentSnapshot<Object?>> filteredMap,
+    bool isGeneral,
+  ) {
     query.value = mapQuery.value.text.toLowerCase();
     if (query.value.isEmpty) {
       filteredMap.clear();
@@ -973,11 +1009,10 @@ class CarTradingController extends GetxController {
           return cap['pay'].toString().toLowerCase().contains(query) ||
               cap['receive'].toString().toLowerCase().contains(query) ||
               cap['comment'].toString().toLowerCase().contains(query) ||
-              getdataName(isGeneral == false ? cap['name'] : cap['item'],
-                      isGeneral == false ? allNames : allItems)
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
+              getdataName(
+                isGeneral == false ? cap['name'] : cap['item'],
+                isGeneral == false ? allNames : allItems,
+              ).toString().toLowerCase().contains(query) ||
               textToDate(cap['date']).toLowerCase().contains(query);
         }).toList(),
       );

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -139,7 +138,7 @@ class UsersController extends GetxController {
           "user_name": name.text,
           "email": email.text.toLowerCase(),
           "password": pass.text,
-          "roles_ids": selectedRoles.entries
+          "roles": selectedRoles.entries
               .where((entry) => entry.value[1] == true)
               .map((entry) => entry.value[0])
               .toList(),
@@ -202,6 +201,90 @@ class UsersController extends GetxController {
     }
   }
 
+  Future<void> updateUserDetails(String userID) async {
+    try {
+      if (name.text.isEmpty || email.text.isEmpty || selectedRoles.isEmpty) {
+        showSnackBar('Note', 'Please fill all fields');
+        return;
+      }
+      sigupgInProcess.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/users/update_user/$userID');
+      Map updatedData = {
+        "user_name": name.text,
+        "roles": selectedRoles.entries
+            .where((entry) => entry.value[1] == true)
+            .map((entry) => entry.value[0])
+            .toList(),
+        "expiry_date": selectedDate.value.toIso8601String(),
+      };
+      if (pass.text.isNotEmpty) {
+        updatedData['password'] = pass.text;
+      }
+
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(updatedData),
+      );
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        Get.back();
+        showSnackBar('Done', decoded['message']);
+      } else if (response.statusCode == 400) {
+        showSnackBar('Alert', decoded['detail']);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateUserDetails(userID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      sigupgInProcess.value = false;
+    } catch (e) {
+      sigupgInProcess.value = false;
+    }
+  }
+
+  Future<void> changeUserStatus(String userId, bool status) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/users/change_user_status/$userId');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(status),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await changeUserStatus(userId, status);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      //
+    }
+  }
+
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
@@ -257,17 +340,17 @@ class UsersController extends GetxController {
     }
   }
 
-  // this functions is to change the user status from active / inactive
-  Future<void> changeUserStatus(String userId, bool status) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('sys-users')
-          .doc(userId)
-          .update({'status': status});
-    } catch (e) {
-      //
-    }
-  }
+  // // this functions is to change the user status from active / inactive
+  // Future<void> changeUserStatus(String userId, bool status) async {
+  //   try {
+  //     await FirebaseFirestore.instance
+  //         .collection('sys-users')
+  //         .doc(userId)
+  //         .update({'status': status});
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
 
   // Function to format the date
   String formatDate(DateTime date) {
@@ -306,62 +389,6 @@ class UsersController extends GetxController {
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
   }
-
-  // this function is to update user details
-  Future<void> updateUserDetails(String userId) async {
-    try {
-      sigupgInProcess.value = true;
-      // Prepare the update data
-      Map<String, dynamic> updateData = {
-        'roles': selectedRoles.entries
-            .where(
-              (entry) => entry.value is List && entry.value[1] == true,
-            ) // Check the role status
-            .map((entry) => entry.value[0]) // Extract the role name
-            .toList(),
-        'expiry_date': '${selectedDate.value}',
-        'user_name': name.text,
-        'email': email.text.toLowerCase(),
-      };
-
-      // Add the hashed password only if pass.text is not empty
-      if (pass.text.isNotEmpty) {
-        // Hash the password
-        // var bytes = utf8.encode(pass.text); // Convert password to bytes
-        // var digest = sha256.convert(bytes); // Hash the password
-        // String hashedPassword = digest.toString();
-
-        // Add the hashed password to the update data
-        // updateData['password'] = hashedPassword;
-      }
-
-      // Update the Firestore document
-      await FirebaseFirestore.instance
-          .collection('sys-users') // Replace with your collection name
-          .doc(userId) // The document ID you want to update
-          .update(updateData);
-
-      sigupgInProcess.value = false;
-      Get.back();
-
-      // Success message
-      showSnackBar('Success', 'User details updated successfully');
-    } catch (e) {
-      // Handle errors
-      sigupgInProcess.value = false;
-
-      showSnackBar('Error', 'Failed to update user details: $e');
-    }
-  }
-
-  // // this function is to delete user from the DB
-  // Future<void> deleteUser(String userID) async {
-  //   Get.back();
-  //   await FirebaseFirestore.instance
-  //       .collection('sys-users')
-  //       .doc(userID)
-  //       .delete();
-  // }
 
   Future<void> getRoles() async {
     try {

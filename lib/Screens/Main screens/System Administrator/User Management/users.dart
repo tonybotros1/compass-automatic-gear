@@ -260,6 +260,7 @@ class Users extends StatelessWidget {
     return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
+        controller.pass.clear();
         controller.email.text = userData.email;
         controller.name.text = userData.userName;
         for (var roleId in userData.roles) {

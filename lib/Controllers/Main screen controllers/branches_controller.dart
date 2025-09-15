@@ -225,11 +225,8 @@ class BranchesController extends GetxController {
           logout();
         }
       } else if (response.statusCode == 401) {
-        isScreenLoding.value = false;
         logout();
-      } else {
-        isScreenLoding.value = false;
-      }
+      } else {}
     } catch (e) {
       //
     }

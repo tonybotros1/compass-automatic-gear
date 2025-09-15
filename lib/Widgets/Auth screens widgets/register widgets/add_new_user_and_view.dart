@@ -54,7 +54,7 @@ Widget addNewUserAndView(
           controller: controller,
           context: context,
           constraints: constraints,
-          date: userExpiryDate),
+          date: userExpiryDate.toString()),
       Expanded(
         child: Container(
             decoration: BoxDecoration(
