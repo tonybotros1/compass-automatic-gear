@@ -13,7 +13,7 @@ Widget myTextFormFieldWithBorder({
   TextEditingController? controller,
   bool? validate,
   bool obscureText = false,
-  IconButton? suffixIcon,
+  Widget? suffixIcon,
   Icon? icon,
   bool? isnumber,
   bool? isDouble,

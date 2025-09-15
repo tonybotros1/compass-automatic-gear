@@ -1,19 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-import '../../../Controllers/Dashboard Controllers/trading_dashboard_controller.dart';
+import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../consts.dart';
 import '../../main screen widgets/auto_size_box.dart';
 
-Widget tableOfTrades({
+Widget tableOfCarTrades({
   required BoxConstraints constraints,
   required BuildContext context,
-  required TradingDashboardController controller,
+  required CarTradingDashboardController controller,
 }) {
-  // final trades = controller.filteredTrades.isEmpty
-  //     ? controller.allTrades
-  //     : controller.filteredTrades;
-
   final dataSource = TradeDataSource(
     trades: controller.filteredTrades,
     context: context,
@@ -31,10 +26,6 @@ Widget tableOfTrades({
       showEmptyRows: false,
       showFirstLastButtons: true,
       rowsPerPage: controller.pagesPerPage.value,
-      // availableRowsPerPage: const [5, 10],
-      // onRowsPerPageChanged: (rows) {
-      //   controller.changeRowsPerPage(rows!);
-      // },
       showCheckboxColumn: false,
       horizontalMargin: horizontalMarginForTable,
       dataRowMaxHeight: 40,
@@ -45,37 +36,48 @@ Widget tableOfTrades({
       columns: [
         DataColumn(
           label: AutoSizedText(text: 'Brand', constraints: constraints),
-          // onSort: controller.onSort,
         ),
         DataColumn(
           label: AutoSizedText(text: 'Model', constraints: constraints),
-          // onSort: controller.onSort,
+        ),
+        DataColumn(
+          label: AutoSizedText(text: 'Year', constraints: constraints),
+        ),
+        DataColumn(
+          label: AutoSizedText(text: 'Status', constraints: constraints),
+        ),
+        DataColumn(
+          label: AutoSizedText(text: 'Specification', constraints: constraints),
+        ),
+        DataColumn(
+          label: AutoSizedText(text: 'Engine Size', constraints: constraints),
+        ),
+        DataColumn(
+          label: AutoSizedText(text: 'Mileage', constraints: constraints),
+        ),
+        DataColumn(
+          label: AutoSizedText(text: 'Bought From', constraints: constraints),
+        ),
+        DataColumn(
+          label: AutoSizedText(text: 'Sold To', constraints: constraints),
         ),
         DataColumn(
           label: AutoSizedText(constraints: constraints, text: 'Buy Date'),
-          // onSort: controller.onSort,
         ),
         DataColumn(
           label: AutoSizedText(constraints: constraints, text: 'Sell Date'),
-          // onSort: controller.onSort,
         ),
         DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-
+          numeric: true,
           label: AutoSizedText(constraints: constraints, text: 'Paid'),
-          // onSort: controller.onSort,
         ),
         DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-
+          numeric: true,
           label: AutoSizedText(constraints: constraints, text: 'Received'),
-          // onSort: controller.onSort,
         ),
         DataColumn(
-          headingRowAlignment: MainAxisAlignment.end,
-
+          numeric: true,
           label: AutoSizedText(constraints: constraints, text: 'Net'),
-          // onSort: controller.onSort,
         ),
       ],
       source: dataSource,
@@ -88,7 +90,7 @@ DataRow dataRowForTheTable(
   context,
   constraints,
   tradeId,
-  TradingDashboardController controller,
+  CarTradingDashboardController controller,
   index,
 ) {
   final isEvenRow = index % 2 == 0;
@@ -174,66 +176,57 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: FutureBuilder<String>(
-            future: controller.gettradePaid(tradeId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  color: Colors.red,
-                  isBold: true,
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
+        FutureBuilder<String>(
+          future: controller.gettradePaid(tradeId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(
+                color: Colors.red,
+                isBold: true,
+                text: '${snapshot.data}',
+              );
+            }
+          },
         ),
       ),
       DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: FutureBuilder<String>(
-            future: controller.gettradeReceived(tradeId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  color: Colors.green,
-                  isBold: true,
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
+        FutureBuilder<String>(
+          future: controller.gettradeReceived(tradeId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(
+                color: Colors.green,
+                isBold: true,
+                text: '${snapshot.data}',
+              );
+            }
+          },
         ),
       ),
       DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: FutureBuilder<String>(
-            future: controller.gettradeNETs(tradeId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  color: Colors.blueGrey,
-                  isBold: true,
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
+        FutureBuilder<String>(
+          future: controller.gettradeNETs(tradeId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return textForDataRowInTable(
+                color: Colors.blueGrey,
+                isBold: true,
+                text: '${snapshot.data}',
+              );
+            }
+          },
         ),
       ),
     ],
@@ -244,7 +237,7 @@ class TradeDataSource extends DataTableSource {
   final List<DocumentSnapshot> trades;
   final BuildContext context;
   final BoxConstraints constraints;
-  final TradingDashboardController controller;
+  final CarTradingDashboardController controller;
 
   TradeDataSource({
     required this.trades,

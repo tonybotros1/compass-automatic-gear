@@ -1009,21 +1009,24 @@ Future<void> selectDateContext(
 
 String cloudinaryThumbnail(
   String originalUrl, {
-  int width = 150,
-  int height = 150,
-  bool crop = true,
+  int? width,
+  int? height,
   int quality = 80,
+  bool fill = false, // if true, it will crop, else keep aspect ratio
 }) {
-  // منتحقق إذا الرابط صحيح
   if (!originalUrl.contains("/upload/")) {
     throw ArgumentError("Not a valid Cloudinary URL");
   }
 
-  final transformation =
-      "w_$width${height > 0 ? ",h_$height" : ""},q_$quality${crop ? ",c_fill" : ""}";
+  // Build transformation dynamically
+  final size = [
+    if (width != null) "w_$width",
+    if (height != null) "h_$height",
+    "q_$quality",
+    fill ? "c_fill" : "c_fit", // choose fit or fill
+  ].join(",");
 
-  // منضيف التحويل بعد كلمة upload/
-  return originalUrl.replaceFirst("/upload/", "/upload/$transformation/");
+  return originalUrl.replaceFirst("/upload/", "/upload/$size/");
 }
 
 // ///////////////////////////////////////

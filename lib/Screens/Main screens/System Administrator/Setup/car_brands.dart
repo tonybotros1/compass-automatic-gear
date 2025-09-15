@@ -160,7 +160,7 @@ DataRow dataRowForTheTable(
       DataCell(
         Image.network(
           fit: BoxFit.fitWidth,
-          cloudinaryThumbnail(brandData.logo, height: 35, width: 35),
+          cloudinaryThumbnail(brandData.logo, width: 45),
           width: 35,
           errorBuilder: (context, url, error) => const Icon(Icons.error),
         ),
