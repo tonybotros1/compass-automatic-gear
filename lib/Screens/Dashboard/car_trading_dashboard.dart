@@ -2,11 +2,13 @@ import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
+import '../../Widgets/Dashboard Widgets/car trading widgets/capital_dialog.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/car_trade_dialog.dart';
 import '../../Widgets/Dashboard Widgets/trading dashboard widgets/bar_chart_section.dart';
 import '../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_car_trading.dart';
 import '../../consts.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class CarTradingDashboard extends StatelessWidget {
   const CarTradingDashboard({super.key});
@@ -41,10 +43,11 @@ class CarTradingDashboard extends StatelessWidget {
                               showedSelectedName: 'name',
                               items: isYearsLoading ? {} : controller.allYears,
                               onChanged: (key, value) {
-                                controller.yearFilter.value.text = value['name'];
+                                controller.yearFilter.value.text =
+                                    value['name'];
                                 controller.monthFilter.clear();
                                 controller.dayFilter.clear();
-                                controller.allDays.clear();                               
+                                controller.allDays.clear();
                                 controller.isYearSelected.value = true;
                                 controller.isMonthSelected.value = false;
                                 controller.isDaySelected.value = false;
@@ -187,13 +190,15 @@ class CarTradingDashboard extends StatelessWidget {
                           Expanded(
                             child: CustomDropdown(
                               showedSelectedName: 'name',
-                              textcontroller: controller.carBrandFilter.value.text,
+                              textcontroller:
+                                  controller.carBrandFilter.value.text,
                               hintText: 'Car Brand',
                               items: isBrandLoading ? {} : controller.allBrands,
                               onChanged: (key, value) {
                                 controller.carModelFilter.value.clear();
                                 controller.getModelsByCarBrand(key);
-                                controller.carBrandFilter.value.text = value['name'];
+                                controller.carBrandFilter.value.text =
+                                    value['name'];
                                 controller.carBrandFilterId.value = key;
                                 controller.carModelFilterId.value = '';
                                 controller.filterTradesByDate();
@@ -209,11 +214,13 @@ class CarTradingDashboard extends StatelessWidget {
                           Expanded(
                             child: CustomDropdown(
                               showedSelectedName: 'name',
-                              textcontroller: controller.carModelFilter.value.text,
+                              textcontroller:
+                                  controller.carModelFilter.value.text,
                               hintText: 'Car Model',
                               items: isModelLoading ? {} : controller.allModels,
                               onChanged: (key, value) {
-                                controller.carModelFilter.value.text = value['name'];
+                                controller.carModelFilter.value.text =
+                                    value['name'];
                                 controller.carModelFilterId.value = key;
                                 controller.filterTradesByDate();
                               },
@@ -242,7 +249,6 @@ class CarTradingDashboard extends StatelessWidget {
                               ),
                             ),
                             addValue: InkWell(
-                              
                               onTap: () {
                                 // controller.clearValues();
                                 carTradesDialog(
@@ -331,7 +337,24 @@ class CarTradingDashboard extends StatelessWidget {
                               ),
                             ),
                             addValue: InkWell(
-                              onTap: () {},
+                              onTap: controller.isCapitalLoading.isFalse
+                                  ? () async {
+                                      controller.searchForCapitals.value
+                                          .clear();
+                                      controller.getAllCapitals();
+                                      capitalOrOutstandingOrGeneralExpensesDialog(
+                                        isGeneralExpenses: false,
+                                        search: controller.searchForCapitals,
+                                        collection: 'capital',
+                                        filteredMap:
+                                            controller.filteredCapitals,
+                                        map: controller.allCapitals,
+                                        screenName: 'Capitals',
+                                        controller: controller,
+                                        canEdit: true,
+                                      );
+                                    }
+                                  : null,
                               child: const Icon(
                                 Icons.add,
                                 color: Colors.grey,
@@ -339,12 +362,21 @@ class CarTradingDashboard extends StatelessWidget {
                               ),
                             ),
                             refresh: InkWell(
-                              onTap: () {},
-                              child: const Icon(
-                                Icons.refresh,
-                                color: Colors.grey,
-                                size: 20,
-                              ),
+                              onTap: () async {
+                                controller.gettingCapitalsSummary.value = true;
+                                await controller.getCapitalsSummary();
+                                controller.gettingCapitalsSummary.value = false;
+                              },
+                              child: controller.gettingCapitalsSummary.isFalse
+                                  ? const Icon(
+                                      Icons.refresh,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    )
+                                  : const SpinKitDoubleBounce(
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
                             ),
                           ),
                           customBox(

@@ -34,6 +34,12 @@ class DropdownController extends GetxController {
     super.onClose();
   }
 
+  void assignValues(String controller, String showedName) {
+    // textControllerValue.value = textcontroller;
+    textController.value = controller;
+    showedSelectedName.value = showedName;
+  }
+
   String extractSearchableText(Widget widget) {
     if (widget is ListTile) {
       if (widget.title is Text) {
@@ -437,7 +443,7 @@ class CustomDropdown extends StatelessWidget {
 
   final GlobalKey buttonKey = GlobalKey();
   final DropdownController controller = DropdownController();
-  final RxString textControllerValue = RxString('');
+  // final RxString textControllerValue = RxString('');
   // Define a LayerLink to bind the target and follower.
   final LayerLink _layerLink = LayerLink();
 
@@ -461,9 +467,11 @@ class CustomDropdown extends StatelessWidget {
       fontSize: 16,
     );
 
-    textControllerValue.value = textcontroller;
-    controller.textController.value = textcontroller;
-    controller.showedSelectedName.value = showedSelectedName;
+    controller.assignValues(textcontroller, showedSelectedName);
+
+    // textControllerValue.value = textcontroller;
+    // controller.textController.value = textcontroller;
+    // controller.showedSelectedName.value = showedSelectedName;
     controller.nextFocusNode = nextFocusNode;
     bool isEnabled = items.isEmpty ? false : enabled ?? true;
 
@@ -520,7 +528,7 @@ class CustomDropdown extends StatelessWidget {
                                     }
                                   : itemBuilder!,
                               onChanged: (key, value) {
-                                textControllerValue.value = '';
+                                controller.textController.value = '';
                                 controller.selectedKey.value = key;
                                 controller.selectedValue.value = value;
                                 controller.isValid.value = true;
@@ -583,7 +591,7 @@ class CustomDropdown extends StatelessWidget {
                                       }
                                     : itemBuilder!,
                                 onChanged: (key, value) {
-                                  textControllerValue.value = '';
+                                  controller.textController.value = '';
                                   controller.selectedKey.value = key;
                                   controller.selectedValue.value = value;
                                   controller.isValid.value = true;
@@ -646,7 +654,10 @@ class CustomDropdown extends StatelessWidget {
                                           controller.selectedValue,
                                         )
                                       : Text(
-                                          textControllerValue.isEmpty
+                                          controller
+                                                  .textController
+                                                  .value
+                                                  .isEmpty
                                               ? controller.selectedKey.isEmpty
                                                     ? ''
                                                     : showedSelectedName
@@ -655,10 +666,11 @@ class CustomDropdown extends StatelessWidget {
                                                           .selectedValue[showedSelectedName]
                                                           .toString()
                                                     : ''
-                                              : textControllerValue.value,
+                                              : controller.textController.value,
                                           style: isEnabled
                                               ? (enabledTextStyle ??
-                                                    (textControllerValue
+                                                    (controller
+                                                                .textController
                                                                 .value
                                                                 .isEmpty &&
                                                             controller
@@ -682,7 +694,7 @@ class CustomDropdown extends StatelessWidget {
                                   color: isEnabled ? Colors.black : Colors.grey,
                                 ),
                                 if (controller.selectedKey.isNotEmpty ||
-                                    textcontroller.isNotEmpty)
+                                    controller.textController.value.isNotEmpty)
                                   IconButton(
                                     icon: const Icon(
                                       Icons.clear,
@@ -692,7 +704,8 @@ class CustomDropdown extends StatelessWidget {
                                     onPressed: () {
                                       controller.selectedKey.value = '';
                                       controller.selectedValue.value = {};
-                                      textControllerValue.value = '';
+                                      controller.textController.value = '';
+                                      // state.didChange(null);
                                       controller.isValid.value = true;
                                       onDelete?.call(); // notify parent
                                     },

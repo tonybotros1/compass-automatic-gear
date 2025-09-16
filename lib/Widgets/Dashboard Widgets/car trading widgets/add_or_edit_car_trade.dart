@@ -60,7 +60,6 @@ Widget addNewCarTradeOrEdit({
               ),
             ),
             SliverFillRemaining(
-              // Tell the sliver that its child DOES provide its own scrolling.
               hasScrollBody: true,
               child: Container(
                 decoration: containerDecor,
@@ -171,28 +170,23 @@ Widget tableOfScreens({
     columns: [
       DataColumn(
         label: AutoSizedText(text: 'Date', constraints: constraints),
-        // onSort: controller.onSort,
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Item'),
-        // onSort: controller.onSort,
       ),
       DataColumn(
         headingRowAlignment: MainAxisAlignment.end,
         label: AutoSizedText(constraints: constraints, text: 'Paid'),
-        // onSort: controller.onSort,
       ),
       DataColumn(
         headingRowAlignment: MainAxisAlignment.end,
 
         label: AutoSizedText(constraints: constraints, text: 'Received'),
-        // onSort: controller.onSort,
       ),
       DataColumn(
         headingRowAlignment: MainAxisAlignment.start,
 
         label: AutoSizedText(constraints: constraints, text: 'Comments'),
-        // onSort: controller.onSort,
       ),
       const DataColumn(label: Text('')),
     ],

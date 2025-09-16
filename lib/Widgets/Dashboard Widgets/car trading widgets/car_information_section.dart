@@ -32,13 +32,12 @@ Container carInformation({
                   myTextFormFieldWithBorder(
                     controller: controller.date.value,
                     labelText: 'Date',
-                    // isDate: true,
-                    suffixIcon: InkWell(
-                      onTap: () {
-                        selectDateContext(context, controller.date.value);
-                      },
-                      child: const Icon(Icons.date_range),
-                    ),
+                    onFieldSubmitted: (_) async {
+                      normalizeDate(
+                        controller.date.value.text,
+                        controller.date.value,
+                      );
+                    },
                   ),
                   myTextFormFieldWithBorder(
                     labelText: 'Mileage',
@@ -46,6 +45,7 @@ Container carInformation({
                     controller: controller.mileage.value,
                   ),
                   CustomDropdown(
+                    width: double.infinity,
                     textcontroller: controller.colorOut.value.text,
                     hintText: 'Outside Color',
                     showedSelectedName: 'name',
@@ -93,7 +93,7 @@ Container carInformation({
                           },
                         ),
                       ),
-                      const IconButton(onPressed: null, icon: SizedBox()),
+                      // const IconButton(onPressed: null, icon: SizedBox()),
                     ],
                   ),
                   Row(
@@ -325,7 +325,7 @@ Container carInformation({
                           },
                         ),
                       ),
-                      const IconButton(onPressed: null, icon: SizedBox()),
+                      // const IconButton(onPressed: null, icon: SizedBox()),
                     ],
                   ),
                 ],

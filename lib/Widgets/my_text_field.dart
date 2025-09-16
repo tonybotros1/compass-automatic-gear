@@ -32,6 +32,7 @@ Widget myTextFormFieldWithBorder({
   void Function(String)? onChanged,
   void Function(String)? onFieldSubmitted,
   bool? isEnabled = true,
+  void Function(PointerDownEvent)? onTapOutside,
 }) {
   return SizedBox(
     width: width,
@@ -49,6 +50,7 @@ Widget myTextFormFieldWithBorder({
               )
             : const SizedBox(),
         TextFormField(
+          onTapOutside: onTapOutside,
           onEditingComplete: onEditingComplete,
           textInputAction: textInputAction,
           focusNode: focusNode,
@@ -56,14 +58,14 @@ Widget myTextFormFieldWithBorder({
           textAlign: textAlign!,
           initialValue: initialValue,
           style: textFieldFontStyle,
-          onTap: () {
-            if (controller != null) {
-              controller.selection = TextSelection(
-                baseOffset: 0,
-                extentOffset: controller.text.length,
-              );
-            }
-          },
+          // onTap: () {
+          //   if (controller != null) {
+          //     controller.selection = TextSelection(
+          //       baseOffset: 0,
+          //       extentOffset: controller.text.length,
+          //     );
+          //   }
+          // },
           minLines: minLines,
           maxLines: maxLines,
           onChanged: onChanged,
@@ -88,6 +90,10 @@ Widget myTextFormFieldWithBorder({
             isDense: true,
             icon: icon,
             suffixIcon: suffixIcon,
+            prefixIconConstraints: const BoxConstraints(
+              maxHeight: 15,
+              maxWidth: 15,
+            ),
             hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
             // labelText: labelText,
             alignLabelWithHint: true,
