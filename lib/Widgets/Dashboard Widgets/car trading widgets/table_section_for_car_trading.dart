@@ -47,6 +47,12 @@ Widget tableOfCarTrades({
           label: AutoSizedText(text: 'Status', constraints: constraints),
         ),
         DataColumn(
+          label: AutoSizedText(text: 'Color in', constraints: constraints),
+        ),
+        DataColumn(
+          label: AutoSizedText(text: 'Color out', constraints: constraints),
+        ),
+        DataColumn(
           label: AutoSizedText(text: 'Specification', constraints: constraints),
         ),
         DataColumn(

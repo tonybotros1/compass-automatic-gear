@@ -36,8 +36,6 @@ class CarTradingDashboardController extends GetxController {
   final RxList<GeneralExpensesModel> filteredGeneralExpenses =
       RxList<GeneralExpensesModel>([]);
   RxMap allYears = RxMap({});
-  RxMap allMonths = RxMap({});
-  RxMap allDays = RxMap({});
   RxBool isScreenLoding = RxBool(false);
   RxString companyId = RxString('');
   RxInt numberOfCars = RxInt(0);
@@ -76,9 +74,6 @@ class CarTradingDashboardController extends GetxController {
   // RxMap allItems = RxMap({});
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
-  RxBool isYearSelected = RxBool(false);
-  RxBool isMonthSelected = RxBool(false);
-  RxBool isDaySelected = RxBool(false);
   RxString status = RxString('');
   RxString currentTradId = RxString('');
   RxString colorOutId = RxString('');
@@ -133,7 +128,8 @@ class CarTradingDashboardController extends GetxController {
   RxBool gettingCapitalsSummary = RxBool(false);
   RxBool gettingOutstandingSummary = RxBool(false);
   RxBool gettingGeneralExpensesSummary = RxBool(false);
-
+Rx<TextEditingController> fromDate = TextEditingController().obs;
+  Rx<TextEditingController> toDate = TextEditingController().obs;
   @override
   void onInit() async {
     connectWebSocket();
@@ -142,7 +138,6 @@ class CarTradingDashboardController extends GetxController {
     getGeneralExpensesSummary();
     getCarBrands();
     getYears();
-    getMonths();
     getColors();
     getEngineTypes();
     getCarSpecefications();
@@ -270,9 +265,6 @@ class CarTradingDashboardController extends GetxController {
     allEngineSizes.assignAll(await helper.getAllListValues('ENGINE_TYPES'));
   }
 
-  Future<void> getMonths() async {
-    allMonths.assignAll(await helper.getAllListValues('MONTHS'));
-  }
 
   Future<void> getBuyersAndSellers() async {
     allBuyersAndSellers.assignAll(
