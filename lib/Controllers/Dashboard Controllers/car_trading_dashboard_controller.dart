@@ -7,12 +7,15 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/car trading/capitals_model.dart';
+import '../../Models/car trading/general_expenses_model.dart';
+import '../../Models/car trading/outstanding_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import '../Main screen controllers/websocket_controller.dart';
 
 class CarTradingDashboardController extends GetxController {
-  Rx<TextEditingController> searchForCapitals = TextEditingController().obs;
+  Rx<TextEditingController> searchForCapitalsOrOutstandingOrGeneralExpenses =
+      TextEditingController().obs;
   Rx<TextEditingController> yearFilter = TextEditingController().obs;
   TextEditingController monthFilter = TextEditingController();
   TextEditingController dayFilter = TextEditingController();
@@ -22,17 +25,16 @@ class CarTradingDashboardController extends GetxController {
   RxString carModelFilterId = RxString('');
   final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
   final RxList<CapitalsModel> allCapitals = RxList<CapitalsModel>([]);
-  final RxList<DocumentSnapshot> allOutstanding = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> allGeneralExpenses = RxList<DocumentSnapshot>(
-    [],
-  );
+  final RxList<OutstandingModel> allOutstanding = RxList<OutstandingModel>([]);
+  final RxList<GeneralExpensesModel> allGeneralExpenses =
+      RxList<GeneralExpensesModel>([]);
   final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
   final RxList<CapitalsModel> filteredCapitals = RxList<CapitalsModel>([]);
-  final RxList<DocumentSnapshot> filteredOutstanding = RxList<DocumentSnapshot>(
+  final RxList<OutstandingModel> filteredOutstanding = RxList<OutstandingModel>(
     [],
   );
-  final RxList<DocumentSnapshot> filteredGeneralExpenses =
-      RxList<DocumentSnapshot>([]);
+  final RxList<GeneralExpensesModel> filteredGeneralExpenses =
+      RxList<GeneralExpensesModel>([]);
   RxMap allYears = RxMap({});
   RxMap allMonths = RxMap({});
   RxMap allDays = RxMap({});
@@ -129,16 +131,16 @@ class CarTradingDashboardController extends GetxController {
   WebSocketService ws = Get.find<WebSocketService>();
   final focusNode = FocusNode();
   RxBool gettingCapitalsSummary = RxBool(false);
+  RxBool gettingOutstandingSummary = RxBool(false);
+  RxBool gettingGeneralExpensesSummary = RxBool(false);
 
   @override
   void onInit() async {
     connectWebSocket();
-    getCapitalsSummary();
+    getCapitalsOROutstandingSummary('capitals');
+    getCapitalsOROutstandingSummary('outstanding');
+    getGeneralExpensesSummary();
     getCarBrands();
-    // getAllTrades();
-    // getAllCapitals();
-    // getAllOutstanding();
-    // getAllGeneralExpenses();
     getYears();
     getMonths();
     getColors();
@@ -146,7 +148,7 @@ class CarTradingDashboardController extends GetxController {
     getCarSpecefications();
     getBuyersAndSellers();
     getNamesOfPeople();
-    // getItems();
+    getItems();
     everAll(
       [
         totalNETsForAllTrades,
@@ -197,29 +199,61 @@ class CarTradingDashboardController extends GetxController {
           allCapitals.removeWhere((b) => b.id == deletedId);
           break;
 
-        // case "model_created":
-        //   final newModel = Model.fromJson(message["data"]);
-        //   allModels.add(newModel);
-        //   break;
+        case "outstanding_created":
+          final newModel = OutstandingModel.fromJson(message["data"]);
+          allOutstanding.add(newModel);
+          break;
 
-        // case "model_updated":
-        //   final updated = Model.fromJson(message["data"]);
-        //   final index = allModels.indexWhere((m) => m.id == updated.id);
-        //   if (index != -1) {
-        //     allModels[index] = updated;
-        //   }
-        //   break;
+        case "outstanding_updated":
+          final updated = OutstandingModel.fromJson(message["data"]);
+          final totals = message['totals'];
+          final index = allOutstanding.indexWhere((m) => m.id == updated.id);
+          if (index != -1) {
+            allOutstanding[index] = updated;
+            totalPays.value = totals['pay'];
+            totalReceives.value = totals['receive'];
+            totalNETs.value = totals['net'];
+          }
+          break;
 
-        // case "model_deleted":
-        //   final deletedId = message["data"]["_id"];
-        //   allModels.removeWhere((m) => m.id == deletedId);
-        //   break;
+        case "outstanding_deleted":
+          final deletedId = message["data"]["_id"];
+          allOutstanding.removeWhere((m) => m.id == deletedId);
+          break;
+
+        case "general_expenses_created":
+          final newModel = GeneralExpensesModel.fromJson(message["data"]);
+          allGeneralExpenses.add(newModel);
+          break;
+
+        case "general_expenses_updated":
+          final updated = GeneralExpensesModel.fromJson(message["data"]);
+          final totals = message['totals'];
+          final index = allGeneralExpenses.indexWhere(
+            (m) => m.id == updated.id,
+          );
+          if (index != -1) {
+            allGeneralExpenses[index] = updated;
+            totalPays.value = totals['pay'];
+            totalReceives.value = totals['receive'];
+            totalNETs.value = totals['net'];
+          }
+          break;
+
+        case "general_expenses_deleted":
+          final deletedId = message["data"]["_id"];
+          allGeneralExpenses.removeWhere((m) => m.id == deletedId);
+          break;
       }
     });
   }
 
   Future<void> getYears() async {
     allYears.assignAll(await helper.getAllListValues('YEARS'));
+  }
+
+  Future<void> getItems() async {
+    allItems.assignAll(await helper.getAllListValues('ITEMS'));
   }
 
   Future<void> getColors() async {
@@ -258,13 +292,14 @@ class CarTradingDashboardController extends GetxController {
     allModels.assignAll(await helper.getModelsValues(brandId));
   }
 
-  Future<void> getCapitalsSummary() async {
+  Future<void> getCapitalsOROutstandingSummary(String type) async {
     try {
-      allCapitals.clear();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/car_trading/get_capitals_summary');
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/get_capitals_or_outstanding_summary/$type',
+      );
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -272,14 +307,21 @@ class CarTradingDashboardController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         Map totals = decoded["summary"];
-        totalPaysForAllCapitals.value = totals['total_pay'];
-        totalReceivesForAllCapitals.value = totals['total_receive'];
-        totalNETsForAllCapitals.value = totals['total_net'];
-        numberOfCapitalsDocs.value = totals['count'];
+        if (type == 'capitals') {
+          totalPaysForAllCapitals.value = totals['total_pay'];
+          totalReceivesForAllCapitals.value = totals['total_receive'];
+          totalNETsForAllCapitals.value = totals['total_net'];
+          numberOfCapitalsDocs.value = totals['count'];
+        } else if (type == 'outstanding') {
+          totalPaysForAllOutstanding.value = totals['total_pay'];
+          totalReceivesForAllOutstanding.value = totals['total_receive'];
+          totalNETsForAllOutstanding.value = totals['total_net'];
+          numberOfOutstandingDocs.value = totals['count'];
+        }
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllCapitals();
+          await getCapitalsOROutstandingSummary(type);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -291,34 +333,41 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> getAllCapitals() async {
+  Future<void> getAllCapitalsOROutstanding(String type) async {
     try {
       isCapitalLoading.value = true;
-      allCapitals.clear();
       totalPays.value = 0;
       totalReceives.value = 0;
       totalNETs.value = 0;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/car_trading/get_all_capitals');
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/get_all_capitals_or_outstanding/$type',
+      );
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        List capitals = decoded['capitals'];
+        List data = decoded['data'];
         Map totals = decoded["totals"];
         totalPays.value = totals['total_pay'];
         totalReceives.value = totals['total_receive'];
         totalNETs.value = totals['total_net'];
-        allCapitals.assignAll(capitals.map((c) => CapitalsModel.fromJson(c)));
+        if (type == "capitals") {
+          allCapitals.assignAll(data.map((c) => CapitalsModel.fromJson(c)));
+        } else if (type == "outstanding") {
+          allOutstanding.assignAll(
+            data.map((c) => OutstandingModel.fromJson(c)),
+          );
+        }
         isCapitalLoading.value = false;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllCapitals();
+          await getAllCapitalsOROutstanding(type);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -335,10 +384,15 @@ class CarTradingDashboardController extends GetxController {
 
   void addNewCapitalOrOutstandingOrGeneralExpenses(String type) async {
     switch (type) {
-      case 'capital':
-        await addNewCapital();
+      case 'capitals':
+        await addNewCapitalOrOutstanding(type);
         break;
-      // case '':
+      case 'outstanding':
+        await addNewCapitalOrOutstanding(type);
+        break;
+      case 'general_expenses':
+        await addNewGeneralExpenses();
+        break;
       default:
     }
   }
@@ -348,10 +402,15 @@ class CarTradingDashboardController extends GetxController {
     String id,
   ) async {
     switch (type) {
-      case 'capital':
-        await deleteCapital(id);
+      case 'capitals':
+        await deleteCapitalOrOutstanding(id, type);
         break;
-      // case '':
+      case 'outstanding':
+        await deleteCapitalOrOutstanding(id, type);
+        break;
+      case 'general_expenses':
+        await deleteGeneralExpenses(id);
+        break;
       default:
     }
   }
@@ -361,15 +420,20 @@ class CarTradingDashboardController extends GetxController {
     String id,
   ) async {
     switch (type) {
-      case 'capital':
-        await updateCapital(id);
+      case 'capitals':
+        await updateCapitalOrOutstanding(id, type);
         break;
-      // case '':
+      case 'outstanding':
+        await updateCapitalOrOutstanding(id, type);
+        break;
+      case 'general_expenses':
+        await updateGeneralEpenses(id);
+        break;
       default:
     }
   }
 
-  Future<void> addNewCapital() async {
+  Future<void> addNewCapitalOrOutstanding(String type) async {
     try {
       if (itemDate.value.text.isEmpty) {
         showSnackBar('Alert', 'Please add valid Date');
@@ -381,7 +445,9 @@ class CarTradingDashboardController extends GetxController {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/car_trading/add_new_capital');
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/add_new_capital_or_outstanding/$type',
+      );
       final response = await http.post(
         url,
         headers: {
@@ -403,7 +469,7 @@ class CarTradingDashboardController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewCapital();
+          await addNewCapitalOrOutstanding(type);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -417,21 +483,28 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> deleteCapital(String id) async {
+  Future<void> deleteCapitalOrOutstanding(String id, String type) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/car_trading/delete_capital/$id');
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/delete_capital_or_outstanding/$type/$id',
+      );
       final response = await http.delete(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        Map totals = decoded["totals"];
+        totalPays.value -= totals["pay"];
+        totalReceives.value -= totals["receive"];
+        totalNETs.value = totalReceives.value - totalPays.value;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deleteCapital(id);
+          await deleteCapitalOrOutstanding(id, type);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -444,7 +517,7 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> updateCapital(String id) async {
+  Future<void> updateCapitalOrOutstanding(String id, String type) async {
     try {
       if (itemDate.value.text.isEmpty) {
         showSnackBar('Alert', 'Please add valid Date');
@@ -456,7 +529,9 @@ class CarTradingDashboardController extends GetxController {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/car_trading/update_capital/$id');
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/update_capital_or_outstanding/$type/$id',
+      );
       final response = await http.patch(
         url,
         headers: {
@@ -475,7 +550,215 @@ class CarTradingDashboardController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewCapital();
+          await updateCapitalOrOutstanding(id, type);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+    } catch (e) {
+      Get.back();
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  Future<void> getAllGeneralExpenses() async {
+    try {
+      isCapitalLoading.value = true;
+      totalPays.value = 0;
+      totalReceives.value = 0;
+      totalNETs.value = 0;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/car_trading/get_all_general_expenses');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List data = decoded['data'];
+        Map totals = decoded["totals"];
+        totalPays.value = totals['total_pay'];
+        totalReceives.value = totals['total_receive'];
+        totalNETs.value = totals['total_net'];
+
+        allGeneralExpenses.assignAll(
+          data.map((g) => GeneralExpensesModel.fromJson(g)),
+        );
+
+        isCapitalLoading.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllGeneralExpenses();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        isCapitalLoading.value = false;
+        logout();
+      } else {
+        isCapitalLoading.value = false;
+      }
+    } catch (e) {
+      isCapitalLoading.value = false;
+    }
+  }
+
+  Future<void> getGeneralExpensesSummary() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/get_general_expenses_summary',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        Map totals = decoded["summary"];
+        totalPaysForAllGeneralExpenses.value = totals['total_pay'];
+        totalReceivesForAllGeneralExpenses.value = totals['total_receive'];
+        totalNETsForAllGeneralExpenses.value = totals['total_net'];
+        numberOfGeneralExpensesDocs.value = totals['count'];
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getGeneralExpensesSummary();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> addNewGeneralExpenses() async {
+    try {
+      if (itemDate.value.text.isEmpty) {
+        showSnackBar('Alert', 'Please add valid Date');
+        return;
+      }
+      final inputFormat = DateFormat("dd-MM-yyyy");
+      final parsedDate = inputFormat.parse(itemDate.value.text);
+      final isoDate = parsedDate.toIso8601String();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/car_trading/add_new_general_expenses');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "date": isoDate,
+          "item": itemId.value,
+          "pay": double.tryParse(pay.text) ?? 0.0,
+          "receive": double.tryParse(receive.text) ?? 0.0,
+          "comment": comments.value.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        totalPays.value += double.tryParse(pay.text) ?? 0.0;
+        totalReceives.value += double.tryParse(receive.text) ?? 0.0;
+        totalNETs.value = totalReceives.value - totalPays.value;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewGeneralExpenses();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+    } catch (e) {
+      Get.back();
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  Future<void> deleteGeneralExpenses(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/delete_general_expenses/$id',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        Map totals = decoded["totals"];
+        totalPays.value -= totals["pay"];
+        totalReceives.value -= totals["receive"];
+        totalNETs.value = totalReceives.value - totalPays.value;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteGeneralExpenses(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> updateGeneralEpenses(String id) async {
+    try {
+      if (itemDate.value.text.isEmpty) {
+        showSnackBar('Alert', 'Please add valid Date');
+        return;
+      }
+      final inputFormat = DateFormat("dd-MM-yyyy");
+      final parsedDate = inputFormat.parse(itemDate.value.text);
+      final isoDate = parsedDate.toIso8601String();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/update_generale_expenses/$id',
+      );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "date": isoDate,
+          "item": itemId.value,
+          "pay": double.tryParse(pay.text) ?? 0.0,
+          "receive": double.tryParse(receive.text) ?? 0.0,
+          "comment": comments.value.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateGeneralEpenses(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -564,44 +847,6 @@ class CarTradingDashboardController extends GetxController {
           });
     } catch (e) {
       isScreenLoding.value = false;
-    }
-  }
-
-  void getAllOutstanding() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_outstanding')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('date', descending: true)
-          .snapshots()
-          .listen((trade) {
-            allOutstanding.assignAll(List<DocumentSnapshot>.from(trade.docs));
-            filteredOutstanding.assignAll(allOutstanding);
-            numberOfOutstandingDocs.value = allOutstanding.length;
-            calculateTotalsForOutstanding();
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getAllGeneralExpenses() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_general_expenses')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('date', descending: true)
-          .snapshots()
-          .listen((trade) {
-            allGeneralExpenses.assignAll(
-              List<DocumentSnapshot>.from(trade.docs),
-            );
-            filteredGeneralExpenses.assignAll(allGeneralExpenses);
-            numberOfGeneralExpensesDocs.value = allGeneralExpenses.length;
-            calculateTotalsForGeneralExpenses();
-          });
-    } catch (e) {
-      //
     }
   }
 
@@ -714,37 +959,37 @@ class CarTradingDashboardController extends GetxController {
   }
 
   void calculateTotalsForOutstanding() {
-    totalNETsForAllOutstanding.value = 0.0;
-    totalPaysForAllOutstanding.value = 0.0;
-    totalReceivesForAllOutstanding.value = 0.0;
+    // totalNETsForAllOutstanding.value = 0.0;
+    // totalPaysForAllOutstanding.value = 0.0;
+    // totalReceivesForAllOutstanding.value = 0.0;
 
-    for (var trade in filteredOutstanding) {
-      final data = trade.data() as Map<String, dynamic>;
+    // for (var trade in filteredOutstanding) {
+    //   final data = trade.data() as Map<String, dynamic>;
 
-      final pay = double.tryParse(data['pay'] ?? 0);
-      final receive = double.tryParse(data['receive'] ?? 0);
+    //   final pay = double.tryParse(data['pay'] ?? 0);
+    //   final receive = double.tryParse(data['receive'] ?? 0);
 
-      totalPaysForAllOutstanding.value += pay!;
-      totalReceivesForAllOutstanding.value += receive!;
-      totalNETsForAllOutstanding.value += (receive - pay);
-    }
+    //   totalPaysForAllOutstanding.value += pay!;
+    //   totalReceivesForAllOutstanding.value += receive!;
+    //   totalNETsForAllOutstanding.value += (receive - pay);
+    // }
   }
 
   void calculateTotalsForGeneralExpenses() {
-    totalNETsForAllGeneralExpenses.value = 0.0;
-    totalPaysForAllGeneralExpenses.value = 0.0;
-    totalReceivesForAllGeneralExpenses.value = 0.0;
+    // totalNETsForAllGeneralExpenses.value = 0.0;
+    // totalPaysForAllGeneralExpenses.value = 0.0;
+    // totalReceivesForAllGeneralExpenses.value = 0.0;
 
-    for (var trade in filteredGeneralExpenses) {
-      final data = trade.data() as Map<String, dynamic>;
+    // for (var trade in filteredGeneralExpenses) {
+    //   final data = trade.data() as Map<String, dynamic>;
 
-      final pay = double.tryParse(data['pay'] ?? 0);
-      final receive = double.tryParse(data['receive'] ?? 0);
+    //   final pay = double.tryParse(data['pay'] ?? 0);
+    //   final receive = double.tryParse(data['receive'] ?? 0);
 
-      totalPaysForAllGeneralExpenses.value += pay!;
-      totalReceivesForAllGeneralExpenses.value += receive!;
-      totalNETsForAllGeneralExpenses.value += (receive - pay);
-    }
+    //   totalPaysForAllGeneralExpenses.value += pay!;
+    //   totalReceivesForAllGeneralExpenses.value += receive!;
+    //   totalNETsForAllGeneralExpenses.value += (receive - pay);
+    // }
   }
 
   void filterTradesForChart() {

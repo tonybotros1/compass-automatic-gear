@@ -339,13 +339,19 @@ class CarTradingDashboard extends StatelessWidget {
                             addValue: InkWell(
                               onTap: controller.isCapitalLoading.isFalse
                                   ? () async {
-                                      controller.searchForCapitals.value
+                                      controller
+                                          .searchForCapitalsOrOutstandingOrGeneralExpenses
+                                          .value
                                           .clear();
-                                      controller.getAllCapitals();
+                                      controller.allCapitals.clear();
+                                      controller.getAllCapitalsOROutstanding(
+                                        'capitals',
+                                      );
                                       capitalOrOutstandingOrGeneralExpensesDialog(
                                         isGeneralExpenses: false,
-                                        search: controller.searchForCapitals,
-                                        collection: 'capital',
+                                        search: controller
+                                            .searchForCapitalsOrOutstandingOrGeneralExpenses,
+                                        collection: 'capitals',
                                         filteredMap:
                                             controller.filteredCapitals,
                                         map: controller.allCapitals,
@@ -364,7 +370,10 @@ class CarTradingDashboard extends StatelessWidget {
                             refresh: InkWell(
                               onTap: () async {
                                 controller.gettingCapitalsSummary.value = true;
-                                await controller.getCapitalsSummary();
+                                await controller
+                                    .getCapitalsOROutstandingSummary(
+                                      'capitals',
+                                    );
                                 controller.gettingCapitalsSummary.value = false;
                               },
                               child: controller.gettingCapitalsSummary.isFalse
@@ -432,7 +441,30 @@ class CarTradingDashboard extends StatelessWidget {
                               ),
                             ),
                             addValue: InkWell(
-                              onTap: () {},
+                              onTap: controller.isCapitalLoading.isFalse
+                                  ? () async {
+                                      controller
+                                          .searchForCapitalsOrOutstandingOrGeneralExpenses
+                                          .value
+                                          .clear();
+                                      controller.allOutstanding.clear();
+                                      controller.getAllCapitalsOROutstanding(
+                                        'outstanding',
+                                      );
+                                      capitalOrOutstandingOrGeneralExpensesDialog(
+                                        isGeneralExpenses: false,
+                                        search: controller
+                                            .searchForCapitalsOrOutstandingOrGeneralExpenses,
+                                        collection: 'outstanding',
+                                        filteredMap:
+                                            controller.filteredOutstanding,
+                                        map: controller.allOutstanding,
+                                        screenName: 'Outstanding',
+                                        controller: controller,
+                                        canEdit: true,
+                                      );
+                                    }
+                                  : null,
                               child: const Icon(
                                 Icons.add,
                                 color: Colors.grey,
@@ -440,12 +472,27 @@ class CarTradingDashboard extends StatelessWidget {
                               ),
                             ),
                             refresh: InkWell(
-                              onTap: () {},
-                              child: const Icon(
-                                Icons.refresh,
-                                color: Colors.grey,
-                                size: 20,
-                              ),
+                              onTap: () async {
+                                controller.gettingOutstandingSummary.value =
+                                    true;
+                                await controller
+                                    .getCapitalsOROutstandingSummary(
+                                      'outstanding',
+                                    );
+                                controller.gettingOutstandingSummary.value =
+                                    false;
+                              },
+                              child:
+                                  controller.gettingOutstandingSummary.isFalse
+                                  ? const Icon(
+                                      Icons.refresh,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    )
+                                  : const SpinKitDoubleBounce(
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
                             ),
                           ),
                           customBox(
@@ -501,7 +548,28 @@ class CarTradingDashboard extends StatelessWidget {
                               ),
                             ),
                             addValue: InkWell(
-                              onTap: () {},
+                              onTap: controller.isCapitalLoading.isFalse
+                                  ? () async {
+                                      controller
+                                          .searchForCapitalsOrOutstandingOrGeneralExpenses
+                                          .value
+                                          .clear();
+                                      controller.allGeneralExpenses.clear();
+                                      controller.getAllGeneralExpenses();
+                                      capitalOrOutstandingOrGeneralExpensesDialog(
+                                        isGeneralExpenses: true,
+                                        search: controller
+                                            .searchForCapitalsOrOutstandingOrGeneralExpenses,
+                                        collection: 'general_expenses',
+                                        filteredMap:
+                                            controller.filteredGeneralExpenses,
+                                        map: controller.allGeneralExpenses,
+                                        screenName: 'General Expenses',
+                                        controller: controller,
+                                        canEdit: true,
+                                      );
+                                    }
+                                  : null,
                               child: const Icon(
                                 Icons.add,
                                 color: Colors.grey,
@@ -509,12 +577,26 @@ class CarTradingDashboard extends StatelessWidget {
                               ),
                             ),
                             refresh: InkWell(
-                              onTap: () {},
-                              child: const Icon(
-                                Icons.refresh,
-                                color: Colors.grey,
-                                size: 20,
-                              ),
+                              onTap: () async {
+                                controller.gettingGeneralExpensesSummary.value =
+                                    true;
+                                await controller.getGeneralExpensesSummary();
+                                controller.gettingGeneralExpensesSummary.value =
+                                    false;
+                              },
+                              child:
+                                  controller
+                                      .gettingGeneralExpensesSummary
+                                      .isFalse
+                                  ? const Icon(
+                                      Icons.refresh,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    )
+                                  : const SpinKitDoubleBounce(
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
                             ),
                           ),
                           customBox(
