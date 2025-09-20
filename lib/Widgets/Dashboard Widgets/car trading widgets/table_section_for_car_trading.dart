@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
+import '../../../Models/car trading/car_trade_model.dart';
 import '../../../consts.dart';
 import '../../main screen widgets/auto_size_box.dart';
 
@@ -92,7 +92,7 @@ Widget tableOfCarTrades({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> tradeData,
+  CarTradeModel tradeData,
   context,
   constraints,
   tradeId,
@@ -111,128 +111,94 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text: controller.getdataName(
-            tradeData['car_brand'],
-            controller.allBrands,
-          ),
-        ),
-        // FutureBuilder<String>(
-        //   future: controller.getCarBrandName(
-        //     tradeData['car_brand'],
-        //   ),
-        //   builder: (context, snapshot) {
-        //     if (snapshot.connectionState == ConnectionState.waiting) {
-        //       return const Text('Loading...');
-        //     } else if (snapshot.hasError) {
-        //       return const Text('Error');
-        //     } else {
-        //       return textForDataRowInTable(
-        //         text: '${snapshot.data}',
-        //       );
-        //     }
-        //   },
-        // ),
-      ),
-      DataCell(
-        FutureBuilder<String>(
-          future: controller.getCarModelName(
-            tradeData['car_brand'],
-            tradeData['car_model'],
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(
-                text: '${snapshot.data}',
-                formatDouble: false,
-              );
-            }
-          },
+          text: tradeData.carBrand.toString(),
         ),
       ),
       DataCell(
-        FutureBuilder<String>(
-          future: controller.getBuyDate(tradeId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(text: '${snapshot.data}');
-            }
-          },
+        textForDataRowInTable(
+          text: tradeData.carModel.toString(),
+          formatDouble: false,
         ),
       ),
       DataCell(
-        FutureBuilder<String>(
-          future: controller.getSellDate(tradeId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(text: '${snapshot.data}');
-            }
-          },
+        textForDataRowInTable(
+          text: tradeData.year.toString(),
+          formatDouble: false,
         ),
       ),
       DataCell(
-        FutureBuilder<String>(
-          future: controller.gettradePaid(tradeId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(
-                color: Colors.red,
-                isBold: true,
-                text: '${snapshot.data}',
-              );
-            }
-          },
+        textForDataRowInTable(
+          text: tradeData.status.toString(),
+          formatDouble: false,
         ),
       ),
       DataCell(
-        FutureBuilder<String>(
-          future: controller.gettradeReceived(tradeId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(
-                color: Colors.green,
-                isBold: true,
-                text: '${snapshot.data}',
-              );
-            }
-          },
+        textForDataRowInTable(
+          text: tradeData.colorIn.toString(),
+          formatDouble: false,
         ),
       ),
       DataCell(
-        FutureBuilder<String>(
-          future: controller.gettradeNETs(tradeId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(
-                color: Colors.blueGrey,
-                isBold: true,
-                text: '${snapshot.data}',
-              );
-            }
-          },
+        textForDataRowInTable(
+          text: tradeData.colorOut.toString(),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.specification.toString(),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.engineSize.toString(),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.mileage.toString(),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.boughtFrom.toString(),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.soldTo.toString(),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: textToDate(tradeData.buyDate.toString()),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: textToDate(tradeData.sellDate.toString()),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.pay.toString(),
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.receive.toString(),
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.net.toString(),
         ),
       ),
     ],
@@ -240,7 +206,7 @@ DataRow dataRowForTheTable(
 }
 
 class TradeDataSource extends DataTableSource {
-  final List<DocumentSnapshot> trades;
+  final List<CarTradeModel> trades;
   final BuildContext context;
   final BoxConstraints constraints;
   final CarTradingDashboardController controller;
@@ -257,11 +223,10 @@ class TradeDataSource extends DataTableSource {
     if (index >= trades.length) return null;
 
     final trade = trades[index];
-    final tradeData = trade.data() as Map<String, dynamic>;
     final tradeId = trade.id;
 
     return dataRowForTheTable(
-      tradeData,
+      trade,
       context,
       constraints,
       tradeId,

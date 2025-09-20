@@ -274,7 +274,7 @@ class CarTradingDashboard extends StatelessWidget {
                             ),
                             addValue: InkWell(
                               onTap: () {
-                                // controller.clearValues();
+                                controller.clearValues();
                                 carTradesDialog(
                                   tradeID: '',
                                   controller: controller,
@@ -282,7 +282,7 @@ class CarTradingDashboard extends StatelessWidget {
                                   onPressed: controller.addingNewValue.value
                                       ? null
                                       : () async {
-                                          // controller.addNewTrade();
+                                          controller.addNewTrade();
                                         },
                                 );
                               },

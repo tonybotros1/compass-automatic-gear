@@ -38,11 +38,17 @@ Container carInformation({
                         controller.date.value,
                       );
                     },
+                    onChanged: (_) {
+                      controller.carModified.value = true;
+                    },
                   ),
                   myTextFormFieldWithBorder(
                     labelText: 'Mileage',
                     isnumber: true,
                     controller: controller.mileage.value,
+                    onChanged: (_) {
+                      controller.carModified.value = true;
+                    },
                   ),
                   CustomDropdown(
                     width: double.infinity,
@@ -53,6 +59,12 @@ Container carInformation({
                     onChanged: (key, value) {
                       controller.colorOut.value.text = value['name'];
                       controller.colorOutId.value = key;
+                      controller.carModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.colorOut.value.clear();
+                      controller.colorOutId.value = '';
+                      controller.carModified.value = true;
                     },
                   ),
                 ],
@@ -85,11 +97,15 @@ Container carInformation({
                             controller.getModelsByCarBrand(key);
                             controller.carBrand.value.text = value['name'];
                             controller.carBrandId.value = key;
+                            controller.carModified.value = true;
                           },
                           onDelete: () {
                             controller.allModels.clear();
                             controller.carModel.value.clear();
                             controller.carModelId.value = '';
+                            controller.carBrand.value.clear();
+                            controller.carBrandId.value = '';
+                            controller.carModified.value = true;
                           },
                         ),
                       ),
@@ -112,6 +128,12 @@ Container carInformation({
                             controller.carSpecification.value.text =
                                 value['name'];
                             controller.carSpecificationId.value = key;
+                            controller.carModified.value = true;
+                          },
+                          onDelete: () {
+                            controller.carSpecification.value.clear();
+                            controller.carSpecificationId.value = '';
+                            controller.carModified.value = true;
                           },
                         ),
                       ),
@@ -142,6 +164,12 @@ Container carInformation({
                           onChanged: (key, value) {
                             controller.colorIn.value.text = value['name'];
                             controller.colorInId.value = key;
+                            controller.carModified.value = true;
+                          },
+                          onDelete: () {
+                            controller.colorIn.value.clear();
+                            controller.colorInId.value = '';
+                            controller.carModified.value = true;
                           },
                         ),
                       ),
@@ -188,6 +216,12 @@ Container carInformation({
                           onChanged: (key, value) {
                             controller.carModel.value.text = value['name'];
                             controller.carModelId.value = key;
+                            controller.carModified.value = true;
+                          },
+                          onDelete: () {
+                            controller.carModel.value.clear();
+                            controller.carModelId.value = '';
+                            controller.carModified.value = true;
                           },
                         ),
                       ),
@@ -214,6 +248,12 @@ Container carInformation({
                           onChanged: (key, value) {
                             controller.engineSize.value.text = value['name'];
                             controller.engineSizeId.value = key;
+                            controller.carModified.value = true;
+                          },
+                          onDelete: () {
+                            controller.engineSize.value.clear();
+                            controller.engineSizeId.value = '';
+                            controller.carModified.value = true;
                           },
                         ),
                       ),
@@ -244,6 +284,12 @@ Container carInformation({
                           onChanged: (key, value) {
                             controller.year.value.text = value['name'];
                             controller.yearId.value = key;
+                            controller.carModified.value = true;
+                          },
+                          onDelete: () {
+                            controller.year.value.clear();
+                            controller.yearId.value = '';
+                            controller.carModified.value = true;
                           },
                         ),
                       ),
@@ -291,6 +337,12 @@ Container carInformation({
                           onChanged: (key, value) {
                             controller.boughtFrom.value.text = value['name'];
                             controller.boughtFromId.value = key;
+                            controller.carModified.value = true;
+                          },
+                          onDelete: () {
+                            controller.boughtFrom.value.clear();
+                            controller.boughtFromId.value = '';
+                            controller.carModified.value = true;
                           },
                         ),
                       ),
@@ -322,6 +374,12 @@ Container carInformation({
                           onChanged: (key, value) {
                             controller.soldTo.value.text = value['name'];
                             controller.soldToId.value = key;
+                            controller.carModified.value = true;
+                          },
+                          onDelete: () {
+                            controller.soldTo.value.clear();
+                            controller.soldToId.value = '';
+                            controller.carModified.value = true;
                           },
                         ),
                       ),
@@ -341,6 +399,9 @@ Container carInformation({
                 controller: controller.note,
                 labelText: 'Note',
                 maxLines: 7,
+                onChanged: (_) {
+                  controller.carModified.value = true;
+                },
               );
             },
           ),

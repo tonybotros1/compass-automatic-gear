@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import '../../Models/car trading/capitals_model.dart';
+import '../../Models/car trading/car_trade_model.dart';
+import '../../Models/car trading/car_trading_items_model.dart';
 import '../../Models/car trading/general_expenses_model.dart';
 import '../../Models/car trading/outstanding_model.dart';
 import '../../consts.dart';
@@ -23,12 +25,12 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> carBrandFilter = TextEditingController().obs;
   RxString carBrandFilterId = RxString('');
   RxString carModelFilterId = RxString('');
-  final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
+  final RxList<CarTradeModel> allTrades = RxList<CarTradeModel>([]);
   final RxList<CapitalsModel> allCapitals = RxList<CapitalsModel>([]);
   final RxList<OutstandingModel> allOutstanding = RxList<OutstandingModel>([]);
   final RxList<GeneralExpensesModel> allGeneralExpenses =
       RxList<GeneralExpensesModel>([]);
-  final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
+  final RxList<CarTradeModel> filteredTrades = RxList<CarTradeModel>([]);
   final RxList<CapitalsModel> filteredCapitals = RxList<CapitalsModel>([]);
   final RxList<OutstandingModel> filteredOutstanding = RxList<OutstandingModel>(
     [],
@@ -37,7 +39,6 @@ class CarTradingDashboardController extends GetxController {
       RxList<GeneralExpensesModel>([]);
   RxMap allYears = RxMap({});
   RxBool isScreenLoding = RxBool(false);
-  RxString companyId = RxString('');
   RxInt numberOfCars = RxInt(0);
   RxInt numberOfCapitalsDocs = RxInt(0);
   RxInt numberOfOutstandingDocs = RxInt(0);
@@ -58,7 +59,7 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalNetProfit = RxDouble(0.0);
   RxInt pagesPerPage = RxInt(7);
   DateFormat format = DateFormat('yyyy-MM-dd');
-  DateFormat itemformat = DateFormat('dd-MM-yyyy');
+  DateFormat inputFormat = DateFormat("dd-MM-yyyy");
   RxInt touchedIndex = 0.obs;
   RxInt newPercentage = RxInt(0);
   RxInt soldPercentage = RxInt(0);
@@ -114,11 +115,12 @@ class CarTradingDashboardController extends GetxController {
   RxString soldToId = RxString('');
   RxString itemId = RxString('');
   RxString nameId = RxString('');
-  RxList<Map<String, dynamic>> addedItems = RxList([]);
+  RxList<CarTradingItemsModel> addedItems = RxList([]);
   RxDouble totalPays = RxDouble(0.0);
   RxDouble totalReceives = RxDouble(0.0);
   RxDouble totalNETs = RxDouble(0.0);
-  RxList<Map> filteredAddedItems = RxList([]);
+  RxList<CarTradingItemsModel> filteredAddedItems =
+      RxList<CarTradingItemsModel>([]);
   RxMap allItems = RxMap({});
   RxMap allNames = RxMap({});
   RxBool isCapitalLoading = RxBool(false);
@@ -128,8 +130,12 @@ class CarTradingDashboardController extends GetxController {
   RxBool gettingCapitalsSummary = RxBool(false);
   RxBool gettingOutstandingSummary = RxBool(false);
   RxBool gettingGeneralExpensesSummary = RxBool(false);
-Rx<TextEditingController> fromDate = TextEditingController().obs;
+  Rx<TextEditingController> fromDate = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
+  RxBool carModified = RxBool(false);
+  RxBool itemsModified = RxBool(false);
+  final Uuid _uuid = const Uuid();
+
   @override
   void onInit() async {
     connectWebSocket();
@@ -265,7 +271,6 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
     allEngineSizes.assignAll(await helper.getAllListValues('ENGINE_TYPES'));
   }
 
-
   Future<void> getBuyersAndSellers() async {
     allBuyersAndSellers.assignAll(
       await helper.getAllListValues('BUYERS_AND_SELLERS'),
@@ -284,10 +289,64 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
     allModels.assignAll(await helper.getModelsValues(brandId));
   }
 
+  void addNewCapitalOrOutstandingOrGeneralExpenses(String type) async {
+    switch (type) {
+      case 'capitals':
+        await addNewCapitalOrOutstanding(type);
+        break;
+      case 'outstanding':
+        await addNewCapitalOrOutstanding(type);
+        break;
+      case 'general_expenses':
+        await addNewGeneralExpenses();
+        break;
+      default:
+    }
+  }
+
+  void deleteCapitalOrOutstandingOrGeneralExpenses(
+    String type,
+    String id,
+  ) async {
+    switch (type) {
+      case 'capitals':
+        await deleteCapitalOrOutstanding(id, type);
+        break;
+      case 'outstanding':
+        await deleteCapitalOrOutstanding(id, type);
+        break;
+      case 'general_expenses':
+        await deleteGeneralExpenses(id);
+        break;
+      default:
+    }
+  }
+
+  void updateCapitalOrOutstandingOrGeneralExpenses(
+    String type,
+    String id,
+  ) async {
+    switch (type) {
+      case 'capitals':
+        await updateCapitalOrOutstanding(id, type);
+        break;
+      case 'outstanding':
+        await updateCapitalOrOutstanding(id, type);
+        break;
+      case 'general_expenses':
+        await updateGeneralEpenses(id);
+        break;
+      default:
+    }
+  }
+
+  // ==================================== Capitals and Outstanding section ====================================
+
   Future<void> getCapitalsOROutstandingSummary(String type) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
+      print(accessToken);
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse(
         '$backendUrl/car_trading/get_capitals_or_outstanding_summary/$type',
@@ -374,64 +433,12 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
     }
   }
 
-  void addNewCapitalOrOutstandingOrGeneralExpenses(String type) async {
-    switch (type) {
-      case 'capitals':
-        await addNewCapitalOrOutstanding(type);
-        break;
-      case 'outstanding':
-        await addNewCapitalOrOutstanding(type);
-        break;
-      case 'general_expenses':
-        await addNewGeneralExpenses();
-        break;
-      default:
-    }
-  }
-
-  void deleteCapitalOrOutstandingOrGeneralExpenses(
-    String type,
-    String id,
-  ) async {
-    switch (type) {
-      case 'capitals':
-        await deleteCapitalOrOutstanding(id, type);
-        break;
-      case 'outstanding':
-        await deleteCapitalOrOutstanding(id, type);
-        break;
-      case 'general_expenses':
-        await deleteGeneralExpenses(id);
-        break;
-      default:
-    }
-  }
-
-  void updateCapitalOrOutstandingOrGeneralExpenses(
-    String type,
-    String id,
-  ) async {
-    switch (type) {
-      case 'capitals':
-        await updateCapitalOrOutstanding(id, type);
-        break;
-      case 'outstanding':
-        await updateCapitalOrOutstanding(id, type);
-        break;
-      case 'general_expenses':
-        await updateGeneralEpenses(id);
-        break;
-      default:
-    }
-  }
-
   Future<void> addNewCapitalOrOutstanding(String type) async {
     try {
       if (itemDate.value.text.isEmpty) {
         showSnackBar('Alert', 'Please add valid Date');
         return;
       }
-      final inputFormat = DateFormat("dd-MM-yyyy");
       final parsedDate = inputFormat.parse(itemDate.value.text);
       final isoDate = parsedDate.toIso8601String();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -515,7 +522,6 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
         showSnackBar('Alert', 'Please add valid Date');
         return;
       }
-      final inputFormat = DateFormat("dd-MM-yyyy");
       final parsedDate = inputFormat.parse(itemDate.value.text);
       final isoDate = parsedDate.toIso8601String();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -555,6 +561,8 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
       showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
+
+  // ==================================== Geneal Expenses section ====================================
 
   Future<void> getAllGeneralExpenses() async {
     try {
@@ -641,7 +649,6 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
         showSnackBar('Alert', 'Please add valid Date');
         return;
       }
-      final inputFormat = DateFormat("dd-MM-yyyy");
       final parsedDate = inputFormat.parse(itemDate.value.text);
       final isoDate = parsedDate.toIso8601String();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -723,7 +730,6 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
         showSnackBar('Alert', 'Please add valid Date');
         return;
       }
-      final inputFormat = DateFormat("dd-MM-yyyy");
       final parsedDate = inputFormat.parse(itemDate.value.text);
       final isoDate = parsedDate.toIso8601String();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -760,6 +766,233 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
       Get.back();
     } catch (e) {
       Get.back();
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  // ==================================== Car Trading section ====================================
+
+  void calculateTotals() {
+    totalNETs.value = 0.0;
+    totalPays.value = 0.0;
+    totalReceives.value = 0.0;
+
+    for (var item in addedItems) {
+      totalPays.value += item.pay!;
+      totalReceives.value += item.receive!;
+    }
+
+    totalNETs.value = totalReceives.value - totalPays.value;
+  }
+
+  void addNewItem() {
+    final String uniqueId = _uuid.v4();
+
+    final parsedDate = inputFormat.parse(itemDate.value.text);
+    addedItems.add(
+      CarTradingItemsModel(
+        id: uniqueId,
+        date: parsedDate,
+        tradeId: currentTradId.value,
+        item: item.text,
+        itemId: itemId.value,
+        pay: double.tryParse(pay.value.text) ?? 0,
+        receive: double.tryParse(receive.value.text) ?? 0,
+        comment: comments.value.text,
+        added: true,
+        modified: true,
+      ),
+    );
+    itemsModified.value = true;
+    Get.back();
+  }
+
+  void updateIdsFromBackend(List response) {
+    for (var map in response) {
+      final uuid = map['uuid'];
+      final realId = map['db_id'];
+
+      final index = addedItems.indexWhere((item) => item.id == uuid);
+      if (index != -1) {
+        addedItems[index].id = realId; // replace temp uuid with real id
+        addedItems[index].modified = false; // reset if needed
+        addedItems.refresh();
+      }
+    }
+  }
+
+  Future<void> addNewTrade() async {
+    try {
+      if (date.value.text.isEmpty) {
+        showSnackBar('Alert', 'Please add valid Date');
+        return;
+      }
+
+      addingNewValue.value = true;
+      bool finishUpdatind = false;
+
+      final parsedDate = inputFormat.parse(date.value.text);
+      final isoDate = parsedDate.toIso8601String();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+
+      Uri addUrl = Uri.parse('$backendUrl/car_trading/add_new_trade');
+      Uri updateTradeUrl = Uri.parse(
+        '$backendUrl/car_trading/update_trade/${currentTradId.value}',
+      );
+      Uri updateTradeItemUrl = Uri.parse(
+        '$backendUrl/car_trading/update_trade_items',
+      );
+
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      };
+
+      Map<String, dynamic> body = {
+        'bought_from': boughtFromId.value,
+        'sold_to': soldToId.value,
+        'date': isoDate,
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'mileage': double.tryParse(mileage.value.text) ?? 0,
+        'specification': carSpecificationId.value,
+        'engine_size': engineSizeId.value,
+        'color_in': colorInId.value,
+        'color_out': colorOutId.value,
+        'year': yearId.value,
+        'note': note.text,
+        'items': addedItems.where((item) => item.deleted == false).map((item) {
+          final parsedDate = inputFormat.parse(item.date.toString());
+          final isoDate = parsedDate.toIso8601String();
+          return {
+            "item_id": item.itemId,
+            "date": isoDate,
+            "comment": item.comment,
+            "pay": item.pay,
+            "receive": item.receive,
+            "uuid": item.id,
+          };
+        }).toList(),
+      };
+
+      if (currentTradId.value == '') {
+        // ---------- ADD ----------
+        final response = await http.post(
+          addUrl,
+          headers: headers,
+          body: jsonEncode(body),
+        );
+
+        final decoded = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          String tradeId = decoded["trade_id"];
+          final uuids = decoded["items_map"];
+          updateIdsFromBackend(uuids);
+          currentTradId.value = tradeId;
+          status.value = 'New';
+          itemsModified.value = false;
+          carModified.value = false;
+          showSnackBar('Done', decoded["message"]);
+        } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) {
+            await addNewTrade();
+          } else if (refreshed == RefreshResult.invalidToken) {
+            logout();
+          }
+        } else if (response.statusCode == 401) {
+          logout();
+        } else {
+          showSnackBar('Error', decoded["detail"] ?? "Failed to add trade");
+        }
+      } else {
+        // ---------- UPDATE ----------
+        http.Response? itemsResponse;
+        http.Response? carResponse;
+
+        if (itemsModified.isTrue) {
+          itemsResponse = await http.patch(
+            updateTradeItemUrl,
+            headers: headers,
+            body: jsonEncode(
+              addedItems.where((item) => item.modified == true).map((item) {
+                return {
+                  "uuid": item.id,
+                  "item": item.item,
+                  "item_id": item.itemId,
+                  "pay": item.pay,
+                  "trade_id": item.tradeId,
+                  "receive": item.receive,
+                  "comment": item.comment,
+                  "date": item.date?.toIso8601String(),
+                  "deleted": item.deleted,
+                  "modified": item.modified,
+                  "added": item.added,
+                };
+              }).toList(),
+            ),
+          );
+          final decoded = jsonDecode(itemsResponse.body);
+          if (itemsResponse.statusCode == 200) {
+            finishUpdatind = true;
+            final uuids = decoded["items_map"];
+            updateIdsFromBackend(uuids);
+            itemsModified.value = false;
+          } else if (itemsResponse.statusCode == 401 &&
+              refreshToken.isNotEmpty) {
+            final refreshed = await helper.refreshAccessToken(refreshToken);
+            if (refreshed == RefreshResult.success) {
+              await addNewTrade();
+            } else if (refreshed == RefreshResult.invalidToken) {
+              logout();
+            }
+          } else if (itemsResponse.statusCode == 401) {
+            logout();
+          } else {
+            showSnackBar(
+              'Error',
+              decoded["detail"] ?? "Failed to update items",
+            );
+          }
+        }
+
+        if (carModified.isTrue) {
+          body.remove("items");
+          body["status"] = status.value;
+          carResponse = await http.patch(
+            updateTradeUrl,
+            headers: headers,
+            body: jsonEncode(body),
+          );
+          final decoded = jsonDecode(carResponse.body);
+          if (carResponse.statusCode == 200) {
+            finishUpdatind = true;
+            carModified.value = false;
+          } else if (carResponse.statusCode == 401 && refreshToken.isNotEmpty) {
+            final refreshed = await helper.refreshAccessToken(refreshToken);
+            if (refreshed == RefreshResult.success) {
+              await addNewTrade();
+            } else if (refreshed == RefreshResult.invalidToken) {
+              logout();
+            }
+          } else if (carResponse.statusCode == 401) {
+            logout();
+          } else {
+            showSnackBar(
+              'Error',
+              decoded["detail"] ?? "Failed to update trade",
+            );
+          }
+        }
+      }
+      if (finishUpdatind == true) {
+        showSnackBar('Done', 'Trade updated successfully');
+      }
+      addingNewValue.value = false;
+    } catch (e) {
+      addingNewValue.value = false;
       showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
@@ -822,25 +1055,25 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
   //       });
   // }
 
-  void getAllTrades() {
-    try {
-      isScreenLoding.value = true;
-      FirebaseFirestore.instance
-          .collection('all_trades')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('date', descending: true)
-          .snapshots()
-          .listen((trade) {
-            allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
-            filteredTrades.assignAll(allTrades);
-            calculateTotalsForAllTrades();
-            numberOfCars.value = allTrades.length;
-            isScreenLoding.value = false;
-          });
-    } catch (e) {
-      isScreenLoding.value = false;
-    }
-  }
+  // void getAllTrades() {
+  //   try {
+  //     isScreenLoding.value = true;
+  //     FirebaseFirestore.instance
+  //         .collection('all_trades')
+  //         .where('company_id', isEqualTo: companyId.value)
+  //         .orderBy('date', descending: true)
+  //         .snapshots()
+  //         .listen((trade) {
+  //           allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
+  //           filteredTrades.assignAll(allTrades);
+  //           calculateTotalsForAllTrades();
+  //           numberOfCars.value = allTrades.length;
+  //           isScreenLoding.value = false;
+  //         });
+  //   } catch (e) {
+  //     isScreenLoding.value = false;
+  //   }
+  // }
 
   String getdataName(String id, Map allData, {title = 'name'}) {
     try {
@@ -918,25 +1151,25 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
   }
 
   void calculateTotalsForAllTrades() {
-    totalNETsForAllTrades.value = 0.0;
-    totalPaysForAllTrades.value = 0.0;
-    totalReceivesForAllTrades.value = 0.0;
+    // totalNETsForAllTrades.value = 0.0;
+    // totalPaysForAllTrades.value = 0.0;
+    // totalReceivesForAllTrades.value = 0.0;
 
-    for (var trade in filteredTrades) {
-      final data = trade.data() as Map<String, dynamic>;
-      final itemsList = data['items'] as List<dynamic>? ?? [];
+    // for (var trade in filteredTrades) {
+    //   final data = trade.data() as Map<String, dynamic>;
+    //   final itemsList = data['items'] as List<dynamic>? ?? [];
 
-      if (itemsList.isNotEmpty) {
-        for (var item in itemsList) {
-          final pay = double.tryParse(item['pay'] ?? 0) ?? 0.0;
-          final receive = double.tryParse(item['receive'] ?? 0) ?? 0.0;
+    //   if (itemsList.isNotEmpty) {
+    //     for (var item in itemsList) {
+    //       final pay = double.tryParse(item['pay'] ?? 0) ?? 0.0;
+    //       final receive = double.tryParse(item['receive'] ?? 0) ?? 0.0;
 
-          totalPaysForAllTrades.value += pay;
-          totalReceivesForAllTrades.value += receive;
-          totalNETsForAllTrades.value += (receive - pay);
-        }
-      }
-    }
+    //       totalPaysForAllTrades.value += pay;
+    //       totalReceivesForAllTrades.value += receive;
+    //       totalNETsForAllTrades.value += (receive - pay);
+    //     }
+    //   }
+    // }
   }
 
   void calculateTotalsForAllAndNetProfit() {
@@ -1279,5 +1512,62 @@ Rx<TextEditingController> fromDate = TextEditingController().obs;
       );
       calculateTotalsForCapitals(filteredMap);
     }
+  }
+
+  void filterItems() {
+    final query = searchForItems.value.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      filteredAddedItems.clear();
+    } else {
+      filteredAddedItems.assignAll(
+        addedItems.where((item) {
+          final dateStr = item.date.toString().toLowerCase();
+          final itemName = item.item.toString().toLowerCase();
+          final payStr = item.pay.toString().toLowerCase();
+          final receiveStr = item.receive.toString().toLowerCase();
+          final commentStr = item.comment.toString().toLowerCase();
+
+          return dateStr.contains(query) ||
+              itemName.contains(query) ||
+              payStr.contains(query) ||
+              commentStr.contains(query) ||
+              receiveStr.contains(query);
+        }).toList(),
+      );
+    }
+  }
+
+  void clearValues() {
+    boughtFrom.value.clear();
+    boughtFromId.value = '';
+    soldTo.value.clear();
+    soldToId.value = '';
+    totalPays.value = 0.0;
+    totalNETs.value = 0.0;
+    totalReceives.value = 0.0;
+    query.value = '';
+    queryForItems.value = '';
+    searchForItems.value.clear();
+    allModels.clear();
+    date.value.text = textToDate(DateTime.now());
+    mileage.value.text = '0';
+    colorIn.value.clear();
+    colorInId.value = '';
+    colorOut.value.clear();
+    colorOutId.value = '';
+    carBrand.value.clear();
+    carBrandId.value = '';
+    carModel.value.clear();
+    carModelId.value = '';
+    carSpecification.value.clear();
+    carSpecificationId.value = '';
+    engineSize.value.clear();
+    engineSizeId.value = '';
+    year.value.clear();
+    yearId.value = '';
+    note.clear();
+    addedItems.clear();
+    status.value = '';
+    currentTradId.value = '';
   }
 }

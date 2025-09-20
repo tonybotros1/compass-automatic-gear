@@ -72,11 +72,8 @@ Future<dynamic> carTradesDialog({
                               ? ElevatedButton(
                                   style: postButtonStyle,
                                   onPressed: () {
-                                    // controller.changeStatus(
-                                    //   controller.currentTradId.value,
-                                    //   'Sold',
-                                    // );
-                                    // controller.status.value = 'Sold';
+                                    controller.status.value = 'Sold';
+                                    controller.carModified.value = true;
                                   },
                                   child: const Text(
                                     'Sold',

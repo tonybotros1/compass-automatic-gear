@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
+import '../../../Models/car trading/car_trading_items_model.dart';
 import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../../main screen widgets/auto_size_box.dart';
 import 'car_information_section.dart';
+import 'item_dialog.dart';
 
 Widget addNewCarTradeOrEdit({
   required BuildContext context,
@@ -34,11 +36,8 @@ Widget addNewCarTradeOrEdit({
                                 : ElevatedButton(
                                     style: new2ButtonStyle,
                                     onPressed: () {
-                                      // controller.changeStatus(
-                                      //   controller.currentTradId.value,
-                                      //   'New',
-                                      // );
-                                      // controller.status.value = 'New';
+                                      controller.status.value = 'New';
+                                      controller.carModified.value = true;
                                     },
                                     child: const Text(
                                       'Change Status To New',
@@ -74,6 +73,13 @@ Widget addNewCarTradeOrEdit({
                     child: Column(
                       children: [
                         searchBar(
+                          onChanged: (_) {
+                            controller.filterItems();
+                          },
+                          onPressedForClearSearch: () {
+                            controller.searchForItems.value.clear();
+                            controller.filterItems();
+                          },
                           search: controller.searchForItems,
                           constraints: constraints,
                           context: context,
@@ -168,6 +174,7 @@ Widget tableOfScreens({
     headingTextStyle: fontStyleForTableHeader,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
+      const DataColumn(label: Text('')),
       DataColumn(
         label: AutoSizedText(text: 'Date', constraints: constraints),
       ),
@@ -175,149 +182,182 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Item'),
       ),
       DataColumn(
-        headingRowAlignment: MainAxisAlignment.end,
-        label: AutoSizedText(constraints: constraints, text: 'Paid'),
-      ),
-      DataColumn(
-        headingRowAlignment: MainAxisAlignment.end,
-
-        label: AutoSizedText(constraints: constraints, text: 'Received'),
-      ),
-      DataColumn(
         headingRowAlignment: MainAxisAlignment.start,
 
         label: AutoSizedText(constraints: constraints, text: 'Comments'),
       ),
-      const DataColumn(label: Text('')),
+      DataColumn(
+        numeric: true,
+        label: AutoSizedText(constraints: constraints, text: 'Paid'),
+      ),
+      DataColumn(
+        numeric: true,
+        label: AutoSizedText(constraints: constraints, text: 'Received'),
+      ),
     ],
     rows:
         controller.filteredAddedItems.isEmpty &&
             controller.searchForItems.value.text.isEmpty
-        ? controller.addedItems.map<DataRow>((item) {
-            final itemData = item;
-            return dataRowForTheTable(
-              itemData,
-              context,
-              constraints,
-              controller,
-            );
-          }).toList()
-        : controller.filteredAddedItems.map<DataRow>((item) {
-            final itemData = item as Map<String, dynamic>;
-            return dataRowForTheTable(
-              itemData,
-              context,
-              constraints,
-              controller,
-            );
-          }).toList(),
+        ? controller.addedItems
+              .where((item) => item.deleted == false)
+              .map<DataRow>((item) {
+                return dataRowForTheTable(
+                  item,
+                  context,
+                  constraints,
+                  controller,
+                );
+              })
+              .toList()
+        : controller.filteredAddedItems
+              .where((item) => item.deleted == false)
+              .map<DataRow>((item) {
+                return dataRowForTheTable(
+                  item,
+                  context,
+                  constraints,
+                  controller,
+                );
+              })
+              .toList(),
   );
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> itemData,
+  CarTradingItemsModel itemData,
   context,
   constraints,
   CarTradingDashboardController controller,
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(itemData['date'])),
-      DataCell(
-        Text(controller.getdataName(itemData['item'], controller.allItems)),
-      ),
-      DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: textForDataRowInTable(
-            text: itemData['pay'],
-            isBold: true,
-            color: Colors.red,
-          ),
-        ),
-      ),
-      DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: textForDataRowInTable(
-            text: itemData['receive'],
-            isBold: true,
-            color: Colors.green,
-          ),
-        ),
-      ),
-      DataCell(Text(itemData['comment'])),
       DataCell(
         Row(
           spacing: 5,
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            editSection(context, controller, itemData, constraints),
             deleteSection(controller, context, itemData),
+            editSection(context, controller, itemData, constraints),
           ],
+        ),
+      ),
+      DataCell(Text(textToDate(itemData.date))),
+      DataCell(Text(itemData.item.toString())),
+      DataCell(Text(itemData.comment.toString())),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.pay.toString(),
+          isBold: true,
+          color: Colors.red,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.receive.toString(),
+          isBold: true,
+          color: Colors.green,
         ),
       ),
     ],
   );
 }
 
-ElevatedButton deleteSection(
+IconButton deleteSection(
   CarTradingDashboardController controller,
-  context,
-  Map itemData,
+  BuildContext context,
+  CarTradingItemsModel itemData,
 ) {
-  return ElevatedButton(
-    style: deleteButtonStyle,
+  return IconButton(
     onPressed: () {
-      controller.addedItems.removeWhere((item) => item['id'] == itemData['id']);
-      // controller.calculateTotals();
+      final index = controller.addedItems.indexWhere(
+        (item) => item.id == itemData.id,
+      );
+      final indexForFilteredItems = controller.filteredAddedItems.indexWhere(
+        (item) => item.id == itemData.id,
+      );
+      if (index != -1) {
+        controller.addedItems[index].deleted = true;
+        controller.addedItems[index].modified = true;
+        controller.addedItems[index].added = false;
+        controller.itemsModified.value = true;
+      }
+      if (indexForFilteredItems != -1) {
+        controller.filteredAddedItems[index].deleted = true;
+        controller.filteredAddedItems[index].modified = true;
+        controller.addedItems[index].added = false;
+        controller.itemsModified.value = true;
+      }
+      controller.addedItems.refresh();
+      controller.filteredAddedItems.refresh();
+      controller.calculateTotals();
     },
-    child: const Text("Delete"),
+    icon: deleteIcon,
   );
 }
 
-ElevatedButton editSection(
+IconButton editSection(
   BuildContext context,
   CarTradingDashboardController controller,
-  Map<String, dynamic> itemData,
+  CarTradingItemsModel itemData,
   constraints,
 ) {
-  return ElevatedButton(
-    style: editButtonStyle,
+  return IconButton(
     onPressed: () async {
-      controller.item.text = controller.getdataName(
-        itemData['item'],
-        controller.allItems,
+      controller.item.text = itemData.item.toString();
+      controller.itemId.value = itemData.itemId.toString();
+      controller.pay.text = itemData.pay.toString();
+      controller.receive.text = itemData.receive.toString();
+      controller.comments.value.text = itemData.comment.toString();
+      controller.itemDate.value.text = textToDate(itemData.date);
+      itemDialog(
+        isGeneralExpenses: false,
+        isTrade: true,
+        controller: controller,
+        canEdit: true,
+        onPressed: () {
+          int index = controller.addedItems.indexWhere(
+            (item) => item.id == itemData.id,
+          );
+          int indexForFilteredItems = controller.filteredAddedItems.indexWhere(
+            (item) => item.id == itemData.id,
+          );
+          if (index != -1) {
+            controller.addedItems[index] = CarTradingItemsModel(
+              id: itemData.id,
+              comment: controller.comments.value.text,
+              date: controller.inputFormat.parse(
+                controller.itemDate.value.text,
+              ),
+              item: controller.item.text,
+              itemId: controller.itemId.value,
+              pay: double.tryParse(controller.pay.value.text) ?? 0,
+              receive: double.tryParse(controller.receive.value.text) ?? 0,
+              modified: true,
+              deleted: false,
+            );
+            controller.itemsModified.value = true;
+          }
+          if (indexForFilteredItems != -1) {
+            controller.filteredAddedItems[index] = CarTradingItemsModel(
+              id: itemData.id,
+              comment: controller.comments.value.text,
+              date: controller.inputFormat.parse(
+                controller.itemDate.value.text,
+              ),
+              item: controller.item.text,
+              itemId: controller.itemId.value,
+              pay: double.tryParse(controller.pay.value.text) ?? 0,
+              receive: double.tryParse(controller.receive.value.text) ?? 0,
+              modified: true,
+              deleted: false,
+            );
+            controller.itemsModified.value = true;
+          }
+          controller.calculateTotals();
+          Get.back();
+        },
       );
-      controller.itemId.value = itemData['item'];
-      controller.pay.text = itemData['pay'];
-      controller.receive.text = itemData['receive'];
-      controller.comments.value.text = itemData['comment'];
-      controller.itemDate.value.text = itemData['date'];
-      // itemDialog(
-      //   isGeneralExpenses: false,
-      //   isTrade: true,
-      //   controller: controller,
-      //   canEdit: true,
-      //   onPressed: () {
-      //     int index = controller.addedItems.indexWhere(
-      //       (item) => item['id'] == itemData['id'],
-      //     );
-      //     if (index != -1) {
-      //       controller.addedItems[index] = {
-      //         'id': itemData['id'],
-      //         'comment': controller.comments.value.text,
-      //         'date': controller.itemDate.value.text,
-      //         'item': controller.itemId.value,
-      //         'pay': controller.pay.value.text,
-      //         'receive': controller.receive.value.text,
-      //       };
-      //     }
-      //     Get.back();
-      //   },
-      // );
     },
-    child: const Text('Edit'),
+    icon: editIcon,
   );
 }
 
@@ -333,15 +373,16 @@ ElevatedButton newItemButton(
       controller.receive.text = '0';
       controller.comments.value.text = '';
       controller.itemDate.value.text = textToDate(DateTime.now());
-      // itemDialog(
-      //   isGeneralExpenses: false,
-      //   isTrade: true,
-      //   controller: controller,
-      //   canEdit: true,
-      //   onPressed: () {
-      //     controller.addNewItem();
-      //   },
-      // );
+      itemDialog(
+        isGeneralExpenses: false,
+        isTrade: true,
+        controller: controller,
+        canEdit: true,
+        onPressed: () {
+          controller.addNewItem();
+          controller.calculateTotals();
+        },
+      );
     },
     style: newButtonStyle,
     child: const Text('New Line'),
