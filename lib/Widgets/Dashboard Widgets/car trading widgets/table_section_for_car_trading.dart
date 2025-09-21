@@ -4,18 +4,12 @@ import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_control
 import '../../../Models/car trading/car_trade_model.dart';
 import '../../../consts.dart';
 import '../../main screen widgets/auto_size_box.dart';
+import 'car_trade_dialog.dart';
 
 Widget tableOfCarTrades({
   required BoxConstraints constraints,
   required BuildContext context,
 }) {
-  // final dataSource = TradeDataSource(
-  //   trades: controller.filteredTrades,
-  //   context: context,
-  //   constraints: constraints,
-  //   controller: controller,
-  // );
-
   return GetX<CarTradingDashboardController>(
     builder: (controller) {
       bool istradingLoading = controller.filteredTrades.isEmpty;
@@ -25,6 +19,7 @@ Widget tableOfCarTrades({
           dataTextStyle: regTextStyle,
         ),
         child: PaginatedDataTable(
+          controller: controller.scrollControllerForTable,
           headingRowHeight: 45,
           showEmptyRows: false,
           showFirstLastButtons: true,
@@ -34,9 +29,9 @@ Widget tableOfCarTrades({
           dataRowMaxHeight: 40,
           dataRowMinHeight: 30,
           columnSpacing: 5,
-
           headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
           columns: [
+            const DataColumn(label: Text('')),
             DataColumn(
               label: AutoSizedText(text: 'Brand', constraints: constraints),
             ),
@@ -112,9 +107,9 @@ Widget tableOfCarTrades({
 
 DataRow dataRowForTheTable(
   CarTradeModel tradeData,
-  context,
-  constraints,
-  tradeId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String tradeId,
   CarTradingDashboardController controller,
   index,
 ) {
@@ -127,6 +122,7 @@ DataRow dataRowForTheTable(
       return isEvenRow ? Colors.grey.shade200 : Colors.white;
     }),
     cells: [
+      DataCell(editSection(tradeData: tradeData, id: tradeId)),
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
@@ -196,7 +192,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: textToDate(tradeData.buyDate.toString()),
+          text: textToDate(tradeData.buyDate ?? ''),
           formatDouble: false,
           color: Colors.purple,
           isBold: true,
@@ -204,7 +200,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: textToDate(tradeData.sellDate.toString()),
+          text: textToDate(tradeData.sellDate ?? ''),
           formatDouble: false,
           color: Colors.blue,
           isBold: true,
@@ -235,6 +231,35 @@ DataRow dataRowForTheTable(
   );
 }
 
+Widget editSection({required CarTradeModel tradeData, required String id}) {
+  return GetX<CarTradingDashboardController>(
+    builder: (controller) {
+      final isLoading = controller.buttonLoadingStates[id] ?? false;
+
+      return IconButton(
+        onPressed: isLoading == false
+            ? () async {
+                controller.setButtonLoading(id, true);
+                await controller.loadValues(tradeData);
+                controller.setButtonLoading(id, false);
+                carTradesDialog(
+                  tradeID: tradeData.id ?? '',
+                  controller: controller,
+                  canEdit: true,
+                  onPressed: controller.addingNewValue.value
+                      ? null
+                      : () async {
+                          controller.addNewTrade();
+                        },
+                );
+              }
+            : null,
+        icon: isLoading == false ? editIcon : loadingProcess,
+      );
+    },
+  );
+}
+
 class TradeDataSource extends DataTableSource {
   final List<CarTradeModel> trades;
   final BuildContext context;
@@ -253,7 +278,7 @@ class TradeDataSource extends DataTableSource {
     if (index >= trades.length) return null;
 
     final trade = trades[index];
-    final tradeId = trade.id;
+    final tradeId = trade.id.toString();
 
     return dataRowForTheTable(
       trade,

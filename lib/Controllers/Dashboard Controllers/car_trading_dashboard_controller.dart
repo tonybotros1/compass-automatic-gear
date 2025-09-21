@@ -143,6 +143,9 @@ class CarTradingDashboardController extends GetxController {
   RxBool itemsModified = RxBool(false);
   final Uuid _uuid = const Uuid();
   RxBool searching = RxBool(false);
+  final ScrollController scrollControllerForTable = ScrollController();
+  var buttonLoadingStates = <String, bool>{}.obs;
+
   @override
   void onInit() async {
     connectWebSocket();
@@ -180,6 +183,12 @@ class CarTradingDashboardController extends GetxController {
   void dispose() {
     focusNode.dispose();
     super.dispose();
+  }
+
+  // function to manage loading button
+  void setButtonLoading(String id, bool isLoading) {
+    buttonLoadingStates[id] = isLoading;
+    buttonLoadingStates.refresh(); // Notify listeners
   }
 
   void connectWebSocket() {
@@ -353,7 +362,6 @@ class CarTradingDashboardController extends GetxController {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
-      print(accessToken);
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse(
         '$backendUrl/car_trading/get_capitals_or_outstanding_summary/$type',
@@ -1068,11 +1076,11 @@ class CarTradingDashboardController extends GetxController {
 
   Future<void> searchEngine(Map<String, dynamic> body) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
 
-      Uri url = Uri.parse(
+      final url = Uri.parse(
         '$backendUrl/car_trading/search_engine_for_car_trading',
       );
       final response = await http.post(
@@ -1083,22 +1091,25 @@ class CarTradingDashboardController extends GetxController {
         },
         body: jsonEncode(body),
       );
+
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        List trades = decoded[0]["trades"];
-        totalPaysForAllTrades.value = decoded[0]['grand_total_pay'] ?? 0;
-        totalReceivesForAllTrades.value =
-            decoded[0]['grand_total_receive'] ?? 0;
-        totalNETsForAllTrades.value = decoded[0]['grand_net'] ?? 0;
+        final data = decoded is List ? decoded[0] : decoded;
+
+        List trades = data["trades"] ?? [];
+        totalPaysForAllTrades.value = data['grand_total_pay'] ?? 0;
+        totalReceivesForAllTrades.value = data['grand_total_receive'] ?? 0;
+        totalNETsForAllTrades.value = data['grand_net'] ?? 0;
+
         filteredTrades.assignAll(
           trades.map((item) => CarTradeModel.fromJson(item)),
         );
-        numberOfCars.value = filteredTrades.length;
+        numberOfCars.value = trades.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await searchEngine(body);
-        } else if (refreshed == RefreshResult.invalidToken) {
+          await searchEngine(body); // retry once
+        } else {
           logout();
         }
       } else if (response.statusCode == 401) {
@@ -1106,6 +1117,40 @@ class CarTradingDashboardController extends GetxController {
       }
     } catch (e) {
       //
+    }
+  }
+
+  Future<void> deleteTrade(String id) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+
+      final url = Uri.parse('$backendUrl/car_trading/delete_trade/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        filteredTrades.removeWhere((trade) => trade.id == id);
+        numberOfCars.value -= 1;
+        print(numberOfCars.value);
+        Get.close(2);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteTrade(id);
+        } else {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
+      }
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
 
@@ -1440,6 +1485,42 @@ class CarTradingDashboardController extends GetxController {
         }).toList(),
       );
     }
+  }
+
+  Future loadValues(CarTradeModel data) async {
+    boughtFrom.value.text = data.boughtFrom ?? '';
+    boughtFromId.value = data.boughtFromId ?? '';
+    soldTo.value.text = data.soldTo ?? '';
+    soldToId.value = data.soldToId ?? '';
+    totalPays.value = data.totalPay ?? 0.0;
+    totalNETs.value = data.net ?? 0.0;
+    totalReceives.value = data.totalReceive ?? 0.0;
+    query.value = '';
+    queryForItems.value = '';
+    searchForItems.value.clear();
+    await getModelsByCarBrand(data.carBrandId ?? '');
+    date.value.text = textToDate(data.date);
+    mileage.value.text = data.mileage.toString();
+    colorIn.value.text = data.colorIn ?? '';
+    colorInId.value = data.colorInId ?? '';
+    colorOut.value.text = data.colorOut ?? '';
+    colorOutId.value = data.colorOutId ?? '';
+    carBrand.value.text = data.carBrand ?? '';
+    carBrandId.value = data.carBrandId ?? '';
+    carModel.value.text = data.carModel ?? '';
+    carModelId.value = data.carModelId ?? '';
+    carSpecification.value.text = data.specification ?? '';
+    carSpecificationId.value = data.specificationId ?? '';
+    engineSize.value.text = data.engineSize ?? '';
+    engineSizeId.value = data.engineSizeId ?? '';
+    year.value.text = data.year ?? '';
+    yearId.value = data.yearId ?? '';
+    note.text = data.note ?? '';
+    addedItems.assignAll(data.tradeItems ?? []);
+    status.value = data.status ?? '';
+    currentTradId.value = data.id ?? '';
+    carModified.value = false;
+    itemsModified.value = false;
   }
 
   void clearValues() {

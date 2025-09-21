@@ -25,32 +25,7 @@ Widget addNewCarTradeOrEdit({
               child: Column(
                 children: [
                   labelContainer(
-                    lable: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Car Information', style: fontStyle1),
-                        GetX<CarTradingDashboardController>(
-                          builder: (controller) {
-                            return controller.currentTradId.value == ''
-                                ? const SizedBox()
-                                : ElevatedButton(
-                                    style: new2ButtonStyle,
-                                    onPressed: () {
-                                      controller.status.value = 'New';
-                                      controller.carModified.value = true;
-                                    },
-                                    child: const Text(
-                                      'Change Status To New',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  );
-                          },
-                        ),
-                      ],
-                    ),
+                    lable: Text('Car Information', style: fontStyle1),
                   ),
                   carInformation(context: context, constraints: constraints),
                   const SizedBox(height: 10),

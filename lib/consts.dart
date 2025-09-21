@@ -819,6 +819,7 @@ String? getMimeTypeFromExtension(String extension) {
 
 Widget closeIcon() {
   return IconButton(
+    visualDensity: VisualDensity.compact,
     onPressed: () {
       Get.back();
     },

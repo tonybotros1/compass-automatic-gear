@@ -10,7 +10,7 @@ class CarTradingItemsModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final DateTime? date;
-  bool added =false;
+  bool added = false;
   bool modified = false;
   bool deleted = false;
 
@@ -41,22 +41,38 @@ class CarTradingItemsModel {
     "comment": comment,
     if (date != null) "date": date!.toIso8601String(),
     "deleted": deleted,
-    "modified": modified
+    "modified": modified,
   };
+
+  /// Helper to parse doubles safely
+  static double? _toDouble(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value.toDouble();
+    if (value is String && value.trim().isNotEmpty) {
+      return double.tryParse(value) ?? 0;
+    }
+    return 0;
+  }
 
   factory CarTradingItemsModel.fromJson(Map<String, dynamic> json) {
     return CarTradingItemsModel(
       id: json['_id'] ?? '',
       item: json['item'] ?? '',
       itemId: json['item_id'] ?? '',
-      pay: json['pay'] ?? '',
-      tradeId: json['trade_id'],
-      receive: json['receive'] ?? '',
+      pay: _toDouble(json['pay']),
+      tradeId: json['trade_id'] ?? '',
+      receive: _toDouble(json['receive']),
       comment: json['comment'] ?? '',
       companyId: json['company_id'] ?? '',
-      date: DateTime.parse(json['date']),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      date: json['date'] != null && json['date'] != ''
+          ? DateTime.tryParse(json['date'])
+          : null,
+      createdAt: json['createdAt'] != null && json['createdAt'] != ''
+          ? DateTime.tryParse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null && json['updatedAt'] != ''
+          ? DateTime.tryParse(json['updatedAt'])
+          : null,
     );
   }
 }

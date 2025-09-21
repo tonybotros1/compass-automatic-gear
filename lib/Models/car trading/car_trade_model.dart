@@ -7,8 +7,8 @@ class CarTradeModel {
   List<CarTradingItemsModel>? tradeItems;
   DateTime? buyDate;
   DateTime? sellDate;
-  int? totalPay;
-  int? totalReceive;
+  double? totalPay;
+  double? totalReceive;
   String? carBrandId;
   String? carBrand;
   String? carModelId;
@@ -29,7 +29,7 @@ class CarTradeModel {
   String? soldTo;
   String? note;
   DateTime? date;
-  int? net;
+  double? net;
 
   CarTradeModel({
     this.id,
@@ -82,31 +82,35 @@ class CarTradeModel {
     buyDate = parseDate(json['buy_date']);
     sellDate = parseDate(json['sell_date']);
     carBrand = json['car_brand'] ?? '';
-    carBrandId = json['car_brand_id']??'';
+    carBrandId = json['car_brand_id'] ?? '';
     carModel = json['car_model'] ?? '';
-    carModelId = json['car_model_id']??'';
-    mileage = json['mileage']?? '';
+    carModelId = json['car_model_id'] ?? '';
+    mileage = (json['mileage'] is num) ? (json['mileage'] as num).toInt() : 0;
     specification = json['specification'] ?? '';
-    specificationId = json['specification_id']?? '';
+    specificationId = json['specification_id'] ?? '';
     engineSize = json['engine_size'] ?? '';
-    engineSizeId = json['engine_size_id']??' ';
-    colorIn = json['color_in']?? '';
-    colorInId = json['color_in_id']?? '';
+    engineSizeId = json['engine_size_id'] ?? '';
+    colorIn = json['color_in'] ?? '';
+    colorInId = json['color_in_id'] ?? '';
     colorOut = json['color_out'] ?? '';
     colorOutId = json['color_out_id'] ?? '';
-    year = json['year']?? '';
-    yearId = json['year_id']?? '';
+    year = json['year'] ?? '';
+    yearId = json['year_id'] ?? '';
     note = json['note'] ?? '';
     status = json['status'] ?? '';
-    totalPay = json['total_pay'] != null
-        ? (json['total_pay'] as num).toInt()
+    totalPay = (json['total_pay'] is num)
+        ? (json['total_pay'] as num).toDouble()
         : 0;
-    totalReceive = json['total_receive'] != null
-        ? (json['total_receive'] as num).toInt()
+
+    totalReceive = (json['total_receive'] is num)
+        ? (json['total_receive'] as num).toDouble()
         : 0;
-    net = json['net'] != null ? (json['net'] as num).toInt() : 0;
+
+    net = (json['net'] is num) ? (json['net'] as num).toDouble() : 0;
+
     // Parse trade items
-    if (json['trade_items'] != null) {
+    if (json['trade_items'] != null &&
+        (json['trade_items'] as List).isNotEmpty) {
       tradeItems = <CarTradingItemsModel>[];
       json['trade_items'].forEach((v) {
         tradeItems!.add(CarTradingItemsModel.fromJson(v));

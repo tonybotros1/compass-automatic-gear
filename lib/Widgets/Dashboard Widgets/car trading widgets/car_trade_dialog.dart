@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../consts.dart';
+import '../../text_button.dart';
 import 'add_or_edit_car_trade.dart';
 
 Future<dynamic> carTradesDialog({
@@ -47,64 +48,75 @@ Future<dynamic> carTradesDialog({
                         },
                       ),
                       const Spacer(),
-                      tradeID != ''
-                          ? ElevatedButton(
-                              style: closeButtonStyle,
-                              onPressed: () {
-                                alertDialog(
-                                  context: context,
-                                  content:
-                                      "The trade will be deleted permanently",
-                                  onPressed: () {
-                                    // controller.deleteTrade(tradeID);
-                                  },
-                                );
-                              },
-                              child: const Text(
-                                "Delete",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            )
-                          : const SizedBox(),
+
                       GetX<CarTradingDashboardController>(
                         builder: (controller) {
                           return controller.currentTradId.value != ''
-                              ? ElevatedButton(
-                                  style: postButtonStyle,
-                                  onPressed: () {
-                                    controller.status.value = 'Sold';
-                                    controller.carModified.value = true;
-                                  },
-                                  child: const Text(
-                                    'Sold',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
+                              ? Row(
+                                  spacing: 10,
+                                  children: [
+                                    separator(),
+
+                                    ClickableHoverText(
+                                      onTap: () {
+                                        controller.status.value = 'Sold';
+                                        controller.carModified.value = true;
+                                      },
+                                      text: 'Sold',
                                     ),
-                                  ),
+                                    point(),
+                                    ClickableHoverText(
+                                      onTap: () {
+                                        controller.status.value = 'New';
+                                        controller.carModified.value = true;
+                                      },
+                                      text: 'New',
+                                    ),
+                                  ],
                                 )
                               : const SizedBox();
                         },
                       ),
-                      GetX<CarTradingDashboardController>(
-                        builder: (controller) => ElevatedButton(
-                          onPressed: onPressed,
-                          style: new2ButtonStyle,
-                          child: controller.addingNewValue.value == false
-                              ? const Text(
-                                  'Save',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                      separator(),
+                      Row(
+                        spacing: tradeID != '' ? 10 : 0,
+                        children: [
+                          GetX<CarTradingDashboardController>(
+                            builder: (controller) {
+                              return ClickableHoverText(
+                                onTap: onPressed,
+                                text: controller.addingNewValue.value == false
+                                    ? 'Save'
+                                    : "...",
+                              );
+                            },
+                          ),
+                          tradeID != ''
+                              ? Row(
+                                  spacing: 10,
+                                  children: [
+                                    point(),
+
+                                    ClickableHoverText(
+                                      onTap: () {
+                                        alertDialog(
+                                          context: context,
+                                          content:
+                                              "The trade will be deleted permanently",
+                                          onPressed: () {
+                                            controller.deleteTrade(tradeID);
+                                          },
+                                        );
+                                      },
+                                      text: "Delete",
+                                    ),
+                                  ],
                                 )
-                              : const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                        ),
+                              : const SizedBox(),
+                        ],
                       ),
-                      closeButton,
+                      separator(),
+                      closeIcon(),
                     ],
                   ),
                 ),

@@ -18,7 +18,7 @@ Future<dynamic> capitalOrOutstandingOrGeneralExpensesDialog({
     barrierDismissible: false,
     Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-      insetPadding: const EdgeInsets.all(8),
+      insetPadding: const EdgeInsets.all(8), 
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SizedBox(
