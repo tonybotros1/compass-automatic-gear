@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -23,9 +22,17 @@ class CarTradingDashboardController extends GetxController {
   TextEditingController dayFilter = TextEditingController();
   Rx<TextEditingController> carModelFilter = TextEditingController().obs;
   Rx<TextEditingController> carBrandFilter = TextEditingController().obs;
+  Rx<TextEditingController> carEngineSizeFilter = TextEditingController().obs;
+  Rx<TextEditingController> carBoughtFromFilter = TextEditingController().obs;
+  Rx<TextEditingController> carSoldToFilter = TextEditingController().obs;
+  Rx<TextEditingController> carSpecificationFilter =
+      TextEditingController().obs;
   RxString carBrandFilterId = RxString('');
   RxString carModelFilterId = RxString('');
-  final RxList<CarTradeModel> allTrades = RxList<CarTradeModel>([]);
+  RxString carEngineSizeFilterId = RxString('');
+  RxString carBoughtFromFilterId = RxString('');
+  RxString carSoldToFilterId = RxString('');
+  RxString carSpecificationFilterId = RxString('');
   final RxList<CapitalsModel> allCapitals = RxList<CapitalsModel>([]);
   final RxList<OutstandingModel> allOutstanding = RxList<OutstandingModel>([]);
   final RxList<GeneralExpensesModel> allGeneralExpenses =
@@ -135,7 +142,7 @@ class CarTradingDashboardController extends GetxController {
   RxBool carModified = RxBool(false);
   RxBool itemsModified = RxBool(false);
   final Uuid _uuid = const Uuid();
-
+  RxBool searching = RxBool(false);
   @override
   void onInit() async {
     connectWebSocket();
@@ -864,8 +871,10 @@ class CarTradingDashboardController extends GetxController {
         'year': yearId.value,
         'note': note.text,
         'items': addedItems.where((item) => item.deleted == false).map((item) {
-          final parsedDate = inputFormat.parse(item.date.toString());
-          final isoDate = parsedDate.toIso8601String();
+          final isoDate = (item.date is DateTime)
+              ? (item.date as DateTime).toIso8601String()
+              : DateTime.parse(item.date.toString()).toIso8601String();
+
           return {
             "item_id": item.itemId,
             "date": isoDate,
@@ -997,180 +1006,110 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
+  void filterSearch() async {
+    searching.value = true;
+
+    Map<String, dynamic> body = {};
+    // final parsedDate = inputFormat.parse(date.value.text);
+    // final isoDate = parsedDate.toIso8601String();
+    if (carBrandFilterId.value != '') {
+      body["car_brand"] = carBrandFilterId.value;
+    }
+    if (carModelFilterId.value != '') {
+      body["car_model"] = carModelFilterId.value;
+    }
+    if (carSpecificationFilterId.value != '') {
+      body["specification"] = carSpecificationFilterId.value;
+    }
+    if (carEngineSizeFilterId.value != '') {
+      body["engine_size"] = carEngineSizeFilterId.value;
+    }
+    if (carBoughtFromFilterId.value != '') {
+      body["bought_from"] = carBoughtFromFilterId.value;
+    }
+    if (carSoldToFilterId.value != '') {
+      body["sold_to"] = carSoldToFilterId.value;
+    }
+    if (isSoldStatusSelected.isTrue) {
+      body["status"] = "Sold";
+    }
+    if (isNewStatusSelected.isTrue) {
+      body["status"] = "New";
+    }
+
+    if (isTodaySelected.isTrue) {
+      body["today"] = true;
+    }
+    if (isThisMonthSelected.isTrue) {
+      body["this_month"] = true;
+    }
+    if (isThisYearSelected.isTrue) {
+      body["this_year"] = true;
+    }
+    if (fromDate.value.text.isNotEmpty) {
+      final parsedDate = inputFormat
+          .parse(fromDate.value.text)
+          .toIso8601String();
+
+      body["from_date"] = parsedDate;
+    }
+    if (toDate.value.text.isNotEmpty) {
+      final parsedDate = inputFormat.parse(toDate.value.text).toIso8601String();
+
+      body["to_date"] = parsedDate;
+    }
+    if (body.isNotEmpty) {
+      await searchEngine(body);
+    } else {
+      await searchEngine({"all": true});
+    }
+    searching.value = false;
+  }
+
+  Future<void> searchEngine(Map<String, dynamic> body) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/search_engine_for_car_trading',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List trades = decoded[0]["trades"];
+        totalPaysForAllTrades.value = decoded[0]['grand_total_pay'] ?? 0;
+        totalReceivesForAllTrades.value =
+            decoded[0]['grand_total_receive'] ?? 0;
+        totalNETsForAllTrades.value = decoded[0]['grand_net'] ?? 0;
+        filteredTrades.assignAll(
+          trades.map((item) => CarTradeModel.fromJson(item)),
+        );
+        numberOfCars.value = filteredTrades.length;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngine(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      //
+    }
+  }
+
   // =======================================================================================================
-
-  void filterByCurrentDate(String dateType) {
-    // var currentDate = DateTime.now();
-    // if (dateType == 'today') {
-    //   day.text = currentDate.day.toString();
-    //   month.text = monthNumberToName(currentDate.month);
-    //   year.value.text = currentDate.year.toString();
-    //   allDays.assignAll(getDaysInMonth(month.text));
-    // } else if (dateType == 'month') {
-    //   day.clear();
-    //   month.text = monthNumberToName(currentDate.month);
-    //   year.value.text = currentDate.year.toString();
-    //   allDays.assignAll(getDaysInMonth(month.text));
-    // } else if (dateType == 'year') {
-    //   day.clear();
-    //   month.clear();
-    //   year.value.text = currentDate.year.toString();
-    //   // calculateMonthlyTotals(int.parse(year.value.text));
-    //   allDays.clear();
-    // } else {
-    //   isNewStatusSelected.value = false;
-    //   isSoldStatusSelected.value = false;
-    //   day.clear();
-    //   month.clear();
-    //   year.value.clear();
-    //   allDays.clear();
-    //   isYearSelected.value = true;
-    //   isMonthSelected.value = false;
-    //   isDaySelected.value = false;
-    //   revenue.assignAll(List.filled(12, 0.0));
-    //   expenses.assignAll(List.filled(12, 0.0));
-    //   net.assignAll(List.filled(12, 0.0));
-    //   carsNumber.assignAll(List.filled(12, 0.0));
-    // }
-    // filterTradesByDate();
-  }
-
-  // // this function is to get items
-  // Future<void> getItems() async {
-  //   var typeDoc = await FirebaseFirestore.instance
-  //       .collection('all_lists')
-  //       .where('code', isEqualTo: 'ITEMS')
-  //       .get();
-
-  //   var typeId = typeDoc.docs.first.id;
-  //   FirebaseFirestore.instance
-  //       .collection('all_lists')
-  //       .doc(typeId)
-  //       .collection('values')
-  //       .where('available', isEqualTo: true)
-  //       .orderBy('added_date')
-  //       .snapshots()
-  //       .listen((item) {
-  //         allItems.value = {for (var doc in item.docs) doc.id: doc.data()};
-  //       });
-  // }
-
-  // void getAllTrades() {
-  //   try {
-  //     isScreenLoding.value = true;
-  //     FirebaseFirestore.instance
-  //         .collection('all_trades')
-  //         .where('company_id', isEqualTo: companyId.value)
-  //         .orderBy('date', descending: true)
-  //         .snapshots()
-  //         .listen((trade) {
-  //           allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
-  //           filteredTrades.assignAll(allTrades);
-  //           calculateTotalsForAllTrades();
-  //           numberOfCars.value = allTrades.length;
-  //           isScreenLoding.value = false;
-  //         });
-  //   } catch (e) {
-  //     isScreenLoding.value = false;
-  //   }
-  // }
-
-  String getdataName(String id, Map allData, {title = 'name'}) {
-    try {
-      final data = allData.entries.firstWhere((data) => data.key == id);
-      return data.value[title];
-    } catch (e) {
-      return '';
-    }
-  }
-
-  Future<String> getCarModelName(String brandId, String modelId) async {
-    try {
-      var name = await FirebaseFunctions.instance
-          .httpsCallable('get_model_name')
-          .call({"brandId": brandId, "modelId": modelId});
-      return name.data;
-    } catch (e) {
-      return '';
-    }
-  }
-
-  Future<String> getSellDate(String tradeId) async {
-    try {
-      var name = await FirebaseFunctions.instance
-          .httpsCallable('get_sell_date')
-          .call(tradeId);
-      return name.data;
-    } catch (e) {
-      return '';
-    }
-  }
-
-  Future<String> getBuyDate(String tradeId) async {
-    try {
-      var name = await FirebaseFunctions.instance
-          .httpsCallable('get_buy_date')
-          .call(tradeId);
-      return name.data;
-    } catch (e) {
-      return '';
-    }
-  }
-
-  Future<String> gettradePaid(String tradeId) async {
-    try {
-      var paid = await FirebaseFunctions.instance
-          .httpsCallable('get_trade_total_paid')
-          .call(tradeId);
-      return paid.data.toString();
-    } catch (e) {
-      return '';
-    }
-  }
-
-  Future<String> gettradeReceived(String tradeId) async {
-    try {
-      var rec = await FirebaseFunctions.instance
-          .httpsCallable('get_trade_total_received')
-          .call(tradeId);
-      return rec.data.toString();
-    } catch (e) {
-      return '';
-    }
-  }
-
-  Future<String> gettradeNETs(String tradeId) async {
-    try {
-      var net = await FirebaseFunctions.instance
-          .httpsCallable('get_trade_total_NETs')
-          .call(tradeId);
-      return net.data.toString();
-    } catch (e) {
-      return '';
-    }
-  }
-
-  void calculateTotalsForAllTrades() {
-    // totalNETsForAllTrades.value = 0.0;
-    // totalPaysForAllTrades.value = 0.0;
-    // totalReceivesForAllTrades.value = 0.0;
-
-    // for (var trade in filteredTrades) {
-    //   final data = trade.data() as Map<String, dynamic>;
-    //   final itemsList = data['items'] as List<dynamic>? ?? [];
-
-    //   if (itemsList.isNotEmpty) {
-    //     for (var item in itemsList) {
-    //       final pay = double.tryParse(item['pay'] ?? 0) ?? 0.0;
-    //       final receive = double.tryParse(item['receive'] ?? 0) ?? 0.0;
-
-    //       totalPaysForAllTrades.value += pay;
-    //       totalReceivesForAllTrades.value += receive;
-    //       totalNETsForAllTrades.value += (receive - pay);
-    //     }
-    //   }
-    // }
-  }
 
   void calculateTotalsForAllAndNetProfit() {
     totalNETsForAll.value =
@@ -1181,40 +1120,6 @@ class CarTradingDashboardController extends GetxController {
 
     totalNetProfit.value =
         totalNETsForAllTrades.value + totalNETsForAllGeneralExpenses.value;
-  }
-
-  void calculateTotalsForOutstanding() {
-    // totalNETsForAllOutstanding.value = 0.0;
-    // totalPaysForAllOutstanding.value = 0.0;
-    // totalReceivesForAllOutstanding.value = 0.0;
-
-    // for (var trade in filteredOutstanding) {
-    //   final data = trade.data() as Map<String, dynamic>;
-
-    //   final pay = double.tryParse(data['pay'] ?? 0);
-    //   final receive = double.tryParse(data['receive'] ?? 0);
-
-    //   totalPaysForAllOutstanding.value += pay!;
-    //   totalReceivesForAllOutstanding.value += receive!;
-    //   totalNETsForAllOutstanding.value += (receive - pay);
-    // }
-  }
-
-  void calculateTotalsForGeneralExpenses() {
-    // totalNETsForAllGeneralExpenses.value = 0.0;
-    // totalPaysForAllGeneralExpenses.value = 0.0;
-    // totalReceivesForAllGeneralExpenses.value = 0.0;
-
-    // for (var trade in filteredGeneralExpenses) {
-    //   final data = trade.data() as Map<String, dynamic>;
-
-    //   final pay = double.tryParse(data['pay'] ?? 0);
-    //   final receive = double.tryParse(data['receive'] ?? 0);
-
-    //   totalPaysForAllGeneralExpenses.value += pay!;
-    //   totalReceivesForAllGeneralExpenses.value += receive!;
-    //   totalNETsForAllGeneralExpenses.value += (receive - pay);
-    // }
   }
 
   void filterTradesForChart() {
@@ -1569,5 +1474,28 @@ class CarTradingDashboardController extends GetxController {
     addedItems.clear();
     status.value = '';
     currentTradId.value = '';
+  }
+
+  void onTapForAll() {
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+    carBrandFilter.value.clear();
+    carModelFilter.value.clear();
+    carBrandFilterId.value = '';
+    carModelFilterId.value = '';
+    allModels.clear();
+    carSoldToFilter.value.clear();
+    carSoldToFilterId.value = '';
+    carBoughtFromFilter.value.clear();
+    carBoughtFromFilterId.value = '';
+    isNewStatusSelected.value = false;
+    isSoldStatusSelected.value = false;
+    carEngineSizeFilter.value.clear();
+    carEngineSizeFilterId.value = '';
+    carSpecificationFilter.value.clear();
+    carSpecificationFilterId.value == '';
+    fromDate.value.clear();
+    toDate.value.clear();
   }
 }

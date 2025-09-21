@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../Models/car trading/car_trade_model.dart';
 import '../../../consts.dart';
@@ -7,87 +8,105 @@ import '../../main screen widgets/auto_size_box.dart';
 Widget tableOfCarTrades({
   required BoxConstraints constraints,
   required BuildContext context,
-  required CarTradingDashboardController controller,
 }) {
-  final dataSource = TradeDataSource(
-    trades: controller.filteredTrades,
-    context: context,
-    constraints: constraints,
-    controller: controller,
-  );
+  // final dataSource = TradeDataSource(
+  //   trades: controller.filteredTrades,
+  //   context: context,
+  //   constraints: constraints,
+  //   controller: controller,
+  // );
 
-  return DataTableTheme(
-    data: DataTableThemeData(
-      headingTextStyle: fontStyleForTableHeader,
-      dataTextStyle: regTextStyle,
-    ),
-    child: PaginatedDataTable(
-      headingRowHeight: 45,
-      showEmptyRows: false,
-      showFirstLastButtons: true,
-      rowsPerPage: controller.pagesPerPage.value,
-      showCheckboxColumn: false,
-      horizontalMargin: horizontalMarginForTable,
-      dataRowMaxHeight: 40,
-      dataRowMinHeight: 30,
-      columnSpacing: 5,
+  return GetX<CarTradingDashboardController>(
+    builder: (controller) {
+      bool istradingLoading = controller.filteredTrades.isEmpty;
+      return DataTableTheme(
+        data: DataTableThemeData(
+          headingTextStyle: fontStyleForTableHeader,
+          dataTextStyle: regTextStyle,
+        ),
+        child: PaginatedDataTable(
+          headingRowHeight: 45,
+          showEmptyRows: false,
+          showFirstLastButtons: true,
+          rowsPerPage: controller.pagesPerPage.value,
+          showCheckboxColumn: false,
+          horizontalMargin: horizontalMarginForTable,
+          dataRowMaxHeight: 40,
+          dataRowMinHeight: 30,
+          columnSpacing: 5,
 
-      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-      columns: [
-        DataColumn(
-          label: AutoSizedText(text: 'Brand', constraints: constraints),
+          headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+          columns: [
+            DataColumn(
+              label: AutoSizedText(text: 'Brand', constraints: constraints),
+            ),
+            DataColumn(
+              label: AutoSizedText(text: 'Model', constraints: constraints),
+            ),
+            DataColumn(
+              label: AutoSizedText(text: 'Year', constraints: constraints),
+            ),
+            DataColumn(
+              label: AutoSizedText(text: 'Status', constraints: constraints),
+            ),
+            DataColumn(
+              label: AutoSizedText(text: 'Color in', constraints: constraints),
+            ),
+            DataColumn(
+              label: AutoSizedText(text: 'Color out', constraints: constraints),
+            ),
+            DataColumn(
+              label: AutoSizedText(
+                text: 'Specification',
+                constraints: constraints,
+              ),
+            ),
+            DataColumn(
+              label: AutoSizedText(
+                text: 'Engine Size',
+                constraints: constraints,
+              ),
+            ),
+            DataColumn(
+              label: AutoSizedText(text: 'Mileage', constraints: constraints),
+            ),
+            DataColumn(
+              label: AutoSizedText(
+                text: 'Bought From',
+                constraints: constraints,
+              ),
+            ),
+            DataColumn(
+              label: AutoSizedText(text: 'Sold To', constraints: constraints),
+            ),
+            DataColumn(
+              label: AutoSizedText(constraints: constraints, text: 'Buy Date'),
+            ),
+            DataColumn(
+              label: AutoSizedText(constraints: constraints, text: 'Sell Date'),
+            ),
+            DataColumn(
+              numeric: true,
+              label: AutoSizedText(constraints: constraints, text: 'Paid'),
+            ),
+            DataColumn(
+              numeric: true,
+              label: AutoSizedText(constraints: constraints, text: 'Received'),
+            ),
+            DataColumn(
+              numeric: true,
+              label: AutoSizedText(constraints: constraints, text: 'Net'),
+            ),
+          ],
+          source: TradeDataSource(
+            trades: istradingLoading ? [] : controller.filteredTrades,
+            context: context,
+            constraints: constraints,
+            controller: controller,
+          ),
         ),
-        DataColumn(
-          label: AutoSizedText(text: 'Model', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'Year', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'Status', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'Color in', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'Color out', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'Specification', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'Engine Size', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'Mileage', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'Bought From', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'Sold To', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(constraints: constraints, text: 'Buy Date'),
-        ),
-        DataColumn(
-          label: AutoSizedText(constraints: constraints, text: 'Sell Date'),
-        ),
-        DataColumn(
-          numeric: true,
-          label: AutoSizedText(constraints: constraints, text: 'Paid'),
-        ),
-        DataColumn(
-          numeric: true,
-          label: AutoSizedText(constraints: constraints, text: 'Received'),
-        ),
-        DataColumn(
-          numeric: true,
-          label: AutoSizedText(constraints: constraints, text: 'Net'),
-        ),
-      ],
-      source: dataSource,
-    ),
+      );
+    },
   );
 }
 
@@ -124,14 +143,11 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: tradeData.year.toString(),
           formatDouble: false,
+          color: Colors.teal,
+          isBold: true,
         ),
       ),
-      DataCell(
-        textForDataRowInTable(
-          text: tradeData.status.toString(),
-          formatDouble: false,
-        ),
-      ),
+      DataCell(statusBox(tradeData.status.toString())),
       DataCell(
         textForDataRowInTable(
           text: tradeData.colorIn.toString(),
@@ -160,45 +176,59 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: tradeData.mileage.toString(),
           formatDouble: false,
+          color: Colors.deepOrange,
+          isBold: true,
         ),
       ),
       DataCell(
         textForDataRowInTable(
           text: tradeData.boughtFrom.toString(),
           formatDouble: false,
+          maxWidth: null,
         ),
       ),
       DataCell(
         textForDataRowInTable(
           text: tradeData.soldTo.toString(),
           formatDouble: false,
+          maxWidth: null,
         ),
       ),
       DataCell(
         textForDataRowInTable(
           text: textToDate(tradeData.buyDate.toString()),
           formatDouble: false,
+          color: Colors.purple,
+          isBold: true,
         ),
       ),
       DataCell(
         textForDataRowInTable(
           text: textToDate(tradeData.sellDate.toString()),
           formatDouble: false,
+          color: Colors.blue,
+          isBold: true,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: tradeData.pay.toString(),
+          text: tradeData.totalPay.toString(),
+          color: Colors.red,
+          isBold: true,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: tradeData.receive.toString(),
+          text: tradeData.totalReceive.toString(),
+          color: Colors.green,
+          isBold: true,
         ),
       ),
       DataCell(
         textForDataRowInTable(
           text: tradeData.net.toString(),
+          color: Colors.blueGrey,
+          isBold: true,
         ),
       ),
     ],

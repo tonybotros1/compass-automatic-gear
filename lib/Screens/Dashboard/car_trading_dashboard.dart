@@ -32,6 +32,14 @@ class CarTradingDashboard extends StatelessWidget {
                         builder: (controller) {
                           bool isBrandLoading = controller.allBrands.isEmpty;
                           bool isModelLoading = controller.allModels.isEmpty;
+                          bool isEngineSizeLoading =
+                              controller.allEngineSizes.isEmpty;
+                          bool isBoughtFromLoading =
+                              controller.allBuyersAndSellers.isEmpty;
+                          bool isSoldToLoading =
+                              controller.allBuyersAndSellers.isEmpty;
+                          bool isSpecificationsLoading =
+                              controller.allCarSpecifications.isEmpty;
                           return Row(
                             spacing: 10,
                             children: [
@@ -81,30 +89,83 @@ class CarTradingDashboard extends StatelessWidget {
                               CustomDropdown(
                                 width: 150,
                                 hintText: 'Specification',
-                                items: const {},
-                                onChanged: (key, value) {},
-                                onDelete: () {},
+                                showedSelectedName: 'name',
+                                textcontroller: controller
+                                    .carSpecificationFilter
+                                    .value
+                                    .text,
+                                items: isSpecificationsLoading
+                                    ? {}
+                                    : controller.allCarSpecifications,
+                                onChanged: (key, value) {
+                                  controller.carSpecificationFilter.value.text =
+                                      value["name"];
+                                  controller.carSpecificationFilterId.value =
+                                      key;
+                                },
+                                onDelete: () {
+                                  controller.carSpecificationFilter.value
+                                      .clear();
+                                  controller.carSpecificationFilterId.value =
+                                      '';
+                                },
                               ),
                               CustomDropdown(
                                 width: 150,
                                 hintText: 'Engine Size',
-                                items: const {},
-                                onChanged: (key, value) {},
-                                onDelete: () {},
+                                showedSelectedName: 'name',
+                                textcontroller:
+                                    controller.carEngineSizeFilter.value.text,
+                                items: isEngineSizeLoading
+                                    ? {}
+                                    : controller.allEngineSizes,
+                                onChanged: (key, value) {
+                                  controller.carEngineSizeFilter.value.text =
+                                      value['name'];
+                                  controller.carEngineSizeFilterId.value = key;
+                                },
+                                onDelete: () {
+                                  controller.carEngineSizeFilter.value.clear();
+                                  controller.carEngineSizeFilterId.value = '';
+                                },
                               ),
                               CustomDropdown(
                                 width: 150,
                                 hintText: 'Bought From',
-                                items: const {},
-                                onChanged: (key, value) {},
-                                onDelete: () {},
+                                textcontroller:
+                                    controller.carBoughtFromFilter.value.text,
+                                showedSelectedName: 'name',
+                                items: isBoughtFromLoading
+                                    ? {}
+                                    : controller.allBuyersAndSellers,
+                                onChanged: (key, value) {
+                                  controller.carBoughtFromFilter.value.text =
+                                      value['name'];
+                                  controller.carBoughtFromFilterId.value = key;
+                                },
+                                onDelete: () {
+                                  controller.carBoughtFromFilter.value.clear();
+                                  controller.carBoughtFromFilterId.value = '';
+                                },
                               ),
                               CustomDropdown(
                                 width: 150,
                                 hintText: 'Sold To',
-                                items: const {},
-                                onChanged: (key, value) {},
-                                onDelete: () {},
+                                items: isSoldToLoading
+                                    ? {}
+                                    : controller.allBuyersAndSellers,
+                                textcontroller:
+                                    controller.carSoldToFilter.value.text,
+                                showedSelectedName: 'name',
+                                onChanged: (key, value) {
+                                  controller.carSoldToFilter.value.text =
+                                      value['name'];
+                                  controller.carSoldToFilterId.value = key;
+                                },
+                                onDelete: () {
+                                  controller.carSoldToFilter.value.clear();
+                                  controller.carSoldToFilterId.value = '';
+                                },
                               ),
                             ],
                           );
@@ -141,16 +202,7 @@ class CarTradingDashboard extends StatelessWidget {
                               ElevatedButton(
                                 style: allButtonStyle,
                                 onPressed: () {
-                                  controller.filterByCurrentDate('all');
-                                  // controller.isAllSelected.value = true;
-                                  controller.isTodaySelected.value = false;
-                                  controller.isThisMonthSelected.value = false;
-                                  controller.isThisYearSelected.value = false;
-                                  controller.carBrandFilter.value.clear();
-                                  controller.carModelFilter.value.clear();
-                                  controller.carBrandFilterId.value = '';
-                                  controller.carModelFilterId.value = '';
-                                  controller.allModels.clear();
+                                  controller.onTapForAll();
                                 },
                                 child: const Text('All'),
                               ),
@@ -158,8 +210,6 @@ class CarTradingDashboard extends StatelessWidget {
                                 style: todayButtonStyle,
                                 onPressed: controller.isTodaySelected.isFalse
                                     ? () {
-                                        controller.filterByCurrentDate('today');
-                                        // controller.isAllSelected.value = false;
                                         controller.isTodaySelected.value = true;
                                         controller.isThisMonthSelected.value =
                                             false;
@@ -174,7 +224,6 @@ class CarTradingDashboard extends StatelessWidget {
                                 onPressed:
                                     controller.isThisMonthSelected.isFalse
                                     ? () {
-                                        controller.filterByCurrentDate('month');
                                         controller.isTodaySelected.value =
                                             false;
                                         controller.isThisMonthSelected.value =
@@ -189,7 +238,6 @@ class CarTradingDashboard extends StatelessWidget {
                                 style: thisYearButtonStyle,
                                 onPressed: controller.isThisYearSelected.isFalse
                                     ? () {
-                                        controller.filterByCurrentDate('year');
                                         controller.isTodaySelected.value =
                                             false;
                                         controller.isThisMonthSelected.value =
@@ -237,16 +285,17 @@ class CarTradingDashboard extends StatelessWidget {
                               ),
                               ElevatedButton(
                                 style: saveButtonStyle,
-                                onPressed: controller.isThisYearSelected.isFalse
-                                    ? () async {
-                                        // controller.removeFilters();
-                                        // controller.searchEngine();
+                                onPressed: controller.searching.isFalse
+                                    ? () {
+                                        controller.filterSearch();
                                       }
                                     : null,
-                                child: Text(
-                                  'Find',
-                                  style: fontStyleForElevatedButtons,
-                                ),
+                                child: controller.searching.isFalse
+                                    ? Text(
+                                        'Find',
+                                        style: fontStyleForElevatedButtons,
+                                      )
+                                    : loadingProcess,
                               ),
                             ],
                           );
@@ -686,14 +735,9 @@ class CarTradingDashboard extends StatelessWidget {
                         bottomRight: Radius.circular(15),
                       ),
                     ),
-                    child: GetX<CarTradingDashboardController>(
-                      builder: (controller) {
-                        return tableOfCarTrades(
-                          constraints: constraints,
-                          context: context,
-                          controller: controller,
-                        );
-                      },
+                    child: tableOfCarTrades(
+                      constraints: constraints,
+                      context: context,
                     ),
                   ),
                 ),
