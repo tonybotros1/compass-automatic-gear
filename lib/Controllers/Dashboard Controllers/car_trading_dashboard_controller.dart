@@ -17,9 +17,6 @@ import '../Main screen controllers/websocket_controller.dart';
 class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> searchForCapitalsOrOutstandingOrGeneralExpenses =
       TextEditingController().obs;
-  Rx<TextEditingController> yearFilter = TextEditingController().obs;
-  TextEditingController monthFilter = TextEditingController();
-  TextEditingController dayFilter = TextEditingController();
   Rx<TextEditingController> carModelFilter = TextEditingController().obs;
   Rx<TextEditingController> carBrandFilter = TextEditingController().obs;
   Rx<TextEditingController> carEngineSizeFilter = TextEditingController().obs;
@@ -45,7 +42,6 @@ class CarTradingDashboardController extends GetxController {
   final RxList<GeneralExpensesModel> filteredGeneralExpenses =
       RxList<GeneralExpensesModel>([]);
   RxMap allYears = RxMap({});
-  RxBool isScreenLoding = RxBool(false);
   RxInt numberOfCars = RxInt(0);
   RxInt numberOfCapitalsDocs = RxInt(0);
   RxInt numberOfOutstandingDocs = RxInt(0);
@@ -65,21 +61,12 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalNETsForAll = RxDouble(0.0);
   RxDouble totalNetProfit = RxDouble(0.0);
   RxInt pagesPerPage = RxInt(15);
-  DateFormat format = DateFormat('yyyy-MM-dd');
   DateFormat inputFormat = DateFormat("dd-MM-yyyy");
-  RxInt touchedIndex = 0.obs;
-  RxInt newPercentage = RxInt(0);
-  RxInt soldPercentage = RxInt(0);
-  RxList<double> revenue = RxList<double>.filled(12, 0.0);
-  RxList<double> expenses = RxList<double>.filled(12, 0.0);
-  RxList<double> net = RxList<double>.filled(12, 0.0);
-  RxList<double> carsNumber = RxList<double>.filled(12, 0.0);
   RxBool isNewStatusSelected = RxBool(false);
   RxBool isSoldStatusSelected = RxBool(false);
   RxBool isTodaySelected = RxBool(false);
   RxBool isThisMonthSelected = RxBool(false);
   RxBool isThisYearSelected = RxBool(false);
-  // RxMap allItems = RxMap({});
   RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
   RxString status = RxString('');
