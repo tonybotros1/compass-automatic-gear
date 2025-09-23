@@ -42,11 +42,53 @@ class CarBrandsController extends GetxController {
 
   @override
   void onInit() {
+    // toJson();
     connectWebSocket();
     getCarBrands();
 
     super.onInit();
   }
+
+  // void toJson() async {
+  //   try {
+  //     Map<String, dynamic> jsonMap = {};
+  //     var data = await FirebaseFirestore.instance
+  //         .collection("all_brands")
+  //         .get();
+  //     for (var brand in data.docs) {
+  //       var id = brand.id;
+  //       var name = brand["name"];
+  //       var status = true;
+  //       var logo = "";
+  //       var models = await FirebaseFirestore.instance
+  //           .collection('all_brands')
+  //           .doc(id)
+  //           .collection('values')
+  //           .get();
+  //       var modelsMap = {};
+  //       for (var model in models.docs) {
+  //         modelsMap[model.id] = {"name": model["name"], "status": true};
+  //       }
+  //       jsonMap[id] = {
+  //         "name": name,
+  //         "status": status,
+  //         "logo": logo,
+  //         "models": modelsMap,
+  //       };
+  //       print("$id added");
+  //     }
+  //     String jsonString = jsonEncode(jsonMap);
+  //     final blob = html.Blob([jsonString]);
+  //     final url = html.Url.createObjectUrlFromBlob(blob);
+  //     final anchor = html.AnchorElement(href: url)
+  //       ..setAttribute("download", "brands.json")
+  //       ..click();
+  //     html.Url.revokeObjectUrl(url);
+  //     print("✅ brands.json downloaded!");
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   String getScreenName() {
     MainScreenController mainScreenController =

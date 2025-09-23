@@ -1,18 +1,18 @@
 class Brand {
   final String id;
-  final String name;
-  final String logo;
-  final bool status;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  String? name;
+  String? logo;
+  bool? status;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   Brand({
     required this.id,
-    required this.name,
-    required this.logo,
-    required this.status,
-    required this.createdAt,
-    required this.updatedAt,
+    this.name,
+    this.logo,
+    this.status,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory Brand.fromJson(Map<String, dynamic> json) {

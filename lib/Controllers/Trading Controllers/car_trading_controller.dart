@@ -120,6 +120,9 @@ class CarTradingController extends GetxController {
 
   @override
   void onInit() async {
+    // await getNamesOfPeople();
+
+    // toJson();
     await getCompanyId();
     getBuyersAndSellers();
     getColors();
@@ -163,6 +166,120 @@ class CarTradingController extends GetxController {
     });
     super.onInit();
   }
+
+  // void toJson() async {
+  //   try {
+  //     Map<String, dynamic> jsonMap = {};
+  //     var data = await FirebaseFirestore.instance
+  //         .collection('all_outstanding')
+  //         .get();
+  //     for (var d in data.docs) {
+  //       var id = d.id;
+  //       var name = getdataName(d["name"], allNames);
+  //       var date = d["date"];
+  //       var pay = double.tryParse(d["pay"]) ?? 0;
+  //       var receive = double.tryParse(d["receive"]) ?? 0;
+  //       var comment = d["comment"];
+  //       jsonMap[d.id] = {
+  //         "name": name,
+  //         "date": date,
+  //         "pay": pay,
+  //         "receive": receive,
+  //         "comment": comment,
+  //       };
+  //       print("$id added");
+  //     }
+  //         String jsonString = jsonEncode(jsonMap);
+  //         final blob = html.Blob([jsonString]);
+  //         final url = html.Url.createObjectUrlFromBlob(blob);
+  //         final anchor = html.AnchorElement(href: url)
+  //           ..setAttribute("download", "outstanding.json")
+  //           ..click();
+  //         html.Url.revokeObjectUrl(url);
+  //         print("✅ trades.json downloaded!");
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
+
+  // Future saveToJson() async {
+  //   try {
+  //     Map<String, dynamic> jsonMap = {};
+  //     var trades = await FirebaseFirestore.instance
+  //         .collection('all_trades')
+  //         .get();
+  //     for (var element in trades.docs) {
+  //       var brand = await getCarBrandName(element["car_brand"]);
+
+  //       var model = await getCarModelName(
+  //         element["car_brand"],
+  //         element["car_model"],
+  //       );
+  //       var colorin = getdataName(element["color_in"], allColors);
+  //       var colorout = getdataName(element["color_out"], allColors);
+  //       var date = element["date"];
+  //       var engineSize = getdataName(element["engine_size"], allEngineSizes);
+  //       var mileage = element["mileage"];
+  //       var note = element["note"];
+  //       var boughtfrom =
+  //           element.data().containsKey("bought_from") &&
+  //               element.get("bought_from") != null
+  //           ? getdataName(element.get("bought_from"), allBuyersAndSellers)
+  //           : "";
+
+  //       var soldto =
+  //           element.data().containsKey("sold_to") &&
+  //               element.get("sold_to") != null
+  //           ? getdataName(element.get("sold_to"), allBuyersAndSellers)
+  //           : "";
+
+  //       var specification = getdataName(
+  //         element["specification"],
+  //         allCarSpecifications,
+  //       );
+  //       var status = element["status"];
+  //       var year = getdataName(element["year"], allYears);
+  //       List items = element["items"];
+  //       List newItems = [];
+  //       for (var item in items) {
+  //         newItems.add({
+  //           "comment": item["comment"],
+  //           "date": item["date"],
+  //           "pay": double.tryParse(item["pay"]) ?? 0,
+  //           "receive": double.tryParse(item["receive"]) ?? 0,
+  //           "item": getdataName(item["item"], allItems),
+  //         });
+  //       }
+  //       jsonMap[element.id] = {
+  //         "car_brand": brand,
+  //         "car_model": model,
+  //         "sold_to": soldto,
+  //         "bought_from": boughtfrom,
+  //         "color_in": colorin,
+  //         "color_out": colorout,
+  //         "date": date,
+  //         "engine_size": engineSize,
+  //         "mileage": mileage,
+  //         "note": note,
+  //         "specification": specification,
+  //         "status": status,
+  //         "year": year,
+  //         "items": newItems,
+  //       };
+  //       print("${element.id} added");
+  //     }
+  //     String jsonString = jsonEncode(jsonMap);
+  //     final blob = html.Blob([jsonString]);
+  //     final url = html.Url.createObjectUrlFromBlob(blob);
+  //     final anchor = html.AnchorElement(href: url)
+  //       ..setAttribute("download", "trades.json")
+  //       ..click();
+  //     html.Url.revokeObjectUrl(url);
+  //     print("✅ trades.json downloaded!");
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   void changeRowsPerPage(int rows) {
     pagesPerPage.value = rows;
@@ -877,6 +994,17 @@ class CarTradingController extends GetxController {
       var name = await FirebaseFunctions.instance
           .httpsCallable('get_model_name')
           .call({"brandId": brandId, "modelId": modelId});
+      return name.data;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  Future<String> getCarBrandName(String brandId) async {
+    try {
+      var name = await FirebaseFunctions.instance
+          .httpsCallable('get_brand_name')
+          .call(brandId);
       return name.data;
     } catch (e) {
       return '';

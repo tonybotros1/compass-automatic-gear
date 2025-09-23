@@ -156,11 +156,13 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(brandData.name)),
+      DataCell(Text(brandData.name.toString())),
       DataCell(
         Image.network(
           fit: BoxFit.fitWidth,
-          cloudinaryThumbnail(brandData.logo, width: 45),
+          brandData.logo.toString().isNotEmpty
+              ? cloudinaryThumbnail(brandData.logo.toString(), width: 45)
+              : "",
           width: 35,
           errorBuilder: (context, url, error) => const Icon(Icons.error),
         ),
@@ -273,7 +275,7 @@ ElevatedButton activeInActiveSection(
   );
 }
 
-ElevatedButton deleteSection(CarBrandsController controller, brandId, context) {
+ElevatedButton deleteSection(CarBrandsController controller,String brandId,BuildContext context) {
   return ElevatedButton(
     style: deleteButtonStyle,
     onPressed: () {
@@ -293,14 +295,14 @@ ElevatedButton editSection(
   BuildContext context,
   CarBrandsController controller,
   Brand brandData,
-  constraints,
-  brandId,
+  BoxConstraints constraints,
+  String brandId,
 ) {
   return ElevatedButton(
     style: editButtonStyle,
     onPressed: () {
-      controller.brandName.text = brandData.name;
-      controller.logoUrl.value = brandData.logo;
+      controller.brandName.text = brandData.name.toString();
+      controller.logoUrl.value = brandData.logo.toString();
       controller.imageBytes.value = Uint8List(0);
       controller.logoSelectedError.value = false;
       carBrandsDialog(

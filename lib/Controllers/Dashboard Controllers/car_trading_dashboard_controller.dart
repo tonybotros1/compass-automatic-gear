@@ -64,7 +64,7 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalNETsForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAll = RxDouble(0.0);
   RxDouble totalNetProfit = RxDouble(0.0);
-  RxInt pagesPerPage = RxInt(7);
+  RxInt pagesPerPage = RxInt(15);
   DateFormat format = DateFormat('yyyy-MM-dd');
   DateFormat inputFormat = DateFormat("dd-MM-yyyy");
   RxInt touchedIndex = 0.obs;
@@ -362,6 +362,7 @@ class CarTradingDashboardController extends GetxController {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
+      print(accessToken);
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse(
         '$backendUrl/car_trading/get_capitals_or_outstanding_summary/$type',
@@ -1093,6 +1094,7 @@ class CarTradingDashboardController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        print("yes");
         final decoded = jsonDecode(response.body);
         final data = decoded is List ? decoded[0] : decoded;
 
@@ -1116,7 +1118,7 @@ class CarTradingDashboardController extends GetxController {
         logout();
       }
     } catch (e) {
-      //
+      print(e);
     }
   }
 
@@ -1134,7 +1136,6 @@ class CarTradingDashboardController extends GetxController {
       if (response.statusCode == 200) {
         filteredTrades.removeWhere((trade) => trade.id == id);
         numberOfCars.value -= 1;
-        print(numberOfCars.value);
         Get.close(2);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);

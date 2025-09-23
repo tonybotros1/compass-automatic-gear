@@ -61,6 +61,7 @@ class CarTradingDashboard extends StatelessWidget {
                                   controller.carModelFilterId.value = '';
                                 },
                                 onDelete: () {
+                                  controller.allModels.clear();
                                   controller.carModelFilter.value.clear();
                                   controller.carBrandFilter.value.clear();
                                   controller.carBrandFilterId.value = '';
@@ -741,37 +742,11 @@ class CarTradingDashboard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                // SliverToBoxAdapter(
-                //   child: GetX<CarTradingDashboardController>(
-                //     builder: (controller) {
-                //       return SyncfusionMultiBarChart(
-                //         labels: controller.isYearSelected.isTrue
-                //             ? months
-                //             : controller.isMonthSelected.isTrue
-                //             ? controller.allDays.values
-                //                   .map((e) => e['name'].toString())
-                //                   .toList()
-                //             : controller.isDaySelected.isTrue
-                //             ? ['Today']
-                //             : months,
-                //         expenses: controller.expenses,
-                //         net: controller.net,
-                //         revenue: controller.revenue,
-                //         carsNumber: controller.carsNumber,
-                //       );
-                //     },
-                //   ),
-                // ),
               ],
             ),
           );
         },
       ),
     );
-  }
-
-  Container hintMark({required Color color}) {
-    return Container(height: 10, width: 10, color: color);
   }
 }
