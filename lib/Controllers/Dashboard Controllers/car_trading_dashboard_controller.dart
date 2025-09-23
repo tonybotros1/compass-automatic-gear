@@ -349,7 +349,6 @@ class CarTradingDashboardController extends GetxController {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
-      print(accessToken);
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse(
         '$backendUrl/car_trading/get_capitals_or_outstanding_summary/$type',
@@ -1081,7 +1080,6 @@ class CarTradingDashboardController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        print("yes");
         final decoded = jsonDecode(response.body);
         final data = decoded is List ? decoded[0] : decoded;
 
@@ -1105,7 +1103,7 @@ class CarTradingDashboardController extends GetxController {
         logout();
       }
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
 

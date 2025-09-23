@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/sales_man_controller.dart';
+import '../../../../Models/salesman/salesman_model.dart';
 import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/sales_man_widgets/sale_man_dialog.dart';
@@ -30,13 +31,22 @@ class SalesMan extends StatelessWidget {
                     init: SalesManController(),
                     builder: (controller) {
                       return searchBar(
+                        onChanged: (_) {
+                          controller.filterSalesMan();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.clear();
+                          controller.filterSalesMan();
+                        },
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        // controller: controller,
                         title: 'Search for sales man',
-                        button:
-                            newSalesManButton(context, constraints, controller),
+                        button: newSalesManButton(
+                          context,
+                          constraints,
+                          controller,
+                        ),
                       );
                     },
                   ),
@@ -49,9 +59,7 @@ class SalesMan extends StatelessWidget {
                           );
                         }
                         if (controller.allSalesMan.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
+                          return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
                           scrollDirection: Axis
@@ -78,10 +86,11 @@ class SalesMan extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens(
-    {required BoxConstraints constraints,
-    required BuildContext context,
-    required SalesManController controller}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required SalesManController controller,
+}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -95,127 +104,151 @@ Widget tableOfScreens(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          text: 'Name',
-          constraints: constraints,
-        ),
+        label: AutoSizedText(text: 'Name', constraints: constraints),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Target',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Target'),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         onSort: controller.onSort,
       ),
       const DataColumn(label: Text('')),
     ],
-    rows: controller.filteredSalesMan.isEmpty &&
+    rows:
+        controller.filteredSalesMan.isEmpty &&
             controller.search.value.text.isEmpty
         ? controller.allSalesMan.map<DataRow>((saleman) {
-            final salemanData = saleman.data() as Map<String, dynamic>;
             final salemanId = saleman.id;
             return dataRowForTheTable(
-                salemanData, context, constraints, salemanId, controller);
+              saleman,
+              context,
+              constraints,
+              salemanId,
+              controller,
+            );
           }).toList()
         : controller.filteredSalesMan.map<DataRow>((saleman) {
-            final salemanData = saleman.data() as Map<String, dynamic>;
             final salemanId = saleman.id;
             return dataRowForTheTable(
-                salemanData, context, constraints, salemanId, controller);
+              saleman,
+              context,
+              constraints,
+              salemanId,
+              controller,
+            );
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> salemanData, context,
-    constraints, salemanId, SalesManController controller) {
-  return DataRow(cells: [
-    DataCell(Text(
-      salemanData['name'] ?? 'no name',
-    )),
-    DataCell(
-      Text(
-        '${salemanData['target']}',
-      ),
-    ),
-    DataCell(
-      Text(
-        salemanData['added_date'] != null && salemanData['added_date'] != ''
-            ? textToDate(salemanData['added_date']) //
-            : 'N/A',
-      ),
-    ),
-    DataCell(Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 5),
-          child: editSection(
-              context, controller, salemanData, constraints, salemanId),
+DataRow dataRowForTheTable(
+  SalesmanModel salemanData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String salemanId,
+  SalesManController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(Text(salemanData.name.toString())),
+      DataCell(
+        textForDataRowInTable(
+          text: salemanData.target.toString(),
+          color: Colors.green,
+          isBold: true,
         ),
-        deleteSection(controller, salemanId, context),
-      ],
-    )),
-  ]);
+      ),
+      DataCell(Text(textToDate(salemanData.createdAt))),
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 5),
+              child: editSection(
+                context,
+                controller,
+                salemanData,
+                constraints,
+                salemanId,
+              ),
+            ),
+            deleteSection(controller, salemanId, context),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 ElevatedButton deleteSection(
-    SalesManController controller, variableId, context) {
+  SalesManController controller,
+  variableId,
+  context,
+) {
   return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: "The sale man will be deleted permanently",
-            onPressed: () {
-              controller.deleteSaleman(variableId);
-            });
-      },
-      child: const Text("Delete"));
+    style: deleteButtonStyle,
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The sale man will be deleted permanently",
+        onPressed: () {
+          controller.deleteSaleman(variableId);
+        },
+      );
+    },
+    child: const Text("Delete"),
+  );
 }
 
-ElevatedButton editSection(BuildContext context, SalesManController controller,
-    Map<String, dynamic> salemanData,BoxConstraints constraints,String salemanId) {
+ElevatedButton editSection(
+  BuildContext context,
+  SalesManController controller,
+  SalesmanModel salemanData,
+  BoxConstraints constraints,
+  String salemanId,
+) {
   return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () {
-        controller.name.text = salemanData['name'] ?? '';
-        controller.target.text = (salemanData['target'] ?? '').toString();
-        saleManDialog(
-            constraints: constraints,
-            controller: controller,
-            onPressed: controller.addingNewValue.value
-                ? null
-                : () {
-                    controller.editSaleMan(salemanId);
-                  });
-      },
-      child: const Text('Edit'));
+    style: editButtonStyle,
+    onPressed: () {
+      controller.name.text = salemanData.name.toString();
+      controller.target.text = salemanData.target.toString();
+      saleManDialog(
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () {
+                controller.editSaleMan(salemanId);
+              },
+      );
+    },
+    child: const Text('Edit'),
+  );
 }
 
-ElevatedButton newSalesManButton(BuildContext context,
-    BoxConstraints constraints, SalesManController controller) {
+ElevatedButton newSalesManButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  SalesManController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.name.clear();
       controller.target.clear();
       saleManDialog(
-          constraints: constraints,
-          controller: controller,
-          onPressed: controller.addingNewValue.value
-              ? null
-              : () async {
-                  await controller.addNewSaleMan();
-                });
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                await controller.addNewSaleMan();
+              },
+      );
     },
     style: newButtonStyle,
-    child: const Text('New Sale Man'),
+    child: const Text('New Salesman'),
   );
 }
