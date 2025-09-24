@@ -827,15 +827,36 @@ Widget closeIcon() {
   );
 }
 
-// this function is to see if the warrant date is end or not
 bool isBeforeToday(String dateStr) {
-  if (dateStr.isEmpty) {
-    return false;
+  if (dateStr.isEmpty) return false;
+
+  // List of possible date formats
+  final formats = [
+    DateFormat("dd-MM-yyyy"),
+    DateFormat("yyyy-MM-dd"),
+    DateFormat("MM/dd/yyyy"),
+    DateFormat("dd/MM/yyyy"),
+    DateFormat("yyyy/MM/dd"),
+    DateFormat("yyyyMMdd"),
+    DateFormat("dd MMM yyyy"),
+    DateFormat("MMM dd, yyyy"),
+  ];
+
+  DateTime? inputDate;
+
+  for (var format in formats) {
+    try {
+      inputDate = format.parseStrict(dateStr);
+      break; // parsed successfully, exit loop
+    } catch (_) {
+      continue; // try next format
+    }
   }
 
-  DateFormat format = DateFormat("dd-MM-yyyy");
-
-  DateTime inputDate = format.parse(dateStr);
+  if (inputDate == null) {
+    // Could not parse the date
+    return false;
+  }
 
   DateTime today = DateTime.now();
   DateTime todayOnly = DateTime(today.year, today.month, today.day);

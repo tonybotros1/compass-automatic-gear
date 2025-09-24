@@ -393,7 +393,7 @@ class UsersController extends GetxController {
   Future<void> getRoles() async {
     try {
       isLoading.value = true;
-      RxMap rolesMap = RxMap(await helper.getAllRoles(selectedRoles));
+      RxMap rolesMap = RxMap(await helper.getAllRoles());
       Map<String, List<dynamic>> tempSelectedRoles = {};
       for (var role in rolesMap.values) {
         tempSelectedRoles[role['role_name']] = [role["_id"], false];

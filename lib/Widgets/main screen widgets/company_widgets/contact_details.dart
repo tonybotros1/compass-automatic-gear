@@ -5,9 +5,7 @@ import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/company_controller.dart';
 import '../../my_text_field.dart';
 
-Container contactDetails({
-  required CompanyController controller,
-}) {
+Container contactDetails({required CompanyController controller}) {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
@@ -68,48 +66,55 @@ Container contactDetails({
           hintText: 'Enter your address',
           validate: true,
         ),
-        GetX<CompanyController>(builder: (controller) {
-          final isCountriesLoading = controller.allCountries.isEmpty;
-          return Row(
-            spacing: 10,
-            children: [
-              Expanded(
+        GetX<CompanyController>(
+          builder: (controller) {
+            final isCountriesLoading = controller.allCountries.isEmpty;
+            return Row(
+              spacing: 10,
+              children: [
+                Expanded(
                   child: CustomDropdown(
-                hintText: 'Country',
-                showedSelectedName: 'name',
-                textcontroller: controller.country.text,
-                items: isCountriesLoading ? {} : controller.allCountries,
-                itemBuilder: (context, key, value) {
-                  return ListTile(
-                    title: Text('${value['name']}'),
-                  );
-                },
-                onChanged: (key, value) {
-                  controller.country.text = value['name'];
-                  controller.getCitiesByCountryID(key);
-                  controller.city.clear();
-                  controller.selectedCountryId.value = key;
-                },
-              )),
-              Expanded(
+                    hintText: 'Country',
+                    showedSelectedName: 'name',
+                    textcontroller: controller.country.text,
+                    items: isCountriesLoading ? {} : controller.allCountries,
+                    onChanged: (key, value) {
+                      controller.country.text = value['name'];
+                      controller.getCitiesByCountryId(key);
+                      controller.city.clear();
+                      controller.selectedCountryId.value = key;
+                      controller.selectedCityId.value = '';
+                    },
+                    onDelete: () {
+                      controller.country.clear();
+                      controller.allCities.clear();
+                      controller.city.clear();
+                      controller.selectedCountryId.value = '';
+                      controller.selectedCityId.value = '';
+                    },
+                  ),
+                ),
+                Expanded(
                   child: CustomDropdown(
-                hintText: 'City',
-                showedSelectedName: 'name',
-                textcontroller: controller.city.text,
-                items: controller.allCities.isEmpty ? {} : controller.allCities,
-                itemBuilder: (context, key, value) {
-                  return ListTile(
-                    title: Text(value['name']),
-                  );
-                },
-                onChanged: (key, value) {
-                  controller.city.text = value['name'];
-                  controller.selectedCityId.value = key;
-                },
-              )),
-            ],
-          );
-        }),
+                    hintText: 'City',
+                    showedSelectedName: 'name',
+                    textcontroller: controller.city.text,
+                    items: controller.allCities.isEmpty
+                        ? {}
+                        : controller.allCities,
+                    onChanged: (key, value) {
+                      controller.city.text = value['name'];
+                      controller.selectedCityId.value = key;
+                    },onDelete: (){
+                      controller.city.clear();
+                      controller.selectedCityId.value = '';
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ],
     ),
   );

@@ -294,7 +294,7 @@ class BranchesController extends GetxController {
 
   Future<void> getCountries() async {
     try {
-      allCountries.assignAll(await helper.getCountries(allCountries));
+      allCountries.assignAll(await helper.getCountries());
     } catch (e) {
       //
     }
@@ -302,7 +302,7 @@ class BranchesController extends GetxController {
 
   void getCitiesByCountryID(String countryID) async {
     try {
-      allCities.assignAll(await helper.getCitiesValues(allCities, countryID));
+      allCities.assignAll(await helper.getCitiesValues(countryID));
     } catch (e) {
       //
     }

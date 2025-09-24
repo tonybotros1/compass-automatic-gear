@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,7 +60,7 @@ class Helpers {
   }
 
   // this function is to get all countries for drop down menu
-  Future getCountries(RxMap map) async {
+  Future getCountries() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -76,12 +75,12 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> jsonDate = decoded["countries"];
-        map.value = {for (var country in jsonDate) country['_id']: country};
+        var map = {for (var country in jsonDate) country['_id']: country};
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCountries(map);
+          await getCountries();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -96,7 +95,7 @@ class Helpers {
   }
 
   // this function is to ger all cities of selected country for drop down menu
-  Future getCitiesValues(RxMap map, String countryId) async {
+  Future getCitiesValues(String countryId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -109,12 +108,12 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> jsonData = decoded["cities"];
-        map.value = {for (var city in jsonData) city['_id']: city};
+        var map = {for (var city in jsonData) city['_id']: city};
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCitiesValues(map, countryId);
+          await getCitiesValues(countryId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -129,7 +128,7 @@ class Helpers {
   }
 
   // this function is to ger all roles for drop down menu
-  Future getAllRoles(RxMap map) async {
+  Future getAllRoles() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -144,12 +143,12 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> jsonData = decoded["roles"];
-        map.value = {for (var role in jsonData) role['_id']: role};
+        var map = {for (var role in jsonData) role['_id']: role};
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllRoles(map);
+          await getAllRoles();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
