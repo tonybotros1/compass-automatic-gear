@@ -44,31 +44,32 @@ class CompanyModel {
   });
 
   CompanyModel.fromJson(Map<String, dynamic> json) {
-    id = json['_id'];
-    companyName = json['company_name'];
+    id = json['_id'] ?? '';
+    companyName = json['company_name'] ?? '';
     status = json['status'] ?? false;
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
-    companyLogoUrl = json['company_logo_url'];
-    companyLogoPublicId = json['company_logo_public_id'];
-    industry = json['industry'];
-    industryId = json['industry_id'];
-    userId = json['user_id'];
-    userEmail = json['user_email'];
-    userName = json['user_name'];
-    userPhoneNumber = json['user_phone_number'];
-    userAddress = json['user_address'];
-    userExpiryDate = json['user_expiry_date'];
-    userCountry = json['user_country'];
-    userCountryId = json['user_country_id'];
-    userCity = json['user_city'];
-    userCityId = json['user_city_id'];
-    if (json['main_user_roles'] != null) {
+    createdAt = json['createdAt'] ?? '';
+    updatedAt = json['updatedAt'] ?? '';
+    companyLogoUrl = json['company_logo_url'] ?? '';
+    companyLogoPublicId = json['company_logo_public_id'] ?? '';
+    industry = json['industry'] ?? '';
+    industryId = json['industry_id'] ?? '';
+    userId = json['user_id'] ?? '';
+    userEmail = json['user_email'] ?? '';
+    userName = json['user_name'] ?? '';
+    userPhoneNumber = json['user_phone_number'] ?? '';
+    userAddress = json['user_address'] ?? '';
+    userExpiryDate = json['user_expiry_date'] ?? '';
+    userCountry = json['user_country'] ?? '';
+    userCountryId = json['user_country_id'] ?? '';
+    userCity = json['user_city'] ?? '';
+    userCityId = json['user_city_id'] ?? '';
+    if (json['main_user_roles'] != null && json['main_user_roles'] is List) {
       mainUserRoles = <MainUserRoles>[];
-      json['main_user_roles'].forEach((v) {
-        // ignore: unnecessary_new
-        mainUserRoles!.add(new MainUserRoles.fromJson(v));
-      });
+      for (var v in json['main_user_roles']) {
+        if (v is Map<String, dynamic>) {
+          mainUserRoles!.add(MainUserRoles.fromJson(v));
+        }
+      }
     }
   }
 

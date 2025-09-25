@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto/crypto.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -61,7 +58,7 @@ class CompanyController extends GetxController {
   void connectWebSocket() {
     ws.events.listen((message) {
       switch (message["type"]) {
-        case "company_added":
+        case "company_created":
           final newCounter = CompanyModel.fromJson(message["data"]);
           allCompanies.add(newCounter);
           break;
@@ -173,10 +170,14 @@ class CompanyController extends GetxController {
         "address": address.text,
         "country": selectedCountryId.value,
         "city": selectedCityId.value,
-        "roles_ids": jsonEncode(
-          roleIDFromList.map((role) => role.sId).whereType<String>().toList(),
-        ),
       });
+      for (var role in roleIDFromList) {
+        if (role.sId != null) {
+          request.files.add(
+            http.MultipartFile.fromString('roles_ids', role.sId!),
+          );
+        }
+      }
 
       if (imageBytes != null) {
         request.files.add(
@@ -191,7 +192,12 @@ class CompanyController extends GetxController {
       final response = await request.send();
 
       if (response.statusCode == 200) {
-        // success
+        Get.back();
+        addingNewCompanyProcess.value = false;
+      } else if (response.statusCode == 400) {
+        final respStr = await response.stream.bytesToString();
+        final decoded = jsonDecode(respStr);
+        showSnackBar('Error', decoded['detail'] ?? 'Bad Request');
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -203,7 +209,6 @@ class CompanyController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       }
-      Get.back();
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try again');
     } finally {
@@ -211,183 +216,137 @@ class CompanyController extends GetxController {
     }
   }
 
-  // =====================================================================================================
-
-  Future<void> deletCompany(String companyId) async {
-    try {
-      Get.back();
-      await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyId)
-          .delete();
-
-      var users = await FirebaseFirestore.instance
-          .collection('sys-users')
-          .where('company_id', isEqualTo: companyId)
-          .get();
-
-      for (var user in users.docs) {
-        await user.reference.delete();
-      }
-    } catch (e) {
-      //
-    }
-  }
-
-  Future<void> editActiveOrInActiveStatus(String companyId, bool status) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyId)
-          .update({'status': status});
-    } catch (e) {
-      //
-    }
-  }
-
-  // Future<void> addNewCompany() async {
-  //   try {
-  //     addingNewCompanyProcess.value = true;
-
-  //     var userDataSnapshot = await FirebaseFirestore.instance
-  //         .collection('sys-users')
-  //         .where('email', isEqualTo: email.text) // Check for existing email
-  //         .get();
-
-  //     if (userDataSnapshot.docs.isNotEmpty) {
-  //       addingNewCompanyProcess.value = false;
-  //       showSnackBar(
-  //         'Email already in use',
-  //         'This email is already registered',
-  //       );
-  //       return;
-  //     }
-
-  //     if (imageBytes != null && imageBytes!.isNotEmpty) {
-  //       final Reference storageRef = FirebaseStorage.instance.ref().child(
-  //         'images/${formatPhrase(companyName.text)}_${DateTime.now()}.png',
-  //       );
-  //       final UploadTask uploadTask = storageRef.putData(
-  //         imageBytes!,
-  //         SettableMetadata(contentType: 'image/png'),
-  //       );
-
-  //       await uploadTask.then((p0) async {
-  //         logoUrl.value = await storageRef.getDownloadURL();
-  //       });
-  //     }
-
-  //     var bytes = utf8.encode(password.text);
-  //     var digest = sha256.convert(bytes);
-  //     String hashedPassword = digest.toString();
-
-  //     var newCompany = await FirebaseFirestore.instance
-  //         .collection('companies')
-  //         .add({
-  //           'company_logo': logoUrl.value,
-  //           'company_name': companyName.text,
-  //           'industry': industryId.value,
-  //           'added_date': DateTime.now().toString(),
-  //           'status': true,
-  //           'contact_details': {
-  //             'address': address.text,
-  //             'city': selectedCityId.value,
-  //             'country': selectedCountryId.value,
-  //             'phone': phoneNumber.text,
-  //           },
-  //         });
-
-  //     DateTime now = DateTime.now();
-  //     DateTime expiryDate = DateTime(now.year, now.month + 1, now.day);
-
-  //     var newUser = await FirebaseFirestore.instance
-  //         .collection('sys-users')
-  //         .add({
-  //           "user_name": userName.text,
-  //           "email": email.text,
-  //           "password": hashedPassword,
-  //           "roles": roleIDFromList,
-  //           "expiry_date": expiryDate.toString(),
-  //           "added_date": DateTime.now().toString(),
-  //           "status": true,
-  //           "company_id": newCompany.id,
-  //         });
-
-  //     await FirebaseFirestore.instance
-  //         .collection('companies')
-  //         .doc(newCompany.id)
-  //         .update({
-  //           'contact_details': {
-  //             'address': address.text,
-  //             'city': selectedCityId.value,
-  //             'country': selectedCountryId.value,
-  //             'phone': phoneNumber.text,
-  //             'user_id': newUser.id,
-  //           },
-  //         });
-
-  //     addingNewCompanyProcess.value = false;
-  //   } catch (e) {
-  //     addingNewCompanyProcess.value = false;
-  //   }
-  // }
-
-  Future<void> updateCompany(String companyID, String userId) async {
+  Future<void> updateCompany(String companyID, String userID) async {
     try {
       addingNewCompanyProcess.value = true;
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
 
-      var newCompanyData = {
-        'company_name': companyName.text,
-        'industry': industryId.value,
-        'contact_details': {
-          'address': address.text,
-          'city': selectedCityId.value,
-          'country': selectedCountryId.value,
-          'phone': phoneNumber.text,
-          'user_id': userId,
-        },
-      };
+      final url = Uri.parse(
+        '$backendUrl/companies/update_company/$companyID/$userID',
+      );
+      final request = http.MultipartRequest('PATCH', url);
 
-      if (imageBytes != null && imageBytes!.isNotEmpty) {
-        final Reference storageRef = FirebaseStorage.instance.ref().child(
-          'images/${formatPhrase(companyName.text)}_${DateTime.now()}.png',
-        );
-        final UploadTask uploadTask = storageRef.putData(
-          imageBytes!,
-          SettableMetadata(contentType: 'image/png'),
-        );
+      request.headers['Authorization'] = 'Bearer $accessToken';
 
-        await uploadTask.then((p0) async {
-          logoUrl.value = await storageRef.getDownloadURL();
-        });
-        newCompanyData['company_logo'] = logoUrl.value;
+      request.fields.addAll({
+        "company_name": companyName.text,
+        "admin_email": email.text,
+        "admin_password": password.text,
+        "industry": industryId.value,
+        "admin_name": userName.text,
+        "phone_number": phoneNumber.text,
+        "address": address.text,
+        "country": selectedCountryId.value,
+        "city": selectedCityId.value,
+      });
+      for (var role in roleIDFromList) {
+        if (role.sId != null) {
+          request.files.add(
+            http.MultipartFile.fromString('roles_ids', role.sId!),
+          );
+        }
       }
 
-      var newUserData = {'user_name': userName.text, 'roles': roleIDFromList};
-      if (password.text.isNotEmpty) {
-        // Hash the password using SHA-256
-        var bytes = utf8.encode(password.text); // Convert password to bytes
-        var digest = sha256.convert(bytes); // Hash the password
-        String hashedPassword = digest.toString();
-        newUserData['password'] = hashedPassword;
+      if (imageBytes != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'company_logo',
+            imageBytes!,
+            filename: "company_logo_${companyName.text}.png",
+          ),
+        );
       }
 
-      await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyID)
-          .update(newCompanyData);
+      final response = await request.send();
 
-      await FirebaseFirestore.instance
-          .collection('sys-users')
-          .doc(userId)
-          .update(newUserData);
-
-      addingNewCompanyProcess.value = false;
-      Get.back();
+      if (response.statusCode == 200) {
+        Get.back();
+        addingNewCompanyProcess.value = false;
+      } else if (response.statusCode == 400) {
+        final respStr = await response.stream.bytesToString();
+        final decoded = jsonDecode(respStr);
+        showSnackBar('Error', decoded['detail'] ?? 'Bad Request');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateCompany(companyID,userID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
     } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+    } finally {
       addingNewCompanyProcess.value = false;
     }
   }
+
+  Future<void> deleteCompany(String companyID, String userID) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final url = Uri.parse(
+        '$backendUrl/companies/delete_company/$companyID/$userID',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteCompany(companyID, userID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  
+  Future<void> changeCompanyStatus(String companyID,bool status) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/companies/change_company_status/$companyID');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(status),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await changeCompanyStatus(companyID, status);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      //
+    }
+  }
+
+  // =====================================================================================================
+
 
   // this function is to select an image for logo
   Future<void> pickImage() async {

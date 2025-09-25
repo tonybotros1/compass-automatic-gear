@@ -178,7 +178,10 @@ DataRow dataRowForTheTable(
       DataCell(
         companyData.companyLogoUrl != null && companyData.companyLogoUrl != ''
             ? Image.network(
-                companyData.companyLogoUrl.toString(),
+                cloudinaryThumbnail(
+                  companyData.companyLogoUrl.toString(),
+                  width: 30,
+                ),
                 width: 40,
                 errorBuilder: (context, url, error) => const Icon(Icons.error),
               )
@@ -191,7 +194,6 @@ DataRow dataRowForTheTable(
           text: companyData.userName ?? '',
           color: secColor,
           isBold: true,
-          maxWidth: null,
         ),
       ),
       DataCell(
@@ -221,7 +223,7 @@ DataRow dataRowForTheTable(
                 companyId,
               ),
             ),
-            deleteSection(controller, companyId, context),
+            deleteSection(controller, companyData, context),
           ],
         ),
       ),
@@ -229,7 +231,11 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton deleteSection(CompanyController controller, companyId, context) {
+ElevatedButton deleteSection(
+  CompanyController controller,
+  CompanyModel companyData,
+  context,
+) {
   return ElevatedButton(
     style: deleteButtonStyle,
     onPressed: () {
@@ -237,7 +243,14 @@ ElevatedButton deleteSection(CompanyController controller, companyId, context) {
         context: context,
         content: "The Company and its users will be deleted permanently",
         onPressed: () {
-          controller.deletCompany(companyId);
+          if (companyData.id != '' && companyData.userId != '') {
+            controller.deleteCompany(
+              companyData.id.toString(),
+              companyData.userId.toString(),
+            );
+          } else {
+            showSnackBar('Alert', 'can\'t proceed');
+          }
         },
       );
     },
@@ -261,7 +274,7 @@ ElevatedButton activeInActiveSection(
       } else {
         status = false;
       }
-      controller.editActiveOrInActiveStatus(companyId, status);
+      controller.changeCompanyStatus(companyId, status);
     },
     child: companyData.status == true
         ? const Text('Active')
@@ -305,10 +318,10 @@ ElevatedButton editEction(
         onPressed: controller.addingNewCompanyProcess.value
             ? null
             : () {
-                // controller.updateCompany(
-                //   companyID,
-                //   companyData['contact_details']['user_id'],
-                // );
+                controller.updateCompany(
+                  companyID,
+                  companyData.userId.toString(),
+                );
               },
       );
     },
@@ -343,21 +356,21 @@ ElevatedButton newCompanyButton(
         onPressed: controller.addingNewCompanyProcess.isTrue
             ? null
             : () async {
-                // if (controller.userName.text.isNotEmpty &&
-                //     controller.companyName.text.isNotEmpty &&
-                //     controller.industry.value.text.isNotEmpty &&
-                //     controller.password.text.isNotEmpty &&
-                //     controller.phoneNumber.text.isNotEmpty &&
-                //     controller.email.text.isNotEmpty &&
-                //     controller.address.text.isNotEmpty &&
-                //     controller.country.text.isNotEmpty &&
-                //     controller.city.text.isNotEmpty &&
-                //     controller.imageBytes!.isNotEmpty &&
-                //     controller.roleIDFromList.isNotEmpty) {
-                controller.addNewCompany();
-                // } else {
-                //   showSnackBar('Note', 'Please fill all fields');
-                // }
+                if (controller.userName.text.isNotEmpty &&
+                    controller.companyName.text.isNotEmpty &&
+                    controller.industry.value.text.isNotEmpty &&
+                    controller.password.text.isNotEmpty &&
+                    controller.phoneNumber.text.isNotEmpty &&
+                    controller.email.text.isNotEmpty &&
+                    controller.address.text.isNotEmpty &&
+                    controller.country.text.isNotEmpty &&
+                    controller.city.text.isNotEmpty &&
+                    controller.imageBytes!.isNotEmpty &&
+                    controller.roleIDFromList.isNotEmpty) {
+                  controller.addNewCompany();
+                } else {
+                  showSnackBar('Note', 'Please fill all fields');
+                }
               },
       );
     },
