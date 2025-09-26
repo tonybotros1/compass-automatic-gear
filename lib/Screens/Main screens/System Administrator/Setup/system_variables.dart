@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/system%20variables/system_variables_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -30,10 +31,16 @@ class SystemVariables extends StatelessWidget {
                     init: SystemVariablesController(),
                     builder: (controller) {
                       return searchBar(
+                        onChanged: (_) {
+                          controller.filterVariables();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.clear();
+                          controller.filterVariables();
+                        },
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        // controller: controller,
                         title: 'Search for variables',
                         button: newValueButton(
                           context,
@@ -139,10 +146,9 @@ Widget tableOfScreens({
         controller.filteredVariables.isEmpty &&
             controller.search.value.text.isEmpty
         ? controller.allVariables.map<DataRow>((variable) {
-            final variableData = variable.data() as Map<String, dynamic>;
-            final variableId = variable.id;
+            final variableId = variable.id ?? '';
             return dataRowForTheTable(
-              variableData,
+              variable,
               context,
               constraints,
               variableId,
@@ -150,10 +156,9 @@ Widget tableOfScreens({
             );
           }).toList()
         : controller.filteredVariables.map<DataRow>((variable) {
-            final variableData = variable.data() as Map<String, dynamic>;
-            final variableId = variable.id;
+            final variableId = variable.id ?? '';
             return dataRowForTheTable(
-              variableData,
+              variable,
               context,
               constraints,
               variableId,
@@ -164,23 +169,17 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> variableData,
-  context,
-  constraints,
-  variableId,
+  SystemVariablesModel variableData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String variableId,
   SystemVariablesController controller,
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(variableData['code'] ?? 'no code')),
-      DataCell(Text(variableData['value'] ?? 'no value')),
-      DataCell(
-        Text(
-          variableData['added_date'] != null && variableData['added_date'] != ''
-              ? textToDate(variableData['added_date']) //
-              : 'N/A',
-        ),
-      ),
+      DataCell(Text(variableData.code.toString())),
+      DataCell(Text(variableData.value.toString())),
+      DataCell(Text(textToDate(variableData.createdAt))),
       DataCell(
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -205,8 +204,8 @@ DataRow dataRowForTheTable(
 
 ElevatedButton deleteSection(
   SystemVariablesController controller,
-  variableId,
-  context,
+  String variableId,
+  BuildContext context,
 ) {
   return ElevatedButton(
     style: deleteButtonStyle,
@@ -226,15 +225,15 @@ ElevatedButton deleteSection(
 ElevatedButton editSection(
   BuildContext context,
   SystemVariablesController controller,
-  Map<String, dynamic> variableData,
+  SystemVariablesModel variableData,
   BoxConstraints constraints,
   String variableId,
 ) {
   return ElevatedButton(
     style: editButtonStyle,
     onPressed: () {
-      controller.code.text = variableData['code'] ?? '';
-      controller.value.text = variableData['value'] ?? '';
+      controller.code.text = variableData.code ?? '';
+      controller.value.text = variableData.value ?? '';
       systemVariablesDialog(
         canEdit: false,
         constraints: constraints,
@@ -242,7 +241,7 @@ ElevatedButton editSection(
         onPressed: controller.addingNewValue.value
             ? null
             : () {
-                controller.editVariable(variableId);
+                controller.updateVariable(variableId);
               },
       );
     },
