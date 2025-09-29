@@ -1,4 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/ap_payment_type_controller.dart';
+import 'package:datahubai/Models/ap%20payment%20types/ap_payment_types_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,6 +32,13 @@ class ApPaymentType extends StatelessWidget {
                     init: ApPaymentTypeController(),
                     builder: (controller) {
                       return searchBar(
+                        onChanged: (_) {
+                          controller.filterTypes();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.clear();
+                          controller.filterTypes();
+                        },
                         search: controller.search,
                         constraints: constraints,
                         context: context,
@@ -103,10 +111,9 @@ Widget tableOfScreens({
         controller.filteredApPaymentTypes.isEmpty &&
             controller.search.value.text.isEmpty
         ? controller.allApPaymentTypes.map<DataRow>((type) {
-            final typeData = type.data() as Map<String, dynamic>;
             final typeId = type.id;
             return dataRowForTheTable(
-              typeData,
+              type,
               context,
               constraints,
               typeId,
@@ -114,10 +121,9 @@ Widget tableOfScreens({
             );
           }).toList()
         : controller.filteredApPaymentTypes.map<DataRow>((type) {
-            final typeData = type.data() as Map<String, dynamic>;
             final typeId = type.id;
             return dataRowForTheTable(
-              typeData,
+              type,
               context,
               constraints,
               typeId,
@@ -128,7 +134,7 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> typeData,
+  APPaymentTypesModel typeData,
   context,
   constraints,
   typeId,
@@ -136,14 +142,8 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(typeData['type'] ?? 'no type')),
-      DataCell(
-        Text(
-          typeData['added_date'] != null && typeData['added_date'] != ''
-              ? textToDate(typeData['added_date']) //
-              : 'N/A',
-        ),
-      ),
+      DataCell(Text(typeData.type ?? '')),
+      DataCell(Text(textToDate(typeData.createdAt))),
       DataCell(
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -189,14 +189,14 @@ ElevatedButton deleteSection(
 ElevatedButton editSection(
   BuildContext context,
   ApPaymentTypeController controller,
-  Map<String, dynamic> typeData,
+  APPaymentTypesModel typeData,
   constraints,
   typeId,
 ) {
   return ElevatedButton(
     style: editButtonStyle,
     onPressed: () async {
-      controller.type.text = typeData['type'];
+      controller.type.text = typeData.type ?? '';
       apPaymentTypeDialog(
         constraints: constraints,
         controller: controller,
@@ -204,7 +204,7 @@ ElevatedButton editSection(
         onPressed: controller.addingNewValue.value
             ? null
             : () {
-                controller.editType(typeId);
+                controller.updateType(typeId);
               },
       );
     },

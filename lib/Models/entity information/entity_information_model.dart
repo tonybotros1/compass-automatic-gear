@@ -116,13 +116,11 @@ class EntityInformationModel {
 
     trn = json.containsKey('trn') ? json['trn'] ?? '' : '';
 
-    createdAt = json.containsKey('createdAt') && json['createdAt'] != null
-        ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
-        : DateTime.now();
+    createdAt =
+        DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now();
 
-    updatedAt = json.containsKey('updatedAt') && json['updatedAt'] != null
-        ? DateTime.tryParse(json['updatedAt'].toString()) ?? DateTime.now()
-        : DateTime.now();
+    updatedAt =
+        DateTime.tryParse(json['updatedAt'].toString()) ?? DateTime.now();
 
     salesmanId = json.containsKey('salesman_id')
         ? json['salesman_id'] ?? ''
