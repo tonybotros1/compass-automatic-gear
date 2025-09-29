@@ -35,7 +35,10 @@ class Technician extends StatelessWidget {
                         // controller: controller,
                         title: 'Search for technicianses',
                         button: newtechniciansesButton(
-                            context, constraints, controller),
+                          context,
+                          constraints,
+                          controller,
+                        ),
                       );
                     },
                   ),
@@ -43,18 +46,13 @@ class Technician extends StatelessWidget {
                     child: GetX<TechnicianController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allTechnician.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
+                          return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
+                          scrollDirection: Axis.vertical,
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
@@ -77,10 +75,11 @@ class Technician extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens(
-    {required BoxConstraints constraints,
-    required BuildContext context,
-    required TechnicianController controller}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required TechnicianController controller,
+}) {
   return DataTable(
     horizontalMargin: horizontalMarginForTable,
     dataRowMaxHeight: 40,
@@ -94,129 +93,153 @@ Widget tableOfScreens(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          text: 'Name',
-          constraints: constraints,
-        ),
+        label: AutoSizedText(text: 'Name', constraints: constraints),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Job',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Job'),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         onSort: controller.onSort,
       ),
-      const DataColumn(
-        label: Text(''),
-      ),
+      const DataColumn(label: Text('')),
     ],
-    rows: controller.filteredTechnicians.isEmpty &&
+    rows:
+        controller.filteredTechnicians.isEmpty &&
             controller.search.value.text.isEmpty
         ? controller.allTechnician.map<DataRow>((technicians) {
             final techniciansData = technicians.data() as Map<String, dynamic>;
             final techniciansId = technicians.id;
-            return dataRowForTheTable(techniciansData, context, constraints,
-                techniciansId, controller);
+            return dataRowForTheTable(
+              techniciansData,
+              context,
+              constraints,
+              techniciansId,
+              controller,
+            );
           }).toList()
         : controller.filteredTechnicians.map<DataRow>((technicians) {
             final techniciansData = technicians.data() as Map<String, dynamic>;
             final techniciansId = technicians.id;
-            return dataRowForTheTable(techniciansData, context, constraints,
-                techniciansId, controller);
+            return dataRowForTheTable(
+              techniciansData,
+              context,
+              constraints,
+              techniciansId,
+              controller,
+            );
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> techniciansData, context,
-    constraints, techniciansId, TechnicianController controller) {
-  return DataRow(cells: [
-    DataCell(Text(
-      techniciansData['name'] ?? '',
-    )),
-    DataCell(
-      Text(
-        techniciansData['job'] ?? '',
+DataRow dataRowForTheTable(
+  Map<String, dynamic> techniciansData,
+  context,
+  constraints,
+  techniciansId,
+  TechnicianController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(Text(techniciansData['name'] ?? '')),
+      DataCell(Text(techniciansData['job'] ?? '')),
+      DataCell(
+        Text(
+          techniciansData['added_date'] != null &&
+                  techniciansData['added_date'] != ''
+              ? textToDate(techniciansData['added_date'])
+              : 'N/A',
+        ),
       ),
-    ),
-    DataCell(
-      Text(
-        techniciansData['added_date'] != null &&
-                techniciansData['added_date'] != ''
-            ? textToDate(techniciansData['added_date'])
-            : 'N/A',
+      DataCell(
+        Row(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            editSection(
+              context,
+              controller,
+              techniciansData,
+              constraints,
+              techniciansId,
+            ),
+            deleteSection(controller, techniciansId, context),
+          ],
+        ),
       ),
-    ),
-    DataCell(Row(
-      spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        editSection(
-            context, controller, techniciansData, constraints, techniciansId),
-        deleteSection(controller, techniciansId, context),
-      ],
-    )),
-  ]);
+    ],
+  );
 }
 
 ElevatedButton deleteSection(
-    TechnicianController controller, techniciansId, context) {
+  TechnicianController controller,
+  techniciansId,
+  context,
+) {
   return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: "The technicians will be deleted permanently",
-            onPressed: () {
-              controller.deleteTechnician(techniciansId);
-            });
-      },
-      child: const Text("Delete"));
+    style: deleteButtonStyle,
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The technicians will be deleted permanently",
+        onPressed: () {
+          controller.deleteTechnician(techniciansId);
+        },
+      );
+    },
+    child: const Text("Delete"),
+  );
 }
 
-ElevatedButton editSection(BuildContext context, TechnicianController controller,
-    Map<String, dynamic> techniciansData,BoxConstraints constraints,String techniciansId) {
+ElevatedButton editSection(
+  BuildContext context,
+  TechnicianController controller,
+  Map<String, dynamic> techniciansData,
+  BoxConstraints constraints,
+  String techniciansId,
+) {
   return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () async {
-        controller.name.text = techniciansData['name'];
-        controller.job.text = techniciansData['job'];
-        technicianDialog(
-            constraints: constraints,
-            controller: controller,
-            canEdit: true,
-            onPressed: controller.addingNewValue.value
-                ? null
-                : () {
-                    controller.editTechnician(techniciansId);
-                  });
-      },
-      child: const Text('Edit'));
+    style: editButtonStyle,
+    onPressed: () async {
+      controller.name.text = techniciansData['name'];
+      controller.job.text = techniciansData['job'];
+      technicianDialog(
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () {
+                controller.editTechnician(techniciansId);
+              },
+      );
+    },
+    child: const Text('Edit'),
+  );
 }
 
-ElevatedButton newtechniciansesButton(BuildContext context,
-    BoxConstraints constraints, TechnicianController controller) {
+ElevatedButton newtechniciansesButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  TechnicianController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.name.clear();
       controller.job.clear();
 
       technicianDialog(
-          constraints: constraints,
-          controller: controller,
-          canEdit: true,
-          onPressed: controller.addingNewValue.value
-              ? null
-              : () async {
-                  await controller.addNewTechnicians();
-                });
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                await controller.addNewTechnicians();
+              },
+      );
     },
     style: newButtonStyle,
     child: const Text('New Technician'),

@@ -54,9 +54,7 @@ class EntityInformations extends StatelessWidget {
                     child: GetX<EntityInformationsController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allEntities.isEmpty) {
                           return const Center(child: Text('No Element'));

@@ -57,16 +57,14 @@ class Countries extends StatelessWidget {
                     child: GetX<CountriesController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allCountries.isEmpty) {
                           return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
                           scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
+                              .vertical,
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(

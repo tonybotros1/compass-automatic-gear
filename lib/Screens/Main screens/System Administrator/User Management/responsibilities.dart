@@ -53,9 +53,7 @@ class Responsibilities extends StatelessWidget {
                     child: GetX<ResponsibilitiesController>(
                       builder: (controller) {
                         if (controller.isScreenLoading.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allResponsibilities.isEmpty) {
                           return const Center(child: Text('No Element'));

@@ -49,9 +49,7 @@ class ListOfValues extends StatelessWidget {
                     child: GetX<ListOfValuesController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.listMap.isEmpty) {
                           return const Center(child: Text('No Element'));

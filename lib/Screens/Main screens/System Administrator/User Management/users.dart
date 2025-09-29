@@ -10,8 +10,6 @@ import '../../../../consts.dart';
 class Users extends StatelessWidget {
   const Users({super.key});
 
-  // final UsersController controller = Get.put(UsersController());
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,16 +49,13 @@ class Users extends StatelessWidget {
                     child: GetX<UsersController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allUsers.isEmpty) {
                           return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, // Allow horizontal scrolling for table
+                          scrollDirection: Axis.vertical,
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfUsers(

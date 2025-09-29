@@ -54,16 +54,14 @@ class Branches extends StatelessWidget {
                     child: GetX<BranchesController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allBranches.isEmpty) {
                           return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
                           scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
+                              .vertical,
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(

@@ -54,9 +54,7 @@ class Currency extends StatelessWidget {
                     child: GetX<CurrencyController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allCurrencies.isEmpty) {
                           return const Center(child: Text('No Element'));

@@ -118,9 +118,7 @@ class ApInvoices extends StatelessWidget {
                                         controller.fromDate.value.text,
                                         controller.fromDate.value,
                                       );
-                                      // if (nor) {
-                                      //   controller.searchEngine();
-                                      // }
+                                     
                                     },
                                   ),
                                 ),
@@ -133,9 +131,7 @@ class ApInvoices extends StatelessWidget {
                                         controller.toDate.value.text,
                                         controller.toDate.value,
                                       );
-                                      // if (nor) {
-                                      //   controller.searchEngine();
-                                      // }
+                                      
                                     },
                                   ),
                                 ),

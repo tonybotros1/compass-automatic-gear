@@ -10,15 +10,23 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<LoadingScreenController>(
-        init: LoadingScreenController(),
-        builder: (controller) {
-          return SafeArea(
-              child: Scaffold(
+      init: LoadingScreenController(),
+      builder: (controller) {
+        return SafeArea(
+          child: Scaffold(
             backgroundColor: Colors.white,
-            body: Center(
-              child: CircularProgressIndicator(color: mainColor),
-            ),
-          ));
-        });
+            body: controller.needRefresh.isFalse
+                ? Center(child: loadingProcess)
+                : ElevatedButton(
+                    onPressed: () {
+                      controller.needRefresh.value = false;
+                      controller.checkLogStatus();
+                    },
+                    child: const Text('Refresh'),
+                  ),
+          ),
+        );
+      },
+    );
   }
 }

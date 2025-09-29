@@ -54,9 +54,7 @@ class Counters extends StatelessWidget {
                     child: GetX<CountersController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allCounters.isEmpty) {
                           return const Center(child: Text('No Element'));

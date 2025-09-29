@@ -33,7 +33,6 @@ class InvoiceItems extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        // controller: controller,
                         title: 'Search for invoice items',
                         button: newInvoiceItemButton(
                             context, constraints, controller),
@@ -44,9 +43,7 @@ class InvoiceItems extends StatelessWidget {
                     child: GetX<InvoiceItemsController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allInvoiceItems.isEmpty) {
                           return const Center(

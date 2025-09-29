@@ -33,7 +33,6 @@ class InventeryItems extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        // controller: controller,
                         title: 'Search for items',
                         button: newCurrencyButton(
                           context,
@@ -47,9 +46,7 @@ class InventeryItems extends StatelessWidget {
                     child: GetX<InventeryItemsController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allItems.isEmpty) {
                           return const Center(child: Text('No Element'));

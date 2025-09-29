@@ -27,7 +27,6 @@ class QuotationCard extends StatelessWidget {
             child: SizedBox(
               width: constraints.maxWidth,
               child: ListView(
-                // crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GetX<QuotationCardController>(
                     builder: (controller) {

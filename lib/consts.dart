@@ -870,10 +870,10 @@ bool isBeforeToday(String dateStr) {
   return inputDate.isBefore(todayOnly);
 }
 
-var loadingProcess = const SizedBox(
+var loadingProcess = SizedBox(
   height: 20,
   width: 20,
-  child: CircularProgressIndicator(strokeWidth: 2),
+  child: CircularProgressIndicator(strokeWidth: 2, color: mainColor),
 );
 Container carLogo(String? logo) {
   return Container(

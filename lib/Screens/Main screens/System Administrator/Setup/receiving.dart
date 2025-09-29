@@ -261,7 +261,6 @@ class Receiving extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              // Expanded(flex: 2, child: SizedBox()),
                               newReceivingButton(
                                 context,
                                 constraints,

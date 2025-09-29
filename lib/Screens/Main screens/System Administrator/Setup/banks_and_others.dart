@@ -33,10 +33,12 @@ class BanksAndOthers extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        // controller: controller,
                         title: 'Search for bankes',
-                        button:
-                            newbankesButton(context, constraints, controller),
+                        button: newbankesButton(
+                          context,
+                          constraints,
+                          controller,
+                        ),
                       );
                     },
                   ),
@@ -44,18 +46,13 @@ class BanksAndOthers extends StatelessWidget {
                     child: GetX<BanksAndOthersController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allBanks.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
+                          return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
+                          scrollDirection: Axis.vertical,
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
@@ -78,10 +75,11 @@ class BanksAndOthers extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens(
-    {required BoxConstraints constraints,
-    required BuildContext context,
-    required BanksAndOthersController controller}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required BanksAndOthersController controller,
+}) {
   return DataTable(
     horizontalMargin: horizontalMarginForTable,
     dataRowMaxHeight: 40,
@@ -95,149 +93,162 @@ Widget tableOfScreens(
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
-        label: AutoSizedText(
-          text: 'Account Name',
-          constraints: constraints,
-        ),
+        label: AutoSizedText(text: 'Account Name', constraints: constraints),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Account Number',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Account Number'),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Currency',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Currency'),
         onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Account Type',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Account Type'),
         onSort: controller.onSort,
       ),
 
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         onSort: controller.onSort,
       ),
-      const DataColumn(
-        label: Text(''),
-      ),
+      const DataColumn(label: Text('')),
     ],
     rows:
         controller.filteredBanks.isEmpty && controller.search.value.text.isEmpty
-            ? controller.allBanks.map<DataRow>((bank) {
-                final bankData = bank.data() as Map<String, dynamic>;
-                final bankId = bank.id;
-                return dataRowForTheTable(
-                    bankData, context, constraints, bankId, controller);
-              }).toList()
-            : controller.filteredBanks.map<DataRow>((bank) {
-                final bankData = bank.data() as Map<String, dynamic>;
-                final bankId = bank.id;
-                return dataRowForTheTable(
-                    bankData, context, constraints, bankId, controller);
-              }).toList(),
+        ? controller.allBanks.map<DataRow>((bank) {
+            final bankData = bank.data() as Map<String, dynamic>;
+            final bankId = bank.id;
+            return dataRowForTheTable(
+              bankData,
+              context,
+              constraints,
+              bankId,
+              controller,
+            );
+          }).toList()
+        : controller.filteredBanks.map<DataRow>((bank) {
+            final bankData = bank.data() as Map<String, dynamic>;
+            final bankId = bank.id;
+            return dataRowForTheTable(
+              bankData,
+              context,
+              constraints,
+              bankId,
+              controller,
+            );
+          }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> bankData, context,
-    constraints, bankId, BanksAndOthersController controller) {
-  return DataRow(cells: [
-    DataCell(Text(
-      bankData['account_name'] ?? '',
-    )),
-    DataCell(
-      Text(
-        bankData['account_number'] ?? 'no name',
+DataRow dataRowForTheTable(
+  Map<String, dynamic> bankData,
+  context,
+  constraints,
+  bankId,
+  BanksAndOthersController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(Text(bankData['account_name'] ?? '')),
+      DataCell(Text(bankData['account_number'] ?? 'no name')),
+      DataCell(
+        Text(controller.currencyNames[bankData['country_id']] ?? 'no name'),
       ),
-    ),
-    DataCell(
-      Text(
-        controller.currencyNames[bankData['country_id']] ?? 'no name',
+      DataCell(
+        Text(
+          controller.getdataName(
+            bankData['account_type'],
+            controller.allAccountTypes,
+          ),
+        ),
       ),
-    ),
-    DataCell(
-      Text(
-        controller.getdataName(bankData['account_type'],controller.allAccountTypes),
+      DataCell(
+        Text(
+          bankData['added_date'] != null && bankData['added_date'] != ''
+              ? textToDate(bankData['added_date']) //
+              : 'N/A',
+        ),
       ),
-    ),
-    DataCell(
-      Text(
-        bankData['added_date'] != null && bankData['added_date'] != ''
-            ? textToDate(bankData['added_date']) //
-            : 'N/A',
+      DataCell(
+        Row(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            editSection(context, controller, bankData, constraints, bankId),
+            deleteSection(controller, bankId, context),
+          ],
+        ),
       ),
-    ),
-    DataCell(Row(
-      spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        editSection(context, controller, bankData, constraints, bankId),
-        deleteSection(controller, bankId, context),
-      ],
-    )),
-  ]);
+    ],
+  );
 }
 
 ElevatedButton deleteSection(
-    BanksAndOthersController controller, bankId, context) {
+  BanksAndOthersController controller,
+  bankId,
+  context,
+) {
   return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: "The bank will be deleted permanently",
-            onPressed: () {
-              controller.deleteBank(bankId);
-            });
-      },
-      child: const Text("Delete"));
+    style: deleteButtonStyle,
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The bank will be deleted permanently",
+        onPressed: () {
+          controller.deleteBank(bankId);
+        },
+      );
+    },
+    child: const Text("Delete"),
+  );
 }
 
-ElevatedButton editSection(BuildContext context, BanksAndOthersController controller,
-    Map<String, dynamic> bankData, constraints, bankId) {
+ElevatedButton editSection(
+  BuildContext context,
+  BanksAndOthersController controller,
+  Map<String, dynamic> bankData,
+  constraints,
+  bankId,
+) {
   return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () async {
-        controller.loadValues(bankData);
-        banksDialog(
-            constraints: constraints,
-            controller: controller,
-            canEdit: true,
-            onPressed: controller.addingNewValue.value
-                ? null
-                : () {
-                    controller.editBank(bankId);
-                  });
-      },
-      child: const Text('Edit'));
+    style: editButtonStyle,
+    onPressed: () async {
+      controller.loadValues(bankData);
+      banksDialog(
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () {
+                controller.editBank(bankId);
+              },
+      );
+    },
+    child: const Text('Edit'),
+  );
 }
 
-ElevatedButton newbankesButton(BuildContext context,
-    BoxConstraints constraints, BanksAndOthersController controller) {
+ElevatedButton newbankesButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  BanksAndOthersController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.clearValues();
       banksDialog(
-          constraints: constraints,
-          controller: controller,
-          canEdit: true,
-          onPressed: controller.addingNewValue.value
-              ? null
-              : () async {
-                  controller.addNewBank();
-                });
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                controller.addNewBank();
+              },
+      );
     },
     style: newButtonStyle,
     child: const Text('New Bank'),

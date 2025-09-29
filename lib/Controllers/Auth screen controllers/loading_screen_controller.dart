@@ -11,6 +11,7 @@ class LoadingScreenController extends GetxController {
   String backendUrl = backendTestURI;
   final secureStorage = const FlutterSecureStorage();
   Helpers helper = Helpers();
+  RxBool needRefresh = RxBool(false);
 
   @override
   void onInit() async {
@@ -37,9 +38,14 @@ class LoadingScreenController extends GetxController {
           await isUserValid(userId);
         } else if (refreshed == RefreshResult.invalidToken) {
           return false;
+        } else if (refreshed == RefreshResult.networkError) {
+          needRefresh.value = true;
         }
         return false;
       } else if (response.statusCode == 401) {
+        return false;
+      } else if (response.statusCode == 500) {
+        needRefresh.value = true;
         return false;
       } else {
         return false;
@@ -71,7 +77,8 @@ class LoadingScreenController extends GetxController {
         });
       }
     } catch (e) {
-      checkLogStatus();
+      // checkLogStatus();
+      needRefresh.value = true;
     }
   }
 }

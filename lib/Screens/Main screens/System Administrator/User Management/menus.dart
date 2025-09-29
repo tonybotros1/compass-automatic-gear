@@ -40,7 +40,6 @@ class Menus extends StatelessWidget {
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        // controller: controller,
                         title: 'Search for menus',
                         button: newMenuButton(context, constraints, controller),
                       );
@@ -49,20 +48,16 @@ class Menus extends StatelessWidget {
                   Expanded(
                     child: GetX<MenusController>(
                       builder: (controller) {
-                        // print(controller.isScreenLoading.value);
                         if (controller.isScreenLoading.value == true &&
                             controller.allMenus.isEmpty) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.isScreenLoading.value == false &&
                             controller.allMenus.isEmpty) {
                           return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
+                          scrollDirection: Axis.vertical,
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfMenus(
@@ -220,9 +215,9 @@ ElevatedButton editSection(
   return ElevatedButton(
     style: editButtonStyle,
     onPressed: () {
-      controller.menuName.text = menuData['name']??'';
-      controller.code.text = menuData['code']??'';
-      controller.menuRoute.text = menuData['routeName']??'';
+      controller.menuName.text = menuData['name'] ?? '';
+      controller.code.text = menuData['code'] ?? '';
+      controller.menuRoute.text = menuData['routeName'] ?? '';
       menusDialog(
         constraints: constraints,
         controller: controller,
@@ -248,9 +243,9 @@ ElevatedButton viewSection(
             controller.buttonLoadingStates[menuId] == false
         ? () async {
             controller.menuIDFromList.clear();
-             controller.selectedMenuID.value = '';
-             controller.screenIDFromList.clear();
-             controller.getScreens();
+            controller.selectedMenuID.value = '';
+            controller.screenIDFromList.clear();
+            controller.getScreens();
             controller.setButtonLoading(menuId, true); // Start loading
             await controller.getMenuTree(menuId);
             controller.setButtonLoading(menuId, false); // Stop loading

@@ -43,9 +43,7 @@ class JobTasks extends StatelessWidget {
                     child: GetX<JobTasksController>(
                       builder: (controller) {
                         if (controller.isScreenLoding.value) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return Center(child: loadingProcess);
                         }
                         if (controller.allTasks.isEmpty) {
                           return const Center(
