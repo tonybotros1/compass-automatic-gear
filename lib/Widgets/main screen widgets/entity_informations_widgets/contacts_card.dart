@@ -1,10 +1,9 @@
-import 'package:datahubai/Models/entity_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../Models/dynamic_field_models.dart';
+import '../../../Models/entity information/entity_information_model.dart';
 import '../../../consts.dart';
 import '../dynamic_field.dart';
 
@@ -112,22 +111,27 @@ Widget buildSmartField(
                                 .controller!
                                 .text,
 
-                            hintText: isphoneTypesLoading
-                                ? 'Loading...'
-                                : 'Type',
+                            hintText: 'Type',
                             menuValues: isphoneTypesLoading
                                 ? {}
                                 : controller.phoneTypesMap,
-                            itemBuilder: (context, key, value) {
-                              return ListTile(title: Text('${value['name']}'));
-                            },
                             onSelected: (key, value) {
                               controller
                                       .phoneTypesControllers[index]
                                       .controller!
                                       .text =
                                   value['name'];
-                              controller.contactPhone[index].type = key;
+                              controller.contactPhone[index].type =
+                                  value['name'];
+                              controller.contactPhone[index].typeId = key;
+                            },
+                            onDelete: () {
+                              controller
+                                  .phoneTypesControllers[index]
+                                  .controller!
+                                  .clear();
+                              controller.contactPhone[index].type = '';
+                              controller.contactPhone[index].typeId = '';
                             },
                           ),
                         ),
@@ -142,7 +146,7 @@ Widget buildSmartField(
                             hintText: 'Enter Phone',
                             validate: false,
                             onChanged: (value) {
-                              controller.contactPhone[index].number = value;
+                              controller.contactPhone[index].number = value.trim();
                             },
                           ),
                         ),
@@ -156,7 +160,7 @@ Widget buildSmartField(
                             hintText: 'Enter Email',
                             validate: false,
                             onChanged: (value) {
-                              controller.contactPhone[index].email = value;
+                              controller.contactPhone[index].email = value.trim();
                             },
                           ),
                         ),
@@ -170,7 +174,7 @@ Widget buildSmartField(
                             hintText: 'Enter Name',
                             validate: false,
                             onChanged: (value) {
-                              controller.contactPhone[index].name = value;
+                              controller.contactPhone[index].name = value.trim();
                             },
                           ),
                         ),
@@ -185,7 +189,7 @@ Widget buildSmartField(
                             hintText: 'Enter Job Title',
                             validate: false,
                             onChanged: (value) {
-                              controller.contactPhone[index].jobTitle = value;
+                              controller.contactPhone[index].jobTitle = value.trim();
                             },
                           ),
                         ),

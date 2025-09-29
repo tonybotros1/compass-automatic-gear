@@ -21,6 +21,7 @@ class DropdownConfig {
   final int flex;
   final Widget Function(BuildContext, String, dynamic)? itemBuilder;
   final void Function(String, dynamic)? onSelected;
+  final void Function()? onDelete;
   final Widget Function(String, dynamic)? showedResult;
   final String textController;
   final bool? isEnabled;
@@ -33,6 +34,7 @@ class DropdownConfig {
       this.validate = false,
       this.flex = 1,
       this.itemBuilder,
+      this.onDelete,
       this.onSelected,
       this.textController = '',
       this.showedSelectedName = '',

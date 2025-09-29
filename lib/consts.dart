@@ -439,6 +439,12 @@ var deleteIcon = const Icon(Icons.delete_forever, color: Colors.red);
 
 var editIcon = const Icon(Icons.edit_note_rounded, color: Colors.blue);
 
+var activeIcon = const Icon(Icons.check, color: Color(0xff9ACBD0));
+var inActiveIcon = const Icon(
+  Icons.horizontal_rule_rounded,
+  color: Color(0xff09122C),
+);
+
 var screenPadding = const EdgeInsets.only(
   left: 14,
   right: 14,

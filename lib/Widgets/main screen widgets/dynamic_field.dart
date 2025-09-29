@@ -16,6 +16,7 @@ Widget dynamicFields({
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: config.isDropdown
                 ? CustomDropdown(
+                  onDelete: config.dropdownConfig?.onDelete,
                     showedResult: config.dropdownConfig?.showedResult,
                     showedSelectedName:
                         config.dropdownConfig!.showedSelectedName,

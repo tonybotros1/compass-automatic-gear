@@ -1,0 +1,71 @@
+[
+    {
+        "_id": "68da2684c4cf68ddceda1ba0",
+        "entity_name": "Tony's Company",
+        "entity_picture": null,
+        "entity_code": [
+            "Customer"
+        ],
+        "credit_limit": 200,
+        "entity_status": "Company",
+        "group_name": "Tony's Group",
+        "trn": "Vvvvv",
+        "entity_address": [
+            {
+                "isPrimary": true,
+                "country_id": "68bc4a6e86bba294c2127e32",
+                "country": "Syrian Arab Republic",
+                "city_id": "68bc6f3a5942aeb7593148c3",
+                "city": "Damascus"
+            },
+            {
+                "isPrimary": null,
+                "country_id": "68bc4abc86bba294c2127e33",
+                "country": "United Arab Emirates",
+                "city_id": "68bc854cc446f3133e39a704",
+                "city": "Dubai"
+            },
+            {
+                "isPrimary": null,
+                "country_id": "68c2a3aa3bbbe38357e4bcbe",
+                "country": "State Of Kuwait",
+                "city_id": "68da2684c4cf68ddceda1b9f"
+            }
+        ],
+        "entity_phone": [
+            {
+                "number": 963934914410,
+                "name": "Tony Botros",
+                "job_title": "Manager",
+                "email": "Tony@gmail.com",
+                "isPrimary": true,
+                "type_id": "68c5b3d654d387060446fd44",
+                "type": "Personal"
+            },
+            {
+                "number": 963999999999,
+                "name": "Tomy Peter",
+                "job_title": "Gang Star",
+                "email": "Test@gmail.com",
+                "isPrimary": null,
+                "type_id": "68c5b3ce54d387060446fd43",
+                "type": "Others"
+            }
+        ],
+        "entity_social": [
+            {
+                "link": "Facebook.com",
+                "type_id": "68c5b7bc54d387060446fd60",
+                "type": "Facebook"
+            },
+            {
+                "link": "Instagrm.com",
+                "type_id": "68c5b7c554d387060446fd61",
+                "type": "Instagram"
+            }
+        ],
+        "status": true,
+        "createdAt": "2025-09-29T06:26:12.208Z",
+        "updatedAt": "2025-09-29T06:26:12.208Z"
+    }
+]

@@ -26,7 +26,7 @@ Widget myTextFormFieldWithBorder({
   maxLines = 1,
   // double? borderRadius = 4,
   TextAlign? textAlign = TextAlign.start,
-  String? initialValue,
+  // String? initialValue,
   int? minLines,
   TextInputType? keyboardType,
   void Function(String)? onChanged,
@@ -56,7 +56,7 @@ Widget myTextFormFieldWithBorder({
           focusNode: focusNode,
           onFieldSubmitted: onFieldSubmitted,
           textAlign: textAlign!,
-          initialValue: initialValue,
+          // initialValue: initialValue,
           style: textFieldFontStyle,
           // onTap: () {
           //   if (controller != null) {

@@ -1,10 +1,10 @@
-import 'package:datahubai/Models/entity_model.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/dynamic_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../Models/dynamic_field_models.dart';
+import '../../../Models/entity information/entity_information_model.dart';
 import '../../../consts.dart';
 
 Widget addressCardSection(EntityInformationsController controller) {
@@ -110,7 +110,8 @@ Widget buildSmartField(
                             hintText: 'Enter Line',
                             validate: false,
                             onChanged: (value) {
-                              controller.contactAddress[index].line = value;
+                              controller.contactAddress[index].line = value
+                                  .trim();
                             },
                           ),
                         ),
@@ -123,16 +124,10 @@ Widget buildSmartField(
                                 .countriesControllers[index]
                                 .controller!
                                 .text,
-
-                            hintText: isCountriesLoading
-                                ? 'Loading...'
-                                : 'Country',
+                            hintText: 'Country',
                             menuValues: isCountriesLoading
                                 ? {}
                                 : controller.allCountries,
-                            itemBuilder: (context, key, value) {
-                              return ListTile(title: Text('${value['name']}'));
-                            },
                             onSelected: (key, value) {
                               controller
                                       .countriesControllers[index]
@@ -142,8 +137,20 @@ Widget buildSmartField(
                               controller.citiesControllers[index].controller!
                                   .clear();
                               controller.getCitiesByCountryID(key, index);
-
-                              controller.contactAddress[index].country = key;
+                              controller.contactAddress[index].countryId = key;
+                              controller.contactAddress[index].country =
+                                  value['name'];
+                            },
+                            onDelete: () {
+                              controller.countriesControllers[index].controller!
+                                  .clear();
+                              controller.citiesControllers[index].controller!
+                                  .clear();
+                              controller.allCities[index].clear();
+                              controller.contactAddress[index].countryId = '';
+                              controller.contactAddress[index].country = '';
+                              controller.contactAddress[index].city = '';
+                              controller.contactAddress[index].cityId = '';
                             },
                           ),
                         ),
@@ -160,16 +167,21 @@ Widget buildSmartField(
                             menuValues: controller.allCities[index].isEmpty
                                 ? {}
                                 : controller.allCities[index],
-                            itemBuilder: (context, key, value) {
-                              return ListTile(title: Text('${value['name']}'));
-                            },
                             onSelected: (key, value) {
                               controller
                                       .citiesControllers[index]
                                       .controller!
                                       .text =
                                   value['name'];
-                              controller.contactAddress[index].city = key;
+                              controller.contactAddress[index].cityId = key;
+                              controller.contactAddress[index].city =
+                                  value['name'];
+                            },
+                            onDelete: () {
+                              controller.citiesControllers[index].controller!
+                                  .clear();
+                              controller.contactAddress[index].cityId = '';
+                              controller.contactAddress[index].city = '';
                             },
                           ),
                         ),
