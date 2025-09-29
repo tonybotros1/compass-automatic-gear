@@ -142,7 +142,10 @@ class EntityInformationsController extends GetxController {
     allCountries.assignAll(await helper.getCountries());
   }
 
-  Future<void> getCitiesByCountryID(String countryID, int index) async {
+  Future<void> getCitiesByCountryID(String? countryID, int index) async {
+    if (countryID == null || countryID.trim().isEmpty) {
+      return; // do nothing if id is null or empty
+    }
     allCities[index].value = await helper.getCitiesValues(countryID);
   }
 
@@ -508,13 +511,11 @@ class EntityInformationsController extends GetxController {
     for (var i = 0; i < length; i++) {
       final address = contactAddress[i];
 
-      getCitiesByCountryID(address.country.toString(), i);
-
       countriesControllers[i].controller?.text = address.country ?? '';
       addressPrimary[i].isPrimary = address.isPrimary ?? false;
       citiesControllers[i].controller?.text = address.city ?? '';
       linesControllers[i].controller?.text = address.line ?? '';
-      await getCitiesByCountryID(address.countryId ?? '', i);
+      await getCitiesByCountryID(address.countryId.toString(), i);
     }
   }
 
