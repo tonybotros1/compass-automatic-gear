@@ -293,4 +293,38 @@ class Helpers {
       return {};
     }
   }
+
+  Future getCurrencies() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendTestURI/currencies/get_all_currencies_for_drop_down_menu',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decode = jsonDecode(response.body);
+        List<dynamic> jsonData = decode['currencies'];
+        Map map = {for (var model in jsonData) model['_id']: model};
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getCurrencies();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
 }

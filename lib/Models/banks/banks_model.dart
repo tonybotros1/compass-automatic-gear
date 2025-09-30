@@ -6,6 +6,7 @@ class BanksModel {
   String? currencyId;
   String? countryName;
   String? countryCode;
+  String? countryId;
   double? rate;
   String? currency;
   String? accountTypeName;
@@ -20,6 +21,7 @@ class BanksModel {
     this.currencyId,
     this.countryName,
     this.countryCode,
+    this.countryId,
     this.rate,
     this.currency,
     this.accountTypeName,
@@ -47,6 +49,7 @@ class BanksModel {
     countryCode = json.containsKey('country_code')
         ? json['country_code'] ?? ""
         : "";
+    countryId = json.containsKey('country_id') ? json['country_id'] ?? "" : "";
     rate = json.containsKey('rate') ? json['rate'] ?? 0 : 0;
     currency = json.containsKey('currency') ? json['currency'] ?? "" : "";
     accountTypeName = json.containsKey('account_type_name')
@@ -65,6 +68,7 @@ class BanksModel {
     data['currency_id'] = currencyId;
     data['country_name'] = countryName;
     data['country_code'] = countryCode;
+    data['country_id'] = countryId;
     data['rate'] = rate;
     data['currency'] = currency;
     data['account_type_name'] = accountTypeName;

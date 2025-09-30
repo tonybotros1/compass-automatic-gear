@@ -97,6 +97,7 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
+      const DataColumn(label: Text('')),
       DataColumn(
         label: AutoSizedText(text: 'Type', constraints: constraints),
         // onSort: controller.onSort,
@@ -105,7 +106,6 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         // onSort: controller.onS ort,
       ),
-      const DataColumn(label: Text('')),
     ],
     rows:
         controller.filteredApPaymentTypes.isEmpty &&
@@ -142,37 +142,23 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(typeData.type ?? '')),
-      DataCell(Text(textToDate(typeData.createdAt))),
       DataCell(
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 5, left: 5),
-              child: editSection(
-                context,
-                controller,
-                typeData,
-                constraints,
-                typeId,
-              ),
-            ),
             deleteSection(controller, typeId, context),
+            editSection(context, controller, typeData, constraints, typeId),
           ],
         ),
       ),
+      DataCell(Text(typeData.type ?? '')),
+      DataCell(Text(textToDate(typeData.createdAt))),
     ],
   );
 }
 
-ElevatedButton deleteSection(
-  ApPaymentTypeController controller,
-  typeId,
-  context,
-) {
-  return ElevatedButton(
-    style: deleteButtonStyle,
+IconButton deleteSection(ApPaymentTypeController controller, typeId, context) {
+  return IconButton(
     onPressed: () {
       alertDialog(
         context: context,
@@ -182,19 +168,18 @@ ElevatedButton deleteSection(
         },
       );
     },
-    child: const Text("Delete"),
+    icon: deleteIcon,
   );
 }
 
-ElevatedButton editSection(
+IconButton editSection(
   BuildContext context,
   ApPaymentTypeController controller,
   APPaymentTypesModel typeData,
   constraints,
   typeId,
 ) {
-  return ElevatedButton(
-    style: editButtonStyle,
+  return IconButton(
     onPressed: () async {
       controller.type.text = typeData.type ?? '';
       apPaymentTypeDialog(
@@ -208,7 +193,7 @@ ElevatedButton editSection(
               },
       );
     },
-    child: const Text('Edit'),
+    icon: editIcon,
   );
 }
 

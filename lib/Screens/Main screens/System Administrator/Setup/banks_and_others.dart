@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/banks/banks_model.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,6 +31,13 @@ class BanksAndOthers extends StatelessWidget {
                     init: BanksAndOthersController(),
                     builder: (controller) {
                       return searchBar(
+                        onChanged: (_) {
+                          controller.filterBanks();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.clear();
+                          controller.filterBanks();
+                        },
                         search: controller.search,
                         constraints: constraints,
                         context: context,
@@ -92,6 +100,7 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
+      const DataColumn(label: Text('')),
       DataColumn(
         label: AutoSizedText(text: 'Account Name', constraints: constraints),
         onSort: controller.onSort,
@@ -105,6 +114,14 @@ Widget tableOfScreens({
         onSort: controller.onSort,
       ),
       DataColumn(
+        label: AutoSizedText(constraints: constraints, text: 'Country'),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(constraints: constraints, text: 'Rate'),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Account Type'),
         onSort: controller.onSort,
       ),
@@ -113,15 +130,13 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         onSort: controller.onSort,
       ),
-      const DataColumn(label: Text('')),
     ],
     rows:
         controller.filteredBanks.isEmpty && controller.search.value.text.isEmpty
         ? controller.allBanks.map<DataRow>((bank) {
-            final bankData = bank.data() as Map<String, dynamic>;
             final bankId = bank.id;
             return dataRowForTheTable(
-              bankData,
+              bank,
               context,
               constraints,
               bankId,
@@ -129,10 +144,9 @@ Widget tableOfScreens({
             );
           }).toList()
         : controller.filteredBanks.map<DataRow>((bank) {
-            final bankData = bank.data() as Map<String, dynamic>;
             final bankId = bank.id;
             return dataRowForTheTable(
-              bankData,
+              bank,
               context,
               constraints,
               bankId,
@@ -143,7 +157,7 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> bankData,
+  BanksModel bankData,
   context,
   constraints,
   bankId,
@@ -151,47 +165,33 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(bankData['account_name'] ?? '')),
-      DataCell(Text(bankData['account_number'] ?? 'no name')),
-      DataCell(
-        Text(controller.currencyNames[bankData['country_id']] ?? 'no name'),
-      ),
-      DataCell(
-        Text(
-          controller.getdataName(
-            bankData['account_type'],
-            controller.allAccountTypes,
-          ),
-        ),
-      ),
-      DataCell(
-        Text(
-          bankData['added_date'] != null && bankData['added_date'] != ''
-              ? textToDate(bankData['added_date']) //
-              : 'N/A',
-        ),
-      ),
       DataCell(
         Row(
           spacing: 5,
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            editSection(context, controller, bankData, constraints, bankId),
             deleteSection(controller, bankId, context),
+            editSection(context, controller, bankData, constraints, bankId),
           ],
         ),
       ),
+      DataCell(Text(bankData.accountName ?? '')),
+      DataCell(Text(bankData.accountNumber ?? '')),
+      DataCell(Text(bankData.currency ?? '')),
+      DataCell(Text(bankData.countryName ?? '')),
+      DataCell(Text(bankData.rate.toString())),
+      DataCell(Text(bankData.accountTypeName ?? '')),
+      DataCell(Text(textToDate(bankData.createdAt))),
     ],
   );
 }
 
-ElevatedButton deleteSection(
+IconButton deleteSection(
   BanksAndOthersController controller,
-  bankId,
-  context,
+  String bankId,
+  BuildContext context,
 ) {
-  return ElevatedButton(
-    style: deleteButtonStyle,
+  return IconButton(
     onPressed: () {
       alertDialog(
         context: context,
@@ -201,19 +201,18 @@ ElevatedButton deleteSection(
         },
       );
     },
-    child: const Text("Delete"),
+    icon: deleteIcon,
   );
 }
 
-ElevatedButton editSection(
+IconButton editSection(
   BuildContext context,
   BanksAndOthersController controller,
-  Map<String, dynamic> bankData,
+  BanksModel bankData,
   constraints,
   bankId,
 ) {
-  return ElevatedButton(
-    style: editButtonStyle,
+  return IconButton(
     onPressed: () async {
       controller.loadValues(bankData);
       banksDialog(
@@ -223,11 +222,11 @@ ElevatedButton editSection(
         onPressed: controller.addingNewValue.value
             ? null
             : () {
-                controller.editBank(bankId);
+                controller.updateBank(bankId);
               },
       );
     },
-    child: const Text('Edit'),
+    icon: editIcon,
   );
 }
 
