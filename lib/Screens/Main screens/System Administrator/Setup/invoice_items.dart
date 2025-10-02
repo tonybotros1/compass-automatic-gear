@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/invoice%20items/invoice_items_model.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/invoice_items_widgets/invoice_items_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,12 +31,22 @@ class InvoiceItems extends StatelessWidget {
                     init: InvoiceItemsController(),
                     builder: (controller) {
                       return searchBar(
+                        onChanged: (_) {
+                          controller.filterInvoiceItems();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.clear();
+                          controller.filterInvoiceItems();
+                        },
                         search: controller.search,
                         constraints: constraints,
                         context: context,
                         title: 'Search for invoice items',
                         button: newInvoiceItemButton(
-                            context, constraints, controller),
+                          context,
+                          constraints,
+                          controller,
+                        ),
                       );
                     },
                   ),
@@ -46,9 +57,7 @@ class InvoiceItems extends StatelessWidget {
                           return Center(child: loadingProcess);
                         }
                         if (controller.allInvoiceItems.isEmpty) {
-                          return const Center(
-                            child: Text('No Element'),
-                          );
+                          return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
                           scrollDirection: Axis
@@ -75,10 +84,11 @@ class InvoiceItems extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens(
-    {required BoxConstraints constraints,
-    required BuildContext context,
-    required InvoiceItemsController controller}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required InvoiceItemsController controller,
+}) {
   return DataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
@@ -91,112 +101,142 @@ Widget tableOfScreens(
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
-      DataColumn(
-        label: AutoSizedText(
-          text: 'Name',
-          constraints: constraints,
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Description',
-        ),
-        onSort: controller.onSort,
-      ),
-      DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Price',
-        ),
-        onSort: controller.onSort,
-      ),
       const DataColumn(label: Text('')),
+      DataColumn(
+        label: AutoSizedText(text: 'Name', constraints: constraints),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(constraints: constraints, text: 'Description'),
+        onSort: controller.onSort,
+      ),
+      DataColumn(
+        label: AutoSizedText(constraints: constraints, text: 'Price'),
+        onSort: controller.onSort,
+      ),
     ],
-    rows: controller.filteredInvoiceItems.isEmpty &&
+    rows:
+        controller.filteredInvoiceItems.isEmpty &&
             controller.search.value.text.isEmpty
         ? controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-            final invoiceItemsData =
-                invoiceItems.data() as Map<String, dynamic>;
-            final invoiceItemsId = invoiceItems.id;
-            return dataRowForTheTable(invoiceItemsData, context, constraints,
-                invoiceItemsId, controller);
+            final invoiceItemsId = invoiceItems.id ?? '';
+            return dataRowForTheTable(
+              invoiceItems,
+              context,
+              constraints,
+              invoiceItemsId,
+              controller,
+            );
           }).toList()
         : controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
-            final invoiceItemsData =
-                invoiceItems.data() as Map<String, dynamic>;
-            final invoiceItemsId = invoiceItems.id;
-            return dataRowForTheTable(invoiceItemsData, context, constraints,
-                invoiceItemsId, controller);
+            final invoiceItemsId = invoiceItems.id ?? '';
+            return dataRowForTheTable(
+              invoiceItems,
+              context,
+              constraints,
+              invoiceItemsId,
+              controller,
+            );
           }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> invoiceItemsData, context,
-    constraints, invoiceItemsId, InvoiceItemsController controller) {
-  return DataRow(cells: [
-    DataCell(textForDataRowInTable(
-        text: '${invoiceItemsData['name']}', maxWidth: null)),
-    DataCell(textForDataRowInTable(
-        text: '${invoiceItemsData['description']}', maxWidth: 300)),
-    DataCell(textForDataRowInTable(
-      text: '${invoiceItemsData['price']}',
-    )),
-    DataCell(Row(
-      spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        editSection(
-            context, controller, invoiceItemsData, constraints, invoiceItemsId),
-        deleteSection(controller, invoiceItemsId, context),
-      ],
-    )),
-  ]);
+DataRow dataRowForTheTable(
+  InvoiceItemsModel invoiceItemsData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String invoiceItemsId,
+  InvoiceItemsController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(
+        Row(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            deleteSection(controller, invoiceItemsId, context),
+            editSection(
+              context,
+              controller,
+              invoiceItemsData,
+              constraints,
+              invoiceItemsId,
+            ),
+          ],
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: invoiceItemsData.name ?? '',
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: invoiceItemsData.description ?? '',
+          maxWidth: 300,
+        ),
+      ),
+      DataCell(textForDataRowInTable(text: invoiceItemsData.price.toString())),
+    ],
+  );
 }
 
-ElevatedButton deleteSection(
-    InvoiceItemsController controller, invoiceItemsId, context) {
-  return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: "The invoiceItems will be deleted permanently",
-            onPressed: () {
-              controller.deleteInvoiceItem(invoiceItemsId);
-            });
-      },
-      child: const Text("Delete"));
+IconButton deleteSection(
+  InvoiceItemsController controller,
+  String invoiceItemsId,
+  BuildContext context,
+) {
+  return IconButton(
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The invoiceItems will be deleted permanently",
+        onPressed: () {
+          controller.deleteInvoiceItem(invoiceItemsId);
+        },
+      );
+    },
+    icon: deleteIcon,
+  );
 }
 
-ElevatedButton editSection(BuildContext context, InvoiceItemsController controller,
-    Map<String, dynamic> invoiceItemsData, constraints, invoiceItemsId) {
-  return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () {
-        controller.description.text = invoiceItemsData['description'] ?? '';
-        controller.name.text = invoiceItemsData['name'] ?? '';
-        controller.price.text = (invoiceItemsData['price'] ?? '').toString();
-        invoiceItemsDialog(
-          constraints: constraints,
-          controller: controller,
-          onPressed: controller.addingNewValue.value
-              ? null
-              : () async {
-                  if (controller.name.text.isEmpty) {
-                    showSnackBar('Alert', 'Please Enter Name');
-                  } else {
-                    await controller.editInvoiceItem(invoiceItemsId);
-                  }
-                },
-        );
-      },
-      child: const Text('Edit'));
+IconButton editSection(
+  BuildContext context,
+  InvoiceItemsController controller,
+  InvoiceItemsModel invoiceItemsData,
+  BoxConstraints constraints,
+  String invoiceItemsId,
+) {
+  return IconButton(
+    onPressed: () {
+      controller.description.text = invoiceItemsData.description ?? '';
+      controller.name.text = invoiceItemsData.name ?? '';
+      controller.price.text = (invoiceItemsData.price ?? '').toString();
+      invoiceItemsDialog(
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                if (controller.name.text.isEmpty) {
+                  showSnackBar('Alert', 'Please Enter Name');
+                } else {
+                  await controller.updateInvoiceItem(invoiceItemsId);
+                }
+              },
+      );
+    },
+    icon: editIcon,
+  );
 }
 
-ElevatedButton newInvoiceItemButton(BuildContext context,
-    BoxConstraints constraints, InvoiceItemsController controller) {
+ElevatedButton newInvoiceItemButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  InvoiceItemsController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.name.clear();

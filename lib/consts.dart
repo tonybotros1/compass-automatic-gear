@@ -10,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Widgets/text_button.dart';
+
 // String backendURI = 'https://datahubai-backend.onrender.com';
 // String backendTestURI = 'https://datahubai-backend.onrender.com';
 String backendTestURI = 'http://127.0.0.1:8000';
@@ -823,13 +825,25 @@ String? getMimeTypeFromExtension(String extension) {
   return mimeTypes[extension.toLowerCase()];
 }
 
+// Widget closeIcon() {
+//   return IconButton(
+//     visualDensity: VisualDensity.compact,
+//     onPressed: () {
+//       Get.back();
+//     },
+//     icon: const Icon(Icons.close, color: Colors.white),
+//   );
+// }
+
 Widget closeIcon() {
-  return IconButton(
-    visualDensity: VisualDensity.compact,
-    onPressed: () {
-      Get.back();
-    },
-    icon: const Icon(Icons.close, color: Colors.white),
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    child: ClickableHoverText(
+      onTap: () {
+        Get.back();
+      },
+      text: "⨉",
+    ),
   );
 }
 
