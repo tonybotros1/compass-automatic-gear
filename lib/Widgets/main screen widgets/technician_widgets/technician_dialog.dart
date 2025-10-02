@@ -2,6 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/technician_con
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
+import '../../text_button.dart';
 import 'add_new_technician_or_edit.dart';
 
 Future<dynamic> technicianDialog(
@@ -35,25 +36,13 @@ Future<dynamic> technicianDialog(
                     ),
                     const Spacer(),
                     GetX<TechnicianController>(
-                        builder: (controller) => ElevatedButton(
-                              onPressed: onPressed,
-                              style: new2ButtonStyle,
-                              child: controller.addingNewValue.value == false
-                                  ? const Text(
-                                      'Save',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  : const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
+                        builder: (controller) => ClickableHoverText(
+                              onTap: onPressed,
+                              text: controller.addingNewValue.value == false
+                                  ? 'Save' : "•••"
                             )),
-                    closeButton
+                            separator(),
+                    closeIcon()
                   ],
                 ),
               ),

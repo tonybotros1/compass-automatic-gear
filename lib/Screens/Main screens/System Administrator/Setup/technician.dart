@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/technicians/technicians_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/technician_controller.dart';
@@ -29,10 +30,16 @@ class Technician extends StatelessWidget {
                     init: TechnicianController(),
                     builder: (controller) {
                       return searchBar(
+                        onChanged: (_) {
+                          controller.filterTechnicians();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.clear();
+                          controller.filterTechnicians();
+                        },
                         search: controller.search,
                         constraints: constraints,
                         context: context,
-                        // controller: controller,
                         title: 'Search for technicianses',
                         button: newtechniciansesButton(
                           context,
@@ -92,6 +99,7 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
+      const DataColumn(label: Text('')),
       DataColumn(
         label: AutoSizedText(text: 'Name', constraints: constraints),
         onSort: controller.onSort,
@@ -104,16 +112,14 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         onSort: controller.onSort,
       ),
-      const DataColumn(label: Text('')),
     ],
     rows:
         controller.filteredTechnicians.isEmpty &&
             controller.search.value.text.isEmpty
         ? controller.allTechnician.map<DataRow>((technicians) {
-            final techniciansData = technicians.data() as Map<String, dynamic>;
             final techniciansId = technicians.id;
             return dataRowForTheTable(
-              techniciansData,
+              technicians,
               context,
               constraints,
               techniciansId,
@@ -121,10 +127,9 @@ Widget tableOfScreens({
             );
           }).toList()
         : controller.filteredTechnicians.map<DataRow>((technicians) {
-            final techniciansData = technicians.data() as Map<String, dynamic>;
             final techniciansId = technicians.id;
             return dataRowForTheTable(
-              techniciansData,
+              technicians,
               context,
               constraints,
               techniciansId,
@@ -135,7 +140,7 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> techniciansData,
+  TechnicianModel techniciansData,
   context,
   constraints,
   techniciansId,
@@ -143,21 +148,12 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(techniciansData['name'] ?? '')),
-      DataCell(Text(techniciansData['job'] ?? '')),
-      DataCell(
-        Text(
-          techniciansData['added_date'] != null &&
-                  techniciansData['added_date'] != ''
-              ? textToDate(techniciansData['added_date'])
-              : 'N/A',
-        ),
-      ),
       DataCell(
         Row(
           spacing: 5,
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            deleteSection(controller, techniciansId, context),
             editSection(
               context,
               controller,
@@ -165,21 +161,22 @@ DataRow dataRowForTheTable(
               constraints,
               techniciansId,
             ),
-            deleteSection(controller, techniciansId, context),
           ],
         ),
       ),
+      DataCell(Text(techniciansData.name ?? '')),
+      DataCell(Text(techniciansData.job ?? '')),
+      DataCell(Text(textToDate(techniciansData.createdAt))),
     ],
   );
 }
 
-ElevatedButton deleteSection(
+IconButton deleteSection(
   TechnicianController controller,
   techniciansId,
   context,
 ) {
-  return ElevatedButton(
-    style: deleteButtonStyle,
+  return IconButton(
     onPressed: () {
       alertDialog(
         context: context,
@@ -189,22 +186,21 @@ ElevatedButton deleteSection(
         },
       );
     },
-    child: const Text("Delete"),
+    icon: deleteIcon,
   );
 }
 
-ElevatedButton editSection(
+IconButton editSection(
   BuildContext context,
   TechnicianController controller,
-  Map<String, dynamic> techniciansData,
+  TechnicianModel techniciansData,
   BoxConstraints constraints,
   String techniciansId,
 ) {
-  return ElevatedButton(
-    style: editButtonStyle,
+  return IconButton(
     onPressed: () async {
-      controller.name.text = techniciansData['name'];
-      controller.job.text = techniciansData['job'];
+      controller.name.text = techniciansData.name ?? '';
+      controller.job.text = techniciansData.job ?? '';
       technicianDialog(
         constraints: constraints,
         controller: controller,
@@ -212,11 +208,11 @@ ElevatedButton editSection(
         onPressed: controller.addingNewValue.value
             ? null
             : () {
-                controller.editTechnician(techniciansId);
+                controller.updateTechnicians(techniciansId);
               },
       );
     },
-    child: const Text('Edit'),
+    icon: editIcon,
   );
 }
 
