@@ -695,13 +695,13 @@ class CustomDropdown extends StatelessWidget {
                                 ),
                                 if (controller.selectedKey.isNotEmpty ||
                                     controller.textController.value.isNotEmpty)
-                                  IconButton(
-                                    icon: const Icon(
+                                  InkWell(
+                                    child: const Icon(
                                       Icons.clear,
                                       size: 18,
                                       color: Colors.red,
                                     ),
-                                    onPressed: () {
+                                    onTap: () {
                                       controller.selectedKey.value = '';
                                       controller.selectedValue.value = {};
                                       controller.textController.value = '';

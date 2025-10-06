@@ -1,14 +1,17 @@
-// import 'dart:io';
+import 'dart:convert';
 import 'dart:typed_data';
-// import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'dart:html' as html;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:datahubai/consts.dart';
+import 'package:uuid/uuid.dart';
+import '../../Models/job cards/job_card_invoice_items_model.dart';
+import '../../Models/job cards/job_card_model.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
+import '../../helpers.dart';
 import '../Mobile section controllers/cards_screen_controller.dart';
 import 'main_screen_contro.dart';
 import 'quotation_card_controller.dart';
@@ -29,7 +32,6 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> reference1 = TextEditingController().obs;
   Rx<TextEditingController> reference2 = TextEditingController().obs;
   Rx<TextEditingController> deliveryTime = TextEditingController().obs;
-
   Rx<TextEditingController> minTestKms = TextEditingController().obs;
   Rx<TextEditingController> invoiceCounter = TextEditingController().obs;
   Rx<TextEditingController> lpoCounter = TextEditingController().obs;
@@ -52,7 +54,6 @@ class JobCardController extends GetxController {
   TextEditingController customerEntityPhoneNumber = TextEditingController();
   TextEditingController customerCreditNumber = TextEditingController();
   TextEditingController customerOutstanding = TextEditingController();
-  // TextEditingController customerSaleMan = TextEditingController();
   RxString customerSaleMan = RxString('');
   TextEditingController customerBranch = TextEditingController();
   TextEditingController customerCurrency = TextEditingController();
@@ -76,11 +77,10 @@ class JobCardController extends GetxController {
   RxString label = RxString('');
   RxBool isScreenLoding = RxBool(false);
   RxBool loadingInvoiceItems = RxBool(false);
-  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allJobCards =
-      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
-  final RxList<DocumentSnapshot> historyJobCards = RxList<DocumentSnapshot>([]);
-  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allInvoiceItems =
-      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
+  final RxList<JobCardModel> allJobCards = RxList<JobCardModel>([]);
+  final RxList<JobCardModel> historyJobCards = RxList<JobCardModel>([]);
+  final RxList<JobCardInvoiceItemsModel> allInvoiceItems =
+      RxList<JobCardInvoiceItemsModel>([]);
 
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
@@ -177,29 +177,27 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> fromDate = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
   Rx<TextEditingController> statusFilter = TextEditingController().obs;
-
+  final Uuid _uuid = const Uuid();
+  String backendUrl = backendTestURI;
+  RxBool isJobModified = RxBool(false);
+  RxBool isJobInvoicesModified = RxBool(false);
   @override
   void onInit() async {
     super.onInit();
-    // exportCollectionToJson('job_cards');
+    await getCompanyDetails();
     jobWarrentyEndDate.value.addListener(() {
-      // Refresh the Rx to notify GetX that something changed
       jobWarrentyEndDate.refresh();
     });
-    await getCompanyId();
+    getInvoiceItemsFromCollection();
     getAllCustomers();
-    getCarBrands();
-    getCountries();
-    getCompanyDetails();
-    getUserId();
     getAllUsers();
-    getSalesMan();
     getBranches();
     getCurrencies();
+    getSalesMan();
+    getCarBrands();
+    getCountries();
     getColors();
     getEngineTypes();
-    // getAllJobCards();
-    getInvoiceItemsFromCollection();
   }
 
   @override
@@ -208,46 +206,427 @@ class JobCardController extends GetxController {
     super.onClose();
   }
 
-  // Future<void> exportCollectionToJson(String collectionName) async {
+  Future<void> getColors() async {
+    allColors.assignAll(await helper.getAllListValues('COLORS'));
+  }
+
+  Future<void> getEngineTypes() async {
+    allEngineType.assignAll(await helper.getAllListValues('ENGINE_TYPES'));
+  }
+
+  Future<void> getCarBrands() async {
+    allBrands.assignAll(await helper.getCarBrands());
+  }
+
+  Future<void> getModelsByCarBrand(String brandID) async {
+    allModels.assignAll(await helper.getModelsValues(brandID));
+  }
+
+  Future<void> getCountries() async {
+    allCountries.assignAll(await helper.getCountries());
+  }
+
+  Future<void> getCitiesByCountryID(String countryID) async {
+    allCities.assignAll(await helper.getCitiesValues(countryID));
+  }
+
+  Future<void> getSalesMan() async {
+    salesManMap.assignAll(await helper.getSalesMan());
+  }
+
+  Future<void> getCurrencies() async {
+    allCurrencies.assignAll(await helper.getCurrencies());
+  }
+
+  Future<void> getCompanyDetails() async {
+    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
+  }
+
+  Future<void> getBranches() async {
+    allBranches.assignAll(await helper.getBrunches());
+  }
+
+  Future<void> getAllUsers() async {
+    allCustomers.assignAll(await helper.getCustomers());
+  }
+
+  Future<void> getAllCustomers() async {
+    allUsers.assignAll(await helper.getSysUsers());
+  }
+
+  Future<void> getInvoiceItemsFromCollection() async {
+    allInvoiceItemsFromCollection.assignAll(await helper.getInvoiceItems());
+  }
+
+  Future<void> addNewJobCard() async {
+    try {
+      if (jobStatus1.value != 'New' && jobStatus1.value != '') {
+        showSnackBar('Alert', 'Only new jobs can be edited');
+        return;
+      }
+      showSnackBar('Adding', 'Please Wait');
+      addingNewValue.value = true;
+      Map<String, dynamic> newData = {
+        'label': '',
+        'job_status_1': jobStatus1.value,
+        'job_status_2': jobStatus2.value,
+        'car_brand_logo': carBrandLogo.value,
+        'company_id': companyId.value,
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'plate_number': plateNumber.text,
+        'plate_code': plateCode.text,
+        'country': countryId.value,
+        'city': cityId.value,
+        'year': year.text,
+        'color': colorId.value,
+        'engine_type': engineTypeId.value,
+        'vehicle_identification_number': vin.text,
+        'transmission_type': transmissionType.text,
+        'mileage_in': double.tryParse(mileageIn.value.text) ?? 0,
+        'mileage_out': double.tryParse(mileageOut.value.text) ?? 0,
+        'fuel_amount': double.tryParse(fuelAmount.value.text) ?? 0,
+        'mileage_in_out_diff': double.tryParse(inOutDiff.value.text) ?? 0,
+        'customer': customerId.value,
+        'contact_name': customerEntityName.text,
+        'contact_number': customerEntityPhoneNumber.text,
+        'contact_email': customerEntityEmail.text,
+        'credit_limit': double.tryParse(customerCreditNumber.text) ?? 0,
+        'outstanding': double.tryParse(customerOutstanding.text) ?? 0,
+        'salesman': customerSaleManId.value,
+        'branch': customerBranchId.value,
+        'currency': customerCurrencyId.value,
+        'rate': double.tryParse(customerCurrencyRate.text) ?? 0,
+        'payment_method': payType.value,
+        'lpo_number': lpoCounter.value.text,
+        'job_approval_date': convertDateToIson(approvalDate.value.text),
+        'job_start_date': convertDateToIson(startDate.value.text),
+        'job_cancellation_date': convertDateToIson(
+          jobCancelationDate.value.text,
+        ),
+        'job_finish_date': convertDateToIson(finishDate.value.text),
+        'job_delivery_date': convertDateToIson(deliveryDate.value.text),
+        'job_warranty_end_date': convertDateToIson(
+          jobWarrentyEndDate.value.text,
+        ),
+        'job_warranty_days': int.tryParse(jobWarrentyDays.value.text) ?? 0,
+        'job_warranty_km': double.tryParse(jobWarrentyKM.value.text) ?? 0,
+        'job_min_test_km': double.tryParse(minTestKms.value.text) ?? 0,
+        'job_reference_1': reference1.value.text,
+        'job_reference_2': reference2.value.text,
+        'delivery_time': deliveryTime.value.text,
+        'job_notes': jobNotes.text,
+        'job_delivery_notes': deliveryNotes.text,
+        'invoice_items': allInvoiceItems.map((item) => item.toJson()).toList(),
+      };
+
+      final rawDate = jobCardDate.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['job_date'] = convertDateToIson(rawDate);
+        } catch (e) {
+          showSnackBar('Alert', 'Please enter valid job date');
+        }
+      }
+
+      final rawDate2 = invoiceDate.value.text.trim();
+      if (rawDate2.isNotEmpty) {
+        try {
+          newData['invoice_date'] = convertDateToIson(rawDate2);
+        } catch (e) {
+          showSnackBar('Alert', 'Please enter valid invoice date');
+        }
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri addingJobUrl = Uri.parse('$backendUrl/job_cards/add_new_job_card');
+
+      if (jobCardAdded.isFalse) {
+        jobStatus1.value = 'New';
+        jobStatus2.value = 'New';
+        newData['job_status_1'] = 'New';
+        newData['job_status_2'] = 'New';
+        final response = await http.post(
+          addingJobUrl,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(newData),
+        );
+        if (response.statusCode == 200) {
+          final decoded = jsonDecode(response.body);
+          JobCardModel newJob = JobCardModel.fromJson(decoded['job_card']);
+          jobCardCounter.value.text = newJob.jobNumber ?? '';
+          jobCardAdded.value = true;
+          addingNewValue.value = false;
+          curreentJobCardId.value = newJob.id ?? '';
+          allInvoiceItems.value = newJob.invoiceItemsDetails ?? [];
+          isJobInvoicesModified.value = false;
+          isJobModified.value = false;
+          showSnackBar('Done', 'Job Added Successfully');
+        } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) {
+            await addNewJobCard();
+          } else if (refreshed == RefreshResult.invalidToken) {
+            logout();
+          }
+        } else if (response.statusCode == 401) {
+          logout();
+        }
+      } else {
+        if (isJobModified.isTrue) {
+          Uri updatingJobUrl = Uri.parse(
+            '$backendUrl/job_cards/update_job_card/$curreentJobCardId',
+          );
+          Map newDataToUpdate = newData;
+          newDataToUpdate.remove('invoice_items');
+          final response = await http.patch(
+            updatingJobUrl,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode(newDataToUpdate),
+          );
+          if (response.statusCode == 200) {
+            showSnackBar('Done', 'Updated Successfully');
+            isJobModified.value = false;
+          } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+            final refreshed = await helper.refreshAccessToken(refreshToken);
+            if (refreshed == RefreshResult.success) {
+              await addNewJobCard();
+            } else if (refreshed == RefreshResult.invalidToken) {
+              logout();
+            }
+          } else if (response.statusCode == 401) {
+            logout();
+          }
+        }
+        if (isJobInvoicesModified.isTrue) {
+          Uri updatingJobInvoicesUrl = Uri.parse(
+            '$backendUrl/job_cards/update_job_invoice_items',
+          );
+          final response = await http.patch(
+            updatingJobInvoicesUrl,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode(
+              allInvoiceItems
+                  .where(
+                    (item) =>
+                        (item.isModified == true ||
+                        item.added == true ||
+                        (item.deleted == true && item.id != null)),
+                  ).map((item)=> item.toJson())
+                  .toList(),
+            ),
+          );
+          if (response.statusCode == 200) {
+            showSnackBar('Done', 'Updated Successfully');
+            isJobInvoicesModified.value = false;
+          } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+            final refreshed = await helper.refreshAccessToken(refreshToken);
+            if (refreshed == RefreshResult.success) {
+              await addNewJobCard();
+            } else if (refreshed == RefreshResult.invalidToken) {
+              logout();
+            }
+          } else if (response.statusCode == 401) {
+            logout();
+          }
+        }
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // Future<void> addNewJobCard() async {
   //   try {
-  //     final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  //     if (jobStatus1.value != 'New' && jobStatus1.value != '') {
+  //       showSnackBar('Alert', 'Only new jobs can be edited');
+  //       return;
+  //     }
+  //     showSnackBar('Adding', 'Please Wait');
+  //     addingNewValue.value = true;
+  // Map<String, dynamic> newData = {
+  //   'label': '',
+  //   'job_status_1': jobStatus1.value,
+  //   'job_status_2': jobStatus2.value,
+  //   'car_brand_logo': carBrandLogo.value,
+  //   'company_id': companyId.value,
+  //   'car_brand': carBrandId.value,
+  //   'car_model': carModelId.value,
+  //   'plate_number': plateNumber.text,
+  //   'plate_code': plateCode.text,
+  //   'country': countryId.value,
+  //   'city': cityId.value,
+  //   'year': year.text,
+  //   'color': colorId.value,
+  //   'engine_type': engineTypeId.value,
+  //   'vehicle_identification_number': vin.text,
+  //   'transmission_type': transmissionType.text,
+  //   'mileage_in': mileageIn.value.text,
+  //   'fuel_amount': fuelAmount.value.text,
+  //   'mileage_out': mileageOut.value.text,
+  //   'mileage_in_out_diff': inOutDiff.value.text,
+  //   'customer': customerId.value,
+  //   'contact_name': customerEntityName.text,
+  //   'contact_number': customerEntityPhoneNumber.text,
+  //   'contact_email': customerEntityEmail.text,
+  //   'credit_limit': customerCreditNumber.text,
+  //   'outstanding': customerOutstanding.text,
+  //   'saleMan': customerSaleManId.value,
+  //   'branch': customerBranchId.value,
+  //   'currency': customerCurrencyId.value,
+  //   'rate': customerCurrencyRate.text,
+  //   'payment_method': payType.value,
+  //   'job_number': jobCardCounter.value.text,
+  //   'invoice_number': invoiceCounter.value.text,
+  //   'lpo_number': lpoCounter.value.text,
+  //   'job_approval_date': approvalDate.value.text,
+  //   'job_start_date': startDate.value.text,
+  //   'job_cancelation_date': jobCancelationDate.value.text,
+  //   'job_finish_date': finishDate.value.text,
+  //   'job_delivery_date': deliveryDate.value.text,
+  //   'job_warrenty_days': jobWarrentyDays.value.text,
+  //   'job_warrenty_km': jobWarrentyKM.value.text,
+  //   'job_warrenty_end_date': jobWarrentyEndDate.value.text,
+  //   'job_min_test_km': minTestKms.value.text,
+  //   'job_reference_1': reference1.value.text,
+  //   'job_reference_2': reference2.value.text,
+  //   'delivery_time': deliveryTime.value.text,
+  //   'job_notes': jobNotes.text,
+  //   'job_delivery_notes': deliveryNotes.text,
+  // };
 
-  //     QuerySnapshot snapshot = await firestore
-  //         .collection(collectionName)
-  //         .get();
+  //     final rawDate = jobCardDate.value.text.trim();
+  //     if (rawDate.isNotEmpty) {
+  //       try {
+  //         newData['job_date'] = Timestamp.fromDate(format.parseStrict(rawDate));
+  //       } catch (e) {
+  //         // إذا حابب تعرض للمستخدم خطأ في التنسيق
+  //         // print('Invalid quotation_date format: $e');
+  //       }
+  //     }
 
-  //     List<Map<String, dynamic>> data = snapshot.docs.map((doc) {
-  //       Map<String, dynamic> d = doc.data() as Map<String, dynamic>;
+  //     final rawDate2 = invoiceDate.value.text.trim();
+  //     if (rawDate2.isNotEmpty) {
+  //       try {
+  //         newData['invoice_date'] = Timestamp.fromDate(
+  //           format.parseStrict(rawDate2),
+  //         );
+  //       } catch (e) {
+  //         // إذا حابب تعرض للمستخدم خطأ في التنسيق
+  //         // print('Invalid quotation_date format: $e');
+  //       }
+  //     }
 
-  //       // Convert Timestamps
-  //       d = d.map((key, value) {
-  //         if (value is Timestamp) {
-  //           return MapEntry(key, value.toDate().toIso8601String());
-  //         }
-  //         return MapEntry(key, value);
-  //       });
+  //     if (jobCardCounter.value.text.isEmpty) {
+  //       jobStatus1.value = 'New';
+  //       jobStatus2.value = 'New';
+  //       newData['label'] = '';
 
-  //       return d;
-  //     }).toList();
+  //       newData['job_status_1'] = 'New';
+  //       newData['job_status_2'] = 'New';
+  //       await getCurrentJobCardCounterNumber();
+  //       newData['job_number'] = jobCardCounter.value.text;
+  //     }
 
-  //     String jsonString = const JsonEncoder.withIndent('  ').convert(data);
-
-  //     // ✅ Create download link
-  //     final blob = html.Blob([jsonString], 'application/json');
-  //     final url = html.Url.createObjectUrlFromBlob(blob);
-  //     final anchor = html.AnchorElement(href: url)
-  //       ..setAttribute("download", "$collectionName.json")
-  //       ..click();
-  //     html.Url.revokeObjectUrl(url);
-
-  //     print(
-  //       "✅ Exported ${data.length} docs from '$collectionName' and downloaded",
-  //     );
+  //     if (jobCardAdded.isFalse) {
+  //       newData['added_date'] = DateTime.now().toString();
+  //       var newJob = await FirebaseFirestore.instance
+  //           .collection('job_cards')
+  //           .add(newData);
+  //       jobCardAdded.value = true;
+  //       curreentJobCardId.value = newJob.id;
+  //       getAllInvoiceItems(newJob.id);
+  //       showSnackBar('Done', 'Job Added Successfully');
+  //     } else {
+  //       newData.remove('added_date');
+  //       await FirebaseFirestore.instance
+  //           .collection('job_cards')
+  //           .doc(curreentJobCardId.value)
+  //           .update(newData);
+  //       showSnackBar('Done', 'Updated Successfully');
+  //     }
+  //     canAddInternalNotesAndInvoiceItems.value = true;
+  //     addingNewValue.value = false;
   //   } catch (e) {
-  //     print("❌ Error exporting collection: $e");
+  //     canAddInternalNotesAndInvoiceItems.value = false;
+  //     addingNewValue.value = false;
+  //     showSnackBar('Alert', 'Something Went Wrong');
   //   }
   // }
 
+  void addNewInvoiceItem() {
+    final String uniqueId = _uuid.v4();
+
+    allInvoiceItems.add(
+      JobCardInvoiceItemsModel(
+        added: true,
+        uid: uniqueId,
+        nameId: invoiceItemNameId.value,
+        name: invoiceItemName.text,
+        lineNumber: int.tryParse(lineNumber.text) ?? 0,
+        description: description.text,
+        quantity: int.tryParse(quantity.text) ?? 0,
+        price: double.tryParse(price.text) ?? 0.0,
+        amount: double.tryParse(amount.text) ?? 0.0,
+        discount: double.tryParse(discount.text) ?? 0.0,
+        total: double.tryParse(total.text) ?? 0.0,
+        vat: double.tryParse(vat.text) ?? 0.0,
+        net: double.tryParse(net.text) ?? 0.0,
+      ),
+    );
+    isJobInvoicesModified.value = true;
+    Get.back();
+  }
+
+  Future<void> deleteInvoiceItem(String itemId) async {
+    int index = allInvoiceItems.indexWhere(
+      (item) => (item.id == itemId || item.uid == itemId),
+    );
+    allInvoiceItems[index].deleted = true;
+    allInvoiceItems.refresh();
+    isJobInvoicesModified.value = true;
+    Get.back();
+  }
+
+  Future<void> editInvoiceItem(String itemId) async {
+    int index = allInvoiceItems.indexWhere(
+      (item) => (item.id == itemId || item.uid == itemId),
+    );
+    final oldItem = allInvoiceItems[index];
+
+    if (index != -1) {
+      allInvoiceItems[index] = JobCardInvoiceItemsModel(
+        id: oldItem.id,
+        uid: oldItem.uid,
+        nameId: invoiceItemNameId.value,
+        name: invoiceItemName.text,
+        lineNumber: int.tryParse(lineNumber.text) ?? 0,
+        description: description.text,
+        quantity: int.tryParse(quantity.text) ?? 0,
+        price: double.tryParse(price.text) ?? 0.0,
+        amount: double.tryParse(amount.text) ?? 0.0,
+        discount: double.tryParse(discount.text) ?? 0.0,
+        total: double.tryParse(total.text) ?? 0.0,
+        vat: double.tryParse(vat.text) ?? 0.0,
+        net: double.tryParse(net.text) ?? 0.0,
+      );
+    }
+    isJobInvoicesModified.value = true;
+
+    Get.back();
+  }
+
+  // ===============================================================================================================
   void changejobWarrentyEndDateDependingOnWarrentyDays() {
     DateTime date = format.parse(deliveryDate.value.text);
     DateTime newDate = date.add(
@@ -256,81 +635,27 @@ class JobCardController extends GetxController {
     jobWarrentyEndDate.value.text = format.format(newDate);
   }
 
-  // Future<void> calculateMoneyForAllJobs() async {
-  //   try {
-  //     // Reset totals at the beginning.
-  //     double totalVat = 0.0;
-  //     double grandTotal = 0.0;
-  //     double totalNet = 0.0;
-
-  //     if (allJobCards.isEmpty) {
-  //       allJobsVATS.value = 0;
-  //       allJobsTotals.value = 0;
-  //       allJobsNET.value = 0;
-  //       return;
-  //     }
-
-  //     // 1. Create a list of Futures, where each Future gets the 'invoice_items'
-  //     // subcollection for a single job card.
-  //     List<Future<QuerySnapshot<Map<String, dynamic>>>> futures = [];
-  //     for (var job in allJobCards) {
-  //       final future = FirebaseFirestore.instance
-  //           .collection('job_cards')
-  //           .doc(job.id)
-  //           .collection('invoice_items')
-  //           .get();
-  //       futures.add(future);
-  //     }
-
-  //     // 2. Execute all the Futures in parallel and wait for them all to complete.
-  //     // This is much faster than awaiting each one in a loop.
-  //     final List<QuerySnapshot<Map<String, dynamic>>> snapshots =
-  //         await Future.wait(futures);
-
-  //     // 3. Now that all data is fetched, iterate through the results in memory.
-  //     // This part is very fast as there are no more network requests.
-  //     for (var invoiceListSnapshot in snapshots) {
-  //       for (var invoiceDoc in invoiceListSnapshot.docs) {
-  //         var data = invoiceDoc.data();
-  //         totalVat += double.tryParse(data['vat'].toString()) ?? 0.0;
-  //         grandTotal += double.tryParse(data['total'].toString()) ?? 0.0;
-  //         totalNet += double.tryParse(data['net'].toString()) ?? 0.0;
-  //       }
-  //     }
-
-  //     // 4. Update the UI with the final calculated totals.
-  //     allJobsVATS.value = totalVat;
-  //     allJobsTotals.value = grandTotal;
-  //     allJobsNET.value = totalNet;
-  //   } catch (e) {
-  //     // Optionally reset values on error
-  //     allJobsVATS.value = 0;
-  //     allJobsTotals.value = 0;
-  //     allJobsNET.value = 0;
-  //   }
-  // }
-
   Future<void> calculateMoneyForAllJobs() async {
-    try {
-      allJobsVATS.value = 0;
-      allJobsTotals.value = 0;
-      allJobsNET.value = 0;
-      if (allJobCards.isEmpty) {
-        return;
-      }
-      for (var job in allJobCards) {
-        allJobsVATS.value +=
-            double.tryParse(job.data()['total_vat_amount'].toString()) ?? 0.0;
-        allJobsTotals.value +=
-            double.tryParse(job.data()['totals_amount'].toString()) ?? 0.0;
-        allJobsNET.value +=
-            double.tryParse(job.data()['total_net_amount'].toString()) ?? 0.0;
-      }
-    } catch (e) {
-      allJobsVATS.value = 0;
-      allJobsTotals.value = 0;
-      allJobsNET.value = 0;
-    }
+    // try {
+    //   allJobsVATS.value = 0;
+    //   allJobsTotals.value = 0;
+    //   allJobsNET.value = 0;
+    //   if (allJobCards.isEmpty) {
+    //     return;
+    //   }
+    //   for (var job in allJobCards) {
+    //     allJobsVATS.value +=
+    //         double.tryParse(job.data()['total_vat_amount'].toString()) ?? 0.0;
+    //     allJobsTotals.value +=
+    //         double.tryParse(job.data()['totals_amount'].toString()) ?? 0.0;
+    //     allJobsNET.value +=
+    //         double.tryParse(job.data()['total_net_amount'].toString()) ?? 0.0;
+    //   }
+    // } catch (e) {
+    //   allJobsVATS.value = 0;
+    //   allJobsTotals.value = 0;
+    //   allJobsNET.value = 0;
+    // }
   }
 
   Future<void> openQuotationCardScreenByNumber() async {
@@ -376,16 +701,16 @@ class JobCardController extends GetxController {
   }
 
   void selectForHistory(String vin) {
-    historyJobCards.assignAll(
-      allJobCards.where((job) {
-        final data = job.data() as Map<String, dynamic>?;
-        if (data?['vehicle_identification_number'] != '') {
-          return data?['vehicle_identification_number'] == vin;
-        } else {
-          return false;
-        }
-      }).toList(),
-    );
+    // historyJobCards.assignAll(
+    //   allJobCards.where((job) {
+    //     final data = job.data() as Map<String, dynamic>?;
+    //     if (data?['vehicle_identification_number'] != '') {
+    //       return data?['vehicle_identification_number'] == vin;
+    //     } else {
+    //       return false;
+    //     }
+    //   }).toList(),
+    // );
   }
 
   List<double> calculateTotals() {
@@ -395,10 +720,9 @@ class JobCardController extends GetxController {
     double sumofNET = 0.0;
 
     for (var job in allInvoiceItems) {
-      var data = job.data() as Map<String, dynamic>?;
-      sumofTotal += double.parse(data?['total']);
-      sumofNET += double.parse(data?['net']);
-      sumofVAT += double.parse(data?['vat']);
+      sumofTotal += job.total ?? 0;
+      sumofNET += job.net ?? 0;
+      sumofVAT += job.vat ?? 0;
     }
 
     return [sumofTotal, sumofVAT, sumofNET];
@@ -515,6 +839,35 @@ class JobCardController extends GetxController {
   }
 
   void clearValues() {
+    currentCountryVAT.value = companyDetails.containsKey('country_vat')
+        ? companyDetails['country_vat'].toString()
+        : "";
+    country.text = companyDetails.containsKey('country')
+        ? companyDetails['country'] ?? ""
+        : "";
+    countryId.value = companyDetails.containsKey('country_id')
+        ? companyDetails['country_id'] ?? ""
+        : "";
+    getCitiesByCountryID(companyDetails['country_id']);
+    jobCardDate.value.text = textToDate(DateTime.now());
+    invoiceDate.value.text = textToDate(DateTime.now());
+    startDate.value.text = textToDate(DateTime.now());
+    customerCurrencyId.value = companyDetails.containsKey('currency_id')
+        ? companyDetails['currency_id'] ?? ""
+        : "";
+    customerCurrencyRate.text = companyDetails.containsKey('currency_rate')
+        ? companyDetails['currency_rate'].toString()
+        : "";
+    customerCurrency.text = companyDetails.containsKey('currency_code')
+        ? companyDetails['currency_code'] ?? ""
+        : "";
+    mileageIn.value.text = '0';
+    mileageOut.value.text = '0';
+    inOutDiff.value.text = '0';
+    customerCreditNumber.text = '0';
+    customerOutstanding.text = '0';
+    isCashSelected.value = true;
+    payType.value = 'Cash';
     canAddInternalNotesAndInvoiceItems.value = false;
     quotationCounter.value = '';
     allInvoiceItems.clear();
@@ -565,397 +918,258 @@ class JobCardController extends GetxController {
     deliveryNotes.clear();
   }
 
-  void loadInspectionFormValues(String id, Map<String, dynamic> data) {
-    controller.imagesList.clear();
-    controller.currenyJobId.value = id;
-    controller.inEditMode.value = true;
-    controller.inEditMode.value = true;
-    controller.technicianId.value = data['technician'] ?? '';
-    controller.date.text = textToDate(data['added_date']);
-    controller.customer.text = customerName.text;
-    controller.customerId.value = data['customer'];
-    controller.brand.text = carBrand.text;
-    controller.brandId.value = data['car_brand'];
-    controller.model.text = carModel.text;
-    controller.modelId.value = data['car_model'];
-    controller.color.text = color.text;
-    controller.colorId.value = data['color'];
-    controller.plateNumber.text = plateNumber.text;
-    controller.code.text = data['plate_code'];
-    controller.engineType.text = engineType.text;
+  void loadInspectionFormValues(String id, JobCardModel data) {
+    // controller.imagesList.clear();
+    // controller.currenyJobId.value = id;
+    // controller.inEditMode.value = true;
+    // controller.inEditMode.value = true;
+    // controller.technicianId.value = data.technician ?? '';
+    // controller.date.text = textToDate(data.date);
+    // controller.customer.text = customerName.text;
+    // controller.customerId.value = data.customer ?? '';
+    // controller.brand.text = carBrand.text;
+    // controller.brandId.value = data.carBrand ?? '';
+    // controller.model.text = carModel.text;
+    // controller.modelId.value = data.carModel ?? '';
+    // controller.color.text = color.text;
+    // controller.colorId.value = data.color ?? '';
+    // controller.plateNumber.text = plateNumber.text;
+    // controller.code.text = data.plateCode ?? '';
+    // controller.engineType.text = engineType.text;
+    // controller.year.text = data.year ?? '';
+    // controller.mileage.text = data.mileageIn.toString();
+    // controller.vin.text = data.vehicleIdentificationNumber??'';
+    // controller.comments.text = data['inspection_report_comments'] ?? '';
+    // controller.selectedCheckBoxIndicesForLeftFront.assignAll(
+    //   (data['left_front_wheel'] as Map<String, dynamic>?)?.map(
+    //         (key, value) => MapEntry(
+    //           key,
+    //           Map<String, String>.from(value as Map), // Explicit conversion
+    //         ),
+    //       ) ??
+    //       {},
+    // );
+    // controller.leftFrontBrakeLining.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForLeftFront['Brake Lining']?['value'] ??
+    //     '';
+    // controller.leftFrontTireTread.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForLeftFront['Tire Tread']?['value'] ??
+    //     '';
 
-    controller.year.text = data['year'];
-    controller.mileage.text = data['mileage_in'];
-    controller.vin.text = data['vehicle_identification_number'];
-    controller.comments.text = data['inspection_report_comments'] ?? '';
-    controller.selectedCheckBoxIndicesForLeftFront.assignAll(
-      (data['left_front_wheel'] as Map<String, dynamic>?)?.map(
-            (key, value) => MapEntry(
-              key,
-              Map<String, String>.from(value as Map), // Explicit conversion
-            ),
-          ) ??
-          {},
-    );
-    controller.leftFrontBrakeLining.text =
-        controller
-            .selectedCheckBoxIndicesForLeftFront['Brake Lining']?['value'] ??
-        '';
-    controller.leftFrontTireTread.text =
-        controller
-            .selectedCheckBoxIndicesForLeftFront['Tire Tread']?['value'] ??
-        '';
+    // controller.leftFrontWearPattern.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForLeftFront['Wear Pattern']?['value'] ??
+    //     '';
+    // controller.leftFrontTirePressureBefore.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForLeftFront['Tire Pressure PSI']?['before'] ??
+    //     '';
+    // controller.leftFrontTirePressureAfter.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForLeftFront['Tire Pressure PSI']?['after'] ??
+    //     '';
 
-    controller.leftFrontWearPattern.text =
-        controller
-            .selectedCheckBoxIndicesForLeftFront['Wear Pattern']?['value'] ??
-        '';
-    controller.leftFrontTirePressureBefore.text =
-        controller
-            .selectedCheckBoxIndicesForLeftFront['Tire Pressure PSI']?['before'] ??
-        '';
-    controller.leftFrontTirePressureAfter.text =
-        controller
-            .selectedCheckBoxIndicesForLeftFront['Tire Pressure PSI']?['after'] ??
-        '';
+    // controller.selectedCheckBoxIndicesForRightFront.value =
+    //     (data['right_front_wheel'] as Map<String, dynamic>?)?.map(
+    //       (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
+    //     ) ??
+    //     {};
 
-    controller.selectedCheckBoxIndicesForRightFront.value =
-        (data['right_front_wheel'] as Map<String, dynamic>?)?.map(
-          (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
-        ) ??
-        {};
+    // controller.rightFrontBrakeLining.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightFront['Brake Lining']?['value'] ??
+    //     '';
+    // controller.rightFrontTireTread.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightFront['Tire Tread']?['value'] ??
+    //     '';
 
-    controller.rightFrontBrakeLining.text =
-        controller
-            .selectedCheckBoxIndicesForRightFront['Brake Lining']?['value'] ??
-        '';
-    controller.rightFrontTireTread.text =
-        controller
-            .selectedCheckBoxIndicesForRightFront['Tire Tread']?['value'] ??
-        '';
+    // controller.rightFrontWearPattern.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightFront['Wear Pattern']?['value'] ??
+    //     '';
+    // controller.rightFrontTirePressureBefore.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightFront['Tire Pressure PSI']?['before'] ??
+    //     '';
+    // controller.rightFrontTirePressureAfter.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightFront['Tire Pressure PSI']?['after'] ??
+    //     '';
 
-    controller.rightFrontWearPattern.text =
-        controller
-            .selectedCheckBoxIndicesForRightFront['Wear Pattern']?['value'] ??
-        '';
-    controller.rightFrontTirePressureBefore.text =
-        controller
-            .selectedCheckBoxIndicesForRightFront['Tire Pressure PSI']?['before'] ??
-        '';
-    controller.rightFrontTirePressureAfter.text =
-        controller
-            .selectedCheckBoxIndicesForRightFront['Tire Pressure PSI']?['after'] ??
-        '';
+    // controller.selectedCheckBoxIndicesForLeftRear.value =
+    //     (data['left_rear_wheel'] as Map<String, dynamic>?)?.map(
+    //       (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
+    //     ) ??
+    //     {};
 
-    controller.selectedCheckBoxIndicesForLeftRear.value =
-        (data['left_rear_wheel'] as Map<String, dynamic>?)?.map(
-          (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
-        ) ??
-        {};
+    // controller.leftRearBrakeLining.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForLeftRear['Brake Lining']?['value'] ??
+    //     '';
+    // controller.leftRearTireTread.text =
+    //     controller.selectedCheckBoxIndicesForLeftRear['Tire Tread']?['value'] ??
+    //     '';
 
-    controller.leftRearBrakeLining.text =
-        controller
-            .selectedCheckBoxIndicesForLeftRear['Brake Lining']?['value'] ??
-        '';
-    controller.leftRearTireTread.text =
-        controller.selectedCheckBoxIndicesForLeftRear['Tire Tread']?['value'] ??
-        '';
+    // controller.leftRearWearPattern.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForLeftRear['Wear Pattern']?['value'] ??
+    //     '';
+    // controller.leftRearTirePressureBefore.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForLeftRear['Tire Pressure PSI']?['before'] ??
+    //     '';
+    // controller.leftRearTirePressureAfter.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForLeftRear['Tire Pressure PSI']?['after'] ??
+    //     '';
 
-    controller.leftRearWearPattern.text =
-        controller
-            .selectedCheckBoxIndicesForLeftRear['Wear Pattern']?['value'] ??
-        '';
-    controller.leftRearTirePressureBefore.text =
-        controller
-            .selectedCheckBoxIndicesForLeftRear['Tire Pressure PSI']?['before'] ??
-        '';
-    controller.leftRearTirePressureAfter.text =
-        controller
-            .selectedCheckBoxIndicesForLeftRear['Tire Pressure PSI']?['after'] ??
-        '';
+    // controller.selectedCheckBoxIndicesForRightRear.value =
+    //     (data['right_rear_wheel'] as Map<String, dynamic>?)?.map(
+    //       (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
+    //     ) ??
+    //     {};
 
-    controller.selectedCheckBoxIndicesForRightRear.value =
-        (data['right_rear_wheel'] as Map<String, dynamic>?)?.map(
-          (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
-        ) ??
-        {};
+    // controller.rightRearBrakeLining.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightRear['Brake Lining']?['value'] ??
+    //     '';
+    // controller.rightRearTireTread.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightRear['Tire Tread']?['value'] ??
+    //     '';
 
-    controller.rightRearBrakeLining.text =
-        controller
-            .selectedCheckBoxIndicesForRightRear['Brake Lining']?['value'] ??
-        '';
-    controller.rightRearTireTread.text =
-        controller
-            .selectedCheckBoxIndicesForRightRear['Tire Tread']?['value'] ??
-        '';
+    // controller.rightRearWearPattern.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightRear['Wear Pattern']?['value'] ??
+    //     '';
+    // controller.rightRearTirePressureBefore.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightRear['Tire Pressure PSI']?['before'] ??
+    //     '';
+    // controller.rightRearTirePressureAfter.text =
+    //     controller
+    //         .selectedCheckBoxIndicesForRightRear['Tire Pressure PSI']?['after'] ??
+    //     '';
 
-    controller.rightRearWearPattern.text =
-        controller
-            .selectedCheckBoxIndicesForRightRear['Wear Pattern']?['value'] ??
-        '';
-    controller.rightRearTirePressureBefore.text =
-        controller
-            .selectedCheckBoxIndicesForRightRear['Tire Pressure PSI']?['before'] ??
-        '';
-    controller.rightRearTirePressureAfter.text =
-        controller
-            .selectedCheckBoxIndicesForRightRear['Tire Pressure PSI']?['after'] ??
-        '';
+    // controller.selectedCheckBoxIndicesForInteriorExterior.value =
+    //     (data['interior_exterior'] as Map<String, dynamic>?)?.map(
+    //       (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
+    //     ) ??
+    //     {};
 
-    controller.selectedCheckBoxIndicesForInteriorExterior.value =
-        (data['interior_exterior'] as Map<String, dynamic>?)?.map(
-          (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
-        ) ??
-        {};
+    // controller.selectedCheckBoxIndicesForUnderVehicle.value =
+    //     (data['under_vehicle'] as Map<String, dynamic>?)?.map(
+    //       (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
+    //     ) ??
+    //     {};
 
-    controller.selectedCheckBoxIndicesForUnderVehicle.value =
-        (data['under_vehicle'] as Map<String, dynamic>?)?.map(
-          (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
-        ) ??
-        {};
+    // controller.selectedCheckBoxIndicesForUnderHood.value =
+    //     (data['under_hood'] as Map<String, dynamic>?)?.map(
+    //       (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
+    //     ) ??
+    //     {};
 
-    controller.selectedCheckBoxIndicesForUnderHood.value =
-        (data['under_hood'] as Map<String, dynamic>?)?.map(
-          (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
-        ) ??
-        {};
+    // controller.selectedCheckBoxIndicesForBatteryPerformance.value =
+    //     (data['battery_performance'] as Map<String, dynamic>?)?.map(
+    //       (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
+    //     ) ??
+    //     {};
 
-    controller.selectedCheckBoxIndicesForBatteryPerformance.value =
-        (data['battery_performance'] as Map<String, dynamic>?)?.map(
-          (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
-        ) ??
-        {};
+    // controller.selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire.value =
+    //     (data['extra_checks'] as Map<String, dynamic>?)?.map(
+    //       (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
+    //     ) ??
+    //     {};
 
-    controller.selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire.value =
-        (data['extra_checks'] as Map<String, dynamic>?)?.map(
-          (key, value) => MapEntry(key, Map<String, String>.from(value as Map)),
-        ) ??
-        {};
-
-    controller.carImagesURLs.assignAll(
-      List<String>.from(data['car_images'] ?? []),
-    );
-    controller.customerSignatureURL.value = data['customer_signature'] ?? '';
-    controller.advisorSignatureURL.value = data['advisor_signature'] ?? '';
-    controller.carDialogImageURL.value = data['car_dialog'] ?? '';
-    controller.carBrandLogo.value = data['car_brand_logo'] ?? '';
+    // controller.carImagesURLs.assignAll(
+    //   List<String>.from(data['car_images'] ?? []),
+    // );
+    // controller.customerSignatureURL.value = data['customer_signature'] ?? '';
+    // controller.advisorSignatureURL.value = data['advisor_signature'] ?? '';
+    // controller.carDialogImageURL.value = data['car_dialog'] ?? '';
+    // controller.carBrandLogo.value = data['car_brand_logo'] ?? '';
   }
 
-  Future<void> loadValues(Map<String, dynamic> data) async {
-    var quotationId = data['quotation_id'] ?? '';
-    if (quotationId != '') {
-      var quotation = await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .where(FieldPath.documentId, isEqualTo: quotationId)
-          .get();
-      if (quotation.docs.isNotEmpty) {
-        quotationCounter.value = quotation.docs.first
-            .data()['quotation_number'];
-      } else {
-        quotationCounter.value = '';
-      }
-    }
-    // quotationCounter.value = data['quotation_number'] ?? '';
+  Future<void> loadValues(JobCardModel data) async {
+    quotationCounter.value = data.quotationNumber ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
-    jobCancelationDate.value.text = textToDate(data['job_cancelation_date']);
-    jobStatus1.value = data['job_status_1'] ?? '';
-    jobStatus2.value = data['job_status_2'] ?? '';
-    carBrandLogo.value = data['car_brand_logo'] ?? '';
-    carBrandId.value = data['car_brand'] ?? '';
-    carBrand.text = getdataName(data['car_brand'], allBrands);
-    carModelId.value = data['car_model'] ?? '';
-    getCitiesByCountryID(data['country']);
-    getModelsByCarBrand(data['car_brand']);
-    await getModelName(data['car_brand'], data['car_model']).then((value) {
-      carModel.text = value;
-    });
-    plateNumber.text = data['plate_number'] ?? '';
-    plateCode.text = data['plate_code'] ?? '';
-    countryId.value = data['country'] ?? '';
-    country.text = getdataName(data['country'], allCountries);
-    cityId.value = data['city'] ?? '';
-    await getCityName(data['country'], data['city']).then((value) {
-      city.text = value;
-    });
-    year.text = data['year'] ?? '';
-    colorId.value = data['color'] ?? '';
-    engineTypeId.value = data['engine_type'] ?? '';
-    color.text = getdataName(data['color'], allColors);
-    engineType.text = getdataName(data['engine_type'], allEngineType);
-    vin.text = data['vehicle_identification_number'] ?? '';
-    transmissionType.text = data['transmission_type'] ?? '';
-    mileageIn.value.text = data['mileage_in'] ?? '';
-    fuelAmount.value.text = data['fuel_amount'] ?? '';
-    mileageOut.value.text = data['mileage_out'] ?? '';
-    inOutDiff.value.text = data['mileage_in_out_diff'] ?? '';
-    customerId.value = data['customer'] ?? '';
-    customerName.text = getdataName(
-      data['customer'],
-      allCustomers,
-      title: 'entity_name',
-    );
-    customerEntityName.text = data['contact_name'] ?? '';
-    customerEntityPhoneNumber.text = data['contact_number'] ?? '';
-    customerEntityEmail.text = data['contact_email'] ?? '';
-    customerCreditNumber.text = data['credit_limit'] ?? '';
-    customerOutstanding.text = data['outstanding'] ?? '';
-    customerSaleManId.value = data['saleMan'] ?? '';
-    customerSaleMan.value = getdataName(data['saleMan'], salesManMap);
-    customerBranchId.value = data['branch'] ?? '';
-    customerBranch.text = getdataName(data['branch'], allBranches);
-    customerCurrencyId.value = data['currency'] ?? '';
-    customerCurrency.text = data['currency'] != ''
-        ? getdataName(
-            getdataName(data['currency'], allCurrencies, title: 'country_id'),
-            allCountries,
-            title: 'currency_code',
-          )
-        : '';
-    customerCurrencyRate.text = data['rate'] ?? '';
-    payType.value = data['payment_method'] ?? '';
-    data['payment_method'] == 'Cash'
+    jobCancelationDate.value.text = textToDate(data.jobCancellationDate);
+    jobStatus1.value = data.jobStatus1 ?? '';
+    jobStatus2.value = data.jobStatus2 ?? '';
+    carBrandLogo.value = data.carBrandLogo ?? '';
+    carBrandId.value = data.carBrand ?? '';
+    carBrand.text = data.carBrandName ?? '';
+    carModelId.value = data.carModel ?? '';
+    carModel.text = data.carModelName ?? '';
+    var jobCountry = data.country ?? "";
+    var jobCarBrand = data.carBrand ?? "";
+    if (jobCountry.isNotEmpty) {
+      getCitiesByCountryID(jobCountry);
+    }
+    if (jobCarBrand.isNotEmpty) {
+      getModelsByCarBrand(jobCarBrand);
+    }
+
+    plateNumber.text = data.plateNumber ?? '';
+    plateCode.text = data.plateCode ?? '';
+    countryId.value = jobCountry;
+    country.text = data.countryName ?? '';
+    cityId.value = data.city ?? '';
+    city.text = data.cityName ?? '';
+
+    year.text = data.year ?? '';
+    colorId.value = data.color ?? '';
+    engineTypeId.value = data.engineType ?? '';
+    color.text = data.colorName ?? '';
+    engineType.text = data.engineTypeName ?? '';
+    vin.text = data.vehicleIdentificationNumber ?? '';
+    transmissionType.text = data.transmissionType ?? '';
+    mileageIn.value.text = data.mileageIn.toString();
+    fuelAmount.value.text = data.fuelAmount.toString();
+    mileageOut.value.text = data.mileageOut.toString();
+    inOutDiff.value.text = data.mileageInOutDiff.toString();
+    customerId.value = data.customer ?? '';
+    customerName.text = data.customerName ?? '';
+    customerEntityName.text = data.contactName ?? '';
+    customerEntityPhoneNumber.text = data.contactNumber ?? '';
+    customerEntityEmail.text = data.contactEmail ?? '';
+    customerCreditNumber.text = data.creditLimit.toString();
+    customerOutstanding.text = data.outstanding.toString();
+    customerSaleManId.value = data.salesman ?? '';
+    customerSaleMan.value = data.salesmanName ?? '';
+    customerBranchId.value = data.branch ?? '';
+    customerBranch.text = data.branchName ?? '';
+    customerCurrencyId.value = data.currency ?? '';
+    customerCurrency.text = data.currencyCode ?? '';
+
+    customerCurrencyRate.text = data.rate.toString();
+    payType.value = data.paymentMethod ?? '';
+    data.paymentMethod == 'Cash'
         ? (isCashSelected.value = true) && (isCreditSelected.value = false)
         : (isCreditSelected.value = true) && (isCashSelected.value = false);
-    jobCardCounter.value.text = data['job_number'] ?? '';
+    jobCardCounter.value.text = data.jobNumber ?? '';
 
-    invoiceCounter.value.text = data['invoice_number'] ?? '';
-    lpoCounter.value.text = data['lpo_number'] ?? '';
-    jobCardDate.value.text = textToDate(data['job_date']);
-    invoiceDate.value.text = textToDate(data['invoice_date']);
-    approvalDate.value.text = textToDate(data['job_approval_date']);
-    startDate.value.text = textToDate(data['job_start_date']);
-    finishDate.value.text = textToDate(data['job_finish_date']);
-    deliveryDate.value.text = textToDate(data['job_delivery_date']);
-    jobWarrentyDays.value.text = data['job_warrenty_days'] ?? '';
-    jobWarrentyKM.value.text = data['job_warrenty_km'] ?? '';
-    jobWarrentyEndDate.value.text = textToDate(data['job_warrenty_end_date']);
-    minTestKms.value.text = data['job_min_test_km'] ?? '';
-    reference1.value.text = data['job_reference_1'] ?? '';
-    reference2.value.text = data['job_reference_2'] ?? '';
-    deliveryTime.value.text = data['delivery_time'] ?? '';
+    invoiceCounter.value.text = data.invoiceNumber ?? '';
+    lpoCounter.value.text = data.lpoNumber ?? '';
+    jobCardDate.value.text = textToDate(data.jobDate);
+    invoiceDate.value.text = textToDate(data.invoiceDate);
+    approvalDate.value.text = textToDate(data.jobApprovalDate);
+    startDate.value.text = textToDate(data.jobStartDate);
+    finishDate.value.text = textToDate(data.jobFinishDate);
+    deliveryDate.value.text = textToDate(data.jobDeliveryDate);
+    jobWarrentyDays.value.text = data.jobWarrantyDays.toString();
+    jobWarrentyKM.value.text = data.jobWarrantyKm.toString();
+    jobWarrentyEndDate.value.text = textToDate(data.jobWarrantyEndDate);
+    minTestKms.value.text = data.jobMinTestKm.toString();
+    reference1.value.text = data.jobReference1 ?? '';
+    reference2.value.text = data.jobReference2 ?? '';
+    deliveryTime.value.text = data.deliveryTime ?? '';
 
-    jobNotes.text = data['job_notes'] ?? '';
-    deliveryNotes.text = data['job_delivery_notes'] ?? '';
-  }
-
-  Future<void> addNewJobCard() async {
-    try {
-      if (jobStatus1.value != 'New' && jobStatus1.value != '') {
-        showSnackBar('Alert', 'Only new jobs can be edited');
-        return;
-      }
-      showSnackBar('Adding', 'Please Wait');
-      addingNewValue.value = true;
-      Map<String, dynamic> newData = {
-        'label': '',
-        'job_status_1': jobStatus1.value,
-        'job_status_2': jobStatus2.value,
-        'car_brand_logo': carBrandLogo.value,
-        'company_id': companyId.value,
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': plateCode.text,
-        'country': countryId.value,
-        'city': cityId.value,
-        'year': year.text,
-        'color': colorId.value,
-        'engine_type': engineTypeId.value,
-        'vehicle_identification_number': vin.text,
-        'transmission_type': transmissionType.text,
-        'mileage_in': mileageIn.value.text,
-        'fuel_amount': fuelAmount.value.text,
-        'mileage_out': mileageOut.value.text,
-        'mileage_in_out_diff': inOutDiff.value.text,
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'outstanding': customerOutstanding.text,
-        'saleMan': customerSaleManId.value,
-        'branch': customerBranchId.value,
-        'currency': customerCurrencyId.value,
-        'rate': customerCurrencyRate.text,
-        'payment_method': payType.value,
-        'job_number': jobCardCounter.value.text,
-        'invoice_number': invoiceCounter.value.text,
-        'lpo_number': lpoCounter.value.text,
-        // 'job_date': jobCardDate.value.text,
-        // 'invoice_date': invoiceDate.value.text,
-        'job_approval_date': approvalDate.value.text,
-        'job_start_date': startDate.value.text,
-        'job_cancelation_date': jobCancelationDate.value.text,
-        'job_finish_date': finishDate.value.text,
-        'job_delivery_date': deliveryDate.value.text,
-        'job_warrenty_days': jobWarrentyDays.value.text,
-        'job_warrenty_km': jobWarrentyKM.value.text,
-        'job_warrenty_end_date': jobWarrentyEndDate.value.text,
-        'job_min_test_km': minTestKms.value.text,
-        'job_reference_1': reference1.value.text,
-        'job_reference_2': reference2.value.text,
-        'delivery_time': deliveryTime.value.text,
-        'job_notes': jobNotes.text,
-        'job_delivery_notes': deliveryNotes.text,
-      };
-
-      final rawDate = jobCardDate.value.text.trim();
-      if (rawDate.isNotEmpty) {
-        try {
-          newData['job_date'] = Timestamp.fromDate(format.parseStrict(rawDate));
-        } catch (e) {
-          // إذا حابب تعرض للمستخدم خطأ في التنسيق
-          // print('Invalid quotation_date format: $e');
-        }
-      }
-
-      final rawDate2 = invoiceDate.value.text.trim();
-      if (rawDate2.isNotEmpty) {
-        try {
-          newData['invoice_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate2),
-          );
-        } catch (e) {
-          // إذا حابب تعرض للمستخدم خطأ في التنسيق
-          // print('Invalid quotation_date format: $e');
-        }
-      }
-
-      if (jobCardCounter.value.text.isEmpty) {
-        jobStatus1.value = 'New';
-        jobStatus2.value = 'New';
-        newData['label'] = '';
-
-        newData['job_status_1'] = 'New';
-        newData['job_status_2'] = 'New';
-        await getCurrentJobCardCounterNumber();
-        newData['job_number'] = jobCardCounter.value.text;
-      }
-
-      if (jobCardAdded.isFalse) {
-        newData['added_date'] = DateTime.now().toString();
-        var newJob = await FirebaseFirestore.instance
-            .collection('job_cards')
-            .add(newData);
-        jobCardAdded.value = true;
-        curreentJobCardId.value = newJob.id;
-        getAllInvoiceItems(newJob.id);
-        showSnackBar('Done', 'Job Added Successfully');
-      } else {
-        newData.remove('added_date');
-        await FirebaseFirestore.instance
-            .collection('job_cards')
-            .doc(curreentJobCardId.value)
-            .update(newData);
-        showSnackBar('Done', 'Updated Successfully');
-      }
-      canAddInternalNotesAndInvoiceItems.value = true;
-      addingNewValue.value = false;
-    } catch (e) {
-      canAddInternalNotesAndInvoiceItems.value = false;
-      addingNewValue.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
-    }
+    jobNotes.text = data.jobNotes ?? '';
+    deliveryNotes.text = data.jobDeliveryNotes ?? '';
   }
 
   Future<void> addNewInternalNote(
@@ -1028,92 +1242,6 @@ class JobCardController extends GetxController {
       addingNewInternalNotProcess.value = false;
     } catch (e) {
       addingNewInternalNotProcess.value = false;
-    }
-  }
-
-  Future<void> addNewInvoiceItem(String jobId) async {
-    try {
-      addingNewinvoiceItemsValue.value = true;
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .collection('invoice_items')
-          .add({
-            'company_id': companyId.value,
-            'name': invoiceItemNameId.value,
-            'line_number': int.tryParse(lineNumber.text),
-            'description': description.text,
-            'quantity': quantity.text,
-            'price': price.text,
-            'amount': amount.text,
-            'discount': discount.text,
-            'total': total.text,
-            'vat': vat.text,
-            'net': net.text,
-            'added_date': DateTime.now().toString(),
-          });
-      addingNewinvoiceItemsValue.value = false;
-      Get.back();
-      double allNets = 0.0;
-      double allVats = 0.0;
-      double alltotals = 0.0;
-      for (var invoice in allInvoiceItems) {
-        allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
-        allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
-        alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
-      }
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({
-            'total_net_amount': allNets,
-            'total_vat_amount': allVats,
-            'totals_amount': alltotals,
-          });
-    } catch (e) {
-      addingNewinvoiceItemsValue.value = false;
-    }
-  }
-
-  Future<void> editInvoiceItem(String jobId, String itemId) async {
-    try {
-      Get.back();
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .collection('invoice_items')
-          .doc(itemId)
-          .update({
-            'name': invoiceItemNameId.value,
-            'line_number': int.tryParse(lineNumber.text),
-            'description': description.text,
-            'quantity': quantity.text,
-            'price': price.text,
-            'amount': amount.text,
-            'discount': discount.text,
-            'total': total.text,
-            'vat': vat.text,
-            'net': net.text,
-          });
-
-      double allNets = 0.0;
-      double allVats = 0.0;
-      double alltotals = 0.0;
-      for (var invoice in allInvoiceItems) {
-        allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
-        allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
-        alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
-      }
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({
-            'total_net_amount': allNets,
-            'total_vat_amount': allVats,
-            'totals_amount': alltotals,
-          });
-    } catch (e) {
-      //
     }
   }
 
@@ -1315,14 +1443,14 @@ class JobCardController extends GetxController {
           .collection('quotation_cards')
           .add(newData);
 
-      for (var element in allInvoiceItems) {
-        var data = element.data();
-        await FirebaseFirestore.instance
-            .collection('quotation_cards')
-            .doc(newQuotation.id)
-            .collection('invoice_items')
-            .add(data);
-      }
+      // for (var element in allInvoiceItems) {
+      //   var data = element.data();
+      //   await FirebaseFirestore.instance
+      //       .collection('quotation_cards')
+      //       .doc(newQuotation.id)
+      //       .collection('invoice_items')
+      //       .add(data);
+      // }
       await FirebaseFirestore.instance
           .collection('job_cards')
           .doc(jobId)
@@ -1434,7 +1562,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  Future<void> editNewForJobCard(String jobId,String status) async {
+  Future<void> editNewForJobCard(String jobId, String status) async {
     try {
       newingJob.value = true;
       await FirebaseFirestore.instance
@@ -1458,7 +1586,7 @@ class JobCardController extends GetxController {
     }
   }
 
-  Future<void> editCancelForJobCard(String jobId,String status) async {
+  Future<void> editCancelForJobCard(String jobId, String status) async {
     try {
       cancellingJob.value = true;
       await FirebaseFirestore.instance
@@ -1519,37 +1647,6 @@ class JobCardController extends GetxController {
     }
   }
 
-  Future<void> deleteInvoiceItem(String jobId, String itemId) async {
-    try {
-      Get.back();
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .collection('invoice_items')
-          .doc(itemId)
-          .delete();
-
-      double allNets = 0.0;
-      double allVats = 0.0;
-      double alltotals = 0.0;
-      for (var invoice in allInvoiceItems) {
-        allNets += double.tryParse(invoice.data()['net'].toString()) ?? 0.0;
-        allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
-        alltotals += double.tryParse(invoice.data()['total'].toString()) ?? 0.0;
-      }
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({
-            'total_net_amount': allNets,
-            'total_vat_amount': allVats,
-            'totals_amount': alltotals,
-          });
-    } catch (e) {
-      //
-    }
-  }
-
   Future<void> deleteJobCard(String jobId) async {
     try {
       Get.back();
@@ -1558,20 +1655,6 @@ class JobCardController extends GetxController {
           .collection('job_cards')
           .doc(jobId)
           .delete();
-    } catch (e) {
-      //
-    }
-  }
-
-  void getAllUsers() {
-    try {
-      FirebaseFirestore.instance
-          .collection('sys-users')
-          .where('company_id', isEqualTo: companyId.value)
-          .snapshots()
-          .listen((users) {
-            allUsers.value = {for (var doc in users.docs) doc.id: doc.data()};
-          });
     } catch (e) {
       //
     }
@@ -1593,11 +1676,6 @@ class JobCardController extends GetxController {
     }
 
     return combinedItems;
-  }
-
-  Future<void> getUserId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId.value = prefs.getString('userId')!;
   }
 
   void scrollToBottom() {
@@ -1634,78 +1712,6 @@ class JobCardController extends GetxController {
     isCashSelected.value = isCash ? value : false;
     isCreditSelected.value = isCash ? false : value;
     payType.value = isCash ? 'Cash' : 'Credit';
-  }
-
-  void getCurrencies() {
-    FirebaseFirestore.instance
-        .collection('currencies')
-        .where('company_id', isEqualTo: companyId.value)
-        .snapshots()
-        .listen((branches) {
-          allCurrencies.value = {
-            for (var doc in branches.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  void getBranches() {
-    FirebaseFirestore.instance
-        .collection('branches')
-        .where('company_id', isEqualTo: companyId.value)
-        .orderBy('name')
-        .snapshots()
-        .listen((branches) {
-          allBranches.value = {
-            for (var doc in branches.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  void getInvoiceItemsFromCollection() {
-    FirebaseFirestore.instance
-        .collection('invoice_items')
-        .where('company_id', isEqualTo: companyId.value)
-        .orderBy('name')
-        .snapshots()
-        .listen((items) {
-          allInvoiceItemsFromCollection.value = {
-            for (var doc in items.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  void getSalesMan() {
-    FirebaseFirestore.instance
-        .collection('sales_man')
-        .where('company_id', isEqualTo: companyId.value)
-        .orderBy('name')
-        .snapshots()
-        .listen((branches) {
-          salesManMap.value = {
-            for (var doc in branches.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  Future<void> getCompanyId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    companyId.value = prefs.getString('companyId')!;
-  }
-
-  void getCompanyDetails() {
-    try {
-      FirebaseFirestore.instance
-          .collection('companies')
-          .where(FieldPath.documentId, isEqualTo: companyId.value)
-          .snapshots()
-          .listen((company) {
-            companyDetails.assignAll(
-              Map<String, dynamic>.from(company.docs.first.data() as Map),
-            );
-          });
-    } catch (e) {
-      //
-    }
   }
 
   Future<String> getCityName(String countryId, String cityId) async {
@@ -1750,68 +1756,6 @@ class JobCardController extends GetxController {
     inOutDiff.value.text =
         (int.parse(mileageOut.value.text) - int.parse(mileageIn.value.text))
             .toString();
-  }
-
-  // this function is to get colors
-  Future<void> getColors() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'COLORS')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name')
-        .snapshots()
-        .listen((colors) {
-          allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
-        });
-  }
-
-  // this function is to get engine types
-  Future<void> getEngineTypes() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'ENGINE_TYPES')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name')
-        .snapshots()
-        .listen((types) {
-          allEngineType.value = {
-            for (var doc in types.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  void getAllCustomers() {
-    try {
-      FirebaseFirestore.instance
-          .collection('entity_informations')
-          .where('company_id', isEqualTo: companyId.value)
-          .where('entity_code', arrayContains: 'Customer')
-          .orderBy('entity_name')
-          .snapshots()
-          .listen((customers) {
-            allCustomers.value = {
-              for (var doc in customers.docs) doc.id: doc.data(),
-            };
-          });
-    } catch (e) {
-      //
-    }
   }
 
   Future<void> getCurrentJobCardCounterNumber() async {
@@ -1919,311 +1863,6 @@ class JobCardController extends GetxController {
     }
   }
 
-  void getCountries() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_countries')
-          .orderBy('name')
-          .snapshots()
-          .listen((countries) {
-            allCountries.value = {
-              for (var doc in countries.docs) doc.id: doc.data(),
-            };
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getCitiesByCountryID(String countryID) {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_countries')
-          .doc(countryID)
-          .collection('values')
-          .snapshots()
-          .listen((cities) {
-            allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getCarBrands() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .orderBy('name')
-          .snapshots()
-          .listen((brands) {
-            allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getModelsByCarBrand(String brandId) {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .snapshots()
-          .listen((models) {
-            allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  // this function is to sort data in table
-  void onSort(int columnIndex, bool ascending) {
-    if (columnIndex == 0) {
-      allJobCards.sort((counter1, counter2) {
-        final String? value1 = counter1.get('code');
-        final String? value2 = counter2.get('code');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 1) {
-      allJobCards.sort((counter1, counter2) {
-        final String? value1 = counter1.get('name');
-        final String? value2 = counter2.get('name');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 2) {
-      allJobCards.sort((counter1, counter2) {
-        final String? value1 = counter1.get('added_date');
-        final String? value2 = counter2.get('added_date');
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    }
-    sortColumnIndex.value = columnIndex;
-    isAscending.value = ascending;
-  }
-
-  int compareString(bool ascending, String value1, String value2) {
-    int comparison = value1.compareTo(value2);
-    return ascending ? comparison : -comparison; // Reverse if descending
-  }
-
-  // void getAllJobCards() {
-  //   try {
-  //     FirebaseFirestore.instance
-  //         .collection('job_cards')
-  //         .where('company_id', isEqualTo: companyId.value)
-  //         .orderBy('job_number', descending: true)
-  //         .snapshots()
-  //         .listen((QuerySnapshot<Map<String, dynamic>> jobCards) {
-  //       final docs =
-  //           jobCards.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>();
-
-  //       allJobCards.assignAll(docs);
-
-  //       numberOfJobs.value = allJobCards.length;
-  //       isScreenLoding.value = false;
-  //       calculateMoneyForAllJobs();
-  //     });
-  //   } catch (e) {
-  //     isScreenLoding.value = false;
-  //   }
-  // }
-
-  // new: store the resolved car-model names by job-card ID:
-  final RxMap<String, String> carBrandsNames = <String, String>{}.obs;
-  final RxMap<String, String> carModelsNames = <String, String>{}.obs;
-  final RxMap<String, String> customerNames = <String, String>{}.obs;
-
-  void getAllJobCards() {
-    FirebaseFirestore.instance
-        .collection('job_cards')
-        .where('company_id', isEqualTo: companyId.value)
-        .orderBy('job_number', descending: true)
-        .snapshots()
-        .asyncMap((snapshot) async {
-          final docs = snapshot.docs;
-
-          // collect unique, non-empty IDs
-          final brandIds = docs
-              .map((d) => d.data()['car_brand'] as String?)
-              .whereType<String>()
-              .map((s) => s.trim())
-              .where((s) => s.isNotEmpty)
-              .toSet()
-              .toList();
-
-          final modelIds = docs
-              .map((d) => d.data()['car_model'] as String?)
-              .whereType<String>()
-              .map((s) => s.trim())
-              .where((s) => s.isNotEmpty)
-              .toSet()
-              .toList();
-
-          final customerIds = docs
-              .map((d) => d.data()['customer'] as String?)
-              .whereType<String>()
-              .map((s) => s.trim())
-              .where((s) => s.isNotEmpty)
-              .toSet()
-              .toList();
-
-          // 1) chunk helper
-          List<List<T>> chunk<T>(List<T> list, int size) {
-            final chunks = <List<T>>[];
-            for (var i = 0; i < list.length; i += size) {
-              chunks.add(
-                list.sublist(
-                  i,
-                  i + size > list.length ? list.length : i + size,
-                ),
-              );
-            }
-            return chunks;
-          }
-
-          // 2) batch-fetch brands in chunks
-          final Map<String, String> brandIdToName = {};
-          for (var chunkIds in chunk(brandIds, 10)) {
-            final snaps = await FirebaseFirestore.instance
-                .collection('all_brands')
-                .where(FieldPath.documentId, whereIn: chunkIds)
-                .get();
-            for (var b in snaps.docs) {
-              brandIdToName[b.id] = b.data()['name'] as String;
-            }
-          }
-
-          // 3) fetch models per brand
-          final Map<String, String> modelIdToName = {};
-          for (var brandId in brandIds) {
-            final sub = await FirebaseFirestore.instance
-                .collection('all_brands')
-                .doc(brandId)
-                .collection('values')
-                .get();
-            for (var m in sub.docs) {
-              if (modelIds.contains(m.id)) {
-                modelIdToName[m.id] = m.data()['name'] as String;
-              }
-            }
-          }
-
-          // 4) batch-fetch customers in chunks
-          final Map<String, String> customerIdToName = {};
-          for (var chunkIds in chunk(customerIds, 10)) {
-            final snaps = await FirebaseFirestore.instance
-                .collection('entity_informations')
-                .where(FieldPath.documentId, whereIn: chunkIds)
-                .where('company_id', isEqualTo: companyId.value)
-                .get();
-            for (var c in snaps.docs) {
-              customerIdToName[c.id] = c.data()['entity_name'] as String;
-            }
-          }
-
-          // 5) build lookups per job-card
-          final brandLookup = <String, String>{};
-          final modelLookup = <String, String>{};
-          final customerLookup = <String, String>{};
-
-          for (var doc in docs) {
-            final data = doc.data();
-            final bId = (data['car_brand'] as String?)?.trim();
-            final mId = (data['car_model'] as String?)?.trim();
-            final cId = (data['customer'] as String?)?.trim();
-
-            if (bId != null && brandIdToName.containsKey(bId)) {
-              brandLookup[doc.id] = brandIdToName[bId]!;
-            }
-            if (mId != null && modelIdToName.containsKey(mId)) {
-              modelLookup[doc.id] = modelIdToName[mId]!;
-            }
-            if (cId != null && customerIdToName.containsKey(cId)) {
-              customerLookup[doc.id] = customerIdToName[cId]!;
-            }
-          }
-
-          return _Batch(docs, brandLookup, modelLookup, customerLookup);
-        })
-        .listen(
-          (batch) {
-            allJobCards.assignAll(batch.docs);
-            carBrandsNames.assignAll(batch.brandLookup);
-            carModelsNames.assignAll(batch.modelLookup);
-            customerNames.assignAll(batch.customerLookup);
-
-            numberOfJobs.value = batch.docs.length;
-            isScreenLoding.value = false;
-            calculateMoneyForAllJobs();
-          },
-          onError: (_) {
-            isScreenLoding.value = false;
-            // handle error…
-          },
-        );
-  }
-
-  // Future<void> getAllJobCards({bool isNextPage = false}) async {
-  //   if (!hasMore) return;
-
-  //   try {
-  //     Query query = FirebaseFirestore.instance
-  //         .collection('job_cards')
-  //         .where('company_id', isEqualTo: companyId.value)
-  //         .orderBy('job_number', descending: true)
-  //         .limit(5);
-
-  //     if (isNextPage && lastDocument != null) {
-  //       query = query.startAfterDocument(lastDocument!);
-  //     }
-
-  //     final querySnapshot = await query.get();
-
-  //     if (querySnapshot.docs.isNotEmpty) {
-  //       if (isNextPage) {
-  //         allJobCards.addAll(querySnapshot.docs);
-  //       } else {
-  //         allJobCards.assignAll(querySnapshot.docs);
-  //       }
-
-  //       lastDocument = querySnapshot.docs.last;
-  //       numberOfJobs.value = allJobCards.length;
-
-  //       // If fewer than 5 documents are returned, there are no more
-  //       if (querySnapshot.docs.length < 5) hasMore = false;
-  //     } else {
-  //       hasMore = false;
-  //     }
-
-  //     isScreenLoding.value = false;
-  //     calculateMoneyForAllJobs();
-  //   } catch (e) {
-  //     isScreenLoding.value = false;
-  //     // print('Error: $e');
-  //   }
-  // }
-
   Stream<List<Map<String, dynamic>>> getJobCardInternalNotes(String jobId) {
     return FirebaseFirestore.instance
         .collection('job_cards')
@@ -2243,21 +1882,21 @@ class JobCardController extends GetxController {
   }
 
   void getAllInvoiceItems(String jobId) {
-    try {
-      loadingInvoiceItems.value = true;
-      FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .collection('invoice_items')
-          .orderBy('line_number')
-          .snapshots()
-          .listen((QuerySnapshot<Map<String, dynamic>> items) {
-            allInvoiceItems.assignAll(items.docs);
-            loadingInvoiceItems.value = false;
-          });
-    } catch (e) {
-      loadingInvoiceItems.value = false;
-    }
+    // try {
+    //   loadingInvoiceItems.value = true;
+    //   FirebaseFirestore.instance
+    //       .collection('job_cards')
+    //       .doc(jobId)
+    //       .collection('invoice_items')
+    //       .orderBy('line_number')
+    //       .snapshots()
+    //       .listen((QuerySnapshot<Map<String, dynamic>> items) {
+    //         allInvoiceItems.assignAll(items.docs);
+    //         loadingInvoiceItems.value = false;
+    //       });
+    // } catch (e) {
+    //   loadingInvoiceItems.value = false;
+    // }
   }
 
   String getdataName(String id, Map allData, {title = 'name'}) {
@@ -2269,164 +1908,22 @@ class JobCardController extends GetxController {
     }
   }
 
-  void onSelectForCustomers(String selectedId) {
-    var currentUserDetails = allCustomers.entries.firstWhere((entry) {
-      return entry.key.toString().toLowerCase().contains(
-        selectedId.toLowerCase(),
-      );
-    });
-
-    var phoneDetails = currentUserDetails.value['entity_phone'].firstWhere(
+  void onSelectForCustomers(Map selectedCustomer) {
+    List phoneDetails = selectedCustomer['entity_phone'];
+    Map phone = phoneDetails.firstWhere(
       (value) => value['isPrimary'] == true,
       orElse: () => {'phone': ''},
     );
 
-    customerEntityPhoneNumber.text = phoneDetails['number'] ?? '';
-    customerEntityName.text = phoneDetails['name'] ?? '';
-    customerEntityEmail.text = phoneDetails['email'] ?? '';
+    customerEntityPhoneNumber.text = phone['number'] ?? '';
+    customerEntityName.text = phone['name'] ?? '';
+    customerEntityEmail.text = phone['email'] ?? '';
 
-    customerCreditNumber.text =
-        (currentUserDetails.value['credit_limit'] ?? '0').toString();
-    customerSaleManId.value = currentUserDetails.value['sales_man'] ?? '';
-    customerSaleMan.value = getdataName(
-      currentUserDetails.value['sales_man'],
-      salesManMap,
-    );
+    customerCreditNumber.text = (selectedCustomer['credit_limit'] ?? '0')
+        .toString();
+    customerSaleManId.value = selectedCustomer['salesman_id'] ?? '';
+    customerSaleMan.value = selectedCustomer['salesman'] ?? "";
   }
-
-  // Future<void> searchEngine() async {
-  //   isScreenLoding.value = true;
-  //   final collection = FirebaseFirestore.instance
-  //       .collection('job_cards')
-  //       .where('company_id', isEqualTo: companyId.value);
-  //   Query<Map<String, dynamic>> query = collection;
-
-  //   // 1) زر "All" يجلب كل البيانات فورًا
-  //   if (isAllSelected.value) {
-  //     // لا نضيف أي where، نجلب كل الوثائق
-  //     final snapshot = await query.get();
-  //     allJobCards.assignAll(snapshot.docs);
-  //     calculateMoneyForAllJobs();
-  //     numberOfJobs.value = allJobCards.length;
-
-  //     isScreenLoding.value = false;
-  //     return;
-  //   }
-
-  //   // 2) زر "Today"
-  //   if (isTodaySelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfDay = DateTime(now.year, now.month, now.day);
-  //     final endOfDay =
-  //         startOfDay.add(Duration(days: 1)).subtract(Duration(milliseconds: 1));
-  //     fromDate.value.text = textToDate(startOfDay);
-  //     toDate.value.text = textToDate(endOfDay);
-  //     query = query
-  //         .where('job_date',
-  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-  //         .where('job_date', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay));
-  //   }
-
-  //   // 3) زر "This Month"
-  //   else if (isThisMonthSelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfMonth = DateTime(now.year, now.month, 1);
-  //     final startOfNextMonth = (now.month < 12)
-  //         ? DateTime(now.year, now.month + 1, 1)
-  //         : DateTime(now.year + 1, 1, 1);
-  //     final endOfMonth = startOfNextMonth.subtract(Duration(milliseconds: 1));
-  //     fromDate.value.text = textToDate(startOfMonth);
-  //     toDate.value.text = textToDate(endOfMonth);
-  //     query = query
-  //         .where('job_date',
-  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
-  //         .where('job_date',
-  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth));
-  //   }
-
-  //   // 4) زر "This Year"
-  //   else if (isThisYearSelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfYear = DateTime(now.year, 1, 1);
-  //     final startOfNextYear = DateTime(now.year + 1, 1, 1);
-  //     final endOfYear = startOfNextYear.subtract(Duration(milliseconds: 1));
-  //     fromDate.value.text = textToDate(startOfYear);
-  //     toDate.value.text = textToDate(endOfYear);
-  //     query = query
-  //         .where('job_date',
-  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
-  //         .where('job_date',
-  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfYear));
-  //   }
-
-  //   // 5) إذا لم يُختر أي من الأزرار الخاصة بالفترة، نطبق فلتر التواريخ اليدوي
-  //   else {
-  //     if (fromDate.value.text.trim().isNotEmpty) {
-  //       try {
-  //         final dtFrom = format.parseStrict(fromDate.value.text.trim());
-  //         query = query.where(
-  //           'job_date',
-  //           isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
-  //         );
-  //       } catch (_) {}
-  //     }
-  //     if (toDate.value.text.trim().isNotEmpty) {
-  //       try {
-  //         final dtTo = format.parseStrict(toDate.value.text.trim());
-  //         query = query.where(
-  //           'job_date',
-  //           isLessThanOrEqualTo: Timestamp.fromDate(dtTo),
-  //         );
-  //       } catch (_) {}
-  //     }
-  //   }
-
-  //   // 6) باقي الفلاتر العامة
-  //   if (jobNumberFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'job_number',
-  //       isEqualTo: jobNumberFilter.value.text.trim(),
-  //     );
-  //   }
-
-  //   if (statusFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'job_status_1',
-  //       isEqualTo: statusFilter.value.text.trim(),
-  //     );
-  //   }
-  //   if (carBrandIdFilter.value.isNotEmpty) {
-  //     query = query.where('car_brand', isEqualTo: carBrandIdFilter.value);
-  //   }
-  //   if (carModelIdFilter.value.isNotEmpty) {
-  //     query = query.where('car_model', isEqualTo: carModelIdFilter.value);
-  //   }
-  //   if (plateNumberFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'plate_number',
-  //       isEqualTo: plateNumberFilter.value.text.trim(),
-  //     );
-  //   }
-  //   if (vinFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'vehicle_identification_number',
-  //       isEqualTo: vinFilter.value.text.trim(),
-  //     );
-  //   }
-  //   if (customerNameIdFilter.value.isNotEmpty) {
-  //     query = query.where(
-  //       'customer',
-  //       isEqualTo: customerNameIdFilter.value,
-  //     );
-  //   }
-
-  //   // 7) تنفيذ الاستعلام وجلب النتائج
-  //   final snapshot = await query.get();
-  //   allJobCards.assignAll(snapshot.docs);
-  //   numberOfJobs.value = allJobCards.length;
-  //   calculateMoneyForAllJobs();
-  //   isScreenLoding.value = false;
-  // }
 
   Future<void> searchEngine() async {
     isScreenLoding.value = true;
@@ -2555,7 +2052,7 @@ class JobCardController extends GetxController {
         }).toList();
 
     // 4. UPDATE THE UI
-    allJobCards.assignAll(filteredJobCards);
+    // allJobCards.assignAll(filteredJobCards);
     numberOfJobs.value = allJobCards.length;
     calculateMoneyForAllJobs(); // Make sure this function iterates over the final list
     isScreenLoding.value = false;
@@ -2594,14 +2091,4 @@ class JobCardController extends GetxController {
     toDate.value.clear();
     isScreenLoding.value = false;
   }
-}
-
-// 1) Define a simple holder for the two things you want to return:
-class _Batch {
-  final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
-  final Map<String, String> brandLookup;
-  final Map<String, String> modelLookup;
-  final Map<String, String> customerLookup;
-
-  _Batch(this.docs, this.brandLookup, this.modelLookup, this.customerLookup);
 }

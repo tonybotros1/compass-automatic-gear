@@ -9,20 +9,21 @@ Widget carDetailsSection() {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
-    child: GetX<JobCardController>(builder: (controller) {
-      var isBrandsLoading = controller.allBrands.isEmpty;
-      final isCountriesLoading = controller.allCountries.isEmpty;
-      final isColorsLoading = controller.allColors.isEmpty;
-      final isEngineTypeLoading = controller.allEngineType.isEmpty;
+    child: GetX<JobCardController>(
+      builder: (controller) {
+        var isBrandsLoading = controller.allBrands.isEmpty;
+        final isCountriesLoading = controller.allCountries.isEmpty;
+        final isColorsLoading = controller.allColors.isEmpty;
+        final isEngineTypeLoading = controller.allEngineType.isEmpty;
 
-      return Column(
-        spacing: 10,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            spacing: 10,
-            children: [
-              Expanded(
+        return Column(
+          spacing: 10,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              spacing: 10,
+              children: [
+                Expanded(
                   flex: 2,
                   child: CustomDropdown(
                     showedSelectedName: 'name',
@@ -30,25 +31,36 @@ Widget carDetailsSection() {
                     hintText: 'Brand',
                     items: isBrandsLoading ? {} : controller.allBrands,
                     onChanged: (key, value) {
-                      controller.carBrandLogo.value = value['logo'];
-                      controller.carBrand.text = value['name'];
+                      controller.carBrandLogo.value = value['logo'] ?? "";
+                      controller.carBrand.text = value['name'] ?? "";
                       controller.carModel.clear();
                       controller.getModelsByCarBrand(key);
                       controller.carBrandId.value = key;
+                      controller.isJobModified.value = true;
                     },
-                  )),
-              Expanded(
+                    onDelete: () {
+                      controller.carBrandLogo.value = "";
+                      controller.carBrand.clear();
+                      controller.carModel.clear();
+                      controller.allModels.clear();
+                      controller.carBrandId.value = "";
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                Expanded(
                   child: Container(
-                alignment: Alignment.centerLeft,
-                child: carLogo(controller.carBrandLogo.value),
-              )),
-              const Expanded(child: SizedBox()),
-            ],
-          ),
-          Row(
-            spacing: 10,
-            children: [
-              Expanded(
+                    alignment: Alignment.centerLeft,
+                    child: carLogo(controller.carBrandLogo.value),
+                  ),
+                ),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
                   flex: 2,
                   child: CustomDropdown(
                     showedSelectedName: 'name',
@@ -60,162 +72,226 @@ Widget carDetailsSection() {
                     onChanged: (key, value) {
                       controller.carModel.text = value['name'];
                       controller.carModelId.value = key;
+                      controller.isJobModified.value = true;
                     },
-                  )),
-              Expanded(
+                    onDelete: () {
+                      controller.carModel.clear();
+                      controller.carModelId.value = "";
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                Expanded(
                   child: CustomDropdown(
-                showedSelectedName: 'name',
-                textcontroller: controller.color.text,
-                hintText: 'Color',
-                items: isColorsLoading ? {} : controller.allColors,
-                onChanged: (key, value) {
-                  controller.color.text = value['name'];
-                  controller.colorId.value = key;
-                },
-              )),
-              Expanded(
+                    showedSelectedName: 'name',
+                    textcontroller: controller.color.text,
+                    hintText: 'Color',
+                    items: isColorsLoading ? {} : controller.allColors,
+                    onChanged: (key, value) {
+                      controller.color.text = value['name'];
+                      controller.colorId.value = key;
+                      controller.isJobModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.color.clear();
+                      controller.colorId.value = "";
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                Expanded(
                   child: myTextFormFieldWithBorder(
-                controller: controller.year,
-                labelText: 'Year',
-                hintText: 'Enter Year',
-              )),
-            ],
-          ),
-          Row(
-            spacing: 10,
-            children: [
-              Expanded(
+                    controller: controller.year,
+                    labelText: 'Year',
+                    hintText: 'Enter Year',
+                    onChanged: (_) {
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
                   child: myTextFormFieldWithBorder(
-                controller: controller.plateNumber,
-                labelText: 'Plate No.',
-                hintText: 'Enter Plate No.',
-              )),
-              Expanded(
+                    controller: controller.plateNumber,
+                    labelText: 'Plate No.',
+                    hintText: 'Enter Plate No.',
+                    onChanged: (_) {
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                Expanded(
                   child: myTextFormFieldWithBorder(
-                isCapitaLetters: true,
-                controller: controller.plateCode,
-                labelText: 'Code',
-                hintText: 'Enter Plate Code',
-              )),
-              const Expanded(flex: 2, child: SizedBox())
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
+                    isCapitaLetters: true,
+                    controller: controller.plateCode,
+                    labelText: 'Code',
+                    hintText: 'Enter Plate Code',
+                    onChanged: (_) {
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                const Expanded(flex: 2, child: SizedBox()),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
                   child: CustomDropdown(
-                showedSelectedName: 'name',
-                textcontroller: controller.country.text,
-                hintText: 'Country',
-                items: isCountriesLoading ? {} : controller.allCountries,
-                onChanged: (key, value) {
-                  controller.country.text = value['name'];
-                  controller.city.clear();
-                  // controller.onSelectForCountryAndCity(entry.key);
-                  controller.getCitiesByCountryID(key);
-                  controller.countryId.value = key;
-                },
-              )),
-              const Expanded(child: SizedBox())
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
+                    showedSelectedName: 'name',
+                    textcontroller: controller.country.text,
+                    hintText: 'Country',
+                    items: isCountriesLoading ? {} : controller.allCountries,
+                    onChanged: (key, value) {
+                      controller.country.text = value['name'] ?? "";
+                      controller.city.clear();
+                      controller.getCitiesByCountryID(key);
+                      controller.countryId.value = key;
+                      controller.isJobModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.country.clear();
+                      controller.city.clear();
+                      controller.allCities.clear();
+                      controller.countryId.value = "";
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
                   child: CustomDropdown(
-                showedSelectedName: 'name',
-                textcontroller: controller.city.text,
-                hintText: 'City',
-                items: controller.allCities.isEmpty ? {} : controller.allCities,
-                onChanged: (key, value) {
-                  controller.country.text = value['name'];
-                  controller.city.clear();
-                  controller.city.text = value['name'];
-                  controller.cityId.value = key;
-                },
-              )),
-              const Expanded(child: SizedBox())
-            ],
-          ),
-          Row(
-            spacing: 10,
-            children: [
-              Expanded(
+                    showedSelectedName: 'name',
+                    textcontroller: controller.city.text,
+                    hintText: 'City',
+                    items: controller.allCities.isEmpty
+                        ? {}
+                        : controller.allCities,
+                    onChanged: (key, value) {
+                      controller.city.text = value['name'] ?? "";
+                      controller.cityId.value = key;
+                      controller.isJobModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.city.clear();
+                      controller.cityId.value = "";
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
                   child: myTextFormFieldWithBorder(
-                controller: controller.transmissionType,
-                labelText: 'Transmission Type',
-                hintText: 'Enter Transmission Type',
-                isCapitaLetters: true,
-              )),
-              Expanded(
+                    controller: controller.transmissionType,
+                    labelText: 'Transmission Type',
+                    hintText: 'Enter Transmission Type',
+                    isCapitaLetters: true,
+                    onChanged: (_) {
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                Expanded(
                   child: CustomDropdown(
-                showedSelectedName: 'name',
-                textcontroller: controller.engineType.text,
-                hintText: 'Engine Type',
-                items: isEngineTypeLoading ? {} : controller.allEngineType,
-                onChanged: (key, value) {
-                  controller.engineType.text = value['name'];
-                  controller.engineTypeId.value = key;
-                },
-              )),
-              const Expanded(child: SizedBox())
-            ],
-          ),
-          Row(
-            spacing: 10,
-            children: [
-              Expanded(
+                    showedSelectedName: 'name',
+                    textcontroller: controller.engineType.text,
+                    hintText: 'Engine Type',
+                    items: isEngineTypeLoading ? {} : controller.allEngineType,
+                    onChanged: (key, value) {
+                      controller.engineType.text = value['name'] ?? "";
+                      controller.engineTypeId.value = key;
+                      controller.isJobModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.engineType.clear();
+                      controller.engineTypeId.value = "";
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
                   child: myTextFormFieldWithBorder(
-                controller: controller.vin,
-                labelText: 'VIN',
-                isCapitaLetters: true,
-                hintText: 'Enter VIN',
-              )),
-              const Expanded(child: SizedBox())
-            ],
-          ),
-          Row(
-            spacing: 10,
-            children: [
-              Expanded(
+                    controller: controller.vin,
+                    labelText: 'VIN',
+                    isCapitaLetters: true,
+                    hintText: 'Enter VIN',
+                    onChanged: (_) {
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
                   child: myTextFormFieldWithBorder(
-                      isnumber: true,
-                      controller: controller.mileageIn.value,
-                      labelText: 'Mileage In',
-                      hintText: 'Enter Mileage In',
-                      onChanged: (value) {
-                        if (controller.mileageIn.value.text.isNotEmpty) {
-                          controller.inOutDiffCalculating();
-                        } else {
-                          controller.mileageIn.value.text = '0';
-                          controller.inOutDiffCalculating();
-                        }
-                      })),
-              Expanded(
+                    isnumber: true,
+                    controller: controller.mileageIn.value,
+                    labelText: 'Mileage In',
+                    hintText: 'Enter Mileage In',
+                    onChanged: (value) {
+                      if (controller.mileageIn.value.text.isNotEmpty) {
+                        controller.inOutDiffCalculating();
+                      } else {
+                        controller.mileageIn.value.text = '0';
+                        controller.inOutDiffCalculating();
+                      }
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                Expanded(
                   child: myTextFormFieldWithBorder(
-                      isnumber: true,
-                      controller: controller.mileageOut.value,
-                      labelText: 'Mileage Out',
-                      hintText: 'Enter Mileage Out',
-                      onChanged: (value) {
-                        if (controller.mileageOut.value.text.isNotEmpty) {
-                          controller.inOutDiffCalculating();
-                        } else {
-                          controller.mileageOut.value.text = '0';
-                          controller.inOutDiffCalculating();
-                        }
-                      })),
-              Expanded(
+                    isnumber: true,
+                    controller: controller.mileageOut.value,
+                    labelText: 'Mileage Out',
+                    hintText: 'Enter Mileage Out',
+                    onChanged: (value) {
+                      if (controller.mileageOut.value.text.isNotEmpty) {
+                        controller.inOutDiffCalculating();
+                      } else {
+                        controller.mileageOut.value.text = '0';
+                        controller.inOutDiffCalculating();
+                      }
+                      controller.isJobModified.value = true;
+                    },
+                  ),
+                ),
+                Expanded(
                   child: myTextFormFieldWithBorder(
-                isEnabled: false,
-                controller: controller.inOutDiff.value,
-                labelText: 'In Out Diff',
-              )),
-              const Expanded(child: SizedBox())
-            ],
-          ),
-        ],
-      );
-    }),
+                    isEnabled: false,
+                    controller: controller.inOutDiff.value,
+                    labelText: 'In Out Diff',
+                  ),
+                ),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+          ],
+        );
+      },
+    ),
   );
 }

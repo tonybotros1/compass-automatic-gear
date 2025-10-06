@@ -847,6 +847,15 @@ Widget closeIcon() {
   );
 }
 
+String? convertDateToIson(String date) {
+  if (date.isEmpty){
+    return null;
+  }
+  final parsedDate = format.parse(date);
+  final isoDate = parsedDate.toIso8601String();
+  return isoDate;
+}
+
 bool isBeforeToday(String dateStr) {
   if (dateStr.isEmpty) return false;
 

@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Models/job%20cards/job_card_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
@@ -11,8 +11,7 @@ import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
 class JobCard extends StatelessWidget {
-  JobCard({super.key});
-  final JobCardController jobCardController = Get.put(JobCardController());
+  const JobCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,139 +25,166 @@ class JobCard extends StatelessWidget {
               width: constraints.maxWidth,
               child: ListView(
                 children: [
-                  GetX<JobCardController>(builder: (controller) {
-                    bool isBrandLoading = controller.allBrands.isEmpty;
-                    bool isModelLoading = controller.allModels.isEmpty;
-                    bool isCustomersLoading = controller.allCustomers.isEmpty;
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      spacing: 10,
-                      children: [
-                        Expanded(
+                  GetX<JobCardController>(
+                    init: JobCardController(),
+                    builder: (controller) {
+                      bool isBrandLoading = controller.allBrands.isEmpty;
+                      bool isModelLoading = controller.allModels.isEmpty;
+                      bool isCustomersLoading = controller.allCustomers.isEmpty;
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        spacing: 10,
+                        children: [
+                          Expanded(
                             child: myTextFormFieldWithBorder(
-                          labelText: 'Job NO.',
-                          controller: controller.jobNumberFilter.value,
-                        )),
-                        Expanded(
-                            child: myTextFormFieldWithBorder(
-                          labelText: 'Invoice NO.',
-                          controller: controller.invoiceNumberFilter.value,
-                        )),
-                        Expanded(
-                          flex: 2,
-                          child: CustomDropdown(
-                            showedSelectedName: 'name',
-                            textcontroller:
-                                controller.carBrandIdFilterName.value.text,
-                            hintText: 'Car Brand',
-                            items: isBrandLoading ? {} : controller.allBrands,
-                            onChanged: (key, value) async {
-                              controller.carModel.clear();
-                              controller.getModelsByCarBrand(key);
-                              controller.carBrandIdFilter.value = key;
-                              controller.carBrandIdFilterName.value.text =
-                                  value['name'];
-                              controller.carModelIdFilter.value = '';
-                              controller.carModelIdFilterName.value.text = '';
-                            },
+                              labelText: 'Job NO.',
+                              controller: controller.jobNumberFilter.value,
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: CustomDropdown(
-                            showedSelectedName: 'name',
-                            textcontroller:
-                                controller.carModelIdFilterName.value.text,
-                            hintText: 'Car Model',
-                            items: isModelLoading ? {} : controller.allModels,
-                            onChanged: (key, value) async {
-                              controller.carModelIdFilter.value = key;
-                              controller.carModelIdFilterName.value.text =
-                                  value['name'];
-                            },
-                          ),
-                        ),
-                        Expanded(
+                          Expanded(
                             child: myTextFormFieldWithBorder(
-                          labelText: 'Plate NO.',
-                          controller: controller.plateNumberFilter.value,
-                        )),
-                        Expanded(
+                              labelText: 'Invoice NO.',
+                              controller: controller.invoiceNumberFilter.value,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: CustomDropdown(
+                              showedSelectedName: 'name',
+                              textcontroller:
+                                  controller.carBrandIdFilterName.value.text,
+                              hintText: 'Car Brand',
+                              items: isBrandLoading ? {} : controller.allBrands,
+                              onChanged: (key, value) async {
+                                controller.getModelsByCarBrand(key);
+                                controller.carBrandIdFilter.value = key;
+                                controller.carBrandIdFilterName.value.text =
+                                    value['name'];
+                                controller.carModelIdFilter.value = '';
+                                controller.carModelIdFilterName.value.text = '';
+                              },
+                              onDelete: () {
+                                controller.carBrandIdFilter.value = "";
+                                controller.carBrandIdFilterName.value.clear();
+                                controller.carModelIdFilter.value = '';
+                                controller.carModelIdFilterName.value.text = '';
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: CustomDropdown(
+                              showedSelectedName: 'name',
+                              textcontroller:
+                                  controller.carModelIdFilterName.value.text,
+                              hintText: 'Car Model',
+                              items: isModelLoading ? {} : controller.allModels,
+                              onChanged: (key, value) async {
+                                controller.carModelIdFilter.value = key;
+                                controller.carModelIdFilterName.value.text =
+                                    value['name'];
+                              },
+                              onDelete: () {
+                                controller.carModelIdFilter.value = "";
+                                controller.carModelIdFilterName.value.clear();
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: myTextFormFieldWithBorder(
+                              labelText: 'Plate NO.',
+                              controller: controller.plateNumberFilter.value,
+                            ),
+                          ),
+                          Expanded(
                             flex: 2,
                             child: myTextFormFieldWithBorder(
                               labelText: 'VIN',
                               controller: controller.vinFilter.value,
-                            )),
-                        Expanded(
+                            ),
+                          ),
+                          Expanded(
                             flex: 3,
                             child: CustomDropdown(
-                                textcontroller: controller
-                                    .customerNameIdFilterName.value.text,
-                                showedSelectedName: 'entity_name',
-                                hintText: 'Customer Name',
-                                onChanged: (key, value) async {
-                                  controller.customerNameIdFilterName.value
-                                      .text = value['entity_name'];
-                                  controller.customerNameIdFilter.value = key;
-                                },
-                                items: isCustomersLoading
-                                    ? {}
-                                    : controller.allCustomers)),
-                        Expanded(
-                          child: CustomDropdown(
-                            textcontroller: controller.statusFilter.value.text,
-                            showedSelectedName: 'name',
-                            hintText: 'Status',
-                            items: allStatus,
-                            onChanged: (key, value) async {
-                              controller.statusFilter.value.text =
-                                  value['name'];
-                            },
+                              textcontroller: controller
+                                  .customerNameIdFilterName
+                                  .value
+                                  .text,
+                              showedSelectedName: 'entity_name',
+                              hintText: 'Customer Name',
+                              onChanged: (key, value) async {
+                                controller.customerNameIdFilterName.value.text =
+                                    value['entity_name'];
+                                controller.customerNameIdFilter.value = key;
+                              },
+                              items: isCustomersLoading
+                                  ? {}
+                                  : controller.allCustomers,
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
-                  const SizedBox(
-                    height: 10,
+                          Expanded(
+                            child: CustomDropdown(
+                              textcontroller:
+                                  controller.statusFilter.value.text,
+                              showedSelectedName: 'name',
+                              hintText: 'Status',
+                              items: allStatus,
+                              onChanged: (key, value) async {
+                                controller.statusFilter.value.text =
+                                    value['name'];
+                              },
+                              onDelete: () {
+                                controller.statusFilter.value.clear();
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                  GetBuilder<JobCardController>(builder: (controller) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Row(
-                            spacing: 10,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Expanded(
+                  const SizedBox(height: 10),
+                  GetBuilder<JobCardController>(
+                    builder: (controller) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Row(
+                              spacing: 10,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
                                   child: myTextFormFieldWithBorder(
-                                controller: controller.fromDate.value,
-                                labelText: 'From Date',
-                                onFieldSubmitted: (_) async {
-                                  normalizeDate(
-                                      controller.fromDate.value.text,
-                                      controller.fromDate.value);
-                                  // if (nor) {
-                                  //   controller.searchEngine();
-                                  // }
-                                },
-                              )),
-                              Expanded(
+                                    controller: controller.fromDate.value,
+                                    labelText: 'From Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.fromDate.value.text,
+                                        controller.fromDate.value,
+                                      );
+                                      // if (nor) {
+                                      //   controller.searchEngine();
+                                      // }
+                                    },
+                                  ),
+                                ),
+                                Expanded(
                                   child: myTextFormFieldWithBorder(
-                                controller: controller.toDate.value,
-                                labelText: 'To Date',
-                                onFieldSubmitted: (_) async {
-                                  normalizeDate(
-                                      controller.toDate.value.text,
-                                      controller.toDate.value);
-                                  // if (nor) {
-                                  //   controller.searchEngine();
-                                  // }
-                                },
-                              )),
-                              ElevatedButton(
+                                    controller: controller.toDate.value,
+                                    labelText: 'To Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.toDate.value.text,
+                                        controller.toDate.value,
+                                      );
+                                      // if (nor) {
+                                      //   controller.searchEngine();
+                                      // }
+                                    },
+                                  ),
+                                ),
+                                ElevatedButton(
                                   style: allButtonStyle,
                                   onPressed: () {
                                     controller.clearAllFilters();
@@ -174,8 +200,9 @@ class JobCard extends StatelessWidget {
                                     controller.allModels.clear();
                                     controller.searchEngine();
                                   },
-                                  child: const Text('All')),
-                              ElevatedButton(
+                                  child: const Text('All'),
+                                ),
+                                ElevatedButton(
                                   style: todayButtonStyle,
                                   onPressed: controller.isTodaySelected.isFalse
                                       ? () {
@@ -195,11 +222,12 @@ class JobCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: const Text('Today')),
-                              ElevatedButton(
+                                  child: const Text('Today'),
+                                ),
+                                ElevatedButton(
                                   style: thisMonthButtonStyle,
-                                  onPressed: controller
-                                          .isThisMonthSelected.isFalse
+                                  onPressed:
+                                      controller.isThisMonthSelected.isFalse
                                       ? () {
                                           controller.isAllSelected.value =
                                               false;
@@ -218,11 +246,12 @@ class JobCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: const Text('This Month')),
-                              ElevatedButton(
+                                  child: const Text('This Month'),
+                                ),
+                                ElevatedButton(
                                   style: thisYearButtonStyle,
-                                  onPressed: controller
-                                          .isThisYearSelected.isFalse
+                                  onPressed:
+                                      controller.isThisYearSelected.isFalse
                                       ? () {
                                           controller.isTodaySelected.value =
                                               false;
@@ -239,124 +268,128 @@ class JobCard extends StatelessWidget {
                                           controller.searchEngine();
                                         }
                                       : null,
-                                  child: const Text('This Year')),
-                              ElevatedButton(
+                                  child: const Text('This Year'),
+                                ),
+                                ElevatedButton(
                                   style: saveButtonStyle,
                                   onPressed:
                                       controller.isThisYearSelected.isFalse
-                                          ? () async {
-                                              controller.removeFilters();
-                                              controller.searchEngine();
-                                            }
-                                          : null,
+                                      ? () async {
+                                          controller.removeFilters();
+                                          controller.searchEngine();
+                                        }
+                                      : null,
                                   child: Text(
                                     'Find',
                                     style: fontStyleForElevatedButtons,
-                                  )),
-                              ElevatedButton(
+                                  ),
+                                ),
+                                ElevatedButton(
                                   style: clearVariablesButtonStyle,
                                   onPressed:
                                       controller.isThisYearSelected.isFalse
-                                          ? () {
-                                              controller.clearAllFilters();
-                                              controller.update();
-                                            }
-                                          : null,
+                                      ? () {
+                                          controller.clearAllFilters();
+                                          controller.update();
+                                        }
+                                      : null,
                                   child: Text(
                                     'Clear Filters',
                                     style: fontStyleForElevatedButtons,
-                                  )),
-                            ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const Expanded(flex: 2, child: SizedBox()),
-                        newJobCardButton(context, constraints, controller)
-                      ],
-                    );
-                  }),
+                          const Expanded(flex: 2, child: SizedBox()),
+                          newJobCardButton(context, constraints, controller),
+                        ],
+                      );
+                    },
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<JobCardController>(
-                        init: JobCardController(),
-                        builder: (controller) {
-                          return Row(
-                            spacing: 10,
-                            children: [
-                              customBox(
-                                  title: 'NUMBER OF JOBS',
-                                  value: Text(
-                                    '${controller.numberOfJobs.value}',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: mainColor,
-                                        fontSize: 16),
-                                  )),
-                              customBox(
-                                  title: 'TOTALS',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.green,
-                                    isBold: true,
-                                    text: '${controller.allJobsTotals.value}',
-                                  )),
-                              customBox(
-                                  title: 'VATS',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.red,
-                                    isBold: true,
-                                    text: '${controller.allJobsVATS.value}',
-                                  )),
-                              customBox(
-                                  title: 'NETS',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.blueGrey,
-                                    isBold: true,
-                                    text: '${controller.allJobsNET.value}',
-                                  )),
-                            ],
-                          );
-                        }),
+                      builder: (controller) {
+                        return Row(
+                          spacing: 10,
+                          children: [
+                            customBox(
+                              title: 'NUMBER OF JOBS',
+                              value: Text(
+                                '${controller.numberOfJobs.value}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: mainColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            customBox(
+                              title: 'TOTALS',
+                              value: textForDataRowInTable(
+                                fontSize: 16,
+                                color: Colors.green,
+                                isBold: true,
+                                text: '${controller.allJobsTotals.value}',
+                              ),
+                            ),
+                            customBox(
+                              title: 'VATS',
+                              value: textForDataRowInTable(
+                                fontSize: 16,
+                                color: Colors.red,
+                                isBold: true,
+                                text: '${controller.allJobsVATS.value}',
+                              ),
+                            ),
+                            customBox(
+                              title: 'NETS',
+                              value: textForDataRowInTable(
+                                fontSize: 16,
+                                color: Colors.blueGrey,
+                                isBold: true,
+                                text: '${controller.allJobsNET.value}',
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
-                  GetX<JobCardController>(builder: (controller) {
-                    return Container(
-                      // height: controller.allJobCards.isEmpty ? 300 : null,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        children: [
-                          // searchBar(
-                          //   search: controller.search,
-                          //   constraints: constraints,
-                          //   context: context,
-                          //   title: 'Search for job cards',
-                          //   button: newJobCardButton(
-                          //       context, constraints, controller),
-                          // ),
-                          controller.isScreenLoding.isTrue &&
-                                  controller.allJobCards.isEmpty
-                              ? Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: loadingProcess,
-                                )
-                              : SizedBox(
-                                  width: constraints.maxWidth,
-                                  child: tableOfScreens(
+                  GetX<JobCardController>(
+                    builder: (controller) {
+                      return Container(
+                        // height: controller.allJobCards.isEmpty ? 300 : null,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          children: [
+                            controller.isScreenLoding.isTrue &&
+                                    controller.allJobCards.isEmpty
+                                ? Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: loadingProcess,
+                                  )
+                                : SizedBox(
+                                    width: constraints.maxWidth,
+                                    child: tableOfScreens(
                                       showHistoryButton: true,
                                       scrollController:
                                           controller.scrollControllerFotTable1,
                                       constraints: constraints,
                                       context: context,
                                       controller: controller,
-                                      data: controller.allJobCards),
-                                )
-                        ],
-                      ),
-                    );
-                  }),
+                                      data: controller.allJobCards,
+                                    ),
+                                  ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                   // const SizedBox(
                   //   height: 10,
                   // ),
@@ -402,7 +435,7 @@ Widget tableOfScreens({
   required BoxConstraints constraints,
   required BuildContext context,
   required JobCardController controller,
-  required RxList<DocumentSnapshot> data,
+  required List<JobCardModel> data,
   required ScrollController scrollController,
   required bool showHistoryButton,
 }) {
@@ -428,7 +461,7 @@ Widget tableOfScreens({
       controller: scrollController,
       child: PaginatedDataTable(
         controller: scrollController,
-        rowsPerPage: 5,
+        rowsPerPage: 10,
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
@@ -453,57 +486,70 @@ Widget tableOfScreens({
             label: columnForTable(constraints, 'Job', 'Number'),
             // onSort: controller.onSort,
           ),
-          DataColumn(label: columnForTable(constraints, '', 'Date')
-              // onSort: controller.onSort,
-              ),
-          DataColumn(label: columnForTable(constraints, '', 'Status')
-              // onSort: controller.onSort,
-              ),
-          DataColumn(label: columnForTable(constraints, 'Invoice', 'Number')
-              // onSort: controller.onSort,
-              ),
-          DataColumn(label: columnForTable(constraints, '', 'Date')
-              // onSort: controller.onSort,
-              ),
-          DataColumn(label: columnForTable(constraints, '', 'LPO Number')
-              // onSort: controller.onSort,
-              ),
-          DataColumn(label: columnForTable(constraints, 'Car', 'Brand')
-              // onSort: controller.onSort,
-              ),
-          DataColumn(label: columnForTable(constraints, '', 'Model')
-              // onSort: controller.onSort,
-              ),
-          DataColumn(label: columnForTable(constraints, 'Plate', 'Number')
-              // onSort: controller.onSort,
-              ),
+          DataColumn(
+            label: columnForTable(constraints, '', 'Date'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: columnForTable(constraints, '', 'Status'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: columnForTable(constraints, 'Invoice', 'Number'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: columnForTable(constraints, '', 'Date'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: columnForTable(constraints, '', 'LPO Number'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: columnForTable(constraints, 'Car', 'Brand'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: columnForTable(constraints, '', 'Model'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: columnForTable(constraints, 'Plate', 'Number'),
+            // onSort: controller.onSort,
+          ),
           // DataColumn(label: columnForTable(constraints, '', 'Code')
           //     // onSort: controller.onSort,
           //     ),
           // DataColumn(label: columnForTable(constraints, '', 'City')
           //     // onSort: controller.onSort,
           //     ),
-          DataColumn(label: columnForTable(constraints, '', 'Customer Name')
-              // onSort: controller.onSort,
-              ),
-          DataColumn(label: columnForTable(constraints, '', 'VIN')
-              // onSort: controller.onSort,
-              ),
           DataColumn(
-              headingRowAlignment: MainAxisAlignment.end,
-              label: columnForTable(constraints, '', 'Totals')
-              // onSort: controller.onSort,
-              ),
+            label: columnForTable(constraints, '', 'Customer Name'),
+            // onSort: controller.onSort,
+          ),
           DataColumn(
-              headingRowAlignment: MainAxisAlignment.end,
-              label: columnForTable(constraints, '', 'VAT')
-              // onSort: controller.onSort,
-              ),
+            label: columnForTable(constraints, '', 'VIN'),
+            // onSort: controller.onSort,
+          ),
           DataColumn(
-              headingRowAlignment: MainAxisAlignment.end,
-              label: columnForTable(constraints, '', 'NET')
-              // onSort: controller.onSort,
-              ),
+            numeric: true,
+            headingRowAlignment: MainAxisAlignment.end,
+            label: columnForTable(constraints, '', 'Totals'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            numeric: true,
+            headingRowAlignment: MainAxisAlignment.end,
+            label: columnForTable(constraints, '', 'VAT'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            numeric: true,
+            headingRowAlignment: MainAxisAlignment.end,
+            label: columnForTable(constraints, '', 'NET'),
+            // onSort: controller.onSort,
+          ),
         ],
         source: dataSource,
       ),
@@ -512,7 +558,10 @@ Widget tableOfScreens({
 }
 
 Column columnForTable(
-    BoxConstraints constraints, String title1, String title2) {
+  BoxConstraints constraints,
+  String title1,
+  String title2,
+) {
   return Column(
     spacing: 5,
     mainAxisAlignment: MainAxisAlignment.end,
@@ -524,164 +573,107 @@ Column columnForTable(
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> jobData, context, constraints,
-    jobId, JobCardController controller, int index) {
+DataRow dataRowForTheTable(
+  JobCardModel jobData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String jobId,
+  JobCardController controller,
+  int index,
+) {
   final isEvenRow = index % 2 == 0;
   return DataRow(
-      color: WidgetStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(WidgetState.selected)) {
-          return Colors.grey.shade400;
-        }
-        return isEvenRow ? Colors.grey.shade200 : Colors.white;
-      }),
-      cells: [
-        DataCell(Row(
-          children: [
-            editSection(context, jobData, constraints, jobId),
-          ],
-        )),
-        DataCell(jobData['label'] == 'Draft'
+    color: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.grey.shade400;
+      }
+      return isEvenRow ? Colors.grey.shade200 : Colors.white;
+    }),
+    cells: [
+      DataCell(
+        Row(children: [editSection(context, jobData, constraints, jobId)]),
+      ),
+      DataCell(
+        jobData.label == 'Draft'
             ? statusBox('D')
-            : jobData['label'] == 'Returned'
-                ? statusBox('R')
-                : const SizedBox()),
+            : jobData.label == 'Returned'
+            ? statusBox('R')
+            : const SizedBox(),
+      ),
 
-        DataCell(textForDataRowInTable(text: '${jobData['job_number']}')),
-        DataCell(textForDataRowInTable(
-            text: jobData['job_number'] != ''
-                ? textToDate(jobData['job_date'])
-                : '')),
-        DataCell(
-          statusBox(
-            jobData['job_status_1'] == 'Posted'
-                ? ((isBeforeToday(jobData['job_warrenty_end_date']))
+      DataCell(textForDataRowInTable(text: '${jobData.jobNumber}')),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.jobNumber != '' ? textToDate(jobData.jobDate) : '',
+        ),
+      ),
+      DataCell(
+        statusBox(
+          jobData.jobStatus1 == 'Posted'
+              ? ((isBeforeToday(jobData.jobWarrantyEndDate.toString()))
                     ? 'Closed'
                     : 'Warranty')
-                : (jobData['job_status_2'] as String? ?? 'Unknown'),
-            hieght: 35,
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-          ),
+              : (jobData.jobStatus2 ?? ''),
+          hieght: 35,
+          padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
+      ),
 
-        DataCell(textForDataRowInTable(text: '${jobData['invoice_number']}')),
-        DataCell(textForDataRowInTable(
-            text: jobData['invoice_number'] != ''
-                ? textToDate(jobData['invoice_date'])
-                : '')),
-        DataCell(SelectableText(
-          '${jobData['lpo_number']}',
-          maxLines: 1,
-        )),
-        // DataCell(
-        //     textForDataRowInTable(text: '${controller.carBrandsNames[jobId]}')),
-        DataCell(textForDataRowInTable(
-            text: controller.getdataName(
-                jobData['car_brand'], controller.allBrands))),
-        // DataCell(
-        //     textForDataRowInTable(text: '${controller.carModelsNames[jobId]}')),
-        DataCell(
-          FutureBuilder<String>(
-            future: controller.getModelName(
-                jobData['car_brand'], jobData['car_model']),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  text: '${snapshot.data}',
-                );
-              }
-            },
+      DataCell(textForDataRowInTable(text: jobData.invoiceNumber ?? '')),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.invoiceNumber != ''
+              ? textToDate(jobData.invoiceDate)
+              : '',
+        ),
+      ),
+      DataCell(SelectableText(jobData.lpoNumber ?? '', maxLines: 1)),
+      DataCell(textForDataRowInTable(text: jobData.carBrandName ?? '')),
+      DataCell(textForDataRowInTable(text: jobData.carModelName ?? '')),
+      DataCell(SelectableText(jobData.plateNumber ?? '', maxLines: 1)),
+      DataCell(
+        textForDataRowInTable(maxWidth: null, text: jobData.customerName ?? ''),
+      ),
+      DataCell(
+        SelectableText(jobData.vehicleIdentificationNumber ?? '', maxLines: 1),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          color: Colors.green,
+          isBold: true,
+          text: (jobData.totals.toString()),
+        ),
+      ),
+      DataCell(
+        Align(
+          alignment: Alignment.centerRight,
+          child: textForDataRowInTable(
+            color: Colors.red,
+            isBold: true,
+            text: (jobData.vat.toString()),
           ),
         ),
-        DataCell(SelectableText(
-          jobData['plate_number'],
-          maxLines: 1,
-        )),
-        // DataCell(SelectableText(
-        //   jobData['plate_code'],
-        //   maxLines: 1,
-        // )),
-        // DataCell(
-        //   FutureBuilder<String>(
-        //     future: controller.getCityName(jobData['country'], jobData['city']),
-        //     builder: (context, snapshot) {
-        //       if (snapshot.connectionState == ConnectionState.waiting) {
-        //         return const Text('Loading...');
-        //       } else if (snapshot.hasError) {
-        //         return const Text('Error');
-        //       } else {
-        //         return textForDataRowInTable(
-        //           text: '${snapshot.data}',
-        //         );
-        //       }
-        //     },
-        //   ),
-        // ),
-        // DataCell(textForDataRowInTable(
-        //     maxWidth: null, text: '${controller.customerNames[jobId]}')),
-        DataCell(
-          textForDataRowInTable(
-            maxWidth: null,
-            // maxWidth: 1,
-            text: controller.getdataName(
-                jobData['customer'], controller.allCustomers,
-                title: 'entity_name'),
+      ),
+      DataCell(
+        Align(
+          alignment: Alignment.centerRight,
+          child: textForDataRowInTable(
+            color: Colors.blueGrey,
+            isBold: true,
+            text: (jobData.net.toString()),
           ),
         ),
-        DataCell(SelectableText(
-          jobData['vehicle_identification_number'],
-          maxLines: 1,
-        )),
-        DataCell(
-          Align(
-            alignment: Alignment.centerRight,
-            child: textForDataRowInTable(
-              color: Colors.green,
-              isBold: true,
-              text: (jobData.containsKey('totals_amount') &&
-                      jobData['totals_amount'] != null &&
-                      jobData['totals_amount'].toString().trim().isNotEmpty)
-                  ? jobData['totals_amount'].toString()
-                  : '0',
-            ),
-          ),
-        ),
-        DataCell(
-          Align(
-            alignment: Alignment.centerRight,
-            child: textForDataRowInTable(
-              color: Colors.red,
-              isBold: true,
-              text: (jobData.containsKey('total_vat_amount') &&
-                      jobData['total_vat_amount'] != null &&
-                      jobData['total_vat_amount'].toString().trim().isNotEmpty)
-                  ? jobData['total_vat_amount'].toString()
-                  : '0',
-            ),
-          ),
-        ),
-        DataCell(
-          Align(
-            alignment: Alignment.centerRight,
-            child: textForDataRowInTable(
-              color: Colors.blueGrey,
-              isBold: true,
-              text: (jobData.containsKey('total_net_amount') &&
-                      jobData['total_net_amount'] != null &&
-                      jobData['total_net_amount'].toString().trim().isNotEmpty)
-                  ? jobData['total_net_amount'].toString()
-                  : '0',
-            ),
-          ),
-        )
-      ]);
+      ),
+    ],
+  );
 }
 
-Widget editSection(BuildContext context, Map<String, dynamic> jobData,
-    BoxConstraints constraints, String jobId) {
+Widget editSection(
+  BuildContext context,
+  JobCardModel jobData,
+  BoxConstraints constraints,
+  String jobId,
+) {
   return GetX<JobCardController>(
     builder: (controller) {
       // Always read the reactive map here so GetX rebuilds when it changes
@@ -713,193 +705,184 @@ Widget editSection(BuildContext context, Map<String, dynamic> jobData,
                 height: 24,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : const Icon(
-                Icons.edit_note_rounded,
-                color: Colors.blue,
-              ),
+            : const Icon(Icons.edit_note_rounded, color: Colors.blue),
       );
     },
   );
 }
 
 ElevatedButton historySection(
-    JobCardController controller, Map<String, dynamic> jobData) {
+  JobCardController controller,
+  Map<String, dynamic> jobData,
+) {
   return ElevatedButton(
-      style: historyButtonStyle,
-      onPressed: () async {
-        controller.selectForHistory(jobData['vehicle_identification_number']);
-        // controller.currentCountryVAT.value = controller.getdataName(
-        //     controller.companyDetails['contact_details']['country'],
-        //     controller.allCountries,
-        //     title: 'vat');
-        // controller.loadValues(jobData);
-        // editJobCardDialog(controller, jobData, jobId);
-      },
-      child: const Text('History'));
+    style: historyButtonStyle,
+    onPressed: () async {
+      controller.selectForHistory(jobData['vehicle_identification_number']);
+      // controller.currentCountryVAT.value = controller.getdataName(
+      //     controller.companyDetails['contact_details']['country'],
+      //     controller.allCountries,
+      //     title: 'vat');
+      // controller.loadValues(jobData);
+      // editJobCardDialog(controller, jobData, jobId);
+    },
+    child: const Text('History'),
+  );
 }
 
 Future<dynamic> editJobCardDialog(
-    JobCardController controller, Map<String, dynamic> jobData, String jobId,
-    {String screenName = '', headerColor = ''}) {
+  JobCardController controller,
+  JobCardModel jobData,
+  String jobId, {
+  String screenName = '',
+  headerColor = '',
+}) {
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       insetPadding: const EdgeInsets.all(8),
-      child: LayoutBuilder(builder: (context, constraints) {
-        return Column(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(5),
-                  topRight: Radius.circular(5),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(5),
+                    topRight: Radius.circular(5),
+                  ),
+                  color: headerColor == '' ? mainColor : headerColor,
                 ),
-                color: headerColor == '' ? mainColor : headerColor,
-              ),
-              padding: const EdgeInsets.all(16),
-              width: constraints.maxWidth,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints:
-                      BoxConstraints(minWidth: constraints.maxWidth - 40),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        spacing: 10,
-                        children: [
-                          Text(
-                            screenName == ''
-                                ? controller.getScreenName()
-                                : screenName,
-                            style: fontStyleForScreenNameUsedInButtons,
-                          ),
-                          GetX<JobCardController>(builder: (ctl) {
-                            if (ctl.jobStatus2.value.isNotEmpty &&
-                                ctl.jobStatus1.value.isNotEmpty) {
-                              return statusBox(
-                                ctl.jobStatus1.value == 'Posted'
-                                    ? (isBeforeToday(
-                                            ctl.jobWarrentyEndDate.value.text)
-                                        ? 'Closed'
-                                        : 'Warranty')
-                                    : ctl.jobStatus2.value,
-                                hieght: 35,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5),
-                              );
-                            }
-                            return const SizedBox();
-                          }),
-                        ],
-                      ),
-                      Row(
-                        spacing: 10,
-                        children: [
-                          separator(),
-                          creatQuotationButton(controller, jobId),
-                          point(),
-                          inspectionFormButton(
-                              controller, jobId, jobData, context),
-                          point(),
-                          internalNotesButton(controller, constraints, jobId),
-                          separator(),
-                          saveJobButton(() => controller.editJobCard(jobId)),
-                          point(),
-                          copyJobButton(jobId, context),
-                          point(),
-                          deleteJobButton(controller, context, jobId),
-                          separator(),
-                          changeStatusToPostedButton(controller, jobId),
-                          point(),
-                          changeStatusToCancelledButton(jobId),
-                          point(),
-                          changeStatusToNewButton(jobId),
-                          point(),
-                          changeStatusToApproveButton(jobId),
-                          point(),
-                          changeStatusToReadyButton(jobId),
-                          separator(),
-                          closeIcon(),
-                        ],
-                      ),
-                    ],
+                padding: const EdgeInsets.all(16),
+                width: constraints.maxWidth,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: constraints.maxWidth - 40,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          spacing: 10,
+                          children: [
+                            Text(
+                              screenName == ''
+                                  ? controller.getScreenName()
+                                  : screenName,
+                              style: fontStyleForScreenNameUsedInButtons,
+                            ),
+                            GetX<JobCardController>(
+                              builder: (ctl) {
+                                if (ctl.jobStatus2.value.isNotEmpty &&
+                                    ctl.jobStatus1.value.isNotEmpty) {
+                                  return statusBox(
+                                    ctl.jobStatus1.value == 'Posted'
+                                        ? (isBeforeToday(
+                                                ctl
+                                                    .jobWarrentyEndDate
+                                                    .value
+                                                    .text,
+                                              )
+                                              ? 'Closed'
+                                              : 'Warranty')
+                                        : ctl.jobStatus2.value,
+                                    hieght: 35,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                    ),
+                                  );
+                                }
+                                return const SizedBox();
+                              },
+                            ),
+                          ],
+                        ),
+                        Row(
+                          spacing: 10,
+                          children: [
+                            separator(),
+                            creatQuotationButton(controller, jobId),
+                            point(),
+                            inspectionFormButton(
+                              controller,
+                              jobId,
+                              jobData,
+                              context,
+                            ),
+                            point(),
+                            internalNotesButton(controller, constraints, jobId),
+                            separator(),
+                            saveJobButton(() => controller.editJobCard(jobId)),
+                            point(),
+                            copyJobButton(jobId, context),
+                            point(),
+                            deleteJobButton(controller, context, jobId),
+                            separator(),
+                            changeStatusToPostedButton(controller, jobId),
+                            point(),
+                            changeStatusToCancelledButton(jobId),
+                            point(),
+                            changeStatusToNewButton(jobId),
+                            point(),
+                            changeStatusToApproveButton(jobId),
+                            point(),
+                            changeStatusToReadyButton(jobId),
+                            separator(),
+                            closeIcon(),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: addNewJobCardOrEdit(
-                  jobId: jobId,
-                  controller: controller,
-                  constraints: constraints,
-                  context: context,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: addNewJobCardOrEdit(
+                    jobId: jobId,
+                    controller: controller,
+                    constraints: constraints,
+                    context: context,
+                  ),
                 ),
               ),
-            ),
-          ],
-        );
-      }),
+            ],
+          );
+        },
+      ),
     ),
   );
 }
 
-ElevatedButton newJobCardButton(BuildContext context,
-    BoxConstraints constraints, JobCardController controller) {
+ElevatedButton newJobCardButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  JobCardController controller,
+) {
   return ElevatedButton(
     onPressed: () {
-      controller.currentCountryVAT.value = controller.getdataName(
-          controller.companyDetails['contact_details']['country'],
-          controller.allCountries,
-          title: 'vat');
-      controller.country.text = controller.getdataName(
-          controller.companyDetails['contact_details']['country'],
-          controller.allCountries);
-      controller.countryId.value =
-          controller.companyDetails['contact_details']['country'];
-      controller.getCitiesByCountryID(
-          controller.companyDetails['contact_details']['country']);
-      controller.mileageIn.value.text = '0';
-      controller.mileageOut.value.text = '0';
-      controller.inOutDiff.value.text = '0';
-      controller.customerCreditNumber.text = '0';
-      controller.customerOutstanding.text = '0';
-      controller.isCashSelected.value = true;
-      controller.payType.value = 'Cash';
-      controller.jobCardDate.value.text = textToDate(DateTime.now());
-      controller.invoiceDate.value.text = textToDate(DateTime.now());
-      controller.startDate.value.text = textToDate(DateTime.now());
-      var entry = controller.allCurrencies.entries.firstWhere(
-          (entry) =>
-              entry.value['country_id'] ==
-              controller.companyDetails['contact_details']['country'],
-          orElse: () => const MapEntry('', {}));
-      controller.customerCurrencyId.value = entry.key ?? '';
-      controller.customerCurrencyRate.text =
-          (entry.value['rate'] ?? '1').toString();
-      controller.customerCurrency.text = controller.getdataName(
-          controller.companyDetails['contact_details']['country'],
-          controller.allCountries,
-          title: 'currency_code');
       controller.clearValues();
       Get.dialog(
-          barrierDismissible: false,
-          Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5)),
-              insetPadding: const EdgeInsets.all(8),
-              child: LayoutBuilder(builder: (context, constraints) {
-                return Column(children: [
-                  GetX<JobCardController>(builder: (controller) {
-                    return Container(
+        barrierDismissible: false,
+        Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          insetPadding: const EdgeInsets.all(8),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  GetX<JobCardController>(
+                    builder: (controller) {
+                      return Container(
                         decoration: BoxDecoration(
                           borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(5),
-                              topRight: Radius.circular(5)),
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5),
+                          ),
                           color: mainColor,
                         ),
                         padding: const EdgeInsets.all(16),
@@ -908,87 +891,107 @@ ElevatedButton newJobCardButton(BuildContext context,
                           scrollDirection: Axis.horizontal,
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                                minWidth: constraints.maxWidth - 40),
+                              minWidth: constraints.maxWidth - 40,
+                            ),
                             child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    spacing: 10,
-                                    children: [
-                                      Text(
-                                        controller.getScreenName(),
-                                        style:
-                                            fontStyleForScreenNameUsedInButtons,
-                                      ),
-                                      controller.jobStatus2.value.isNotEmpty
-                                          ? statusBox(
-                                              controller.jobStatus1.value ==
-                                                      'Posted'
-                                                  ? ((isBeforeToday(controller
-                                                          .jobWarrentyEndDate
-                                                          .value
-                                                          .text))
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    Text(
+                                      controller.getScreenName(),
+                                      style:
+                                          fontStyleForScreenNameUsedInButtons,
+                                    ),
+                                    controller.jobStatus2.value.isNotEmpty
+                                        ? statusBox(
+                                            controller.jobStatus1.value ==
+                                                    'Posted'
+                                                ? ((isBeforeToday(
+                                                        controller
+                                                            .jobWarrentyEndDate
+                                                            .value
+                                                            .text,
+                                                      ))
                                                       ? 'Closed'
                                                       : 'Warranty')
-                                                  : (controller
-                                                      .jobStatus2.value),
-                                              hieght: 35,
-                                              padding: const EdgeInsets.symmetric(
-                                                  horizontal: 5),
-                                            )
-                                          : const SizedBox(),
-                                    ],
-                                  ),
-                                  Row(
-                                    spacing: 10,
-                                    children: [
-                                      separator(),
-                                      creatQuotationButton(controller,
-                                          controller.curreentJobCardId.value),
-                                      point(),
-                                      internalNotesButton(
-                                          controller,
-                                          constraints,
-                                          controller.curreentJobCardId.value),
-                                      separator(),
-                                      saveJobButton(
-                                          () => controller.addNewJobCard()),
-                                      separator(),
-                                      changeStatusToPostedButton(controller,
-                                          controller.curreentJobCardId.value),
-                                      point(),
-                                      changeStatusToCancelledButton(
-                                          controller.curreentJobCardId.value),
-                                      point(),
-                                      changeStatusToNewButton(
-                                          controller.curreentJobCardId.value),
-                                      point(),
-                                      changeStatusToApproveButton(
-                                          controller.curreentJobCardId.value),
-                                      point(),
-                                      changeStatusToReadyButton(
-                                          controller.curreentJobCardId.value),
-                                      separator(),
-                                      closeIcon()
-                                    ],
-                                  ),
-                                ]),
+                                                : (controller.jobStatus2.value),
+                                            hieght: 35,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 5,
+                                            ),
+                                          )
+                                        : const SizedBox(),
+                                  ],
+                                ),
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    separator(),
+                                    creatQuotationButton(
+                                      controller,
+                                      controller.curreentJobCardId.value,
+                                    ),
+                                    point(),
+                                    internalNotesButton(
+                                      controller,
+                                      constraints,
+                                      controller.curreentJobCardId.value,
+                                    ),
+                                    separator(),
+                                    saveJobButton(
+                                      () => controller.addNewJobCard(),
+                                    ),
+                                    separator(),
+                                    changeStatusToPostedButton(
+                                      controller,
+                                      controller.curreentJobCardId.value,
+                                    ),
+                                    point(),
+                                    changeStatusToCancelledButton(
+                                      controller.curreentJobCardId.value,
+                                    ),
+                                    point(),
+                                    changeStatusToNewButton(
+                                      controller.curreentJobCardId.value,
+                                    ),
+                                    point(),
+                                    changeStatusToApproveButton(
+                                      controller.curreentJobCardId.value,
+                                    ),
+                                    point(),
+                                    changeStatusToReadyButton(
+                                      controller.curreentJobCardId.value,
+                                    ),
+                                    separator(),
+                                    closeIcon(),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ));
-                  }),
+                        ),
+                      );
+                    },
+                  ),
                   Expanded(
-                      child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: addNewJobCardOrEdit(
-                      jobId: controller.curreentJobCardId.value,
-                      controller: controller,
-                      constraints: constraints,
-                      context: context,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: addNewJobCardOrEdit(
+                        jobId: controller.curreentJobCardId.value,
+                        controller: controller,
+                        constraints: constraints,
+                        context: context,
+                      ),
                     ),
-                  ))
-                ]);
-              })));
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
     },
     style: newButtonStyle,
     child: const Text('New Card'),
@@ -996,7 +999,7 @@ ElevatedButton newJobCardButton(BuildContext context,
 }
 
 class CardDataSource extends DataTableSource {
-  final List<DocumentSnapshot> cards;
+  final List<JobCardModel> cards;
   final BuildContext context;
   final BoxConstraints constraints;
   final JobCardController controller;
@@ -1012,12 +1015,11 @@ class CardDataSource extends DataTableSource {
   DataRow? getRow(int index) {
     if (index >= cards.length) return null;
 
-    final trade = cards[index];
-    final cardData = trade.data() as Map<String, dynamic>;
-    final cardId = trade.id;
+    final jobCard = cards[index];
+    final cardId = jobCard.id ?? '';
 
     return dataRowForTheTable(
-      cardData,
+      jobCard,
       context,
       constraints,
       cardId,

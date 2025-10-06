@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/job%20cards/job_card_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -176,7 +177,7 @@ Widget internalNotesButton(
 }
 
 Widget inspectionFormButton(JobCardController controller, jobId,
-    Map<String, dynamic> jobData, BuildContext context) {
+    JobCardModel jobData, BuildContext context) {
   return ClickableHoverText(
       // style: inspectionFormButtonStyle,
       onTap: () {

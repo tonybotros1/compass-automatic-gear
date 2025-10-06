@@ -313,31 +313,31 @@ class QuotationCardController extends GetxController {
   // }
 
   Future<void> openJobCardScreenByNumber() async {
-    try {
-      openingJobCardScreen.value = true;
-      var job = await FirebaseFirestore.instance
-          .collection('job_cards')
-          .where('job_number', isEqualTo: jobCardCounter.value)
-          .get();
-      var id = job.docs.first.id;
-      var data = job.docs.first.data();
+    // try {
+    //   openingJobCardScreen.value = true;
+    //   var job = await FirebaseFirestore.instance
+    //       .collection('job_cards')
+    //       .where('job_number', isEqualTo: jobCardCounter.value)
+    //       .get();
+    //   var id = job.docs.first.id;
+    //   var data = job.docs.first.data();
 
-      JobCardController jobCardController = Get.put(JobCardController());
-      jobCardController.getAllInvoiceItems(id);
-      await jobCardController.loadValues(data);
-      editJobCardDialog(
-        jobCardController,
-        data,
-        id,
-        screenName: '💳 Job Card',
-        headerColor: Colors.deepPurple,
-      );
-      openingJobCardScreen.value = false;
-      showSnackBar('Done', 'Opened Successfully');
-    } catch (e) {
-      openingJobCardScreen.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
-    }
+    //   JobCardController jobCardController = Get.put(JobCardController());
+    //   jobCardController.getAllInvoiceItems(id);
+    //   // await jobCardController.loadValues(data); // need to br changed
+    //   editJobCardDialog(
+    //     jobCardController,
+    //     data,
+    //     id,
+    //     screenName: '💳 Job Card',
+    //     headerColor: Colors.deepPurple,
+    //   );
+    //   openingJobCardScreen.value = false;
+    //   showSnackBar('Done', 'Opened Successfully');
+    // } catch (e) {
+    //   openingJobCardScreen.value = false;
+    //   showSnackBar('Alert', 'Something Went Wrong');
+    // }
   }
 
   void clearValues() {

@@ -32,7 +32,7 @@ Widget addNewBankOrEdit({
           return CustomDropdown(
             showedSelectedName: 'currency_code',
             textcontroller: controller.currency.value.text,
-            hintText: isCurrencyLoading ? 'Loading...' : 'Currency',
+            hintText: 'Currency',
             items: isCurrencyLoading ? {} : controller.allCurrencies,
             onChanged: (key, value) {
               controller.currency.value.text = value['currency_code'];

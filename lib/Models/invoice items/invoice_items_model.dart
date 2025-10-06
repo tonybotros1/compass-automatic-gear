@@ -2,7 +2,7 @@ class InvoiceItemsModel {
   String? id;
   String? companyId;
   String? name;
-  int? price;
+  double? price;
   String? description;
   DateTime? createdAt;
   DateTime? updatedAt;
