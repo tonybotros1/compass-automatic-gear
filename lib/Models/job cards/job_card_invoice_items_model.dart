@@ -67,6 +67,7 @@ class JobCardInvoiceItemsModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+    data['uid'] = uid;
     data['id'] = id;
     data['name'] = nameId;
     data['quantity'] = quantity;

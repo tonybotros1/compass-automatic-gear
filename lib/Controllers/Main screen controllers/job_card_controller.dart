@@ -110,12 +110,6 @@ class JobCardController extends GetxController {
   RxString userId = RxString('');
   RxString jobStatus1 = RxString('');
   RxString jobStatus2 = RxString('');
-  RxBool postingJob = RxBool(false);
-  RxBool cancellingJob = RxBool(false);
-  RxBool newingJob = RxBool(false);
-  RxBool approvingJob = RxBool(false);
-  RxBool readingJob = RxBool(false);
-  // internal notes section
   RxBool addingNewInternalNotProcess = RxBool(false);
   RxBool jobCardAdded = RxBool(false);
   RxString curreentJobCardId = RxString('');
@@ -258,13 +252,20 @@ class JobCardController extends GetxController {
     allInvoiceItemsFromCollection.assignAll(await helper.getInvoiceItems());
   }
 
+  Future getCurrentJobCardStatus(String id) async {
+    return await helper.getJobCardStatus(id);
+  }
+
   Future<void> addNewJobCard() async {
     try {
-      if (jobStatus1.value != 'New' && jobStatus1.value != '') {
-        showSnackBar('Alert', 'Only new jobs can be edited');
-        return;
+      if (curreentJobCardId.isNotEmpty) {
+        Map jobStatus = await getCurrentJobCardStatus(curreentJobCardId.value);
+        String status1 = jobStatus['job_status_1'];
+        if (status1 != 'New' && status1 != '') {
+          showSnackBar('Alert', 'Only new jobs can be edited');
+          return;
+        }
       }
-      showSnackBar('Adding', 'Please Wait');
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'label': '',
@@ -317,6 +318,7 @@ class JobCardController extends GetxController {
         'delivery_time': deliveryTime.value.text,
         'job_notes': jobNotes.text,
         'job_delivery_notes': deliveryNotes.text,
+        'invoice_number': invoiceCounter.value.text,
         'invoice_items': allInvoiceItems.map((item) => item.toJson()).toList(),
       };
 
@@ -342,9 +344,8 @@ class JobCardController extends GetxController {
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri addingJobUrl = Uri.parse('$backendUrl/job_cards/add_new_job_card');
 
-      if (jobCardAdded.isFalse) {
-        jobStatus1.value = 'New';
-        jobStatus2.value = 'New';
+      if (jobCardAdded.isFalse && curreentJobCardId.isEmpty) {
+        showSnackBar('Adding', 'Please Wait');
         newData['job_status_1'] = 'New';
         newData['job_status_2'] = 'New';
         final response = await http.post(
@@ -356,6 +357,8 @@ class JobCardController extends GetxController {
           body: jsonEncode(newData),
         );
         if (response.statusCode == 200) {
+          jobStatus1.value = 'New';
+          jobStatus2.value = 'New';
           final decoded = jsonDecode(response.body);
           JobCardModel newJob = JobCardModel.fromJson(decoded['job_card']);
           jobCardCounter.value.text = newJob.jobNumber ?? '';
@@ -377,6 +380,9 @@ class JobCardController extends GetxController {
           logout();
         }
       } else {
+        if (isJobInvoicesModified.isTrue || isJobModified.isTrue) {
+          showSnackBar('Updating', 'Please Wait');
+        }
         if (isJobModified.isTrue) {
           Uri updatingJobUrl = Uri.parse(
             '$backendUrl/job_cards/update_job_card/$curreentJobCardId',
@@ -422,11 +428,36 @@ class JobCardController extends GetxController {
                         (item.isModified == true ||
                         item.added == true ||
                         (item.deleted == true && item.id != null)),
-                  ).map((item)=> item.toJson())
+                  )
+                  .map((item) => item.toJson())
                   .toList(),
             ),
           );
           if (response.statusCode == 200) {
+            final decoded = jsonDecode(response.body);
+            List updatedItems = decoded['updated_items'];
+            List deletedItems = decoded['deleted_items'];
+            if (deletedItems.isNotEmpty) {
+              for (var id in deletedItems) {
+                allInvoiceItems.removeWhere((item) => item.id == id);
+              }
+            }
+            if (updatedItems.isNotEmpty) {
+              for (var item in updatedItems) {
+                var uid = item['uid'];
+                var id = item['_id'];
+                final localIndex = allInvoiceItems.indexWhere(
+                  (item) => item.uid == uid,
+                );
+
+                if (localIndex != -1) {
+                  allInvoiceItems[localIndex].id = id;
+                  allInvoiceItems[localIndex].added = false;
+                  allInvoiceItems[localIndex].isModified = false;
+                  allInvoiceItems[localIndex].deleted = false;
+                }
+              }
+            }
             showSnackBar('Done', 'Updated Successfully');
             isJobInvoicesModified.value = false;
           } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
@@ -441,128 +472,13 @@ class JobCardController extends GetxController {
           }
         }
       }
+      canAddInternalNotesAndInvoiceItems.value = true;
+      addingNewValue.value = false;
     } catch (e) {
-      print(e);
+      showSnackBar('Alert', 'Something went wrong please try again');
+      addingNewValue.value = false;
     }
   }
-
-  // Future<void> addNewJobCard() async {
-  //   try {
-  //     if (jobStatus1.value != 'New' && jobStatus1.value != '') {
-  //       showSnackBar('Alert', 'Only new jobs can be edited');
-  //       return;
-  //     }
-  //     showSnackBar('Adding', 'Please Wait');
-  //     addingNewValue.value = true;
-  // Map<String, dynamic> newData = {
-  //   'label': '',
-  //   'job_status_1': jobStatus1.value,
-  //   'job_status_2': jobStatus2.value,
-  //   'car_brand_logo': carBrandLogo.value,
-  //   'company_id': companyId.value,
-  //   'car_brand': carBrandId.value,
-  //   'car_model': carModelId.value,
-  //   'plate_number': plateNumber.text,
-  //   'plate_code': plateCode.text,
-  //   'country': countryId.value,
-  //   'city': cityId.value,
-  //   'year': year.text,
-  //   'color': colorId.value,
-  //   'engine_type': engineTypeId.value,
-  //   'vehicle_identification_number': vin.text,
-  //   'transmission_type': transmissionType.text,
-  //   'mileage_in': mileageIn.value.text,
-  //   'fuel_amount': fuelAmount.value.text,
-  //   'mileage_out': mileageOut.value.text,
-  //   'mileage_in_out_diff': inOutDiff.value.text,
-  //   'customer': customerId.value,
-  //   'contact_name': customerEntityName.text,
-  //   'contact_number': customerEntityPhoneNumber.text,
-  //   'contact_email': customerEntityEmail.text,
-  //   'credit_limit': customerCreditNumber.text,
-  //   'outstanding': customerOutstanding.text,
-  //   'saleMan': customerSaleManId.value,
-  //   'branch': customerBranchId.value,
-  //   'currency': customerCurrencyId.value,
-  //   'rate': customerCurrencyRate.text,
-  //   'payment_method': payType.value,
-  //   'job_number': jobCardCounter.value.text,
-  //   'invoice_number': invoiceCounter.value.text,
-  //   'lpo_number': lpoCounter.value.text,
-  //   'job_approval_date': approvalDate.value.text,
-  //   'job_start_date': startDate.value.text,
-  //   'job_cancelation_date': jobCancelationDate.value.text,
-  //   'job_finish_date': finishDate.value.text,
-  //   'job_delivery_date': deliveryDate.value.text,
-  //   'job_warrenty_days': jobWarrentyDays.value.text,
-  //   'job_warrenty_km': jobWarrentyKM.value.text,
-  //   'job_warrenty_end_date': jobWarrentyEndDate.value.text,
-  //   'job_min_test_km': minTestKms.value.text,
-  //   'job_reference_1': reference1.value.text,
-  //   'job_reference_2': reference2.value.text,
-  //   'delivery_time': deliveryTime.value.text,
-  //   'job_notes': jobNotes.text,
-  //   'job_delivery_notes': deliveryNotes.text,
-  // };
-
-  //     final rawDate = jobCardDate.value.text.trim();
-  //     if (rawDate.isNotEmpty) {
-  //       try {
-  //         newData['job_date'] = Timestamp.fromDate(format.parseStrict(rawDate));
-  //       } catch (e) {
-  //         // إذا حابب تعرض للمستخدم خطأ في التنسيق
-  //         // print('Invalid quotation_date format: $e');
-  //       }
-  //     }
-
-  //     final rawDate2 = invoiceDate.value.text.trim();
-  //     if (rawDate2.isNotEmpty) {
-  //       try {
-  //         newData['invoice_date'] = Timestamp.fromDate(
-  //           format.parseStrict(rawDate2),
-  //         );
-  //       } catch (e) {
-  //         // إذا حابب تعرض للمستخدم خطأ في التنسيق
-  //         // print('Invalid quotation_date format: $e');
-  //       }
-  //     }
-
-  //     if (jobCardCounter.value.text.isEmpty) {
-  //       jobStatus1.value = 'New';
-  //       jobStatus2.value = 'New';
-  //       newData['label'] = '';
-
-  //       newData['job_status_1'] = 'New';
-  //       newData['job_status_2'] = 'New';
-  //       await getCurrentJobCardCounterNumber();
-  //       newData['job_number'] = jobCardCounter.value.text;
-  //     }
-
-  //     if (jobCardAdded.isFalse) {
-  //       newData['added_date'] = DateTime.now().toString();
-  //       var newJob = await FirebaseFirestore.instance
-  //           .collection('job_cards')
-  //           .add(newData);
-  //       jobCardAdded.value = true;
-  //       curreentJobCardId.value = newJob.id;
-  //       getAllInvoiceItems(newJob.id);
-  //       showSnackBar('Done', 'Job Added Successfully');
-  //     } else {
-  //       newData.remove('added_date');
-  //       await FirebaseFirestore.instance
-  //           .collection('job_cards')
-  //           .doc(curreentJobCardId.value)
-  //           .update(newData);
-  //       showSnackBar('Done', 'Updated Successfully');
-  //     }
-  //     canAddInternalNotesAndInvoiceItems.value = true;
-  //     addingNewValue.value = false;
-  //   } catch (e) {
-  //     canAddInternalNotesAndInvoiceItems.value = false;
-  //     addingNewValue.value = false;
-  //     showSnackBar('Alert', 'Something Went Wrong');
-  //   }
-  // }
 
   void addNewInvoiceItem() {
     final String uniqueId = _uuid.v4();
@@ -619,6 +535,7 @@ class JobCardController extends GetxController {
         total: double.tryParse(total.text) ?? 0.0,
         vat: double.tryParse(vat.text) ?? 0.0,
         net: double.tryParse(net.text) ?? 0.0,
+        isModified: true,
       );
     }
     isJobInvoicesModified.value = true;
@@ -1525,125 +1442,120 @@ class JobCardController extends GetxController {
   }
 
   Future<void> editApproveForJobCard(String jobId, String status) async {
-    try {
-      approvingJob.value = true;
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({
-            'job_status_2': status,
-            'job_approval_date': DateTime.now().toString(),
-          });
+    if (jobStatus1.value.isEmpty) {
+      showSnackBar('Alert', 'Please Save The Job First');
+      return;
+    }
+    Map jobStatus = await getCurrentJobCardStatus(jobId);
+    String status1 = jobStatus['job_status_1'];
+    String status2 = jobStatus['job_status_2'];
+    if (status1 == 'New' && status2 != 'Approved') {
       approvalDate.value.text = textToDate(DateTime.now());
       jobStatus2.value = 'Approved';
-      approvingJob.value = false;
-      showSnackBar('Done', 'Status is Approved Now');
-    } catch (e) {
-      approvingJob.value = false;
+      isJobModified.value = true;
+    } else if (status2 == 'Approved') {
+      showSnackBar('Alert', 'Job is Already Approved');
+    } else if (status1 == 'Posted') {
+      showSnackBar('Alert', 'Job is Posted');
+    } else if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'Job is Cancelled');
     }
   }
 
   Future<void> editReadyForJobCard(String jobId, String status) async {
-    try {
-      readingJob.value = true;
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({
-            'job_status_2': status,
-            'job_finish_date': DateTime.now().toString(),
-          });
-      finishDate.value.text = textToDate(DateTime.now());
+    if (jobStatus1.value.isEmpty) {
+      showSnackBar('Alert', 'Please Save The Job First');
+      return;
+    }
+    Map jobStatus = await getCurrentJobCardStatus(jobId);
+    String status1 = jobStatus['job_status_1'];
+    String status2 = jobStatus['job_status_2'];
+    if (status1 == 'New' && status2 != 'Ready') {
       jobStatus2.value = 'Ready';
-      readingJob.value = false;
-      showSnackBar('Done', 'Status is Ready Now');
-    } catch (e) {
-      readingJob.value = false;
+      finishDate.value.text = textToDate(DateTime.now());
+      isJobModified.value = true;
+    } else if (status2 == 'Ready') {
+      showSnackBar('Alert', 'Job is Already Ready');
+    } else if (status1 == 'Posted') {
+      showSnackBar('Alert', 'Job is Posted');
+    } else if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'Job is Cancelled');
     }
   }
 
   Future<void> editNewForJobCard(String jobId, String status) async {
-    try {
-      newingJob.value = true;
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({
-            'job_status_2': status,
-            'job_status_1': status,
-            'job_finish_date': '',
-            'job_approval_date': '',
-          });
+    if (jobStatus1.value.isEmpty) {
+      showSnackBar('Alert', 'Please Save The Job First');
+      return;
+    }
+    Map jobStatus = await getCurrentJobCardStatus(jobId);
+    String status1 = jobStatus['job_status_1'];
+    String status2 = jobStatus['job_status_2'];
+    if (status1 == 'New' && status2 != 'New') {
       finishDate.value.text = '';
       approvalDate.value.text = '';
-      jobStatus2.value = 'New';
-      jobStatus1.value = 'New';
-      newingJob.value = false;
-
-      showSnackBar('Done', 'Status is New Now');
-    } catch (e) {
-      newingJob.value = false;
+      jobStatus2.value = status;
+      jobStatus1.value = status;
+      isJobModified.value = true;
+    } else if (status2 == 'New') {
+      showSnackBar('Alert', 'Job is Already New');
+    } else if (status1 == 'Cancelled') {
+      // showSnackBar('Alert', 'Job is Cancelled');
+      finishDate.value.text = '';
+      approvalDate.value.text = '';
+      jobStatus2.value = status;
+      jobStatus1.value = status;
+      isJobModified.value = true;
+    } else if (status1 == 'Posted') {
+      showSnackBar('Alert', 'Job is Posted');
     }
   }
 
   Future<void> editCancelForJobCard(String jobId, String status) async {
-    try {
-      cancellingJob.value = true;
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({
-            'job_status_1': status,
-            'job_status_2': status,
-            'job_cancelation_date': DateTime.now().toString(),
-          });
+    if (jobStatus1.value.isEmpty) {
+      showSnackBar('Alert', 'Please Save The Job First');
+      return;
+    }
+    Map jobStatus = await getCurrentJobCardStatus(jobId);
+    String status1 = jobStatus['job_status_1'];
+    String status2 = jobStatus['job_status_2'];
+    if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'Job is Already Cancelled');
+    } else if (status1 == 'Posted') {
+      showSnackBar('Alert', 'Job is Posted');
+    } else if (status1 != 'Cancelled' &&
+        status2 != 'Cancelled' &&
+        status1 != '') {
       jobCancelationDate.value.text = textToDate(DateTime.now());
       jobStatus1.value = status;
       jobStatus2.value = status;
-      cancellingJob.value = false;
-      showSnackBar('Done', 'Status is Cancelled Now');
-    } catch (e) {
-      cancellingJob.value = false;
     }
   }
 
   Future<void> editPostForJobCard(String jobId) async {
-    try {
-      var status2 = '';
-      postingJob.value = true;
-      var doc = await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .get();
-      var warrEndDate = doc.data()?['job_warrenty_end_date'];
-
-      if (warrEndDate != '') {
-        if (isBeforeToday(jobWarrentyEndDate.value.text)) {
-          status2 = 'Closed';
-        } else {
-          status2 = 'Warranty';
-        }
-        await getCurrentInvoiceCounterNumber();
-        await FirebaseFirestore.instance
-            .collection('job_cards')
-            .doc(jobId)
-            .update({
-              'invoice_number': invoiceCounter.value.text,
-              'invoice_date': DateTime.now().toString(),
-              'job_status_1': 'Posted',
-              'job_status_2': status2,
-            });
-
-        jobStatus1.value = 'Posted';
-        jobStatus2.value = status2;
-        postingJob.value = false;
-        showSnackBar('Done', 'Status is Posted Now');
+    if (jobStatus1.value.isEmpty) {
+      showSnackBar('Alert', 'Please Save The Job First');
+      return;
+    }
+    Map jobStatus = await getCurrentJobCardStatus(jobId);
+    String status1 = jobStatus['job_status_1'];
+    if (status1 == 'Posted') {
+      showSnackBar('Alert', 'Job is Already Posted');
+    } else if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'Job is Cancelled');
+    } else if (jobWarrentyEndDate.value.text.isEmpty &&
+        status1.isNotEmpty &&
+        status1 != 'Cancelled' &&
+        status1 != 'Posted') {
+      showSnackBar('Alert', 'You Must Enter Warranty End Date First');
+    } else {
+      // controllerr.editPostForJobCard(jobId);
+      if (isBeforeToday(jobWarrentyEndDate.value.text)) {
+        jobStatus2.value = 'Closed';
       } else {
-        showSnackBar('Alert', 'Save Job To get the Warrenty End Date');
-        postingJob.value = false;
+        jobStatus2.value = 'Warranty';
       }
-    } catch (e) {
-      postingJob.value = false;
+      jobStatus1.value = 'Posted';
     }
   }
 
