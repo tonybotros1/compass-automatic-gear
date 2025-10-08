@@ -475,8 +475,100 @@ class JobCardController extends GetxController {
       canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
     } catch (e) {
+      print(e);
       showSnackBar('Alert', 'Something went wrong please try again');
       addingNewValue.value = false;
+    }
+  }
+
+  void filterSearch() async {
+    Map<String, dynamic> body = {};
+    if (carBrandIdFilter.value.isNotEmpty) {
+      body["car_brand"] = carBrandIdFilter.value;
+    }
+    if (carModelIdFilter.value.isNotEmpty) {
+      body["car_model"] = carModelIdFilter.value;
+    }
+    if (jobNumberFilter.value.text.isNotEmpty) {
+      body["job_number"] = jobNumberFilter.value.text;
+    }
+    if (invoiceNumberFilter.value.text.isNotEmpty) {
+      body["invoice_number"] = invoiceNumberFilter.value.text;
+    }
+    if (plateNumberFilter.value.text.isNotEmpty) {
+      body["plate_number"] = plateNumberFilter.value.text;
+    }
+    if (vinFilter.value.text.isNotEmpty) {
+      body["vin"] = vinFilter.value.text;
+    }
+    if (statusFilter.value.text.isNotEmpty) {
+      body["status"] = statusFilter.value.text;
+    }
+    if (customerNameIdFilter.value.isNotEmpty) {
+      body["customer_name"] = customerNameIdFilter.value;
+    }
+    if (isTodaySelected.isTrue) {
+      body["today"] = true;
+    }
+    if (isThisMonthSelected.isTrue) {
+      body["this_month"] = true;
+    }
+    if (isThisYearSelected.isTrue) {
+      body["this_year"] = true;
+    }
+    if (fromDate.value.text.isNotEmpty) {
+      body["from_date"] = convertDateToIson(fromDate.value.text);
+    }
+    if (toDate.value.text.isNotEmpty) {
+      body["to_date"] = convertDateToIson(toDate.value.text);
+    }
+    if (body.isNotEmpty) {
+      await searchEngine(body);
+    } else {
+      await searchEngine({"all": true});
+    }
+  }
+
+  Future<void> searchEngine(Map<String, dynamic> body) async {
+    try {
+      isScreenLoding.value = true;
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/job_cards/search_engine_for_job_cards');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List jobs = decoded['job_cards'];
+        Map grandTotals = decoded['grand_totals'];
+        allJobsTotals.value = grandTotals['grand_total'];
+        allJobsVATS.value = grandTotals['grand_vat'];
+        allJobsNET.value = grandTotals['grand_net'];
+        allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
+        numberOfJobs.value = allJobCards.length;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngine(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      isScreenLoding.value = false;
+    } catch (e) {
+      print(e);
+      isScreenLoding.value = false;
     }
   }
 
@@ -498,6 +590,7 @@ class JobCardController extends GetxController {
         total: double.tryParse(total.text) ?? 0.0,
         vat: double.tryParse(vat.text) ?? 0.0,
         net: double.tryParse(net.text) ?? 0.0,
+        jobId: curreentJobCardId.value
       ),
     );
     isJobInvoicesModified.value = true;
@@ -552,29 +645,6 @@ class JobCardController extends GetxController {
     jobWarrentyEndDate.value.text = format.format(newDate);
   }
 
-  Future<void> calculateMoneyForAllJobs() async {
-    // try {
-    //   allJobsVATS.value = 0;
-    //   allJobsTotals.value = 0;
-    //   allJobsNET.value = 0;
-    //   if (allJobCards.isEmpty) {
-    //     return;
-    //   }
-    //   for (var job in allJobCards) {
-    //     allJobsVATS.value +=
-    //         double.tryParse(job.data()['total_vat_amount'].toString()) ?? 0.0;
-    //     allJobsTotals.value +=
-    //         double.tryParse(job.data()['totals_amount'].toString()) ?? 0.0;
-    //     allJobsNET.value +=
-    //         double.tryParse(job.data()['total_net_amount'].toString()) ?? 0.0;
-    //   }
-    // } catch (e) {
-    //   allJobsVATS.value = 0;
-    //   allJobsTotals.value = 0;
-    //   allJobsNET.value = 0;
-    // }
-  }
-
   Future<void> openQuotationCardScreenByNumber() async {
     try {
       openingQuotationCardScreen.value = true;
@@ -608,7 +678,7 @@ class JobCardController extends GetxController {
   // function to manage loading button
   void setButtonLoading(String menuId, bool isLoading) {
     buttonLoadingStates[menuId] = isLoading;
-    buttonLoadingStates.refresh(); // Notify listeners
+    buttonLoadingStates.refresh();
   }
 
   String getScreenName() {
@@ -636,65 +706,13 @@ class JobCardController extends GetxController {
     double sumofVAT = 0.0;
     double sumofNET = 0.0;
 
-    for (var job in allInvoiceItems) {
+    for (var job in allInvoiceItems.where((item)=> item.deleted != true)) {
       sumofTotal += job.total ?? 0;
       sumofNET += job.net ?? 0;
       sumofVAT += job.vat ?? 0;
     }
 
     return [sumofTotal, sumofVAT, sumofNET];
-  }
-
-  Stream<double> calculateAllTotals(String jobId) {
-    return FirebaseFirestore.instance
-        .collection('job_cards')
-        .doc(jobId)
-        .collection('invoice_items')
-        .snapshots()
-        .map((snapshot) {
-          double sumOfTotal = 0.0;
-
-          for (var job in snapshot.docs) {
-            var data = job.data() as Map<String, dynamic>?;
-            sumOfTotal +=
-                double.tryParse(data?['total']?.toString() ?? '0') ?? 0;
-          }
-          return sumOfTotal;
-        });
-  }
-
-  Stream<double> calculateAllVATs(String jobId) {
-    return FirebaseFirestore.instance
-        .collection('job_cards')
-        .doc(jobId)
-        .collection('invoice_items')
-        .snapshots()
-        .map((snapshot) {
-          double sumOfVAT = 0.0;
-
-          for (var job in snapshot.docs) {
-            var data = job.data() as Map<String, dynamic>?;
-            sumOfVAT += double.tryParse(data?['vat']?.toString() ?? '0') ?? 0;
-          }
-          return sumOfVAT;
-        });
-  }
-
-  Stream<double> calculateAllNETs(String jobId) {
-    return FirebaseFirestore.instance
-        .collection('job_cards')
-        .doc(jobId)
-        .collection('invoice_items')
-        .snapshots()
-        .map((snapshot) {
-          double sumOfNET = 0.0;
-
-          for (var job in snapshot.docs) {
-            var data = job.data() as Map<String, dynamic>?;
-            sumOfNET += double.tryParse(data?['net']?.toString() ?? '0') ?? 0;
-          }
-          return sumOfNET;
-        });
   }
 
   void updateCalculating() {
@@ -1011,6 +1029,9 @@ class JobCardController extends GetxController {
   }
 
   Future<void> loadValues(JobCardModel data) async {
+    jobCardAdded.value = true;
+    curreentJobCardId.value = data.id ?? '';
+    allInvoiceItems.value = data.invoiceItemsDetails ?? [];
     quotationCounter.value = data.quotationNumber ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
     jobCancelationDate.value.text = textToDate(data.jobCancellationDate);
@@ -1618,50 +1639,11 @@ class JobCardController extends GetxController {
     }
   }
 
-  void selectCashOrCredit(String selected, bool value) {
-    bool isCash = selected == 'cash';
-
-    isCashSelected.value = isCash ? value : false;
-    isCreditSelected.value = isCash ? false : value;
-    payType.value = isCash ? 'Cash' : 'Credit';
-  }
-
-  Future<String> getCityName(String countryId, String cityId) async {
-    try {
-      var cities = await FirebaseFirestore.instance
-          .collection('all_countries')
-          .doc(countryId)
-          .collection('values')
-          .doc(cityId)
-          .get();
-
-      if (cities.exists) {
-        return cities.data()!['name'].toString();
-      } else {
-        return '';
-      }
-    } catch (e) {
-      return ''; // Return empty string on error
-    }
-  }
-
-  Future<String> getModelName(String brandId, String modelId) async {
-    try {
-      var cities = await FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .doc(modelId)
-          .get();
-
-      if (cities.exists) {
-        return cities.data()!['name'];
-      } else {
-        return '';
-      }
-    } catch (e) {
-      return ''; // Return empty string on error
-    }
+  void selectCashOrCredit(String selected) {
+    bool isCash = selected == 'Cash';
+    isCashSelected.value = isCash;
+    isCreditSelected.value = !isCash;
+    payType.value = selected;
   }
 
   void inOutDiffCalculating() {
@@ -1793,24 +1775,6 @@ class JobCardController extends GetxController {
         });
   }
 
-  void getAllInvoiceItems(String jobId) {
-    // try {
-    //   loadingInvoiceItems.value = true;
-    //   FirebaseFirestore.instance
-    //       .collection('job_cards')
-    //       .doc(jobId)
-    //       .collection('invoice_items')
-    //       .orderBy('line_number')
-    //       .snapshots()
-    //       .listen((QuerySnapshot<Map<String, dynamic>> items) {
-    //         allInvoiceItems.assignAll(items.docs);
-    //         loadingInvoiceItems.value = false;
-    //       });
-    // } catch (e) {
-    //   loadingInvoiceItems.value = false;
-    // }
-  }
-
   String getdataName(String id, Map allData, {title = 'name'}) {
     try {
       final data = allData.entries.firstWhere((data) => data.key == id);
@@ -1837,145 +1801,138 @@ class JobCardController extends GetxController {
     customerSaleMan.value = selectedCustomer['salesman'] ?? "";
   }
 
-  Future<void> searchEngine() async {
-    isScreenLoding.value = true;
+  // Future<void> searchEngine() async {
+  //   isScreenLoding.value = true;
 
-    // Start with the base query for the company.
-    Query<Map<String, dynamic>> query = FirebaseFirestore.instance
-        .collection('job_cards')
-        .where('company_id', isEqualTo: companyId.value);
+  //   // Start with the base query for the company.
+  //   Query<Map<String, dynamic>> query = FirebaseFirestore.instance
+  //       .collection('job_cards')
+  //       .where('company_id', isEqualTo: companyId.value);
 
-    // 1. APPLY DATE FILTERS TO THE FIRESTORE QUERY
-    // This requires only ONE composite index: (company_id, job_date).
+  //   // 1. APPLY DATE FILTERS TO THE FIRESTORE QUERY
+  //   // This requires only ONE composite index: (company_id, job_date).
 
-    if (isAllSelected.value) {
-      // If "All" is selected, we don't apply any date filter to the Firestore query.
-      // We will fetch all documents for the company.
-    } else if (isTodaySelected.value) {
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
-      fromDate.value.text = textToDate(startOfDay);
-      toDate.value.text = textToDate(endOfDay);
-      query = query
-          .where(
-            'job_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
-          )
-          .where('job_date', isLessThan: Timestamp.fromDate(endOfDay));
-    } else if (isThisMonthSelected.value) {
-      final now = DateTime.now();
-      final startOfMonth = DateTime(now.year, now.month, 1);
-      final endOfMonth = (now.month < 12)
-          ? DateTime(now.year, now.month + 1, 1)
-          : DateTime(now.year + 1, 1, 1);
-      fromDate.value.text = textToDate(startOfMonth);
-      toDate.value.text = textToDate(endOfMonth);
-      query = query
-          .where(
-            'job_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
-          )
-          .where('job_date', isLessThan: Timestamp.fromDate(endOfMonth));
-    } else if (isThisYearSelected.value) {
-      final now = DateTime.now();
-      final startOfYear = DateTime(now.year, 1, 1);
-      final endOfYear = DateTime(now.year + 1, 1, 1);
-      fromDate.value.text = textToDate(startOfYear);
-      toDate.value.text = textToDate(endOfYear);
-      query = query
-          .where(
-            'job_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
-          )
-          .where('job_date', isLessThan: Timestamp.fromDate(endOfYear));
-    } else {
-      // Manual date range
-      if (fromDate.value.text.trim().isNotEmpty) {
-        try {
-          final dtFrom = format.parseStrict(fromDate.value.text.trim());
-          query = query.where(
-            'job_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
-          );
-        } catch (_) {}
-      }
-      if (toDate.value.text.trim().isNotEmpty) {
-        try {
-          final dtTo = format
-              .parseStrict(toDate.value.text.trim())
-              .add(const Duration(days: 1));
-          query = query.where('job_date', isLessThan: Timestamp.fromDate(dtTo));
-        } catch (_) {}
-      }
-    }
+  //   if (isAllSelected.value) {
+  //     // If "All" is selected, we don't apply any date filter to the Firestore query.
+  //     // We will fetch all documents for the company.
+  //   } else if (isTodaySelected.value) {
+  //     final now = DateTime.now();
+  //     final startOfDay = DateTime(now.year, now.month, now.day);
+  //     final endOfDay = startOfDay.add(const Duration(days: 1));
+  //     fromDate.value.text = textToDate(startOfDay);
+  //     toDate.value.text = textToDate(endOfDay);
+  //     query = query
+  //         .where(
+  //           'job_date',
+  //           isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+  //         )
+  //         .where('job_date', isLessThan: Timestamp.fromDate(endOfDay));
+  //   } else if (isThisMonthSelected.value) {
+  //     final now = DateTime.now();
+  //     final startOfMonth = DateTime(now.year, now.month, 1);
+  //     final endOfMonth = (now.month < 12)
+  //         ? DateTime(now.year, now.month + 1, 1)
+  //         : DateTime(now.year + 1, 1, 1);
+  //     fromDate.value.text = textToDate(startOfMonth);
+  //     toDate.value.text = textToDate(endOfMonth);
+  //     query = query
+  //         .where(
+  //           'job_date',
+  //           isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+  //         )
+  //         .where('job_date', isLessThan: Timestamp.fromDate(endOfMonth));
+  //   } else if (isThisYearSelected.value) {
+  //     final now = DateTime.now();
+  //     final startOfYear = DateTime(now.year, 1, 1);
+  //     final endOfYear = DateTime(now.year + 1, 1, 1);
+  //     fromDate.value.text = textToDate(startOfYear);
+  //     toDate.value.text = textToDate(endOfYear);
+  //     query = query
+  //         .where(
+  //           'job_date',
+  //           isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
+  //         )
+  //         .where('job_date', isLessThan: Timestamp.fromDate(endOfYear));
+  //   } else {
+  //     // Manual date range
+  //     if (fromDate.value.text.trim().isNotEmpty) {
+  //       try {
+  //         final dtFrom = format.parseStrict(fromDate.value.text.trim());
+  //         query = query.where(
+  //           'job_date',
+  //           isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
+  //         );
+  //       } catch (_) {}
+  //     }
+  //     if (toDate.value.text.trim().isNotEmpty) {
+  //       try {
+  //         final dtTo = format
+  //             .parseStrict(toDate.value.text.trim())
+  //             .add(const Duration(days: 1));
+  //         query = query.where('job_date', isLessThan: Timestamp.fromDate(dtTo));
+  //       } catch (_) {}
+  //     }
+  //   }
 
-    // 2. EXECUTE THE FIRESTORE QUERY
-    // Fetch all documents matching the company and date range.
-    final snapshot = await query.get();
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedJobCards =
-        snapshot.docs;
+  //   // 2. EXECUTE THE FIRESTORE QUERY
+  //   // Fetch all documents matching the company and date range.
+  //   final snapshot = await query.get();
+  //   List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedJobCards =
+  //       snapshot.docs;
 
-    // 3. APPLY ALL OTHER FILTERS ON THE CLIENT-SIDE
-    // Filter the 'fetchedJobCards' list in memory.
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredJobCards =
-        fetchedJobCards.where((doc) {
-          final data = doc.data();
+  //   // 3. APPLY ALL OTHER FILTERS ON THE CLIENT-SIDE
+  //   // Filter the 'fetchedJobCards' list in memory.
+  //   List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredJobCards =
+  //       fetchedJobCards.where((doc) {
+  //         final data = doc.data();
 
-          // Job Number Filter
-          if (jobNumberFilter.value.text.trim().isNotEmpty &&
-              data['job_number'] != jobNumberFilter.value.text.trim()) {
-            return false;
-          }
-          // Status Filter
-          if (statusFilter.value.text.trim().isNotEmpty &&
-              data['job_status_1'] != statusFilter.value.text.trim()) {
-            return false;
-          }
-          // Car Brand Filter
-          if (carBrandIdFilter.value.isNotEmpty &&
-              data['car_brand'] != carBrandIdFilter.value) {
-            return false;
-          }
-          // Car Model Filter
-          if (carModelIdFilter.value.isNotEmpty &&
-              data['car_model'] != carModelIdFilter.value) {
-            return false;
-          }
-          // Plate Number Filter
-          if (plateNumberFilter.value.text.trim().isNotEmpty &&
-              data['plate_number'] != plateNumberFilter.value.text.trim()) {
-            return false;
-          }
-          // VIN Filter
-          if (vinFilter.value.text.trim().isNotEmpty &&
-              data['vehicle_identification_number'] !=
-                  vinFilter.value.text.trim()) {
-            return false;
-          }
-          // Customer Filter
-          if (customerNameIdFilter.value.isNotEmpty &&
-              data['customer'] != customerNameIdFilter.value) {
-            return false;
-          }
+  //         // Job Number Filter
+  //         if (jobNumberFilter.value.text.trim().isNotEmpty &&
+  //             data['job_number'] != jobNumberFilter.value.text.trim()) {
+  //           return false;
+  //         }
+  //         // Status Filter
+  //         if (statusFilter.value.text.trim().isNotEmpty &&
+  //             data['job_status_1'] != statusFilter.value.text.trim()) {
+  //           return false;
+  //         }
+  //         // Car Brand Filter
+  //         if (carBrandIdFilter.value.isNotEmpty &&
+  //             data['car_brand'] != carBrandIdFilter.value) {
+  //           return false;
+  //         }
+  //         // Car Model Filter
+  //         if (carModelIdFilter.value.isNotEmpty &&
+  //             data['car_model'] != carModelIdFilter.value) {
+  //           return false;
+  //         }
+  //         // Plate Number Filter
+  //         if (plateNumberFilter.value.text.trim().isNotEmpty &&
+  //             data['plate_number'] != plateNumberFilter.value.text.trim()) {
+  //           return false;
+  //         }
+  //         // VIN Filter
+  //         if (vinFilter.value.text.trim().isNotEmpty &&
+  //             data['vehicle_identification_number'] !=
+  //                 vinFilter.value.text.trim()) {
+  //           return false;
+  //         }
+  //         // Customer Filter
+  //         if (customerNameIdFilter.value.isNotEmpty &&
+  //             data['customer'] != customerNameIdFilter.value) {
+  //           return false;
+  //         }
 
-          // If the document passed all filters, keep it.
-          return true;
-        }).toList();
+  //         // If the document passed all filters, keep it.
+  //         return true;
+  //       }).toList();
 
-    // 4. UPDATE THE UI
-    // allJobCards.assignAll(filteredJobCards);
-    numberOfJobs.value = allJobCards.length;
-    calculateMoneyForAllJobs(); // Make sure this function iterates over the final list
-    isScreenLoding.value = false;
-  }
-
-  void removeFilters() {
-    isAllSelected.value = false;
-    isTodaySelected.value = false;
-    isThisMonthSelected.value = false;
-    isThisYearSelected.value = false;
-  }
+  //   // 4. UPDATE THE UI
+  //   // allJobCards.assignAll(filteredJobCards);
+  //   numberOfJobs.value = allJobCards.length;
+  //   calculateMoneyForAllJobs(); // Make sure this function iterates over the final list
+  //   isScreenLoding.value = false;
+  // }
 
   void clearAllFilters() {
     statusFilter.value.clear();

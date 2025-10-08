@@ -18,6 +18,7 @@ class JobCardInvoiceItemsModel {
   bool? isModified;
   bool? deleted;
   bool? added;
+  String? jobId;
 
   JobCardInvoiceItemsModel({
     this.id,
@@ -39,6 +40,7 @@ class JobCardInvoiceItemsModel {
     this.added,
     this.deleted,
     this.isModified,
+    this.jobId
   });
 
   JobCardInvoiceItemsModel.fromJson(Map<String, dynamic> json) {
@@ -82,6 +84,7 @@ class JobCardInvoiceItemsModel {
     data['is_modified'] = isModified;
     data['deleted'] = deleted;
     data['added'] = added;
+    data['job_card_id'] = jobId;
     return data;
   }
 }

@@ -117,6 +117,11 @@ class JobCard extends StatelessWidget {
                                     value['entity_name'];
                                 controller.customerNameIdFilter.value = key;
                               },
+                              onDelete: () {
+                                controller.customerNameIdFilterName.value
+                                    .clear();
+                                controller.customerNameIdFilter.value = "";
+                              },
                               items: isCustomersLoading
                                   ? {}
                                   : controller.allCustomers,
@@ -143,7 +148,7 @@ class JobCard extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 10),
-                  GetBuilder<JobCardController>(
+                  GetX<JobCardController>(
                     builder: (controller) {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -163,9 +168,6 @@ class JobCard extends StatelessWidget {
                                         controller.fromDate.value.text,
                                         controller.fromDate.value,
                                       );
-                                      // if (nor) {
-                                      //   controller.searchEngine();
-                                      // }
                                     },
                                   ),
                                 ),
@@ -178,9 +180,6 @@ class JobCard extends StatelessWidget {
                                         controller.toDate.value.text,
                                         controller.toDate.value,
                                       );
-                                      // if (nor) {
-                                      //   controller.searchEngine();
-                                      // }
                                     },
                                   ),
                                 ),
@@ -198,7 +197,6 @@ class JobCard extends StatelessWidget {
                                     controller.carBrandId.value = '';
                                     controller.carModelId.value = '';
                                     controller.allModels.clear();
-                                    controller.searchEngine();
                                   },
                                   child: const Text('All'),
                                 ),
@@ -219,7 +217,6 @@ class JobCard extends StatelessWidget {
                                           controller.isMonthSelected.value =
                                               false;
                                           controller.isDaySelected.value = true;
-                                          controller.searchEngine();
                                         }
                                       : null,
                                   child: const Text('Today'),
@@ -243,7 +240,6 @@ class JobCard extends StatelessWidget {
                                               true;
                                           controller.isDaySelected.value =
                                               false;
-                                          controller.searchEngine();
                                         }
                                       : null,
                                   child: const Text('This Month'),
@@ -265,34 +261,30 @@ class JobCard extends StatelessWidget {
                                               false;
                                           controller.isDaySelected.value =
                                               false;
-                                          controller.searchEngine();
                                         }
                                       : null,
                                   child: const Text('This Year'),
                                 ),
                                 ElevatedButton(
                                   style: saveButtonStyle,
-                                  onPressed:
-                                      controller.isThisYearSelected.isFalse
+                                  onPressed: controller.isScreenLoding.isFalse
                                       ? () async {
-                                          controller.removeFilters();
-                                          controller.searchEngine();
+                                          controller.filterSearch();
                                         }
                                       : null,
-                                  child: Text(
-                                    'Find',
-                                    style: fontStyleForElevatedButtons,
-                                  ),
+                                  child: controller.isScreenLoding.isFalse
+                                      ? Text(
+                                          'Find',
+                                          style: fontStyleForElevatedButtons,
+                                        )
+                                      : loadingProcess,
                                 ),
                                 ElevatedButton(
                                   style: clearVariablesButtonStyle,
-                                  onPressed:
-                                      controller.isThisYearSelected.isFalse
-                                      ? () {
-                                          controller.clearAllFilters();
-                                          controller.update();
-                                        }
-                                      : null,
+                                  onPressed: () {
+                                    controller.clearAllFilters();
+                                    // controller.update();
+                                  },
                                   child: Text(
                                     'Clear Filters',
                                     style: fontStyleForElevatedButtons,
@@ -360,31 +352,24 @@ class JobCard extends StatelessWidget {
                   GetX<JobCardController>(
                     builder: (controller) {
                       return Container(
-                        // height: controller.allJobCards.isEmpty ? 300 : null,
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Column(
                           children: [
-                            controller.isScreenLoding.isTrue &&
-                                    controller.allJobCards.isEmpty
-                                ? Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: loadingProcess,
-                                  )
-                                : SizedBox(
-                                    width: constraints.maxWidth,
-                                    child: tableOfScreens(
-                                      showHistoryButton: true,
-                                      scrollController:
-                                          controller.scrollControllerFotTable1,
-                                      constraints: constraints,
-                                      context: context,
-                                      controller: controller,
-                                      data: controller.allJobCards,
-                                    ),
-                                  ),
+                            SizedBox(
+                              width: constraints.maxWidth,
+                              child: tableOfScreens(
+                                showHistoryButton: true,
+                                scrollController:
+                                    controller.scrollControllerFotTable1,
+                                constraints: constraints,
+                                context: context,
+                                controller: controller,
+                                data: controller.allJobCards,
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -439,12 +424,8 @@ Widget tableOfScreens({
   required ScrollController scrollController,
   required bool showHistoryButton,
 }) {
-  final dataSource = CardDataSource(
-    cards: data,
-    context: context,
-    constraints: constraints,
-    controller: controller,
-  );
+  bool isJobsLoading = data.isEmpty;
+
   return DataTableTheme(
     data: DataTableThemeData(
       headingTextStyle: fontStyleForTableHeader,
@@ -467,9 +448,6 @@ Widget tableOfScreens({
         dataRowMinHeight: 30,
         headingRowHeight: 70,
         columnSpacing: 15,
-        // showBottomBorder: true,
-        // dataTextStyle: regTextStyle,
-        // headingTextStyle: fontStyleForTableHeader,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
         headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
@@ -534,24 +512,26 @@ Widget tableOfScreens({
           ),
           DataColumn(
             numeric: true,
-            headingRowAlignment: MainAxisAlignment.end,
             label: columnForTable(constraints, '', 'Totals'),
             // onSort: controller.onSort,
           ),
           DataColumn(
             numeric: true,
-            headingRowAlignment: MainAxisAlignment.end,
             label: columnForTable(constraints, '', 'VAT'),
             // onSort: controller.onSort,
           ),
           DataColumn(
             numeric: true,
-            headingRowAlignment: MainAxisAlignment.end,
             label: columnForTable(constraints, '', 'NET'),
             // onSort: controller.onSort,
           ),
         ],
-        source: dataSource,
+        source: CardDataSource(
+          cards: isJobsLoading ? [] : data,
+          context: context,
+          constraints: constraints,
+          controller: controller,
+        ),
       ),
     ),
   );
@@ -601,10 +581,12 @@ DataRow dataRowForTheTable(
             : const SizedBox(),
       ),
 
-      DataCell(textForDataRowInTable(text: '${jobData.jobNumber}')),
+      DataCell(textForDataRowInTable(text: jobData.jobNumber ?? "")),
       DataCell(
         textForDataRowInTable(
-          text: jobData.jobNumber != '' ? textToDate(jobData.jobDate) : '',
+          text: jobData.jobNumber != ''
+              ? textToDate(jobData.jobDate ?? "")
+              : '',
         ),
       ),
       DataCell(
@@ -676,9 +658,7 @@ Widget editSection(
 ) {
   return GetX<JobCardController>(
     builder: (controller) {
-      // Always read the reactive map here so GetX rebuilds when it changes
       final isLoading = controller.buttonLoadingStates[jobId] ?? false;
-
       return IconButton(
         tooltip: 'Edit',
         onPressed: isLoading
@@ -687,12 +667,10 @@ Widget editSection(
                 controller.setButtonLoading(jobId, true);
 
                 try {
-                  controller.getAllInvoiceItems(jobId);
-                  controller.currentCountryVAT.value = controller.getdataName(
-                    controller.companyDetails['contact_details']['country'],
-                    controller.allCountries,
-                    title: 'vat',
-                  );
+                  controller.currentCountryVAT.value =
+                      controller.companyDetails.containsKey('country_vat')
+                      ? controller.companyDetails['country_vat'].toString()
+                      : "";
                   await controller.loadValues(jobData);
                   editJobCardDialog(controller, jobData, jobId);
                 } finally {
@@ -815,7 +793,7 @@ Future<dynamic> editJobCardDialog(
                             point(),
                             internalNotesButton(controller, constraints, jobId),
                             separator(),
-                            saveJobButton(() => controller.editJobCard(jobId)),
+                            saveJobButton(() => controller.addNewJobCard()),
                             point(),
                             copyJobButton(jobId, context),
                             point(),

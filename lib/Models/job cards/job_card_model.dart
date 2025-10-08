@@ -148,116 +148,123 @@ class JobCardModel {
     this.technicianName,
     this.date,
   });
-JobCardModel.fromJson(Map<String, dynamic> json) {
-  id = json['_id'] ?? '';
-  quotationId = json['quotation_id'] ?? '';
-  quotationNumber = json['quotation_number'] ?? '';
-  label = json['label'] ?? '';
-  jobStatus1 = json['job_status_1'] ?? '';
-  jobStatus2 = json['job_status_2'] ?? '';
-  carBrandLogo = json['car_brand_logo'] ?? '';
-  carBrand = json['car_brand'] ?? '';
-  carModel = json['car_model'] ?? '';
-  plateNumber = json['plate_number'] ?? '';
-  plateCode = json['plate_code'] ?? '';
-  country = json['country'] ?? '';
-  city = json['city'] ?? '';
-  year = json['year'] ?? '';
-  color = json['color'] ?? '';
-  engineType = json['engine_type'] ?? '';
-  vehicleIdentificationNumber = json['vehicle_identification_number'] ?? '';
-  transmissionType = json['transmission_type'] ?? '';
-  mileageIn = json['mileage_in'] ?? 0;
-  mileageOut = json['mileage_out'] ?? 0;
-  mileageInOutDiff = json['mileage_in_out_diff'] ?? 0;
-  fuelAmount = json['fuel_amount'] ?? 0;
-  customer = json['customer'] ?? '';
-  contactName = json['contact_name'] ?? '';
-  contactEmail = json['contact_email'] ?? '';
-  contactNumber = json['contact_number'] ?? '';
-  creditLimit = json['credit_limit'] ?? 0;
-  outstanding = json['outstanding'] ?? 0;
-  salesman = json['salesman'] ?? '';
-  branch = json['branch'] ?? '';
-  currency = json['currency'] ?? '';
-  rate = json['rate'] ?? 0;
-  paymentMethod = json['payment_method'] ?? '';
-  lpoNumber = json['lpo_number'] ?? '';
+  JobCardModel.fromJson(Map<String, dynamic> json) {
+    id = json['_id'] ?? '';
+    quotationId = json['quotation_id'] ?? '';
+    quotationNumber = json['quotation_number'] ?? '';
+    label = json['label'] ?? '';
+    jobStatus1 = json['job_status_1'] ?? '';
+    jobStatus2 = json['job_status_2'] ?? '';
+    carBrandLogo = json['car_brand_logo'] ?? '';
+    carBrand = json['car_brand'] ?? '';
+    carModel = json['car_model'] ?? '';
+    plateNumber = json['plate_number'] ?? '';
+    plateCode = json['plate_code'] ?? '';
+    country = json['country'] ?? '';
+    city = json['city'] ?? '';
+    year = json['year']?.toString() ?? '';
+    color = json['color'] ?? '';
+    engineType = json['engine_type'] ?? '';
+    vehicleIdentificationNumber = json['vehicle_identification_number'] ?? '';
+    transmissionType = json['transmission_type'] ?? '';
+    mileageIn = json['mileage_in'] ?? 0;
+    mileageOut = json['mileage_out'] ?? 0;
+    mileageInOutDiff = json['mileage_in_out_diff'] ?? 0;
+    fuelAmount = json['fuel_amount'] ?? 0;
+    customer = json['customer'] ?? '';
+    contactName = json['contact_name'] ?? '';
+    contactEmail = json['contact_email'] ?? '';
+    contactNumber = json['contact_number'] ?? '';
+    creditLimit = json['credit_limit'] ?? 0;
+    outstanding = json['outstanding'] ?? 0;
+    salesman = json['salesman'] ?? '';
+    branch = json['branch'] ?? '';
+    currency = json['currency'] ?? '';
+    rate = json['rate'] ?? 0;
+    paymentMethod = json['payment_method'] ?? '';
+    lpoNumber = json['lpo_number'] ?? '';
 
-  jobApprovalDate = json['job_approval_date'] != null
-      ? DateTime.tryParse(json['job_approval_date'].toString())
-      : null;
-  jobStartDate = json['job_start_date'] != null
-      ? DateTime.tryParse(json['job_start_date'].toString())
-      : null;
-  jobCancellationDate = json['job_cancellation_date'] != null
-      ? DateTime.tryParse(json['job_cancellation_date'].toString())
-      : null;
-  jobFinishDate = json['job_finish_date'] != null
-      ? DateTime.tryParse(json['job_finish_date'].toString())
-      : null;
-  jobDeliveryDate = json['job_delivery_date'] != null
-      ? DateTime.tryParse(json['job_delivery_date'].toString())
-      : null;
+    jobApprovalDate = json['job_approval_date'] != null
+        ? DateTime.tryParse(json['job_approval_date'].toString())
+        : null;
+    jobStartDate = json['job_start_date'] != null
+        ? DateTime.tryParse(json['job_start_date'].toString())
+        : null;
+    jobCancellationDate = json['job_cancellation_date'] != null
+        ? DateTime.tryParse(json['job_cancellation_date'].toString())
+        : null;
+    jobFinishDate = json['job_finish_date'] != null
+        ? DateTime.tryParse(json['job_finish_date'].toString())
+        : null;
+    jobDeliveryDate = json['job_delivery_date'] != null
+        ? DateTime.tryParse(json['job_delivery_date'].toString())
+        : null;
 
-  jobWarrantyDays = json['job_warranty_days'] ?? 0;
-  jobWarrantyKm = json['job_warranty_km'] ?? 0;
-  jobWarrantyEndDate = json['job_warranty_end_date'] != null
-      ? DateTime.tryParse(json['job_warranty_end_date'].toString())
-      : null;
-  jobMinTestKm = json['job_min_test_km'] ?? 0;
-  jobReference1 = json['job_reference_1'] ?? '';
-  jobReference2 = json['job_reference_2'] ?? '';
-  deliveryTime = json['delivery_time'] ?? '';
-  jobNotes = json['job_notes'] ?? '';
-  jobDeliveryNotes = json['job_delivery_notes'] ?? '';
+    jobWarrantyDays = json['job_warranty_days'] ?? 0;
+    jobWarrantyKm = json['job_warranty_km'] ?? 0;
+    jobWarrantyEndDate = json['job_warranty_end_date'] != null
+        ? DateTime.tryParse(json['job_warranty_end_date'].toString())
+        : null;
+    jobMinTestKm = json['job_min_test_km'] ?? 0;
+    jobReference1 = json['job_reference_1'] ?? '';
+    jobReference2 = json['job_reference_2'] ?? '';
+    deliveryTime = json['delivery_time'] ?? '';
+    jobNotes = json['job_notes'] ?? '';
+    jobDeliveryNotes = json['job_delivery_notes'] ?? '';
 
-  jobDate = json['job_date'] != null
-      ? DateTime.tryParse(json['job_date'].toString())
-      : null;
-  invoiceDate = json['invoice_date'] != null
-      ? DateTime.tryParse(json['invoice_date'].toString())
-      : null;
+    jobDate = json['job_date'] != null
+        ? DateTime.tryParse(json['job_date'].toString())
+        : null;
+    invoiceDate = json['invoice_date'] != null
+        ? DateTime.tryParse(json['invoice_date'].toString())
+        : null;
 
-  companyId = json['company_id'] ?? '';
+    companyId = json['company_id'] ?? '';
 
-  createdAt = json['createdAt'] != null
-      ? DateTime.tryParse(json['createdAt'].toString())
-      : null;
-  updatedAt = json['updatedAt'] != null
-      ? DateTime.tryParse(json['updatedAt'].toString())
-      : null;
+    createdAt = json['createdAt'] != null
+        ? DateTime.tryParse(json['createdAt'].toString())
+        : null;
+    updatedAt = json['updatedAt'] != null
+        ? DateTime.tryParse(json['updatedAt'].toString())
+        : null;
 
-  jobNumber = json['job_number'] ?? '';
-  invoiceNumber = json['invoice_number'] ?? '';
+    jobNumber = json['job_number'] ?? '';
+    invoiceNumber = json['invoice_number'] ?? '';
 
-  if (json['invoice_items_details'] != null) {
-    invoiceItemsDetails = (json['invoice_items_details'] as List)
-        .map((v) => JobCardInvoiceItemsModel.fromJson(v))
-        .toList();
+    // ✅ Parse invoice items list
+    if (json['invoice_items_details'] != null) {
+      invoiceItemsDetails = (json['invoice_items_details'] as List)
+          .map((v) => JobCardInvoiceItemsModel.fromJson(v))
+          .toList();
+    } else {
+      invoiceItemsDetails = [];
+    }
+
+    // ✅ Names from lookups
+    carBrandName = json['car_brand_name'] ?? '';
+    carModelName = json['car_model_name'] ?? '';
+    countryName = json['country_name'] ?? '';
+    cityName = json['city_name'] ?? '';
+    colorName = json['color_name'] ?? '';
+    engineTypeName = json['engine_type_name'] ?? '';
+    customerName = json['customer_name'] ?? '';
+    salesmanName = json['salesman_name'] ?? '';
+    branchName = json['branch_name'] ?? '';
+    currencyCode = json['currency_code'] ?? '';
+
+    // ✅ Totals (fixed to match backend field names)
+    totals = json['total_amount'] ?? 0;
+    vat = json['total_vat'] ?? 0;
+    net = json['total_net'] ?? 0;
+
+    // ✅ Optional extra fields
+    technician = json['technician'] ?? '';
+    technicianName = json['technician_name'] ?? '';
+
+    date = json['date'] != null
+        ? DateTime.tryParse(json['date'].toString())
+        : null;
   }
-
-  carBrandName = json['car_brand_name'] ?? '';
-  carModelName = json['car_model_name'] ?? '';
-  countryName = json['country_name'] ?? '';
-  cityName = json['city_name'] ?? '';
-  colorName = json['color_name'] ?? '';
-  engineTypeName = json['engine_type_name'] ?? '';
-  customerName = json['customer_name'] ?? '';
-  salesmanName = json['salesman_name'] ?? '';
-  branchName = json['branch_name'] ?? '';
-  currencyCode = json['currency_code'] ?? '';
-
-  totals = json['totals'] ?? 0;
-  net = json['net'] ?? 0;
-  vat = json['vat'] ?? 0;
-  technician = json['technician'] ?? '';
-  technicianName = json['technician_name'] ?? '';
-
-  date = json['date'] != null
-      ? DateTime.tryParse(json['date'].toString())
-      : null;
-}
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};

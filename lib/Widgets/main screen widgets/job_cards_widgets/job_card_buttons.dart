@@ -110,7 +110,7 @@ GetX<JobCardController> saveJobButton(void Function() onSave) {
             : () {
                 onSave();
               },
-        text: controller.addingNewValue.value ? 'Save' : "•••",
+        text: controller.addingNewValue.isFalse ? 'Save' : "•••",
       );
     },
   );
@@ -214,7 +214,7 @@ GetBuilder<JobCardController> copyJobButton(
             showSnackBar('Copying', 'Please Wait');
 
             var newData = await controller.copyJob(jobId);
-            controller.getAllInvoiceItems(newData['newId']);
+            // controller.getAllInvoiceItems(newData['newId']);
             await controller.loadValues(newData['data']);
             controller.loadingCopyJob.value = false;
             editJobCardDialog(controller, newData['data'], newData['newId']);
