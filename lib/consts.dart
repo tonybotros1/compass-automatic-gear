@@ -578,6 +578,7 @@ void showSnackBar(String title, String body) {
     isDismissible: true,
     forwardAnimationCurve: Curves.easeOutBack,
     animationDuration: const Duration(milliseconds: 500),
+    overlayColor: Colors.transparent, // 👈 allows click-through
   );
 }
 
@@ -848,7 +849,7 @@ Widget closeIcon() {
 }
 
 String? convertDateToIson(String date) {
-  if (date.isEmpty){
+  if (date.isEmpty) {
     return null;
   }
   final parsedDate = format.parse(date);
@@ -856,41 +857,150 @@ String? convertDateToIson(String date) {
   return isoDate;
 }
 
+// bool isBeforeToday(String dateStr) {
+//   if (dateStr.isEmpty) return false;
+//   print(dateStr);
+
+//   // List of possible date formats
+//   final formats = [
+//   // --- Date only ---
+//   DateFormat("dd-MM-yyyy"),
+//   DateFormat("yyyy-MM-dd"),
+//   DateFormat("MM/dd/yyyy"),
+//   DateFormat("dd/MM/yyyy"),
+//   DateFormat("yyyy/MM/dd"),
+//   DateFormat("yyyyMMdd"),
+//   DateFormat("dd MMM yyyy"),
+//   DateFormat("MMM dd, yyyy"),
+
+//   // --- Date + Time (24-hour) ---
+//   DateFormat("dd-MM-yyyy HH:mm"),
+//   DateFormat("dd-MM-yyyy HH:mm:ss"),
+//   DateFormat("dd-MM-yyyy HH:mm:ss.SSS"), // with milliseconds
+//   DateFormat("yyyy-MM-dd HH:mm"),
+//   DateFormat("yyyy-MM-dd HH:mm:ss"),
+//   DateFormat("yyyy-MM-dd HH:mm:ss.SSS"), // with milliseconds
+//   DateFormat("MM/dd/yyyy HH:mm"),
+//   DateFormat("MM/dd/yyyy HH:mm:ss"),
+//   DateFormat("MM/dd/yyyy HH:mm:ss.SSS"),
+//   DateFormat("dd/MM/yyyy HH:mm"),
+//   DateFormat("dd/MM/yyyy HH:mm:ss"),
+//   DateFormat("dd/MM/yyyy HH:mm:ss.SSS"),
+
+//   // --- Date + Time (12-hour with AM/PM) ---
+//   DateFormat("dd-MM-yyyy hh:mm a"),
+//   DateFormat("dd-MM-yyyy hh:mm:ss a"),
+//   DateFormat("yyyy-MM-dd hh:mm a"),
+//   DateFormat("yyyy-MM-dd hh:mm:ss a"),
+//   DateFormat("MM/dd/yyyy hh:mm a"),
+//   DateFormat("MM/dd/yyyy hh:mm:ss a"),
+//   DateFormat("dd/MM/yyyy hh:mm a"),
+//   DateFormat("dd/MM/yyyy hh:mm:ss a"),
+
+//   // --- With month name + time ---
+//   DateFormat("dd MMM yyyy HH:mm"),
+//   DateFormat("dd MMM yyyy HH:mm:ss"),
+//   DateFormat("dd MMM yyyy HH:mm:ss.SSS"),
+//   DateFormat("MMM dd, yyyy HH:mm"),
+//   DateFormat("MMM dd, yyyy hh:mm a"),
+// ];
+
+//   DateTime? inputDate;
+
+//   for (var format in formats) {
+//     try {
+//       inputDate = format.parseStrict(dateStr);
+//       break; // parsed successfully, exit loop
+//     } catch (_) {
+//       continue; // try next format
+//     }
+//   }
+
+//   if (inputDate == null) {
+//     // Could not parse the date
+//     return false;
+//   }
+
+//   DateTime today = DateTime.now();
+//   DateTime todayOnly = DateTime(today.year, today.month, today.day);
+
+//   return inputDate.isBefore(todayOnly);
+// }
+
 bool isBeforeToday(String dateStr) {
-  if (dateStr.isEmpty) return false;
+  if (dateStr.trim().isEmpty) return false;
 
-  // List of possible date formats
-  final formats = [
-    DateFormat("dd-MM-yyyy"),
-    DateFormat("yyyy-MM-dd"),
-    DateFormat("MM/dd/yyyy"),
-    DateFormat("dd/MM/yyyy"),
-    DateFormat("yyyy/MM/dd"),
-    DateFormat("yyyyMMdd"),
-    DateFormat("dd MMM yyyy"),
-    DateFormat("MMM dd, yyyy"),
-  ];
+  dateStr = dateStr.trim();
 
-  DateTime? inputDate;
+  // ✅ 1. Detect the format quickly using simple regex checks
+  String? pattern;
 
-  for (var format in formats) {
-    try {
-      inputDate = format.parseStrict(dateStr);
-      break; // parsed successfully, exit loop
-    } catch (_) {
-      continue; // try next format
+  // --- ISO / MySQL formats ---
+  if (RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(dateStr)) {
+    pattern = "yyyy-MM-dd";
+  } else if (RegExp(
+    r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2}(\.\d{3})?)?$',
+  ).hasMatch(dateStr)) {
+    pattern = "yyyy-MM-dd HH:mm:ss.SSS";
+  }
+  // --- Slash-separated formats ---
+  else if (RegExp(r'^\d{2}/\d{2}/\d{4}$').hasMatch(dateStr)) {
+    pattern = "dd/MM/yyyy";
+  } else if (RegExp(
+    r'^\d{2}/\d{2}/\d{4} \d{2}:\d{2}(:\d{2})?$',
+  ).hasMatch(dateStr)) {
+    pattern = "dd/MM/yyyy HH:mm:ss";
+  }
+  // --- Dash-separated European style ---
+  else if (RegExp(r'^\d{2}-\d{2}-\d{4}$').hasMatch(dateStr)) {
+    pattern = "dd-MM-yyyy";
+  } else if (RegExp(
+    r'^\d{2}-\d{2}-\d{4} \d{2}:\d{2}(:\d{2})?$',
+  ).hasMatch(dateStr)) {
+    pattern = "dd-MM-yyyy HH:mm:ss";
+  }
+  // --- With month name ---
+  else if (RegExp(r'^\d{2} [A-Za-z]{3,} \d{4}').hasMatch(dateStr)) {
+    pattern = "dd MMM yyyy";
+  } else if (RegExp(r'^[A-Za-z]{3,} \d{2}, \d{4}').hasMatch(dateStr)) {
+    pattern = "MMM dd, yyyy";
+  }
+  // --- Compact style like 20240202 ---
+  else if (RegExp(r'^\d{8}$').hasMatch(dateStr)) {
+    pattern = "yyyyMMdd";
+  }
+  // --- If time + AM/PM ---
+  else if (RegExp(r'(AM|PM)$', caseSensitive: false).hasMatch(dateStr)) {
+    if (dateStr.contains('-')) {
+      pattern = "dd-MM-yyyy hh:mm:ss a";
+    } else if (dateStr.contains('/')) {
+      pattern = "dd/MM/yyyy hh:mm:ss a";
+    } else {
+      pattern = "yyyy-MM-dd hh:mm:ss a";
     }
   }
 
-  if (inputDate == null) {
-    // Could not parse the date
+  // ✅ 2. Parse once using detected pattern
+  DateTime? inputDate;
+  try {
+    if (pattern != null) {
+      inputDate = DateFormat(pattern).parse(dateStr);
+    } else {
+      // fallback: try ISO8601 auto parser
+      inputDate = DateTime.tryParse(dateStr);
+    }
+  } catch (_) {
     return false;
   }
 
-  DateTime today = DateTime.now();
-  DateTime todayOnly = DateTime(today.year, today.month, today.day);
+  if (inputDate == null) return false;
 
-  return inputDate.isBefore(todayOnly);
+  // ✅ 3. Compare only the date parts (ignore time)
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final inputDay = DateTime(inputDate.year, inputDate.month, inputDate.day);
+
+  return inputDay.isBefore(today);
 }
 
 var loadingProcess = SizedBox(

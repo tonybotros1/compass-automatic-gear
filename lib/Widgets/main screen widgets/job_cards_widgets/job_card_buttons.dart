@@ -122,11 +122,11 @@ Widget internalNotesButton(
   String jobId,
 ) {
   return ClickableHoverText(
-    // style: internalNotesButtonStyle,
     onTap: () async {
       if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
         controller.noteMessage.value = '';
         controller.internalNote.value.clear();
+        controller.getJobCardInternalNotes(jobId);
         internalNotesDialog(controller, constraints, jobId);
       } else {
         showSnackBar('Alert', 'Please Save Job First');
@@ -205,28 +205,11 @@ GetBuilder<JobCardController> copyJobButton(
       return ClickableHoverText(
         // style: copyJobButtonStyle,
         onTap: () async {
-          if (controller.jobStatus1.value == 'New' ||
-              controller.jobStatus1.value == 'Approved' ||
-              controller.jobStatus1.value == 'Ready') {
-            showSnackBar('Alert', 'Only Posted / Cancelled Jobs Can be Copied');
-          } else {
-            Get.back();
-            showSnackBar('Copying', 'Please Wait');
-
-            var newData = await controller.copyJob(jobId);
-            // controller.getAllInvoiceItems(newData['newId']);
-            await controller.loadValues(newData['data']);
-            controller.loadingCopyJob.value = false;
-            editJobCardDialog(controller, newData['data'], newData['newId']);
-            showSnackBar('Done', 'Job Copied Successfully');
-            // alertMessage(
-            //     context: context,
-            //     content: "Job Copied Successfully",
-            //     onPressed: () {
-            //       Get.back();
-            //       // controller.deleteJobCard(jobId);
-            //     });
-          }
+          JobCardModel newData = await controller.copyJob(jobId);
+          await controller.loadValues(newData);
+          controller.loadingCopyJob.value = false;
+          editJobCardDialog(controller, newData, newData.id ?? '');
+          showSnackBar('Done', 'Job Copied Successfully');
         },
         text: 'Copy',
       );

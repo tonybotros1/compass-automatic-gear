@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:datahubai/consts.dart';
 import 'package:uuid/uuid.dart';
+import '../../Models/job cards/internal_notes_model.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/job cards/job_card_model.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
@@ -81,7 +81,8 @@ class JobCardController extends GetxController {
   final RxList<JobCardModel> historyJobCards = RxList<JobCardModel>([]);
   final RxList<JobCardInvoiceItemsModel> allInvoiceItems =
       RxList<JobCardInvoiceItemsModel>([]);
-
+  final RxList<InternalNotesModel> allInternalNotes =
+      RxList<InternalNotesModel>([]);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
@@ -175,6 +176,7 @@ class JobCardController extends GetxController {
   String backendUrl = backendTestURI;
   RxBool isJobModified = RxBool(false);
   RxBool isJobInvoicesModified = RxBool(false);
+  RxBool isJobInternalNotesLoading = RxBool(false);
   @override
   void onInit() async {
     super.onInit();
@@ -475,9 +477,53 @@ class JobCardController extends GetxController {
       canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
     } catch (e) {
-      print(e);
       showSnackBar('Alert', 'Something went wrong please try again');
       addingNewValue.value = false;
+    }
+  }
+
+  Future<void> deleteJobCard(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/job_cards/delete_job_card/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        String deletedJobId = decoded['job_id'];
+        allJobCards.removeWhere((job) => job.id == deletedJobId);
+        Get.close(2);
+        showSnackBar('Success', 'Job card deleted successfully');
+      } else if (response.statusCode == 400 || response.statusCode == 404) {
+        final decoded =
+            jsonDecode(response.body) ?? 'Failed to delete job card';
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'] ?? 'Only New Job Cards Allowed';
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteJobCard(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 500) {
+        final decoded = jsonDecode(response.body);
+        final error =
+            decoded['detail'] ?? 'Server error while deleting job card';
+        showSnackBar('Server Error', error);
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
 
@@ -535,6 +581,7 @@ class JobCardController extends GetxController {
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
+      print(accessToken);
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse('$backendUrl/job_cards/search_engine_for_job_cards');
       final response = await http.post(
@@ -567,7 +614,6 @@ class JobCardController extends GetxController {
 
       isScreenLoding.value = false;
     } catch (e) {
-      print(e);
       isScreenLoding.value = false;
     }
   }
@@ -590,7 +636,7 @@ class JobCardController extends GetxController {
         total: double.tryParse(total.text) ?? 0.0,
         vat: double.tryParse(vat.text) ?? 0.0,
         net: double.tryParse(net.text) ?? 0.0,
-        jobId: curreentJobCardId.value
+        jobId: curreentJobCardId.value,
       ),
     );
     isJobInvoicesModified.value = true;
@@ -635,6 +681,242 @@ class JobCardController extends GetxController {
 
     Get.back();
   }
+
+  Future copyJob(String id) async {
+    try {
+      Map jobStatus = await getCurrentJobCardStatus(id);
+      final status1 = jobStatus['job_status_1'];
+      if (status1 == 'New' || status1 == 'Approved' || status1 == 'Ready') {
+        showSnackBar('Alert', 'Only Posted / Cancelled Jobs Can be Copied');
+        return;
+      }
+      Get.back();
+      showSnackBar('Copying', 'Please Wait');
+
+      loadingCopyJob.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/job_cards/copy_job_card/$id');
+      final response = await http.post(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        var copiedJobData = decoded['copied_job'];
+        JobCardModel copiedJob = JobCardModel.fromJson(copiedJobData);
+        allJobCards.add(copiedJob);
+        return copiedJob;
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await copyJob(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      loadingCopyJob.value = false;
+    } catch (e) {
+      loadingCopyJob.value = false;
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  Future<void> getJobCardInternalNotes(String jobId) async {
+    try {
+      isJobInternalNotesLoading.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards/get_all_internal_notes_for_job_card/$jobId',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List jobInternalNotes = decoded['internal_notes'];
+        allInternalNotes.assignAll(
+          jobInternalNotes.map((note) => InternalNotesModel.fromJson(note)),
+        );
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getJobCardInternalNotes(jobId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      isJobInternalNotesLoading.value = false;
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+      isJobInternalNotesLoading.value = false;
+    }
+  }
+
+  Future<void> addNewInternalNote(
+    String jobId,
+    Map<String, dynamic> note,
+  ) async {
+    try {
+      addingNewInternalNotProcess.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards/add_new_internal_note_for_job_card/$jobId',
+      );
+      final request = http.MultipartRequest('POST', url);
+      request.headers.addAll({
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'multipart/form-data',
+      });
+      if (note.containsKey('note_type')) {
+        if (note['note_type'] == 'text') {
+          request.fields['note'] = note['note'];
+          request.fields['note_type'] = note['note_type'];
+        } else {
+          request.fields['file_name'] = note['file_name'];
+          request.fields['note_type'] = note['note_type'];
+           request.files.add(
+          http.MultipartFile.fromBytes(
+            'media_note',
+            note['media_note'],
+            filename: note['file_name'],
+          ),
+        );
+        }
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        Map<String, dynamic> data = decoded['new_internal_note'];
+        allInternalNotes.add(InternalNotesModel.fromJson(data));
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getJobCardInternalNotes(jobId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewInternalNotProcess.value = false;
+    } catch (e) {
+      print(e);
+      showSnackBar('Alert', 'Something went wrong please try again');
+      addingNewInternalNotProcess.value = false;
+    }
+  }
+
+  // Future<void> addNewInternalNote(
+  //   String jobcardID,
+  //   Map<String, dynamic> note,
+  // ) async {
+  //   try {
+  //     addingNewInternalNotProcess.value = true;
+  //     final jobDoc = FirebaseFirestore.instance
+  //         .collection('job_cards')
+  //         .doc(jobcardID)
+  //         .collection('internal_notes');
+
+  //     if (note['type'] == 'Text') {
+  //       await jobDoc.add(note);
+  //     } else {
+  //       final originalFileName = note['file_name'] as String;
+
+  //       // Extract filename and extension
+  //       final extIndex = originalFileName.lastIndexOf('.');
+  //       final (String fileName, String extension) = extIndex != -1
+  //           ? (
+  //               originalFileName.substring(0, extIndex),
+  //               originalFileName.substring(extIndex + 1),
+  //             )
+  //           : (originalFileName, '');
+
+  //       // Create timestamped filename
+  //       final timestamp = DateTime.now().toIso8601String().replaceAll(
+  //         RegExp(r'[^0-9T-]'),
+  //         '_',
+  //       );
+  //       final storageFileName = extension.isNotEmpty
+  //           ? '${fileName}_$timestamp.$extension'
+  //           : '${fileName}_$timestamp';
+
+  //       // Create storage reference
+  //       final Reference storageRef = FirebaseStorage.instance.ref().child(
+  //         'internal_notes/$storageFileName',
+  //       );
+
+  //       // Determine MIME type
+  //       final mimeType =
+  //           note['type'] as String? ?? getMimeTypeFromExtension(extension);
+
+  //       // Upload file and wait for completion
+  //       final UploadTask uploadTask = storageRef.putData(
+  //         note['note'],
+  //         SettableMetadata(
+  //           contentType: mimeType ?? 'application/octet-stream',
+  //           customMetadata: {'original_filename': originalFileName},
+  //         ),
+  //       );
+
+  //       // Wait for upload to complete
+  //       final TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
+
+  //       // Get download URL after upload completion
+  //       final String fileUrl = await snapshot.ref.getDownloadURL();
+
+  //       // Store the note in Firestore
+  //       await jobDoc.add({
+  //         'file_name': originalFileName,
+  //         'type': mimeType ?? 'application/octet-stream',
+  //         'note': fileUrl,
+  //         'user_id': note['user_id'],
+  //         'time': note['time'],
+  //       });
+  //     }
+  //     addingNewInternalNotProcess.value = false;
+  //   } catch (e) {
+  //     addingNewInternalNotProcess.value = false;
+  //   }
+  // }
 
   // ===============================================================================================================
   void changejobWarrentyEndDateDependingOnWarrentyDays() {
@@ -701,12 +983,11 @@ class JobCardController extends GetxController {
   }
 
   List<double> calculateTotals() {
-    // this is for invoice items
     double sumofTotal = 0.0;
     double sumofVAT = 0.0;
     double sumofNET = 0.0;
 
-    for (var job in allInvoiceItems.where((item)=> item.deleted != true)) {
+    for (var job in allInvoiceItems.where((item) => item.deleted != true)) {
       sumofTotal += job.total ?? 0;
       sumofNET += job.net ?? 0;
       sumofVAT += job.vat ?? 0;
@@ -1110,226 +1391,6 @@ class JobCardController extends GetxController {
     deliveryNotes.text = data.jobDeliveryNotes ?? '';
   }
 
-  Future<void> addNewInternalNote(
-    String jobcardID,
-    Map<String, dynamic> note,
-  ) async {
-    try {
-      addingNewInternalNotProcess.value = true;
-      final jobDoc = FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobcardID)
-          .collection('internal_notes');
-
-      if (note['type'] == 'Text') {
-        await jobDoc.add(note);
-      } else {
-        final originalFileName = note['file_name'] as String;
-
-        // Extract filename and extension
-        final extIndex = originalFileName.lastIndexOf('.');
-        final (String fileName, String extension) = extIndex != -1
-            ? (
-                originalFileName.substring(0, extIndex),
-                originalFileName.substring(extIndex + 1),
-              )
-            : (originalFileName, '');
-
-        // Create timestamped filename
-        final timestamp = DateTime.now().toIso8601String().replaceAll(
-          RegExp(r'[^0-9T-]'),
-          '_',
-        );
-        final storageFileName = extension.isNotEmpty
-            ? '${fileName}_$timestamp.$extension'
-            : '${fileName}_$timestamp';
-
-        // Create storage reference
-        final Reference storageRef = FirebaseStorage.instance.ref().child(
-          'internal_notes/$storageFileName',
-        );
-
-        // Determine MIME type
-        final mimeType =
-            note['type'] as String? ?? getMimeTypeFromExtension(extension);
-
-        // Upload file and wait for completion
-        final UploadTask uploadTask = storageRef.putData(
-          note['note'],
-          SettableMetadata(
-            contentType: mimeType ?? 'application/octet-stream',
-            customMetadata: {'original_filename': originalFileName},
-          ),
-        );
-
-        // Wait for upload to complete
-        final TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
-
-        // Get download URL after upload completion
-        final String fileUrl = await snapshot.ref.getDownloadURL();
-
-        // Store the note in Firestore
-        await jobDoc.add({
-          'file_name': originalFileName,
-          'type': mimeType ?? 'application/octet-stream',
-          'note': fileUrl,
-          'user_id': note['user_id'],
-          'time': note['time'],
-        });
-      }
-      addingNewInternalNotProcess.value = false;
-    } catch (e) {
-      addingNewInternalNotProcess.value = false;
-    }
-  }
-
-  void editJobCard(String jobId) {
-    try {
-      if (jobStatus1.value == 'Posted' || jobStatus1.value == 'Cancelled') {
-        showSnackBar('Alert', 'Can\'t Edit For Posted / Cancelled Jobs');
-        return;
-      }
-      addingNewValue.value = true;
-
-      Map<String, dynamic> updatedData = {
-        'label': label.value,
-        'job_status_1': jobStatus1.value,
-        'job_status_2': jobStatus2.value,
-        'car_brand_logo': carBrandLogo.value,
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': plateCode.text,
-        'country': countryId.value,
-        'city': cityId.value,
-        'year': year.text,
-        'color': colorId.value,
-        'engine_type': engineTypeId.value,
-        'vehicle_identification_number': vin.text,
-        'transmission_type': transmissionType.text,
-        'mileage_in': mileageIn.value.text,
-        'fuel_amount': fuelAmount.value.text,
-        'mileage_out': mileageOut.value.text,
-        'mileage_in_out_diff': inOutDiff.value.text,
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'outstanding': customerOutstanding.text,
-        'saleMan': customerSaleManId.value,
-        'branch': customerBranchId.value,
-        'currency': customerCurrencyId.value,
-        'rate': customerCurrencyRate.text,
-        'payment_method': payType.value,
-        'job_number': jobCardCounter.value.text,
-        'invoice_number': invoiceCounter.value.text,
-        'lpo_number': lpoCounter.value.text,
-        // 'job_date': jobCardDate.value.text,
-        // 'invoice_date': invoiceDate.value.text,
-        'job_approval_date': approvalDate.value.text,
-        'job_start_date': startDate.value.text,
-        'job_finish_date': finishDate.value.text,
-        'job_delivery_date': deliveryDate.value.text,
-        'job_warrenty_days': jobWarrentyDays.value.text,
-        'job_warrenty_km': jobWarrentyKM.value.text,
-        'job_warrenty_end_date': jobWarrentyEndDate.value.text,
-        'job_min_test_km': minTestKms.value.text,
-        'job_reference_1': reference1.value.text,
-        'job_reference_2': reference2.value.text,
-        'delivery_time': deliveryTime.value.text,
-        'job_notes': jobNotes.text,
-        'job_delivery_notes': deliveryNotes.text,
-      };
-
-      // تحويل التاريخ إلى Timestamp إذا حقل التاريخ غير فارغ
-      final rawDate = jobCardDate.value.text.trim();
-      if (rawDate.isNotEmpty) {
-        try {
-          updatedData['job_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate),
-          );
-        } catch (e) {
-          // اختياري: تقدر تعرض تنبيه إذا التنسيق خاطئ
-          // print('Invalid quotation_date format: $e');
-        }
-      }
-
-      final rawDate2 = invoiceDate.value.text.trim();
-      if (rawDate2.isNotEmpty) {
-        try {
-          updatedData['invoice_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate2),
-          );
-        } catch (e) {
-          // اختياري: تقدر تعرض تنبيه إذا التنسيق خاطئ
-          // print('Invalid quotation_date format: $e');
-        }
-      }
-
-      FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update(updatedData);
-
-      addingNewValue.value = false;
-      showSnackBar('Done', 'Job Updated Successfully');
-    } catch (e) {
-      addingNewValue.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
-    }
-  }
-
-  Future<void> getCurrentQuotationCounterNumber() async {
-    try {
-      var qnId = '';
-      var updateqn = '';
-      var qnDoc = await FirebaseFirestore.instance
-          .collection('counters')
-          .where('code', isEqualTo: 'QN')
-          .where('company_id', isEqualTo: companyId.value)
-          .get();
-
-      if (qnDoc.docs.isEmpty) {
-        // Define constants for new counter values
-        const prefix = 'QN';
-        const separator = '-';
-        const initialValue = 1;
-
-        var newCounter = await FirebaseFirestore.instance
-            .collection('counters')
-            .add({
-              'code': 'QN',
-              'description': 'Quotation Number',
-              'prefix': prefix,
-              'value': initialValue,
-              'length': 0,
-              'separator': separator,
-              'added_date': DateTime.now().toString(),
-              'company_id': companyId.value,
-              'status': true,
-            });
-        qnId = newCounter.id;
-        // Set the counter text with prefix and separator
-        quotationCounter.value = '$prefix$separator$initialValue';
-        updateqn = initialValue.toString();
-      } else {
-        var firstDoc = qnDoc.docs.first;
-        qnId = firstDoc.id;
-        var currentValue = firstDoc.data()['value'] ?? 0;
-        quotationCounter.value =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
-        updateqn = (currentValue + 1).toString();
-      }
-
-      await FirebaseFirestore.instance.collection('counters').doc(qnId).update({
-        'value': int.parse(updateqn),
-      });
-    } catch (e) {
-      //
-    }
-  }
-
   Future<void> createQuotationCard(String jobId) async {
     try {
       showSnackBar('Creating', 'Please Wait');
@@ -1374,7 +1435,7 @@ class JobCardController extends GetxController {
         'quotation_notes': '',
       };
 
-      await getCurrentQuotationCounterNumber();
+      // await getCurrentQuotationCounterNumber();
       newData['quotation_number'] = quotationCounter.value;
       newData['added_date'] = DateTime.now().toString();
       var newQuotation = await FirebaseFirestore.instance
@@ -1399,66 +1460,6 @@ class JobCardController extends GetxController {
     } catch (e) {
       creatingNewQuotation.value = false;
       showSnackBar('Alert', 'Something Went Wrong');
-    }
-  }
-
-  Future<Map<String, dynamic>> copyJob(String jobId) async {
-    try {
-      loadingCopyJob.value = true;
-
-      var mainJob = await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .get();
-
-      Map<String, dynamic>? data = mainJob.data();
-      if (data != null) {
-        data.remove('id');
-        data['job_status_1'] = 'New';
-        data['job_status_2'] = 'New';
-        data['invoice_number'] = '';
-        data['invoice_date'] = '';
-        await getCurrentJobCardCounterNumber();
-        data['job_number'] = jobCardCounter.value.text;
-        final warrentyEndDate = data['job_warrenty_end_date'];
-        if (warrentyEndDate != null && isBeforeToday(warrentyEndDate)) {
-          data['label'] = '';
-        } else {
-          data['label'] = 'Returned';
-        }
-
-        var newCopiedJob = await FirebaseFirestore.instance
-            .collection('job_cards')
-            .add(data);
-
-        var jobInvoices = await FirebaseFirestore.instance
-            .collection('job_cards')
-            .doc(jobId)
-            .collection('invoice_items')
-            .get();
-        if (jobInvoices.docs.isNotEmpty) {
-          for (var element in jobInvoices.docs) {
-            await FirebaseFirestore.instance
-                .collection('job_cards')
-                .doc(newCopiedJob.id)
-                .collection('invoice_items')
-                .add(element.data());
-          }
-        }
-
-        return {'newId': newCopiedJob.id, 'data': data};
-      } else {
-        loadingCopyJob.value = false;
-        showSnackBar('Alert', 'Job has no data');
-        throw Exception('Job data is empty');
-      }
-    } catch (e) {
-      showSnackBar(
-        'Alert',
-        'Something went wrong while copying the job. Please try again',
-      );
-      loadingCopyJob.value = false;
-      rethrow;
     }
   }
 
@@ -1550,6 +1551,7 @@ class JobCardController extends GetxController {
       jobCancelationDate.value.text = textToDate(DateTime.now());
       jobStatus1.value = status;
       jobStatus2.value = status;
+      isJobModified.value = true;
     }
   }
 
@@ -1577,19 +1579,7 @@ class JobCardController extends GetxController {
         jobStatus2.value = 'Warranty';
       }
       jobStatus1.value = 'Posted';
-    }
-  }
-
-  Future<void> deleteJobCard(String jobId) async {
-    try {
-      Get.back();
-      Get.back();
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .delete();
-    } catch (e) {
-      //
+      isJobModified.value = true;
     }
   }
 
@@ -1757,32 +1747,14 @@ class JobCardController extends GetxController {
     }
   }
 
-  Stream<List<Map<String, dynamic>>> getJobCardInternalNotes(String jobId) {
-    return FirebaseFirestore.instance
-        .collection('job_cards')
-        .doc(jobId)
-        .collection('internal_notes')
-        .orderBy('time')
-        .snapshots()
-        .map((querySnapshot) {
-          if (querySnapshot.docs.isNotEmpty) {
-            return querySnapshot.docs.map((doc) {
-              return {'id': doc.id, ...doc.data()};
-            }).toList();
-          } else {
-            return [];
-          }
-        });
-  }
-
-  String getdataName(String id, Map allData, {title = 'name'}) {
-    try {
-      final data = allData.entries.firstWhere((data) => data.key == id);
-      return data.value[title];
-    } catch (e) {
-      return '';
-    }
-  }
+  // String getdataName(String id, Map allData, {title = 'name'}) {
+  //   try {
+  //     final data = allData.entries.firstWhere((data) => data.key == id);
+  //     return data.value[title];
+  //   } catch (e) {
+  //     return '';
+  //   }
+  // }
 
   void onSelectForCustomers(Map selectedCustomer) {
     List phoneDetails = selectedCustomer['entity_phone'];

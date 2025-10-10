@@ -86,7 +86,8 @@ static Future<void> pickFile(
             'Failed to download file - Status code: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Download error: $e');
+      // throw Exception('Download error: $e');
+      print(e);
     }
   }
 
