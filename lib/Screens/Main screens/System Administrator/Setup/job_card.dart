@@ -453,6 +453,7 @@ Widget tableOfScreens({
         dataRowMinHeight: 30,
         headingRowHeight: 70,
         columnSpacing: 15,
+        horizontalMargin: 5,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
         headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
@@ -575,9 +576,7 @@ DataRow dataRowForTheTable(
       return isEvenRow ? Colors.grey.shade200 : Colors.white;
     }),
     cells: [
-      DataCell(
-        Row(children: [editSection(context, jobData, constraints, jobId)]),
-      ),
+      DataCell(editSection(context, jobData, constraints, jobId)),
       DataCell(
         jobData.label == 'Draft'
             ? statusBox('D')

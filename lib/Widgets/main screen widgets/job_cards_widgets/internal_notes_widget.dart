@@ -241,6 +241,7 @@ Future internalNotesDialog(
                                                     FilePickerService();
                                                 openFile.openFile(
                                                   note.note ?? '',
+                                                  note.fileName ?? '',
                                                 );
                                               },
                                               child: Row(

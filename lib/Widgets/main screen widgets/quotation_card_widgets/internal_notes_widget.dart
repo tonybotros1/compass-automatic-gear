@@ -232,7 +232,7 @@ Future internalNotesDialog(QuotationCardController controller,
                                                   var openFile =
                                                       FilePickerService();
                                                   openFile
-                                                      .openFile(note['note']);
+                                                      .openFile(note['note'],''); // need to add the file name here 
                                                 },
                                                 child: Row(
                                                   mainAxisAlignment:

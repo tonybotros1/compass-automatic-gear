@@ -496,6 +496,7 @@ class JobCardController extends GetxController {
         final decoded = jsonDecode(response.body);
         String deletedJobId = decoded['job_id'];
         allJobCards.removeWhere((job) => job.id == deletedJobId);
+        numberOfJobs.value -= 1;
         Get.close(2);
         showSnackBar('Success', 'Job card deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
@@ -839,84 +840,104 @@ class JobCardController extends GetxController {
       }
       addingNewInternalNotProcess.value = false;
     } catch (e) {
-      print(e);
       showSnackBar('Alert', 'Something went wrong please try again');
       addingNewInternalNotProcess.value = false;
     }
   }
 
-  // Future<void> addNewInternalNote(
-  //   String jobcardID,
-  //   Map<String, dynamic> note,
-  // ) async {
-  //   try {
-  //     addingNewInternalNotProcess.value = true;
-  //     final jobDoc = FirebaseFirestore.instance
-  //         .collection('job_cards')
-  //         .doc(jobcardID)
-  //         .collection('internal_notes');
+  
+  Future<void> createQuotationCard(String jobId) async {
+    try {
+      showSnackBar('Creating', 'Please Wait');
+      creatingNewQuotation.value = true;
+      Map<String, dynamic> newData = {
+        'quotation_status': 'New',
+        'car_brand_logo': carBrandLogo.value,
+        'company_id': companyId.value,
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'plate_number': plateNumber.text,
+        'plate_code': plateCode.text,
+        'country': countryId.value,
+        'city': cityId.value,
+        'year': year.text,
+        'color': colorId.value,
+        'engine_type': engineTypeId.value,
+        'vehicle_identification_number': vin.text,
+        'transmission_type': transmissionType.text,
+        'mileage_in': mileageIn.value.text,
+        'mileage_out': mileageOut.value.text,
+        'mileage_in_out_diff': inOutDiff.value.text,
+        'customer': customerId.value,
+        'contact_name': customerEntityName.text,
+        'contact_number': customerEntityPhoneNumber.text,
+        'contact_email': customerEntityEmail.text,
+        'credit_limit': customerCreditNumber.text,
+        'outstanding': customerOutstanding.text,
+        'saleMan': customerSaleManId.value,
+        'branch': customerBranchId.value,
+        'currency': customerCurrencyId.value,
+        'rate': customerCurrencyRate.text,
+        'payment_method': payType.value,
+        'quotation_number': quotationCounter.value,
+        'quotation_date': '',
+        'validity_days': '',
+        'validity_end_date': '',
+        'reference_number': '',
+        'delivery_time': '',
+        'quotation_warrenty_days': jobWarrentyDays.value.text,
+        'quotation_warrenty_km': jobWarrentyKM.value.text,
+        'quotation_notes': '',
+      };
 
-  //     if (note['type'] == 'Text') {
-  //       await jobDoc.add(note);
-  //     } else {
-  //       final originalFileName = note['file_name'] as String;
+      // await getCurrentQuotationCounterNumber();
+      newData['quotation_number'] = quotationCounter.value;
+      newData['added_date'] = DateTime.now().toString();
+      var newQuotation = await FirebaseFirestore.instance
+          .collection('quotation_cards')
+          .add(newData);
 
-  //       // Extract filename and extension
-  //       final extIndex = originalFileName.lastIndexOf('.');
-  //       final (String fileName, String extension) = extIndex != -1
-  //           ? (
-  //               originalFileName.substring(0, extIndex),
-  //               originalFileName.substring(extIndex + 1),
-  //             )
-  //           : (originalFileName, '');
+      // for (var element in allInvoiceItems) {
+      //   var data = element.data();
+      //   await FirebaseFirestore.instance
+      //       .collection('quotation_cards')
+      //       .doc(newQuotation.id)
+      //       .collection('invoice_items')
+      //       .add(data);
+      // }
+      await FirebaseFirestore.instance
+          .collection('job_cards')
+          .doc(jobId)
+          .update({'quotation_id': newQuotation.id});
+      showSnackBar('Done', 'Quotation Created Successfully');
 
-  //       // Create timestamped filename
-  //       final timestamp = DateTime.now().toIso8601String().replaceAll(
-  //         RegExp(r'[^0-9T-]'),
-  //         '_',
-  //       );
-  //       final storageFileName = extension.isNotEmpty
-  //           ? '${fileName}_$timestamp.$extension'
-  //           : '${fileName}_$timestamp';
+      creatingNewQuotation.value = false;
+    } catch (e) {
+      creatingNewQuotation.value = false;
+      showSnackBar('Alert', 'Something Went Wrong');
+    }
+  }
 
-  //       // Create storage reference
-  //       final Reference storageRef = FirebaseStorage.instance.ref().child(
-  //         'internal_notes/$storageFileName',
-  //       );
-
-  //       // Determine MIME type
-  //       final mimeType =
-  //           note['type'] as String? ?? getMimeTypeFromExtension(extension);
-
-  //       // Upload file and wait for completion
-  //       final UploadTask uploadTask = storageRef.putData(
-  //         note['note'],
-  //         SettableMetadata(
-  //           contentType: mimeType ?? 'application/octet-stream',
-  //           customMetadata: {'original_filename': originalFileName},
-  //         ),
-  //       );
-
-  //       // Wait for upload to complete
-  //       final TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
-
-  //       // Get download URL after upload completion
-  //       final String fileUrl = await snapshot.ref.getDownloadURL();
-
-  //       // Store the note in Firestore
-  //       await jobDoc.add({
-  //         'file_name': originalFileName,
-  //         'type': mimeType ?? 'application/octet-stream',
-  //         'note': fileUrl,
-  //         'user_id': note['user_id'],
-  //         'time': note['time'],
-  //       });
-  //     }
-  //     addingNewInternalNotProcess.value = false;
-  //   } catch (e) {
-  //     addingNewInternalNotProcess.value = false;
-  //   }
-  // }
+  Future<void> editApproveForJobCard(String jobId, String status) async {
+    if (jobStatus1.value.isEmpty) {
+      showSnackBar('Alert', 'Please Save The Job First');
+      return;
+    }
+    Map jobStatus = await getCurrentJobCardStatus(jobId);
+    String status1 = jobStatus['job_status_1'];
+    String status2 = jobStatus['job_status_2'];
+    if (status1 == 'New' && status2 != 'Approved') {
+      approvalDate.value.text = textToDate(DateTime.now());
+      jobStatus2.value = 'Approved';
+      isJobModified.value = true;
+    } else if (status2 == 'Approved') {
+      showSnackBar('Alert', 'Job is Already Approved');
+    } else if (status1 == 'Posted') {
+      showSnackBar('Alert', 'Job is Posted');
+    } else if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'Job is Cancelled');
+    }
+  }
 
   // ===============================================================================================================
   void changejobWarrentyEndDateDependingOnWarrentyDays() {
@@ -1391,98 +1412,6 @@ class JobCardController extends GetxController {
     deliveryNotes.text = data.jobDeliveryNotes ?? '';
   }
 
-  Future<void> createQuotationCard(String jobId) async {
-    try {
-      showSnackBar('Creating', 'Please Wait');
-      creatingNewQuotation.value = true;
-      Map<String, dynamic> newData = {
-        'quotation_status': 'New',
-        'car_brand_logo': carBrandLogo.value,
-        'company_id': companyId.value,
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': plateCode.text,
-        'country': countryId.value,
-        'city': cityId.value,
-        'year': year.text,
-        'color': colorId.value,
-        'engine_type': engineTypeId.value,
-        'vehicle_identification_number': vin.text,
-        'transmission_type': transmissionType.text,
-        'mileage_in': mileageIn.value.text,
-        'mileage_out': mileageOut.value.text,
-        'mileage_in_out_diff': inOutDiff.value.text,
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'outstanding': customerOutstanding.text,
-        'saleMan': customerSaleManId.value,
-        'branch': customerBranchId.value,
-        'currency': customerCurrencyId.value,
-        'rate': customerCurrencyRate.text,
-        'payment_method': payType.value,
-        'quotation_number': quotationCounter.value,
-        'quotation_date': '',
-        'validity_days': '',
-        'validity_end_date': '',
-        'reference_number': '',
-        'delivery_time': '',
-        'quotation_warrenty_days': jobWarrentyDays.value.text,
-        'quotation_warrenty_km': jobWarrentyKM.value.text,
-        'quotation_notes': '',
-      };
-
-      // await getCurrentQuotationCounterNumber();
-      newData['quotation_number'] = quotationCounter.value;
-      newData['added_date'] = DateTime.now().toString();
-      var newQuotation = await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .add(newData);
-
-      // for (var element in allInvoiceItems) {
-      //   var data = element.data();
-      //   await FirebaseFirestore.instance
-      //       .collection('quotation_cards')
-      //       .doc(newQuotation.id)
-      //       .collection('invoice_items')
-      //       .add(data);
-      // }
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({'quotation_id': newQuotation.id});
-      showSnackBar('Done', 'Quotation Created Successfully');
-
-      creatingNewQuotation.value = false;
-    } catch (e) {
-      creatingNewQuotation.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
-    }
-  }
-
-  Future<void> editApproveForJobCard(String jobId, String status) async {
-    if (jobStatus1.value.isEmpty) {
-      showSnackBar('Alert', 'Please Save The Job First');
-      return;
-    }
-    Map jobStatus = await getCurrentJobCardStatus(jobId);
-    String status1 = jobStatus['job_status_1'];
-    String status2 = jobStatus['job_status_2'];
-    if (status1 == 'New' && status2 != 'Approved') {
-      approvalDate.value.text = textToDate(DateTime.now());
-      jobStatus2.value = 'Approved';
-      isJobModified.value = true;
-    } else if (status2 == 'Approved') {
-      showSnackBar('Alert', 'Job is Already Approved');
-    } else if (status1 == 'Posted') {
-      showSnackBar('Alert', 'Job is Posted');
-    } else if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'Job is Cancelled');
-    }
-  }
 
   Future<void> editReadyForJobCard(String jobId, String status) async {
     if (jobStatus1.value.isEmpty) {
@@ -1613,21 +1542,21 @@ class JobCardController extends GetxController {
     });
   }
 
-  Future<void> selectDateContext(
-    BuildContext context,
-    TextEditingController date,
-  ) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
+  // Future<void> selectDateContext(
+  //   BuildContext context,
+  //   TextEditingController date,
+  // ) async {
+  //   final DateTime? picked = await showDatePicker(
+  //     context: context,
+  //     initialDate: DateTime.now(),
+  //     firstDate: DateTime(2000),
+  //     lastDate: DateTime(2101),
+  //   );
 
-    if (picked != null) {
-      date.text = textToDate(picked.toString());
-    }
-  }
+  //   if (picked != null) {
+  //     date.text = textToDate(picked.toString());
+  //   }
+  // }
 
   void selectCashOrCredit(String selected) {
     bool isCash = selected == 'Cash';
@@ -1642,119 +1571,7 @@ class JobCardController extends GetxController {
             .toString();
   }
 
-  Future<void> getCurrentJobCardCounterNumber() async {
-    try {
-      var jcnId = '';
-      var updateJobCard = '';
-      var jcnDoc = await FirebaseFirestore.instance
-          .collection('counters')
-          .where('code', isEqualTo: 'JCN')
-          .where('company_id', isEqualTo: companyId.value)
-          .get();
-
-      if (jcnDoc.docs.isEmpty) {
-        // Define constants for the new counter values
-        const prefix = 'JCN';
-        const separator = '-';
-        const initialValue = 1;
-
-        var newCounter = await FirebaseFirestore.instance
-            .collection('counters')
-            .add({
-              'code': 'JCN',
-              'description': 'Job Card Number',
-              'prefix': prefix,
-              'value': initialValue,
-              'length': 0,
-              'separator': separator,
-              'added_date': DateTime.now().toString(),
-              'company_id': companyId.value,
-              'status': true,
-            });
-        jcnId = newCounter.id;
-        // Set the counter text with prefix and separator
-        jobCardCounter.value.text = '$prefix$separator$initialValue';
-        updateJobCard = initialValue.toString();
-      } else {
-        var firstDoc = jcnDoc.docs.first;
-        jcnId = firstDoc.id;
-        var currentValue = firstDoc.data()['value'] ?? 0;
-        // Use the existing prefix and separator from the document
-        jobCardCounter.value.text =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
-        updateJobCard = (currentValue + 1).toString();
-      }
-
-      await FirebaseFirestore.instance.collection('counters').doc(jcnId).update(
-        {'value': int.parse(updateJobCard)},
-      );
-    } catch (e) {
-      // Optionally handle errors here
-      // print("Error in getCurrentJobCardCounterNumber: $e");
-    }
-  }
-
-  Future<void> getCurrentInvoiceCounterNumber() async {
-    try {
-      var jciId = '';
-      var updateInvoice = '';
-      var jciDoc = await FirebaseFirestore.instance
-          .collection('counters')
-          .where('code', isEqualTo: 'JCI')
-          .where('company_id', isEqualTo: companyId.value)
-          .get();
-
-      if (jciDoc.docs.isEmpty) {
-        // Define constants for the new counter values
-        const prefix = 'JCI';
-        const separator = '-';
-        const initialValue = 1;
-
-        var newCounter = await FirebaseFirestore.instance
-            .collection('counters')
-            .add({
-              'code': 'JCI',
-              'description': 'Job Card Invoice Number',
-              'prefix': prefix,
-              'value': initialValue,
-              'length': 0,
-              'separator': separator,
-              'added_date': DateTime.now().toString(),
-              'company_id': companyId.value,
-              'status': true,
-            });
-        jciId = newCounter.id;
-        // Set the counter text with prefix and separator
-        invoiceCounter.value.text = '$prefix$separator$initialValue';
-        updateInvoice = initialValue.toString();
-      } else {
-        var firstDoc = jciDoc.docs.first;
-        jciId = firstDoc.id;
-        var currentValue = firstDoc.data()['value'] ?? 0;
-        invoiceCounter.value.text =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
-        updateInvoice = (currentValue + 1).toString();
-      }
-
-      await FirebaseFirestore.instance.collection('counters').doc(jciId).update(
-        {
-          'value': int.parse(updateInvoice), // Increment the value
-        },
-      );
-    } catch (e) {
-      // Optionally handle the error here
-      // print("Error in getCurrentInvoiceCounterNumber: $e");
-    }
-  }
-
-  // String getdataName(String id, Map allData, {title = 'name'}) {
-  //   try {
-  //     final data = allData.entries.firstWhere((data) => data.key == id);
-  //     return data.value[title];
-  //   } catch (e) {
-  //     return '';
-  //   }
-  // }
+ 
 
   void onSelectForCustomers(Map selectedCustomer) {
     List phoneDetails = selectedCustomer['entity_phone'];
@@ -1773,146 +1590,13 @@ class JobCardController extends GetxController {
     customerSaleMan.value = selectedCustomer['salesman'] ?? "";
   }
 
-  // Future<void> searchEngine() async {
-  //   isScreenLoding.value = true;
-
-  //   // Start with the base query for the company.
-  //   Query<Map<String, dynamic>> query = FirebaseFirestore.instance
-  //       .collection('job_cards')
-  //       .where('company_id', isEqualTo: companyId.value);
-
-  //   // 1. APPLY DATE FILTERS TO THE FIRESTORE QUERY
-  //   // This requires only ONE composite index: (company_id, job_date).
-
-  //   if (isAllSelected.value) {
-  //     // If "All" is selected, we don't apply any date filter to the Firestore query.
-  //     // We will fetch all documents for the company.
-  //   } else if (isTodaySelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfDay = DateTime(now.year, now.month, now.day);
-  //     final endOfDay = startOfDay.add(const Duration(days: 1));
-  //     fromDate.value.text = textToDate(startOfDay);
-  //     toDate.value.text = textToDate(endOfDay);
-  //     query = query
-  //         .where(
-  //           'job_date',
-  //           isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
-  //         )
-  //         .where('job_date', isLessThan: Timestamp.fromDate(endOfDay));
-  //   } else if (isThisMonthSelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfMonth = DateTime(now.year, now.month, 1);
-  //     final endOfMonth = (now.month < 12)
-  //         ? DateTime(now.year, now.month + 1, 1)
-  //         : DateTime(now.year + 1, 1, 1);
-  //     fromDate.value.text = textToDate(startOfMonth);
-  //     toDate.value.text = textToDate(endOfMonth);
-  //     query = query
-  //         .where(
-  //           'job_date',
-  //           isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
-  //         )
-  //         .where('job_date', isLessThan: Timestamp.fromDate(endOfMonth));
-  //   } else if (isThisYearSelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfYear = DateTime(now.year, 1, 1);
-  //     final endOfYear = DateTime(now.year + 1, 1, 1);
-  //     fromDate.value.text = textToDate(startOfYear);
-  //     toDate.value.text = textToDate(endOfYear);
-  //     query = query
-  //         .where(
-  //           'job_date',
-  //           isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
-  //         )
-  //         .where('job_date', isLessThan: Timestamp.fromDate(endOfYear));
-  //   } else {
-  //     // Manual date range
-  //     if (fromDate.value.text.trim().isNotEmpty) {
-  //       try {
-  //         final dtFrom = format.parseStrict(fromDate.value.text.trim());
-  //         query = query.where(
-  //           'job_date',
-  //           isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
-  //         );
-  //       } catch (_) {}
-  //     }
-  //     if (toDate.value.text.trim().isNotEmpty) {
-  //       try {
-  //         final dtTo = format
-  //             .parseStrict(toDate.value.text.trim())
-  //             .add(const Duration(days: 1));
-  //         query = query.where('job_date', isLessThan: Timestamp.fromDate(dtTo));
-  //       } catch (_) {}
-  //     }
-  //   }
-
-  //   // 2. EXECUTE THE FIRESTORE QUERY
-  //   // Fetch all documents matching the company and date range.
-  //   final snapshot = await query.get();
-  //   List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedJobCards =
-  //       snapshot.docs;
-
-  //   // 3. APPLY ALL OTHER FILTERS ON THE CLIENT-SIDE
-  //   // Filter the 'fetchedJobCards' list in memory.
-  //   List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredJobCards =
-  //       fetchedJobCards.where((doc) {
-  //         final data = doc.data();
-
-  //         // Job Number Filter
-  //         if (jobNumberFilter.value.text.trim().isNotEmpty &&
-  //             data['job_number'] != jobNumberFilter.value.text.trim()) {
-  //           return false;
-  //         }
-  //         // Status Filter
-  //         if (statusFilter.value.text.trim().isNotEmpty &&
-  //             data['job_status_1'] != statusFilter.value.text.trim()) {
-  //           return false;
-  //         }
-  //         // Car Brand Filter
-  //         if (carBrandIdFilter.value.isNotEmpty &&
-  //             data['car_brand'] != carBrandIdFilter.value) {
-  //           return false;
-  //         }
-  //         // Car Model Filter
-  //         if (carModelIdFilter.value.isNotEmpty &&
-  //             data['car_model'] != carModelIdFilter.value) {
-  //           return false;
-  //         }
-  //         // Plate Number Filter
-  //         if (plateNumberFilter.value.text.trim().isNotEmpty &&
-  //             data['plate_number'] != plateNumberFilter.value.text.trim()) {
-  //           return false;
-  //         }
-  //         // VIN Filter
-  //         if (vinFilter.value.text.trim().isNotEmpty &&
-  //             data['vehicle_identification_number'] !=
-  //                 vinFilter.value.text.trim()) {
-  //           return false;
-  //         }
-  //         // Customer Filter
-  //         if (customerNameIdFilter.value.isNotEmpty &&
-  //             data['customer'] != customerNameIdFilter.value) {
-  //           return false;
-  //         }
-
-  //         // If the document passed all filters, keep it.
-  //         return true;
-  //       }).toList();
-
-  //   // 4. UPDATE THE UI
-  //   // allJobCards.assignAll(filteredJobCards);
-  //   numberOfJobs.value = allJobCards.length;
-  //   calculateMoneyForAllJobs(); // Make sure this function iterates over the final list
-  //   isScreenLoding.value = false;
-  // }
-
   void clearAllFilters() {
     statusFilter.value.clear();
-    allJobCards.clear();
-    numberOfJobs.value = 0;
-    allJobsTotals.value = 0;
-    allJobsVATS.value = 0;
-    allJobsNET.value = 0;
+    // allJobCards.clear();
+    // numberOfJobs.value = 0;
+    // allJobsTotals.value = 0;
+    // allJobsVATS.value = 0;
+    // allJobsNET.value = 0;
     allModels.clear();
     isAllSelected.value = false;
     isTodaySelected.value = false;
