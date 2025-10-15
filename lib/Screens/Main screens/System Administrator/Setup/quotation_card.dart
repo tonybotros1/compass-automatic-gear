@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,10 +11,7 @@ import '../../../../Widgets/main screen widgets/quotation_card_widgets/quotation
 import '../../../../consts.dart';
 
 class QuotationCard extends StatelessWidget {
-  QuotationCard({super.key});
-  final QuotationCardController quotationCardController = Get.put(
-    QuotationCardController(),
-  );
+  const QuotationCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +26,7 @@ class QuotationCard extends StatelessWidget {
               child: ListView(
                 children: [
                   GetX<QuotationCardController>(
+                    init: QuotationCardController(),
                     builder: (controller) {
                       bool isBrandLoading = controller.allBrands.isEmpty;
                       bool isModelLoading = controller.allModels.isEmpty;
@@ -298,7 +296,6 @@ class QuotationCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<QuotationCardController>(
-                      init: QuotationCardController(),
                       builder: (controller) {
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -388,11 +385,7 @@ class QuotationCard extends StatelessWidget {
                                 constraints: constraints,
                                 context: context,
                                 controller: controller,
-                                data:
-                                    controller.filteredQuotationCards.isEmpty &&
-                                        controller.search.value.text.isEmpty
-                                    ? controller.allQuotationCards
-                                    : controller.filteredQuotationCards,
+                                data: controller.allQuotationCards,
                               ),
                             );
                           },
@@ -415,15 +408,9 @@ Widget tableOfScreens({
   required BoxConstraints constraints,
   required BuildContext context,
   required QuotationCardController controller,
-  required RxList<DocumentSnapshot> data,
+  required List<QuotationCardsModel> data,
   required ScrollController scrollController,
 }) {
-  final dataSource = CardDataSource(
-    cards: data,
-    context: context,
-    constraints: constraints,
-    controller: controller,
-  );
   return DataTableTheme(
     data: DataTableThemeData(
       headingTextStyle: fontStyleForTableHeader,
@@ -540,30 +527,6 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          // DataColumn(
-          //   label: Column(
-          //     spacing: 5,
-          //     mainAxisAlignment: MainAxisAlignment.end,
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       const SizedBox(),
-          //       AutoSizedText(text: 'Code', constraints: constraints),
-          //     ],
-          //   ),
-          //   // onSort: controller.onSort,
-          // ),
-          // DataColumn(
-          //   label: Column(
-          //     spacing: 5,
-          //     mainAxisAlignment: MainAxisAlignment.end,
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       const SizedBox(),
-          //       AutoSizedText(text: 'City', constraints: constraints),
-          //     ],
-          //   ),
-          //   // onSort: controller.onSort,
-          // ),
           DataColumn(
             label: Column(
               spacing: 5,
@@ -589,7 +552,7 @@ Widget tableOfScreens({
             // onSort: controller.onSort,
           ),
           DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
+            numeric: true,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -601,8 +564,7 @@ Widget tableOfScreens({
             // onSort: controller.onSort,
           ),
           DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-
+            numeric: true,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -614,8 +576,7 @@ Widget tableOfScreens({
             // onSort: controller.onSort,
           ),
           DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
-
+            numeric: true,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -627,17 +588,22 @@ Widget tableOfScreens({
             // onSort: controller.onSort,
           ),
         ],
-        source: dataSource,
+        source: CardDataSource(
+          cards: data,
+          context: context,
+          constraints: constraints,
+          controller: controller,
+        ),
       ),
     ),
   );
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> cardData,
-  context,
-  constraints,
-  cardId,
+  QuotationCardsModel cardData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String cardId,
   QuotationCardController controller,
   int index,
 ) {
@@ -657,147 +623,47 @@ DataRow dataRowForTheTable(
           ],
         ),
       ),
-      DataCell(textForDataRowInTable(text: '${cardData['quotation_number']}')),
+      DataCell(textForDataRowInTable(text: cardData.quotationNumber ?? '')),
+      DataCell(textForDataRowInTable(text: textToDate(cardData.quotationDate))),
       DataCell(
-        textForDataRowInTable(
-          text: cardData['quotation_number'] != ''
-              ? textToDate(cardData['quotation_date'])
-              : '',
-        ),
-      ),
-      DataCell(
-        cardData['quotation_status'] != ''
+        cardData.quotationStatus != ''
             ? statusBox(
-                '${cardData['quotation_status']}',
+                '${cardData.quotationStatus}',
                 hieght: 35,
                 padding: const EdgeInsets.symmetric(horizontal: 5),
               )
             : const SizedBox(),
       ),
+      DataCell(textForDataRowInTable(text: cardData.carBrand ?? '')),
+      DataCell(textForDataRowInTable(text: cardData.carModel ?? '')),
+      DataCell(textForDataRowInTable(text: cardData.color ?? '')),
+      DataCell(SelectableText(cardData.plateNumber ?? '', maxLines: 1)),
+
+      DataCell(
+        textForDataRowInTable(maxWidth: null, text: cardData.customer ?? ''),
+      ),
+      DataCell(
+        SelectableText(cardData.vehicleIdentificationNumber ?? '', maxLines: 1),
+      ),
       DataCell(
         textForDataRowInTable(
-          text: controller.getdataName(
-            cardData['car_brand'],
-            controller.allBrands,
-          ),
+          color: Colors.green,
+          isBold: true,
+          text: '${cardData.totals}',
         ),
       ),
-      DataCell(
-        FutureBuilder<String>(
-          future: controller.getModelName(
-            cardData['car_brand'],
-            cardData['car_model'],
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(text: '${snapshot.data}');
-            }
-          },
-        ),
-      ),
-      DataCell(
-        Text(controller.getdataName(cardData['color'], controller.allColors)),
-      ),
-      DataCell(SelectableText(cardData['plate_number'], maxLines: 1)),
-      // DataCell(SelectableText(
-      //   cardData['plate_code'],
-      //   maxLines: 1,
-      // )),
-      // DataCell(
-      //   FutureBuilder<String>(
-      //     future:
-      //         controller.getCityName(cardData['country'], cardData['city']),
-      //     builder: (context, snapshot) {
-      //       if (snapshot.connectionState == ConnectionState.waiting) {
-      //         return const Text('Loading...');
-      //       } else if (snapshot.hasError) {
-      //         return const Text('Error');
-      //       } else {
-      //         return textForDataRowInTable(
-      //           text: '${snapshot.data}',
-      //         );
-      //       }
-      //     },
-      //   ),
-      // ),
       DataCell(
         textForDataRowInTable(
-          maxWidth: null,
-          text: controller.getdataName(
-            cardData['customer'],
-            controller.allCustomers,
-            title: 'entity_name',
-          ),
+          color: Colors.red,
+          isBold: true,
+          text: '${cardData.vat}',
         ),
       ),
       DataCell(
-        SelectableText(cardData['vehicle_identification_number'], maxLines: 1),
-      ),
-      DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: StreamBuilder<double>(
-            stream: controller.calculateAllTotals(cardId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  color: Colors.green,
-                  isBold: true,
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
-        ),
-      ),
-      DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: StreamBuilder<double>(
-            stream: controller.calculateAllVATs(cardId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  color: Colors.red,
-                  isBold: true,
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
-        ),
-      ),
-      DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: StreamBuilder<double>(
-            stream: controller.calculateAllNETs(cardId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  color: Colors.blueGrey,
-                  isBold: true,
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
+        textForDataRowInTable(
+          color: Colors.blueGrey,
+          isBold: true,
+          text: '${cardData.net}',
         ),
       ),
     ],
@@ -807,7 +673,7 @@ DataRow dataRowForTheTable(
 Widget editSection(
   BuildContext context,
   QuotationCardController controller,
-  Map<String, dynamic> cardData,
+  QuotationCardsModel cardData,
   BoxConstraints constraints,
   String cardId,
 ) {
@@ -821,13 +687,10 @@ Widget editSection(
             controller.buttonLoadingStates[cardId] == null || isLoading == false
             ? () async {
                 controller.setButtonLoading(cardId, true);
-
-                controller.getAllInvoiceItems(cardId);
-                controller.currentCountryVAT.value = controller.getdataName(
-                  controller.companyDetails['contact_details']['country'],
-                  controller.allCountries,
-                  title: 'vat',
-                );
+                controller.currentCountryVAT.value =
+                    controller.companyDetails.containsKey('country_vat')
+                    ? controller.companyDetails['country_vat'].toString()
+                    : "";
                 await controller.loadValues(cardData, cardId);
                 editQuotationCardDialog(controller, cardData, cardId);
                 controller.setButtonLoading(cardId, false);
@@ -854,7 +717,7 @@ ElevatedButton historySection(
 
 Future<dynamic> editQuotationCardDialog(
   QuotationCardController controller,
-  Map<String, dynamic> cardData,
+  QuotationCardsModel cardData,
   String quotationId, {
   String screenName = '',
   headerColor = '',
@@ -970,40 +833,6 @@ ElevatedButton newQuotationCardButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.quotationDate.value.text = textToDate(DateTime.now());
-      controller.currentCountryVAT.value = controller.getdataName(
-        controller.companyDetails['contact_details']['country'],
-        controller.allCountries,
-        title: 'vat',
-      );
-      controller.country.text = controller.getdataName(
-        controller.companyDetails['contact_details']['country'],
-        controller.allCountries,
-      );
-      controller.countryId.value =
-          controller.companyDetails['contact_details']['country'];
-      controller.getCitiesByCountryID(
-        controller.companyDetails['contact_details']['country'],
-      );
-      controller.mileageIn.value.text = '0';
-      controller.customerCreditNumber.text = '0';
-      controller.customerOutstanding.text = '0';
-      controller.isCashSelected.value = true;
-      controller.payType.value = 'Cash';
-      var entry = controller.allCurrencies.entries.firstWhere(
-        (entry) =>
-            entry.value['country_id'] ==
-            controller.companyDetails['contact_details']['country'],
-        orElse: () => const MapEntry('', {}),
-      );
-      controller.customerCurrencyId.value = entry.key ?? '';
-      controller.customerCurrencyRate.text = (entry.value['rate'] ?? '1')
-          .toString();
-      controller.customerCurrency.text = controller.getdataName(
-        controller.companyDetails['contact_details']['country'],
-        controller.allCountries,
-        title: 'currency_code',
-      );
       controller.clearValues();
       Get.dialog(
         barrierDismissible: false,
@@ -1110,7 +939,7 @@ ElevatedButton newQuotationCardButton(
 }
 
 class CardDataSource extends DataTableSource {
-  final List<DocumentSnapshot> cards;
+  final List<QuotationCardsModel> cards;
   final BuildContext context;
   final BoxConstraints constraints;
   final QuotationCardController controller;
@@ -1126,12 +955,11 @@ class CardDataSource extends DataTableSource {
   DataRow? getRow(int index) {
     if (index >= cards.length) return null;
 
-    final trade = cards[index];
-    final cardData = trade.data() as Map<String, dynamic>;
-    final cardId = trade.id;
+    final quotation = cards[index];
+    final cardId = quotation.id ?? '';
 
     return dataRowForTheTable(
-      cardData,
+      quotation,
       context,
       constraints,
       cardId,

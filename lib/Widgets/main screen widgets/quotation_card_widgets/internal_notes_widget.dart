@@ -175,11 +175,11 @@ Future internalNotesDialog(QuotationCardController controller,
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          textAlign: TextAlign.start,
-                                          controller.getdataName(
-                                              note['user_id'],
-                                              controller.allUsers,
-                                              title: 'user_name'),
+                                          textAlign: TextAlign.start,'',
+                                          // controller.getdataName(
+                                          //     note['user_id'],
+                                          //     controller.allUsers,
+                                          //     title: 'user_name'),
                                           style: TextStyle(
                                             color: isUserNote
                                                 ? Colors.deepOrangeAccent

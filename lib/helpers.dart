@@ -571,6 +571,38 @@ class Helpers {
     }
   }
 
+  
+  Future getQuotationCardStatus(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendTestURI/quotation_cards/get_quotation_card_status/$id');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final status = decoded['data'];
+        return status;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getJobCardStatus(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
   Future<Map<String, dynamic>> getAllTechnicians() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();

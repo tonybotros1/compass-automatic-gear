@@ -198,32 +198,15 @@ Widget customerDetailsSection() {
               children: [
                 Expanded(
                   child: CustomDropdown(
-                    showedResult: (key, value) {
-                      return Text(controller.getdataName(
-                          value['country_id'], controller.allCountries,
-                          title: 'currency_code'));
-                    },
                     textcontroller: controller.customerCurrency.value.text,
                     hintText: 'Currency',
                     items: isCurrenciesLoading ? {} : controller.allCurrencies,
-                    itemBuilder: (context, key, value) {
-                      return Container(
-                          alignment: Alignment.centerLeft,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
-                          child: Text(controller.getdataName(
-                              value['country_id'], controller.allCountries,
-                              title: 'currency_code')));
-                    },
                     onChanged: (key, value) {
-                      controller.customerCurrency.text = controller.getdataName(
-                        value['country_id'],
-                        controller.allCountries,
-                        title: 'currency_code',
-                      );
+                       controller.customerCurrency.text = value['currency_code'];
                       controller.customerCurrencyId.value = key;
                       controller.customerCurrencyRate.text =
                           (value['rate'] ?? '1').toString();
+                      controller.isQuotationModified.value = true;
                     },
                   ),
                 ),

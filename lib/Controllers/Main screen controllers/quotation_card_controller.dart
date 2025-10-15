@@ -1,15 +1,16 @@
+import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../Screens/Main screens/System Administrator/Setup/job_card.dart';
+import '../../Models/job cards/job_card_invoice_items_model.dart';
+import '../../Models/quotation cards/quotation_cards_model.dart';
 import '../../consts.dart';
+import '../../helpers.dart';
 import 'main_screen_contro.dart';
 
 class QuotationCardController extends GetxController {
@@ -41,24 +42,23 @@ class QuotationCardController extends GetxController {
   TextEditingController customerEntityPhoneNumber = TextEditingController();
   TextEditingController customerCreditNumber = TextEditingController();
   TextEditingController customerOutstanding = TextEditingController();
-  // TextEditingController customerSaleMan = TextEditingController();
   RxString customerSaleMan = RxString('');
   TextEditingController customerBranch = TextEditingController();
   TextEditingController customerCurrency = TextEditingController();
   TextEditingController customerCurrencyRate = TextEditingController();
   Rx<TextEditingController> mileageIn = TextEditingController().obs;
-  Rx<TextEditingController> fuelAmount = TextEditingController().obs;
+  // Rx<TextEditingController> fuelAmount = TextEditingController().obs;
   Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(false);
   RxBool loadingInvoiceItems = RxBool(false);
-  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allQuotationCards =
-      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
-  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>>
-  filteredQuotationCards = RxList<QueryDocumentSnapshot<Map<String, dynamic>>>(
-    [],
-  );
-  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allInvoiceItems =
-      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
+  final RxList<QuotationCardsModel> allQuotationCards =
+      RxList<QuotationCardsModel>([]);
+  // final RxList<QueryDocumentSnapshot<Map<String, dynamic>>>
+  // filteredQuotationCards = RxList<QueryDocumentSnapshot<Map<String, dynamic>>>(
+  //   [],
+  // );
+  final RxList<JobCardInvoiceItemsModel> allInvoiceItems =
+      RxList<JobCardInvoiceItemsModel>([]);
   final ScrollController scrollControllerFotTable1 = ScrollController();
   RxString carBrandId = RxString('');
   RxString carBrandLogo = RxString('');
@@ -78,9 +78,7 @@ class QuotationCardController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxMap allBrands = RxMap({});
   RxMap allTechnicians = RxMap({});
-  RxMap allYears = RxMap({});
-  final RxMap<String, Map<String, dynamic>> allModels =
-      <String, Map<String, dynamic>>{}.obs;
+  RxMap allModels = {}.obs;
   RxMap allCustomers = RxMap({});
   RxMap salesManMap = RxMap({});
   RxBool addingNewValue = RxBool(false);
@@ -100,9 +98,9 @@ class QuotationCardController extends GetxController {
   var selectedRowIndex = Rxn<int>();
   final ScrollController scrollController = ScrollController();
   RxString quotationStatus = RxString('');
-  RxBool isCashSelected = RxBool(true);
-  RxBool isCreditSelected = RxBool(false);
-  RxString payType = RxString('Cash');
+  // RxBool isCashSelected = RxBool(true);
+  // RxBool isCreditSelected = RxBool(false);
+  // RxString payType = RxString('Cash');
   DateFormat format = DateFormat("dd-MM-yyyy");
   RxString curreentQuotationCardId = RxString('');
   TextEditingController invoiceItemName = TextEditingController();
@@ -158,131 +156,421 @@ class QuotationCardController extends GetxController {
   Rx<TextEditingController> fromDate = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
   Rx<TextEditingController> statusFilter = TextEditingController().obs;
+  String backendUrl = backendTestURI;
+  RxBool isQuotationInvoicesModified = RxBool(false);
+  RxBool isQuotationModified = RxBool(false);
 
   @override
   void onInit() async {
     super.onInit();
-    // jobWarrentyEndDate.value.addListener(() {
-    //   // Refresh the Rx to notify GetX that something changed
-    //   jobWarrentyEndDate.refresh();
-    // });
-    getColors();
-    await getCompanyId();
-    getAllCustomers();
-    getCarBrands();
-    getCountries();
     getCompanyDetails();
-    getUserId();
     getAllUsers();
-    getSalesMan();
-    getBranches();
-    getCurrencies();
-    getEngineTypes();
-    getYears();
-    getInvoiceItemsFromCollection();
   }
 
-  // this function is to get years
-  Future<void> getYears() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'YEARS')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name', descending: true)
-        .snapshots()
-        .listen((year) {
-          allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
-        });
+  Future<void> getAllUsers() async {
+    allUsers.assignAll(await helper.getSysUsers());
   }
 
-  // calculateMoneyForAllQuotations() async {
-  //   try {
-  //     allQuotationsVATS.value = 0.0;
-  //     allQuotationsTotals.value = 0.0;
-  //     allQuotationsNET.value = 0.0;
+  Future<Map<String, dynamic>> getColors() async {
+    return await helper.getAllListValues('COLORS');
+  }
 
-  //     for (var quot in filteredQuotationCards.isEmpty
-  //         ? allQuotationCards
-  //         : filteredQuotationCards) {
-  //       final id = quot.id;
+  Future<Map<String, dynamic>> getEngineTypes() async {
+    return await helper.getAllListValues('ENGINE_TYPES');
+  }
 
-  //       FirebaseFirestore.instance
-  //           .collection('quotation_cards')
-  //           .doc(id)
-  //           .collection('invoice_items')
-  //           .snapshots()
-  //           .listen((invoices) {
-  //         for (var invoice in invoices.docs) {
-  //           var data = invoice.data() as Map<String, dynamic>?;
-  //           allQuotationsVATS.value += double.parse(data?['vat']);
-  //           allQuotationsTotals.value += double.parse(data?['total']);
-  //           allQuotationsNET.value += double.parse(data?['net']);
-  //         }
-  //       });
-  //     }
-  //   } catch (e) {
-  //     // print(e);
-  //   }
-  // }
+  Future<Map<String, dynamic>> getCarBrands() async {
+    return await helper.getCarBrands();
+  }
 
-  Future<void> calculateMoneyForAllQuotations() async {
+  Future<void> getModelsByCarBrand(String brandID) async {
+    allModels.assignAll(await helper.getModelsValues(brandID));
+  }
+
+  Future<Map<String, dynamic>> getCountries() async {
+    return await helper.getCountries();
+  }
+
+  Future<void> getCitiesByCountryID(String countryID) async {
+    allCities.assignAll(await helper.getCitiesValues(countryID));
+  }
+
+  Future<Map<String, dynamic>> getSalesMan() async {
+    return await helper.getSalesMan();
+  }
+
+  Future<Map<String, dynamic>> getCurrencies() async {
+    return await helper.getCurrencies();
+  }
+
+  Future<void> getCompanyDetails() async {
+    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
+  }
+
+  Future<Map<String, dynamic>> getBranches() async {
+    return await helper.getBrunches();
+  }
+
+  Future<Map<String, dynamic>> getAllCustomers() async {
+    return await helper.getCustomers();
+  }
+
+  Future<Map<String, dynamic>> getInvoiceItemsFromCollection() async {
+    return await helper.getInvoiceItems();
+  }
+
+  Future getCurrentQuotationCardStatus(String id) async {
+    return await helper.getQuotationCardStatus(id);
+  }
+
+  Future<void> addNewQuotationCard() async {
     try {
-      // Reset totals at the beginning.
-      double totalVat = 0.0;
-      double grandTotal = 0.0;
-      double totalNet = 0.0;
-
-      if (allQuotationCards.isEmpty) {
-        allQuotationsVATS.value = 0;
-        allQuotationsTotals.value = 0;
-        allQuotationsNET.value = 0;
-        return;
+      if (curreentQuotationCardId.isNotEmpty) {
+        Map jobStatus = await getCurrentQuotationCardStatus(
+          curreentQuotationCardId.value,
+        );
+        String status1 = jobStatus['quotation_status'];
+        if (status1 != 'New' && status1 != '') {
+          showSnackBar('Alert', 'Only new quotation can be edited');
+          return;
+        }
       }
+      addingNewValue.value = true;
+      Map<String, dynamic> newData = {
+        'quotation_status': quotationStatus.value,
+        'car_brand_logo': carBrandLogo.value,
+        'car_brand': carBrandId.value,
+        'car_model': carModelId.value,
+        'plate_number': plateNumber.text,
+        'plate_code': plateCode.text,
+        'country': countryId.value,
+        'city': cityId.value,
+        'year': year.text,
+        'color': colorId.value,
+        'engine_type': engineTypeId.value,
+        'vehicle_identification_number': vin.text,
+        'transmission_type': transmissionType.text,
+        'mileage_in': mileageIn.value.text,
+        'customer': customerId.value,
+        'contact_name': customerEntityName.text,
+        'contact_number': customerEntityPhoneNumber.text,
+        'contact_email': customerEntityEmail.text,
+        'credit_limit': customerCreditNumber.text,
+        'outstanding': customerOutstanding.text,
+        'saleMan': customerSaleManId.value,
+        'branch': customerBranchId.value,
+        'currency': customerCurrencyId.value,
+        'rate': customerCurrencyRate.text,
+        'validity_days': quotationDays.value.text,
+        'validity_end_date': validityEndDate.value.text,
+        'reference_number': referenceNumber.value.text,
+        'delivery_time': deliveryTime.value.text,
+        'quotation_warrenty_days': quotationWarrentyDays.value.text,
+        'quotation_warrenty_km': quotationWarrentyKM.value.text,
+        'quotation_notes': quotationNotes.text,
+        'invoice_items': allInvoiceItems.map((item) => item.toJson()).toList(),
+      };
 
-      // 1. Create a list of Futures for fetching the 'invoice_items' for each quotation.
-      List<Future<QuerySnapshot<Map<String, dynamic>>>> futures = [];
-      for (var quotation in allQuotationCards) {
-        final future = FirebaseFirestore.instance
-            .collection('quotation_cards')
-            .doc(quotation.id)
-            .collection(
-              'quotation_invoice_items',
-            ) // Assuming the subcollection is named this
-            .get();
-        futures.add(future);
-      }
-
-      // 2. Execute all the Futures in parallel.
-      final List<QuerySnapshot<Map<String, dynamic>>> snapshots =
-          await Future.wait(futures);
-
-      // 3. Iterate through the results in memory to perform calculations.
-      for (var invoiceListSnapshot in snapshots) {
-        for (var invoiceDoc in invoiceListSnapshot.docs) {
-          var data = invoiceDoc.data();
-          totalVat += double.tryParse(data['vat'].toString()) ?? 0.0;
-          grandTotal += double.tryParse(data['total'].toString()) ?? 0.0;
-          totalNet += double.tryParse(data['net'].toString()) ?? 0.0;
+      final rawDate = quotationDate.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['quotation_date'] = convertDateToIson(rawDate);
+        } catch (e) {
+          showSnackBar('Alert', 'Please enter valid job date');
         }
       }
 
-      // 4. Update the UI with the final calculated totals.
-      allQuotationsVATS.value = totalVat;
-      allQuotationsTotals.value = grandTotal;
-      allQuotationsNET.value = totalNet;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri addingJobUrl = Uri.parse(
+        '$backendUrl/quotation_cards/add_new_quotation_card',
+      );
+
+      if (quotationCardAdded.isFalse && curreentQuotationCardId.isEmpty) {
+        showSnackBar('Adding', 'Please Wait');
+        newData['quotation_status'] = 'New';
+        final response = await http.post(
+          addingJobUrl,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(newData),
+        );
+        if (response.statusCode == 200) {
+          quotationStatus.value = 'New';
+          final decoded = jsonDecode(response.body);
+          QuotationCardsModel newQuotation = QuotationCardsModel.fromJson(
+            decoded['quotation_card'],
+          );
+          quotationCounter.value.text = newQuotation.quotationNumber ?? '';
+          quotationCardAdded.value = true;
+          addingNewValue.value = false;
+          curreentQuotationCardId.value = newQuotation.id ?? '';
+          allInvoiceItems.value = newQuotation.invoiceItemsDetails ?? [];
+          isQuotationInvoicesModified.value = false;
+          isQuotationModified.value = false;
+          showSnackBar('Done', 'Quotation Added Successfully');
+        } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) {
+            await addNewQuotationCard();
+          } else if (refreshed == RefreshResult.invalidToken) {
+            logout();
+          }
+        } else if (response.statusCode == 401) {
+          logout();
+        }
+      } else {
+        if (isQuotationInvoicesModified.isTrue || isQuotationModified.isTrue) {
+          showSnackBar('Updating', 'Please Wait');
+        }
+        if (isQuotationModified.isTrue) {
+          Uri updatingJobUrl = Uri.parse(
+            '$backendUrl/quotation_cards/update_quotation_card/$curreentQuotationCardId',
+          );
+          Map newDataToUpdate = newData;
+          newDataToUpdate.remove('invoice_items');
+          final response = await http.patch(
+            updatingJobUrl,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode(newDataToUpdate),
+          );
+          if (response.statusCode == 200) {
+            showSnackBar('Done', 'Updated Successfully');
+            isQuotationModified.value = false;
+          } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+            final refreshed = await helper.refreshAccessToken(refreshToken);
+            if (refreshed == RefreshResult.success) {
+              await addNewQuotationCard();
+            } else if (refreshed == RefreshResult.invalidToken) {
+              logout();
+            }
+          } else if (response.statusCode == 401) {
+            logout();
+          }
+        }
+        if (isQuotationInvoicesModified.isTrue) {
+          Uri updatingJobInvoicesUrl = Uri.parse(
+            '$backendUrl/quotation_cards/update_quotation_invoice_items',
+          );
+          final response = await http.patch(
+            updatingJobInvoicesUrl,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode(
+              allInvoiceItems
+                  .where(
+                    (item) =>
+                        (item.isModified == true ||
+                        item.added == true ||
+                        (item.deleted == true && item.id != null)),
+                  )
+                  .map((item) => item.toJson())
+                  .toList(),
+            ),
+          );
+          if (response.statusCode == 200) {
+            final decoded = jsonDecode(response.body);
+            List updatedItems = decoded['updated_items'];
+            List deletedItems = decoded['deleted_items'];
+            if (deletedItems.isNotEmpty) {
+              for (var id in deletedItems) {
+                allInvoiceItems.removeWhere((item) => item.id == id);
+              }
+            }
+            if (updatedItems.isNotEmpty) {
+              for (var item in updatedItems) {
+                var uid = item['uid'];
+                var id = item['_id'];
+                final localIndex = allInvoiceItems.indexWhere(
+                  (item) => item.uid == uid,
+                );
+
+                if (localIndex != -1) {
+                  allInvoiceItems[localIndex].id = id;
+                  allInvoiceItems[localIndex].added = false;
+                  allInvoiceItems[localIndex].isModified = false;
+                  allInvoiceItems[localIndex].deleted = false;
+                }
+              }
+            }
+            showSnackBar('Done', 'Updated Successfully');
+            isQuotationInvoicesModified.value = false;
+          } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+            final refreshed = await helper.refreshAccessToken(refreshToken);
+            if (refreshed == RefreshResult.success) {
+              await addNewQuotationCard();
+            } else if (refreshed == RefreshResult.invalidToken) {
+              logout();
+            }
+          } else if (response.statusCode == 401) {
+            logout();
+          }
+        }
+      }
+      canAddInternalNotesAndInvoiceItems.value = true;
+      addingNewValue.value = false;
     } catch (e) {
-      allQuotationsVATS.value = 0;
-      allQuotationsTotals.value = 0;
-      allQuotationsNET.value = 0;
+      showSnackBar('Alert', 'Something went wrong please try again');
+      addingNewValue.value = false;
     }
   }
+
+  // Future<void> addNewQuotationCard() async {
+  //   try {
+  //     if (quotationStatus.value != 'New' && quotationStatus.value != '') {
+  //       showSnackBar('Alert', 'Only new quotations can be edited');
+  //       return;
+  //     }
+  //     addingNewValue.value = true;
+  //     Map<String, dynamic> newData = {
+  //       // 'job_number': '',
+  //       'quotation_status': quotationStatus.value,
+  //       'car_brand_logo': carBrandLogo.value,
+  //       // 'company_id': companyId.value,
+  //       'car_brand': carBrandId.value,
+  //       'car_model': carModelId.value,
+  //       'plate_number': plateNumber.text,
+  //       'plate_code': plateCode.text,
+  //       'country': countryId.value,
+  //       'city': cityId.value,
+  //       'year': year.text,
+  //       'color': colorId.value,
+  //       'engine_type': engineTypeId.value,
+  //       'vehicle_identification_number': vin.text,
+  //       'transmission_type': transmissionType.text,
+  //       'mileage_in': mileageIn.value.text,
+  //       'customer': customerId.value,
+  //       'contact_name': customerEntityName.text,
+  //       'contact_number': customerEntityPhoneNumber.text,
+  //       'contact_email': customerEntityEmail.text,
+  //       'credit_limit': customerCreditNumber.text,
+  //       'outstanding': customerOutstanding.text,
+  //       'saleMan': customerSaleManId.value,
+  //       'branch': customerBranchId.value,
+  //       'currency': customerCurrencyId.value,
+  //       'rate': customerCurrencyRate.text,
+  //       // 'payment_method': payType.value,
+  //       // 'quotation_number': quotationCounter.value.text,
+  //       // 'quotation_date': Timestamp.fromDate(
+  //       //   format.parse(quotationDate.value.text.trim()),
+  //       // ),
+  //       'validity_days': quotationDays.value.text,
+  //       'validity_end_date': validityEndDate.value.text,
+  //       'reference_number': referenceNumber.value.text,
+  //       'delivery_time': deliveryTime.value.text,
+  //       'quotation_warrenty_days': quotationWarrentyDays.value.text,
+  //       'quotation_warrenty_km': quotationWarrentyKM.value.text,
+  //       'quotation_notes': quotationNotes.text,
+  //     };
+
+  //     final rawDate = quotationDate.value.text.trim();
+  //     if (rawDate.isNotEmpty) {
+  //       try {
+  //         newData['quotation_date'] = Timestamp.fromDate(
+  //           format.parseStrict(rawDate),
+  //         );
+  //       } catch (e) {
+  //         // إذا حابب تعرض للمستخدم خطأ في التنسيق
+  //         // print('Invalid quotation_date format: $e');
+  //       }
+  //     }
+
+  //     if (quotationCounter.value.text.isEmpty) {
+  //       quotationStatus.value = 'New';
+  //       newData['quotation_status'] = 'New';
+  //       newData['label'] = '';
+
+  //       await getCurrentQuotationCounterNumber();
+  //       newData['quotation_number'] = quotationCounter.value.text;
+  //     }
+
+  //     if (quotationCardAdded.isFalse) {
+  //       newData['added_date'] = DateTime.now().toString();
+  //       var newQuotation = await FirebaseFirestore.instance
+  //           .collection('quotation_cards')
+  //           .add(newData);
+  //       quotationCardAdded.value = true;
+  //       curreentQuotationCardId.value = newQuotation.id;
+  //       getAllInvoiceItems(newQuotation.id);
+  //       showSnackBar('Done', 'Added Successfully');
+  //     } else {
+  //       newData.remove('added_date');
+  //       await FirebaseFirestore.instance
+  //           .collection('quotation_cards')
+  //           .doc(curreentQuotationCardId.value)
+  //           .update(newData);
+  //       showSnackBar('Done', 'Updated Successfully');
+  //     }
+  //     canAddInternalNotesAndInvoiceItems.value = true;
+  //     addingNewValue.value = false;
+  //   } catch (e) {
+  //     canAddInternalNotesAndInvoiceItems.value = false;
+  //     addingNewValue.value = false;
+  //     showSnackBar('Alert', 'Something Went Wrong');
+  //   }
+  // }
+
+  // ===================================================================================================================================
+
+  // Future<void> calculateMoneyForAllQuotations() async {
+  //   try {
+  //     // Reset totals at the beginning.
+  //     double totalVat = 0.0;
+  //     double grandTotal = 0.0;
+  //     double totalNet = 0.0;
+
+  //     if (allQuotationCards.isEmpty) {
+  //       allQuotationsVATS.value = 0;
+  //       allQuotationsTotals.value = 0;
+  //       allQuotationsNET.value = 0;
+  //       return;
+  //     }
+
+  //     // 1. Create a list of Futures for fetching the 'invoice_items' for each quotation.
+  //     List<Future<QuerySnapshot<Map<String, dynamic>>>> futures = [];
+  //     for (var quotation in allQuotationCards) {
+  //       final future = FirebaseFirestore.instance
+  //           .collection('quotation_cards')
+  //           .doc(quotation.id)
+  //           .collection(
+  //             'quotation_invoice_items',
+  //           ) // Assuming the subcollection is named this
+  //           .get();
+  //       futures.add(future);
+  //     }
+
+  //     // 2. Execute all the Futures in parallel.
+  //     final List<QuerySnapshot<Map<String, dynamic>>> snapshots =
+  //         await Future.wait(futures);
+
+  //     // 3. Iterate through the results in memory to perform calculations.
+  //     for (var invoiceListSnapshot in snapshots) {
+  //       for (var invoiceDoc in invoiceListSnapshot.docs) {
+  //         var data = invoiceDoc.data();
+  //         totalVat += double.tryParse(data['vat'].toString()) ?? 0.0;
+  //         grandTotal += double.tryParse(data['total'].toString()) ?? 0.0;
+  //         totalNet += double.tryParse(data['net'].toString()) ?? 0.0;
+  //       }
+  //     }
+
+  //     // 4. Update the UI with the final calculated totals.
+  //     allQuotationsVATS.value = totalVat;
+  //     allQuotationsTotals.value = grandTotal;
+  //     allQuotationsNET.value = totalNet;
+  //   } catch (e) {
+  //     allQuotationsVATS.value = 0;
+  //     allQuotationsTotals.value = 0;
+  //     allQuotationsNET.value = 0;
+  //   }
+  // }
 
   // Future<void> calculateMoneyForAllQuotations() async {
   //   try {
@@ -341,6 +629,29 @@ class QuotationCardController extends GetxController {
   }
 
   void clearValues() {
+    quotationDate.value.text = textToDate(DateTime.now());
+    currentCountryVAT.value = companyDetails.containsKey('country_vat')
+        ? companyDetails['country_vat'].toString()
+        : "";
+    country.text = companyDetails.containsKey('country')
+        ? companyDetails['country'] ?? ""
+        : "";
+
+    countryId.value = companyDetails.containsKey('country_id')
+        ? companyDetails['country_id'] ?? ""
+        : "";
+    mileageIn.value.text = '0';
+    customerCreditNumber.text = '0';
+    customerOutstanding.text = '0';
+    customerCurrencyId.value = companyDetails.containsKey('currency_id')
+        ? companyDetails['currency_id'] ?? ""
+        : "";
+    customerCurrencyRate.text = companyDetails.containsKey('currency_rate')
+        ? companyDetails['currency_rate'].toString()
+        : "";
+    customerCurrency.text = companyDetails.containsKey('currency_code')
+        ? companyDetails['currency_code'] ?? ""
+        : "";
     jobCardCounter.value = '';
     allInvoiceItems.clear();
     canAddInternalNotesAndInvoiceItems.value = false;
@@ -388,115 +699,87 @@ class QuotationCardController extends GetxController {
     buttonLoadingStates.refresh(); // Notify listeners
   }
 
-  Future<void> loadValues(Map<String, dynamic> data, String id) async {
-    var job = await FirebaseFirestore.instance
-        .collection('job_cards')
-        .where('quotation_id', isEqualTo: id)
-        .get();
-    if (job.docs.isNotEmpty) {
-      jobCardCounter.value = job.docs.first.data()['job_number'];
-    } else {
-      jobCardCounter.value = '';
-    }
+  Future<void> loadValues(QuotationCardsModel data, String id) async {
+    // var job = await FirebaseFirestore.instance
+    //     .collection('job_cards')
+    //     .where('quotation_id', isEqualTo: id).             (this need to be fixed)
+    //     .get();
+    // if (job.docs.isNotEmpty) {
+    //   jobCardCounter.value = job.docs.first.data()['job_number'];
+    // } else {
+    //   jobCardCounter.value = '';
+    // }
     // jobCardCounter.value.text = data['job_number'] ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
-    quotationStatus.value = data['quotation_status'] as String? ?? '';
-    carBrandLogo.value = data['car_brand_logo'] as String? ?? '';
-    carBrandId.value = data['car_brand'] as String? ?? '';
+    quotationStatus.value = data.quotationStatus ?? '';
+    carBrandLogo.value = data.carBrandLogo ?? '';
 
-    color.text = getdataName(data['color'], allColors);
-    colorId.value = data['color'];
+    color.text = data.color ?? '';
+    colorId.value = data.colorId ?? '';
 
     // Car brand & model (with async model name lookup)
-    final brandId = data['car_brand'] as String? ?? '';
-    carBrand.text = getdataName(brandId, allBrands);
-    carBrandId.value = brandId;
+    carBrand.text = data.carBrand ?? '';
+    carBrandId.value = data.carBrandId ?? '';
 
-    final modelId = data['car_model'] as String? ?? '';
-    carModelId.value = modelId;
-    carModel.text = await getModelName(brandId, modelId);
+    carModelId.value = data.carModelId ?? '';
+    carModel.text = data.carModel ?? '';
 
     // Country & city
-    final countryIdVal = data['country'] as String? ?? '';
-    countryId.value = countryIdVal;
-    country.text = getdataName(countryIdVal, allCountries);
+    countryId.value = data.countryId ?? '';
+    country.text = data.country ?? '';
 
     // If you need these lists populated before setting city name:
-    getCitiesByCountryID(countryIdVal);
-    getModelsByCarBrand(brandId);
+    if (countryId.value.isNotEmpty) {
+      getCitiesByCountryID(countryId.value);
+    }
+    if (carBrandId.value.isNotEmpty) {
+      getModelsByCarBrand(carBrandId.value);
+    }
 
-    final cityIdVal = data['city'] as String? ?? '';
-    cityId.value = cityIdVal;
-    city.text = await getCityName(countryIdVal, cityIdVal);
+    cityId.value = data.cityId ?? '';
+    city.text = data.city ?? '';
 
     // Plate, year, code, VIN, transmission
-    plateNumber.text = data['plate_number'] as String? ?? '';
-    plateCode.text = data['plate_code'] as String? ?? '';
-    year.text = data['year'] as String? ?? '';
-    vin.text = data['vehicle_identification_number'] as String? ?? '';
-    transmissionType.text = data['transmission_type'] as String? ?? '';
+    plateNumber.text = data.plateNumber ?? '';
+    plateCode.text = data.plateCode ?? '';
+    year.text = data.year ?? '';
+    vin.text = data.vehicleIdentificationNumber ?? '';
+    transmissionType.text = data.transmissionType ?? '';
 
     // Mileage & fuel amounts
-    mileageIn.value.text = data['mileage_in'] as String? ?? '';
-    fuelAmount.value.text = data['fuel_amount'] as String? ?? '';
+    mileageIn.value.text = data.mileageIn.toString();
 
     // Customer info
-    final custId = data['customer'] as String? ?? '';
-    customerId.value = custId;
-    customerName.text = getdataName(custId, allCustomers, title: 'entity_name');
-    customerEntityName.text = data['contact_name'] as String? ?? '';
-    customerEntityPhoneNumber.text = data['contact_number'] as String? ?? '';
-    customerEntityEmail.text = data['contact_email'] as String? ?? '';
-    customerCreditNumber.text = data['credit_limit'] as String? ?? '';
-    customerOutstanding.text = data['outstanding'] as String? ?? '';
+    customerId.value = data.customerId ?? '';
+    customerName.text = data.customer ?? '';
+    customerEntityName.text = data.contactName ?? '';
+    customerEntityPhoneNumber.text = data.contactNumber ?? '';
+    customerEntityEmail.text = data.contactEmail ?? '';
+    customerCreditNumber.text = data.creditLimit.toString();
+    customerOutstanding.text = data.outstanding.toString();
 
     // Salesman & branch
-    final saleManId = data['saleMan'] as String? ?? '';
-    customerSaleManId.value = saleManId;
-    customerSaleMan.value = getdataName(saleManId, salesManMap);
+    customerSaleManId.value = data.salesmanId ?? '';
+    customerSaleMan.value = data.salesman ?? '';
 
-    final branchId = data['branch'] as String? ?? '';
-    customerBranchId.value = branchId;
-    customerBranch.text = getdataName(branchId, allBranches);
+    customerBranchId.value = data.branchId ?? '';
+    customerBranch.text = data.branch ?? '';
 
     // Currency & rate
-    final currencyId = data['currency'] as String? ?? '';
-    customerCurrencyId.value = currencyId;
-    if (currencyId.isNotEmpty) {
-      final countryForCurr = getdataName(
-        currencyId,
-        allCurrencies,
-        title: 'country_id',
-      );
-      customerCurrency.text = getdataName(
-        countryForCurr,
-        allCountries,
-        title: 'currency_code',
-      );
-    } else {
-      customerCurrency.text = '';
-    }
-    customerCurrencyRate.text = data['rate'] as String? ?? '';
-
-    // Payment method
-    final payMethod = data['payment_method'] as String? ?? '';
-    payType.value = payMethod;
-    isCashSelected.value = payMethod == 'Cash';
-    isCreditSelected.value = !isCashSelected.value;
+    customerCurrencyId.value = data.currencyId ?? '';
+    customerCurrency.text = data.currency ?? '';
+    customerCurrencyRate.text = data.rate.toString();
 
     // Quotation metadata
-    quotationCounter.value.text = data['quotation_number'] as String? ?? '';
-    quotationDate.value.text =
-        textToDate(data['quotation_date']) as String? ?? '';
-    quotationDays.value.text = data['validity_days'] as String? ?? '';
-    validityEndDate.value.text = data['validity_end_date'] as String? ?? '';
-    referenceNumber.value.text = data['reference_number'] as String? ?? '';
-    deliveryTime.value.text = data['delivery_time'] as String? ?? '';
-    quotationWarrentyDays.value.text =
-        data['quotation_warrenty_days'] as String? ?? '';
-    quotationWarrentyKM.value.text =
-        data['quotation_warrenty_km'] as String? ?? '';
-    quotationNotes.text = data['quotation_notes'] as String? ?? '';
+    quotationCounter.value.text = data.quotationNumber ?? '';
+    quotationDate.value.text = textToDate(data.quotationDate);
+    quotationDays.value.text = data.validityDays.toString();
+    validityEndDate.value.text = textToDate(data.validityEndDate);
+    referenceNumber.value.text = data.referenceNumber ?? '';
+    deliveryTime.value.text = data.deliveryTime ?? '';
+    quotationWarrentyDays.value.text = data.quotationWarrentyDays.toString();
+    quotationWarrentyKM.value.text = data.quotationWarrentyKm.toString();
+    quotationNotes.text = data.quotationNotes ?? '';
   }
 
   Future<void> addNewInternalNote(String id, Map<String, dynamic> note) async {
@@ -587,101 +870,6 @@ class QuotationCardController extends GetxController {
         });
   }
 
-  Future<void> addNewQuotationCard() async {
-    try {
-      if (quotationStatus.value != 'New' && quotationStatus.value != '') {
-        showSnackBar('Alert', 'Only new quotations can be edited');
-        return;
-      }
-      addingNewValue.value = true;
-      Map<String, dynamic> newData = {
-        'job_number': '',
-        'quotation_status': quotationStatus.value,
-        'car_brand_logo': carBrandLogo.value,
-        'company_id': companyId.value,
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': plateCode.text,
-        'country': countryId.value,
-        'city': cityId.value,
-        'year': year.text,
-        'color': colorId.value,
-        'engine_type': engineTypeId.value,
-        'vehicle_identification_number': vin.text,
-        'transmission_type': transmissionType.text,
-        'mileage_in': mileageIn.value.text,
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'outstanding': customerOutstanding.text,
-        'saleMan': customerSaleManId.value,
-        'branch': customerBranchId.value,
-        'currency': customerCurrencyId.value,
-        'rate': customerCurrencyRate.text,
-        'payment_method': payType.value,
-        'quotation_number': quotationCounter.value.text,
-        // 'quotation_date': Timestamp.fromDate(
-        //   format.parse(quotationDate.value.text.trim()),
-        // ),
-        'validity_days': quotationDays.value.text,
-        'validity_end_date': validityEndDate.value.text,
-        'reference_number': referenceNumber.value.text,
-        'delivery_time': deliveryTime.value.text,
-        'quotation_warrenty_days': quotationWarrentyDays.value.text,
-        'quotation_warrenty_km': quotationWarrentyKM.value.text,
-        'quotation_notes': quotationNotes.text,
-      };
-
-      final rawDate = quotationDate.value.text.trim();
-      if (rawDate.isNotEmpty) {
-        try {
-          newData['quotation_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate),
-          );
-        } catch (e) {
-          // إذا حابب تعرض للمستخدم خطأ في التنسيق
-          // print('Invalid quotation_date format: $e');
-        }
-      }
-
-      if (quotationCounter.value.text.isEmpty) {
-        quotationStatus.value = 'New';
-        newData['quotation_status'] = 'New';
-        newData['label'] = '';
-
-        await getCurrentQuotationCounterNumber();
-        newData['quotation_number'] = quotationCounter.value.text;
-      }
-
-      if (quotationCardAdded.isFalse) {
-        newData['added_date'] = DateTime.now().toString();
-        var newQuotation = await FirebaseFirestore.instance
-            .collection('quotation_cards')
-            .add(newData);
-        quotationCardAdded.value = true;
-        curreentQuotationCardId.value = newQuotation.id;
-        getAllInvoiceItems(newQuotation.id);
-        showSnackBar('Done', 'Added Successfully');
-      } else {
-        newData.remove('added_date');
-        await FirebaseFirestore.instance
-            .collection('quotation_cards')
-            .doc(curreentQuotationCardId.value)
-            .update(newData);
-        showSnackBar('Done', 'Updated Successfully');
-      }
-      canAddInternalNotesAndInvoiceItems.value = true;
-      addingNewValue.value = false;
-    } catch (e) {
-      canAddInternalNotesAndInvoiceItems.value = false;
-      addingNewValue.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
-    }
-  }
-
   void editQuotationCard(String id) {
     try {
       // منع التعديل إذا الحالة Posted أو Cancelled
@@ -709,7 +897,7 @@ class QuotationCardController extends GetxController {
         'vehicle_identification_number': vin.text,
         'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
-        'fuel_amount': fuelAmount.value.text,
+        // 'fuel_amount': fuelAmount.value.text,
         'customer': customerId.value,
         'contact_name': customerEntityName.text,
         'contact_number': customerEntityPhoneNumber.text,
@@ -720,7 +908,7 @@ class QuotationCardController extends GetxController {
         'branch': customerBranchId.value,
         'currency': customerCurrencyId.value,
         'rate': customerCurrencyRate.text,
-        'payment_method': payType.value,
+        // 'payment_method': payType.value,
         'quotation_number': quotationCounter.value.text,
         // 'quotation_date' نضيفه لاحقًا بشرط عدم كونه فارغ
         'validity_days': quotationDays.value.text,
@@ -899,7 +1087,7 @@ class QuotationCardController extends GetxController {
         'vehicle_identification_number': vin.text,
         'transmission_type': transmissionType.text,
         'mileage_in': mileageIn.value.text,
-        'fuel_amount': fuelAmount.value.text,
+        // 'fuel_amount': fuelAmount.value.text,
         'customer': customerId.value,
         'contact_name': customerEntityName.text,
         'contact_number': customerEntityPhoneNumber.text,
@@ -910,7 +1098,7 @@ class QuotationCardController extends GetxController {
         'branch': customerBranchId.value,
         'currency': customerCurrencyId.value,
         'rate': customerCurrencyRate.text,
-        'payment_method': payType.value,
+        // 'payment_method': payType.value,
         'job_number': jobCardCounter.value,
         'invoice_number': '',
         'lpo_number': '',
@@ -936,18 +1124,18 @@ class QuotationCardController extends GetxController {
       newData['job_number'] = jobCardCounter.value;
       newData['added_date'] = DateTime.now().toString();
 
-      var newJob = await FirebaseFirestore.instance
-          .collection('job_cards')
-          .add(newData);
+      // var newJob = await FirebaseFirestore.instance
+      //     .collection('job_cards')
+      //     .add(newData);
 
-      for (var element in allInvoiceItems) {
-        var data = element.data();
-        await FirebaseFirestore.instance
-            .collection('job_cards')
-            .doc(newJob.id)
-            .collection('invoice_items')
-            .add(data);
-      }
+      // for (var element in allInvoiceItems) {
+      //   var data = element.data();
+      //   await FirebaseFirestore.instance
+      //       .collection('job_cards')
+      //       .doc(newJob.id)
+      //       .collection('invoice_items')
+      //       .add(data);
+      // }
 
       creatingNewJob.value = false;
       showSnackBar('Done', 'Job Created Successfully');
@@ -1186,35 +1374,22 @@ class QuotationCardController extends GetxController {
     net.text = '0';
   }
 
-  void getInvoiceItemsFromCollection() {
-    FirebaseFirestore.instance
-        .collection('invoice_items')
-        .where('company_id', isEqualTo: companyId.value)
-        .orderBy('name')
-        .snapshots()
-        .listen((items) {
-          allInvoiceItemsFromCollection.value = {
-            for (var doc in items.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
   void getAllInvoiceItems(String quotationId) {
-    try {
-      loadingInvoiceItems.value = true;
-      FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(quotationId)
-          .collection('quotation_invoice_items')
-          .orderBy('line_number')
-          .snapshots()
-          .listen((QuerySnapshot<Map<String, dynamic>> items) {
-            allInvoiceItems.assignAll(items.docs);
-            loadingInvoiceItems.value = false;
-          });
-    } catch (e) {
-      loadingInvoiceItems.value = false;
-    }
+    // try {
+    //   loadingInvoiceItems.value = true;
+    //   FirebaseFirestore.instance
+    //       .collection('quotation_cards')
+    //       .doc(quotationId)
+    //       .collection('quotation_invoice_items')
+    //       .orderBy('line_number')
+    //       .snapshots()
+    //       .listen((QuerySnapshot<Map<String, dynamic>> items) {
+    //         allInvoiceItems.assignAll(items.docs);
+    //         loadingInvoiceItems.value = false;
+    //       });
+    // } catch (e) {
+    //   loadingInvoiceItems.value = false;
+    // }
   }
 
   List<double> calculateTotals() {
@@ -1223,192 +1398,14 @@ class QuotationCardController extends GetxController {
     double sumofVAT = 0.0;
     double sumofNET = 0.0;
 
-    for (var job in allInvoiceItems) {
-      var data = job.data() as Map<String, dynamic>?;
-      sumofTotal += double.parse(data?['total']);
-      sumofNET += double.parse(data?['net']);
-      sumofVAT += double.parse(data?['vat']);
-    }
+    // for (var job in allInvoiceItems) {
+    //   var data = job.data() as Map<String, dynamic>?;
+    //   sumofTotal += double.parse(data?['total']);
+    //   sumofNET += double.parse(data?['net']);
+    //   sumofVAT += double.parse(data?['vat']);
+    // }
 
     return [sumofTotal, sumofVAT, sumofNET];
-  }
-
-  // this function is to get engine types
-  Future<void> getEngineTypes() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'ENGINE_TYPES')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name')
-        .snapshots()
-        .listen((types) {
-          allEngineType.value = {
-            for (var doc in types.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  // this function is to get colors
-  Future<void> getColors() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'COLORS')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name')
-        .snapshots()
-        .listen((colors) {
-          allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
-        });
-  }
-
-  void getBranches() {
-    FirebaseFirestore.instance
-        .collection('branches')
-        .where('company_id', isEqualTo: companyId.value)
-        .orderBy('name')
-        .snapshots()
-        .listen((branches) {
-          allBranches.value = {
-            for (var doc in branches.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  void getCurrencies() {
-    FirebaseFirestore.instance
-        .collection('currencies')
-        .where('company_id', isEqualTo: companyId.value)
-        .snapshots()
-        .listen((branches) {
-          allCurrencies.value = {
-            for (var doc in branches.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  void getSalesMan() {
-    FirebaseFirestore.instance
-        .collection('sales_man')
-        .where('company_id', isEqualTo: companyId.value)
-        .orderBy('name')
-        .snapshots()
-        .listen((branches) {
-          salesManMap.value = {
-            for (var doc in branches.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  void getAllUsers() {
-    try {
-      FirebaseFirestore.instance
-          .collection('sys-users')
-          .where('company_id', isEqualTo: companyId.value)
-          .snapshots()
-          .listen((users) {
-            allUsers.value = {for (var doc in users.docs) doc.id: doc.data()};
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  Future<void> getUserId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId.value = prefs.getString('userId')!;
-  }
-
-  void getCompanyDetails() {
-    try {
-      FirebaseFirestore.instance
-          .collection('companies')
-          .where(FieldPath.documentId, isEqualTo: companyId.value)
-          .snapshots()
-          .listen((company) {
-            companyDetails.assignAll(
-              Map<String, dynamic>.from(company.docs.first.data() as Map),
-            );
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getCountries() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_countries')
-          .orderBy('name')
-          .snapshots()
-          .listen((countries) {
-            allCountries.value = {
-              for (var doc in countries.docs) doc.id: doc.data(),
-            };
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getCarBrands() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .orderBy('name')
-          .snapshots()
-          .listen((brands) {
-            allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getAllCustomers() {
-    try {
-      FirebaseFirestore.instance
-          .collection('entity_informations')
-          .where('company_id', isEqualTo: companyId.value)
-          .where('entity_code', arrayContains: 'Customer')
-          .orderBy('entity_name')
-          .snapshots()
-          .listen((customers) {
-            allCustomers.value = {
-              for (var doc in customers.docs) doc.id: doc.data(),
-            };
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  Future<void> getCompanyId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    companyId.value = prefs.getString('companyId')!;
-  }
-
-  void selectCashOrCredit(String selected, bool value) {
-    bool isCash = selected == 'cash';
-
-    isCashSelected.value = isCash ? value : false;
-    isCreditSelected.value = isCash ? false : value;
-    payType.value = isCash ? 'Cash' : 'Credit';
   }
 
   Future<void> selectDateContext(
@@ -1466,39 +1463,6 @@ class QuotationCardController extends GetxController {
       currentUserDetails.value['sales_man'],
       salesManMap,
     );
-  }
-
-  void getCitiesByCountryID(String countryID) {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_countries')
-          .doc(countryID)
-          .collection('values')
-          .snapshots()
-          .listen((cities) {
-            allCities.value = {for (var doc in cities.docs) doc.id: doc.data()};
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getModelsByCarBrand(String brandId) {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .snapshots()
-          .listen((snapshot) {
-            final Map<String, Map<String, dynamic>> mapped = {
-              for (var doc in snapshot.docs) doc.id: doc.data(),
-            };
-            allModels.value = mapped;
-          }, onError: (e) {});
-    } catch (e) {
-      //
-    }
   }
 
   Stream<double> calculateAllTotals(String jobId) {
@@ -1559,14 +1523,14 @@ class QuotationCardController extends GetxController {
     return mainScreenController.selectedScreenName.value;
   }
 
-  String getdataName(String id, Map allData, {title = 'name'}) {
-    try {
-      final data = allData.entries.firstWhere((data) => data.key == id);
-      return data.value[title];
-    } catch (e) {
-      return '';
-    }
-  }
+  // String getdataName(String id, Map allData, {title = 'name'}) {
+  //   try {
+  //     final data = allData.entries.firstWhere((data) => data.key == id);
+  //     return data.value[title];
+  //   } catch (e) {
+  //     return '';
+  //   }
+  // }
 
   Future<String> getModelName(String brandId, String modelId) async {
     try {
@@ -1579,25 +1543,6 @@ class QuotationCardController extends GetxController {
 
       if (cities.exists) {
         return cities.data()!['name'];
-      } else {
-        return '';
-      }
-    } catch (e) {
-      return ''; // Return empty string on error
-    }
-  }
-
-  Future<String> getCityName(String countryId, String cityId) async {
-    try {
-      var cities = await FirebaseFirestore.instance
-          .collection('all_countries')
-          .doc(countryId)
-          .collection('values')
-          .doc(cityId)
-          .get();
-
-      if (cities.exists) {
-        return cities.data()!['name'].toString();
       } else {
         return '';
       }
@@ -1869,9 +1814,9 @@ class QuotationCardController extends GetxController {
         }).toList();
 
     // 4. UPDATE THE UI
-    allQuotationCards.assignAll(filteredQuotations);
+    // allQuotationCards.assignAll(filteredQuotations);
     numberOfQuotations.value = allQuotationCards.length;
-    await calculateMoneyForAllQuotations(); // Call the optimized calculation method
+    // await calculateMoneyForAllQuotations(); // Call the optimized calculation method
     isScreenLoding.value = false;
   }
 

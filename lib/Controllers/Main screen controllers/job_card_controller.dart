@@ -10,7 +10,6 @@ import 'package:uuid/uuid.dart';
 import '../../Models/job cards/internal_notes_model.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/job cards/job_card_model.dart';
-import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../helpers.dart';
 import '../Mobile section controllers/cards_screen_controller.dart';
 import 'main_screen_contro.dart';
@@ -936,18 +935,18 @@ class JobCardController extends GetxController {
           .where('quotation_number', isEqualTo: quotationCounter.value)
           .get();
       var id = quotation.docs.first.id;
-      var data = quotation.docs.first.data();
+      // var data = quotation.docs.first.data();
 
       quotationCardController.getAllInvoiceItems(id);
-      await quotationCardController.loadValues(data, id);
-      showSnackBar('Done', 'Opened Successfully');
-      await editQuotationCardDialog(
-        quotationCardController,
-        data,
-        id,
-        screenName: '🧾 Quotation',
-        headerColor: Colors.deepPurple,
-      );
+      // await quotationCardController.loadValues(data, id);
+      // showSnackBar('Done', 'Opened Successfully');
+      // await editQuotationCardDialog(
+      //   quotationCardController,
+      //   data,
+      //   id,
+      //   screenName: '🧾 Quotation',
+      //   headerColor: Colors.deepPurple,
+      // );
       openingQuotationCardScreen.value = false;
     } catch (e) {
       openingQuotationCardScreen.value = false;
