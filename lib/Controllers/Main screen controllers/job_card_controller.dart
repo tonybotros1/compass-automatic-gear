@@ -87,28 +87,17 @@ class JobCardController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
   RxBool creatingNewQuotation = RxBool(false);
-  RxString companyId = RxString('');
   RxMap companyDetails = RxMap({});
-  RxMap allCountries = RxMap({});
   RxMap allCities = RxMap({});
-  RxMap allColors = RxMap({});
-  RxMap allEngineType = RxMap({});
-  RxMap allBranches = RxMap({});
-  RxMap allCurrencies = RxMap({});
-  RxMap allInvoiceItemsFromCollection = RxMap({});
   RxBool loadingCopyJob = RxBool(false);
   var selectedRowIndex = Rxn<int>();
   var buttonLoadingStates = <String, bool>{}.obs;
 
-  RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
-  RxMap allCustomers = RxMap({});
-  RxMap salesManMap = RxMap({});
   RxBool isCashSelected = RxBool(true);
   RxBool isCreditSelected = RxBool(false);
   RxString payType = RxString('Cash');
   RxMap allUsers = RxMap();
-  RxString userId = RxString('');
   RxString jobStatus1 = RxString('');
   RxString jobStatus2 = RxString('');
   RxBool addingNewInternalNotProcess = RxBool(false);
@@ -185,15 +174,7 @@ class JobCardController extends GetxController {
       jobWarrentyEndDate.refresh();
     });
     getInvoiceItemsFromCollection();
-    getAllCustomers();
     getAllUsers();
-    getBranches();
-    getCurrencies();
-    getSalesMan();
-    getCarBrands();
-    getCountries();
-    getColors();
-    getEngineTypes();
   }
 
   @override
@@ -202,56 +183,56 @@ class JobCardController extends GetxController {
     super.onClose();
   }
 
-  Future<void> getColors() async {
-    allColors.assignAll(await helper.getAllListValues('COLORS'));
+  Future<Map<String, dynamic>> getColors() async {
+    return await helper.getAllListValues('COLORS');
   }
 
-  Future<void> getEngineTypes() async {
-    allEngineType.assignAll(await helper.getAllListValues('ENGINE_TYPES'));
+  Future<Map<String, dynamic>> getEngineTypes() async {
+    return await helper.getAllListValues('ENGINE_TYPES');
   }
 
-  Future<void> getCarBrands() async {
-    allBrands.assignAll(await helper.getCarBrands());
+  Future<Map<String, dynamic>> getCarBrands() async {
+    return await helper.getCarBrands();
   }
 
   Future<void> getModelsByCarBrand(String brandID) async {
     allModels.assignAll(await helper.getModelsValues(brandID));
   }
 
-  Future<void> getCountries() async {
-    allCountries.assignAll(await helper.getCountries());
+  Future<Map<String, dynamic>> getCountries() async {
+    return await helper.getCountries();
   }
 
   Future<void> getCitiesByCountryID(String countryID) async {
     allCities.assignAll(await helper.getCitiesValues(countryID));
   }
 
-  Future<void> getSalesMan() async {
-    salesManMap.assignAll(await helper.getSalesMan());
+  Future<Map<String, dynamic>> getSalesMan() async {
+    return await helper.getSalesMan();
   }
 
-  Future<void> getCurrencies() async {
-    allCurrencies.assignAll(await helper.getCurrencies());
+  Future<Map<String, dynamic>> getCurrencies() async {
+    return await helper.getCurrencies();
   }
 
   Future<void> getCompanyDetails() async {
     companyDetails.assignAll(await helper.getCurrentCompanyDetails());
   }
 
-  Future<void> getBranches() async {
-    allBranches.assignAll(await helper.getBrunches());
+  Future<Map<String,dynamic>> getBranches() async {
+    return await helper.getBrunches();
+  }
+
+  Future<Map<String, dynamic>> getAllCustomers() async {
+    return await helper.getCustomers();
   }
 
   Future<void> getAllUsers() async {
-    allCustomers.assignAll(await helper.getCustomers());
-  }
-
-  Future<void> getAllCustomers() async {
     allUsers.assignAll(await helper.getSysUsers());
   }
 
-  Future<void> getInvoiceItemsFromCollection() async {
-    allInvoiceItemsFromCollection.assignAll(await helper.getInvoiceItems());
+  Future<Map<String,dynamic>> getInvoiceItemsFromCollection() async {
+    return await helper.getInvoiceItems();
   }
 
   Future getCurrentJobCardStatus(String id) async {
@@ -274,7 +255,6 @@ class JobCardController extends GetxController {
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'car_brand_logo': carBrandLogo.value,
-        'company_id': companyId.value,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
         'plate_number': plateNumber.text,
@@ -582,7 +562,6 @@ class JobCardController extends GetxController {
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
-      print(accessToken);
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse('$backendUrl/job_cards/search_engine_for_job_cards');
       final response = await http.post(
@@ -803,13 +782,13 @@ class JobCardController extends GetxController {
         } else {
           request.fields['file_name'] = note['file_name'];
           request.fields['note_type'] = note['note_type'];
-           request.files.add(
-          http.MultipartFile.fromBytes(
-            'media_note',
-            note['media_note'],
-            filename: note['file_name'],
-          ),
-        );
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'media_note',
+              note['media_note'],
+              filename: note['file_name'],
+            ),
+          );
         }
       }
 
@@ -845,7 +824,6 @@ class JobCardController extends GetxController {
     }
   }
 
-  
   Future<void> createQuotationCard(String jobId) async {
     try {
       showSnackBar('Creating', 'Please Wait');
@@ -853,7 +831,6 @@ class JobCardController extends GetxController {
       Map<String, dynamic> newData = {
         'quotation_status': 'New',
         'car_brand_logo': carBrandLogo.value,
-        'company_id': companyId.value,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
         'plate_number': plateNumber.text,
@@ -1412,7 +1389,6 @@ class JobCardController extends GetxController {
     deliveryNotes.text = data.jobDeliveryNotes ?? '';
   }
 
-
   Future<void> editReadyForJobCard(String jobId, String status) async {
     if (jobStatus1.value.isEmpty) {
       showSnackBar('Alert', 'Please Save The Job First');
@@ -1542,21 +1518,21 @@ class JobCardController extends GetxController {
     });
   }
 
-  // Future<void> selectDateContext(
-  //   BuildContext context,
-  //   TextEditingController date,
-  // ) async {
-  //   final DateTime? picked = await showDatePicker(
-  //     context: context,
-  //     initialDate: DateTime.now(),
-  //     firstDate: DateTime(2000),
-  //     lastDate: DateTime(2101),
-  //   );
+  Future<void> selectDateContext(
+    BuildContext context,
+    TextEditingController date,
+  ) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
 
-  //   if (picked != null) {
-  //     date.text = textToDate(picked.toString());
-  //   }
-  // }
+    if (picked != null) {
+      date.text = textToDate(picked.toString());
+    }
+  }
 
   void selectCashOrCredit(String selected) {
     bool isCash = selected == 'Cash';
@@ -1570,8 +1546,6 @@ class JobCardController extends GetxController {
         (int.parse(mileageOut.value.text) - int.parse(mileageIn.value.text))
             .toString();
   }
-
- 
 
   void onSelectForCustomers(Map selectedCustomer) {
     List phoneDetails = selectedCustomer['entity_phone'];

@@ -26,10 +26,6 @@ void main() async {
       : await Firebase.initializeApp();
   globalPrefs = await SharedPreferences.getInstance();
 
-  // if (web.window.location.pathname != '/') {
-  //   // Replace the current URL with '/'
-  //   web.window.history.replaceState(null, 'DataHub AI', '/');
-  // }
   final ws = Get.put(WebSocketService());
   ws.connect();
   runApp(const MyApp());

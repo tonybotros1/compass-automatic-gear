@@ -15,7 +15,17 @@ import 'Widgets/text_button.dart';
 // String backendURI = 'https://datahubai-backend.onrender.com';
 // String backendTestURI = 'https://datahubai-backend.onrender.com';
 String backendTestURI = 'http://127.0.0.1:8000';
+// String backendTestURI = "http://10.0.2.2:8000";
 String webSocketURL = "ws://localhost:8000/ws";
+
+IconButton dateRange({required BuildContext context, required TextEditingController date}) {
+  return IconButton(
+    onPressed: () async {
+      selectDateContext(context, date);
+    },
+    icon: const Icon(Icons.date_range),
+  );
+}
 
 var fontStyleForAppBar = TextStyle(
   fontSize: 20,

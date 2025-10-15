@@ -13,10 +13,10 @@ Widget customerDetailsSection() {
     decoration: containerDecor,
     child: GetX<JobCardController>(
       builder: (controller) {
-        var isCustomersLoading = controller.allCustomers.isEmpty;
-        final isBranchesLoading = controller.allBranches.isEmpty;
-        final isCurrenciesLoading = controller.allCurrencies.isEmpty;
-        final isSalesManLoading = controller.salesManMap.isEmpty;
+        // var isCustomersLoading = controller.allCustomers.isEmpty;
+        // final isBranchesLoading = controller.allBranches.isEmpty;
+        // final isCurrenciesLoading = controller.allCurrencies.isEmpty;
+        // final isSalesManLoading = controller.salesManMap.isEmpty;
         return FocusTraversalGroup(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,9 +33,9 @@ Widget customerDetailsSection() {
                           showedSelectedName: 'entity_name',
                           textcontroller: controller.customerName.text,
                           hintText: 'Customer',
-                          items: isCustomersLoading
-                              ? {}
-                              : controller.allCustomers,
+                          // items: isCustomersLoading
+                          //     ? {}
+                          //     : controller.allCustomers,
                           onChanged: (key, value) {
                             controller.customerName.text = value['entity_name'];
                             controller.onSelectForCustomers(value);
@@ -52,6 +52,9 @@ Widget customerDetailsSection() {
                             controller.customerSaleMan.value = "";
                             controller.customerId.value = "";
                             controller.isJobModified.value = true;
+                          },
+                          onOpen: () {
+                            return controller.getAllCustomers();
                           },
                         ),
                       ),
@@ -185,7 +188,6 @@ Widget customerDetailsSection() {
                     showedSelectedName: 'name',
                     textcontroller: controller.customerSaleMan.value,
                     hintText: 'Salesman',
-                    items: isSalesManLoading ? {} : controller.salesManMap,
                     onChanged: (key, value) {
                       controller.customerSaleMan.value = value['name'];
                       controller.customerSaleManId.value = key;
@@ -195,6 +197,8 @@ Widget customerDetailsSection() {
                       controller.customerSaleMan.value = "";
                       controller.customerSaleManId.value = "";
                       controller.isJobModified.value = true;
+                    },onOpen: (){
+                      return controller.getSalesMan();
                     },
                   ),
                 ),
@@ -204,7 +208,6 @@ Widget customerDetailsSection() {
                 showedSelectedName: 'name',
                 textcontroller: controller.customerBranch.text,
                 hintText: 'Branch',
-                items: isBranchesLoading ? {} : controller.allBranches,
                 onChanged: (key, value) {
                   controller.customerBranch.text = value['name'];
                   controller.customerBranchId.value = key;
@@ -214,6 +217,8 @@ Widget customerDetailsSection() {
                   controller.customerBranch.clear();
                   controller.customerBranchId.value = "";
                   controller.isJobModified.value = true;
+                },onOpen: (){
+                  return controller.getBranches();
                 },
               ),
               Row(
@@ -223,7 +228,6 @@ Widget customerDetailsSection() {
                     width: 170,
                     textcontroller: controller.customerCurrency.value.text,
                     hintText: 'Currency',
-                    items: isCurrenciesLoading ? {} : controller.allCurrencies,
                     showedSelectedName: 'currency_code',
                     onChanged: (key, value) {
                       controller.customerCurrency.text = value['currency_code'];
@@ -237,6 +241,8 @@ Widget customerDetailsSection() {
                       controller.customerCurrencyId.value = "";
                       controller.customerCurrencyRate.clear();
                       controller.isJobModified.value = true;
+                    },onOpen: (){
+                      return controller.getCurrencies();
                     },
                   ),
                   myTextFormFieldWithBorder(

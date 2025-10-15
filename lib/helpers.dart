@@ -60,7 +60,7 @@ class Helpers {
   }
 
   // this function is to get all countries for drop down menu
-  Future getCountries() async {
+  Future<Map<String, dynamic>> getCountries() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -75,7 +75,9 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> jsonDate = decoded["countries"];
-        var map = {for (var country in jsonDate) country['_id']: country};
+        Map<String, dynamic> map = {
+          for (var country in jsonDate) country['_id']: country,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -84,8 +86,10 @@ class Helpers {
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
+        return {};
       } else if (response.statusCode == 401) {
         logout();
+        return {};
       } else {
         return {};
       }
@@ -128,7 +132,7 @@ class Helpers {
   }
 
   // this function is to ger all roles for drop down menu
-  Future getAllRoles() async {
+  Future<Map<String, dynamic>> getAllRoles() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -143,7 +147,9 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> jsonData = decoded["roles"];
-        var map = {for (var role in jsonData) role['_id']: role};
+        Map<String, dynamic> map = {
+          for (var role in jsonData) role['_id']: role,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -152,8 +158,10 @@ class Helpers {
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
+        return {};
       } else if (response.statusCode == 401) {
         logout();
+        return {};
       } else {
         return {};
       }
@@ -163,7 +171,7 @@ class Helpers {
   }
 
   // this function is to get all list values by code for drop down menu
-  Future getAllListValues(String code) async {
+  Future<Map<String, dynamic>> getAllListValues(String code) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -178,7 +186,9 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> jsonData = decoded["values"];
-        Map map = {for (var role in jsonData) role['_id']: role};
+        Map<String, dynamic> map = {
+          for (var role in jsonData) role['_id']: role,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -187,8 +197,10 @@ class Helpers {
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
+        return {};
       } else if (response.statusCode == 401) {
         logout();
+        return {};
       } else {
         return {};
       }
@@ -197,7 +209,7 @@ class Helpers {
     }
   }
 
-  Future getCarBrands() async {
+  Future<Map<String, dynamic>> getCarBrands() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -209,7 +221,9 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
         List<dynamic> jsonData = decoded['brands'];
-        Map map = {for (var brand in jsonData) brand['_id']: brand};
+        Map<String, dynamic> map = {
+          for (var brand in jsonData) brand['_id']: brand,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -218,8 +232,10 @@ class Helpers {
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
+        return {};
       } else if (response.statusCode == 401) {
         logout();
+        return {};
       } else {
         return {};
       }
@@ -262,7 +278,7 @@ class Helpers {
     }
   }
 
-  Future getSalesMan() async {
+  Future<Map<String, dynamic>> getSalesMan() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -275,7 +291,9 @@ class Helpers {
       if (response.statusCode == 200) {
         final decode = jsonDecode(response.body);
         List<dynamic> jsonData = decode['salesman'];
-        Map map = {for (var model in jsonData) model['_id']: model};
+        Map<String, dynamic> map = {
+          for (var model in jsonData) model['_id']: model,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -284,8 +302,10 @@ class Helpers {
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
+        return {};
       } else if (response.statusCode == 401) {
         logout();
+        return {};
       } else {
         return {};
       }
@@ -294,7 +314,7 @@ class Helpers {
     }
   }
 
-  Future getCurrencies() async {
+  Future<Map<String, dynamic>> getCurrencies() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -309,7 +329,9 @@ class Helpers {
       if (response.statusCode == 200) {
         final decode = jsonDecode(response.body);
         List<dynamic> jsonData = decode['currencies'];
-        Map map = {for (var model in jsonData) model['_id']: model};
+        Map<String, dynamic> map = {
+          for (var model in jsonData) model['_id']: model,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -318,8 +340,10 @@ class Helpers {
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
+        return {};
       } else if (response.statusCode == 401) {
         logout();
+        return {};
       } else {
         return {};
       }
@@ -361,7 +385,7 @@ class Helpers {
     }
   }
 
-  Future getBrunches() async {
+  Future<Map<String, dynamic>> getBrunches() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -376,7 +400,9 @@ class Helpers {
       if (response.statusCode == 200) {
         final decode = jsonDecode(response.body);
         List<dynamic> jsonData = decode['branches'];
-        Map map = {for (var model in jsonData) model['_id']: model};
+        Map<String, dynamic> map = {
+          for (var model in jsonData) model['_id']: model,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -385,8 +411,10 @@ class Helpers {
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
+        return {};
       } else if (response.statusCode == 401) {
         logout();
+        return {};
       } else {
         return {};
       }
@@ -395,7 +423,7 @@ class Helpers {
     }
   }
 
-  Future getCustomers() async {
+  Future<Map<String, dynamic>> getCustomers() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -410,17 +438,21 @@ class Helpers {
       if (response.statusCode == 200) {
         final decode = jsonDecode(response.body);
         List<dynamic> jsonData = decode['customers'];
-        Map map = {for (var model in jsonData) model['_id']: model};
+        Map<String, dynamic> map = {
+          for (var model in jsonData) model['_id']: model,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getBrunches();
+          await getCustomers();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
+        return {};
       } else if (response.statusCode == 401) {
         logout();
+        return {};
       } else {
         return {};
       }
@@ -456,7 +488,7 @@ class Helpers {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getBrunches();
+          await getSysUsers();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -470,7 +502,7 @@ class Helpers {
     }
   }
 
-  Future getInvoiceItems() async {
+  Future<Map<String, dynamic>> getInvoiceItems() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -485,17 +517,21 @@ class Helpers {
       if (response.statusCode == 200) {
         final decode = jsonDecode(response.body);
         List<dynamic> jsonData = decode['invoice_items'];
-        Map map = {for (var model in jsonData) model['_id']: model};
+        Map<String, dynamic> map = {
+          for (var model in jsonData) model['_id']: model,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getBrunches();
+          await getInvoiceItems();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
+        return {};
       } else if (response.statusCode == 401) {
         logout();
+        return {};
       } else {
         return {};
       }
@@ -509,9 +545,7 @@ class Helpers {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse(
-        '$backendTestURI/job_cards/get_job_card_status/$id',
-      );
+      var url = Uri.parse('$backendTestURI/job_cards/get_job_card_status/$id');
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -523,12 +557,48 @@ class Helpers {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getBrunches();
+          await getJobCardStatus(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future<Map<String, dynamic>> getAllTechnicians() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendTestURI/technicians/get_all_technicians');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decode = jsonDecode(response.body);
+        List<dynamic> jsonData = decode['technicians'];
+        Map<String, dynamic> map = {
+          for (var model in jsonData) model['_id']: model,
+        };
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllTechnicians();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
       } else {
         return {};
       }

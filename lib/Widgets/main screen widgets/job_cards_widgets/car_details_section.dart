@@ -11,11 +11,6 @@ Widget carDetailsSection() {
     decoration: containerDecor,
     child: GetX<JobCardController>(
       builder: (controller) {
-        var isBrandsLoading = controller.allBrands.isEmpty;
-        final isCountriesLoading = controller.allCountries.isEmpty;
-        final isColorsLoading = controller.allColors.isEmpty;
-        final isEngineTypeLoading = controller.allEngineType.isEmpty;
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
@@ -29,7 +24,7 @@ Widget carDetailsSection() {
                   showedSelectedName: 'name',
                   textcontroller: controller.carBrand.text,
                   hintText: 'Brand',
-                  items: isBrandsLoading ? {} : controller.allBrands,
+                  items: const {},
                   onChanged: (key, value) {
                     controller.carBrandLogo.value = value['logo'] ?? "";
                     controller.carBrand.text = value['name'] ?? "";
@@ -46,6 +41,9 @@ Widget carDetailsSection() {
                     controller.carBrandId.value = "";
                     controller.carModelId.value = "";
                     controller.isJobModified.value = true;
+                  },
+                  onOpen: () async {
+                    return await controller.getCarBrands();
                   },
                 ),
                 Container(
@@ -81,7 +79,6 @@ Widget carDetailsSection() {
                   showedSelectedName: 'name',
                   textcontroller: controller.color.text,
                   hintText: 'Color',
-                  items: isColorsLoading ? {} : controller.allColors,
                   onChanged: (key, value) {
                     controller.color.text = value['name'];
                     controller.colorId.value = key;
@@ -91,6 +88,9 @@ Widget carDetailsSection() {
                     controller.color.clear();
                     controller.colorId.value = "";
                     controller.isJobModified.value = true;
+                  },
+                  onOpen: () async {
+                    return controller.getColors();
                   },
                 ),
                 myTextFormFieldWithBorder(
@@ -133,7 +133,6 @@ Widget carDetailsSection() {
               showedSelectedName: 'name',
               textcontroller: controller.country.text,
               hintText: 'Country',
-              items: isCountriesLoading ? {} : controller.allCountries,
               onChanged: (key, value) {
                 controller.country.text = value['name'] ?? "";
                 controller.city.clear();
@@ -147,6 +146,8 @@ Widget carDetailsSection() {
                 controller.allCities.clear();
                 controller.countryId.value = "";
                 controller.isJobModified.value = true;
+              },onOpen: (){
+                return controller.getCountries();
               },
             ),
             CustomDropdown(
@@ -184,7 +185,6 @@ Widget carDetailsSection() {
                   showedSelectedName: 'name',
                   textcontroller: controller.engineType.text,
                   hintText: 'Engine Type',
-                  items: isEngineTypeLoading ? {} : controller.allEngineType,
                   onChanged: (key, value) {
                     controller.engineType.text = value['name'] ?? "";
                     controller.engineTypeId.value = key;
@@ -194,6 +194,8 @@ Widget carDetailsSection() {
                     controller.engineType.clear();
                     controller.engineTypeId.value = "";
                     controller.isJobModified.value = true;
+                  },onOpen: (){
+                    return controller.getEngineTypes();
                   },
                 ),
               ],

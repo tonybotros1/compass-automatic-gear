@@ -13,17 +13,23 @@ class InspectionReposrt extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: FittedBox(
-          child: GetBuilder<CardsScreenController>(builder: (controller) {
-            return TextButton(
+          child: GetBuilder<CardsScreenController>(
+            builder: (controller) {
+              return TextButton(
                 onPressed: () {
                   controller.clearAllValues();
                 },
                 child: const Text(
                   'Clear',
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ));
-          }),
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            },
+          ),
         ),
         title: const Text(
           'Inspection Report',
@@ -32,16 +38,23 @@ class InspectionReposrt extends StatelessWidget {
         centerTitle: true,
         backgroundColor: mainColor,
         actions: [
-          GetBuilder<CardsScreenController>(builder: (controller) {
-            return IconButton(
+          GetBuilder<CardsScreenController>(
+            builder: (controller) {
+              return TextButton(
                 onPressed: () {
                   controller.addInspectionCard(context);
                 },
-                icon: const Icon(
-                  Icons.done_outline_rounded,
-                  color: Colors.white,
-                ));
-          })
+                child: const Text(
+                  'Done',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
       body: buildInspectionReportBody(context),

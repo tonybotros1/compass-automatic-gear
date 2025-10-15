@@ -20,8 +20,9 @@ class CardsScreenController extends GetxController {
   TextEditingController customerEntityEmail = TextEditingController();
   TextEditingController customerCreditNumber = TextEditingController();
   Rx<TextEditingController> technicianName = TextEditingController().obs;
-  TextEditingController date =
-      TextEditingController(text: textToDate(DateTime.now()));
+  TextEditingController date = TextEditingController(
+    text: textToDate(DateTime.now()),
+  );
   TextEditingController brand = TextEditingController();
   TextEditingController model = TextEditingController();
   TextEditingController plateNumber = TextEditingController();
@@ -38,8 +39,9 @@ class CardsScreenController extends GetxController {
   final RxList<DocumentSnapshot> allCarCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> newCarCards = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> doneCarCards = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredCarCards =
-      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredCarCards = RxList<DocumentSnapshot>(
+    [],
+  );
   Rx<TextEditingController> search = TextEditingController().obs;
   RxString query = RxString('');
   final RxBool loading = RxBool(false);
@@ -52,8 +54,8 @@ class CardsScreenController extends GetxController {
   RxString modelId = RxString('');
   RxString engineTypeId = RxString('');
   RxString colorId = RxString('');
-  RxString companyId = RxString('');
-  RxString userId = RxString('');
+  // RxString companyId = RxString('');
+  // RxString userId = RxString('');
   RxString customerSaleManId = RxString('');
   RxMap allCustomers = RxMap({});
   RxMap allTechnicians = RxMap({});
@@ -80,7 +82,7 @@ class CardsScreenController extends GetxController {
       <String, Map<String, String>>{}.obs;
 
   RxMap<String, Map<String, String>>
-      selectedCheckBoxIndicesForInteriorExterior =
+  selectedCheckBoxIndicesForInteriorExterior =
       <String, Map<String, String>>{}.obs;
 
   RxMap<String, Map<String, String>> selectedCheckBoxIndicesForUnderVehicle =
@@ -90,11 +92,11 @@ class CardsScreenController extends GetxController {
       <String, Map<String, String>>{}.obs;
 
   RxMap<String, Map<String, String>>
-      selectedCheckBoxIndicesForBatteryPerformance =
+  selectedCheckBoxIndicesForBatteryPerformance =
       <String, Map<String, String>>{}.obs;
 
   RxMap<String, Map<String, String>>
-      selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire =
+  selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire =
       <String, Map<String, String>>{}.obs;
 
   // Wheel controllers section
@@ -143,7 +145,7 @@ class CardsScreenController extends GetxController {
     'Clutch Operation (if equipped)',
     'Back Up Lights Left / Right',
     'Dash Warning Lights',
-    'Carpet / Upholstery / Floor Mats'
+    'Carpet / Upholstery / Floor Mats',
   ]);
 
   // under vehicle
@@ -156,7 +158,7 @@ class CardsScreenController extends GetxController {
     'Drive Shaft Boots, Constant Velocity Boots, U-Joints, Transmission Linkage (if equipped)',
     'Transmission, Differential, Transfer Case, (Check Fluid Level, Fluid Condition and Fluid Leaks)',
     'Fluid Lines and Connections, Fluid Tank Band, Fuel Tank Vapor Vent Systems Hoses',
-    'Inspect Nuts and Blots on Body and Chassis'
+    'Inspect Nuts and Blots on Body and Chassis',
   ]);
 
   RxList underHoodList = RxList([
@@ -165,18 +167,18 @@ class CardsScreenController extends GetxController {
     'Drive Belts (condition and adjustment)',
     'Cooling System Hoses, Heater Hpses, Air Condition, Hoses and Connections',
     'Radiator Core, Air Conditioner Condenser',
-    'Clutch Reservoir Fluid / Condition (as equipped)'
+    'Clutch Reservoir Fluid / Condition (as equipped)',
   ]);
 
   RxList batteryPerformanceList = RxList([
     'Battery Terminal / Cables / Mountings',
-    'Condition Of Battery / Cold Cranking Amps'
+    'Condition Of Battery / Cold Cranking Amps',
   ]);
 
   RxList singleCheckBoxForBrakeAndTireList = RxList([
     'Alignment Check Needed',
     'Wheel Ballance Needed',
-    'Brake Inspection Not Performed This Visit'
+    'Brake Inspection Not Performed This Visit',
   ]);
 
   TextEditingController batteryColdCrankingAmpsFactorySpecs =
@@ -185,16 +187,41 @@ class CardsScreenController extends GetxController {
 
   @override
   void onInit() async {
-    await getUserAndCompanyId();
-    getAllCustomers();
-    getAllCards();
     getCarBrands();
-    getTechnicians();
+    getAllCustomers();
     getColors();
     getEngineTypes();
+    getTechnicians();
+
+    // getAllCards();
     super.onInit();
   }
 
+  Future<void> getAllCustomers() async {
+    allCustomers.assignAll(await helper.getCustomers());
+  }
+
+  Future<void> getCarBrands() async {
+    allBrands.assignAll(await helper.getCarBrands());
+  }
+
+  Future<void> getModelsByCarBrand(String brandID) async {
+    allModels.assignAll(await helper.getModelsValues(brandID));
+  }
+
+  Future<void> getColors() async {
+    allColors.assignAll(await helper.getAllListValues('COLORS'));
+  }
+
+  Future<void> getEngineTypes() async {
+    allEngineTypes.assignAll(await helper.getAllListValues('ENGINE_TYPES'));
+  }
+
+  Future<void> getTechnicians() async {
+    allTechnicians.assignAll(await helper.getAllTechnicians());
+  }
+
+  // ==================================================================================================
   Future<void> loadingDetailsVariables(dynamic carCard) async {
     var carData = carCard.data() as Map<String, dynamic>;
     String carBrandName = carCard['car_brand'] != ''
@@ -206,44 +233,47 @@ class CardsScreenController extends GetxController {
     String customerName = carCard['customer'] != ''
         ? getdataName(carCard['customer'], allCustomers, title: 'entity_name')
         : '';
-    String carColor =
-        carCard['color'] != '' ? getdataName(carCard['color'], allColors) : '';
+    String carColor = carCard['color'] != ''
+        ? getdataName(carCard['color'], allColors)
+        : '';
     String technician = carCard['technician'] != ''
         ? getdataName(carCard['technician'], allTechnicians)
         : '';
     String engineType = carCard['engine_type'] != ''
         ? getdataName(carCard['engine_type'], allEngineTypes)
         : '';
-    Get.to(() => CarDetailsScreen(),
-        arguments: CarCardModel(
-          vin: carCard['vehicle_identification_number']?.toString() ?? '',
-          engineType: engineType,
-          technician: technician,
-          year: carData['year']?.toString() ?? '',
-          code: carData['plate_code']?.toString() ?? '',
-          fuelAmount:
-              double.tryParse(carData['fuel_amount']?.toString() ?? '') ?? 0,
-          data: carData,
-          carImages: List<String>.from(carData['car_images'] ?? []),
-          customerSignature: carData['customer_signature']?.toString() ?? '',
-          advisorSignature: carData['advisor_signature']?.toString() ?? '',
-          carBrand: carBrandName,
-          carMileage: carData['mileage_in']?.toString() ?? '',
-          carModel: carModelName,
-          chassisNumber:
-              carData['vehicle_identification_number']?.toString() ?? '',
-          color: carColor,
-          customerName: customerName,
-          date: carData['added_date']?.toString() ?? '',
-          emailAddress: carData['contact_email']?.toString() ?? '',
-          phoneNumber: carData['contact_number']?.toString() ?? '',
-          plateNumber: carData['plate_number']?.toString() ?? '',
-          comments: carData['inspection_report_comments']?.toString() ?? '',
-          docID: carCard.id, // Document ID is directly from the snapshot
-          status1: carData['job_status_1']?.toString() ?? '',
-          status2: carData['job_status_2']?.toString() ?? '',
-        ),
-        transition: Transition.leftToRight);
+    Get.to(
+      () => CarDetailsScreen(),
+      arguments: CarCardModel(
+        vin: carCard['vehicle_identification_number']?.toString() ?? '',
+        engineType: engineType,
+        technician: technician,
+        year: carData['year']?.toString() ?? '',
+        code: carData['plate_code']?.toString() ?? '',
+        fuelAmount:
+            double.tryParse(carData['fuel_amount']?.toString() ?? '') ?? 0,
+        data: carData,
+        carImages: List<String>.from(carData['car_images'] ?? []),
+        customerSignature: carData['customer_signature']?.toString() ?? '',
+        advisorSignature: carData['advisor_signature']?.toString() ?? '',
+        carBrand: carBrandName,
+        carMileage: carData['mileage_in']?.toString() ?? '',
+        carModel: carModelName,
+        chassisNumber:
+            carData['vehicle_identification_number']?.toString() ?? '',
+        color: carColor,
+        customerName: customerName,
+        date: carData['added_date']?.toString() ?? '',
+        emailAddress: carData['contact_email']?.toString() ?? '',
+        phoneNumber: carData['contact_number']?.toString() ?? '',
+        plateNumber: carData['plate_number']?.toString() ?? '',
+        comments: carData['inspection_report_comments']?.toString() ?? '',
+        docID: carCard.id, // Document ID is directly from the snapshot
+        status1: carData['job_status_1']?.toString() ?? '',
+        status2: carData['job_status_2']?.toString() ?? '',
+      ),
+      transition: Transition.leftToRight,
+    );
   }
 
   void clearAllValues() {
@@ -350,7 +380,8 @@ class CardsScreenController extends GetxController {
   }
 
   final customCachedManeger = CacheManager(
-      Config('customCacheKey', stalePeriod: const Duration(days: 3)));
+    Config('customCacheKey', stalePeriod: const Duration(days: 3)),
+  );
 
   Future<void> editInspectionCard(BuildContext context, String jobId) async {
     try {
@@ -359,7 +390,7 @@ class CardsScreenController extends GetxController {
         'transmission_type': transmissionType.text,
         'car_brand_logo': carBrandLogo.value,
         'technician': technicianId.value,
-        'company_id': companyId.value,
+        // 'company_id': companyId.value,
         'car_brand': brandId.value,
         'car_model': modelId.value,
         'plate_number': plateNumber.text,
@@ -393,8 +424,9 @@ class CardsScreenController extends GetxController {
       if (imagesList.isNotEmpty) {
         List<Map<String, dynamic>> uploadedImages = await saveCarImages();
         // Add URLs to the data.
-        carImagesURLs
-            .addAll(uploadedImages.map((item) => item['url']).toList());
+        carImagesURLs.addAll(
+          uploadedImages.map((item) => item['url']).toList(),
+        );
 
         myData['car_images'] = carImagesURLs;
       }
@@ -425,7 +457,7 @@ class CardsScreenController extends GetxController {
         'quotation_status': '',
         'car_brand_logo': carBrandLogo.value,
         'technician': technicianId.value,
-        'company_id': companyId.value,
+        // 'company_id': companyId.value,
         'car_brand': brandId.value,
         'car_model': modelId.value,
         'plate_number': plateNumber.text,
@@ -497,8 +529,9 @@ class CardsScreenController extends GetxController {
       if (imagesList.isNotEmpty) {
         List<Map<String, dynamic>> uploadedImages = await saveCarImages();
         // Add URLs to the data.
-        newData['car_images'] =
-            uploadedImages.map((item) => item['url']).toList();
+        newData['car_images'] = uploadedImages
+            .map((item) => item['url'])
+            .toList();
         // Track each uploaded image reference.
         for (var item in uploadedImages) {
           uploadedStorageRefs.add(item['ref']);
@@ -513,21 +546,23 @@ class CardsScreenController extends GetxController {
       uploadedStorageRefs.add(dialogResult['ref']);
 
       // Save signature images.
-      customerSignatureAsImage =
-          await signatureControllerForCustomer.toPngBytes();
-      advisorSignatureAsImage =
-          await signatureControllerForAdvisor.toPngBytes();
+      customerSignatureAsImage = await signatureControllerForCustomer
+          .toPngBytes();
+      advisorSignatureAsImage = await signatureControllerForAdvisor
+          .toPngBytes();
 
       if (customerSignatureAsImage != null) {
-        Map<String, dynamic> custResult =
-            await saveSignatureImage(customerSignatureAsImage);
+        Map<String, dynamic> custResult = await saveSignatureImage(
+          customerSignatureAsImage,
+        );
         newData['customer_signature'] = custResult['url'];
         uploadedStorageRefs.add(custResult['ref']);
       }
 
       if (advisorSignatureAsImage != null) {
-        Map<String, dynamic> advResult =
-            await saveSignatureImage(advisorSignatureAsImage);
+        Map<String, dynamic> advResult = await saveSignatureImage(
+          advisorSignatureAsImage,
+        );
         newData['advisor_signature'] = advResult['url'];
         uploadedStorageRefs.add(advResult['ref']);
       }
@@ -553,24 +588,24 @@ class CardsScreenController extends GetxController {
 
   Future<dynamic> loadingScreen(BuildContext context) {
     return showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) {
-          return const Center(
-              child: Row(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return const Center(
+          child: Row(
             spacing: 20,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(
-                color: Colors.white,
-              ),
+              CircularProgressIndicator(color: Colors.white),
               Text(
                 'Please Wait...',
                 style: TextStyle(color: Colors.white, fontSize: 20),
-              )
+              ),
             ],
-          ));
-        });
+          ),
+        );
+      },
+    );
   }
 
   Future<List<Map<String, dynamic>>> saveCarImages() async {
@@ -578,7 +613,8 @@ class CardsScreenController extends GetxController {
     try {
       for (var image in imagesList) {
         final Reference storageRef = FirebaseStorage.instance.ref().child(
-            'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
+          'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png',
+        );
         final Uint8List imageBytes = await image.readAsBytes();
         final UploadTask uploadTask = storageRef.putData(imageBytes);
         await uploadTask;
@@ -603,14 +639,16 @@ class CardsScreenController extends GetxController {
         throw Exception('Error: RenderRepaintBoundary is null');
       }
       ui.Image image = await boundary.toImage(pixelRatio: 2.0);
-      ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
       if (byteData == null) {
         throw Exception('Error: Failed to convert image to byte data');
       }
       Uint8List pngBytes = byteData.buffer.asUint8List();
       final Reference storageRef = FirebaseStorage.instance.ref().child(
-          'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png');
+        'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png',
+      );
       final UploadTask uploadTask = storageRef.putData(pngBytes);
       await uploadTask;
       final String imageUrl = await storageRef.getDownloadURL();
@@ -622,7 +660,8 @@ class CardsScreenController extends GetxController {
   }
 
   Future<Map<String, dynamic>> saveSignatureImage(
-      dynamic signatureAsImage) async {
+    dynamic signatureAsImage,
+  ) async {
     try {
       final Reference ref = FirebaseStorage.instance
           .ref()
@@ -638,8 +677,10 @@ class CardsScreenController extends GetxController {
   }
 
   void openImageViewer(List imageUrls, int index) {
-    Get.toNamed('/imageViewer',
-        arguments: {'images': imageUrls, 'index': index});
+    Get.toNamed(
+      '/imageViewer',
+      arguments: {'images': imageUrls, 'index': index},
+    );
   }
 
   // this functions is to take photos
@@ -717,9 +758,13 @@ class CardsScreenController extends GetxController {
     update();
   }
 
-// to check a box and save its value in the map
-  void updateSelectedBox(String label, String statusKey, String statusValue,
-      RxMap<String, Map<String, String>> dataMap) {
+  // to check a box and save its value in the map
+  void updateSelectedBox(
+    String label,
+    String statusKey,
+    String statusValue,
+    RxMap<String, Map<String, String>> dataMap,
+  ) {
     if (!dataMap.containsKey(label)) {
       dataMap[label] = {};
     }
@@ -736,9 +781,13 @@ class CardsScreenController extends GetxController {
     update();
   }
 
-// to upate the text field and save its value in the map
-  void updateEnteredField(String label, String valueKey, String value,
-      RxMap<String, Map<String, String>> dataMap) {
+  // to upate the text field and save its value in the map
+  void updateEnteredField(
+    String label,
+    String valueKey,
+    String value,
+    RxMap<String, Map<String, String>> dataMap,
+  ) {
     if (!dataMap.containsKey(label)) {
       dataMap[label] = {};
     }
@@ -748,7 +797,9 @@ class CardsScreenController extends GetxController {
   }
 
   Future<void> selectDateContext(
-      BuildContext context, TextEditingController date) async {
+    BuildContext context,
+    TextEditingController date,
+  ) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -761,19 +812,10 @@ class CardsScreenController extends GetxController {
     }
   }
 
-// this function is to get user and company id:
-  Future<void> getUserAndCompanyId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId.value = (prefs.getString('userId'))!;
-    companyId.value = prefs.getString('companyId')!;
-  }
-
-// this function is to get the data name from id
+  // this function is to get the data name from id
   String getdataName(String id, Map allData, {title = 'name'}) {
     try {
-      final data = allData.entries.firstWhere(
-        (data) => data.key == id,
-      );
+      final data = allData.entries.firstWhere((data) => data.key == id);
       return data.value[title];
     } catch (e) {
       return '';
@@ -781,41 +823,41 @@ class CardsScreenController extends GetxController {
   }
 
   Future<void> getAllCards() async {
-    try {
-      loading.value = true;
+    // try {
+    //   loading.value = true;
 
-      FirebaseFirestore.instance
-          .collection('job_cards')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('added_date', descending: true)
-          .snapshots()
-          .listen((QuerySnapshot<Map<String, dynamic>> event) {
-        // 1) Cast the underlying JSArray<dynamic> to the correct typed list:
-        final docs =
-            event.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>();
+    //   FirebaseFirestore.instance
+    //       .collection('job_cards')
+    //       .where('company_id', isEqualTo: companyId.value)
+    //       .orderBy('added_date', descending: true)
+    //       .snapshots()
+    //       .listen((QuerySnapshot<Map<String, dynamic>> event) {
+    //     // 1) Cast the underlying JSArray<dynamic> to the correct typed list:
+    //     final docs =
+    //         event.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>();
 
-        // 2) Assign all cards first
-        allCarCards.assignAll(docs);
+    //     // 2) Assign all cards first
+    //     allCarCards.assignAll(docs);
 
-        // 3) Clear and repartition into Draft vs Done
-        newCarCards
-          ..clear()
-          ..addAll(docs.where((doc) => doc.data()['label'] == 'Draft'));
+    //     // 3) Clear and repartition into Draft vs Done
+    //     newCarCards
+    //       ..clear()
+    //       ..addAll(docs.where((doc) => doc.data()['label'] == 'Draft'));
 
-        doneCarCards
-          ..clear()
-          ..addAll(docs.where((doc) => doc.data()['label'] != 'Draft'));
+    //     doneCarCards
+    //       ..clear()
+    //       ..addAll(docs.where((doc) => doc.data()['label'] != 'Draft'));
 
-        // 4) Update counts and loading state
-        numberOfNewCars.value = newCarCards.length;
-        numberOfDoneCars.value = doneCarCards.length;
-        loading.value = false;
-      }, onError: (e) {
-        loading.value = false;
-      });
-    } catch (e) {
-      loading.value = false;
-    }
+    //     // 4) Update counts and loading state
+    //     numberOfNewCars.value = newCarCards.length;
+    //     numberOfDoneCars.value = doneCarCards.length;
+    //     loading.value = false;
+    //   }, onError: (e) {
+    //     loading.value = false;
+    //   });
+    // } catch (e) {
+    //   loading.value = false;
+    // }
   }
 
   // Function to filter the list based on search criteria
@@ -828,11 +870,16 @@ class CardsScreenController extends GetxController {
       final data = documentSnapshot.data() as Map<String, dynamic>?;
 
       // Fetch the model name asynchronously
-      final modelName =
-          await getModelName(data?['car_brand'], data?['car_model']);
+      final modelName = await getModelName(
+        data?['car_brand'],
+        data?['car_model'],
+      );
 
-      final customerName =
-          getdataName(data?['customer'], allCustomers, title: 'entity_name');
+      final customerName = getdataName(
+        data?['customer'],
+        allCustomers,
+        title: 'entity_name',
+      );
       final brandName = getdataName(data?['car_brand'], allBrands);
       final platNumber = data?['plate_number'] ?? '';
       final date = textToDate(data?['added_date']);
@@ -840,10 +887,9 @@ class CardsScreenController extends GetxController {
       // Check if any of the fields contain the query
       if (customerName.toString().toLowerCase().contains(query) ||
           brandName.toString().toLowerCase().contains(query) ||
-          modelName
-              .toString()
-              .toLowerCase()
-              .contains(query) || // Now modelName is included
+          modelName.toString().toLowerCase().contains(
+            query,
+          ) || // Now modelName is included
           platNumber.toString().toLowerCase().contains(query) ||
           date.toString().toLowerCase().contains(query)) {
         filteredResults.add(documentSnapshot);
@@ -852,63 +898,6 @@ class CardsScreenController extends GetxController {
 
     // Update the list with the filtered results
     filteredCarCards.assignAll(filteredResults);
-  }
-
-  void getAllCustomers() {
-    try {
-      FirebaseFirestore.instance
-          .collection('entity_informations')
-          .where('entity_code', arrayContains: 'Customer')
-          .snapshots()
-          .listen((customers) {
-        allCustomers.value = {
-          for (var doc in customers.docs) doc.id: doc.data()
-        };
-      });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getCarBrands() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .snapshots()
-          .listen((brands) {
-        allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
-      });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getTechnicians() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_technicians')
-          .snapshots()
-          .listen((tech) {
-        allTechnicians.value = {for (var doc in tech.docs) doc.id: doc.data()};
-      });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getModelsByCarBrand(String brandId) {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .snapshots()
-          .listen((models) {
-        allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
-      });
-    } catch (e) {
-      //
-    }
   }
 
   Future<String> getModelName(String brandId, String modelId) async {
@@ -930,53 +919,11 @@ class CardsScreenController extends GetxController {
     }
   }
 
-// this function is to get colors
-  Future<void> getColors() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'COLORS')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .snapshots()
-        .listen((colors) {
-      allColors.value = {for (var doc in colors.docs) doc.id: doc.data()};
-    });
-  }
-
-  // this function is to get engine types
-  Future<void> getEngineTypes() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'ENGINE_TYPES')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name')
-        .snapshots()
-        .listen((types) {
-      allEngineTypes.value = {for (var doc in types.docs) doc.id: doc.data()};
-    });
-  }
-
   void onSelectForCustomers(String selectedId) {
     var currentUserDetails = allCustomers.entries.firstWhere((entry) {
-      return entry.key
-          .toString()
-          .toLowerCase()
-          .contains(selectedId.toLowerCase());
+      return entry.key.toString().toLowerCase().contains(
+        selectedId.toLowerCase(),
+      );
     });
 
     var phoneDetails = currentUserDetails.value['entity_phone'].firstWhere(

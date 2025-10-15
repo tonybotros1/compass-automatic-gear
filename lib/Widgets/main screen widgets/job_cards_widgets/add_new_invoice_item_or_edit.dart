@@ -6,9 +6,7 @@ import '../../../Screens/Main screens/System Administrator/Setup/invoice_items.d
 import '../../../consts.dart';
 import '../../my_text_field.dart';
 
-Widget addNewinvoiceItemsOrEdit({
-  required JobCardController controller,
-}) {
+Widget addNewinvoiceItemsOrEdit({required JobCardController controller}) {
   return SingleChildScrollView(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,81 +36,87 @@ Widget addNewinvoiceItemsOrEdit({
                           validate: true,
                         ),
                       ),
-                      const Expanded(flex: 4, child: SizedBox())
+                      const Expanded(flex: 4, child: SizedBox()),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  GetX<JobCardController>(builder: (context) {
-                    bool isLoading =
-                        controller.allInvoiceItemsFromCollection.isEmpty;
-                    return Row(crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: CustomDropdown(
-                            hintText: 'Name',
-                            textcontroller: controller.invoiceItemName.text,
-                            showedSelectedName: 'name',
-                            validator: true,
-                            items: isLoading
-                                ? {}
-                                : controller.allInvoiceItemsFromCollection,
-                            onChanged: (key, value) {
-                              controller.invoiceItemName.text = value['name'];
-                              controller.description.text =
-                                  value['description'];
-                              controller.invoiceItemNameId.value = key;
-                            },
-                          ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: CustomDropdown(
+                          hintText: 'Name',
+                          textcontroller: controller.invoiceItemName.text,
+                          showedSelectedName: 'name',
+                          validator: true,
+                          onChanged: (key, value) {
+                            controller.invoiceItemName.text = value['name'];
+                            controller.description.text = value['description'];
+                            controller.invoiceItemNameId.value = key;
+                          },
+                          onOpen: () {
+                            return controller.getInvoiceItemsFromCollection();
+                          },
+                          onDelete: () {
+                            controller.invoiceItemName.clear();
+                            controller.invoiceItemNameId.value = '';
+                          },
                         ),
-                        IconButton(
-                            onPressed: () {
-                              Get.dialog(
-                                  barrierDismissible: false,
-                                  Dialog(
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5)),
-                                    insetPadding: const EdgeInsets.all(8),
-                                    child: LayoutBuilder(
-                                        builder: (context, constraints) {
-                                      return Column(
-                                        children: [
-                                          Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    const BorderRadius.only(
-                                                        topLeft:
-                                                            Radius.circular(5),
-                                                        topRight:
-                                                            Radius.circular(5)),
-                                                color: mainColor,
-                                              ),
-                                              padding: const EdgeInsets.all(16),
-                                              width: constraints.maxWidth,
-                                              child:
-                                                  Row(spacing: 10, children: [
-                                                Text(
-                                                  'Invoice Items',
-                                                  style:
-                                                      fontStyleForScreenNameUsedInButtons,
-                                                ),
-                                                const Spacer(),
-                                                closeIcon()
-                                              ])),
-                                          const Expanded(
-                                              child: Padding(
-                                                  padding:
-                                                      EdgeInsets.all(8),
-                                                  child: InvoiceItems()))
-                                        ],
-                                      );
-                                    }),
-                                  ));
-                            },
-                            icon: const Icon(Icons.add))
-                      ],
-                    );
-                  }),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          Get.dialog(
+                            barrierDismissible: false,
+                            Dialog(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              insetPadding: const EdgeInsets.all(8),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  return Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(5),
+                                            topRight: Radius.circular(5),
+                                          ),
+                                          color: mainColor,
+                                        ),
+                                        padding: const EdgeInsets.all(16),
+                                        width: constraints.maxWidth,
+                                        child: Row(
+                                          spacing: 10,
+                                          children: [
+                                            Text(
+                                              'Invoice Items',
+                                              style:
+                                                  fontStyleForScreenNameUsedInButtons,
+                                            ),
+                                            const Spacer(),
+                                            closeIcon(),
+                                          ],
+                                        ),
+                                      ),
+                                      const Expanded(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8),
+                                          child: InvoiceItems(),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.add),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
                     maxLines: 13,

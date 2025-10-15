@@ -1,6 +1,7 @@
 import 'package:datahubai/Widgets/capital_letters_field.dart';
 import 'package:datahubai/Widgets/decimal_text_field.dart';
 import 'package:datahubai/Widgets/first_letter_from_each_word_capital.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -85,11 +86,15 @@ Widget myTextFormFieldWithBorder({
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 10,
-              vertical: 11,
+              vertical: !kIsWeb ? 7 : 11,
             ),
             isDense: true,
             icon: icon,
             suffixIcon: suffixIcon,
+            suffixIconConstraints: const BoxConstraints(
+              maxHeight: 30,
+              maxWidth: 30,
+            ),
             prefixIconConstraints: const BoxConstraints(
               maxHeight: 15,
               maxWidth: 15,

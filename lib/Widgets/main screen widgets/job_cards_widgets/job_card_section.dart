@@ -50,6 +50,10 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(
+                suffixIcon: dateRange(
+                  context: context,
+                  date: controller.jobCardDate.value,
+                ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
                     controller.jobCardDate.value.text,
@@ -65,6 +69,10 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
+                suffixIcon: dateRange(
+                  context: context,
+                  date: controller.invoiceDate.value,
+                ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
                     controller.invoiceDate.value.text,
@@ -80,6 +88,10 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
+                suffixIcon: dateRange(
+                  context: context,
+                  date: controller.approvalDate.value,
+                ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
                     controller.approvalDate.value.text,
@@ -100,6 +112,10 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(
+                suffixIcon: dateRange(
+                  context: context,
+                  date: controller.startDate.value,
+                ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
                     controller.startDate.value.text,
@@ -115,6 +131,10 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
+                suffixIcon: dateRange(
+                  context: context,
+                  date: controller.finishDate.value,
+                ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
                     controller.finishDate.value.text,
@@ -130,6 +150,10 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
+                suffixIcon: dateRange(
+                  context: context,
+                  date: controller.deliveryDate.value,
+                ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
                     controller.deliveryDate.value.text,
@@ -185,6 +209,10 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
+                suffixIcon: dateRange(
+                  context: context,
+                  date: controller.jobWarrentyEndDate.value,
+                ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
                     controller.jobWarrentyEndDate.value.text,
@@ -200,6 +228,10 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
+                suffixIcon: dateRange(
+                  context: context,
+                  date: controller.jobCancelationDate.value,
+                ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
                     controller.jobCancelationDate.value.text,
