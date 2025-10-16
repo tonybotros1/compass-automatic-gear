@@ -29,6 +29,7 @@ Widget carDetailsSection() {
                       controller.carBrand.text = value['name'];
                       controller.getModelsByCarBrand(key);
                       controller.carBrandId.value = key;
+                      controller.isQuotationModified.value = true;
                     },
                     onDelete: () {
                       controller.carBrandLogo.value = '';
@@ -36,6 +37,7 @@ Widget carDetailsSection() {
                       controller.carModel.clear();
                       controller.allModels.clear();
                       controller.carBrandId.value = '';
+                      controller.isQuotationModified.value = true;
                       controller.isQuotationModified.value = true;
                     },
                     onOpen: () {
@@ -67,10 +69,12 @@ Widget carDetailsSection() {
                     onChanged: (key, value) {
                       controller.carModel.text = value['name'];
                       controller.carModelId.value = key;
+                      controller.isQuotationModified.value = true;
                     },
                     onDelete: () {
                       controller.carModel.clear();
                       controller.carModelId.value = '';
+                      controller.isQuotationModified.value = true;
                       controller.isQuotationModified.value = true;
                     },
                   ),
@@ -83,10 +87,12 @@ Widget carDetailsSection() {
                     onChanged: (key, value) {
                       controller.color.text = value['name'];
                       controller.colorId.value = key;
+                      controller.isQuotationModified.value = true;
                     },
                     onDelete: () {
                       controller.color.clear();
                       controller.colorId.value = '';
+                      controller.isQuotationModified.value = true;
                     },
                     onOpen: () {
                       return controller.getColors();
@@ -98,6 +104,9 @@ Widget carDetailsSection() {
                     controller: controller.year,
                     labelText: 'Year',
                     hintText: 'Enter Year',
+                    onChanged: (_) {
+                      controller.isQuotationModified.value = true;
+                    },
                   ),
                 ),
               ],
@@ -110,6 +119,9 @@ Widget carDetailsSection() {
                     controller: controller.plateNumber,
                     labelText: 'Plate No.',
                     hintText: 'Enter Plate No.',
+                    onChanged: (_) {
+                      controller.isQuotationModified.value = true;
+                    },
                   ),
                 ),
                 Expanded(
@@ -118,6 +130,9 @@ Widget carDetailsSection() {
                     labelText: 'Code',
                     hintText: 'Enter Plate Code',
                     isCapitaLetters: true,
+                    onChanged: (_) {
+                      controller.isQuotationModified.value = true;
+                    },
                   ),
                 ),
                 const Expanded(flex: 2, child: SizedBox()),
@@ -135,12 +150,14 @@ Widget carDetailsSection() {
                       controller.city.clear();
                       controller.getCitiesByCountryID(key);
                       controller.countryId.value = key;
+                      controller.isQuotationModified.value = true;
                     },
                     onDelete: () {
                       controller.country.clear();
                       controller.city.clear();
                       controller.allCities.clear();
                       controller.countryId.value = '';
+                      controller.isQuotationModified.value = true;
                     },
                     onOpen: () {
                       return controller.getCountries();
@@ -165,6 +182,14 @@ Widget carDetailsSection() {
                       controller.city.clear();
                       controller.city.text = value['name'];
                       controller.cityId.value = key;
+                      controller.isQuotationModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.country.clear();
+                      controller.city.clear();
+                      controller.city.clear();
+                      controller.cityId.value = '';
+                      controller.isQuotationModified.value = true;
                     },
                   ),
                 ),
@@ -180,6 +205,9 @@ Widget carDetailsSection() {
                     labelText: 'Transmission Type',
                     hintText: 'Enter Transmission Type',
                     isCapitaLetters: true,
+                    onChanged: (_) {
+                      controller.isQuotationModified.value = true;
+                    },
                   ),
                 ),
                 Expanded(
@@ -190,10 +218,12 @@ Widget carDetailsSection() {
                     onChanged: (key, value) {
                       controller.engineType.text = value['name'];
                       controller.engineTypeId.value = key;
+                      controller.isQuotationModified.value = true;
                     },
                     onDelete: () {
                       controller.engineType.clear();
                       controller.engineTypeId.value = '';
+                      controller.isQuotationModified.value = true;
                     },
                     onOpen: () {
                       return controller.getEngineTypes();
@@ -212,6 +242,9 @@ Widget carDetailsSection() {
                     labelText: 'VIN',
                     hintText: 'Enter VIN',
                     isCapitaLetters: true,
+                    onChanged: (_) {
+                      controller.isQuotationModified.value = true;
+                    },
                   ),
                 ),
                 const Expanded(child: SizedBox()),
@@ -226,6 +259,9 @@ Widget carDetailsSection() {
                     controller: controller.mileageIn.value,
                     labelText: 'Mileage In',
                     hintText: 'Enter Mileage In',
+                    onChanged: (_) {
+                      controller.isQuotationModified.value = true;
+                    },
                   ),
                 ),
                 const Expanded(child: SizedBox()),

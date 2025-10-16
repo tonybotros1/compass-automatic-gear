@@ -19,11 +19,6 @@ Widget invoiceItemsSection({
             controller.allInvoiceItems.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
-        // if (controller.allInvoiceItems.isEmpty) {
-        //   return const Center(
-        //     child: Text('No Element'),
-        //   );
-        // }
         return SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: tableOfScreens(
@@ -245,9 +240,9 @@ DataRow dataRowForTheTable(
 
 Widget deleteSection(
   String quotationId,
-  context,
+  BuildContext context,
   QuotationCardController controller,
-  invoiceItemsId,
+  String invoiceItemsId,
 ) {
   return IconButton(
     onPressed: () {
@@ -256,7 +251,7 @@ Widget deleteSection(
           context: context,
           content: 'This will be deleted permanently',
           onPressed: () {
-            controller.deleteInvoiceItem(quotationId, invoiceItemsId);
+            controller.deleteInvoiceItem(invoiceItemsId);
           },
         );
       } else {
@@ -296,7 +291,7 @@ Widget editSection(
           onPressed: controller.addingNewinvoiceItemsValue.value
               ? null
               : () {
-                  controller.editInvoiceItem(quotationId, invoiceItemsId);
+                  controller.editInvoiceItem(invoiceItemsId);
                 },
         );
       } else {
@@ -315,29 +310,26 @@ ElevatedButton newinvoiceItemsButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
-        if (controller.quotationStatus.value == 'New') {
-          controller.clearInvoiceItemsVariables();
+      // if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
+      //   if (controller.quotationStatus.value == 'New') {
 
-          invoiceItemsForQuotationDialog(
-            controller: controller,
-            constraints: constraints,
-            onPressed: controller.addingNewinvoiceItemsValue.value
-                ? null
-                : () async {
-                    controller.addNewInvoiceItem(
-                      quotationId != ''
-                          ? quotationId
-                          : controller.curreentQuotationCardId.value,
-                    );
-                  },
-          );
-        } else {
-          showSnackBar('Alert', 'Only New Quotations Allowed');
-        }
-      } else {
-        showSnackBar('Alert', 'Please Save Quotation First');
-      }
+      //   } else {
+      //     showSnackBar('Alert', 'Only New Quotations Allowed');
+      //   }
+      // } else {
+      //   showSnackBar('Alert', 'Please Save Quotation First');
+      // }
+      controller.clearInvoiceItemsVariables();
+
+      invoiceItemsForQuotationDialog(
+        controller: controller,
+        constraints: constraints,
+        onPressed: controller.addingNewinvoiceItemsValue.value
+            ? null
+            : () async {
+                controller.addNewInvoiceItem();
+              },
+      );
     },
     style: new2ButtonStyle,
     child: const Text(

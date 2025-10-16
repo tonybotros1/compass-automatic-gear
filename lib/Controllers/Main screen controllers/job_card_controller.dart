@@ -168,6 +168,7 @@ class JobCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    searchEngine({"today": true});
     await getCompanyDetails();
     jobWarrentyEndDate.value.addListener(() {
       jobWarrentyEndDate.refresh();
@@ -218,7 +219,7 @@ class JobCardController extends GetxController {
     companyDetails.assignAll(await helper.getCurrentCompanyDetails());
   }
 
-  Future<Map<String,dynamic>> getBranches() async {
+  Future<Map<String, dynamic>> getBranches() async {
     return await helper.getBrunches();
   }
 
@@ -230,7 +231,7 @@ class JobCardController extends GetxController {
     allUsers.assignAll(await helper.getSysUsers());
   }
 
-  Future<Map<String,dynamic>> getInvoiceItemsFromCollection() async {
+  Future<Map<String, dynamic>> getInvoiceItemsFromCollection() async {
     return await helper.getInvoiceItems();
   }
 

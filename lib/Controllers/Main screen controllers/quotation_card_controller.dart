@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/quotation cards/quotation_cards_model.dart';
 import '../../consts.dart';
@@ -159,6 +160,7 @@ class QuotationCardController extends GetxController {
   String backendUrl = backendTestURI;
   RxBool isQuotationInvoicesModified = RxBool(false);
   RxBool isQuotationModified = RxBool(false);
+  final Uuid _uuid = const Uuid();
 
   @override
   void onInit() async {
@@ -250,23 +252,25 @@ class QuotationCardController extends GetxController {
         'engine_type': engineTypeId.value,
         'vehicle_identification_number': vin.text,
         'transmission_type': transmissionType.text,
-        'mileage_in': mileageIn.value.text,
+        'mileage_in': double.tryParse(mileageIn.value.text) ?? 0,
         'customer': customerId.value,
         'contact_name': customerEntityName.text,
         'contact_number': customerEntityPhoneNumber.text,
         'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'outstanding': customerOutstanding.text,
-        'saleMan': customerSaleManId.value,
+        'credit_limit': double.tryParse(customerCreditNumber.text) ?? 0,
+        'outstanding': double.tryParse(customerOutstanding.text) ?? 0,
+        'salesman': customerSaleManId.value,
         'branch': customerBranchId.value,
         'currency': customerCurrencyId.value,
-        'rate': customerCurrencyRate.text,
-        'validity_days': quotationDays.value.text,
-        'validity_end_date': validityEndDate.value.text,
+        'rate': double.tryParse(customerCurrencyRate.text) ?? 0,
+        'validity_days': int.tryParse(quotationDays.value.text) ?? 0,
+        'validity_end_date': convertDateToIson(validityEndDate.value.text),
         'reference_number': referenceNumber.value.text,
         'delivery_time': deliveryTime.value.text,
-        'quotation_warrenty_days': quotationWarrentyDays.value.text,
-        'quotation_warrenty_km': quotationWarrentyKM.value.text,
+        'quotation_warranty_days':
+            int.tryParse(quotationWarrentyDays.value.text) ?? 0,
+        'quotation_warranty_km':
+            double.tryParse(quotationWarrentyKM.value.text) ?? 0,
         'quotation_notes': quotationNotes.text,
         'invoice_items': allInvoiceItems.map((item) => item.toJson()).toList(),
       };
@@ -418,6 +422,7 @@ class QuotationCardController extends GetxController {
       canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
     } catch (e) {
+      print(e);
       showSnackBar('Alert', 'Something went wrong please try again');
       addingNewValue.value = false;
     }
@@ -517,6 +522,69 @@ class QuotationCardController extends GetxController {
   //     showSnackBar('Alert', 'Something Went Wrong');
   //   }
   // }
+
+  void addNewInvoiceItem() {
+    final String uniqueId = _uuid.v4();
+
+    allInvoiceItems.add(
+      JobCardInvoiceItemsModel(
+        added: true,
+        uid: uniqueId,
+        nameId: invoiceItemNameId.value,
+        name: invoiceItemName.text,
+        lineNumber: int.tryParse(lineNumber.text) ?? 0,
+        description: description.text,
+        quantity: int.tryParse(quantity.text) ?? 0,
+        price: double.tryParse(price.text) ?? 0.0,
+        amount: double.tryParse(amount.text) ?? 0.0,
+        discount: double.tryParse(discount.text) ?? 0.0,
+        total: double.tryParse(total.text) ?? 0.0,
+        vat: double.tryParse(vat.text) ?? 0.0,
+        net: double.tryParse(net.text) ?? 0.0,
+        jobId: curreentQuotationCardId.value,
+      ),
+    );
+    isQuotationInvoicesModified.value = true;
+    Get.back();
+  }
+
+  Future<void> deleteInvoiceItem(String itemId) async {
+    int index = allInvoiceItems.indexWhere(
+      (item) => (item.id == itemId || item.uid == itemId),
+    );
+    allInvoiceItems[index].deleted = true;
+    allInvoiceItems.refresh();
+    isQuotationInvoicesModified.value = true;
+    Get.back();
+  }
+
+  Future<void> editInvoiceItem(String itemId) async {
+    int index = allInvoiceItems.indexWhere(
+      (item) => (item.id == itemId || item.uid == itemId),
+    );
+    final oldItem = allInvoiceItems[index];
+
+    if (index != -1) {
+      allInvoiceItems[index] = JobCardInvoiceItemsModel(
+        id: oldItem.id,
+        uid: oldItem.uid,
+        nameId: invoiceItemNameId.value,
+        name: invoiceItemName.text,
+        lineNumber: int.tryParse(lineNumber.text) ?? 0,
+        description: description.text,
+        quantity: int.tryParse(quantity.text) ?? 0,
+        price: double.tryParse(price.text) ?? 0.0,
+        amount: double.tryParse(amount.text) ?? 0.0,
+        discount: double.tryParse(discount.text) ?? 0.0,
+        total: double.tryParse(total.text) ?? 0.0,
+        vat: double.tryParse(vat.text) ?? 0.0,
+        net: double.tryParse(net.text) ?? 0.0,
+        isModified: true,
+      );
+    }
+    isQuotationInvoicesModified.value = true;
+    Get.back();
+  }
 
   // ===================================================================================================================================
 
@@ -640,6 +708,9 @@ class QuotationCardController extends GetxController {
     countryId.value = companyDetails.containsKey('country_id')
         ? companyDetails['country_id'] ?? ""
         : "";
+    if (countryId.value.isNotEmpty) {
+      getCitiesByCountryID(countryId.value);
+    }
     mileageIn.value.text = '0';
     customerCreditNumber.text = '0';
     customerOutstanding.text = '0';
@@ -700,6 +771,13 @@ class QuotationCardController extends GetxController {
   }
 
   Future<void> loadValues(QuotationCardsModel data, String id) async {
+    curreentQuotationCardId.value = id;
+    Map number = await helper.getJobNumberForQuotationCard(id);
+    if (number.isNotEmpty) {
+      jobCardCounter.value = number['job_number'];
+    } else {
+      jobCardCounter.value = '';
+    }
     // var job = await FirebaseFirestore.instance
     //     .collection('job_cards')
     //     .where('quotation_id', isEqualTo: id).             (this need to be fixed)
@@ -1248,74 +1326,6 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  void deleteInvoiceItem(String quotationId, String itemId) {
-    try {
-      Get.back();
-      FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(quotationId)
-          .collection('quotation_invoice_items')
-          .doc(itemId)
-          .delete();
-    } catch (e) {
-      //
-    }
-  }
-
-  Future<void> editInvoiceItem(String quotationId, String itemId) async {
-    try {
-      Get.back();
-      await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(quotationId)
-          .collection('quotation_invoice_items')
-          .doc(itemId)
-          .update({
-            'name': invoiceItemNameId.value,
-            'line_number': int.tryParse(lineNumber.text),
-            'description': description.text,
-            'quantity': quantity.text,
-            'price': price.text,
-            'amount': amount.text,
-            'discount': discount.text,
-            'total': total.text,
-            'vat': vat.text,
-            'net': net.text,
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  Future<void> addNewInvoiceItem(String id) async {
-    try {
-      addingNewinvoiceItemsValue.value = true;
-      await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(id)
-          .collection('quotation_invoice_items')
-          .add({
-            'company_id': companyId.value,
-            'name': invoiceItemNameId.value,
-            'line_number': int.tryParse(lineNumber.text),
-            'description': description.text,
-            'quantity': quantity.text,
-            'price': price.text,
-            'amount': amount.text,
-            'discount': discount.text,
-            'total': total.text,
-            'vat': vat.text,
-            'net': net.text,
-            'added_date': DateTime.now().toString(),
-            'parent_collection': 'quotation_cards',
-          });
-      addingNewinvoiceItemsValue.value = false;
-      Get.back();
-    } catch (e) {
-      addingNewinvoiceItemsValue.value = false;
-    }
-  }
-
   void updateAmount() {
     if (net.text.isEmpty) net.text = '0';
     if (net.text != '0') {
@@ -1440,29 +1450,21 @@ class QuotationCardController extends GetxController {
             .toString();
   }
 
-  void onSelectForCustomers(String selectedId) {
-    var currentUserDetails = allCustomers.entries.firstWhere((entry) {
-      return entry.key.toString().toLowerCase().contains(
-        selectedId.toLowerCase(),
-      );
-    });
-
-    var phoneDetails = currentUserDetails.value['entity_phone'].firstWhere(
+  void onSelectForCustomers(Map selectedCustomer) {
+    List phoneDetails = selectedCustomer['entity_phone'];
+    Map phone = phoneDetails.firstWhere(
       (value) => value['isPrimary'] == true,
       orElse: () => {'phone': ''},
     );
 
-    customerEntityPhoneNumber.text = phoneDetails['number'] ?? '';
-    customerEntityName.text = phoneDetails['name'] ?? '';
-    customerEntityEmail.text = phoneDetails['email'] ?? '';
+    customerEntityPhoneNumber.text = phone['number'] ?? '';
+    customerEntityName.text = phone['name'] ?? '';
+    customerEntityEmail.text = phone['email'] ?? '';
 
-    customerCreditNumber.text =
-        (currentUserDetails.value['credit_limit'] ?? '0').toString();
-    customerSaleManId.value = currentUserDetails.value['sales_man'] ?? '';
-    customerSaleMan.value = getdataName(
-      currentUserDetails.value['sales_man'],
-      salesManMap,
-    );
+    customerCreditNumber.text = (selectedCustomer['credit_limit'] ?? '0')
+        .toString();
+    customerSaleManId.value = selectedCustomer['salesman_id'] ?? '';
+    customerSaleMan.value = selectedCustomer['salesman'] ?? "";
   }
 
   Stream<double> calculateAllTotals(String jobId) {

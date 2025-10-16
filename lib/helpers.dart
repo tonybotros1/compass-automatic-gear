@@ -571,13 +571,14 @@ class Helpers {
     }
   }
 
-  
   Future getQuotationCardStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse('$backendTestURI/quotation_cards/get_quotation_card_status/$id');
+      var url = Uri.parse(
+        '$backendTestURI/quotation_cards/get_quotation_card_status/$id',
+      );
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -590,6 +591,40 @@ class Helpers {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           await getJobCardStatus(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future getJobNumberForQuotationCard(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendTestURI/quotation_cards/get_job_number_for_quotation/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final number = decoded['job_number'];
+        print(number);
+        return number;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getJobNumberForQuotationCard(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }

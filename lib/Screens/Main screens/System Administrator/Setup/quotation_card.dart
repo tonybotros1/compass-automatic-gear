@@ -145,9 +145,6 @@ class QuotationCard extends StatelessWidget {
                                         controller.fromDate.value.text,
                                         controller.fromDate.value,
                                       );
-                                      // if (nor) {
-                                      //   controller.searchEngine();
-                                      // }
                                     },
                                   ),
                                 ),
@@ -160,9 +157,6 @@ class QuotationCard extends StatelessWidget {
                                         controller.toDate.value.text,
                                         controller.toDate.value,
                                       );
-                                      // if (nor) {
-                                      //   controller.searchEngine();
-                                      // }
                                     },
                                   ),
                                 ),
@@ -788,7 +782,7 @@ Future<dynamic> editQuotationCardDialog(
                             ),
                             separator(),
                             saveQuotationButton(
-                              () => controller.editQuotationCard(quotationId),
+                              () => controller.addNewQuotationCard(),
                             ),
                             point(),
                             copyQuotationButton(quotationId),

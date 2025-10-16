@@ -50,9 +50,12 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(
-                suffixIcon: dateRange(
-                  context: context,
-                  date: controller.jobCardDate.value,
+                suffixIcon: IconButton(
+                  onPressed: () async {
+                    selectDateContext(context, controller.jobCardDate.value);
+                    controller.isJobModified.value = true;
+                  },
+                  icon: const Icon(Icons.date_range),
                 ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
@@ -69,9 +72,12 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
-                suffixIcon: dateRange(
-                  context: context,
-                  date: controller.invoiceDate.value,
+                suffixIcon: IconButton(
+                  onPressed: () async {
+                    selectDateContext(context, controller.invoiceDate.value);
+                    controller.isJobModified.value = true;
+                  },
+                  icon: const Icon(Icons.date_range),
                 ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
@@ -88,9 +94,12 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
-                suffixIcon: dateRange(
-                  context: context,
-                  date: controller.approvalDate.value,
+                suffixIcon: IconButton(
+                  onPressed: () async {
+                    selectDateContext(context, controller.approvalDate.value);
+                    controller.isJobModified.value = true;
+                  },
+                  icon: const Icon(Icons.date_range),
                 ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
@@ -112,9 +121,12 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(
-                suffixIcon: dateRange(
-                  context: context,
-                  date: controller.startDate.value,
+                suffixIcon: IconButton(
+                  onPressed: () async {
+                    selectDateContext(context, controller.startDate.value);
+                    controller.isJobModified.value = true;
+                  },
+                  icon: const Icon(Icons.date_range),
                 ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
@@ -131,9 +143,12 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
-                suffixIcon: dateRange(
-                  context: context,
-                  date: controller.finishDate.value,
+                suffixIcon: IconButton(
+                  onPressed: () async {
+                    selectDateContext(context, controller.finishDate.value);
+                    controller.isJobModified.value = true;
+                  },
+                  icon: const Icon(Icons.date_range),
                 ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
@@ -150,9 +165,12 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
-                suffixIcon: dateRange(
-                  context: context,
-                  date: controller.deliveryDate.value,
+                suffixIcon: IconButton(
+                  onPressed: () async {
+                    selectDateContext(context, controller.deliveryDate.value);
+                    controller.isJobModified.value = true;
+                  },
+                  icon: const Icon(Icons.date_range),
                 ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
@@ -209,9 +227,15 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
-                suffixIcon: dateRange(
-                  context: context,
-                  date: controller.jobWarrentyEndDate.value,
+                suffixIcon: IconButton(
+                  onPressed: () async {
+                    selectDateContext(
+                      context,
+                      controller.jobWarrentyEndDate.value,
+                    );
+                    controller.isJobModified.value = true;
+                  },
+                  icon: const Icon(Icons.date_range),
                 ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
@@ -228,9 +252,15 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
-                suffixIcon: dateRange(
-                  context: context,
-                  date: controller.jobCancelationDate.value,
+                suffixIcon: IconButton(
+                  onPressed: () async {
+                    selectDateContext(
+                      context,
+                      controller.jobCancelationDate.value,
+                    );
+                    controller.isJobModified.value = true;
+                  },
+                  icon: const Icon(Icons.date_range),
                 ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(
