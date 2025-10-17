@@ -339,21 +339,17 @@ class JobCard extends StatelessWidget {
                             topRight: Radius.circular(2),
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              width: constraints.maxWidth,
-                              child: tableOfScreens(
-                                showHistoryButton: true,
-                                scrollController:
-                                    controller.scrollControllerFotTable1,
-                                constraints: constraints,
-                                context: context,
-                                controller: controller,
-                                data: controller.allJobCards,
-                              ),
-                            ),
-                          ],
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            showHistoryButton: true,
+                            scrollController:
+                                controller.scrollControllerFotTable1,
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
+                            data: controller.allJobCards,
+                          ),
                         ),
                       );
                     },

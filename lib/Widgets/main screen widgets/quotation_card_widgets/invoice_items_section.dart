@@ -94,17 +94,20 @@ Widget tableOfScreens({
           ),
         ],
         rows: [
-          ...controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-            String invoiceItemsId = invoiceItems.id ?? '';
-            return dataRowForTheTable(
-              invoiceItems,
-              context,
-              constraints,
-              invoiceItemsId,
-              controller,
-              quotationId,
-            );
-          }),
+          ...controller.allInvoiceItems
+              .where((item) => item.deleted != true)
+              .map<DataRow>((invoiceItems) {
+                String invoiceItemsId =
+                    invoiceItems.id ?? invoiceItems.uid ?? '';
+                return dataRowForTheTable(
+                  invoiceItems,
+                  context,
+                  constraints,
+                  invoiceItemsId,
+                  controller,
+                  quotationId,
+                );
+              }),
           DataRow(
             selected: true,
             cells: [
@@ -154,8 +157,8 @@ Widget tableOfScreens({
 
 DataRow dataRowForTheTable(
   JobCardInvoiceItemsModel invoiceItemsData,
-  context,
-  constraints,
+  BuildContext context,
+  BoxConstraints constraints,
   String invoiceItemsId,
   QuotationCardController controller,
   String quotationId,
@@ -246,7 +249,8 @@ Widget deleteSection(
 ) {
   return IconButton(
     onPressed: () {
-      if (controller.quotationStatus.value == 'New') {
+      if (controller.quotationStatus.value == 'New' ||
+          controller.quotationStatus.value.isEmpty) {
         alertDialog(
           context: context,
           content: 'This will be deleted permanently',
@@ -272,7 +276,8 @@ Widget editSection(
 ) {
   return IconButton(
     onPressed: () {
-      if (controller.quotationStatus.value == 'New') {
+      if (controller.quotationStatus.value == 'New' ||
+          controller.quotationStatus.value.isEmpty) {
         controller.invoiceItemNameId.value = invoiceItemsData.nameId ?? '';
         controller.invoiceItemName.text = invoiceItemsData.name ?? '';
         controller.lineNumber.text = (invoiceItemsData.lineNumber ?? '')

@@ -118,39 +118,39 @@ class QuotationCardsModel {
         ? DateTime.tryParse(json['updatedAt'].toString())
         : null;
 
-    branch = json['branch'] ?? '';
-    branchId = json['branch_id'] ?? '';
+    branch = json['branch_name'] ?? '';
+    branchId = json['branch'] ?? '';
 
-    carBrand = json['car_brand'] ?? '';
-    carBrandId = json['car_brand_id'] ?? '';
+    carBrand = json['car_brand_name'] ?? '';
+    carBrandId = json['car_brand'] ?? '';
     carBrandLogo = json['car_brand_logo'] ?? '';
 
-    carModel = json['car_model'] ?? '';
-    carModelId = json['car_model_id'] ?? '';
+    carModel = json['car_model_name'] ?? '';
+    carModelId = json['car_model'] ?? '';
 
-    city = json['city'] ?? '';
-    cityId = json['city_id'] ?? '';
+    city = json['city_name'] ?? '';
+    cityId = json['city'] ?? '';
 
-    color = json['color'] ?? '';
-    colorId = json['color_id'] ?? '';
+    color = json['color_name'] ?? '';
+    colorId = json['color'] ?? '';
 
     contactEmail = json['contact_email'] ?? '';
     contactName = json['contact_name'] ?? '';
     contactNumber = json['contact_number'] ?? '';
 
-    country = json['country'] ?? '';
-    countryId = json['country_id'] ?? '';
+    country = json['country_name'] ?? '';
+    countryId = json['country'] ?? '';
 
     creditLimit = json['credit_limit'] ?? 0;
-    currency = json['currency'] ?? '';
-    currencyId = json['currency_id'] ?? '';
+    currency = json['currency_code'] ?? '';
+    currencyId = json['currency'] ?? '';
 
-    customer = json['customer'] ?? '';
-    customerId = json['customer_id'] ?? '';
+    customer = json['customer_name'] ?? '';
+    customerId = json['customer'] ?? '';
 
     deliveryTime = json['delivery_time'] ?? '';
-    engineType = json['engine_type'] ?? '';
-    engineTypeId = json['engine_type_id'] ?? '';
+    engineType = json['engine_type_name'] ?? '';
+    engineTypeId = json['engine_type'] ?? '';
 
     jobNumber = json['job_number'] ?? '';
     mileageIn = json.containsKey('mileage_in')
@@ -183,8 +183,8 @@ class QuotationCardsModel {
 
     referenceNumber = json['reference_number'] ?? '';
 
-    salesman = json['salesman'] ?? '';
-    salesmanId = json['salesman_id'] ?? '';
+    salesman = json['salesman_name'] ?? '';
+    salesmanId = json['salesman'] ?? '';
 
     transmissionType = json['transmission_type'] ?? '';
     validityDays = json['validity_days'] ?? '';

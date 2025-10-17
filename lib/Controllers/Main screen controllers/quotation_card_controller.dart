@@ -129,8 +129,6 @@ class QuotationCardController extends GetxController {
   Rx<TextEditingController> internalNote = TextEditingController().obs;
   RxString noteMessage = RxString('');
   RxBool addingNewInternalNotProcess = RxBool(false);
-  RxBool postingQuotation = RxBool(false);
-  RxBool cancelingQuotation = RxBool(false);
   RxBool openingJobCardScreen = RxBool(false);
   RxInt numberOfQuotations = RxInt(0);
   RxDouble allQuotationsVATS = RxDouble(0.0);
@@ -165,6 +163,7 @@ class QuotationCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    searchEngine({"today": true});
     getCompanyDetails();
     getAllUsers();
   }
@@ -272,7 +271,9 @@ class QuotationCardController extends GetxController {
         'quotation_warranty_km':
             double.tryParse(quotationWarrentyKM.value.text) ?? 0,
         'quotation_notes': quotationNotes.text,
-        'invoice_items': allInvoiceItems.map((item) => item.toJson()).toList(),
+        'invoice_items': allInvoiceItems
+            .map((item) => item.toJsonForQuotation())
+            .toList(),
       };
 
       final rawDate = quotationDate.value.text.trim();
@@ -376,7 +377,7 @@ class QuotationCardController extends GetxController {
                         item.added == true ||
                         (item.deleted == true && item.id != null)),
                   )
-                  .map((item) => item.toJson())
+                  .map((item) => item.toJsonForQuotation())
                   .toList(),
             ),
           );
@@ -422,106 +423,10 @@ class QuotationCardController extends GetxController {
       canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
     } catch (e) {
-      print(e);
       showSnackBar('Alert', 'Something went wrong please try again');
       addingNewValue.value = false;
     }
   }
-
-  // Future<void> addNewQuotationCard() async {
-  //   try {
-  //     if (quotationStatus.value != 'New' && quotationStatus.value != '') {
-  //       showSnackBar('Alert', 'Only new quotations can be edited');
-  //       return;
-  //     }
-  //     addingNewValue.value = true;
-  //     Map<String, dynamic> newData = {
-  //       // 'job_number': '',
-  //       'quotation_status': quotationStatus.value,
-  //       'car_brand_logo': carBrandLogo.value,
-  //       // 'company_id': companyId.value,
-  //       'car_brand': carBrandId.value,
-  //       'car_model': carModelId.value,
-  //       'plate_number': plateNumber.text,
-  //       'plate_code': plateCode.text,
-  //       'country': countryId.value,
-  //       'city': cityId.value,
-  //       'year': year.text,
-  //       'color': colorId.value,
-  //       'engine_type': engineTypeId.value,
-  //       'vehicle_identification_number': vin.text,
-  //       'transmission_type': transmissionType.text,
-  //       'mileage_in': mileageIn.value.text,
-  //       'customer': customerId.value,
-  //       'contact_name': customerEntityName.text,
-  //       'contact_number': customerEntityPhoneNumber.text,
-  //       'contact_email': customerEntityEmail.text,
-  //       'credit_limit': customerCreditNumber.text,
-  //       'outstanding': customerOutstanding.text,
-  //       'saleMan': customerSaleManId.value,
-  //       'branch': customerBranchId.value,
-  //       'currency': customerCurrencyId.value,
-  //       'rate': customerCurrencyRate.text,
-  //       // 'payment_method': payType.value,
-  //       // 'quotation_number': quotationCounter.value.text,
-  //       // 'quotation_date': Timestamp.fromDate(
-  //       //   format.parse(quotationDate.value.text.trim()),
-  //       // ),
-  //       'validity_days': quotationDays.value.text,
-  //       'validity_end_date': validityEndDate.value.text,
-  //       'reference_number': referenceNumber.value.text,
-  //       'delivery_time': deliveryTime.value.text,
-  //       'quotation_warrenty_days': quotationWarrentyDays.value.text,
-  //       'quotation_warrenty_km': quotationWarrentyKM.value.text,
-  //       'quotation_notes': quotationNotes.text,
-  //     };
-
-  //     final rawDate = quotationDate.value.text.trim();
-  //     if (rawDate.isNotEmpty) {
-  //       try {
-  //         newData['quotation_date'] = Timestamp.fromDate(
-  //           format.parseStrict(rawDate),
-  //         );
-  //       } catch (e) {
-  //         // إذا حابب تعرض للمستخدم خطأ في التنسيق
-  //         // print('Invalid quotation_date format: $e');
-  //       }
-  //     }
-
-  //     if (quotationCounter.value.text.isEmpty) {
-  //       quotationStatus.value = 'New';
-  //       newData['quotation_status'] = 'New';
-  //       newData['label'] = '';
-
-  //       await getCurrentQuotationCounterNumber();
-  //       newData['quotation_number'] = quotationCounter.value.text;
-  //     }
-
-  //     if (quotationCardAdded.isFalse) {
-  //       newData['added_date'] = DateTime.now().toString();
-  //       var newQuotation = await FirebaseFirestore.instance
-  //           .collection('quotation_cards')
-  //           .add(newData);
-  //       quotationCardAdded.value = true;
-  //       curreentQuotationCardId.value = newQuotation.id;
-  //       getAllInvoiceItems(newQuotation.id);
-  //       showSnackBar('Done', 'Added Successfully');
-  //     } else {
-  //       newData.remove('added_date');
-  //       await FirebaseFirestore.instance
-  //           .collection('quotation_cards')
-  //           .doc(curreentQuotationCardId.value)
-  //           .update(newData);
-  //       showSnackBar('Done', 'Updated Successfully');
-  //     }
-  //     canAddInternalNotesAndInvoiceItems.value = true;
-  //     addingNewValue.value = false;
-  //   } catch (e) {
-  //     canAddInternalNotesAndInvoiceItems.value = false;
-  //     addingNewValue.value = false;
-  //     showSnackBar('Alert', 'Something Went Wrong');
-  //   }
-  // }
 
   void addNewInvoiceItem() {
     final String uniqueId = _uuid.v4();
@@ -584,6 +489,181 @@ class QuotationCardController extends GetxController {
     }
     isQuotationInvoicesModified.value = true;
     Get.back();
+  }
+
+  Future<void> deleteQuotationCard(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/quotation_cards/delete_quotation_card/$id',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        String deletedQuotationId = decoded['quotation_id'];
+        allQuotationCards.removeWhere((job) => job.id == deletedQuotationId);
+        numberOfQuotations.value -= 1;
+        Get.close(2);
+        showSnackBar('Success', 'Quotation card deleted successfully');
+      } else if (response.statusCode == 400 || response.statusCode == 404) {
+        final decoded =
+            jsonDecode(response.body) ?? 'Failed to delete quotation card';
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'] ?? 'Only New Quotation Cards Allowed';
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteQuotationCard(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 500) {
+        final decoded = jsonDecode(response.body);
+        final error =
+            decoded['detail'] ?? 'Server error while deleting job card';
+        showSnackBar('Server Error', error);
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  Future<void> editPostForQuotation(String id) async {
+    if (quotationStatus.value.isEmpty) {
+      showSnackBar('Alert', 'Please save the quotation first');
+      return;
+    }
+
+    Map currentQuotationStatus = await getCurrentQuotationCardStatus(id);
+    String qstatus = currentQuotationStatus['quotation_status'];
+    if (qstatus == 'Posted') {
+      showSnackBar('Alert', 'Quotation is Already Posted');
+    } else if (qstatus == 'Cancelled') {
+      showSnackBar('Alert', 'Quotation is Cancelled');
+    } else {
+      quotationStatus.value = 'Posted';
+      isQuotationModified.value = true;
+    }
+  }
+
+  Future<void> editCancelForQuotation(String id) async {
+    if (quotationStatus.value.isEmpty) {
+      showSnackBar('Alert', 'Please Save The Quotation First');
+      return;
+    }
+    Map currentQuotationStatus = await getCurrentQuotationCardStatus(id);
+    String status1 = currentQuotationStatus['quotation_status'];
+    if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'Quotation is Already Cancelled');
+    } else if (status1 == 'Posted') {
+      showSnackBar('Alert', 'Quotation is Posted');
+    } else {
+      quotationStatus.value = 'Cancelled';
+    }
+  }
+
+  void filterSearch() async {
+    Map<String, dynamic> body = {};
+    if (carBrandIdFilter.value.isNotEmpty) {
+      body["car_brand"] = carBrandIdFilter.value;
+    }
+    if (carModelIdFilter.value.isNotEmpty) {
+      body["car_model"] = carModelIdFilter.value;
+    }
+    if (quotaionNumberFilter.value.text.isNotEmpty) {
+      body["quotation_number"] = quotaionNumberFilter.value.text;
+    }
+    if (plateNumberFilter.value.text.isNotEmpty) {
+      body["plate_number"] = plateNumberFilter.value.text;
+    }
+    if (vinFilter.value.text.isNotEmpty) {
+      body["vin"] = vinFilter.value.text;
+    }
+    if (statusFilter.value.text.isNotEmpty) {
+      body["status"] = statusFilter.value.text;
+    }
+    if (customerNameIdFilter.value.isNotEmpty) {
+      body["customer_name"] = customerNameIdFilter.value;
+    }
+    if (isTodaySelected.isTrue) {
+      body["today"] = true;
+    }
+    if (isThisMonthSelected.isTrue) {
+      body["this_month"] = true;
+    }
+    if (isThisYearSelected.isTrue) {
+      body["this_year"] = true;
+    }
+    if (fromDate.value.text.isNotEmpty) {
+      body["from_date"] = convertDateToIson(fromDate.value.text);
+    }
+    if (toDate.value.text.isNotEmpty) {
+      body["to_date"] = convertDateToIson(toDate.value.text);
+    }
+    if (body.isNotEmpty) {
+      await searchEngine(body);
+    } else {
+      await searchEngine({"all": true});
+    }
+  }
+
+  Future<void> searchEngine(Map<String, dynamic> body) async {
+    try {
+      isScreenLoding.value = true;
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/quotation_cards/search_engine_for_quotation_cards',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List jobs = decoded['quotation_cards'];
+        Map grandTotals = decoded['grand_totals'];
+        allQuotationsTotals.value = grandTotals['grand_total'];
+        allQuotationsVATS.value = grandTotals['grand_vat'];
+        allQuotationsNET.value = grandTotals['grand_net'];
+        allQuotationCards.assignAll(
+          jobs.map((job) => QuotationCardsModel.fromJson(job)),
+        );
+        numberOfQuotations.value = allQuotationCards.length;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngine(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        isScreenLoding.value = false;
+      }
+
+      isScreenLoding.value = false;
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
   }
 
   // ===================================================================================================================================
@@ -772,22 +852,9 @@ class QuotationCardController extends GetxController {
 
   Future<void> loadValues(QuotationCardsModel data, String id) async {
     curreentQuotationCardId.value = id;
-    Map number = await helper.getJobNumberForQuotationCard(id);
-    if (number.isNotEmpty) {
-      jobCardCounter.value = number['job_number'];
-    } else {
-      jobCardCounter.value = '';
-    }
-    // var job = await FirebaseFirestore.instance
-    //     .collection('job_cards')
-    //     .where('quotation_id', isEqualTo: id).             (this need to be fixed)
-    //     .get();
-    // if (job.docs.isNotEmpty) {
-    //   jobCardCounter.value = job.docs.first.data()['job_number'];
-    // } else {
-    //   jobCardCounter.value = '';
-    // }
-    // jobCardCounter.value.text = data['job_number'] ?? '';
+    allInvoiceItems.value = data.invoiceItemsDetails ?? [];
+
+    jobCardCounter.value = data.jobNumber ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
     quotationStatus.value = data.quotationStatus ?? '';
     carBrandLogo.value = data.carBrandLogo ?? '';
@@ -1029,50 +1096,6 @@ class QuotationCardController extends GetxController {
       addingNewValue.value = false;
       showSnackBar('Alert', 'Something Went Wrong');
       // print('Unexpected error in editQuotationCard: $e');
-    }
-  }
-
-  Future<void> deleteQuotationCard(String id) async {
-    try {
-      Get.back();
-      Get.back();
-      await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(id)
-          .delete();
-      showSnackBar('Done', 'Deleted Successfully');
-    } catch (e) {
-      showSnackBar('Alert', 'Something Went Wrong');
-    }
-  }
-
-  Future<void> editPostForQuotation(String id) async {
-    try {
-      postingQuotation.value = true;
-      await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(id)
-          .update({'quotation_status': 'Posted'});
-      quotationStatus.value = 'Posted';
-      postingQuotation.value = false;
-      showSnackBar('Done', 'Quotation Posted');
-    } catch (e) {
-      postingQuotation.value = false;
-    }
-  }
-
-  Future<void> editCancelForQuotation(String id) async {
-    try {
-      cancelingQuotation.value = true;
-      await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(id)
-          .update({'quotation_status': 'Cancelled'});
-      quotationStatus.value = 'Cancelled';
-      cancelingQuotation.value = false;
-      showSnackBar('Done', 'Quotation Cancelled');
-    } catch (e) {
-      cancelingQuotation.value = false;
     }
   }
 
@@ -1408,12 +1431,11 @@ class QuotationCardController extends GetxController {
     double sumofVAT = 0.0;
     double sumofNET = 0.0;
 
-    // for (var job in allInvoiceItems) {
-    //   var data = job.data() as Map<String, dynamic>?;
-    //   sumofTotal += double.parse(data?['total']);
-    //   sumofNET += double.parse(data?['net']);
-    //   sumofVAT += double.parse(data?['vat']);
-    // }
+    for (var item in allInvoiceItems.where((item) => item.deleted != true)) {
+      sumofTotal += item.total ?? 0;
+      sumofNET += item.net ?? 0;
+      sumofVAT += item.vat ?? 0;
+    }
 
     return [sumofTotal, sumofVAT, sumofNET];
   }
@@ -1687,140 +1709,6 @@ class QuotationCardController extends GetxController {
   //   calculateMoneyForAllQuotations();
   //   isScreenLoding.value = false;
   // }
-
-  Future<void> searchEngine() async {
-    isScreenLoding.value = true;
-
-    // Start with the base query for the company.
-    Query<Map<String, dynamic>> query = FirebaseFirestore.instance
-        .collection('quotation_cards')
-        .where('company_id', isEqualTo: companyId.value);
-
-    // 1. APPLY DATE FILTERS TO THE FIRESTORE QUERY
-    // This requires only ONE composite index: (company_id, quotation_date).
-
-    if (isAllSelected.value) {
-      // No date filter needed if "All" is selected.
-    } else if (isTodaySelected.value) {
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
-      fromDate.value.text = textToDate(startOfDay);
-      toDate.value.text = textToDate(endOfDay);
-      query = query
-          .where(
-            'quotation_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
-          )
-          .where('quotation_date', isLessThan: Timestamp.fromDate(endOfDay));
-    } else if (isThisMonthSelected.value) {
-      final now = DateTime.now();
-      final startOfMonth = DateTime(now.year, now.month, 1);
-      final endOfMonth = (now.month < 12)
-          ? DateTime(now.year, now.month + 1, 1)
-          : DateTime(now.year + 1, 1, 1);
-      fromDate.value.text = textToDate(startOfMonth);
-      toDate.value.text = textToDate(endOfMonth);
-      query = query
-          .where(
-            'quotation_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
-          )
-          .where('quotation_date', isLessThan: Timestamp.fromDate(endOfMonth));
-    } else if (isThisYearSelected.value) {
-      final now = DateTime.now();
-      final startOfYear = DateTime(now.year, 1, 1);
-      final endOfYear = DateTime(now.year + 1, 1, 1);
-      fromDate.value.text = textToDate(startOfYear);
-      toDate.value.text = textToDate(endOfYear);
-      query = query
-          .where(
-            'quotation_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
-          )
-          .where('quotation_date', isLessThan: Timestamp.fromDate(endOfYear));
-    } else {
-      // Manual date range
-      if (fromDate.value.text.trim().isNotEmpty) {
-        try {
-          final dtFrom = format.parseStrict(fromDate.value.text.trim());
-          query = query.where(
-            'quotation_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
-          );
-        } catch (_) {}
-      }
-      if (toDate.value.text.trim().isNotEmpty) {
-        try {
-          final dtTo = format
-              .parseStrict(toDate.value.text.trim())
-              .add(const Duration(days: 1));
-          query = query.where(
-            'quotation_date',
-            isLessThan: Timestamp.fromDate(dtTo),
-          );
-        } catch (_) {}
-      }
-    }
-
-    // 2. EXECUTE THE FIRESTORE QUERY
-    final snapshot = await query.get();
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedQuotations =
-        snapshot.docs;
-
-    // 3. APPLY ALL OTHER FILTERS ON THE CLIENT-SIDE
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredQuotations =
-        fetchedQuotations.where((doc) {
-          final data = doc.data();
-
-          // Quotation Number Filter
-          if (quotaionNumberFilter.value.text.trim().isNotEmpty &&
-              data['quotation_number'] !=
-                  quotaionNumberFilter.value.text.trim()) {
-            return false;
-          }
-          // Status Filter
-          if (statusFilter.value.text.trim().isNotEmpty &&
-              data['quotation_status'] != statusFilter.value.text.trim()) {
-            return false;
-          }
-          // Car Brand Filter
-          if (carBrandIdFilter.value.isNotEmpty &&
-              data['car_brand'] != carBrandIdFilter.value) {
-            return false;
-          }
-          // Car Model Filter
-          if (carModelIdFilter.value.isNotEmpty &&
-              data['car_model'] != carModelIdFilter.value) {
-            return false;
-          }
-          // Plate Number Filter
-          if (plateNumberFilter.value.text.trim().isNotEmpty &&
-              data['plate_number'] != plateNumberFilter.value.text.trim()) {
-            return false;
-          }
-          // VIN Filter
-          if (vinFilter.value.text.trim().isNotEmpty &&
-              data['vehicle_identification_number'] !=
-                  vinFilter.value.text.trim()) {
-            return false;
-          }
-          // Customer Filter
-          if (customerNameIdFilter.value.isNotEmpty &&
-              data['customer'] != customerNameIdFilter.value) {
-            return false;
-          }
-
-          // If the document passed all filters, keep it.
-          return true;
-        }).toList();
-
-    // 4. UPDATE THE UI
-    // allQuotationCards.assignAll(filteredQuotations);
-    numberOfQuotations.value = allQuotationCards.length;
-    // await calculateMoneyForAllQuotations(); // Call the optimized calculation method
-    isScreenLoding.value = false;
-  }
 
   void removeFilters() {
     isAllSelected.value = false;

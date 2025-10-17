@@ -87,4 +87,26 @@ class JobCardInvoiceItemsModel {
     data['job_card_id'] = jobId;
     return data;
   }
+
+
+  Map<String, dynamic> toJsonForQuotation() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['uid'] = uid;
+    data['id'] = id;
+    data['name'] = nameId;
+    data['quantity'] = quantity;
+    data['discount'] = discount;
+    data['price'] = price;
+    data['description'] = description;
+    data['amount'] = amount;
+    data['vat'] = vat;
+    data['net'] = net;
+    data['total'] = total;
+    data['line_number'] = lineNumber;
+    data['is_modified'] = isModified;
+    data['deleted'] = deleted;
+    data['added'] = added;
+    data['quotation_card_id'] = jobId;
+    return data;
+  }
 }

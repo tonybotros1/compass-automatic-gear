@@ -283,6 +283,8 @@ Widget customerDetailsSection() {
                         controller.customerCurrencyId.value = '';
                         controller.customerCurrencyRate.clear();
                         controller.isQuotationModified.value = true;
+                      },onOpen: (){
+                        return controller.getCurrencies();
                       },
                     ),
                   ),
