@@ -810,7 +810,7 @@ class JobCardController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getJobCardInternalNotes(jobId);
+          await addNewInternalNote(jobId, note);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -938,7 +938,7 @@ class JobCardController extends GetxController {
       var id = quotation.docs.first.id;
       // var data = quotation.docs.first.data();
 
-      quotationCardController.getAllInvoiceItems(id);
+      // quotationCardController.getAllInvoiceItems(id);
       // await quotationCardController.loadValues(data, id);
       // showSnackBar('Done', 'Opened Successfully');
       // await editQuotationCardDialog(

@@ -1,3 +1,4 @@
+import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -84,23 +85,13 @@ GetBuilder<QuotationCardController> copyQuotationButton(String quotationId) {
       return ClickableHoverText(
         onTap: controller.loadingCopyQuotation.isFalse
             ? () async {
-                if (controller.quotationStatus.value == 'New') {
-                  showSnackBar(
-                    'Alert',
-                    'Only Posted / Cancelled Quotations Can be Copied',
-                  );
-                } else {
-                  Get.back();
-                  var newData = await controller.copyQuotation(quotationId);
-                  controller.getAllInvoiceItems(newData['newId']);
-                  await controller.loadValues(newData['data'], quotationId);
-                  editQuotationCardDialog(
-                    controller,
-                    newData['data'],
-                    newData['newId'],
-                  );
-                  showSnackBar('Done', 'Quotation Copied');
-                }
+                QuotationCardsModel newData = await controller.copyQuotation(
+                  quotationId,
+                );
+                await controller.loadValues(newData, quotationId);
+                controller.loadingCopyQuotation.value = false;
+                editQuotationCardDialog(controller, newData, newData.id ?? '');
+                showSnackBar('Done', 'Quotation Copied');
               }
             : null,
         text: 'Copy',
@@ -119,6 +110,7 @@ Widget internalNotesButton(
       if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
         controller.noteMessage.value = '';
         controller.internalNote.value.clear();
+        controller.getQuotationCardInternalNotes(quotationId);
         internalNotesDialog(controller, constraints, quotationId);
       } else {
         showSnackBar('Alert', 'Please Save Quotation First');
@@ -136,14 +128,7 @@ GetBuilder<QuotationCardController> creatJobButton(String quotationID) {
         onTap: controller.creatingNewJob.isFalse
             ? () async {
                 if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
-                  if (controller.quotationStatus.value == 'Posted') {
-                    controller.createNewJobCard(quotationID);
-                  } else {
-                    showSnackBar(
-                      'Alert',
-                      'Only Posted Quotations Can Create Job From',
-                    );
-                  }
+                  controller.createNewJobCard(quotationID);
                 } else {
                   showSnackBar('Alert', 'Please Save Quotation First');
                 }

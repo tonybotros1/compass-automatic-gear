@@ -25,7 +25,7 @@ Widget carDetailsSection() {
                     textcontroller: controller.carBrand.text,
                     hintText: 'Brand',
                     onChanged: (key, value) {
-                      controller.carBrandLogo.value = value['logo'];
+                      controller.carBrandLogo.value = value['logo'] ?? '';
                       controller.carBrand.text = value['name'];
                       controller.getModelsByCarBrand(key);
                       controller.carBrandId.value = key;

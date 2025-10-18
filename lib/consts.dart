@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'Widgets/text_button.dart';
 
 // String backendURI = 'https://datahubai-backend.onrender.com';
@@ -18,7 +17,10 @@ String backendTestURI = 'http://127.0.0.1:8000';
 // String backendTestURI = "http://10.0.2.2:8000";
 String webSocketURL = "ws://localhost:8000/ws";
 
-IconButton dateRange({required BuildContext context, required TextEditingController date}) {
+IconButton dateRange({
+  required BuildContext context,
+  required TextEditingController date,
+}) {
   return IconButton(
     onPressed: () async {
       selectDateContext(context, date);
@@ -585,12 +587,24 @@ void showSnackBar(String title, String body) {
     colorText: Colors.white,
     duration: const Duration(seconds: 2),
     maxWidth: 300,
+    overlayBlur: 0,
     isDismissible: true,
     forwardAnimationCurve: Curves.easeOutBack,
     animationDuration: const Duration(milliseconds: 500),
     overlayColor: Colors.transparent, // 👈 allows click-through
+    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+   
+    icon: const Icon(
+      Icons.notifications_none_rounded,
+      color: Colors.white,
+      size: 28,
+    ),
   );
 }
+
+// void showSnackBar(String title, String body) {
+//     showDesktopToast(title,body);
+//   }
 
 Future<dynamic> alertMessage({
   required BuildContext context,

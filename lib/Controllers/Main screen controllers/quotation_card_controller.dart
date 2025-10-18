@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import '../../Models/job cards/internal_notes_model.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/quotation cards/quotation_cards_model.dart';
 import '../../consts.dart';
@@ -159,6 +158,9 @@ class QuotationCardController extends GetxController {
   RxBool isQuotationInvoicesModified = RxBool(false);
   RxBool isQuotationModified = RxBool(false);
   final Uuid _uuid = const Uuid();
+  RxBool isQuotationInternalNotesLoading = RxBool(false);
+  final RxList<InternalNotesModel> allInternalNotes =
+      RxList<InternalNotesModel>([]);
 
   @override
   void onInit() async {
@@ -570,6 +572,7 @@ class QuotationCardController extends GetxController {
       showSnackBar('Alert', 'Quotation is Posted');
     } else {
       quotationStatus.value = 'Cancelled';
+      isQuotationModified.value = true;
     }
   }
 
@@ -666,87 +669,319 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  // ===================================================================================================================================
+  Future copyQuotation(String id) async {
+    try {
+      Map quotationStatus = await getCurrentQuotationCardStatus(id);
+      final status1 = quotationStatus['quotation_status'];
+      if (status1 == 'New' || status1 == 'Approved' || status1 == 'Ready') {
+        showSnackBar(
+          'Alert',
+          'Only Posted / Cancelled Quotations Can be Copied',
+        );
+        return;
+      }
+      Get.back();
+      showSnackBar('Copying', 'Please Wait');
 
-  // Future<void> calculateMoneyForAllQuotations() async {
+      loadingCopyQuotation.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/quotation_cards/copy_quotation_card/$id',
+      );
+      final response = await http.post(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        var copiedQuotationData = decoded['copied_quotation'];
+        QuotationCardsModel copiedQuotation = QuotationCardsModel.fromJson(
+          copiedQuotationData,
+        );
+        allQuotationCards.add(copiedQuotation);
+        return copiedQuotation;
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await copyQuotation(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      loadingCopyQuotation.value = false;
+    } catch (e) {
+      loadingCopyQuotation.value = false;
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  Future<void> getQuotationCardInternalNotes(String id) async {
+    try {
+      isQuotationInternalNotesLoading.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/quotation_cards/get_all_internal_notes_for_quotation_card/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List jobInternalNotes = decoded['internal_notes'];
+        allInternalNotes.assignAll(
+          jobInternalNotes.map((note) => InternalNotesModel.fromJson(note)),
+        );
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getQuotationCardInternalNotes(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      isQuotationInternalNotesLoading.value = false;
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+      isQuotationInternalNotesLoading.value = false;
+    }
+  }
+
+  Future<void> addNewInternalNote(String id, Map<String, dynamic> note) async {
+    try {
+      addingNewInternalNotProcess.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/quotation_cards/add_new_internal_note_for_quotation_card/$id',
+      );
+      final request = http.MultipartRequest('POST', url);
+      request.headers.addAll({
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'multipart/form-data',
+      });
+      if (note.containsKey('note_type')) {
+        if (note['note_type'] == 'text') {
+          request.fields['note'] = note['note'];
+          request.fields['note_type'] = note['note_type'];
+        } else {
+          request.fields['file_name'] = note['file_name'];
+          request.fields['note_type'] = note['note_type'];
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'media_note',
+              note['media_note'],
+              filename: note['file_name'],
+            ),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        Map<String, dynamic> data = decoded['new_internal_note'];
+        allInternalNotes.add(InternalNotesModel.fromJson(data));
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewInternalNote(id, note);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewInternalNotProcess.value = false;
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+      addingNewInternalNotProcess.value = false;
+    }
+  }
+
+  Future<void> createNewJobCard(String id) async {
+    try {
+      Map quotationStatus = await getCurrentQuotationCardStatus(id);
+      final status1 = quotationStatus['quotation_status'];
+      if (status1 != 'Posted') {
+        showSnackBar('Alert', 'Only Posted Quotations Allowed');
+        return;
+      }
+      creatingNewJob.value = true;
+      showSnackBar('Creating', 'Please wait');
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/quotation_cards/create_job_card_for_current_quotation/$id',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'multipart/form-data',
+        },
+      );
+      if (response.statusCode == 200) {
+        showSnackBar('Done', 'Job created successfully');
+        final decoded = jsonDecode(response.body);
+        jobCardCounter.value = decoded['job_number'];
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await createNewJobCard(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      creatingNewJob.value = false;
+    } catch (e) {
+      creatingNewJob.value = false;
+    }
+  }
+
+  // Future<void> createNewJobCard(String quotationID) async {
   //   try {
-  //     // Reset totals at the beginning.
-  //     double totalVat = 0.0;
-  //     double grandTotal = 0.0;
-  //     double totalNet = 0.0;
+  //     creatingNewJob.value = true;
 
-  //     if (allQuotationCards.isEmpty) {
-  //       allQuotationsVATS.value = 0;
-  //       allQuotationsTotals.value = 0;
-  //       allQuotationsNET.value = 0;
+  //     // var job = await FirebaseFirestore.instance
+  //     //     .collection('job_cards')
+  //     //     .where('company_id', isEqualTo: companyId.value)
+  //     //     .where('quotation_id', isEqualTo: quotationID)
+  //     //     .get();
+
+  //     if (jobCardCounter.value.isNotEmpty) {
+  //       showSnackBar('Alert', 'Job Already Exists');
+  //       creatingNewJob.value = false;
+
   //       return;
   //     }
+  //     showSnackBar('Creating', 'Please Wait');
 
-  //     // 1. Create a list of Futures for fetching the 'invoice_items' for each quotation.
-  //     List<Future<QuerySnapshot<Map<String, dynamic>>>> futures = [];
-  //     for (var quotation in allQuotationCards) {
-  //       final future = FirebaseFirestore.instance
-  //           .collection('quotation_cards')
-  //           .doc(quotation.id)
-  //           .collection(
-  //             'quotation_invoice_items',
-  //           ) // Assuming the subcollection is named this
-  //           .get();
-  //       futures.add(future);
-  //     }
+  //     Map<String, dynamic> newData = {
+  //       'quotation_id': quotationID,
+  //       'label': '',
+  //       'job_status_1': 'New',
+  //       'job_status_2': 'New',
+  //       'car_brand_logo': carBrandLogo.value,
+  //       'company_id': companyId.value,
+  //       'car_brand': carBrandId.value,
+  //       'car_model': carModelId.value,
+  //       'plate_number': plateNumber.text,
+  //       'plate_code': plateCode.text,
+  //       'country': countryId.value,
+  //       'city': cityId.value,
+  //       'year': year.text,
+  //       'color': colorId.value,
+  //       'engine_type': engineTypeId.value,
+  //       'vehicle_identification_number': vin.text,
+  //       'transmission_type': transmissionType.text,
+  //       'mileage_in': mileageIn.value.text,
+  //       // 'fuel_amount': fuelAmount.value.text,
+  //       'customer': customerId.value,
+  //       'contact_name': customerEntityName.text,
+  //       'contact_number': customerEntityPhoneNumber.text,
+  //       'contact_email': customerEntityEmail.text,
+  //       'credit_limit': customerCreditNumber.text,
+  //       'outstanding': customerOutstanding.text,
+  //       'saleMan': customerSaleManId.value,
+  //       'branch': customerBranchId.value,
+  //       'currency': customerCurrencyId.value,
+  //       'rate': customerCurrencyRate.text,
+  //       // 'payment_method': payType.value,
+  //       'job_number': jobCardCounter.value,
+  //       'invoice_number': '',
+  //       'lpo_number': '',
+  //       'job_date': '',
+  //       'invoice_date': '',
+  //       'job_approval_date': '',
+  //       'job_start_date': '',
+  //       'job_cancelation_date': '',
+  //       'job_finish_date': '',
+  //       'job_delivery_date': '',
+  //       'job_warrenty_days': quotationWarrentyDays.value.text,
+  //       'job_warrenty_km': quotationWarrentyKM.value.text,
+  //       'job_warrenty_end_date': '',
+  //       'job_min_test_km': '',
+  //       'job_reference_1': '',
+  //       'job_reference_2': '',
+  //       'job_reference_3': '',
+  //       'job_notes': '',
+  //       'job_delivery_notes': '',
+  //     };
 
-  //     // 2. Execute all the Futures in parallel.
-  //     final List<QuerySnapshot<Map<String, dynamic>>> snapshots =
-  //         await Future.wait(futures);
+  //     // await getCurrentJobCardCounterNumber();
+  //     newData['job_number'] = jobCardCounter.value;
+  //     newData['added_date'] = DateTime.now().toString();
 
-  //     // 3. Iterate through the results in memory to perform calculations.
-  //     for (var invoiceListSnapshot in snapshots) {
-  //       for (var invoiceDoc in invoiceListSnapshot.docs) {
-  //         var data = invoiceDoc.data();
-  //         totalVat += double.tryParse(data['vat'].toString()) ?? 0.0;
-  //         grandTotal += double.tryParse(data['total'].toString()) ?? 0.0;
-  //         totalNet += double.tryParse(data['net'].toString()) ?? 0.0;
-  //       }
-  //     }
+  //     // var newJob = await FirebaseFirestore.instance
+  //     //     .collection('job_cards')
+  //     //     .add(newData);
 
-  //     // 4. Update the UI with the final calculated totals.
-  //     allQuotationsVATS.value = totalVat;
-  //     allQuotationsTotals.value = grandTotal;
-  //     allQuotationsNET.value = totalNet;
+  //     // for (var element in allInvoiceItems) {
+  //     //   var data = element.data();
+  //     //   await FirebaseFirestore.instance
+  //     //       .collection('job_cards')
+  //     //       .doc(newJob.id)
+  //     //       .collection('invoice_items')
+  //     //       .add(data);
+  //     // }
+
+  //     creatingNewJob.value = false;
+  //     showSnackBar('Done', 'Job Created Successfully');
   //   } catch (e) {
-  //     allQuotationsVATS.value = 0;
-  //     allQuotationsTotals.value = 0;
-  //     allQuotationsNET.value = 0;
+  //     creatingNewJob.value = false;
+  //     showSnackBar('Alert', 'Something Went Wrong');
   //   }
   // }
 
-  // Future<void> calculateMoneyForAllQuotations() async {
-  //   try {
-  //     double totalVat = 0.0;
-  //     double grandTotal = 0.0;
-  //     double totalNet = 0.0;
-
-  //     final snapshot = await FirebaseFirestore.instance
-  //         .collectionGroup('quotation_invoice_items')
-  //         .get();
-
-  //     for (var doc in snapshot.docs) {
-  //       final data = doc.data();
-  //       print(data);
-  //       totalVat += double.tryParse(data['vat'].toString()) ?? 0.0;
-  //       grandTotal += double.tryParse(data['total'].toString()) ?? 0.0;
-  //       totalNet += double.tryParse(data['net'].toString()) ?? 0.0;
-  //     }
-
-  //     allQuotationsVATS.value = totalVat;
-  //     allQuotationsTotals.value = grandTotal;
-  //     allQuotationsNET.value = totalNet;
-  //   } catch (e) {
-  //     allQuotationsVATS.value = 0;
-  //     allQuotationsTotals.value = 0;
-  //     allQuotationsNET.value = 0;
-  //   }
-  // }
+  // ===================================================================================================================================
 
   Future<void> openJobCardScreenByNumber() async {
     // try {
@@ -927,428 +1162,6 @@ class QuotationCardController extends GetxController {
     quotationNotes.text = data.quotationNotes ?? '';
   }
 
-  Future<void> addNewInternalNote(String id, Map<String, dynamic> note) async {
-    try {
-      addingNewInternalNotProcess.value = true;
-      final jobDoc = FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(id)
-          .collection('internal_notes');
-
-      if (note['type'] == 'Text') {
-        await jobDoc.add(note);
-      } else {
-        final originalFileName = note['file_name'] as String;
-
-        // Extract filename and extension
-        final extIndex = originalFileName.lastIndexOf('.');
-        final (String fileName, String extension) = extIndex != -1
-            ? (
-                originalFileName.substring(0, extIndex),
-                originalFileName.substring(extIndex + 1),
-              )
-            : (originalFileName, '');
-
-        // Create timestamped filename
-        final timestamp = DateTime.now().toIso8601String().replaceAll(
-          RegExp(r'[^0-9T-]'),
-          '_',
-        );
-        final storageFileName = extension.isNotEmpty
-            ? '${fileName}_$timestamp.$extension'
-            : '${fileName}_$timestamp';
-
-        // Create storage reference
-        final Reference storageRef = FirebaseStorage.instance.ref().child(
-          'internal_notes/$storageFileName',
-        );
-
-        // Determine MIME type
-        final mimeType =
-            note['type'] as String? ?? getMimeTypeFromExtension(extension);
-
-        // Upload file and wait for completion
-        final UploadTask uploadTask = storageRef.putData(
-          note['note'],
-          SettableMetadata(
-            contentType: mimeType ?? 'application/octet-stream',
-            customMetadata: {'original_filename': originalFileName},
-          ),
-        );
-
-        // Wait for upload to complete
-        final TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
-
-        // Get download URL after upload completion
-        final String fileUrl = await snapshot.ref.getDownloadURL();
-
-        // Store the note in Firestore
-        await jobDoc.add({
-          'file_name': originalFileName,
-          'type': mimeType ?? 'application/octet-stream',
-          'note': fileUrl,
-          'user_id': note['user_id'],
-          'time': note['time'],
-        });
-      }
-      addingNewInternalNotProcess.value = false;
-    } catch (e) {
-      addingNewInternalNotProcess.value = false;
-    }
-  }
-
-  Stream<List<Map<String, dynamic>>> getQuotationCardInternalNotes(String id) {
-    return FirebaseFirestore.instance
-        .collection('quotation_cards')
-        .doc(id)
-        .collection('internal_notes')
-        .orderBy('time')
-        .snapshots()
-        .map((querySnapshot) {
-          if (querySnapshot.docs.isNotEmpty) {
-            return querySnapshot.docs.map((doc) {
-              return {'id': doc.id, ...doc.data()};
-            }).toList();
-          } else {
-            return [];
-          }
-        });
-  }
-
-  void editQuotationCard(String id) {
-    try {
-      // منع التعديل إذا الحالة Posted أو Cancelled
-      if (quotationStatus.value == 'Posted' ||
-          quotationStatus.value == 'Cancelled') {
-        showSnackBar('Alert', 'Can\'t Edit For Posted / Cancelled Quotations');
-        return;
-      }
-
-      addingNewValue.value = true;
-
-      // بناء خريطة التحديث بدون quotation_date مبدئيًا
-      Map<String, dynamic> updatedData = {
-        'quotation_status': quotationStatus.value,
-        'car_brand_logo': carBrandLogo.value,
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': plateCode.text,
-        'country': countryId.value,
-        'city': cityId.value,
-        'year': year.text,
-        'color': colorId.value,
-        'engine_type': engineTypeId.value,
-        'vehicle_identification_number': vin.text,
-        'transmission_type': transmissionType.text,
-        'mileage_in': mileageIn.value.text,
-        // 'fuel_amount': fuelAmount.value.text,
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'outstanding': customerOutstanding.text,
-        'saleMan': customerSaleManId.value,
-        'branch': customerBranchId.value,
-        'currency': customerCurrencyId.value,
-        'rate': customerCurrencyRate.text,
-        // 'payment_method': payType.value,
-        'quotation_number': quotationCounter.value.text,
-        // 'quotation_date' نضيفه لاحقًا بشرط عدم كونه فارغ
-        'validity_days': quotationDays.value.text,
-        'validity_end_date': validityEndDate.value.text,
-        'reference_number': referenceNumber.value.text,
-        'delivery_time': deliveryTime.value.text,
-        'quotation_warrenty_days': quotationWarrentyDays.value.text,
-        'quotation_warrenty_km': quotationWarrentyKM.value.text,
-        'quotation_notes': quotationNotes.text,
-      };
-
-      // تحويل التاريخ إلى Timestamp إذا حقل التاريخ غير فارغ
-      final rawDate = quotationDate.value.text.trim();
-      if (rawDate.isNotEmpty) {
-        try {
-          updatedData['quotation_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate),
-          );
-        } catch (e) {
-          // اختياري: تقدر تعرض تنبيه إذا التنسيق خاطئ
-          // print('Invalid quotation_date format: $e');
-        }
-      }
-
-      // تنفيذ التحديث في Firestore
-      FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(id)
-          .update(updatedData)
-          .then((_) {
-            addingNewValue.value = false;
-            showSnackBar('Done', 'Updated Successfully');
-          })
-          .catchError((e) {
-            addingNewValue.value = false;
-            showSnackBar('Alert', 'Something Went Wrong');
-            // print('Error updating quotation_card $id: $e');
-          });
-    } catch (e) {
-      addingNewValue.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
-      // print('Unexpected error in editQuotationCard: $e');
-    }
-  }
-
-  Future<void> getCurrentJobCardCounterNumber() async {
-    try {
-      var jcnId = '';
-      var updateJobCard = '';
-      var jcnDoc = await FirebaseFirestore.instance
-          .collection('counters')
-          .where('code', isEqualTo: 'JCN')
-          .where('company_id', isEqualTo: companyId.value)
-          .get();
-
-      if (jcnDoc.docs.isEmpty) {
-        // Define constants for the new counter values
-        const prefix = 'JCN';
-        const separator = '-';
-        const initialValue = 1;
-
-        var newCounter = await FirebaseFirestore.instance
-            .collection('counters')
-            .add({
-              'code': 'JCN',
-              'description': 'Job Card Number',
-              'prefix': prefix,
-              'value': initialValue,
-              'length': 0,
-              'separator': separator,
-              'added_date': DateTime.now().toString(),
-              'company_id': companyId.value,
-              'status': true,
-            });
-        jcnId = newCounter.id;
-        // Set the counter text with prefix and separator
-        jobCardCounter.value = '$prefix$separator$initialValue';
-        updateJobCard = initialValue.toString();
-      } else {
-        var firstDoc = jcnDoc.docs.first;
-        jcnId = firstDoc.id;
-        var currentValue = firstDoc.data()['value'] ?? 0;
-        // Use the existing prefix and separator from the document
-        jobCardCounter.value =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
-        updateJobCard = (currentValue + 1).toString();
-      }
-
-      await FirebaseFirestore.instance.collection('counters').doc(jcnId).update(
-        {'value': int.parse(updateJobCard)},
-      );
-    } catch (e) {
-      // Optionally handle errors here
-      // print("Error in getCurrentJobCardCounterNumber: $e");
-    }
-  }
-
-  Future<void> createNewJobCard(String quotationID) async {
-    try {
-      creatingNewJob.value = true;
-
-      // var job = await FirebaseFirestore.instance
-      //     .collection('job_cards')
-      //     .where('company_id', isEqualTo: companyId.value)
-      //     .where('quotation_id', isEqualTo: quotationID)
-      //     .get();
-
-      if (jobCardCounter.value.isNotEmpty) {
-        showSnackBar('Alert', 'Job Already Exists');
-        creatingNewJob.value = false;
-
-        return;
-      }
-      showSnackBar('Creating', 'Please Wait');
-
-      Map<String, dynamic> newData = {
-        'quotation_id': quotationID,
-        'label': '',
-        'job_status_1': 'New',
-        'job_status_2': 'New',
-        'car_brand_logo': carBrandLogo.value,
-        'company_id': companyId.value,
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': plateCode.text,
-        'country': countryId.value,
-        'city': cityId.value,
-        'year': year.text,
-        'color': colorId.value,
-        'engine_type': engineTypeId.value,
-        'vehicle_identification_number': vin.text,
-        'transmission_type': transmissionType.text,
-        'mileage_in': mileageIn.value.text,
-        // 'fuel_amount': fuelAmount.value.text,
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'outstanding': customerOutstanding.text,
-        'saleMan': customerSaleManId.value,
-        'branch': customerBranchId.value,
-        'currency': customerCurrencyId.value,
-        'rate': customerCurrencyRate.text,
-        // 'payment_method': payType.value,
-        'job_number': jobCardCounter.value,
-        'invoice_number': '',
-        'lpo_number': '',
-        'job_date': '',
-        'invoice_date': '',
-        'job_approval_date': '',
-        'job_start_date': '',
-        'job_cancelation_date': '',
-        'job_finish_date': '',
-        'job_delivery_date': '',
-        'job_warrenty_days': quotationWarrentyDays.value.text,
-        'job_warrenty_km': quotationWarrentyKM.value.text,
-        'job_warrenty_end_date': '',
-        'job_min_test_km': '',
-        'job_reference_1': '',
-        'job_reference_2': '',
-        'job_reference_3': '',
-        'job_notes': '',
-        'job_delivery_notes': '',
-      };
-
-      await getCurrentJobCardCounterNumber();
-      newData['job_number'] = jobCardCounter.value;
-      newData['added_date'] = DateTime.now().toString();
-
-      // var newJob = await FirebaseFirestore.instance
-      //     .collection('job_cards')
-      //     .add(newData);
-
-      // for (var element in allInvoiceItems) {
-      //   var data = element.data();
-      //   await FirebaseFirestore.instance
-      //       .collection('job_cards')
-      //       .doc(newJob.id)
-      //       .collection('invoice_items')
-      //       .add(data);
-      // }
-
-      creatingNewJob.value = false;
-      showSnackBar('Done', 'Job Created Successfully');
-    } catch (e) {
-      creatingNewJob.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
-    }
-  }
-
-  Future<Map<String, dynamic>> copyQuotation(String id) async {
-    try {
-      showSnackBar('Copying', 'Please Wait');
-      loadingCopyQuotation.value = true;
-      var mainJob = await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .doc(id)
-          .get();
-
-      Map<String, dynamic>? data = mainJob.data();
-      if (data != null) {
-        data.remove('id');
-        data['quotation_status'] = 'New';
-
-        await getCurrentQuotationCounterNumber();
-        data['quotation_number'] = quotationCounter.value.text;
-
-        var newCopiedQuotation = await FirebaseFirestore.instance
-            .collection('quotation_cards')
-            .add(data);
-
-        var quotationInvoices = await FirebaseFirestore.instance
-            .collection('quotation_cards')
-            .doc(id)
-            .collection('quotation_invoice_items')
-            .get();
-        if (quotationInvoices.docs.isNotEmpty) {
-          for (var element in quotationInvoices.docs) {
-            await FirebaseFirestore.instance
-                .collection('quotation_cards')
-                .doc(newCopiedQuotation.id)
-                .collection('quotation_invoice_items')
-                .add(element.data());
-          }
-        }
-
-        loadingCopyQuotation.value = false;
-        return {'newId': newCopiedQuotation.id, 'data': data};
-      } else {
-        loadingCopyQuotation.value = false;
-        showSnackBar('Alert', 'Quotation has no data');
-        throw Exception('Job data is empty');
-      }
-    } catch (e) {
-      showSnackBar(
-        'Alert',
-        'Something went wrong while copying the quotation. Please try again',
-      );
-      loadingCopyQuotation.value = false;
-      rethrow;
-    }
-  }
-
-  Future<void> getCurrentQuotationCounterNumber() async {
-    try {
-      var qnId = '';
-      var updateqn = '';
-      var qnDoc = await FirebaseFirestore.instance
-          .collection('counters')
-          .where('code', isEqualTo: 'QN')
-          .where('company_id', isEqualTo: companyId.value)
-          .get();
-
-      if (qnDoc.docs.isEmpty) {
-        // Define constants for new counter values
-        const prefix = 'QN';
-        const separator = '-';
-        const initialValue = 1;
-
-        var newCounter = await FirebaseFirestore.instance
-            .collection('counters')
-            .add({
-              'code': 'QN',
-              'description': 'Quotation Number',
-              'prefix': prefix,
-              'value': initialValue,
-              'length': 0,
-              'separator': separator,
-              'added_date': DateTime.now().toString(),
-              'company_id': companyId.value,
-              'status': true,
-            });
-        qnId = newCounter.id;
-        // Set the counter text with prefix and separator
-        quotationCounter.value.text = '$prefix$separator$initialValue';
-        updateqn = initialValue.toString();
-      } else {
-        var firstDoc = qnDoc.docs.first;
-        qnId = firstDoc.id;
-        var currentValue = firstDoc.data()['value'] ?? 0;
-        quotationCounter.value.text =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
-        updateqn = (currentValue + 1).toString();
-      }
-
-      await FirebaseFirestore.instance.collection('counters').doc(qnId).update({
-        'value': int.parse(updateqn),
-      });
-    } catch (e) {
-      //
-    }
-  }
-
   void updateAmount() {
     if (net.text.isEmpty) net.text = '0';
     if (net.text != '0') {
@@ -1405,24 +1218,6 @@ class QuotationCardController extends GetxController {
     total.text = '0';
     vat.text = '0';
     net.text = '0';
-  }
-
-  void getAllInvoiceItems(String quotationId) {
-    // try {
-    //   loadingInvoiceItems.value = true;
-    //   FirebaseFirestore.instance
-    //       .collection('quotation_cards')
-    //       .doc(quotationId)
-    //       .collection('quotation_invoice_items')
-    //       .orderBy('line_number')
-    //       .snapshots()
-    //       .listen((QuerySnapshot<Map<String, dynamic>> items) {
-    //         allInvoiceItems.assignAll(items.docs);
-    //         loadingInvoiceItems.value = false;
-    //       });
-    // } catch (e) {
-    //   loadingInvoiceItems.value = false;
-    // }
   }
 
   List<double> calculateTotals() {
@@ -1489,232 +1284,10 @@ class QuotationCardController extends GetxController {
     customerSaleMan.value = selectedCustomer['salesman'] ?? "";
   }
 
-  Stream<double> calculateAllTotals(String jobId) {
-    return FirebaseFirestore.instance
-        .collection('quotation_cards')
-        .doc(jobId)
-        .collection('quotation_invoice_items')
-        .snapshots()
-        .map((snapshot) {
-          double sumOfTotal = 0.0;
-
-          for (var job in snapshot.docs) {
-            var data = job.data() as Map<String, dynamic>?;
-            sumOfTotal +=
-                double.tryParse(data?['total']?.toString() ?? '0') ?? 0;
-          }
-          return sumOfTotal;
-        });
-  }
-
-  Stream<double> calculateAllVATs(String jobId) {
-    return FirebaseFirestore.instance
-        .collection('quotation_cards')
-        .doc(jobId)
-        .collection('quotation_invoice_items')
-        .snapshots()
-        .map((snapshot) {
-          double sumOfVAT = 0.0;
-
-          for (var job in snapshot.docs) {
-            var data = job.data() as Map<String, dynamic>?;
-            sumOfVAT += double.tryParse(data?['vat']?.toString() ?? '0') ?? 0;
-          }
-          return sumOfVAT;
-        });
-  }
-
-  Stream<double> calculateAllNETs(String jobId) {
-    return FirebaseFirestore.instance
-        .collection('quotation_cards')
-        .doc(jobId)
-        .collection('quotation_invoice_items')
-        .snapshots()
-        .map((snapshot) {
-          double sumOfNET = 0.0;
-
-          for (var job in snapshot.docs) {
-            var data = job.data() as Map<String, dynamic>?;
-            sumOfNET += double.tryParse(data?['net']?.toString() ?? '0') ?? 0;
-          }
-          return sumOfNET;
-        });
-  }
-
   String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
-  }
-
-  // String getdataName(String id, Map allData, {title = 'name'}) {
-  //   try {
-  //     final data = allData.entries.firstWhere((data) => data.key == id);
-  //     return data.value[title];
-  //   } catch (e) {
-  //     return '';
-  //   }
-  // }
-
-  Future<String> getModelName(String brandId, String modelId) async {
-    try {
-      var cities = await FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .doc(modelId)
-          .get();
-
-      if (cities.exists) {
-        return cities.data()!['name'];
-      } else {
-        return '';
-      }
-    } catch (e) {
-      return ''; // Return empty string on error
-    }
-  }
-
-  // Future<void> searchEngine() async {
-  //   isScreenLoding.value = true;
-  //   final collection = FirebaseFirestore.instance
-  //       .collection('quotation_cards')
-  //       .where('company_id', isEqualTo: companyId.value);
-  //   Query<Map<String, dynamic>> query = collection;
-
-  //   // 1) زر "All" يجلب كل البيانات فورًا
-  //   if (isAllSelected.value) {
-  //     // لا نضيف أي where، نجلب كل الوثائق
-  //     final snapshot = await query.get();
-  //     allQuotationCards.assignAll(snapshot.docs);
-  //     calculateMoneyForAllQuotations();
-  //     numberOfQuotations.value = allQuotationCards.length;
-
-  //     isScreenLoding.value = false;
-  //     return;
-  //   }
-
-  //   // 2) زر "Today"
-  //   if (isTodaySelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfDay = DateTime(now.year, now.month, now.day);
-  //     final endOfDay =
-  //         startOfDay.add(Duration(days: 1)).subtract(Duration(milliseconds: 1));
-  //     fromDate.value.text = textToDate(startOfDay);
-  //     toDate.value.text = textToDate(endOfDay);
-  //     query = query
-  //         .where('quotation_date',
-  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-  //         .where('quotation_date',
-  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfDay));
-  //   }
-
-  //   // 3) زر "This Month"
-  //   else if (isThisMonthSelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfMonth = DateTime(now.year, now.month, 1);
-  //     final startOfNextMonth = (now.month < 12)
-  //         ? DateTime(now.year, now.month + 1, 1)
-  //         : DateTime(now.year + 1, 1, 1);
-  //     final endOfMonth = startOfNextMonth.subtract(Duration(milliseconds: 1));
-  //     fromDate.value.text = textToDate(startOfMonth);
-  //     toDate.value.text = textToDate(endOfMonth);
-  //     query = query
-  //         .where('quotation_date',
-  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
-  //         .where('quotation_date',
-  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth));
-  //   }
-
-  //   // 4) زر "This Year"
-  //   else if (isThisYearSelected.value) {
-  //     final now = DateTime.now();
-  //     final startOfYear = DateTime(now.year, 1, 1);
-  //     final startOfNextYear = DateTime(now.year + 1, 1, 1);
-  //     final endOfYear = startOfNextYear.subtract(Duration(milliseconds: 1));
-  //     fromDate.value.text = textToDate(startOfYear);
-  //     toDate.value.text = textToDate(endOfYear);
-  //     query = query
-  //         .where('quotation_date',
-  //             isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
-  //         .where('quotation_date',
-  //             isLessThanOrEqualTo: Timestamp.fromDate(endOfYear));
-  //   }
-
-  //   // 5) إذا لم يُختر أي من الأزرار الخاصة بالفترة، نطبق فلتر التواريخ اليدوي
-  //   else {
-  //     if (fromDate.value.text.trim().isNotEmpty) {
-  //       try {
-  //         final dtFrom = format.parseStrict(fromDate.value.text.trim());
-  //         query = query.where(
-  //           'quotation_date',
-  //           isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
-  //         );
-  //       } catch (_) {}
-  //     }
-  //     if (toDate.value.text.trim().isNotEmpty) {
-  //       try {
-  //         final dtTo = format.parseStrict(toDate.value.text.trim());
-  //         query = query.where(
-  //           'quotation_date',
-  //           isLessThanOrEqualTo: Timestamp.fromDate(dtTo),
-  //         );
-  //       } catch (_) {}
-  //     }
-  //   }
-
-  //   // 6) باقي الفلاتر العامة
-  //   if (quotaionNumberFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'quotation_number',
-  //       isEqualTo: quotaionNumberFilter.value.text.trim(),
-  //     );
-  //   }
-
-  //   if (statusFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'quotation_status',
-  //       isEqualTo: statusFilter.value.text.trim(),
-  //     );
-  //   }
-  //   if (carBrandIdFilter.value.isNotEmpty) {
-  //     query = query.where('car_brand', isEqualTo: carBrandIdFilter.value);
-  //   }
-  //   if (carModelIdFilter.value.isNotEmpty) {
-  //     query = query.where('car_model', isEqualTo: carModelIdFilter.value);
-  //   }
-  //   if (plateNumberFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'plate_number',
-  //       isEqualTo: plateNumberFilter.value.text.trim(),
-  //     );
-  //   }
-  //   if (vinFilter.value.text.trim().isNotEmpty) {
-  //     query = query.where(
-  //       'vehicle_identification_number',
-  //       isEqualTo: vinFilter.value.text.trim(),
-  //     );
-  //   }
-  //   if (customerNameIdFilter.value.isNotEmpty) {
-  //     query = query.where(
-  //       'customer',
-  //       isEqualTo: customerNameIdFilter.value,
-  //     );
-  //   }
-
-  //   // 7) تنفيذ الاستعلام وجلب النتائج
-  //   final snapshot = await query.get();
-  //   allQuotationCards.assignAll(snapshot.docs);
-  //   numberOfQuotations.value = allQuotationCards.length;
-  //   calculateMoneyForAllQuotations();
-  //   isScreenLoding.value = false;
-  // }
-
-  void removeFilters() {
-    isAllSelected.value = false;
-    isTodaySelected.value = false;
-    isThisMonthSelected.value = false;
-    isThisYearSelected.value = false;
   }
 
   void clearAllFilters() {
@@ -1739,7 +1312,6 @@ class QuotationCardController extends GetxController {
     vinFilter.value.clear();
     fromDate.value.clear();
     toDate.value.clear();
-    allQuotationCards.clear();
     isScreenLoding.value = false;
   }
 }

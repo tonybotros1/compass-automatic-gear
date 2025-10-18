@@ -203,14 +203,15 @@ GetBuilder<JobCardController> copyJobButton(
   return GetBuilder<JobCardController>(
     builder: (controller) {
       return ClickableHoverText(
-        // style: copyJobButtonStyle,
-        onTap: () async {
-          JobCardModel newData = await controller.copyJob(jobId);
-          await controller.loadValues(newData);
-          controller.loadingCopyJob.value = false;
-          editJobCardDialog(controller, newData, newData.id ?? '');
-          showSnackBar('Done', 'Job Copied Successfully');
-        },
+        onTap: controller.loadingCopyJob.isFalse
+            ? () async {
+                JobCardModel newData = await controller.copyJob(jobId);
+                await controller.loadValues(newData);
+                controller.loadingCopyJob.value = false;
+                editJobCardDialog(controller, newData, newData.id ?? '');
+                showSnackBar('Done', 'Job Copied Successfully');
+              }
+            : null,
         text: 'Copy',
       );
     },
