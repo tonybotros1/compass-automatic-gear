@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:datahubai/Models/job%20cards/job_card_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -9,13 +10,16 @@ import 'package:uuid/uuid.dart';
 import '../../Models/job cards/internal_notes_model.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/quotation cards/quotation_cards_model.dart';
+import '../../Screens/Main screens/System Administrator/Setup/job_card.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
+import 'job_card_controller.dart';
 import 'main_screen_contro.dart';
 
 class QuotationCardController extends GetxController {
   Rx<TextEditingController> quotationCounter = TextEditingController().obs;
   RxString jobCardCounter = RxString('');
+  RxString jobCardId = RxString('');
   Rx<TextEditingController> quotationDate = TextEditingController().obs;
   Rx<TextEditingController> quotationDays = TextEditingController().obs;
   Rx<TextEditingController> validityEndDate = TextEditingController().obs;
@@ -862,6 +866,7 @@ class QuotationCardController extends GetxController {
         showSnackBar('Done', 'Job created successfully');
         final decoded = jsonDecode(response.body);
         jobCardCounter.value = decoded['job_number'];
+        jobCardId.value = decoded['job_card_id'];
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
@@ -886,132 +891,90 @@ class QuotationCardController extends GetxController {
     }
   }
 
-  // Future<void> createNewJobCard(String quotationID) async {
-  //   try {
-  //     creatingNewJob.value = true;
-
-  //     // var job = await FirebaseFirestore.instance
-  //     //     .collection('job_cards')
-  //     //     .where('company_id', isEqualTo: companyId.value)
-  //     //     .where('quotation_id', isEqualTo: quotationID)
-  //     //     .get();
-
-  //     if (jobCardCounter.value.isNotEmpty) {
-  //       showSnackBar('Alert', 'Job Already Exists');
-  //       creatingNewJob.value = false;
-
-  //       return;
-  //     }
-  //     showSnackBar('Creating', 'Please Wait');
-
-  //     Map<String, dynamic> newData = {
-  //       'quotation_id': quotationID,
-  //       'label': '',
-  //       'job_status_1': 'New',
-  //       'job_status_2': 'New',
-  //       'car_brand_logo': carBrandLogo.value,
-  //       'company_id': companyId.value,
-  //       'car_brand': carBrandId.value,
-  //       'car_model': carModelId.value,
-  //       'plate_number': plateNumber.text,
-  //       'plate_code': plateCode.text,
-  //       'country': countryId.value,
-  //       'city': cityId.value,
-  //       'year': year.text,
-  //       'color': colorId.value,
-  //       'engine_type': engineTypeId.value,
-  //       'vehicle_identification_number': vin.text,
-  //       'transmission_type': transmissionType.text,
-  //       'mileage_in': mileageIn.value.text,
-  //       // 'fuel_amount': fuelAmount.value.text,
-  //       'customer': customerId.value,
-  //       'contact_name': customerEntityName.text,
-  //       'contact_number': customerEntityPhoneNumber.text,
-  //       'contact_email': customerEntityEmail.text,
-  //       'credit_limit': customerCreditNumber.text,
-  //       'outstanding': customerOutstanding.text,
-  //       'saleMan': customerSaleManId.value,
-  //       'branch': customerBranchId.value,
-  //       'currency': customerCurrencyId.value,
-  //       'rate': customerCurrencyRate.text,
-  //       // 'payment_method': payType.value,
-  //       'job_number': jobCardCounter.value,
-  //       'invoice_number': '',
-  //       'lpo_number': '',
-  //       'job_date': '',
-  //       'invoice_date': '',
-  //       'job_approval_date': '',
-  //       'job_start_date': '',
-  //       'job_cancelation_date': '',
-  //       'job_finish_date': '',
-  //       'job_delivery_date': '',
-  //       'job_warrenty_days': quotationWarrentyDays.value.text,
-  //       'job_warrenty_km': quotationWarrentyKM.value.text,
-  //       'job_warrenty_end_date': '',
-  //       'job_min_test_km': '',
-  //       'job_reference_1': '',
-  //       'job_reference_2': '',
-  //       'job_reference_3': '',
-  //       'job_notes': '',
-  //       'job_delivery_notes': '',
-  //     };
-
-  //     // await getCurrentJobCardCounterNumber();
-  //     newData['job_number'] = jobCardCounter.value;
-  //     newData['added_date'] = DateTime.now().toString();
-
-  //     // var newJob = await FirebaseFirestore.instance
-  //     //     .collection('job_cards')
-  //     //     .add(newData);
-
-  //     // for (var element in allInvoiceItems) {
-  //     //   var data = element.data();
-  //     //   await FirebaseFirestore.instance
-  //     //       .collection('job_cards')
-  //     //       .doc(newJob.id)
-  //     //       .collection('invoice_items')
-  //     //       .add(data);
-  //     // }
-
-  //     creatingNewJob.value = false;
-  //     showSnackBar('Done', 'Job Created Successfully');
-  //   } catch (e) {
-  //     creatingNewJob.value = false;
-  //     showSnackBar('Alert', 'Something Went Wrong');
-  //   }
-  // }
-
   // ===================================================================================================================================
 
-  Future<void> openJobCardScreenByNumber() async {
-    // try {
-    //   openingJobCardScreen.value = true;
-    //   var job = await FirebaseFirestore.instance
-    //       .collection('job_cards')
-    //       .where('job_number', isEqualTo: jobCardCounter.value)
-    //       .get();
-    //   var id = job.docs.first.id;
-    //   var data = job.docs.first.data();
+  Future<void> openJobCardScreenByNumber(String id) async {
+    try {
+      openingJobCardScreen.value = true;
 
-    //   JobCardController jobCardController = Get.put(JobCardController());
-    //   jobCardController.getAllInvoiceItems(id);
-    //   // await jobCardController.loadValues(data); // need to br changed
-    //   editJobCardDialog(
-    //     jobCardController,
-    //     data,
-    //     id,
-    //     screenName: '💳 Job Card',
-    //     headerColor: Colors.deepPurple,
-    //   );
-    //   openingJobCardScreen.value = false;
-    //   showSnackBar('Done', 'Opened Successfully');
-    // } catch (e) {
-    //   openingJobCardScreen.value = false;
-    //   showSnackBar('Alert', 'Something Went Wrong');
-    // }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/quotation_cards/open_job_card_screen_by_job_number_for_quotation/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        JobCardModel requiredJob = JobCardModel.fromJson(
+          decoded['required_job'],
+        );
+        JobCardController jobCardController = Get.put(JobCardController());
+        await jobCardController.loadValues(requiredJob);
+        editJobCardDialog(
+          jobCardController,
+          requiredJob,
+          id,
+          screenName: '💳 Job Card',
+          headerColor: Colors.deepPurple,
+        );
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await openJobCardScreenByNumber(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      openingJobCardScreen.value = false;
+    } catch (e) {
+      openingJobCardScreen.value = false;
+    }
   }
 
+  // Future<void> openJobCardScreenByNumber() async {
+  //   // try {
+  //   //   openingJobCardScreen.value = true;
+  //   //   var job = await FirebaseFirestore.instance
+  //   //       .collection('job_cards')
+  //   //       .where('job_number', isEqualTo: jobCardCounter.value)
+  //   //       .get();
+  //   //   var id = job.docs.first.id;
+  //   //   var data = job.docs.first.data();
+
+  //   //   JobCardController jobCardController = Get.put(JobCardController());
+  //   //   jobCardController.getAllInvoiceItems(id);
+  //   //   // await jobCardController.loadValues(data); // need to br changed
+  //   //   editJobCardDialog(
+  //   //     jobCardController,
+  //   //     data,
+  //   //     id,
+  //   //     screenName: '💳 Job Card',
+  //   //     headerColor: Colors.deepPurple,
+  //   //   );
+  //   //   openingJobCardScreen.value = false;
+  //   //   showSnackBar('Done', 'Opened Successfully');
+  //   // } catch (e) {
+  //   //   openingJobCardScreen.value = false;
+  //   //   showSnackBar('Alert', 'Something Went Wrong');
+  //   // }
+  // }
+
   void clearValues() {
+    jobCardId.value = '';
     quotationDate.value.text = textToDate(DateTime.now());
     currentCountryVAT.value = companyDetails.containsKey('country_vat')
         ? companyDetails['country_vat'].toString()
@@ -1090,6 +1053,7 @@ class QuotationCardController extends GetxController {
     allInvoiceItems.value = data.invoiceItemsDetails ?? [];
 
     jobCardCounter.value = data.jobNumber ?? '';
+    jobCardId.value = data.jobCardId ?? '';
     canAddInternalNotesAndInvoiceItems.value = true;
     quotationStatus.value = data.quotationStatus ?? '';
     carBrandLogo.value = data.carBrandLogo ?? '';

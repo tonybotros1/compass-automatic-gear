@@ -8,12 +8,13 @@ import 'customer_details_screen.dart';
 import 'invoice_items_section.dart';
 import 'quotation_section.dart';
 
-Widget addNewQuotationCardOrEdit(
-    {required BoxConstraints constraints,
-    required BuildContext context,
-    required QuotationCardController controller,
-    bool? canEdit,
-    required quotaionId}) {
+Widget addNewQuotationCardOrEdit({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required QuotationCardController controller,
+  bool? canEdit,
+  required quotaionId,
+}) {
   return ListView(
     controller: controller.scrollController,
     children: [
@@ -24,11 +25,7 @@ Widget addNewQuotationCardOrEdit(
           Expanded(
             child: Column(
               children: [
-                labelContainer(
-                    lable: Text(
-                  'Car Details',
-                  style: fontStyle1,
-                )),
+                labelContainer(lable: Text('Car Details', style: fontStyle1)),
                 carDetailsSection(),
               ],
             ),
@@ -37,70 +34,69 @@ Widget addNewQuotationCardOrEdit(
             child: Column(
               children: [
                 labelContainer(
-                    lable: Text(
-                  'Customer Details',
-                  style: fontStyle1,
-                )),
-                customerDetailsSection(),
-                const SizedBox(
-                  height: 10,
+                  lable: Text('Customer Details', style: fontStyle1),
                 ),
+                customerDetailsSection(),
+                const SizedBox(height: 10),
               ],
             ),
           ),
           Expanded(
-              child: Column(
-            children: [
-              labelContainer(
+            child: Column(
+              children: [
+                labelContainer(
                   lable: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Quotation Details',
-                    style: fontStyle1,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Quotation Details', style: fontStyle1),
+                      GetX<QuotationCardController>(
+                        builder: (controller) {
+                          return controller.jobCardCounter.value.isNotEmpty
+                              ? ClickableHoverText(
+                                  color2:
+                                      controller.openingJobCardScreen.isFalse
+                                      ? null
+                                      : Colors.yellow,
+                                  text: controller.openingJobCardScreen.isFalse
+                                      ? controller.jobCardCounter.value
+                                      : 'Loading...',
+                                  onTap: controller.openingJobCardScreen.isFalse
+                                      ? () {
+                                          controller.openJobCardScreenByNumber(
+                                            controller.jobCardId.value,
+                                          );
+                                        }
+                                      : null,
+                                )
+                              : const SizedBox();
+                        },
+                      ),
+                    ],
                   ),
-                  GetX<QuotationCardController>(builder: (controller) {
-                    return controller.jobCardCounter.value.isNotEmpty
-                        ? ClickableHoverText(
-                            color2: controller.openingJobCardScreen.isFalse
-                                ? null
-                                : Colors.yellow,
-                            text: controller.openingJobCardScreen.isFalse
-                                ? controller.jobCardCounter.value
-                                : 'Loading...',
-                            onTap: controller.openingJobCardScreen.isFalse
-                                ? () {
-                                    controller.openJobCardScreenByNumber();
-                                  }
-                                : null,
-                          )
-                        : const SizedBox();
-                  })
-                ],
-              )),
-              quotationsSection(context, controller)
-            ],
-          ))
+                ),
+                quotationsSection(context, controller),
+              ],
+            ),
+          ),
         ],
       ),
       labelContainer(
-          lable: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Invoice Items',
-            style: fontStyle1,
-          ),
-          newinvoiceItemsButton(context, constraints, controller, quotaionId),
-        ],
-      )),
+        lable: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Invoice Items', style: fontStyle1),
+            newinvoiceItemsButton(context, constraints, controller, quotaionId),
+          ],
+        ),
+      ),
       SizedBox(
         height: 250,
         child: invoiceItemsSection(
-            constraints: constraints,
-            context: context,
-            quotationId: quotaionId),
-      )
+          constraints: constraints,
+          context: context,
+          quotationId: quotaionId,
+        ),
+      ),
     ],
   );
 }

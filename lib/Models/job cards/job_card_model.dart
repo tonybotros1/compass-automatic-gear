@@ -46,6 +46,7 @@ class JobCardModel {
   int? jobMinTestKm;
   String? jobReference1;
   String? jobReference2;
+  String? jobReference3;
   String? deliveryTime;
   String? jobNotes;
   String? jobDeliveryNotes;
@@ -148,122 +149,111 @@ class JobCardModel {
     this.technicianName,
     this.date,
   });
+
   JobCardModel.fromJson(Map<String, dynamic> json) {
-    id = json['_id'] ?? '';
-    quotationId = json['quotation_id'] ?? '';
-    quotationNumber = json['quotation_number'] ?? '';
-    label = json['label'] ?? '';
-    jobStatus1 = json['job_status_1'] ?? '';
-    jobStatus2 = json['job_status_2'] ?? '';
-    carBrandLogo = json['car_brand_logo'] ?? '';
-    carBrand = json['car_brand'] ?? '';
-    carModel = json['car_model'] ?? '';
-    plateNumber = json['plate_number'] ?? '';
-    plateCode = json['plate_code'] ?? '';
-    country = json['country'] ?? '';
-    city = json['city'] ?? '';
-    year = json['year']?.toString() ?? '';
-    color = json['color'] ?? '';
-    engineType = json['engine_type'] ?? '';
-    vehicleIdentificationNumber = json['vehicle_identification_number'] ?? '';
-    transmissionType = json['transmission_type'] ?? '';
-    mileageIn = json['mileage_in'] ?? 0;
-    mileageOut = json['mileage_out'] ?? 0;
-    mileageInOutDiff = json['mileage_in_out_diff'] ?? 0;
-    fuelAmount = json['fuel_amount'] ?? 0;
-    customer = json['customer'] ?? '';
-    contactName = json['contact_name'] ?? '';
-    contactEmail = json['contact_email'] ?? '';
-    contactNumber = json['contact_number'] ?? '';
-    creditLimit = json['credit_limit'] ?? 0;
-    outstanding = json['outstanding'] ?? 0;
-    salesman = json['salesman'] ?? '';
-    branch = json['branch'] ?? '';
-    currency = json['currency'] ?? '';
-    rate = json['rate'] ?? 0;
-    paymentMethod = json['payment_method'] ?? '';
-    lpoNumber = json['lpo_number'] ?? '';
+    T? tryGet<T>(String key) {
+      try {
+        if (json.containsKey(key) && json[key] != null && json[key] != '') {
+          return json[key] as T;
+        }
+      } catch (_) {}
+      return null;
+    }
 
-    jobApprovalDate = json['job_approval_date'] != null
-        ? DateTime.tryParse(json['job_approval_date'].toString())
-        : null;
-    jobStartDate = json['job_start_date'] != null
-        ? DateTime.tryParse(json['job_start_date'].toString())
-        : null;
-    jobCancellationDate = json['job_cancellation_date'] != null
-        ? DateTime.tryParse(json['job_cancellation_date'].toString())
-        : null;
-    jobFinishDate = json['job_finish_date'] != null
-        ? DateTime.tryParse(json['job_finish_date'].toString())
-        : null;
-    jobDeliveryDate = json['job_delivery_date'] != null
-        ? DateTime.tryParse(json['job_delivery_date'].toString())
-        : null;
+    DateTime? tryParseDate(String key) {
+      final value = json[key];
+      if (value == null || value == '') return null;
+      return DateTime.tryParse(value.toString());
+    }
 
-    jobWarrantyDays = json['job_warranty_days'] ?? 0;
-    jobWarrantyKm = json['job_warranty_km'] ?? 0;
-    jobWarrantyEndDate = json['job_warranty_end_date'] != null
-        ? DateTime.tryParse(json['job_warranty_end_date'].toString())
-        : null;
-    jobMinTestKm = json['job_min_test_km'] ?? 0;
-    jobReference1 = json['job_reference_1'] ?? '';
-    jobReference2 = json['job_reference_2'] ?? '';
-    deliveryTime = json['delivery_time'] ?? '';
-    jobNotes = json['job_notes'] ?? '';
-    jobDeliveryNotes = json['job_delivery_notes'] ?? '';
+    id = tryGet<String>('_id');
+    quotationId = tryGet<String>('quotation_id');
+    quotationNumber = tryGet<String>('quotation_number');
+    label = tryGet<String>('label');
+    jobStatus1 = tryGet<String>('job_status_1');
+    jobStatus2 = tryGet<String>('job_status_2');
+    carBrandLogo = tryGet<String>('car_brand_logo');
+    carBrand = tryGet<String>('car_brand');
+    carModel = tryGet<String>('car_model');
+    plateNumber = tryGet<String>('plate_number');
+    plateCode = tryGet<String>('plate_code');
+    country = tryGet<String>('country');
+    city = tryGet<String>('city');
+    year = json['year']?.toString();
+    color = tryGet<String>('color');
+    engineType = tryGet<String>('engine_type');
+    vehicleIdentificationNumber = tryGet<String>(
+      'vehicle_identification_number',
+    );
+    transmissionType = tryGet<String>('transmission_type');
+    mileageIn = (tryGet<num>('mileage_in') ?? 0).toInt();
+    mileageOut = (tryGet<num>('mileage_out') ?? 0).toInt();
+    mileageInOutDiff = (tryGet<num>('mileage_in_out_diff') ?? 0).toInt();
+    fuelAmount = (tryGet<num>('fuel_amount') ?? 0).toInt();
+    customer = tryGet<String>('customer');
+    contactName = tryGet<String>('contact_name');
+    contactEmail = tryGet<String>('contact_email');
+    contactNumber = tryGet<String>('contact_number');
+    creditLimit = (tryGet<num>('credit_limit') ?? 0).toInt();
+    outstanding = (tryGet<num>('outstanding') ?? 0).toInt();
+    salesman = tryGet<String>('salesman');
+    branch = tryGet<String>('branch');
+    currency = tryGet<String>('currency');
+    rate = (tryGet<num>('rate') ?? 0).toInt();
+    paymentMethod = tryGet<String>('payment_method');
+    lpoNumber = tryGet<String>('lpo_number');
 
-    jobDate = json['job_date'] != null
-        ? DateTime.tryParse(json['job_date'].toString())
-        : null;
-    invoiceDate = json['invoice_date'] != null
-        ? DateTime.tryParse(json['invoice_date'].toString())
-        : null;
+    jobApprovalDate = tryParseDate('job_approval_date');
+    jobStartDate = tryParseDate('job_start_date');
+    jobCancellationDate = tryParseDate('job_cancellation_date');
+    jobFinishDate = tryParseDate('job_finish_date');
+    jobDeliveryDate = tryParseDate('job_delivery_date');
+    jobWarrantyDays = (tryGet<num>('job_warranty_days') ?? 0).toInt();
+    jobWarrantyKm = (tryGet<num>('job_warranty_km') ?? 0).toInt();
+    jobWarrantyEndDate = tryParseDate('job_warranty_end_date');
+    jobMinTestKm = (tryGet<num>('job_min_test_km') ?? 0).toInt();
+    jobReference1 = tryGet<String>('job_reference_1');
+    jobReference2 = tryGet<String>('job_reference_2');
+    jobReference3 = tryGet<String>('job_reference_3');
+    deliveryTime = tryGet<String>('delivery_time');
+    jobNotes = tryGet<String>('job_notes');
+    jobDeliveryNotes = tryGet<String>('job_delivery_notes');
+    jobDate = tryParseDate('job_date');
+    invoiceDate = tryParseDate('invoice_date');
+    companyId = tryGet<String>('company_id');
+    createdAt = tryParseDate('createdAt');
+    updatedAt = tryParseDate('updatedAt');
+    jobNumber = tryGet<String>('job_number');
+    invoiceNumber = tryGet<String>('invoice_number');
 
-    companyId = json['company_id'] ?? '';
-
-    createdAt = json['createdAt'] != null
-        ? DateTime.tryParse(json['createdAt'].toString())
-        : null;
-    updatedAt = json['updatedAt'] != null
-        ? DateTime.tryParse(json['updatedAt'].toString())
-        : null;
-
-    jobNumber = json['job_number'] ?? '';
-    invoiceNumber = json['invoice_number'] ?? '';
-
-    // ✅ Parse invoice items list
-    if (json['invoice_items_details'] != null) {
-      invoiceItemsDetails = (json['invoice_items_details'] as List)
+    // ✅ invoice items
+    final items = json['invoice_items_details'];
+    if (items is List) {
+      invoiceItemsDetails = items
           .map((v) => JobCardInvoiceItemsModel.fromJson(v))
           .toList();
     } else {
       invoiceItemsDetails = [];
     }
 
-    // ✅ Names from lookups
-    carBrandName = json['car_brand_name'] ?? '';
-    carModelName = json['car_model_name'] ?? '';
-    countryName = json['country_name'] ?? '';
-    cityName = json['city_name'] ?? '';
-    colorName = json['color_name'] ?? '';
-    engineTypeName = json['engine_type_name'] ?? '';
-    customerName = json['customer_name'] ?? '';
-    salesmanName = json['salesman_name'] ?? '';
-    branchName = json['branch_name'] ?? '';
-    currencyCode = json['currency_code'] ?? '';
+    carBrandName = tryGet<String>('car_brand_name');
+    carModelName = tryGet<String>('car_model_name');
+    countryName = tryGet<String>('country_name');
+    cityName = tryGet<String>('city_name');
+    colorName = tryGet<String>('color_name');
+    engineTypeName = tryGet<String>('engine_type_name');
+    customerName = tryGet<String>('customer_name');
+    salesmanName = tryGet<String>('salesman_name');
+    branchName = tryGet<String>('branch_name');
+    currencyCode = tryGet<String>('currency_code');
 
-    // ✅ Totals (fixed to match backend field names)
-    totals = json['total_amount'] ?? 0;
-    vat = json['total_vat'] ?? 0;
-    net = json['total_net'] ?? 0;
+    totals = (tryGet<num>('total_amount') ?? 0).toDouble();
+    vat = (tryGet<num>('total_vat') ?? 0).toDouble();
+    net = (tryGet<num>('total_net') ?? 0).toDouble();
 
-    // ✅ Optional extra fields
-    technician = json['technician'] ?? '';
-    technicianName = json['technician_name'] ?? '';
-
-    date = json['date'] != null
-        ? DateTime.tryParse(json['date'].toString())
-        : null;
+    technician = tryGet<String>('technician');
+    technicianName = tryGet<String>('technician_name');
+    date = tryParseDate('date');
   }
 
   Map<String, dynamic> toJson() {
@@ -311,6 +301,7 @@ class JobCardModel {
     data['job_min_test_km'] = jobMinTestKm;
     data['job_reference_1'] = jobReference1;
     data['job_reference_2'] = jobReference2;
+    data['job_reference_3'] = jobReference3;
     data['delivery_time'] = deliveryTime;
     data['job_notes'] = jobNotes;
     data['job_delivery_notes'] = jobDeliveryNotes;

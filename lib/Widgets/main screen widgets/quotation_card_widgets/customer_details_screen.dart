@@ -12,10 +12,9 @@ Widget customerDetailsSection() {
     decoration: containerDecor,
     child: GetX<QuotationCardController>(
       builder: (controller) {
-        var isCustomersLoading = controller.allCustomers.isEmpty;
-        final isBranchesLoading = controller.allBranches.isEmpty;
-        final isCurrenciesLoading = controller.allCurrencies.isEmpty;
-        final isSalesManLoading = controller.salesManMap.isEmpty;
+        // var isCustomersLoading = controller.allCustomers.isEmpty;
+        // final isBranchesLoading = controller.allBranches.isEmpty;
+        // final isSalesManLoading = controller.salesManMap.isEmpty;
         return FocusTraversalGroup(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,9 +31,6 @@ Widget customerDetailsSection() {
                           showedSelectedName: 'entity_name',
                           textcontroller: controller.customerName.text,
                           hintText: 'Customer',
-                          items: isCustomersLoading
-                              ? {}
-                              : controller.allCustomers,
                           onChanged: (key, value) {
                             controller.customerName.text = value['entity_name'];
                             controller.onSelectForCustomers(value);
@@ -210,10 +206,8 @@ Widget customerDetailsSection() {
                         child: CustomDropdown(
                           showedSelectedName: 'name',
                           textcontroller: controller.customerSaleMan.value,
-                          hintText: 'Sales Man',
-                          items: isSalesManLoading
-                              ? {}
-                              : controller.salesManMap,
+                          hintText: 'Salesman',
+
                           onChanged: (key, value) {
                             controller.customerSaleMan.value = value['name'];
                             controller.customerSaleManId.value = key;
@@ -241,7 +235,6 @@ Widget customerDetailsSection() {
                       showedSelectedName: 'name',
                       textcontroller: controller.customerBranch.text,
                       hintText: 'Branch',
-                      items: isBranchesLoading ? {} : controller.allBranches,
                       onChanged: (key, value) {
                         controller.customerBranch.text = value['name'];
                         controller.customerBranchId.value = key;
@@ -267,9 +260,7 @@ Widget customerDetailsSection() {
                     child: CustomDropdown(
                       textcontroller: controller.customerCurrency.value.text,
                       hintText: 'Currency',
-                      items: isCurrenciesLoading
-                          ? {}
-                          : controller.allCurrencies,
+                      showedSelectedName: 'currency_code',
                       onChanged: (key, value) {
                         controller.customerCurrency.text =
                             value['currency_code'];
@@ -283,7 +274,8 @@ Widget customerDetailsSection() {
                         controller.customerCurrencyId.value = '';
                         controller.customerCurrencyRate.clear();
                         controller.isQuotationModified.value = true;
-                      },onOpen: (){
+                      },
+                      onOpen: () {
                         return controller.getCurrencies();
                       },
                     ),

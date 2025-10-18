@@ -579,6 +579,7 @@ class JobCardController extends GetxController {
         allJobsTotals.value = grandTotals['grand_total'];
         allJobsVATS.value = grandTotals['grand_vat'];
         allJobsNET.value = grandTotals['grand_net'];
+        // print(jobs[0]);
         allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
         numberOfJobs.value = allJobCards.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
