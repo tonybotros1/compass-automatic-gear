@@ -1,4 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_tasks_controller.dart';
+import 'package:datahubai/Models/job%20tasks/job_tasks_model.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,12 +31,22 @@ class JobTasks extends StatelessWidget {
                     init: JobTasksController(),
                     builder: (controller) {
                       return searchBar(
+                        onChanged: (_) {
+                          controller.filterTasks();
+                        },
+                        onPressedForClearSearch: () {
+                          controller.search.value.clear();
+                          controller.filterTasks();
+                        },
                         search: controller.search,
                         constraints: constraints,
                         context: context,
                         title: 'Search for tasks',
-                        button:
-                            newtaskesButton(context, constraints, controller),
+                        button: newtaskesButton(
+                          context,
+                          constraints,
+                          controller,
+                        ),
                       );
                     },
                   ),
@@ -46,9 +57,7 @@ class JobTasks extends StatelessWidget {
                           return Center(child: loadingProcess);
                         }
                         if (controller.allTasks.isEmpty) {
-                          return const Center(
-                            child: Text('No Elements'),
-                          );
+                          return const Center(child: Text('No Elements'));
                         }
                         return SingleChildScrollView(
                           scrollDirection: Axis.vertical,
@@ -74,10 +83,11 @@ class JobTasks extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens(
-    {required BoxConstraints constraints,
-    required BuildContext context,
-    required JobTasksController controller}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required JobTasksController controller,
+}) {
   return DataTable(
     horizontalMargin: horizontalMarginForTable,
     dataRowMaxHeight: 40,
@@ -90,137 +100,128 @@ Widget tableOfScreens(
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
+      const DataColumn(label: Text('')),
       DataColumn(
-        label: AutoSizedText(
-          text: 'Name - EN',
-          constraints: constraints,
-        ),
+        label: AutoSizedText(text: 'Name - EN', constraints: constraints),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          text: 'Name - AR',
-          constraints: constraints,
-        ),
+        label: AutoSizedText(text: 'Name - AR', constraints: constraints),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Points',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Points'),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Category',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Category'),
         // onSort: controller.onSort,
       ),
       DataColumn(
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'Creation Date',
-        ),
+        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         // onSort: controller.onSort,
-      ),
-      const DataColumn(
-        label: Text(''),
       ),
     ],
     rows:
         controller.filteredTasks.isEmpty && controller.search.value.text.isEmpty
-            ? controller.allTasks.map<DataRow>((task) {
-                final taskData = task.data() as Map<String, dynamic>;
-                final taskId = task.id;
-                return dataRowForTheTable(
-                    taskData, context, constraints, taskId, controller);
-              }).toList()
-            : controller.filteredTasks.map<DataRow>((task) {
-                final taskData = task.data() as Map<String, dynamic>;
-                final taskId = task.id;
-                return dataRowForTheTable(
-                    taskData, context, constraints, taskId, controller);
-              }).toList(),
+        ? controller.allTasks.map<DataRow>((task) {
+            final taskId = task.id;
+            return dataRowForTheTable(
+              task,
+              context,
+              constraints,
+              taskId,
+              controller,
+            );
+          }).toList()
+        : controller.filteredTasks.map<DataRow>((task) {
+            final taskId = task.id;
+            return dataRowForTheTable(
+              task,
+              context,
+              constraints,
+              taskId,
+              controller,
+            );
+          }).toList(),
   );
 }
 
-DataRow dataRowForTheTable(Map<String, dynamic> taskData, context, constraints,
-    taskId, JobTasksController controller) {
-  return DataRow(cells: [
-    DataCell(Text(
-      taskData['name_en'] ?? '',
-    )),
-    DataCell(Text(
-      taskData['name_ar'] ?? '',
-    )),
-    DataCell(
-      Text(
-        taskData['points'] ?? '',
+DataRow dataRowForTheTable(
+  JobTasksModel taskData,
+  context,
+  constraints,
+  taskId,
+  JobTasksController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(
+        Row(
+          spacing: 5,
+          children: [
+            deleteSection(controller, taskId, context),
+            editSection(context, controller, taskData, constraints, taskId),
+          ],
+        ),
       ),
-    ),
-    DataCell(
-      Text(
-        taskData['category'] ?? '',
-      ),
-    ),
-    DataCell(
-      Text(
-        taskData['added_date'] != null && taskData['added_date'] != ''
-            ? textToDate(taskData['added_date'])
-            : 'N/A',
-      ),
-    ),
-    DataCell(Row(
-      spacing: 5,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        editSection(context, controller, taskData, constraints, taskId),
-        deleteSection(controller, taskId, context),
-      ],
-    )),
-  ]);
+      DataCell(Text(taskData.nameEN ?? '')),
+      DataCell(Text(taskData.nameAR ?? '')),
+      DataCell(Text(taskData.points.toString())),
+      DataCell(Text(taskData.category ?? '')),
+      DataCell(Text(textToDate(taskData.createdAt))),
+    ],
+  );
 }
 
-ElevatedButton deleteSection(JobTasksController controller, taskId, context) {
-  return ElevatedButton(
-      style: deleteButtonStyle,
-      onPressed: () {
-        alertDialog(
-            context: context,
-            content: "The task will be deleted permanently",
-            onPressed: () {
-              controller.deleteTask(taskId);
-            });
-      },
-      child: const Text("Delete"));
+IconButton deleteSection(JobTasksController controller, taskId, context) {
+  return IconButton(
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The task will be deleted permanently",
+        onPressed: () {
+          controller.deleteTask(taskId);
+        },
+      );
+    },
+    icon: deleteIcon,
+  );
 }
 
-ElevatedButton editSection(BuildContext context, JobTasksController controller,
-    Map<String, dynamic> taskData, constraints, taskId) {
-  return ElevatedButton(
-      style: editButtonStyle,
-      onPressed: () async {
-        controller.nameAR.text = taskData['name_ar'];
-        controller.nameEN.text = taskData['name_en'];
-        controller.points.text = taskData['points'];
-        controller.category.text = taskData['category'];
-        taskDialog(
-            constraints: constraints,
-            controller: controller,
-            canEdit: true,
-            onPressed: controller.addingNewValue.value
-                ? null
-                : () {
-                    controller.editTask(taskId);
-                  });
-      },
-      child: const Text('Edit'));
+IconButton editSection(
+  BuildContext context,
+  JobTasksController controller,
+  JobTasksModel taskData,
+  BoxConstraints constraints,
+  String taskId,
+) {
+  return IconButton(
+    onPressed: () async {
+      controller.nameAR.text = taskData.nameAR ?? '';
+      controller.nameEN.text = taskData.nameEN ?? '';
+      controller.points.text = taskData.points.toString();
+      controller.category.text = taskData.category ?? '';
+      taskDialog(
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () {
+                controller.editTask(taskId);
+              },
+      );
+    },
+    icon: editIcon,
+  );
 }
 
-ElevatedButton newtaskesButton(BuildContext context, BoxConstraints constraints,
-    JobTasksController controller) {
+ElevatedButton newtaskesButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  JobTasksController controller,
+) {
   return ElevatedButton(
     onPressed: () {
       controller.nameAR.clear();
@@ -229,14 +230,15 @@ ElevatedButton newtaskesButton(BuildContext context, BoxConstraints constraints,
       controller.category.clear();
 
       taskDialog(
-          constraints: constraints,
-          controller: controller,
-          canEdit: true,
-          onPressed: controller.addingNewValue.value
-              ? null
-              : () async {
-                  await controller.addNewTask();
-                });
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                await controller.addNewTask();
+              },
+      );
     },
     style: newButtonStyle,
     child: const Text('New Task'),
