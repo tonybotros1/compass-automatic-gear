@@ -664,7 +664,7 @@ Widget editSection(
                     controller.companyDetails.containsKey('country_vat')
                     ? controller.companyDetails['country_vat'].toString()
                     : "";
-                await controller.loadValues(cardData, cardId);
+                await controller.loadValues(cardData);
                 editQuotationCardDialog(controller, cardData, cardId);
                 controller.setButtonLoading(cardId, false);
               }

@@ -88,7 +88,7 @@ GetBuilder<QuotationCardController> copyQuotationButton(String quotationId) {
                 QuotationCardsModel newData = await controller.copyQuotation(
                   quotationId,
                 );
-                await controller.loadValues(newData, quotationId);
+                await controller.loadValues(newData);
                 controller.loadingCopyQuotation.value = false;
                 editQuotationCardDialog(controller, newData, newData.id ?? '');
                 showSnackBar('Done', 'Quotation Copied');

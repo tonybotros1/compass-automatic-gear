@@ -867,6 +867,10 @@ class QuotationCardController extends GetxController {
         final decoded = jsonDecode(response.body);
         jobCardCounter.value = decoded['job_number'];
         jobCardId.value = decoded['job_card_id'];
+      } else if (response.statusCode == 409) {
+        final decoded = jsonDecode(response.body);
+
+        showSnackBar('Alert', decoded['detail']);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
@@ -888,6 +892,7 @@ class QuotationCardController extends GetxController {
       creatingNewJob.value = false;
     } catch (e) {
       creatingNewJob.value = false;
+      showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
 
@@ -1048,8 +1053,8 @@ class QuotationCardController extends GetxController {
     buttonLoadingStates.refresh(); // Notify listeners
   }
 
-  Future<void> loadValues(QuotationCardsModel data, String id) async {
-    curreentQuotationCardId.value = id;
+  Future<void> loadValues(QuotationCardsModel data) async {
+    curreentQuotationCardId.value = data.id ?? '';
     allInvoiceItems.value = data.invoiceItemsDetails ?? [];
 
     jobCardCounter.value = data.jobNumber ?? '';

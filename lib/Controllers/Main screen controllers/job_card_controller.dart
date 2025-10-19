@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -10,6 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../../Models/job cards/internal_notes_model.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/job cards/job_card_model.dart';
+import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../helpers.dart';
 import '../Mobile section controllers/cards_screen_controller.dart';
 import 'main_screen_contro.dart';
@@ -17,6 +19,7 @@ import 'quotation_card_controller.dart';
 
 class JobCardController extends GetxController {
   RxString quotationCounter = RxString('');
+  RxString quotationId = RxString('');
   Rx<TextEditingController> jobCardCounter = TextEditingController().obs;
   Rx<TextEditingController> jobCardDate = TextEditingController().obs;
   Rx<TextEditingController> invoiceDate = TextEditingController().obs;
@@ -825,76 +828,132 @@ class JobCardController extends GetxController {
     }
   }
 
-  Future<void> createQuotationCard(String jobId) async {
+  Future<void> createQuotationCard(String id) async {
     try {
-      showSnackBar('Creating', 'Please Wait');
+      Map quotationStatus = await getCurrentJobCardStatus(id);
+      final status1 = quotationStatus['job_status_1'];
+      if (status1 != 'Posted') {
+        showSnackBar('Alert', 'Only Posted Jobs Allowed');
+        return;
+      }
       creatingNewQuotation.value = true;
-      Map<String, dynamic> newData = {
-        'quotation_status': 'New',
-        'car_brand_logo': carBrandLogo.value,
-        'car_brand': carBrandId.value,
-        'car_model': carModelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': plateCode.text,
-        'country': countryId.value,
-        'city': cityId.value,
-        'year': year.text,
-        'color': colorId.value,
-        'engine_type': engineTypeId.value,
-        'vehicle_identification_number': vin.text,
-        'transmission_type': transmissionType.text,
-        'mileage_in': mileageIn.value.text,
-        'mileage_out': mileageOut.value.text,
-        'mileage_in_out_diff': inOutDiff.value.text,
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'outstanding': customerOutstanding.text,
-        'saleMan': customerSaleManId.value,
-        'branch': customerBranchId.value,
-        'currency': customerCurrencyId.value,
-        'rate': customerCurrencyRate.text,
-        'payment_method': payType.value,
-        'quotation_number': quotationCounter.value,
-        'quotation_date': '',
-        'validity_days': '',
-        'validity_end_date': '',
-        'reference_number': '',
-        'delivery_time': '',
-        'quotation_warrenty_days': jobWarrentyDays.value.text,
-        'quotation_warrenty_km': jobWarrentyKM.value.text,
-        'quotation_notes': '',
-      };
-
-      // await getCurrentQuotationCounterNumber();
-      newData['quotation_number'] = quotationCounter.value;
-      newData['added_date'] = DateTime.now().toString();
-      var newQuotation = await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .add(newData);
-
-      // for (var element in allInvoiceItems) {
-      //   var data = element.data();
-      //   await FirebaseFirestore.instance
-      //       .collection('quotation_cards')
-      //       .doc(newQuotation.id)
-      //       .collection('invoice_items')
-      //       .add(data);
-      // }
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update({'quotation_id': newQuotation.id});
-      showSnackBar('Done', 'Quotation Created Successfully');
-
+      showSnackBar('Creating', 'Please wait');
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards/create_quotation_card_for_current_job/$id',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'multipart/form-data',
+        },
+      );
+      if (response.statusCode == 200) {
+        showSnackBar('Done', 'Quotation created successfully');
+        final decoded = jsonDecode(response.body);
+        quotationCounter.value = decoded['quotation_number'];
+        quotationId.value = decoded['quotation_card_id'];
+      } else if (response.statusCode == 409) {
+        final decoded = jsonDecode(response.body);
+        showSnackBar('Alert', decoded['detail']);
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await createQuotationCard(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
       creatingNewQuotation.value = false;
     } catch (e) {
       creatingNewQuotation.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
+      showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
+
+  // Future<void> createQuotationCard(String jobId) async {
+  //   try {
+  //     showSnackBar('Creating', 'Please Wait');
+  //     creatingNewQuotation.value = true;
+  //     Map<String, dynamic> newData = {
+  //       'quotation_status': 'New',
+  //       'car_brand_logo': carBrandLogo.value,
+  //       'car_brand': carBrandId.value,
+  //       'car_model': carModelId.value,
+  //       'plate_number': plateNumber.text,
+  //       'plate_code': plateCode.text,
+  //       'country': countryId.value,
+  //       'city': cityId.value,
+  //       'year': year.text,
+  //       'color': colorId.value,
+  //       'engine_type': engineTypeId.value,
+  //       'vehicle_identification_number': vin.text,
+  //       'transmission_type': transmissionType.text,
+  //       'mileage_in': mileageIn.value.text,
+  //       'mileage_out': mileageOut.value.text,
+  //       'mileage_in_out_diff': inOutDiff.value.text,
+  //       'customer': customerId.value,
+  //       'contact_name': customerEntityName.text,
+  //       'contact_number': customerEntityPhoneNumber.text,
+  //       'contact_email': customerEntityEmail.text,
+  //       'credit_limit': customerCreditNumber.text,
+  //       'outstanding': customerOutstanding.text,
+  //       'saleMan': customerSaleManId.value,
+  //       'branch': customerBranchId.value,
+  //       'currency': customerCurrencyId.value,
+  //       'rate': customerCurrencyRate.text,
+  //       'payment_method': payType.value,
+  //       'quotation_number': quotationCounter.value,
+  //       'quotation_date': '',
+  //       'validity_days': '',
+  //       'validity_end_date': '',
+  //       'reference_number': '',
+  //       'delivery_time': '',
+  //       'quotation_warrenty_days': jobWarrentyDays.value.text,
+  //       'quotation_warrenty_km': jobWarrentyKM.value.text,
+  //       'quotation_notes': '',
+  //     };
+
+  //     // await getCurrentQuotationCounterNumber();
+  //     newData['quotation_number'] = quotationCounter.value;
+  //     newData['added_date'] = DateTime.now().toString();
+  //     var newQuotation = await FirebaseFirestore.instance
+  //         .collection('quotation_cards')
+  //         .add(newData);
+
+  //     // for (var element in allInvoiceItems) {
+  //     //   var data = element.data();
+  //     //   await FirebaseFirestore.instance
+  //     //       .collection('quotation_cards')
+  //     //       .doc(newQuotation.id)
+  //     //       .collection('invoice_items')
+  //     //       .add(data);
+  //     // }
+  //     await FirebaseFirestore.instance
+  //         .collection('job_cards')
+  //         .doc(jobId)
+  //         .update({'quotation_id': newQuotation.id});
+  //     showSnackBar('Done', 'Quotation Created Successfully');
+
+  //     creatingNewQuotation.value = false;
+  //   } catch (e) {
+  //     creatingNewQuotation.value = false;
+  //     showSnackBar('Alert', 'Something Went Wrong');
+  //   }
+  // }
 
   Future<void> editApproveForJobCard(String jobId, String status) async {
     if (jobStatus1.value.isEmpty) {
@@ -926,35 +985,89 @@ class JobCardController extends GetxController {
     jobWarrentyEndDate.value.text = format.format(newDate);
   }
 
-  Future<void> openQuotationCardScreenByNumber() async {
+  Future<void> openQuotationCardScreenByNumber(String id) async {
     try {
       openingQuotationCardScreen.value = true;
-      QuotationCardController quotationCardController = Get.put(
-        QuotationCardController(),
-      );
-      var quotation = await FirebaseFirestore.instance
-          .collection('quotation_cards')
-          .where('quotation_number', isEqualTo: quotationCounter.value)
-          .get();
-      var id = quotation.docs.first.id;
-      // var data = quotation.docs.first.data();
 
-      // quotationCardController.getAllInvoiceItems(id);
-      // await quotationCardController.loadValues(data, id);
-      // showSnackBar('Done', 'Opened Successfully');
-      // await editQuotationCardDialog(
-      //   quotationCardController,
-      //   data,
-      //   id,
-      //   screenName: '🧾 Quotation',
-      //   headerColor: Colors.deepPurple,
-      // );
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards/open_quotation_card_screen_by_quotation_number_for_job/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        QuotationCardsModel requiredQuotation = QuotationCardsModel.fromJson(
+          decoded['required_quotation'],
+        );
+        QuotationCardController quotationCardController = Get.put(
+          QuotationCardController(),
+        );
+        await quotationCardController.loadValues(requiredQuotation);
+        await editQuotationCardDialog(
+          quotationCardController,
+          requiredQuotation,
+          id,
+          screenName: '🧾 Quotation',
+          headerColor: Colors.deepPurple,
+        );
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await openQuotationCardScreenByNumber(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
       openingQuotationCardScreen.value = false;
     } catch (e) {
       openingQuotationCardScreen.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
     }
   }
+
+  // Future<void> openQuotationCardScreenByNumber() async {
+  //   try {
+  //     openingQuotationCardScreen.value = true;
+  //     QuotationCardController quotationCardController = Get.put(
+  //       QuotationCardController(),
+  //     );
+  //     var quotation = await FirebaseFirestore.instance
+  //         .collection('quotation_cards')
+  //         .where('quotation_number', isEqualTo: quotationCounter.value)
+  //         .get();
+  //     var id = quotation.docs.first.id;
+  //     // var data = quotation.docs.first.data();
+
+  //     // quotationCardController.getAllInvoiceItems(id);
+  //     // await quotationCardController.loadValues(data, id);
+  //     // showSnackBar('Done', 'Opened Successfully');
+  //     // await editQuotationCardDialog(
+  //     //   quotationCardController,
+  //     //   data,
+  //     //   id,
+  //     //   screenName: '🧾 Quotation',
+  //     //   headerColor: Colors.deepPurple,
+  //     // );
+  //     openingQuotationCardScreen.value = false;
+  //   } catch (e) {
+  //     openingQuotationCardScreen.value = false;
+  //     showSnackBar('Alert', 'Something Went Wrong');
+  //   }
+  // }
 
   // function to manage loading button
   void setButtonLoading(String menuId, bool isLoading) {
@@ -1054,6 +1167,7 @@ class JobCardController extends GetxController {
   }
 
   void clearValues() {
+    quotationId.value = '';
     currentCountryVAT.value = companyDetails.containsKey('country_vat')
         ? companyDetails['country_vat'].toString()
         : "";
@@ -1309,6 +1423,7 @@ class JobCardController extends GetxController {
   }
 
   Future<void> loadValues(JobCardModel data) async {
+    quotationId.value = data.quotationId ?? '';
     jobCardAdded.value = true;
     curreentJobCardId.value = data.id ?? '';
     allInvoiceItems.value = data.invoiceItemsDetails ?? [];

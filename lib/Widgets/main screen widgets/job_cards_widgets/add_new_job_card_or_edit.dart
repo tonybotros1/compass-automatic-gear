@@ -26,9 +26,7 @@ Widget addNewJobCardOrEdit({
             Expanded(
               child: Column(
                 children: [
-                  labelContainer(
-                    lable: Text('Car Details', style: fontStyle1),
-                  ),
+                  labelContainer(lable: Text('Car Details', style: fontStyle1)),
                   carDetailsSection(),
                 ],
               ),
@@ -54,10 +52,7 @@ Widget addNewJobCardOrEdit({
                         Text('Job Details', style: fontStyle1),
                         GetX<JobCardController>(
                           builder: (controller) {
-                            return controller
-                                    .quotationCounter
-                                    .value
-                                    .isNotEmpty
+                            return controller.quotationCounter.value.isNotEmpty
                                 ? ClickableHoverText(
                                     color2:
                                         controller
@@ -69,9 +64,7 @@ Widget addNewJobCardOrEdit({
                                         controller
                                             .openingQuotationCardScreen
                                             .isFalse
-                                        ? controller
-                                              .quotationCounter
-                                              .value
+                                        ? controller.quotationCounter.value
                                         : 'Loading...',
                                     onTap:
                                         controller
@@ -79,7 +72,9 @@ Widget addNewJobCardOrEdit({
                                             .isFalse
                                         ? () async {
                                             controller
-                                                .openQuotationCardScreenByNumber();
+                                                .openQuotationCardScreenByNumber(
+                                                  controller.quotationId.value,
+                                                );
                                           }
                                         : null,
                                   )

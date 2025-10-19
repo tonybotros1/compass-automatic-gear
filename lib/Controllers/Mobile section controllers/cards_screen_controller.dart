@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
 import '../../Models/car_card_model.dart';
 import '../../Screens/mobile Screens/card_details_screen.dart';
