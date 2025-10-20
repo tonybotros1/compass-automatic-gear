@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/time_sheets_controller.dart';
+import '../../../../Models/time sheets/time_sheets_model.dart';
 import '../../../../Widgets/main screen widgets/time_sheets_widgets/jobs_section.dart';
 import '../../../../Widgets/main screen widgets/time_sheets_widgets/name_section.dart';
 import '../../../../Widgets/main screen widgets/time_sheets_widgets/task_section.dart';
@@ -22,176 +22,190 @@ class TimeSheets extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GetX<TimeSheetsController>(
-                    init: TimeSheetsController(),
-                    builder: (controller) {
-                      return Row(
-                        spacing: 20,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          customButton(
-                              lable: 'PAUSE ALL',
-                              onTap: () {
-                                controller
-                                    .pauseAllFunction(controller.allTimeSheets);
-                              },
-                              textColor: Colors.blue),
-                          headerBoxLine(
-                              labelColor:
-                                  controller.selectedEmployeeName.value.isEmpty
-                                      ? Colors.red
-                                      : Colors.green,
-                              lable:
-                                  controller.selectedEmployeeName.value.isEmpty
-                                      ? 'NAME'
-                                      : controller.selectedEmployeeName.value
-                                          .toUpperCase(),
-                              onTapForLabel: () {
-                                nameDialog(
-                                    constraints: constraints,
-                                    controller: controller,
-                                    context: context);
-                              },
-                              onTapForIcon: () {
-                                controller.selectedEmployeeId.value = '';
-                                controller.selectedEmployeeName.value = '';
-                              }),
-                          headerBoxLine(
-                              flex: 2,
-                              lable: controller.selectedJob.value.isEmpty
-                                  ? 'CAR'
-                                  : controller.selectedJob.value.toUpperCase(),
-                              labelColor: controller.selectedJob.value.isEmpty
-                                  ? Colors.red
-                                  : Colors.green,
-                              onTapForLabel: () {
-                                jobsDialog(
-                                    constraints: constraints,
-                                    controller: controller,
-                                    context: context);
-                              },
-                              onTapForIcon: () {
-                                controller.selectedJob.value = '';
-                                controller.selectedJobId.value = '';
-                              }),
-                          headerBoxLine(
-                              lable: controller.selectedTask.value.isEmpty
-                                  ? 'TASK'
-                                  : controller.selectedTask.value.toUpperCase(),
-                              labelColor: controller.selectedTask.value.isEmpty
-                                  ? Colors.red
-                                  : Colors.green,
-                              onTapForLabel: () {
-                                taskDialog(
-                                    constraints: constraints,
-                                    controller: controller,
-                                    context: context);
-                              },
-                              onTapForIcon: () {
-                                controller.selectedTask.value = '';
-                                controller.selectedTaskId.value = '';
-                              }),
-                          customButton(
-                              lable: 'START',
-                              onTap: controller.startSheet.isFalse
-                                  ? () {
-                                      if (controller.selectedEmployeeId.value
-                                              .isEmpty ||
-                                          controller
-                                              .selectedJobId.value.isEmpty ||
-                                          controller
-                                              .selectedTaskId.value.isEmpty) {
-                                        showSnackBar('Alert',
-                                            'Please Select all Fields');
-                                      } else {
-                                        controller.startFunction();
-                                      }
-                                    }
-                                  : null,
-                              backgroundcolor: controller.startSheet.isFalse
-                                  ? Colors.green
-                                  : Colors.grey,
-                              textColor: Colors.white)
-                        ],
-                      );
-                    }),
+                  init: TimeSheetsController(),
+                  builder: (controller) {
+                    return Row(
+                      spacing: 20,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        customButton(
+                          lable: 'PAUSE ALL',
+                          onTap: () {
+                            // controller.pauseAllFunction(
+                            //   controller.allTimeSheets,
+                            // );
+                          },
+                          textColor: Colors.blue,
+                        ),
+                        headerBoxLine(
+                          labelColor:
+                              controller.selectedEmployeeName.value.isEmpty
+                              ? Colors.red
+                              : Colors.green,
+                          lable: controller.selectedEmployeeName.value.isEmpty
+                              ? 'NAME'
+                              : controller.selectedEmployeeName.value
+                                    .toUpperCase(),
+                          onTapForLabel: () {
+                            controller.getAllTechnicians();
+                            nameDialog(
+                              constraints: constraints,
+                              controller: controller,
+                              context: context,
+                            );
+                          },
+                          onTapForIcon: () {
+                            controller.selectedEmployeeId.value = '';
+                            controller.selectedEmployeeName.value = '';
+                          },
+                        ),
+                        headerBoxLine(
+                          flex: 2,
+                          lable: controller.selectedJob.value.isEmpty
+                              ? 'CAR'
+                              : controller.selectedJob.value.toUpperCase(),
+                          labelColor: controller.selectedJob.value.isEmpty
+                              ? Colors.red
+                              : Colors.green,
+                          onTapForLabel: () {
+                            controller.getApprovedJobs();
+                            jobsDialog(
+                              constraints: constraints,
+                              controller: controller,
+                              context: context,
+                            );
+                          },
+                          onTapForIcon: () {
+                            controller.selectedJob.value = '';
+                            controller.selectedJobId.value = '';
+                          },
+                        ),
+                        headerBoxLine(
+                          lable: controller.selectedTask.value.isEmpty
+                              ? 'TASK'
+                              : controller.selectedTask.value.toUpperCase(),
+                          labelColor: controller.selectedTask.value.isEmpty
+                              ? Colors.red
+                              : Colors.green,
+                          onTapForLabel: () {
+                            controller.gettAllJobTasks();
+                            taskDialog(
+                              constraints: constraints,
+                              controller: controller,
+                              context: context,
+                            );
+                          },
+                          onTapForIcon: () {
+                            controller.selectedTask.value = '';
+                            controller.selectedTaskId.value = '';
+                          },
+                        ),
+                        customButton(
+                          lable: 'START',
+                          onTap: controller.startSheet.isFalse
+                              ? () {
+                                  if (controller
+                                          .selectedEmployeeId
+                                          .value
+                                          .isEmpty ||
+                                      controller.selectedJobId.value.isEmpty ||
+                                      controller.selectedTaskId.value.isEmpty) {
+                                    showSnackBar(
+                                      'Alert',
+                                      'Please Select all Fields',
+                                    );
+                                  } else {
+                                    controller.startFunction();
+                                  }
+                                }
+                              : null,
+                          backgroundcolor: controller.startSheet.isFalse
+                              ? Colors.green
+                              : Colors.grey,
+                          textColor: Colors.white,
+                        ),
+                      ],
+                    );
+                  },
+                ),
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
-                      border: Border.all(
-                        color: Colors.grey,
-                      ),
+                      border: Border.all(color: Colors.grey),
                     ),
-                    child: GetX<TimeSheetsController>(builder: (controller) {
-                      var crossAxisCount =
-                          (MediaQuery.of(context).size.width ~/ 250)
-                              .clamp(1, 5);
-                      return controller.isScreenLoadingForTimesheets.isFalse &&
-                              controller.allTimeSheets.isEmpty
-                          ? const Center(
-                              child: Text('Empty'),
-                            )
-                          : controller.isScreenLoadingForTimesheets.isTrue
-                              ? Center(
-                                  child: loadingProcess,
-                                )
-                              : GridView.count(
-                                  crossAxisCount: crossAxisCount,
-                                  childAspectRatio: 1.3,
-                                  // padding: EdgeInsets.all(20.w),
-                                  crossAxisSpacing: 40,
-                                  mainAxisSpacing: 40,
-                                  children: List.generate(
-                                      controller.allTimeSheets.length, (index) {
+                    child: GetX<TimeSheetsController>(
+                      builder: (controller) {
+                        var crossAxisCount =
+                            (MediaQuery.of(context).size.width ~/ 250).clamp(
+                              1,
+                              5,
+                            );
+                        return controller
+                                    .isScreenLoadingForTimesheets
+                                    .isFalse &&
+                                controller.allTimeSheets.isEmpty
+                            ? const Center(child: Text('Empty'))
+                            : controller.isScreenLoadingForTimesheets.isTrue
+                            ? Center(child: loadingProcess)
+                            : GridView.count(
+                                crossAxisCount: crossAxisCount,
+                                childAspectRatio: 1.3,
+                                // padding: EdgeInsets.all(20.w),
+                                crossAxisSpacing: 40,
+                                mainAxisSpacing: 40,
+                                children: List.generate(
+                                  controller.allTimeSheets.length,
+                                  (index) {
                                     double cardWidth =
                                         constraints.maxWidth / crossAxisCount;
                                     final sheet =
                                         controller.allTimeSheets[index];
-                                    final data =
-                                        sheet.data() as Map<String, dynamic>? ??
-                                            {};
-                                    String sheetEmployeeName =
-                                        '${getDocumentById(data['employee_id'], controller.allTechnician)?.get('name') ?? ''}';
+                                  
+                                    String sheetEmployeeName = sheet.employeeName ?? '';
 
-                                    Map<String, String> sheetJob = controller
-                                        .getjobInfosById(data['job_id']);
+                                  
 
-                                    String brand = sheetJob['brand'].toString();
-                                    String model = sheetJob['model'].toString();
+                                    String brand = sheet.brandName.toString();
+                                    String model = sheet.modelName.toString();
                                     String plateNumber =
-                                        sheetJob['plate_number'].toString();
-                                    String color = sheetJob['color'].toString();
-                                    String logo = sheetJob['logo'].toString();
+                                        sheet.plateNumber.toString();
+                                    String color = sheet.color.toString();
+                                    String logo = sheet.logo.toString();
 
-                                    DocumentSnapshot<Object?>? taskName =
-                                        getDocumentById(data['task_id'],
-                                            controller.allTasks);
+                                    // DocumentSnapshot<Object?>? taskName =
+                                    //     getDocumentById(
+                                    //       data['task_id'],
+                                    //       controller.allTasks,
+                                    //     );
 
-                                    String sheetTimeTask =
-                                        '${taskName?.get('name_en') ?? ''}  -  ${taskName?.get('name_ar') ?? ''}';
+                                    String sheetTimeTask = 
+                                        '${sheet.taskEnName ?? ''}  -  ${sheet.taskArName?? ''}';
 
                                     final cardColor =
                                         cardColors[index % cardColors.length];
 
                                     final d =
                                         controller.sheetDurations[sheet.id] ??
-                                            const Duration();
+                                        const Duration();
                                     final h = d.inHours;
                                     final m = d.inMinutes % 60;
                                     final s = d.inSeconds % 60;
-                                    final periods = sheet['active_periods']
-                                        as List<dynamic>;
-                                    bool isPaused = periods.isNotEmpty &&
-                                        periods.last['to'] != null;
+                                    final periods =
+                                        sheet.activePeriods
+                                            as List<ActivePeriods>;
+                                    bool isPaused =
+                                        periods.isNotEmpty &&
+                                        periods.last.to != null;
 
                                     return
-                                        //  CourseCard(
-                                        //     course: Course(
-                                        //         title: sheetJob,
-                                        //         instructor: sheetEmployeeName,
-                                        //         color: cardColor));
-                                        EmployeeTaskCard(
+                                    //  CourseCard(
+                                    //     course: Course(
+                                    //         title: sheetJob,
+                                    //         instructor: sheetEmployeeName,
+                                    //         color: cardColor));
+                                    EmployeeTaskCard(
                                       cardWidth: cardWidth,
                                       brand: brand,
                                       model: model,
@@ -202,23 +216,28 @@ class TimeSheets extends StatelessWidget {
                                       totalWorkTime:
                                           '$h:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}',
                                       name: sheetEmployeeName,
-                                      task: sheetTimeTask,
+                                      task:  sheetTimeTask,
                                       statusColor: cardColor,
-                                      startedAt: textToDate(data['start_date'],
-                                          withTime: true, monthNameFirst: true),
+                                      startedAt: textToDate(
+                                        sheet.startDate,
+                                        withTime: true,
+                                        monthNameFirst: true,
+                                      ),
                                       onContinue: () {
-                                        controller.continueFunction(sheet);
+                                        // controller.continueFunction(sheet);
                                       },
                                       onFinish: () {
-                                        controller.finishFunction(sheet);
+                                        // controller.finishFunction(sheet);
                                       },
                                       onPause: () {
-                                        controller.pauseFunction(sheet);
+                                        // controller.pauseFunction(sheet);
                                       },
                                     );
-                                  }),
-                                );
-                    }),
+                                  },
+                                ),
+                              );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -273,21 +292,20 @@ class TimeSheets extends StatelessWidget {
                 color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(5),
               ),
-              child: const Icon(
-                Icons.close_rounded,
-              ),
+              child: const Icon(Icons.close_rounded),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  InkWell customButton(
-      {required String lable,
-      void Function()? onTap,
-      Color? backgroundcolor,
-      Color? textColor}) {
+  InkWell customButton({
+    required String lable,
+    void Function()? onTap,
+    Color? backgroundcolor,
+    Color? textColor,
+  }) {
     return InkWell(
       borderRadius: BorderRadius.circular(5),
       onTap: onTap,
@@ -414,9 +432,7 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                         ),
                       ],
                     ),
-                    SizedBox(
-                      height: scaledPadding(20),
-                    ),
+                    SizedBox(height: scaledPadding(20)),
                     Text(
                       textAlign: TextAlign.center,
                       widget.name,
@@ -475,9 +491,10 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                           Text(
                             widget.totalWorkTime,
                             style: TextStyle(
-                                fontSize: scaledFont(12),
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade700),
+                              fontSize: scaledFont(12),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade700,
+                            ),
                           ),
                           const Spacer(),
                           TextButton.icon(
@@ -490,13 +507,15 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                               }
                             },
                             icon: Icon(
-                                isPaused ? Icons.play_arrow : Icons.pause,
-                                size: scaledFont(16)),
+                              isPaused ? Icons.play_arrow : Icons.pause,
+                              size: scaledFont(16),
+                            ),
                             label: Text(
                               isPaused ? 'Continue' : 'Pause',
                               style: TextStyle(
-                                  fontSize: scaledFont(12),
-                                  fontWeight: FontWeight.bold),
+                                fontSize: scaledFont(12),
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             style: TextButton.styleFrom(
                               foregroundColor: colorScheme.primary,
@@ -504,18 +523,19 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                               minimumSize: const Size(0, 0),
                             ),
                           ),
-                          const SizedBox(
-                            width: 5,
-                          ),
+                          const SizedBox(width: 5),
                           TextButton.icon(
                             onPressed: widget.onFinish,
-                            icon: Icon(Icons.check_circle_outline,
-                                size: scaledFont(16)),
+                            icon: Icon(
+                              Icons.check_circle_outline,
+                              size: scaledFont(16),
+                            ),
                             label: Text(
                               'Finish',
                               style: TextStyle(
-                                  fontSize: scaledFont(12),
-                                  fontWeight: FontWeight.bold),
+                                fontSize: scaledFont(12),
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
@@ -538,8 +558,9 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                       height: 50,
                       width: 50,
                       decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 200),
-                          borderRadius: BorderRadius.circular(12)),
+                        color: Colors.black.withValues(alpha: 200),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       alignment: Alignment.center,
                       child: const Icon(
                         Icons.pause,
@@ -548,7 +569,7 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
                       ),
                     ),
                   )
-                : const SizedBox()
+                : const SizedBox(),
           ],
         ),
       ),

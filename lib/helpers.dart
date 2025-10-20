@@ -619,7 +619,6 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         final number = decoded['job_number'];
-        print(number);
         return number;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
