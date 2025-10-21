@@ -1,12 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/consts.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../Models/job tasks/job_tasks_model.dart';
 import '../../Models/time sheets/approved_jobs_model.dart';
 import '../../Models/time sheets/time_sheets_model.dart';
@@ -37,13 +34,12 @@ class TimeSheetsController extends GetxController {
   final Map<String, String> colorCache = {};
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
-
+  RxBool pausingAllOpenTimeSheets = RxBool(false);
   @override
   void onInit() async {
     connectWebSocket();
     startRealTimeTimer();
-    // getAllTimeSheets();
-
+    getAllTimeSheets();
     super.onInit();
   }
 
@@ -54,71 +50,97 @@ class TimeSheetsController extends GetxController {
   }
 
   void connectWebSocket() {
-    ws.events.listen(
-      (message) {
-        try {
-          if (message["type"] == "timesheet_update") {
-            final payload = jsonDecode(message["payload"]);
-            final opType = payload["operationType"];
-            final doc = payload["fullDocument"];
+    ws.events.listen((message) {
+      switch (message["type"]) {
+        case "time_sheets_start_function":
+          final newCounter = TimeSheetsModel.fromJson(message["data"]);
+          allTimeSheets.add(newCounter);
+          break;
 
-            // Convert to your TimeSheetsModel
-            final timeSheet = TimeSheetsModel.fromJson(doc);
-
-            if (opType == "insert") {
-              allTimeSheets.add(timeSheet);
-            } else if (opType == "update" || opType == "replace") {
-              final i = allTimeSheets.indexWhere((e) => e.id == timeSheet.id);
-              if (i != -1) {
-                allTimeSheets[i] = timeSheet;
-              } else {
-                // If not found, treat as new
-                allTimeSheets.add(timeSheet);
-              }
-            } else if (opType == "delete") {
-              final id = payload["documentKey"]["_id"]["\$oid"];
-              allTimeSheets.removeWhere((e) => e.id == id);
-            }
+        case "time_sheets_pause_function":
+          String updatedId = message["data"]['_id'];
+          int index = allTimeSheets.indexWhere((m) => m.id == updatedId);
+          if (index != -1) {
+            List<ActivePeriods> period =
+                allTimeSheets[index].activePeriods ?? [];
+            period.last.to = DateTime.now();
           }
-        } catch (e) {
-          // print("❌ WebSocket parse error: $e");
-        }
-      },
-      onError: (err) {
-        // print("❌ WebSocket error: $err");
-      },
-      onDone: () async {
-        // print("🔌 WebSocket disconnected, retrying in 5s...");
-        await Future.delayed(const Duration(seconds: 5));
-        connectWebSocket(); // Auto-reconnect
-      },
-    );
+          break;
+
+        case "time_sheets_continue_function":
+          String updatedId = message["data"]["_id"];
+          int index = allTimeSheets.indexWhere((m) => m.id == updatedId);
+          if (index != -1) {
+            List<ActivePeriods> period =
+                allTimeSheets[index].activePeriods ?? [];
+            period.add(ActivePeriods(from: DateTime.now(), to: null));
+          }
+          break;
+        case "time_sheets_finish_function":
+          String updatedId = message["data"]["_id"];
+          allTimeSheets.removeWhere((m) => m.id == updatedId);
+
+          break;
+      }
+    });
   }
 
- void startRealTimeTimer() {
-  _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-    for (final sheet in allTimeSheets) {
-      final periods = sheet.activePeriods;
-      if (periods == null || periods.isEmpty) {
-        sheetDurations[sheet.id ?? ''] = Duration.zero;
-        continue;
+  void startRealTimeTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      for (final sheet in allTimeSheets) {
+        final periods = sheet.activePeriods;
+        if (periods == null || periods.isEmpty) {
+          sheetDurations[sheet.id ?? ''] = Duration.zero;
+          continue;
+        }
+
+        Duration total = Duration.zero;
+
+        for (final period in periods) {
+          final from = period.from;
+          if (from == null) continue;
+
+          final to = period.to ?? DateTime.now();
+          total += to.difference(from);
+        }
+
+        sheetDurations[sheet.id ?? ''] = total;
       }
+    });
+  }
 
-      Duration total = Duration.zero;
-
-      for (final period in periods) {
-        final from = period.from;
-        if (from == null) continue;
-
-        final to = period.to ?? DateTime.now();
-        total += to.difference(from);
-      }
-
-      sheetDurations[sheet.id ?? ''] = total;
+  Future<void> getAllTimeSheets() async {
+    try {
+      isScreenLoadingForTimesheets.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/time_sheets/get_all_time_sheets');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List sheets = decoded['time_sheets'];
+        allTimeSheets.assignAll(
+          sheets.map((sheet) => TimeSheetsModel.fromJson(sheet)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllTimeSheets();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      isScreenLoadingForTimesheets.value = false;
+    } catch (e) {
+      isScreenLoadingForTimesheets.value = false;
     }
-  });
-}
-
+  }
 
   Future getAllTechnicians() async {
     isScreenLodingForTechnicians.value = true;
@@ -191,6 +213,166 @@ class TimeSheetsController extends GetxController {
     }
   }
 
+  Future<void> startFunction() async {
+    try {
+      startSheet.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/time_sheets/start_function');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "job_id": selectedJobId.value,
+          "employee_id": selectedEmployeeId.value,
+          "task_id": selectedTaskId.value,
+        }),
+      );
+      if (response.statusCode == 200) {
+        selectedEmployeeId.value = '';
+        selectedEmployeeName.value = '';
+        selectedJob.value = '';
+        selectedJobId.value = '';
+        selectedTask.value = '';
+        selectedTask.value = '';
+        startSheet.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await startFunction();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      startSheet.value = false;
+    } catch (e) {
+      startSheet.value = false;
+    }
+  }
+
+  Future<void> pauseFunction(String? id) async {
+    try {
+      if (id == null || id == '') {
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/time_sheets/pause_function/$id');
+      final response = await http.patch(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await pauseFunction(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> continueFunction(String? id) async {
+    try {
+      if (id == null || id == '') {
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/time_sheets/continue_function/$id');
+      final response = await http.patch(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await continueFunction(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> finishFunction(String? id) async {
+    try {
+      if (id == null || id == '') {
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/time_sheets/finish_function/$id');
+      final response = await http.patch(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await finishFunction(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> pauseAllFunction() async {
+    try {
+      pausingAllOpenTimeSheets.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/time_sheets/pause_all_function');
+      final response = await http.patch(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        await getAllTimeSheets();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await pauseAllFunction();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      pausingAllOpenTimeSheets.value = false;
+    } catch (e) {
+      pausingAllOpenTimeSheets.value = false;
+    }
+  }
+
+
   // ============================================================================================================
   bool hasActiveTask(String employeeId) {
     final hasActiveJob = allTimeSheets.any((doc) {
@@ -206,156 +388,5 @@ class TimeSheetsController extends GetxController {
       return true;
     }
     return false;
-  }
-
-  // void startRealTimeTimer() {
-  //   _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-  //     for (var doc in allTimeSheets) {
-  //       final String sheetId = doc.id;
-  //       final periods = doc['active_periods'] as List<dynamic>;
-
-  //       Duration total = const Duration();
-
-  //       // Check if job is paused (i.e. last period is closed)
-  //       bool isPaused = periods.isNotEmpty && periods.last['to'] != null;
-
-  //       for (var period in periods) {
-  //         final from = (period['from'] as Timestamp).toDate();
-  //         final toRaw = period['to'];
-  //         // إذا الفترة مغلقة نحسبها
-  //         if (toRaw != null) {
-  //           final to = (toRaw as Timestamp).toDate();
-  //           total += to.difference(from);
-  //         } else if (!isPaused) {
-  //           // إذا شغالة حاليا، نحسب الوقت حتى الآن
-  //           total += DateTime.now().difference(from);
-  //         }
-  //       }
-
-  //       sheetDurations[sheetId] = total;
-  //     }
-  //   });
-  // }
-
-  Future<void> startFunction() async {
-    try {
-      startSheet.value = true;
-      final now = Timestamp.now();
-      await FirebaseFirestore.instance
-          .collection('time_sheets')
-          .add({
-            // 'company_id': companyId.value,
-            'job_id': selectedJobId.value,
-            'employee_id': selectedEmployeeId.value,
-            'task_id': selectedTaskId.value,
-            'start_date': now,
-            'end_date': null,
-            'active_periods': [
-              {'from': now, 'to': null},
-            ],
-          })
-          .then((_) {
-            selectedEmployeeId.value = '';
-            selectedEmployeeName.value = '';
-            selectedJob.value = '';
-            selectedJobId.value = '';
-            selectedTask.value = '';
-            selectedTask.value = '';
-            startSheet.value = false;
-          });
-    } catch (e) {
-      startSheet.value = false;
-    }
-  }
-
-  Future<void> pauseFunction(DocumentSnapshot doc) async {
-    final sheetId = doc.id;
-    final List<dynamic> currentPeriods = List.from(doc['active_periods']);
-
-    // إذا في فترة مفتوحة سكّرها
-    if (currentPeriods.isNotEmpty && currentPeriods.last['to'] == null) {
-      currentPeriods[currentPeriods.length - 1]['to'] = Timestamp.fromDate(
-        DateTime.now(),
-      );
-
-      await FirebaseFirestore.instance
-          .collection('time_sheets')
-          .doc(sheetId)
-          .update({'active_periods': currentPeriods});
-    }
-  }
-
-  Future<void> continueFunction(DocumentSnapshot doc) async {
-    final sheetId = doc.id;
-    final List<dynamic> currentPeriods = List.from(doc['active_periods']);
-
-    final lastPeriod = currentPeriods.isNotEmpty ? currentPeriods.last : null;
-    if (lastPeriod != null && lastPeriod['to'] == null) {
-      return;
-    }
-
-    final newPeriod = {'from': Timestamp.fromDate(DateTime.now()), 'to': null};
-
-    currentPeriods.add(newPeriod);
-
-    await FirebaseFirestore.instance
-        .collection('time_sheets')
-        .doc(sheetId)
-        .update({'active_periods': currentPeriods});
-  }
-
-  Future<void> finishFunction(DocumentSnapshot doc) async {
-    final sheetId = doc.id;
-    final List<dynamic> currentPeriods = List.from(doc['active_periods']);
-
-    if (currentPeriods.isNotEmpty && currentPeriods.last['to'] == null) {
-      currentPeriods[currentPeriods.length - 1]['to'] = Timestamp.fromDate(
-        DateTime.now(),
-      );
-    }
-
-    await FirebaseFirestore.instance
-        .collection('time_sheets')
-        .doc(sheetId)
-        .update({
-          'active_periods': currentPeriods,
-          'end_date': Timestamp.fromDate(DateTime.now()),
-        });
-  }
-
-  Future<void> pauseAllFunction(List<DocumentSnapshot> allDocs) async {
-    final batch = FirebaseFirestore.instance.batch();
-
-    for (var doc in allDocs) {
-      final docRef = doc.reference;
-      final List<dynamic> periods = List.from(doc['active_periods']);
-
-      // Check if there's an open period
-      if (periods.isNotEmpty && periods.last['to'] == null) {
-        periods[periods.length - 1]['to'] = Timestamp.fromDate(DateTime.now());
-
-        batch.update(docRef, {'active_periods': periods});
-      }
-    }
-
-    await batch.commit();
-  }
-
-  void getAllTimeSheets() {
-    try {
-      // isScreenLoadingForTimesheets.value = true;
-      // FirebaseFirestore.instance
-      //     .collection('time_sheets')
-      //     .where('company_id', isEqualTo: companyId.value)
-      //     .where('end_date', isNull: true)
-      //     .orderBy('start_date')
-      //     .snapshots()
-      //     .listen((tech) {
-      //   allTimeSheets.assignAll(List<DocumentSnapshot>.from(tech.docs));
-      //   isScreenLoadingForTimesheets.value = false;
-      // });
-    } catch (e) {
-      isScreenLoadingForTimesheets.value = false;
-    }
   }
 }

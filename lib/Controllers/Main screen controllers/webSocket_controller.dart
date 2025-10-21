@@ -14,15 +14,41 @@ class WebSocketService extends GetxService {
 
   void connect() {
     if (channel != null) return; // don’t reconnect per screen
-    channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
+    try {
+      channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
 
-    channel!.stream.listen((event) {
-      try {
-        final message = jsonDecode(event);
-        _events.add(message);
-      } catch (e) {
-        // print("WS decode error: $e");
-      }
-    });
+      channel!.stream.listen(
+        (event) {
+          try {
+            final message = jsonDecode(event);
+            _events.add(message);
+          } catch (e) {
+            // print("WS decode error: $e");
+          }
+        },
+        onError: (error) {
+          // print("⚠️ WebSocket error: $error");
+          channel = null;
+          Future.delayed(
+            const Duration(seconds: 2),
+            connect,
+          ); // 🔁 auto reconnect
+        },
+        onDone: () {
+          // print("🔌 WebSocket disconnected, reconnecting...");
+          channel = null;
+          Future.delayed(
+            const Duration(seconds: 2),
+            connect,
+          ); // 🔁 auto reconnect
+        },
+      );
+    } catch (e) {
+      channel = null;
+      Future.delayed(
+        const Duration(seconds: 3),
+        connect,
+      ); // Retry after short delay
+    }
   }
 }

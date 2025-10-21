@@ -29,11 +29,11 @@ class TimeSheets extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         customButton(
-                          lable: 'PAUSE ALL',
+                          lable: controller.pausingAllOpenTimeSheets.isFalse
+                              ? 'PAUSE ALL'
+                              : "Pausing",
                           onTap: () {
-                            // controller.pauseAllFunction(
-                            //   controller.allTimeSheets,
-                            // );
+                            controller.pauseAllFunction();
                           },
                           textColor: Colors.blue,
                         ),
@@ -162,30 +162,18 @@ class TimeSheets extends StatelessWidget {
                                         constraints.maxWidth / crossAxisCount;
                                     final sheet =
                                         controller.allTimeSheets[index];
-                                  
-                                    String sheetEmployeeName = sheet.employeeName ?? '';
-
-                                  
-
+                                    String sheetEmployeeName =
+                                        sheet.employeeName ?? '';
                                     String brand = sheet.brandName.toString();
                                     String model = sheet.modelName.toString();
-                                    String plateNumber =
-                                        sheet.plateNumber.toString();
+                                    String plateNumber = sheet.plateNumber
+                                        .toString();
                                     String color = sheet.color.toString();
                                     String logo = sheet.logo.toString();
-
-                                    // DocumentSnapshot<Object?>? taskName =
-                                    //     getDocumentById(
-                                    //       data['task_id'],
-                                    //       controller.allTasks,
-                                    //     );
-
-                                    String sheetTimeTask = 
-                                        '${sheet.taskEnName ?? ''}  -  ${sheet.taskArName?? ''}';
-
+                                    String sheetTimeTask =
+                                        '${sheet.taskEnName ?? ''}  -  ${sheet.taskArName ?? ''}';
                                     final cardColor =
                                         cardColors[index % cardColors.length];
-
                                     final d =
                                         controller.sheetDurations[sheet.id] ??
                                         const Duration();
@@ -216,7 +204,7 @@ class TimeSheets extends StatelessWidget {
                                       totalWorkTime:
                                           '$h:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}',
                                       name: sheetEmployeeName,
-                                      task:  sheetTimeTask,
+                                      task: sheetTimeTask,
                                       statusColor: cardColor,
                                       startedAt: textToDate(
                                         sheet.startDate,
@@ -224,13 +212,13 @@ class TimeSheets extends StatelessWidget {
                                         monthNameFirst: true,
                                       ),
                                       onContinue: () {
-                                        // controller.continueFunction(sheet);
+                                        controller.continueFunction(sheet.id);
                                       },
                                       onFinish: () {
-                                        // controller.finishFunction(sheet);
+                                        controller.finishFunction(sheet.id);
                                       },
                                       onPause: () {
-                                        // controller.pauseFunction(sheet);
+                                        controller.pauseFunction(sheet.id);
                                       },
                                     );
                                   },
