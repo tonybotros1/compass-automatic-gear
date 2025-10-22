@@ -1,14 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_performance_controller.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../Models/employee performance/employee_performance.dart';
 import '../../../consts.dart';
 
 Future<dynamic> infosDialog({
   required BoxConstraints constraints,
   required EmployeesPerformanceController controller,
-  required List<DocumentSnapshot<Object?>> employeeSheets,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -56,7 +55,7 @@ Future<dynamic> infosDialog({
                         child: tableOfScreens(
                           constraints: constraints,
                           controller: controller,
-                          employeeSheets: employeeSheets,
+                          employeeSheets: controller.filteredPerformancesInfos,
                         ),
                       ),
                     );
@@ -74,7 +73,7 @@ Future<dynamic> infosDialog({
 Widget tableOfScreens({
   required BoxConstraints constraints,
   required EmployeesPerformanceController controller,
-  required List<DocumentSnapshot<Object?>> employeeSheets,
+  required List<CompletedSheetsInfos> employeeSheets,
 }) {
   return DataTable(
     clipBehavior: Clip.hardEdge,
@@ -131,12 +130,11 @@ Widget tableOfScreens({
     ],
     rows: List.generate(employeeSheets.length, (i) {
       final sheet = employeeSheets[i];
-      final sheetData = sheet.data() as Map<String, dynamic>;
-      final sheetId = sheet.id;
+      final sheetId = sheet.id ?? '';
       final isEven = i % 2 == 0;
 
       return dataRowForTheTable(
-        sheetData,
+        sheet,
         constraints,
         sheetId,
         controller,
@@ -147,41 +145,12 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> sheetData,
-  constraints,
-  sheetId,
+  CompletedSheetsInfos sheetData,
+  BoxConstraints constraints,
+  String sheetId,
   EmployeesPerformanceController controller,
   bool isEven,
 ) {
-  final jobId = sheetData['job_id'];
-  final taskId = sheetData['task_id'];
-
-  final carData = (jobId != null && controller.cars.containsKey(jobId))
-      ? controller.cars[jobId]
-      : {};
-  final brand = carData != null && carData.containsKey('brand')
-      ? carData['brand'].toString()
-      : '';
-
-  final model = carData != null && carData.containsKey('model')
-      ? carData['model'].toString()
-      : '';
-
-  final taskData =
-      (taskId != null && controller.pointsAndNames.containsKey(taskId))
-      ? controller.pointsAndNames[taskId]
-      : {};
-  final taskName = taskData != null && taskData.containsKey('name')
-      ? taskData['name'].toString()
-      : '';
-  final taskPoints = taskData != null && taskData.containsKey('points')
-      ? taskData['points'].toString()
-      : '0';
-
-  final sheetMins = controller.getSheetMins(sheetData);
-
-  final date = controller.getSheetStartEndDate(sheetData);
-
   return DataRow(
     color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
       return isEven ? Colors.white : Colors.grey.shade200;
@@ -190,7 +159,7 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text: '$brand $model',
+          text: '${sheetData.brandName} ${sheetData.modelName}',
           maxWidth: null,
         ),
       ),
@@ -198,14 +167,14 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           formatDouble: false,
           maxWidth: null,
-          text: taskName,
+          text: '${sheetData.nameEn} - ${sheetData.nameAr}',
         ),
       ),
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
           maxWidth: null,
-          text: date['start_date'],
+          text: textToDate(sheetData.startDate,withTime: true),
           color: const Color(0xffBE5B50),
           isBold: true,
         ),
@@ -214,7 +183,7 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           formatDouble: false,
           maxWidth: null,
-          text: date['end_date'],
+          text: textToDate(sheetData.endDate,withTime: true),
           color: const Color(0xff73946B),
           isBold: true,
         ),
@@ -224,7 +193,7 @@ DataRow dataRowForTheTable(
           formatDouble: false,
           isBold: true,
           color: Colors.blueGrey,
-          text: sheetMins,
+          text: '${sheetData.minutes} mins, ${sheetData.seconds} sec',
         ),
       ),
       DataCell(
@@ -232,7 +201,7 @@ DataRow dataRowForTheTable(
           formatDouble: false,
           isBold: true,
           color: Colors.orange,
-          text: taskPoints,
+          text: sheetData.points.toString(),
         ),
       ),
     ],

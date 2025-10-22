@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:datahubai/Models/employee_performance_model.dart';
+import 'package:datahubai/Models/employee%20performance/employee_performance.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../Controllers/Main screen controllers/employees_performance_controller.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/main screen widgets/employee_performance_widgets/employee_information.dart';
@@ -26,9 +24,6 @@ class EmployeePerformance extends StatelessWidget {
                 GetX<EmployeesPerformanceController>(
                   init: EmployeesPerformanceController(),
                   builder: (controller) {
-                    bool isYearsLoading = controller.allYears.isEmpty;
-                    bool isMonthsLoading = controller.allMonths.isEmpty;
-                    bool isDaysLoading = controller.allDays.isEmpty;
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       spacing: 10,
@@ -39,16 +34,19 @@ class EmployeePerformance extends StatelessWidget {
                             hintText: 'Year',
                             textcontroller: controller.year.value.text,
                             showedSelectedName: 'name',
-                            items: isYearsLoading ? {} : controller.allYears,
                             onChanged: (key, value) {
                               controller.year.text = value['name'];
                               controller.month.clear();
-                              controller.day.clear();
-                              controller.allDays.clear();
-                              // controller.isYearSelected.value = true;
-                              // controller.isMonthSelected.value = false;
-                              // controller.isDaySelected.value = false;
-                              controller.filterTimeSheets();
+                              controller.isThisMonthSelected.value = false;
+                              controller.isThisYearSelected.value = false;
+                              controller.filterSearch();
+                            },
+                            onDelete: () {
+                              controller.year.clear();
+                              controller.month.clear();
+                            },
+                            onOpen: () {
+                              return controller.getAllYears();
                             },
                           ),
                         ),
@@ -58,78 +56,41 @@ class EmployeePerformance extends StatelessWidget {
                             hintText: 'Month',
                             textcontroller: controller.month.text,
                             showedSelectedName: 'name',
-                            items: isMonthsLoading ? {} : controller.allMonths,
                             onChanged: (key, value) {
-                              controller.allDays.assignAll(
-                                getDaysInMonth(value['name']),
-                              );
                               controller.month.text = value['name'];
-                              controller.day.clear();
-                              // controller.isMonthSelected.value = true;
-                              // controller.isYearSelected.value = false;
-                              // controller.isDaySelected.value = false;
-                              controller.filterTimeSheets();
+                              controller.isThisMonthSelected.value = false;
+                              controller.isThisYearSelected.value = false;
+                              controller.filterSearch();
+                            },
+                            onDelete: () {
+                              controller.month.clear();
+                            },
+                            onOpen: () {
+                              return controller.getAllMonths();
                             },
                           ),
                         ),
-                        SizedBox(
-                          width: controller.dropDownWidth,
-                          child: CustomDropdown(
-                            hintText: 'Day',
-                            textcontroller: controller.day.text,
-                            showedSelectedName: 'name',
-                            items: isDaysLoading ? {} : controller.allDays,
-                            onChanged: (key, value) {
-                              controller.day.text = value['name'];
-                              controller.filterTimeSheets();
-                              // controller.isMonthSelected.value = false;
-                              // controller.isYearSelected.value = false;
-                              // controller.isDaySelected.value = true;
-                            },
-                          ),
-                        ),
-                        ElevatedButton(
-                          style: allButtonStyle,
-                          onPressed: () {
-                            controller.filterTimeSheets(preset: 'all');
-                            controller.isTodaySelected.value = false;
-                            controller.isThisMonthSelected.value = false;
-                            controller.isThisYearSelected.value = false;
-                            controller.year.clear();
-                            controller.month.clear();
-                            controller.day.clear();
-                            controller.allDays.clear();
-                          },
-                          child: const Text('All'),
-                        ),
-                        ElevatedButton(
-                          style: todayButtonStyle,
-                          onPressed: controller.isTodaySelected.isFalse
-                              ? () {
-                                  controller.filterTimeSheets(preset: 'today');
-                                  controller.isTodaySelected.value = true;
-                                  controller.isThisMonthSelected.value = false;
-                                  controller.isThisYearSelected.value = false;
-                                  // controller.isYearSelected.value = false;
-                                  // controller.isMonthSelected.value = false;
-                                  // controller.isDaySelected.value = true;
-                                }
-                              : null,
-                          child: const Text('Today'),
-                        ),
+
+                        // ElevatedButton(
+                        //   style: allButtonStyle,
+                        //   onPressed: () {
+                        //     controller.filterTimeSheets(preset: 'all');
+                        //     controller.isTodaySelected.value = false;
+                        //     controller.isThisMonthSelected.value = false;
+                        //     controller.isThisYearSelected.value = false;
+                        //     controller.year.clear();
+                        //     controller.month.clear();
+                        //   },
+                        //   child: const Text('All'),
+                        // ),
                         ElevatedButton(
                           style: thisMonthButtonStyle,
                           onPressed: controller.isThisMonthSelected.isFalse
                               ? () {
-                                  controller.filterTimeSheets(
-                                    preset: 'thisMonth',
-                                  );
-                                  controller.isTodaySelected.value = false;
+                                 
                                   controller.isThisMonthSelected.value = true;
                                   controller.isThisYearSelected.value = false;
-                                  // controller.isYearSelected.value = false;
-                                  // controller.isMonthSelected.value = true;
-                                  // controller.isDaySelected.value = false;
+                                  controller.filterSearch();
                                 }
                               : null,
                           child: const Text('This Month'),
@@ -138,15 +99,10 @@ class EmployeePerformance extends StatelessWidget {
                           style: thisYearButtonStyle,
                           onPressed: controller.isThisYearSelected.isFalse
                               ? () {
-                                  controller.filterTimeSheets(
-                                    preset: 'thisYear',
-                                  );
-                                  controller.isTodaySelected.value = false;
+                                  
                                   controller.isThisMonthSelected.value = false;
                                   controller.isThisYearSelected.value = true;
-                                  // controller.isYearSelected.value = true;
-                                  // controller.isMonthSelected.value = false;
-                                  // controller.isDaySelected.value = false;
+                                  controller.filterSearch();
                                 }
                               : null,
                           child: const Text('This Year'),
@@ -199,7 +155,6 @@ Widget tableOfScreens({
     dataRowMinHeight: 30,
     columnSpacing: 5,
     horizontalMargin: horizontalMarginForTable,
-    // showBottomBorder: true,
     dataTextStyle: regTextStyle,
     headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
@@ -212,7 +167,6 @@ Widget tableOfScreens({
       ),
       DataColumn(
         columnWidth: const IntrinsicColumnWidth(flex: 2),
-
         label: AutoSizedText(text: 'Employee', constraints: constraints),
         // onSort: controller.onSort,
       ),
@@ -244,52 +198,27 @@ Widget tableOfScreens({
         // onSort: controller.onSort,
       ),
     ],
-    rows: List.generate(controller.allTechnician.length, (i) {
-      final task = controller.allTechnician[i];
-      final taskData = task.data() as Map<String, dynamic>;
-      final taskId = task.id;
-      final isEven = i % 2 == 0;
-      final name = taskData['name'] ?? '';
-      final mins = controller.getEmployeeMins(taskId);
-      final tasks = controller.getEmployeeTasks(taskId);
-      final employeeSheets = controller.getEmployeeSheets(taskId);
-      final points = controller.employeePointsMap[taskId] ?? 0;
+    rows: List.generate(controller.filteredPerformances.length, (i) {
+      EmployeePerformanceModel data = controller.filteredPerformances[i];
+      bool isEven = i % 2 == 0;
 
-      final totalForJobs = controller.totalsForJobs.value;
-      final allPoints = controller.employeePointsMap.values.fold(
-        0.0,
-        (a, b) => a + b,
-      );
-
-      final model = EmployeePerformanceModel(
-        employeeName: name,
-        mins: mins,
-        points: points,
-        tasks: tasks,
-        allPoints: allPoints,
-        jobsTotal: totalForJobs,
-      );
       return dataRowForTheTable(
-        taskData,
+        data,
         constraints,
-        taskId,
+        data.id ?? '',
         controller,
         isEven,
-        model,
-        employeeSheets,
       );
     }),
   );
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> taskData,
-  constraints,
-  taskId,
+  EmployeePerformanceModel data,
+  BoxConstraints constraints,
+  String taskId,
   EmployeesPerformanceController controller,
   bool isEven,
-  EmployeePerformanceModel model,
-  List<DocumentSnapshot<Object?>> employeeSheets,
 ) {
   return DataRow(
     color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
@@ -299,12 +228,16 @@ DataRow dataRowForTheTable(
       return Colors.white; // Normal row color
     }),
     cells: [
-      DataCell(infosSection(controller, constraints, employeeSheets)),
-      DataCell((Text(model.employeeName.toString()))),
+      DataCell(
+        infosSection(controller, constraints, data.completedSheetsInfos ?? []),
+      ),
+      DataCell(
+        (textForDataRowInTable(text: data.name ?? '', formatDouble: false)),
+      ),
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text: model.mins.toString(),
+          text: data.timeString ?? '',
           color: Colors.red,
           isBold: true,
         ),
@@ -312,7 +245,7 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text: model.points.toString(),
+          text: data.points.toString(),
           color: Colors.green,
           isBold: true,
         ),
@@ -322,12 +255,12 @@ DataRow dataRowForTheTable(
           formatDouble: false,
           isBold: true,
           color: Colors.blueGrey,
-          text: model.tasks.toString(),
+          text: data.totalTasks.toString(),
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: model.amt.toString(),
+          text: data.amt.toString(),
           isBold: true,
           color: Colors.orange,
         ),
@@ -338,18 +271,13 @@ DataRow dataRowForTheTable(
 
 IconButton infosSection(
   EmployeesPerformanceController controller,
-  constraints,
-  List<DocumentSnapshot<Object?>> employeeSheets,
+  BoxConstraints constraints,
+  List<CompletedSheetsInfos> employeeSheets,
 ) {
   return IconButton(
     onPressed: () {
-      controller.getSheetTasksAndPoints(employeeSheets);
-      controller.getSheetsCar(employeeSheets);
-      infosDialog(
-        constraints: constraints,
-        controller: controller,
-        employeeSheets: employeeSheets,
-      );
+      controller.filteredPerformancesInfos.assignAll(employeeSheets);
+      infosDialog(constraints: constraints, controller: controller);
     },
     icon: const Icon(Icons.list_alt, color: Colors.blueAccent),
   );

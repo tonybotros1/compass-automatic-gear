@@ -884,77 +884,6 @@ class JobCardController extends GetxController {
     }
   }
 
-  // Future<void> createQuotationCard(String jobId) async {
-  //   try {
-  //     showSnackBar('Creating', 'Please Wait');
-  //     creatingNewQuotation.value = true;
-  //     Map<String, dynamic> newData = {
-  //       'quotation_status': 'New',
-  //       'car_brand_logo': carBrandLogo.value,
-  //       'car_brand': carBrandId.value,
-  //       'car_model': carModelId.value,
-  //       'plate_number': plateNumber.text,
-  //       'plate_code': plateCode.text,
-  //       'country': countryId.value,
-  //       'city': cityId.value,
-  //       'year': year.text,
-  //       'color': colorId.value,
-  //       'engine_type': engineTypeId.value,
-  //       'vehicle_identification_number': vin.text,
-  //       'transmission_type': transmissionType.text,
-  //       'mileage_in': mileageIn.value.text,
-  //       'mileage_out': mileageOut.value.text,
-  //       'mileage_in_out_diff': inOutDiff.value.text,
-  //       'customer': customerId.value,
-  //       'contact_name': customerEntityName.text,
-  //       'contact_number': customerEntityPhoneNumber.text,
-  //       'contact_email': customerEntityEmail.text,
-  //       'credit_limit': customerCreditNumber.text,
-  //       'outstanding': customerOutstanding.text,
-  //       'saleMan': customerSaleManId.value,
-  //       'branch': customerBranchId.value,
-  //       'currency': customerCurrencyId.value,
-  //       'rate': customerCurrencyRate.text,
-  //       'payment_method': payType.value,
-  //       'quotation_number': quotationCounter.value,
-  //       'quotation_date': '',
-  //       'validity_days': '',
-  //       'validity_end_date': '',
-  //       'reference_number': '',
-  //       'delivery_time': '',
-  //       'quotation_warrenty_days': jobWarrentyDays.value.text,
-  //       'quotation_warrenty_km': jobWarrentyKM.value.text,
-  //       'quotation_notes': '',
-  //     };
-
-  //     // await getCurrentQuotationCounterNumber();
-  //     newData['quotation_number'] = quotationCounter.value;
-  //     newData['added_date'] = DateTime.now().toString();
-  //     var newQuotation = await FirebaseFirestore.instance
-  //         .collection('quotation_cards')
-  //         .add(newData);
-
-  //     // for (var element in allInvoiceItems) {
-  //     //   var data = element.data();
-  //     //   await FirebaseFirestore.instance
-  //     //       .collection('quotation_cards')
-  //     //       .doc(newQuotation.id)
-  //     //       .collection('invoice_items')
-  //     //       .add(data);
-  //     // }
-  //     await FirebaseFirestore.instance
-  //         .collection('job_cards')
-  //         .doc(jobId)
-  //         .update({'quotation_id': newQuotation.id});
-  //     showSnackBar('Done', 'Quotation Created Successfully');
-
-  //     creatingNewQuotation.value = false;
-  //   } catch (e) {
-  //     creatingNewQuotation.value = false;
-  //     showSnackBar('Alert', 'Something Went Wrong');
-  //   }
-  // }
-
   Future<void> editApproveForJobCard(String jobId, String status) async {
     if (jobStatus1.value.isEmpty) {
       showSnackBar('Alert', 'Please Save The Job First');
@@ -1038,36 +967,6 @@ class JobCardController extends GetxController {
       openingQuotationCardScreen.value = false;
     }
   }
-
-  // Future<void> openQuotationCardScreenByNumber() async {
-  //   try {
-  //     openingQuotationCardScreen.value = true;
-  //     QuotationCardController quotationCardController = Get.put(
-  //       QuotationCardController(),
-  //     );
-  //     var quotation = await FirebaseFirestore.instance
-  //         .collection('quotation_cards')
-  //         .where('quotation_number', isEqualTo: quotationCounter.value)
-  //         .get();
-  //     var id = quotation.docs.first.id;
-  //     // var data = quotation.docs.first.data();
-
-  //     // quotationCardController.getAllInvoiceItems(id);
-  //     // await quotationCardController.loadValues(data, id);
-  //     // showSnackBar('Done', 'Opened Successfully');
-  //     // await editQuotationCardDialog(
-  //     //   quotationCardController,
-  //     //   data,
-  //     //   id,
-  //     //   screenName: '🧾 Quotation',
-  //     //   headerColor: Colors.deepPurple,
-  //     // );
-  //     openingQuotationCardScreen.value = false;
-  //   } catch (e) {
-  //     openingQuotationCardScreen.value = false;
-  //     showSnackBar('Alert', 'Something Went Wrong');
-  //   }
-  // }
 
   // function to manage loading button
   void setButtonLoading(String menuId, bool isLoading) {
