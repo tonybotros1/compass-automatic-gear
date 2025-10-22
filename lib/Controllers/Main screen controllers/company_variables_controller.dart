@@ -1,13 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 import 'package:datahubai/consts.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'main_screen_contro.dart';
+import '../../Models/company variables/company_variables_model.dart';
+import '../../helpers.dart';
 
 class CompanyVariablesController extends GetxController {
-  RxString companyId = RxString('');
   RxString companyLogo = RxString('');
-
+  TextEditingController vatPercentage = TextEditingController();
+  TextEditingController incentivePercentage = TextEditingController();
+  TextEditingController taxNumber = TextEditingController();
+  RxBool updatingVariables = RxBool(false);
   double logoSize = 150;
   RxList<String> userRoles = RxList([]);
 
@@ -28,134 +33,127 @@ class CompanyVariablesController extends GetxController {
     'Country': '',
     'City': '',
   });
-  RxMap industryMap = RxMap({});
-
-  MainScreenController mainScreenController = Get.put(MainScreenController());
+  String backendUrl = backendTestURI;
+  CompanyVariablesModel companyVariablesDetails = CompanyVariablesModel();
 
   @override
   void onInit() async {
-    await getCompanyId();
-    await getIndustries();
-    getCurrentCompanyInformation();
-    getResponsibilitiess();
+    getCompanyVariables();
     super.onInit();
   }
 
-  Future<void> getCompanyId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    companyId.value = prefs.getString('companyId')!;
+  String removePercent(String? text) {
+    if (text == null){
+      return '';
+    }
+    return text.replaceAll('%', '').trim();
   }
 
-  // this function is to get industries
-  Future<void> getIndustries() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'INDUSTRIES')
-        .get();
-
-    var typrId = typeDoc.docs.first.id;
-
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typrId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .snapshots()
-        .listen((business) {
-          industryMap.value = {
-            for (var doc in business.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  Future<void> getCurrentCompanyInformation() async {
+  Future<void> getCompanyVariables() async {
     try {
-      final companyInfos = await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyId.value)
-          .get();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/company_variables/get_company_variables_and_details',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        companyVariablesDetails = CompanyVariablesModel.fromJson(
+          decoded['company_variables'],
+        );
+        companyLogo.value = companyVariablesDetails.companyLogoUrl ?? '';
+        companyInformation['Company Name'] =
+            companyVariablesDetails.companyName ?? '';
+        companyInformation['Industry'] =
+            companyVariablesDetails.industryName ?? '';
 
-      if (companyInfos.exists) {
-        final data = companyInfos.data();
+        ownerInformation['Name'] = companyVariablesDetails.ownerName ?? '';
+        ownerInformation['Phone Number'] =
+            companyVariablesDetails.ownerPhone ?? '';
+        ownerInformation['Email'] = companyVariablesDetails.ownerEmail ?? '';
+        ownerInformation['Address'] =
+            companyVariablesDetails.ownerAddress ?? '';
+        ownerInformation['Country'] = companyVariablesDetails.countryName ?? '';
+        ownerInformation['City'] = companyVariablesDetails.cityName ?? '';
 
-        if (data != null) {
-          getOwnerInformation(data);
-          companyInformation.value = {
-            'Company Name': data['company_name'] ?? '',
-            'Industry': getdataName(data['industry'], industryMap),
-          };
-          companyLogo.value = data['company_logo'] ?? '';
+        companyVariables['Incentive Percentage'] =
+            companyVariablesDetails.incentivePercentage != null
+            ? '${companyVariablesDetails.incentivePercentage! * 100}%'
+            : '';
+        companyVariables['VAT Percentage'] =
+            companyVariablesDetails.vatPercentage != null
+            ? '${companyVariablesDetails.vatPercentage! * 100}%'
+            : "";
+        companyVariables['TAX Number'] =
+            companyVariablesDetails.taxNumber ?? '';
+        userRoles.assignAll(
+          (companyVariablesDetails.rolesDetails ?? []).map(
+            (role) => role.roleName ?? '',
+          ),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getCompanyVariables();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
         }
-      }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
     } catch (e) {
       //
     }
   }
 
-  Future<void> getOwnerInformation(Map data) async {
-    Map<String, dynamic> contactDetails =
-        data['contact_details'] as Map<String, dynamic>;
-
-    ownerInformation.value = {
-      'Name': mainScreenController.userName.value,
-      'Phone Number': contactDetails['phone'],
-      'Email': mainScreenController.userEmail.value,
-      'Address': contactDetails['address'],
-      'Country': await getCountry(contactDetails['country']),
-      'City': await getCity(contactDetails['country'], contactDetails['city']),
-    };
-  }
-
-  Future<String> getCountry(String id) async {
+  Future<void> updateVariables() async {
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('all_countries')
-          .doc(id)
-          .get();
-
-      if (doc.exists) {
-        final data = doc.data();
-        return data?['name'] ?? 'Unknown Country';
-      } else {
-        return 'Country Not Found';
-      }
+      updatingVariables.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/company_variables/update_company_variables',
+      );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          'vat_percentage': (double.tryParse(vatPercentage.text) ?? 0) / 100,
+          'incentive_percentage':
+              (double.tryParse(incentivePercentage.text) ?? 0 )/ 100,
+          'tax_number': taxNumber.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        companyVariables['Incentive Percentage'] =
+            '${incentivePercentage.text}%';
+        companyVariables['VAT Percentage'] = '${vatPercentage.text}%';
+        companyVariables['TAX Number'] = taxNumber.text;
+        Get.back();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateVariables();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      updatingVariables.value = false;
     } catch (e) {
-      return 'Error';
+      updatingVariables.value = false;
     }
   }
 
-  Future getCity(String country,String city) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('all_countries')
-        .doc(country)
-        .collection('values')
-        .doc(city)
-        .get();
-
-    if (doc.exists) {
-      final data = doc.data();
-      return data?['name'] ?? 'Unknown City';
-    } else {
-      return 'City Not Found';
-    }
-  }
-
-  Future<void> getResponsibilitiess() async {
-    List roles = mainScreenController.userRoles;
-    userRoles.clear();
-    final roleSnapshot = await FirebaseFirestore.instance
-        .collection('sys-roles')
-        .where(FieldPath.documentId, whereIn: roles)
-        .get();
-
-    for (var role in roleSnapshot.docs) {
-      userRoles.add(role.data()['role_name']);
-    }
-  }
-
-  // getUserName(id)async{
-  //  var user = await FirebaseFirestore.instance.collection('sys-users').doc(id).get();
-  //  String name = user.data()?['user_name'] ?? '';
-  //  return name;
-  // }
+  // ===================================================================================================================
 }

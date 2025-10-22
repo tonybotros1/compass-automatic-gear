@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/company_variables_controller.dart';
+import '../../../../Widgets/main screen widgets/company_variables_widgets/variables_dialog.dart';
 import '../../../../consts.dart';
 
 class CompanyVariables extends StatelessWidget {
@@ -31,15 +32,7 @@ class CompanyVariables extends StatelessWidget {
                               spacing: 10,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  spacing: 20,
-                                  children: [
-                                    labelBox(
-                                      label: 'Company Information',
-                                      onPressed: () {},
-                                    ),
-                                  ],
-                                ),
+                                labelBox('Company Information'),
                                 controller.companyLogo.value.isNotEmpty
                                     ? logoBox(
                                         controller.logoSize,
@@ -78,10 +71,7 @@ class CompanyVariables extends StatelessWidget {
                               spacing: 20,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                labelBox(
-                                  label: 'Owner\'s Information',
-                                  onPressed: () {},
-                                ),
+                                labelBox('Owner\'s Information'),
 
                                 Column(
                                   spacing: 2,
@@ -109,7 +99,7 @@ class CompanyVariables extends StatelessWidget {
                         ],
                       ),
                       const Divider(),
-                      labelBox(label: 'Responsibilities', onPressed: () {}),
+                      labelBox('Responsibilities'),
 
                       Wrap(
                         spacing: 20,
@@ -135,7 +125,31 @@ class CompanyVariables extends StatelessWidget {
                         }),
                       ),
                       const Divider(),
-                      labelBox(label: 'Variables', onPressed: () {}),
+                      labelBox(
+                        'Variables',
+                        onPressed: () {
+                          controller
+                              .incentivePercentage
+                              .text = controller.removePercent(
+                            controller.companyVariables['Incentive Percentage'],
+                          );
+                          controller.vatPercentage.text = controller
+                              .removePercent(
+                                controller.companyVariables['VAT Percentage'],
+                              );
+                          controller.taxNumber.text =
+                              controller.companyVariables['TAX Number'] ?? '';
+                          variablesDialog(
+                            constraints: constraints,
+                            controller: controller,
+                            onPressed: controller.updatingVariables.isFalse
+                                ? () {
+                                    controller.updateVariables();
+                                  }
+                                : null,
+                          );
+                        },
+                      ),
                       Column(
                         spacing: 2,
                         children: List.generate(
@@ -164,7 +178,7 @@ class CompanyVariables extends StatelessWidget {
     );
   }
 
-  Row labelBox({required String label, required void Function()? onPressed}) {
+  Row labelBox(String label, {void Function()? onPressed}) {
     return Row(
       spacing: 20,
       children: [
@@ -176,13 +190,15 @@ class CompanyVariables extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        IconButton(
-          iconSize: 20,
-          tooltip: 'Edit',
-          color: Colors.grey.shade700,
-          onPressed: onPressed,
-          icon: const Icon(Icons.edit),
-        ),
+        onPressed != null
+            ? IconButton(
+                iconSize: 20,
+                tooltip: 'Edit',
+                color: Colors.grey.shade700,
+                onPressed: onPressed,
+                icon: const Icon(Icons.edit),
+              )
+            : const SizedBox(),
       ],
     );
   }
