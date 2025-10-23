@@ -18,7 +18,6 @@ class EmployeesPerformanceController extends GetxController {
   RxBool isThisYearSelected = RxBool(false);
 
   double dropDownWidth = 150;
-  RxBool isScreenLoadingForTimesheets = RxBool(false);
   RxBool isScreenLoadingForEmployeeTasks = RxBool(false);
   final RxMap<String, int> employeePointsMap = <String, int>{}.obs;
   RxList<EmployeePerformanceModel> filteredPerformances =
@@ -33,6 +32,7 @@ class EmployeesPerformanceController extends GetxController {
 
   @override
   void onInit() async {
+    isThisMonthSelected.value = true;
     searchEngine({'this_month': true});
     super.onInit();
   }

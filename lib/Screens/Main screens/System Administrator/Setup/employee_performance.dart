@@ -101,10 +101,6 @@ class EmployeePerformance extends StatelessWidget {
                 Expanded(
                   child: GetX<EmployeesPerformanceController>(
                     builder: (controller) {
-                      if (controller.isScreenLoadingForTimesheets.value) {
-                        return Center(child: loadingProcess);
-                      }
-
                       return SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: SizedBox(
