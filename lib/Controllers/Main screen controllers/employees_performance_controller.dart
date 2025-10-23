@@ -63,9 +63,15 @@ class EmployeesPerformanceController extends GetxController {
       body['month'] = monthNameToNumber(month.text);
     }
     if (isThisMonthSelected.isTrue) {
+      DateTime now = DateTime.now();
       body['this_month'] = true;
+      year.text = now.year.toString();
+      month.text = monthNumberToName(now.month);
     }
     if (isThisYearSelected.isTrue) {
+      DateTime now = DateTime.now();
+      year.text = now.year.toString();
+      month.clear();
       body['this_year'] = true;
     }
     searchEngine(body);
@@ -105,5 +111,6 @@ class EmployeesPerformanceController extends GetxController {
       //
     }
   }
+
   // =============================================================================================================================
 }

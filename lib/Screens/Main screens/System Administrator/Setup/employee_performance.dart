@@ -70,19 +70,6 @@ class EmployeePerformance extends StatelessWidget {
                             },
                           ),
                         ),
-
-                        // ElevatedButton(
-                        //   style: allButtonStyle,
-                        //   onPressed: () {
-                        //     controller.filterTimeSheets(preset: 'all');
-                        //     controller.isTodaySelected.value = false;
-                        //     controller.isThisMonthSelected.value = false;
-                        //     controller.isThisYearSelected.value = false;
-                        //     controller.year.clear();
-                        //     controller.month.clear();
-                        //   },
-                        //   child: const Text('All'),
-                        // ),
                         ElevatedButton(
                           style: thisMonthButtonStyle,
                           onPressed: controller.isThisMonthSelected.isFalse
