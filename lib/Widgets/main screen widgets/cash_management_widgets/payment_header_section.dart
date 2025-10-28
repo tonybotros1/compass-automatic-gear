@@ -1,4 +1,4 @@
-import 'package:datahubai/Controllers/Main%20screen%20controllers/cash_management_controller.dart';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/cash_management_payments_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
@@ -9,7 +9,7 @@ Widget paymentHeader(BuildContext context) {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
-    child: GetX<CashManagementController>(builder: (controller) {
+    child: GetX<CashManagementPaymentsController>(builder: (controller) {
       bool isVendorLoading = controller.allVendors.isEmpty;
       return Column(
         spacing: 10,

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
+import '../../../Controllers/Main screen controllers/cash_management_payments_controller.dart';
 import '../../../consts.dart';
 import '../../text_button.dart';
 import 'add_new_payment_or_edit.dart';
 
 Future<dynamic> paymentDialog(
     {required BoxConstraints constraints,
-    required CashManagementController controller,
+    required CashManagementPaymentsController controller,
     required void Function()? onPressedForSave,
     required void Function()? onPressedForPost,
     required void Function()? onPressedForDelete,
@@ -38,20 +37,20 @@ Future<dynamic> paymentDialog(
                       '💸 Payment',
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    GetX<CashManagementController>(builder: (controller) {
+                    GetX<CashManagementPaymentsController>(builder: (controller) {
                       return controller.paymentStatus.value != ''
                           ? statusBox(controller.paymentStatus.value)
                           : const SizedBox();
                     }),
                     const Spacer(),
                     separator(),
-                    GetBuilder<CashManagementController>(
+                    GetBuilder<CashManagementPaymentsController>(
                         builder: (controller) => ClickableHoverText(
                               onTap: onPressedForSave,
                               text: 'Save',
                             )),
                     point(),
-                    GetBuilder<CashManagementController>(builder: (controller) {
+                    GetBuilder<CashManagementPaymentsController>(builder: (controller) {
                       return ClickableHoverText(
                           onTap: onPressedForPost, text: 'Post');
                     }),
@@ -60,7 +59,7 @@ Future<dynamic> paymentDialog(
                         spacing: 10,
                         children: [
                           point(),
-                          GetBuilder<CashManagementController>(
+                          GetBuilder<CashManagementPaymentsController>(
                               builder: (controller) {
                             return ClickableHoverText(
                                 onTap: onPressedForCancel, text: 'Cancel');
@@ -69,7 +68,7 @@ Future<dynamic> paymentDialog(
                       ),
                     separator(),
                     if (onPressedForDelete != null)
-                      GetBuilder<CashManagementController>(
+                      GetBuilder<CashManagementPaymentsController>(
                           builder: (controller) {
                         return Row(
                           spacing: 10,

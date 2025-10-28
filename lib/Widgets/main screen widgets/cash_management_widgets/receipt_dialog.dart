@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
+import '../../../Controllers/Main screen controllers/cash_management_receipts_controller.dart';
 import '../../../consts.dart';
 import '../../text_button.dart';
 import 'add_new_receipt_or_edit.dart';
 
-Future<dynamic> receiptDialog(
-    {required BoxConstraints constraints,
-    required CashManagementController controller,
-    required void Function()? onPressedForSave,
-    required void Function()? onPressedForPost,
-    required void Function()? onPressedForcancel,
-    required void Function()? onPressedForDelete,
-    required bool canEdit}) {
+Future<dynamic> receiptDialog({
+  required BoxConstraints constraints,
+  required CashManagementReceiptsController controller,
+  required void Function()? onPressedForSave,
+  required void Function()? onPressedForPost,
+  required void Function()? onPressedForcancel,
+  required void Function()? onPressedForDelete,
+  required bool canEdit,
+}) {
   return Get.dialog(
-      barrierDismissible: false,
-      Dialog(
-        insetPadding: const EdgeInsets.all(8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        child: LayoutBuilder(builder: (context, constraints) {
+    barrierDismissible: false,
+    Dialog(
+      insetPadding: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
           return Column(
             children: [
               Container(
@@ -27,8 +28,9 @@ Future<dynamic> receiptDialog(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(5),
-                      topRight: Radius.circular(5)),
+                    topLeft: Radius.circular(5),
+                    topRight: Radius.circular(5),
+                  ),
                   color: mainColor,
                 ),
                 child: Row(
@@ -38,48 +40,63 @@ Future<dynamic> receiptDialog(
                       '💸 Receipt',
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
-                    GetX<CashManagementController>(builder: (controller) {
-                      return controller.status.value != ''
-                          ? statusBox(controller.status.value)
-                          : const SizedBox();
-                    }),
+                    GetX<CashManagementReceiptsController>(
+                      builder: (controller) {
+                        return controller.status.value != ''
+                            ? statusBox(controller.status.value)
+                            : const SizedBox();
+                      },
+                    ),
                     const Spacer(),
                     separator(),
-                    GetBuilder<CashManagementController>(
-                        builder: (controller) => ClickableHoverText(
-                              onTap: onPressedForSave,
-                              text: 'Save',
-                            )),
+                    GetX<CashManagementReceiptsController>(
+                      builder: (controller) => ClickableHoverText(
+                        onTap: onPressedForSave,
+                        text: controller.addingNewValue.isFalse
+                            ? 'Save'
+                            : "•••",
+                      ),
+                    ),
                     point(),
-                    GetBuilder<CashManagementController>(builder: (controller) {
-                      return ClickableHoverText(
-                          onTap: onPressedForPost, text: 'Post');
-                    }),
+                    GetBuilder<CashManagementReceiptsController>(
+                      builder: (controller) {
+                        return ClickableHoverText(
+                          onTap: onPressedForPost,
+                          text: 'Post',
+                        );
+                      },
+                    ),
                     if (onPressedForcancel != null)
                       Row(
                         spacing: 10,
                         children: [
                           point(),
-                          GetBuilder<CashManagementController>(
-                              builder: (controller) {
-                            return ClickableHoverText(
-                                onTap: onPressedForcancel, text: 'Cancel');
-                          }),
+                          GetBuilder<CashManagementReceiptsController>(
+                            builder: (controller) {
+                              return ClickableHoverText(
+                                onTap: onPressedForcancel,
+                                text: 'Cancel',
+                              );
+                            },
+                          ),
                         ],
                       ),
                     separator(),
                     if (onPressedForDelete != null)
-                      GetBuilder<CashManagementController>(
-                          builder: (controller) {
-                        return Row(
-                          spacing: 10,
-                          children: [
-                            ClickableHoverText(
-                                onTap: onPressedForDelete, text: 'Delete'),
-                            separator(),
-                          ],
-                        );
-                      }),
+                      GetBuilder<CashManagementReceiptsController>(
+                        builder: (controller) {
+                          return Row(
+                            spacing: 10,
+                            children: [
+                              ClickableHoverText(
+                                onTap: onPressedForDelete,
+                                text: 'Delete',
+                              ),
+                              separator(),
+                            ],
+                          );
+                        },
+                      ),
                     closeIcon(),
                   ],
                 ),
@@ -93,9 +110,11 @@ Future<dynamic> receiptDialog(
                     canEdit: canEdit,
                   ),
                 ),
-              )
+              ),
             ],
           );
-        }),
-      ));
+        },
+      ),
+    ),
+  );
 }

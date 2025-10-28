@@ -33,12 +33,9 @@ Widget customerDetailsSection() {
                           showedSelectedName: 'entity_name',
                           textcontroller: controller.customerName.text,
                           hintText: 'Customer',
-                          // items: isCustomersLoading
-                          //     ? {}
-                          //     : controller.allCustomers,
                           onChanged: (key, value) {
                             controller.customerName.text = value['entity_name'];
-                            controller.onSelectForCustomers(value);
+                            controller.onSelectForCustomers(key,value);
                             controller.customerId.value = key;
                             controller.isJobModified.value = true;
                           },

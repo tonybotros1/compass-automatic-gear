@@ -4,7 +4,7 @@ import 'package:datahubai/Widgets/first_letter_from_each_word_capital.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import '../consts.dart';
 import 'date_time_field.dart';
 
@@ -22,6 +22,7 @@ Widget myTextFormFieldWithBorder({
   double? width,
   bool? isCapitaLetters,
   FocusNode? focusNode,
+  bool? moneyFormat,
   TextInputAction? textInputAction,
   void Function()? onEditingComplete,
   maxLines = 1,
@@ -78,6 +79,8 @@ Widget myTextFormFieldWithBorder({
               ? [DateTextFormatter()]
               : isCapitaLetters == true
               ? [CapitalLettersOnlyFormatter()]
+              : moneyFormat == true
+              ? [CurrencyInputFormatter()]
               : [WordCapitalizationInputFormatter()],
           enabled: isEnabled,
           obscureText: obscureText,

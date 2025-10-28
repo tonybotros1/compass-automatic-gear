@@ -133,6 +133,8 @@ class QuotationCard extends StatelessWidget {
                               onChanged: (key, value) async {
                                 controller.statusFilter.value.text =
                                     value['name'];
+                              },onDelete: (){
+                                  controller.statusFilter.value.clear();
                               },
                             ),
                           ),

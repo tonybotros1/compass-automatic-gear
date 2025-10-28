@@ -621,29 +621,92 @@ Future<dynamic> alertMessage({
   );
 }
 
-Future<dynamic> alertDialog({
-  required BuildContext context,
+// Future<dynamic> alertDialog({
+//   required BuildContext context,
+//   required String content,
+//   required void Function() onPressed,
+// }) {
+//   return showCupertinoDialog(
+//     context: context,
+//     builder: (BuildContext context) {
+//       return CupertinoAlertDialog(
+//         title: const Text("Alert"),
+//         content: Text(content),
+//         actions: [
+//           CupertinoDialogAction(
+//             child: const Text("Cancel"),
+//             onPressed: () {
+//               Get.back();
+//             },
+//           ),
+//           CupertinoDialogAction(
+//             isDestructiveAction: true,
+//             isDefaultAction: true,
+//             onPressed: onPressed,
+//             child: const Text('Ok', style: TextStyle(color: Colors.red)),
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }
+
+Future<void> alertDialog({
+  // BuildContext is required in Flutter to locate the dialog in the widget tree
+  required BuildContext context, 
   required String content,
-  required void Function() onPressed,
+  required VoidCallback onPressed,
 }) {
-  return showCupertinoDialog(
+  return showDialog<void>(
     context: context,
+    // Prevents closing the dialog by tapping outside of it
+    barrierDismissible: false, 
     builder: (BuildContext context) {
-      return CupertinoAlertDialog(
-        title: const Text("Alert"),
-        content: Text(content),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text("Cancel"),
+      return AlertDialog(
+        // Minimal rounding (matches the requested "little rounded" corners)
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        
+        // Title consistent with the previous 'Alert'
+        title: const Text(
+          "Alert",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        
+        // Content body
+        content: Text(
+          content,
+          style: const TextStyle(fontSize: 14.0),
+        ),
+        
+        actions: <Widget>[
+          // Cancel Button (Dismisses the dialog)
+          TextButton(
             onPressed: () {
-              Get.back();
+              // Standard way to dismiss a dialog in Flutter
+              Navigator.of(context).pop();
             },
+            child: const Text(
+              "Cancel",
+              style: TextStyle(color: Colors.grey),
+            ),
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            isDefaultAction: true,
-            onPressed: onPressed,
-            child: const Text('Ok', style: TextStyle(color: Colors.red)),
+          
+          // Confirmation Button (Destructive/Primary Action)
+          TextButton(
+            // Execute the provided action
+            onPressed: () {
+              // 1. Dismiss the dialog first
+              Navigator.of(context).pop();
+              // 2. Execute the user's action
+              onPressed();
+            },
+            child: const Text(
+              'OK',
+              // Use a striking color (red) for destructive/important action
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       );

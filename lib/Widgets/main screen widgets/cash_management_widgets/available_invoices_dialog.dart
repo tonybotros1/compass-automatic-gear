@@ -1,43 +1,50 @@
+import 'package:datahubai/Controllers/Main%20screen%20controllers/cahs_management_base_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../Controllers/Main screen controllers/cash_management_controller.dart';
+import '../../../Models/ar receipts and ap payments/customer_invoices_model.dart';
 import '../../../consts.dart';
 import '../auto_size_box.dart';
 
-Widget availableInvoicesDialog(
+Widget availableInvoicesDialog<T extends CashManagementBaseController>(
   BoxConstraints constraints,
   BuildContext context,
   bool isPayment,
-  RxList<dynamic> availableList,
-  RxList<dynamic> selectedAvailableList,
+  T controller,
 ) {
   return SizedBox(
     width: constraints.maxWidth / 1.1,
     child: Padding(
       padding: const EdgeInsets.all(8.0),
-      child: GetX<CashManagementController>(builder: (controller) {
-        if (controller.loadingInvoices.isTrue && availableList.isEmpty) {
-          return Center(child: loadingProcess);
-        }
-        return tableOfScreens(
+      child: GetX<T>(
+        builder: (controller) {
+          if (isPayment) {
+            if (controller.loadingInvoices.isTrue &&
+                controller.availablePayments.isEmpty) {
+              return Center(child: loadingProcess);
+            }
+          } else {
+            if (controller.loadingInvoices.isTrue &&
+                controller.availableReceipts.isEmpty) {
+              return Center(child: loadingProcess);
+            }
+          }
+          return tableOfScreens(
             constraints: constraints,
             context: context,
             controller: controller,
             isPayment: isPayment,
-            availableList: availableList,
-            selectedAvailableList: selectedAvailableList);
-      }),
+          );
+        },
+      ),
     ),
   );
 }
 
-Widget tableOfScreens({
+Widget tableOfScreens<T extends CashManagementBaseController>({
   required BoxConstraints constraints,
   required BuildContext context,
-  required CashManagementController controller,
+  required T controller,
   required bool isPayment,
-  required RxList<dynamic> availableList,
-  required RxList<dynamic> selectedAvailableList,
 }) {
   return DataTable(
     checkboxHorizontalMargin: 2,
@@ -52,7 +59,6 @@ Widget tableOfScreens({
 
     headingRowColor: WidgetStateProperty.all(Colors.grey[300]),
 
-    // **NEW**: select/deselect *all* rows
     onSelectAll: (allSelected) {
       if (allSelected != null) {
         isPayment
@@ -63,66 +69,90 @@ Widget tableOfScreens({
 
     columns: [
       DataColumn(
-          label:
-              AutoSizedText(constraints: constraints, text: 'Invoice Number')),
-      DataColumn(label: AutoSizedText(constraints: constraints, text: 'Note')),
+        label: AutoSizedText(constraints: constraints, text: 'Invoice Number'),
+      ),
       DataColumn(
-          label: AutoSizedText(constraints: constraints, text: 'Invoice Date')),
+        label: AutoSizedText(constraints: constraints, text: 'Note'),
+      ),
+      DataColumn(
+        label: AutoSizedText(constraints: constraints, text: 'Invoice Date'),
+      ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Invoice Amount'),
         numeric: true,
       ),
       DataColumn(
-        label:
-            AutoSizedText(constraints: constraints, text: 'Outstanding Amount'),
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'Outstanding Amount',
+        ),
         numeric: true,
       ),
     ],
 
-    rows: isPayment
-        ? availableList
-            // filter out already‐selected receipts
-            .where((r) => !selectedAvailableList
-                .any((sel) => sel['reference_number'] == r['reference_number']))
-            .toList()
-            // re‐index the filtered list
-            .asMap()
-            .entries
+    rows:
+        //  isPayment
+        //     ? controller.availablePayments
+        //           // filter out already‐selected receipts
+        //           .where(
+        //             (r) => !controller.selectedAvailablePayments.any(
+        //               (sel) => sel['reference_number'] == r['reference_number'],
+        //             ),
+        //           )
+        //           .toList()
+        //           // re‐index the filtered list
+        //           .asMap()
+        //           .entries
+        //           .map((entry) {
+        //             // cast each entry to Map<String,dynamic>
+        //             final receipt = Map<String, dynamic>.from(entry.value);
+        //             final originalIndex = controller.availablePayments.indexWhere(
+        //               (r) => r['reference_number'] == receipt['reference_number'],
+        //             );
+        //             return dataRowForTheTable(
+        //               receipt,
+        //               context,
+        //               constraints,
+        //               controller,
+        //               originalIndex,
+        //               isPayment,
+        //             );
+        //           })
+        //           .toList()
+        //     :
+        controller.availableReceipts
+            // .where((r) => r.isDeleted != true)
+            .where(
+              (r) => !controller.selectedAvailableReceipts.any(
+                (sel) => (sel.jobId == r.jobId) && (sel.isDeleted != true) ,
+              ),
+            )
             .map((entry) {
-            // cast each entry to Map<String,dynamic>
-            final receipt = Map<String, dynamic>.from(entry.value);
-            final originalIndex = availableList.indexWhere(
-                (r) => r['reference_number'] == receipt['reference_number']);
-            return dataRowForTheTable(receipt, context, constraints, controller,
-                originalIndex, isPayment);
-          }).toList()
-        : availableList
-            // filter out already‐selected receipts
-            .where((r) => !selectedAvailableList
-                .any((sel) => sel['invoice_number'] == r['invoice_number']))
-            .toList()
-            // re‐index the filtered list
-            .asMap()
-            .entries
-            .map((entry) {
-            // cast each entry to Map<String,dynamic>
-            final receipt = Map<String, dynamic>.from(entry.value);
-            final originalIndex = availableList.indexWhere(
-                (r) => r['invoice_number'] == receipt['invoice_number']);
-            return dataRowForTheTable(receipt, context, constraints, controller,
-                originalIndex, isPayment);
-          }).toList(),
+              final originalIndex = controller.availableReceipts.indexWhere(
+                (r) => r.jobId == entry.jobId,
+              );
+              return dataRowForTheTable(
+                entry,
+                context,
+                constraints,
+                controller,
+                originalIndex,
+                isPayment,
+              );
+            })
+            .toList(),
   );
 }
 
-DataRow dataRowForTheTable(
-    Map<String, dynamic> receiptData,
-    BuildContext context,
-    BoxConstraints constraints,
-    CashManagementController controller,
-    int index,
-    bool isPayment) {
-  final isSelected = receiptData['is_selected'] as bool? ?? false;
+DataRow dataRowForTheTable<T extends CashManagementBaseController>(
+  CustomerInvoicesModel receiptData,
+  BuildContext context,
+  BoxConstraints constraints,
+  T controller,
+  int index,
+  bool isPayment,
+) {
+  final isSelected = receiptData.isSelected;
 
   return DataRow(
     // each row reflects its own selection flag
@@ -131,18 +161,18 @@ DataRow dataRowForTheTable(
       if (value != null) {
         isPayment
             ? controller.selectPayment(index, value)
-            : controller.selectJobReceipt(index, value);
+            : controller.selectJobReceipt(receiptData.jobId, value);
       }
     },
     cells: [
-      DataCell(Text(receiptData['invoice_number'] ?? '')),
-      DataCell(Text(receiptData['notes'] ?? '')),
-      DataCell(Text(textToDate(receiptData['invoice_date'] ?? ''))),
+      DataCell(Text(receiptData.invoiceNumber)),
+      DataCell(Text(receiptData.notes)),
+      DataCell(Text(textToDate(receiptData.invoiceDate))),
       DataCell(
         Align(
           alignment: Alignment.centerRight,
           child: textForDataRowInTable(
-            text: receiptData['invoice_amount']?.toString() ?? '',
+            text: receiptData.invoiceAmount.toString(),
           ),
         ),
       ),
@@ -150,116 +180,10 @@ DataRow dataRowForTheTable(
         Align(
           alignment: Alignment.centerRight,
           child: textForDataRowInTable(
-            text: receiptData['outstanding_amount']?.toString() ?? '',
+            text: receiptData.outstandingAmount.toString(),
           ),
         ),
       ),
     ],
   );
 }
-
-
-  // controller.loadingInvoices.isFalse
-  //             ? CustomScrollView(
-  //                 slivers: [
-  //                   SliverToBoxAdapter(
-  //                     child: Padding(
-  //                       padding: const EdgeInsets.symmetric(horizontal: 8),
-  //                       child: buildCustomTableHeader(
-  //                         prefix: CupertinoCheckbox(
-  //                             value: controller.isAllJobReceiptsSelected.value,
-  //                             onChanged: controller.availableReceipts.isEmpty
-  //                                 ? null
-  //                                 : (value) {
-  //                                     controller.selectAllJobReceipts(value!);
-  //                                   }),
-  //                         cellConfigs: [
-  //                           TableCellConfig(label: 'Invoice Number'),
-  //                           TableCellConfig(label: 'Invoice Date'),
-  //                           TableCellConfig(label: 'Invoice Amount'),
-  //                           TableCellConfig(label: 'Outsanding Amount'),
-  //                           TableCellConfig(label: 'Note', flex: 5),
-  //                         ],
-  //                       ),
-  //                     ),
-  //                   ),
-  //                   SliverFillRemaining(
-  //                     child: Container(
-  //                         width: double.infinity,
-  //                         padding: EdgeInsets.all(8),
-  //                         constraints: BoxConstraints(
-  //                           minHeight: 100,
-  //                         ),
-  //                         decoration: BoxDecoration(
-  //                           border: Border.all(color: secColor, width: 2),
-  //                           // color: Color.fromARGB(255, 202, 204, 202),
-  //                           borderRadius: BorderRadius.circular(5),
-  //                         ),
-  //                         child: SingleChildScrollView(
-  //                           child: Column(
-  //                             children: controller.availableReceipts
-  //                                 .where((availableReceipt) => !controller
-  //                                     .selectedAvailableReceipts
-  //                                     .any((selected) =>
-  //                                         selected['invoice_number'] ==
-  //                                         availableReceipt['invoice_number']))
-  //                                 .toList()
-  //                                 .asMap()
-  //                                 .entries
-  //                                 .map((entry) {
-  //                               final receipt = entry.value;
-  //                               // find the original index in availableReceipts
-  //                               final originalIndex = controller
-  //                                   .availableReceipts
-  //                                   .indexWhere((r) =>
-  //                                       r['invoice_number'] ==
-  //                                       receipt['invoice_number']);
-  //                               return buildCustomRow(
-  //                                 prefix: GetBuilder<CashManagementController>(
-  //                                     builder: (controller) {
-  //                                   return CupertinoCheckbox(
-  //                                     value: receipt['is_selected'],
-  //                                     onChanged: (value) {
-  //                                       controller.selectJobReceipt(
-  //                                           originalIndex, value!);
-  //                                     },
-  //                                   );
-  //                                 }),
-  //                                 cellConfigs: [
-  //                                   RowCellConfig(
-  //                                     initialValue: receipt['invoice_number'],
-  //                                     flex: 1,
-  //                                     isEnabled: false,
-  //                                   ),
-  //                                   RowCellConfig(
-  //                                     initialValue:
-  //                                         textToDate(receipt['invoice_date']),
-  //                                     flex: 1,
-  //                                     isEnabled: false,
-  //                                   ),
-  //                                   RowCellConfig(
-  //                                     initialValue:
-  //                                         receipt['invoice_amount'].toString(),
-  //                                     flex: 1,
-  //                                     isEnabled: false,
-  //                                   ),
-  //                                   RowCellConfig(
-  //                                     initialValue:
-  //                                         receipt['outstanding_amount']
-  //                                             .toString(),
-  //                                     flex: 1,
-  //                                     isEnabled: false,
-  //                                   ),
-  //                                   RowCellConfig(
-  //                                     initialValue: receipt['notes'],
-  //                                     flex: 5,
-  //                                     isEnabled: false,
-  //                                   ),
-  //                                 ],
-  //                               );
-  //                             }).toList(),
-  //                           ),
-  //                         )),
-  //                   )
-  //                 ],
-  //               )

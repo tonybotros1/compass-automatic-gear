@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_multi_formatter/formatters/currency_input_formatter.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -168,6 +169,8 @@ class JobCardController extends GetxController {
   RxBool isJobModified = RxBool(false);
   RxBool isJobInvoicesModified = RxBool(false);
   RxBool isJobInternalNotesLoading = RxBool(false);
+  final formatter = CurrencyInputFormatter();
+
   @override
   void onInit() async {
     super.onInit();
@@ -240,6 +243,10 @@ class JobCardController extends GetxController {
 
   Future getCurrentJobCardStatus(String id) async {
     return await helper.getJobCardStatus(id);
+  }
+
+  Future<double> calculateCustomerOutstanding(String customerId) async {
+    return await helper.getCustomerOutstanding(customerId);
   }
 
   Future<void> addNewJobCard() async {
@@ -1562,7 +1569,7 @@ class JobCardController extends GetxController {
             .toString();
   }
 
-  void onSelectForCustomers(Map selectedCustomer) {
+  void onSelectForCustomers(String id, Map selectedCustomer) async {
     List phoneDetails = selectedCustomer['entity_phone'];
     Map phone = phoneDetails.firstWhere(
       (value) => value['isPrimary'] == true,
@@ -1572,11 +1579,24 @@ class JobCardController extends GetxController {
     customerEntityPhoneNumber.text = phone['number'] ?? '';
     customerEntityName.text = phone['name'] ?? '';
     customerEntityEmail.text = phone['email'] ?? '';
-
-    customerCreditNumber.text = (selectedCustomer['credit_limit'] ?? '0')
-        .toString();
     customerSaleManId.value = selectedCustomer['salesman_id'] ?? '';
     customerSaleMan.value = selectedCustomer['salesman'] ?? "";
+
+    customerCreditNumber.value = formatter.formatEditUpdate(
+      customerOutstanding.value,
+      TextEditingValue(
+        text: (selectedCustomer['credit_limit'] ?? '0').toString(),
+      ),
+    );
+
+    customerOutstanding.value = formatter.formatEditUpdate(
+      customerOutstanding.value,
+      TextEditingValue(
+        text: await calculateCustomerOutstanding(id).then((value) {
+          return value.toString();
+        }),
+      ),
+    );
   }
 
   void clearAllFilters() {
