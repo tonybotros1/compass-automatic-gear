@@ -2,22 +2,22 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/ap_invoices_co
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../Models/ar receipts and ap payments/ap_invoices_model.dart';
 import '../../../consts.dart';
 import '../auto_size_box.dart';
 import 'invoice_section_for_ap_invoices.dart';
 
-Widget invoicesSection(
-    {required BuildContext context,
-    required BoxConstraints constraints,
-    required id}) {
+Widget invoicesSection({
+  required BuildContext context,
+  required BoxConstraints constraints,
+  required id,
+}) {
   return Container(
     decoration: containerDecor,
     child: GetX<ApInvoicesController>(
       builder: (controller) {
         if (controller.loadingInvoices.value) {
-          return Center(
-            child: loadingProcess,
-          );
+          return Center(child: loadingProcess);
         }
 
         return SingleChildScrollView(
@@ -34,11 +34,12 @@ Widget invoicesSection(
   );
 }
 
-Widget tableOfScreens(
-    {required BoxConstraints constraints,
-    required BuildContext context,
-    required ApInvoicesController controller,
-    required String id}) {
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required ApInvoicesController controller,
+  required String id,
+}) {
   // List data = controller.calculateTotals();
 
   return SingleChildScrollView(
@@ -46,252 +47,224 @@ Widget tableOfScreens(
     child: SizedBox(
       width: constraints.maxWidth - 17,
       child: DataTable(
-          dataRowMaxHeight: 40,
-          dataRowMinHeight: 30,
-          columnSpacing: 5,
-          horizontalMargin: horizontalMarginForTable,
-          showBottomBorder: true,
-          dataTextStyle: regTextStyle,
-          headingTextStyle: fontStyleForTableHeader,
-          sortColumnIndex: controller.sortColumnIndex.value,
-          sortAscending: controller.isAscending.value,
-          headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-          columns: [
-            DataColumn(
-              label: AutoSizedText(
-                constraints: constraints,
-                text: '',
-              ),
+        dataRowMaxHeight: 40,
+        dataRowMinHeight: 30,
+        columnSpacing: 5,
+        horizontalMargin: horizontalMarginForTable,
+        showBottomBorder: true,
+        dataTextStyle: regTextStyle,
+        headingTextStyle: fontStyleForTableHeader,
+        sortColumnIndex: controller.sortColumnIndex.value,
+        sortAscending: controller.isAscending.value,
+        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+        columns: [
+          DataColumn(
+            label: AutoSizedText(constraints: constraints, text: ''),
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Transaction Type',
             ),
-            DataColumn(
-              label: AutoSizedText(
-                constraints: constraints,
-                text: 'Transaction Type',
-              ),
+          ),
+          // DataColumn(
+          //   label: AutoSizedText(
+          //     constraints: constraints,
+          //     text: 'Invoice No.',
+          //   ),
+          // ),
+          // DataColumn(
+          //   label: AutoSizedText(
+          //     constraints: constraints,
+          //     text: 'Invoice Date',
+          //   ),
+          // ),
+          // DataColumn(
+          //   label: AutoSizedText(
+          //     constraints: constraints,
+          //     text: 'Vendor',
+          //   ),
+          // ),
+          DataColumn(
+            label: AutoSizedText(constraints: constraints, text: 'Note'),
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Received Number',
             ),
-            // DataColumn(
-            //   label: AutoSizedText(
-            //     constraints: constraints,
-            //     text: 'Invoice No.',
-            //   ),
-            // ),
-            // DataColumn(
-            //   label: AutoSizedText(
-            //     constraints: constraints,
-            //     text: 'Invoice Date',
-            //   ),
-            // ),
-            // DataColumn(
-            //   label: AutoSizedText(
-            //     constraints: constraints,
-            //     text: 'Vendor',
-            //   ),
-            // ),
-            DataColumn(
-              label: AutoSizedText(
-                constraints: constraints,
-                text: 'Note',
-              ),
-            ),
-            DataColumn(
-              label: AutoSizedText(
-                constraints: constraints,
-                text: 'Received Number',
-              ),
-            ),
-            DataColumn(
-              label: AutoSizedText(
-                constraints: constraints,
-                text: 'Job Number',
-              ),
-            ),
-            DataColumn(
-              headingRowAlignment: MainAxisAlignment.end,
-              label: AutoSizedText(
-                constraints: constraints,
-                text: 'Amount',
-              ),
-            ),
-            DataColumn(
-              headingRowAlignment: MainAxisAlignment.end,
-              label: AutoSizedText(
-                constraints: constraints,
-                text: 'VAT',
-              ),
-            ),
-          ],
-          rows: [
-            ...controller.allInvoices.map<DataRow>((invoiceItems) {
-              final invoiceItemsData = invoiceItems.data();
-              final invoiceItemsId = invoiceItems.id;
-              return dataRowForTheTable(invoiceItemsData, context, constraints,
-                  invoiceItemsId, controller, id);
-            }),
-          ]),
+          ),
+          DataColumn(
+            label: AutoSizedText(constraints: constraints, text: 'Job Number'),
+          ),
+          DataColumn(
+            numeric: true,
+            label: AutoSizedText(constraints: constraints, text: 'Amount'),
+          ),
+          DataColumn(
+            numeric: true,
+            label: AutoSizedText(constraints: constraints, text: 'VAT'),
+          ),
+        ],
+        rows: [
+          ...controller.allInvoices.where((item)=> item.isDeleted != true).map<DataRow>((invoiceItems) {
+            final invoiceItemsId = invoiceItems.id ?? invoiceItems.uuid ?? '';
+            return dataRowForTheTable(
+              invoiceItems,
+              context,
+              constraints,
+              invoiceItemsId,
+              controller,
+              id,
+            );
+          }),
+        ],
+      ),
     ),
   );
 }
 
 DataRow dataRowForTheTable(
-    Map<String, dynamic> invoiceItemsData,
-    context,
-    constraints,
-    String invoiceItemsId,
-    ApInvoicesController controller,
-    String apInvoiceID) {
-  return DataRow(cells: [
-    DataCell(Row(
-      children: [
-        deleteSection(apInvoiceID, context, controller, invoiceItemsId),
-        editSection(apInvoiceID, controller, invoiceItemsData, context,
-            constraints, invoiceItemsId)
-      ],
-    )),
-    DataCell(textForDataRowInTable(
-        text: getdataName(invoiceItemsData['transaction_type'],
-            controller.allTransactionsTypes,
-            title: 'type'))),
-    // DataCell(textForDataRowInTable(
-    //     text: '${invoiceItemsData['invoice_number'] ?? ''}')),
-    // DataCell(textForDataRowInTable(
-    //     text: textToDate(invoiceItemsData['invoice_date'] ?? ''))),
-    // DataCell(textForDataRowInTable(
-    //     text: getdataName(invoiceItemsData['vendor'], controller.allVendors,
-    //         title: 'entity_name'))),
-    DataCell(textForDataRowInTable(text: '${invoiceItemsData['note'] ?? ''}')),
-    DataCell(textForDataRowInTable(
-        text: '${invoiceItemsData['report_reference'] ?? ''}')),
-    DataCell(
-        textForDataRowInTable(text: '${invoiceItemsData['job_number'] ?? ''}')),
-    DataCell(Align(
-        alignment: Alignment.centerRight,
-        child: textForDataRowInTable(
-            text: invoiceItemsData['amount'] ?? '',
-            color: Colors.green,
-            isBold: true))),
-    DataCell(Align(
-        alignment: Alignment.centerRight,
-        child: textForDataRowInTable(
-            text: '${invoiceItemsData['vat'] ?? ''}',
-            color: Colors.red,
-            isBold: true))),
-  ]);
+  ApInvoicesItem invoiceItemsData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String invoiceItemsId,
+  ApInvoicesController controller,
+  String apInvoiceID,
+) {
+  return DataRow(
+    cells: [
+      DataCell(
+        Row(
+          children: [
+            deleteSection(apInvoiceID, context, controller, invoiceItemsId),
+            editSection(
+              apInvoiceID,
+              controller,
+              invoiceItemsData,
+              context,
+              constraints,
+              invoiceItemsId,
+            ),
+          ],
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(text: invoiceItemsData.transactionTypeName ?? ''),
+      ),
+
+      DataCell(textForDataRowInTable(text: invoiceItemsData.note ?? '')),
+      DataCell(
+        textForDataRowInTable(
+          text: '', // '${invoiceItemsData['report_reference'] ?? ''}',
+        ),
+      ),
+      DataCell(textForDataRowInTable(text: invoiceItemsData.jobNumber ?? '')),
+      DataCell(
+        textForDataRowInTable(
+          text: invoiceItemsData.amount.toString(),
+          color: Colors.green,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: invoiceItemsData.vat.toString(),
+          color: Colors.red,
+          isBold: true,
+        ),
+      ),
+    ],
+  );
 }
 
-Widget deleteSection(String apInvoiceID, context,
-    ApInvoicesController controller, invoiceItemsId) {
+Widget deleteSection(
+  String apInvoiceID,
+  context,
+  ApInvoicesController controller,
+  invoiceItemsId,
+) {
   return IconButton(
-      onPressed: () {
-        if (controller.status.value == 'New') {
-          alertDialog(
-              context: context,
-              content: 'This will be deleted permanently',
-              onPressed: () {
-                controller.deleteInvoiceItem(
-                    apInvoiceID != ''
-                        ? apInvoiceID
-                        : controller.currentApInvoiceId.value,
-                    invoiceItemsId);
-              });
-        } else {
-          showSnackBar('Alert', 'Only New AP Invoice Allowed');
-        }
-      },
-      icon: const Icon(
-        Icons.delete,
-        color: Colors.red,
-      ));
+    onPressed: () {
+      if (controller.status.value == 'New' || controller.status.isEmpty) {
+        alertDialog(
+          context: context,
+          content: 'This will be deleted permanently',
+          onPressed: () {
+            controller.deleteInvoiceItem(invoiceItemsId);
+          },
+        );
+      } else {
+        showSnackBar('Alert', 'Only New AP Invoice Allowed');
+      }
+    },
+    icon: const Icon(Icons.delete, color: Colors.red),
+  );
 }
 
 Widget editSection(
-    String apInvoiceID,
-    ApInvoicesController controller,
-    Map<String, dynamic> invoiceItemsData,
-    context,
-    constraints,
-    String invoiceItemsId) {
+  String apInvoiceID,
+  ApInvoicesController controller,
+  ApInvoicesItem invoiceItemsData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String invoiceItemsId,
+) {
   return IconButton(
-      onPressed: () {
-        if (controller.status.value == 'New') {
-          controller.transactionType.text = getdataName(
-              invoiceItemsData['transaction_type'],
-              controller.allTransactionsTypes,
-              title: 'type');
-          controller.transactionTypeId.value =
-              invoiceItemsData['transaction_type'] ?? '';
-          controller.invoiceNote.text = invoiceItemsData['note'] ?? '';
-          controller.vat.text = invoiceItemsData['vat'] ?? '';
-          controller.amount.text = invoiceItemsData['amount'] ?? '';
-          // controller.invoiceNumber.text =
-          //     invoiceItemsData['invoice_number'] ?? '';
-          // controller.invoiceDate.text =
-          //     textToDate(invoiceItemsData['invoice_date']);
-          controller.jobNumber.text = invoiceItemsData['job_number'] ?? '';
-          // controller.vendorForInvoice.text =
-          //     getdataName(invoiceItemsData['vendor'], controller.allVendors,title: 'entity_name');
-          // controller.vendorForInvoiceId.value =
-          //     invoiceItemsData['vendor'] ?? '';
-          invoiceItemsForapInvoicesDialog(
-              apInvoiceID: invoiceItemsId,
-              controller: controller,
-              constraints: constraints,
-              onPressed: controller.addingNewinvoiceItemsValue.value
-                  ? null
-                  : () {
-                      controller.editInvoiceItem(
-                          apInvoiceID != ''
-                              ? apInvoiceID
-                              : controller.currentApInvoiceId.value,
-                          invoiceItemsId);
-                    },
-              context: context);
-        } else {
-          showSnackBar('Alert', 'Only New AP Invoice Allowed');
-        }
-      },
-      icon: const Icon(
-        Icons.edit_note_rounded,
-        color: Colors.blue,
-      ));
+    onPressed: () {
+      if (controller.status.value == 'New' || controller.status.isEmpty) {
+        controller.transactionType.text =
+            invoiceItemsData.transactionTypeName ?? '';
+        controller.transactionTypeId.value =
+            invoiceItemsData.transactionType ?? '';
+        controller.invoiceNote.text = invoiceItemsData.note ?? '';
+        controller.vat.text = invoiceItemsData.vat.toString();
+        controller.amount.text = invoiceItemsData.amount.toString();
+        controller.jobNumber.text = invoiceItemsData.jobNumber ?? '';
+        invoiceItemsForapInvoicesDialog(
+          apInvoiceID: invoiceItemsId,
+          controller: controller,
+          constraints: constraints,
+          onPressed: () {
+            controller.editInvoiceItem(invoiceItemsId);
+          },
+          context: context,
+        );
+      } else {
+        showSnackBar('Alert', 'Only New AP Invoice Allowed');
+      }
+    },
+    icon: const Icon(Icons.edit_note_rounded, color: Colors.blue),
+  );
 }
 
 ElevatedButton newinvoiceItemsButton(
-    BuildContext context,
-    BoxConstraints constraints,
-    ApInvoicesController controller,
-    String apInvoiceID) {
+  BuildContext context,
+  BoxConstraints constraints,
+  ApInvoicesController controller,
+  String apInvoiceID,
+) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.canAddInvoice.isTrue) {
-        if (controller.status.value == 'New') {
-          controller.transactionType.clear();
-          controller.transactionTypeId.value = '';
-          controller.invoiceNote.clear();
-          controller.vat.clear();
-          controller.amount.clear();
-          // controller.invoiceNumber.clear();
-          // controller.invoiceDate.clear();
-          controller.jobNumber.clear();
-          // controller.vendorForInvoice.clear();
-          // controller.vendorForInvoiceId.value = '';
+      if (controller.status.value == 'New' || controller.status.isEmpty) {
+        controller.transactionType.clear();
+        controller.transactionTypeId.value = '';
+        controller.invoiceNote.clear();
+        controller.vat.text = '0.0';
+        controller.amount.text = '0.0';
+        controller.jobNumber.clear();
 
-          invoiceItemsForapInvoicesDialog(
-              context: context,
-              apInvoiceID: apInvoiceID,
-              controller: controller,
-              constraints: constraints,
-              onPressed: controller.addingNewinvoiceItemsValue.value
-                  ? null
-                  : () async {
-                      controller.addNewInvoiceItem(apInvoiceID != ''
-                          ? apInvoiceID
-                          : controller.currentApInvoiceId.value);
-                    });
-        } else {
-          showSnackBar('Alert', 'Only New AP Invoice Allowed');
-        }
+        invoiceItemsForapInvoicesDialog(
+          context: context,
+          apInvoiceID: apInvoiceID,
+          controller: controller,
+          constraints: constraints,
+          onPressed: () {
+            controller.addNewInvoiceItem();
+          },
+        );
       } else {
-        showSnackBar('Alert', 'Please Save AP Invoice First');
+        showSnackBar('Alert', 'Only New AP Invoice Allowed');
       }
     },
     style: new2ButtonStyle,

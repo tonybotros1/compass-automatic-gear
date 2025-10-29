@@ -648,9 +648,9 @@ class JobCardController extends GetxController {
     int index = allInvoiceItems.indexWhere(
       (item) => (item.id == itemId || item.uid == itemId),
     );
-    final oldItem = allInvoiceItems[index];
 
     if (index != -1) {
+      final oldItem = allInvoiceItems[index];
       allInvoiceItems[index] = JobCardInvoiceItemsModel(
         id: oldItem.id,
         uid: oldItem.uid,

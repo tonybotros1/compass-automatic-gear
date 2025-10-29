@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/helpers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_multi_formatter/formatters/currency_input_formatter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -16,6 +17,7 @@ import 'Widgets/text_button.dart';
 String backendTestURI = 'http://127.0.0.1:8000';
 // String backendTestURI = "http://10.0.2.2:8000";
 String webSocketURL = "ws://localhost:8000/ws";
+final formatter = CurrencyInputFormatter();
 
 IconButton dateRange({
   required BuildContext context,
@@ -593,7 +595,7 @@ void showSnackBar(String title, String body) {
     animationDuration: const Duration(milliseconds: 500),
     overlayColor: Colors.transparent, // 👈 allows click-through
     padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-   
+
     icon: const Icon(
       Icons.notifications_none_rounded,
       color: Colors.white,
@@ -621,98 +623,90 @@ Future<dynamic> alertMessage({
   );
 }
 
-// Future<dynamic> alertDialog({
-//   required BuildContext context,
-//   required String content,
-//   required void Function() onPressed,
-// }) {
-//   return showCupertinoDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return CupertinoAlertDialog(
-//         title: const Text("Alert"),
-//         content: Text(content),
-//         actions: [
-//           CupertinoDialogAction(
-//             child: const Text("Cancel"),
-//             onPressed: () {
-//               Get.back();
-//             },
-//           ),
-//           CupertinoDialogAction(
-//             isDestructiveAction: true,
-//             isDefaultAction: true,
-//             onPressed: onPressed,
-//             child: const Text('Ok', style: TextStyle(color: Colors.red)),
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }
-
-Future<void> alertDialog({
-  // BuildContext is required in Flutter to locate the dialog in the widget tree
-  required BuildContext context, 
+Future<dynamic> alertDialog({
+  required BuildContext context,
   required String content,
-  required VoidCallback onPressed,
+  required void Function() onPressed,
 }) {
-  return showDialog<void>(
+  return showCupertinoDialog(
     context: context,
-    // Prevents closing the dialog by tapping outside of it
-    barrierDismissible: false, 
     builder: (BuildContext context) {
-      return AlertDialog(
-        // Minimal rounding (matches the requested "little rounded" corners)
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        
-        // Title consistent with the previous 'Alert'
-        title: const Text(
-          "Alert",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        
-        // Content body
-        content: Text(
-          content,
-          style: const TextStyle(fontSize: 14.0),
-        ),
-        
-        actions: <Widget>[
-          // Cancel Button (Dismisses the dialog)
-          TextButton(
+      return CupertinoAlertDialog(
+        title: const Text("Alert"),
+        content: Text(content),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text("Cancel"),
             onPressed: () {
-              // Standard way to dismiss a dialog in Flutter
-              Navigator.of(context).pop();
+              Get.back();
             },
-            child: const Text(
-              "Cancel",
-              style: TextStyle(color: Colors.grey),
-            ),
           ),
-          
-          // Confirmation Button (Destructive/Primary Action)
-          TextButton(
-            // Execute the provided action
-            onPressed: () {
-              // 1. Dismiss the dialog first
-              Navigator.of(context).pop();
-              // 2. Execute the user's action
-              onPressed();
-            },
-            child: const Text(
-              'OK',
-              // Use a striking color (red) for destructive/important action
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
-            ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            isDefaultAction: true,
+            onPressed: onPressed,
+            child: const Text('Ok', style: TextStyle(color: Colors.red)),
           ),
         ],
       );
     },
   );
 }
+
+// Future<void> alertDialog({
+//   // BuildContext is required in Flutter to locate the dialog in the widget tree
+//   required BuildContext context,
+//   required String content,
+//   required VoidCallback onPressed,
+// }) {
+//   return showDialog<void>(
+//     context: context,
+//     // Prevents closing the dialog by tapping outside of it
+//     barrierDismissible: false,
+//     builder: (BuildContext context) {
+//       return AlertDialog(
+//         // Minimal rounding (matches the requested "little rounded" corners)
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+
+//         // Title consistent with the previous 'Alert'
+//         title: const Text(
+//           "Alert",
+//           style: TextStyle(fontWeight: FontWeight.bold),
+//         ),
+
+//         // Content body
+//         content: Text(content, style: const TextStyle(fontSize: 14.0)),
+
+//         actions: <Widget>[
+//           // Cancel Button (Dismisses the dialog)
+//           TextButton(
+//             onPressed: () {
+//               // Standard way to dismiss a dialog in Flutter
+//               Navigator.of(context).pop();
+//             },
+//             child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+//           ),
+
+//           // Confirmation Button (Destructive/Primary Action)
+//           TextButton(
+//             // Execute the provided action
+//             onPressed: () {
+//               // 1. Dismiss the dialog first
+//               Navigator.of(context).pop();
+//               // 2. Execute the user's action
+//               onPressed();
+//             },
+//             child: const Text(
+//               'OK',
+//               // Use a striking color (red) for destructive/important action
+//               style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+//             ),
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }
 
 String textToDate(
   dynamic inputDate, {

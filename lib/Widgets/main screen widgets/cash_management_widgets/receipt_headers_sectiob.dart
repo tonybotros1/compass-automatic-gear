@@ -71,7 +71,7 @@ Widget receiptHeader(BuildContext context) {
                       controller.customerNameId.value = key;
                       controller.availableReceipts.clear();
                       controller.selectedAvailableReceipts.clear();
-                      controller.outstanding.value = controller.formatter
+                      controller.outstanding.value = formatter
                           .formatEditUpdate(
                             controller.outstanding.value,
                             TextEditingValue(

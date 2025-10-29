@@ -29,9 +29,6 @@ class CashManagementPayment extends StatelessWidget {
                   GetX<CashManagementPaymentsController>(
                     init: CashManagementPaymentsController(),
                     builder: (controller) {
-                      bool isCustomersLoading = controller.allVendors.isEmpty;
-                     
-                      // bool isAccountLoading = controller.allAccounts.isEmpty;
                       return Row(
                         spacing: 10,
                         children: [
@@ -52,6 +49,13 @@ class CashManagementPayment extends StatelessWidget {
                                 controller.receiptTypeFilter.value.text =
                                     value['name'];
                               },
+                              onDelete: () {
+                                controller.receiptTypeFilterId.value = '';
+                                controller.receiptTypeFilter.value.clear();
+                              },
+                              onOpen: () {
+                                return controller.getReceiptsAndPaymentsTypes();
+                              },
                             ),
                           ),
                           Expanded(
@@ -61,13 +65,17 @@ class CashManagementPayment extends StatelessWidget {
                               textcontroller:
                                   controller.customerNameFilter.value.text,
                               hintText: 'Vendor Name',
-                              items: isCustomersLoading
-                                  ? {}
-                                  : controller.allVendors,
                               onChanged: (key, value) async {
                                 controller.customerNameFilterId.value = key;
                                 controller.customerNameFilter.value.text =
                                     value['entity_name'];
+                              },
+                              onDelete: () {
+                                controller.customerNameFilterId.value = '';
+                                controller.customerNameFilter.value.clear();
+                              },
+                              onOpen: () {
+                                return controller.getAllVendors();
                               },
                             ),
                           ),
@@ -77,13 +85,17 @@ class CashManagementPayment extends StatelessWidget {
                               textcontroller:
                                   controller.accountFilter.value.text,
                               hintText: 'Account',
-                              // items: isAccountLoading
-                              //     ? {}
-                              //     : controller.allAccounts,
                               onChanged: (key, value) async {
                                 controller.accountFilterId.value = key;
                                 controller.accountFilter.value.text =
                                     value['account_number'];
+                              },
+                              onDelete: () {
+                                controller.accountFilterId.value = '';
+                                controller.accountFilter.value.clear();
+                              },
+                              onOpen: () {
+                                return controller.getAllAccounts();
                               },
                             ),
                           ),
@@ -590,7 +602,7 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text: ''
+          text: '',
           // getdataName(
           //   cashManagementData['payment_type'],
           //   controller.allReceiptTypes,
@@ -600,7 +612,7 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text:''
+          text: '',
           //  getdataName(
           //   cashManagementData['account'],
           //   controller.allAccounts,

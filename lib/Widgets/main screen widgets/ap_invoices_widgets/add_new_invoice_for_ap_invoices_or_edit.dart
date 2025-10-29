@@ -1,4 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/ap_invoices_controller.dart';
+import 'package:datahubai/Models/job%20cards/job_card_model.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:datahubai/consts.dart';
@@ -18,22 +19,24 @@ Widget addNewinvoiceForApInvoicesOrEdit({
           spacing: 10,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GetX<ApInvoicesController>(
+            GetBuilder<ApInvoicesController>(
               builder: (controller) {
-                bool isTransactionTypesLoading =
-                    controller.allTransactionsTypes.isEmpty;
                 return CustomDropdown(
                   focusNode: controller.focusNode1,
                   nextFocusNode: controller.focusNode2,
                   showedSelectedName: 'type',
                   textcontroller: controller.transactionType.text,
                   hintText: 'Transaction Type',
-                  items: isTransactionTypesLoading
-                      ? {}
-                      : controller.allTransactionsTypes,
                   onChanged: (key, value) {
                     controller.transactionType.text = value['type'];
                     controller.transactionTypeId.value = key;
+                  },
+                  onDelete: () {
+                    controller.transactionType.clear();
+                    controller.transactionTypeId.value = '';
+                  },
+                  onOpen: () {
+                    return controller.getTransactionTypes();
                   },
                 );
               },
@@ -43,6 +46,7 @@ Widget addNewinvoiceForApInvoicesOrEdit({
               children: [
                 Expanded(
                   child: myTextFormFieldWithBorder(
+                    moneyFormat: true,
                     focusNode: controller.focusNode2,
                     onEditingComplete: () {
                       FocusScope.of(
@@ -51,13 +55,13 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                     },
                     textInputAction: TextInputAction.next,
                     labelText: 'Amount',
-                    isDouble: true,
                     controller: controller.amount,
                   ),
                 ),
                 Expanded(
                   child: myTextFormFieldWithBorder(
                     focusNode: controller.focusNode3,
+                    moneyFormat: true,
                     onEditingComplete: () {
                       FocusScope.of(
                         context,
@@ -65,7 +69,6 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                     },
                     textInputAction: TextInputAction.next,
                     labelText: 'VAT',
-                    isDouble: true,
                     controller: controller.vat,
                   ),
                 ),
@@ -217,12 +220,10 @@ Future<dynamic> jobDialog(BoxConstraints constraints, BuildContext context) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Full-width Search Bar
                         SizedBox(
                           width: 400,
                           height: 50,
                           child: SearchBar(
-                            // elevation: WidgetStateProperty.all(0),
                             trailing: [
                               IconButton(
                                 onPressed: () {
@@ -305,6 +306,12 @@ Future<dynamic> jobDialog(BoxConstraints constraints, BuildContext context) {
                                           DataColumn(
                                             label: AutoSizedText(
                                               constraints: constraints,
+                                              text: 'Car Model',
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: AutoSizedText(
+                                              constraints: constraints,
                                               text: 'Plate Number',
                                             ),
                                           ),
@@ -335,16 +342,11 @@ Future<dynamic> jobDialog(BoxConstraints constraints, BuildContext context) {
                                                 (index) {
                                                   final job = controller
                                                       .allJobCards[index];
-                                                  final jobData =
-                                                      job.data()
-                                                          as Map<
-                                                            String,
-                                                            dynamic
-                                                          >;
+
                                                   final jobId = job.id;
 
                                                   return dataRowForTheTable(
-                                                    jobData,
+                                                    job,
                                                     context,
                                                     constraints,
                                                     jobId,
@@ -360,16 +362,11 @@ Future<dynamic> jobDialog(BoxConstraints constraints, BuildContext context) {
                                                 (index) {
                                                   final job = controller
                                                       .filteredJobCards[index];
-                                                  final jobData =
-                                                      job.data()
-                                                          as Map<
-                                                            String,
-                                                            dynamic
-                                                          >;
+
                                                   final jobId = job.id;
 
                                                   return dataRowForTheTable(
-                                                    jobData,
+                                                    job,
                                                     context,
                                                     constraints,
                                                     jobId,
@@ -397,7 +394,7 @@ Future<dynamic> jobDialog(BoxConstraints constraints, BuildContext context) {
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> jobData,
+  JobCardModel jobData,
   context,
   constraints,
   jobId,
@@ -407,24 +404,57 @@ DataRow dataRowForTheTable(
   return DataRow(
     onSelectChanged: (_) {
       Get.back();
-      controller.jobNumber.text = jobData['job_number'];
+      controller.jobNumber.text = jobData.jobNumber ?? '';
     },
     color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-      // Alternate row colors
       return index % 2 == 0 ? Colors.grey[200] : Colors.white;
     }),
     cells: [
-      DataCell(Text(jobData['job_number'] ?? '')),
-      DataCell(Text((getdataName(jobData['car_brand'], controller.allBrands)))),
-      DataCell(Text(jobData['plate_number'] ?? '')),
-      DataCell(Text(jobData['vehicle_identification_number'] ?? '')),
       DataCell(
-        Text(
-          getdataName(
-            jobData['customer'],
-            controller.allCustomers,
-            title: 'entity_name',
-          ),
+        textForDataRowInTable(
+          text: jobData.jobNumber ?? '',
+          color: Colors.green,
+          formatDouble: false,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.carBrandName ?? '',
+          formatDouble: false,
+          color: Colors.blueGrey,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.carModelName ?? '',
+          formatDouble: false,
+          color: Colors.blueGrey,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.plateNumber ?? '',
+          formatDouble: false,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.vehicleIdentificationNumber ?? '',
+          formatDouble: false,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.customerName ?? '',
+          maxWidth: null,
+          formatDouble: false,
+          color: Colors.teal,
+          isBold: true,
         ),
       ),
     ],

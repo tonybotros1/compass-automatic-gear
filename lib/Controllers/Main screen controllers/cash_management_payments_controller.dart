@@ -29,7 +29,10 @@ class CashManagementPaymentsController extends CashManagementBaseController {
     super.onInit();
   }
 
- 
+  Future<Map<String, dynamic>> getAllVendors() async {
+    return await helper.getVendors();
+  }
+  // =======================================================================================================================
 
   Future<void> loadValuesForPayments(Map data) async {
     status.value = data['status'] ?? '';
@@ -60,7 +63,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
     paymentTypeId.value = data['payment_type'] ?? '';
     chequeNumber.text = data['cheque_number'] ?? '';
     chequeDate.text = textToDate(data['cheque_date']);
-    
+
     // account.text = getdataName( // need to be fixed
     //   data['account'],
     //   allAccounts,
@@ -147,9 +150,6 @@ class CashManagementPaymentsController extends CashManagementBaseController {
     }
   }
 
- 
- 
-
   void calculateAmountForSelectedPayments() {
     calculatedAmountForAllSelectedPayments.value = 0.0;
     for (var element in selectedAvailablePayments) {
@@ -171,47 +171,6 @@ class CashManagementPaymentsController extends CashManagementBaseController {
     calculateAmountForSelectedPayments();
     update();
     Get.back();
-  }
-
-  
-
-  void getAllEntities() {
-    try {
-      FirebaseFirestore.instance
-          .collection('entity_informations')
-          // .where('company_id', isEqualTo: companyId.value)
-          .orderBy('entity_name')
-          .snapshots()
-          .listen((entitiesSnapshot) {
-            // Temporary maps to hold filtered entities
-            Map<String, dynamic> vendorsMap = {};
-            Map<String, dynamic> customersMap = {};
-
-            for (var doc in entitiesSnapshot.docs) {
-              var data = doc.data();
-
-              // Safety check: entity_code must be a list
-              if (data['entity_code'] is List) {
-                List entityCodes = data['entity_code'];
-
-                // If 'Vendor' is in the list
-                if (entityCodes.contains('Vendor')) {
-                  vendorsMap[doc.id] = data;
-                }
-
-                // If 'Customer' is in the list
-                if (entityCodes.contains('Customer')) {
-                  customersMap[doc.id] = data;
-                }
-              }
-            }
-
-            // Assign to your observable maps
-            allVendors.value = vendorsMap;
-          });
-    } catch (e) {
-      // print('Error fetching entities: $e');
-    }
   }
 
   Future<void> getVendorInvoices(String vendorId) async {

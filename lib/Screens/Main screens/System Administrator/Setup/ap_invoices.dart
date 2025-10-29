@@ -27,9 +27,7 @@ class ApInvoices extends StatelessWidget {
                   GetX<ApInvoicesController>(
                     init: ApInvoicesController(),
                     builder: (controller) {
-                      bool isInvoiceTypesLoading =
-                          controller.allInvoiceTypes.isEmpty;
-                      bool isVendorsLoading = controller.allVendors.isEmpty;
+                    
                       return Row(
                         children: [
                           Expanded(
@@ -43,14 +41,17 @@ class ApInvoices extends StatelessWidget {
                                         controller.invoiceTypeFilter.text,
                                     showedSelectedName: 'name',
                                     hintText: 'Invoice Type',
-                                    items: isInvoiceTypesLoading
-                                        ? {}
-                                        : controller.allInvoiceTypes,
                                     onChanged: (key, value) {
                                       controller.invoiceTypeFilter.text =
                                           value['name'];
                                       controller.invoiceTypeFilterId.value =
                                           key;
+                                    },onDelete: (){
+                                        controller.invoiceTypeFilter.clear();
+                                      controller.invoiceTypeFilterId.value =
+                                          '';
+                                    },onOpen: (){
+                                      return controller.getInvoiceTypes();
                                     },
                                   ),
                                 ),
@@ -68,11 +69,14 @@ class ApInvoices extends StatelessWidget {
                                         controller.vendorFilter.value.text,
                                     showedSelectedName: 'entity_name',
                                     hintText: 'Vendor',
-                                    items: isVendorsLoading
-                                        ? {}
-                                        : controller.allVendors,
                                     onChanged: (key, value) async {
                                       controller.vendorFilter.value.text = key;
+                                    },
+                                    onDelete: () {
+                                      controller.vendorFilter.value.text = '';
+                                    },
+                                    onOpen: () {
+                                      return controller.getAllVendors();
                                     },
                                   ),
                                 ),
@@ -118,7 +122,6 @@ class ApInvoices extends StatelessWidget {
                                         controller.fromDate.value.text,
                                         controller.fromDate.value,
                                       );
-                                     
                                     },
                                   ),
                                 ),
@@ -131,7 +134,6 @@ class ApInvoices extends StatelessWidget {
                                         controller.toDate.value.text,
                                         controller.toDate.value,
                                       );
-                                      
                                     },
                                   ),
                                 ),
@@ -341,9 +343,6 @@ Widget tableOfScreens({
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
         columnSpacing: 15,
-        // showBottomBorder: true,
-        // dataTextStyle: regTextStyle,
-        // headingTextStyle: fontStyleForTableHeader,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
         headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
@@ -441,11 +440,12 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: getdataName(
-            typeData['vendor'] ?? '',
-            controller.allVendors,
-            title: 'entity_name',
-          ),
+          text:''
+          //  getdataName(
+          //   typeData['vendor'] ?? '',
+          //   controller.allVendors,
+          //   title: 'entity_name',
+          // ),
         ),
       ),
       DataCell(

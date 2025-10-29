@@ -4,7 +4,6 @@ import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/ar_receipts
 import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/customer_invoices_model.dart';
 import 'package:datahubai/helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_multi_formatter/formatters/currency_input_formatter.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,7 +18,6 @@ class CashManagementReceiptsController extends CashManagementBaseController {
   RxString customerNameId = RxString('');
   RxInt numberOfReceipts = RxInt(0);
   RxDouble totalReceiptsReceived = RxDouble(0.0);
-  final formatter = CurrencyInputFormatter();
   String backendUrl = backendTestURI;
   RxBool isInvoicesModified = RxBool(false);
   RxString currentReceiptID = RxString('');
