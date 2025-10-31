@@ -1,13 +1,10 @@
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-
 import '../../Models/ar receipts and ap payments/ap_invoices_model.dart';
 import '../../Models/job cards/job_card_model.dart';
 import '../../consts.dart';
@@ -48,13 +45,14 @@ class ApInvoicesController extends GetxController {
   var buttonLoadingStates = <String, bool>{}.obs;
 
   RxBool isScreenLoding = RxBool(false);
-  final RxList<DocumentSnapshot> allApInvoices = RxList<DocumentSnapshot>([]);
+  final RxList<ApInvoicesModel> allApInvoices = RxList<ApInvoicesModel>([]);
   final RxList<ApInvoicesItem> allInvoices = RxList<ApInvoicesItem>([]);
   final RxList<JobCardModel> allJobCards = RxList<JobCardModel>([]);
   final RxList<JobCardModel> filteredJobCards = RxList<JobCardModel>([]);
   // RxBool addingNewinvoiceItemsValue = RxBool(false);
   RxString invoiceTypeId = RxString('');
   RxString vendorId = RxString('');
+  RxString vendorFilterId = RxString('');
   RxString vendorForInvoiceId = RxString('');
   RxString transactionTypeId = RxString('');
   RxInt sortColumnIndex = RxInt(0);
@@ -66,10 +64,10 @@ class ApInvoicesController extends GetxController {
   // RxBool loadingInvoiceItems = RxBool(false);
   RxBool addingNewValue = RxBool(false);
   RxBool apInvoiceAdded = RxBool(false);
-  RxBool canAddInvoice = RxBool(false);
+  // RxBool canAddInvoice = RxBool(false);
   RxString currentApInvoiceId = RxString('');
   DateFormat format = DateFormat("dd-MM-yyyy");
-  RxBool postingapInvoice = RxBool(false);
+  // RxBool postingapInvoice = RxBool(false);
   RxBool cancellingapInvoice = RxBool(false);
   RxBool deletingapInvoice = RxBool(false);
 
@@ -91,9 +89,17 @@ class ApInvoicesController extends GetxController {
 
   String backendUrl = backendTestURI;
   final Uuid _uuid = const Uuid();
+  RxBool isInvoiceModified = RxBool(false);
+  RxBool isInvoiceItemsModified = RxBool(false);
+  RxInt numberOfAPInvoices = RxInt(0);
+  RxDouble totalAmountForAPInvoices = RxDouble(0);
+  RxDouble totalVATForAPInvoices = RxDouble(0);
+  RxDouble calculatedAmountForInvoiceItems = RxDouble(0.0);
+  RxDouble calculatedVatForInvoiceItems = RxDouble(0.0);
 
   @override
   void onInit() async {
+    searchEngine({"today": true});
     super.onInit();
   }
 
@@ -107,6 +113,19 @@ class ApInvoicesController extends GetxController {
 
   Future<Map<String, dynamic>> getTransactionTypes() async {
     return await helper.getAllAPPaymentTypes();
+  }
+
+  Future getCurrentAPInvoicedStatus(String id) async {
+    return await helper.getAPInvoiceStatus(id);
+  }
+
+  void calculateAmountForSelectedReceipts() {
+    calculatedAmountForInvoiceItems.value = 0.0;
+    calculatedVatForInvoiceItems.value = 0.0;
+    for (var element in allInvoices.where((inv) => inv.isDeleted != true)) {
+      calculatedAmountForInvoiceItems.value += element.amount ?? 0;
+      calculatedVatForInvoiceItems.value += element.vat ?? 0;
+    }
   }
 
   Future<void> getAllJobCards() async {
@@ -141,245 +160,400 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  // =======================================================================================================================
-
-  Future<void> loadValues(String typeId, typeData) async {
-    invoiceNumber.text = typeData['invoice_number'] ?? '';
-    invoiceDate.text = textToDate(typeData['invoice_date'] ?? '');
-    getAllInvoices(typeId);
-    invoiceType.text = getdataName(
-      typeData['invoice_type'] ?? '',
-      allInvoiceTypes,
-    );
-    invoiceTypeId.value = typeData['invoice_type'] ?? '';
-    referenceNumber.text = typeData['reference_number'] ?? '';
-    transactionDate.text = textToDate(typeData['transaction_date']);
-    // vendor.text = getdataName(. // need to be fixed
-    //   typeData['vendor'] ?? '',
-    //   allVendors,
-    //   title: 'entity_name',
-    // );
-    vendorId.value = typeData['vendor'] ?? '';
-    description.text = typeData['description'] ?? '';
-
-    status.value = typeData['status'] ?? '';
-    canAddInvoice.value = true;
-  }
-
-  Future<void> editApInvoice(String id) async {
-    try {
-      if (status.value == 'Posted' || status.value == 'Cancelled') {
-        showSnackBar('Alert', 'Can\'t Edit For Posted / Cancelled AP Invoices');
-        return;
-      }
-      addingNewValue.value = true;
-      Map<String, dynamic> newData = {
-        'invoice_type': invoiceTypeId.value,
-        'vendor': vendorId.value,
-        'description': description.text,
-        'invoice_number': invoiceNumber.text,
-      };
-
-      final rawDate = transactionDate.value.text.trim();
-      if (rawDate.isNotEmpty) {
-        try {
-          newData['transaction_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate),
-          );
-        } catch (e) {
-          showSnackBar('Alert', 'Please Enter Valid Date');
-          return;
-        }
-      }
-
-      final rawDate2 = invoiceDate.value.text.trim();
-      if (rawDate2.isNotEmpty) {
-        try {
-          newData['invoice_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate2),
-          );
-        } catch (e) {
-          showSnackBar('Alert', 'Please Enter Valid Date');
-          return;
-        }
-      }
-
-      await FirebaseFirestore.instance
-          .collection('ap_invoices')
-          .doc(id)
-          .update(newData);
-      showSnackBar('Done', 'Updated Successfully');
-      addingNewValue.value = false;
-    } catch (e) {
-      addingNewValue.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
-    }
-  }
-
-  Future<void> deleteApInvoice(String id) async {
-    try {
-      deletingapInvoice.value = true;
-      await FirebaseFirestore.instance
-          .collection('ap_invoices')
-          .doc(id)
-          .delete();
-      deletingapInvoice.value = false;
-    } catch (e) {
-      deletingapInvoice.value = false;
-    }
-  }
-
-  // Future<void> deleteInvoiceItem(String id, String itemId) async {
-  //   // try {
-  //   //   Get.back();
-  //   //   await FirebaseFirestore.instance
-  //   //       .collection('ap_invoices')
-  //   //       .doc(id)
-  //   //       .collection('invoices')
-  //   //       .doc(itemId)
-  //   //       .delete();
-
-  //   //   double allamounts = 0.0;
-  //   //   double allVats = 0.0;
-  //   //   for (var invoice in allInvoices) {
-  //   //     allamounts +=
-  //   //         double.tryParse(invoice.data()['amount'].toString()) ?? 0.0;
-  //   //     allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
-  //   //   }
-  //   //   await FirebaseFirestore.instance.collection('ap_invoices').doc(id).update(
-  //   //     {'total_amount': allamounts, 'total_vat_amount': allVats},
-  //   //   );
-  //   // } catch (e) {
-  //   //   //
-  //   // }
-  // }
-
   Future<void> addNewApInvoice() async {
     try {
-      showSnackBar('Adding', 'Please Wait');
+      if (currentApInvoiceId.isNotEmpty) {
+        Map jobStatus = await getCurrentAPInvoicedStatus(
+          currentApInvoiceId.value,
+        );
+        String status1 = jobStatus['status'];
+        if (status1 != 'New' && status1 != '') {
+          showSnackBar('Alert', 'Only new jobs can be edited');
+          return;
+        }
+      }
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'invoice_type': invoiceTypeId.value,
         'vendor': vendorId.value,
         'description': description.text,
-        // 'company_id': companyId.value,
         'invoice_number': invoiceNumber.text,
+        'status': status.value,
+        'items': allInvoices
+            .where((item) => item.isDeleted != true)
+            .map((i) => i.toJson())
+            .toList(),
       };
 
       final rawDate = transactionDate.value.text.trim();
       if (rawDate.isNotEmpty) {
         try {
-          newData['transaction_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate),
-          );
+          newData['transaction_date'] = convertDateToIson(rawDate);
         } catch (e) {
-          showSnackBar('Alert', 'Please Enter Valid Date');
-          return;
-          // إذا حابب تعرض للمستخدم خطأ في التنسيق
-          // print('Invalid quotation_date format: $e');
+          showSnackBar('Alert', 'Please enter valid job date');
         }
+      } else {
+        newData['transaction_date'] = null;
       }
 
       final rawDate2 = invoiceDate.value.text.trim();
       if (rawDate2.isNotEmpty) {
         try {
-          newData['invoice_date'] = Timestamp.fromDate(
-            format.parseStrict(rawDate2),
-          );
+          newData['invoice_date'] = convertDateToIson(rawDate2);
         } catch (e) {
-          showSnackBar('Alert', 'Please Enter Valid Date');
-          return;
-          // إذا حابب تعرض للمستخدم خطأ في التنسيق
-          // print('Invalid quotation_date format: $e');
+          showSnackBar('Alert', 'Please enter valid invoice date');
+        }
+      } else {
+        newData['invoice_date'] = null;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri addingJobUrl = Uri.parse(
+        '$backendUrl/ap_invoices/add_new_ap_invoice',
+      );
+
+      if (currentApInvoiceId.isEmpty) {
+        showSnackBar('Adding', 'Please Wait');
+        newData['status'] = 'New';
+        final response = await http.post(
+          addingJobUrl,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(newData),
+        );
+        if (response.statusCode == 200) {
+          status.value = 'New';
+          final decoded = jsonDecode(response.body);
+          ApInvoicesModel newInvoice = ApInvoicesModel.fromJson(
+            decoded['invoice'],
+          );
+          referenceNumber.text = newInvoice.referenceNumber ?? '';
+          addingNewValue.value = false;
+          currentApInvoiceId.value = newInvoice.id ?? '';
+          allInvoices.value = newInvoice.items ?? [];
+          isInvoiceModified.value = false;
+          isInvoiceItemsModified.value = false;
+          showSnackBar('Done', 'Invoice Added Successfully');
+        } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) {
+            await addNewApInvoice();
+          } else if (refreshed == RefreshResult.invalidToken) {
+            logout();
+          }
+        } else if (response.statusCode == 401) {
+          logout();
+        }
+      } else {
+        if (isInvoiceModified.isTrue || isInvoiceItemsModified.isTrue) {
+          showSnackBar('Updating', 'Please Wait');
+        }
+        http.Response? responseForEditingAPInvoice;
+        http.Response? responseForEditingAPInvoiceItems;
+        if (isInvoiceModified.isTrue) {
+          Uri updatingJobUrl = Uri.parse(
+            '$backendUrl/ap_invoices/update_ap_invoice/${currentApInvoiceId.value}',
+          );
+          Map newDataToUpdate = newData;
+          newDataToUpdate.remove('items');
+          responseForEditingAPInvoice = await http.patch(
+            updatingJobUrl,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode(newDataToUpdate),
+          );
+          if (responseForEditingAPInvoice.statusCode == 200) {
+            isInvoiceModified.value = false;
+          } else if (responseForEditingAPInvoice.statusCode == 401 &&
+              refreshToken.isNotEmpty) {
+            final refreshed = await helper.refreshAccessToken(refreshToken);
+            if (refreshed == RefreshResult.success) {
+              await addNewApInvoice();
+            } else if (refreshed == RefreshResult.invalidToken) {
+              logout();
+            }
+          } else if (responseForEditingAPInvoice.statusCode == 401) {
+            logout();
+          }
+        }
+        if (isInvoiceItemsModified.isTrue) {
+          Uri updatingJobInvoicesUrl = Uri.parse(
+            '$backendUrl/ap_invoices/update_invoice_items',
+          );
+          responseForEditingAPInvoiceItems = await http.patch(
+            updatingJobInvoicesUrl,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode(
+              allInvoices
+                  .where(
+                    (item) =>
+                        (item.isModified == true ||
+                        item.isAdded == true ||
+                        (item.isDeleted == true && item.id != null)),
+                  )
+                  .map((item) => item.toJson())
+                  .toList(),
+            ),
+          );
+          if (responseForEditingAPInvoiceItems.statusCode == 200) {
+            final decoded = jsonDecode(responseForEditingAPInvoiceItems.body);
+            List updatedItems = decoded['updated_items'];
+            List deletedItems = decoded['deleted_items'];
+            if (deletedItems.isNotEmpty) {
+              for (var id in deletedItems) {
+                allInvoices.removeWhere((item) => item.id == id);
+              }
+            }
+            if (updatedItems.isNotEmpty) {
+              for (var item in updatedItems) {
+                var uuid = item['uuid'];
+                var id = item['_id'];
+                final localIndex = allInvoices.indexWhere(
+                  (item) => item.uuid == uuid,
+                );
+
+                if (localIndex != -1) {
+                  allInvoices[localIndex].id = id;
+                  allInvoices[localIndex].isAdded = false;
+                  allInvoices[localIndex].isModified = false;
+                  allInvoices[localIndex].isDeleted = false;
+                }
+              }
+            }
+            isInvoiceItemsModified.value = false;
+          } else if (responseForEditingAPInvoiceItems.statusCode == 401 &&
+              refreshToken.isNotEmpty) {
+            final refreshed = await helper.refreshAccessToken(refreshToken);
+            if (refreshed == RefreshResult.success) {
+              await addNewApInvoice();
+            } else if (refreshed == RefreshResult.invalidToken) {
+              logout();
+            }
+          } else if (responseForEditingAPInvoiceItems.statusCode == 401) {
+            logout();
+          }
+        }
+        if ((responseForEditingAPInvoiceItems?.statusCode == 200) ||
+            (responseForEditingAPInvoice?.statusCode == 200)) {
+          showSnackBar('Done', 'Updated Successfully');
         }
       }
-
-      if (referenceNumber.text.isEmpty) {
-        status.value = 'New';
-
-        newData['status'] = 'New';
-        await getCurrentApInvoicesNumber();
-        newData['reference_number'] = referenceNumber.text;
-      }
-
-      if (apInvoiceAdded.isFalse) {
-        newData['added_date'] = DateTime.now().toString();
-        var newJob = await FirebaseFirestore.instance
-            .collection('ap_invoices')
-            .add(newData);
-        apInvoiceAdded.value = true;
-        currentApInvoiceId.value = newJob.id;
-        getAllInvoices(newJob.id);
-        showSnackBar('Done', 'Added Successfully');
-      } else {
-        newData.remove('added_date');
-        await FirebaseFirestore.instance
-            .collection('ap_invoices')
-            .doc(currentApInvoiceId.value)
-            .update(newData);
-        showSnackBar('Done', 'Updated Successfully');
-      }
-      canAddInvoice.value = true;
       addingNewValue.value = false;
-
-      // FirebaseFirestore.instance.collection('ap_invoices').add(newData);
     } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
       addingNewValue.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
     }
+  }
+
+  Future<void> deleteAPInvoice(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/ap_invoices/delete_ap_invoice/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        String deletedId = decoded['invoice_id'];
+        allApInvoices.removeWhere((inv) => inv.id == deletedId);
+        numberOfAPInvoices.value -= 1;
+        Get.close(2);
+        showSnackBar('Success', 'AP Invoice deleted successfully');
+      } else if (response.statusCode == 400 || response.statusCode == 404) {
+        final decoded = jsonDecode(response.body) ?? 'Failed to delete invoice';
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'] ?? 'Only New AP Invoice Allowed';
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteAPInvoice(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 500) {
+        final decoded = jsonDecode(response.body);
+        final error =
+            decoded['detail'] ?? 'Server error while deleting AP Invoice';
+        showSnackBar('Server Error', error);
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      print(e);
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  void filterSearch() async {
+    Map<String, dynamic> body = {};
+    if (invoiceTypeFilterId.value.isNotEmpty) {
+      body["invoice_type"] = invoiceTypeFilterId.value;
+    }
+    if (referenceNumberFilter.text.isNotEmpty) {
+      body["reference_number"] = referenceNumberFilter.text;
+    }
+    if (vendorFilterId.value.isNotEmpty) {
+      body["vandor"] = vendorFilterId.value;
+    }
+
+    if (statusFilter.value.text.isNotEmpty) {
+      body["status"] = statusFilter.value.text;
+    }
+    if (isTodaySelected.isTrue) {
+      body["today"] = true;
+    }
+    if (isThisMonthSelected.isTrue) {
+      body["this_month"] = true;
+    }
+    if (isThisYearSelected.isTrue) {
+      body["this_year"] = true;
+    }
+    if (fromDate.value.text.isNotEmpty) {
+      body["from_date"] = convertDateToIson(fromDate.value.text);
+    }
+    if (toDate.value.text.isNotEmpty) {
+      body["to_date"] = convertDateToIson(toDate.value.text);
+    }
+    if (body.isNotEmpty) {
+      await searchEngine(body);
+    } else {
+      await searchEngine({"all": true});
+    }
+  }
+
+  Future<void> searchEngine(Map<String, dynamic> body) async {
+    try {
+      isScreenLoding.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/ap_invoices/search_engine');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List invs = decoded['invoices'];
+        Map grandTotals = decoded['grand_totals'];
+        totalAmountForAPInvoices.value = grandTotals['grand_amounts'];
+        totalVATForAPInvoices.value = grandTotals['grand_vats'];
+        allApInvoices.assignAll(
+          invs.map((inv) => ApInvoicesModel.fromJson(inv)),
+        );
+        numberOfAPInvoices.value = allApInvoices.length;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngine(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      isScreenLoding.value = false;
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
+  }
+
+  // =======================================================================================================================
+
+  Future<void> loadValues(ApInvoicesModel typeData) async {
+    currentApInvoiceId.value = typeData.id ?? '';
+    isInvoiceItemsModified.value = false;
+    isInvoiceModified.value = false;
+    invoiceNumber.text = typeData.invoiceNumber ?? '';
+    invoiceDate.text = textToDate(typeData.invoiceDate ?? '');
+    invoiceType.text = typeData.invoiceTypeName ?? '';
+    allInvoices.assignAll(typeData.items ?? []);
+    invoiceTypeId.value = typeData.invoiceType ?? '';
+    referenceNumber.text = typeData.referenceNumber ?? '';
+    transactionDate.text = textToDate(typeData.transactionDate);
+    vendor.text = typeData.vendorName ?? '';
+    vendorId.value = typeData.vendor ?? '';
+    description.text = typeData.description ?? '';
+    status.value = typeData.status ?? '';
+    calculateAmountForSelectedReceipts();
+  }
+
+  void clearValues() {
+    currentApInvoiceId.value = '';
+    invoiceNumber.clear();
+    invoiceDate.clear();
+    invoiceType.clear();
+    invoiceTypeId.value = '';
+    referenceNumber.clear();
+    transactionDate.clear();
+    vendor.clear();
+    vendorId.value = '';
+    description.clear();
+    allInvoices.clear();
+    status.value = '';
+    calculatedAmountForInvoiceItems.value = 0;
+    calculatedVatForInvoiceItems.value = 0;
   }
 
   Future<void> editPostForApInvoices(String id) async {
-    try {
-      postingapInvoice.value = true;
-      await FirebaseFirestore.instance.collection('ap_invoices').doc(id).update(
-        {'status': 'Posted'},
-      );
+    if (status.value.isEmpty) {
+      showSnackBar('Alert', 'Please Save The Invoice First');
+      return;
+    }
+    Map invoiceStatus = await getCurrentAPInvoicedStatus(id);
+    String status1 = invoiceStatus['status'];
+
+    if (status1 != 'Posted' && status1 != 'Cancelled' && status1.isNotEmpty) {
       status.value = 'Posted';
-      postingapInvoice.value = false;
-      showSnackBar('Done', 'AP Invoice is Posted');
-    } catch (e) {
-      postingapInvoice.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
+      isInvoiceModified.value = true;
+    } else if (status1 == 'Posted') {
+      showSnackBar('Alert', 'AP Invoice is Already Posted');
+    } else if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'AP Invoice is Cancelled');
     }
   }
 
   Future<void> editCancelForApInvoices(String id) async {
-    try {
-      cancellingapInvoice.value = true;
-      await FirebaseFirestore.instance.collection('ap_invoices').doc(id).update(
-        {'status': 'Cancelled'},
-      );
-      status.value = 'Cancelled';
-      cancellingapInvoice.value = false;
-      showSnackBar('Done', 'AP Invoice is Cancelled');
-    } catch (e) {
-      cancellingapInvoice.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
+    if (status.value.isEmpty) {
+      showSnackBar('Alert', 'Please Save The Invoice First');
+      return;
     }
-  }
+    Map invoiceStatus = await getCurrentAPInvoicedStatus(id);
+    String status1 = invoiceStatus['status'];
 
-  void getAllInvoices(String jobId) {
-    // try {
-    //   loadingInvoices.value = true;
-    //   FirebaseFirestore.instance
-    //       .collection('ap_invoices')
-    //       .doc(jobId)
-    //       .collection('invoices')
-    //       .orderBy('job_number')
-    //       .snapshots()
-    //       .listen((QuerySnapshot<Map<String, dynamic>> items) {
-    //         allInvoices.assignAll(items.docs);
-    //         loadingInvoices.value = false;
-    //       });
-    // } catch (e) {
-    //   loadingInvoices.value = false;
-    // }
+    if (status1 != 'Cancelled' && status1 != 'Posted' && status1.isNotEmpty) {
+      status.value = 'Cancelled';
+      isInvoiceModified.value = true;
+    } else if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'AP Invoice Already Cancelled');
+    } else if (status1 == 'Posted') {
+      showSnackBar('Alert', 'AP Invoice is Posted');
+    }
   }
 
   void addNewInvoiceItem() {
     final String uniqueId = _uuid.v4();
-
+    isInvoiceItemsModified.value = true;
     allInvoices.add(
       ApInvoicesItem(
         uuid: uniqueId,
@@ -393,6 +567,7 @@ class ApInvoicesController extends GetxController {
         isAdded: true,
       ),
     );
+    calculateAmountForSelectedReceipts();
     Get.back();
   }
 
@@ -401,6 +576,7 @@ class ApInvoicesController extends GetxController {
       (item) => (item.id == id || item.uuid == id),
     );
     if (index != -1) {
+      isInvoiceItemsModified.value = true;
       final oldItem = allInvoices[index];
       allInvoices[index] = ApInvoicesItem(
         id: oldItem.id,
@@ -416,6 +592,7 @@ class ApInvoicesController extends GetxController {
       );
       allInvoices.refresh();
     }
+    calculateAmountForSelectedReceipts();
     Get.back();
   }
 
@@ -423,134 +600,14 @@ class ApInvoicesController extends GetxController {
     int index = allInvoices.indexWhere(
       (item) => (item.id == id || item.uuid == id),
     );
-    allInvoices[index].isDeleted = true;
-    allInvoices.refresh();
-    // isJobInvoicesModified.value = true;
-    Get.back();
-  }
-
-  // Future<void> addNewInvoiceItem(String id) async {
-  //   try {
-  //     // addingNewinvoiceItemsValue.value = true;
-
-  //     Map<String, dynamic> newData = {
-  //       // 'company_id': companyId.value,
-  //       'added_date': DateTime.now(),
-  //       'transaction_type': transactionTypeId.value,
-  //       'amount': amount.text,
-  //       'vat': vat.text,
-  //       'job_number': jobNumber.text,
-  //       'note': invoiceNote.text,
-  //       'report_reference': '',
-  //     };
-
-  //     await FirebaseFirestore.instance
-  //         .collection('ap_invoices')
-  //         .doc(id)
-  //         .collection('invoices')
-  //         .add(newData);
-
-  //     // addingNewinvoiceItemsValue.value = false;
-  //     Get.back();
-
-  //     double allamounts = 0.0;
-  //     double allVats = 0.0;
-  //     // for (var invoice in allInvoices) {
-  //     //   allamounts +=
-  //     //       double.tryParse(invoice.data()['amount'].toString()) ?? 0.0;
-  //     //   allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
-  //     // }
-  //     await FirebaseFirestore.instance.collection('ap_invoices').doc(id).update(
-  //       {'total_amount': allamounts, 'total_vat_amount': allVats},
-  //     );
-  //   } catch (e) {
-  //     // addingNewinvoiceItemsValue.value = false;
-  //     showSnackBar('Alert', 'Something Went Wrong Please Try Again');
-  //   }
-  // }
-
-  // Future<void> editInvoiceItem(String id, String itemId) async {
-  //   try {
-  //     Get.back();
-  //     await FirebaseFirestore.instance
-  //         .collection('ap_invoices')
-  //         .doc(id)
-  //         .collection('invoices')
-  //         .doc(itemId)
-  //         .update({
-  //           'transaction_type': transactionTypeId.value,
-  //           'amount': amount.text,
-  //           'vat': vat.text,
-  //           'job_number': jobNumber.text,
-  //           'note': invoiceNote.text,
-  //           'report_reference': '',
-  //         });
-
-  //     double allamounts = 0.0;
-  //     double allVats = 0.0;
-  //     // for (var invoice in allInvoices) {
-  //     //   allamounts +=
-  //     //       double.tryParse(invoice.data()['amount'].toString()) ?? 0.0;
-  //     //   allVats += double.tryParse(invoice.data()['vat'].toString()) ?? 0.0;
-  //     // }
-  //     await FirebaseFirestore.instance.collection('ap_invoices').doc(id).update(
-  //       {'total_amount': allamounts, 'total_vat_amount': allVats},
-  //     );
-  //   } catch (e) {
-  //     //
-  //   }
-  // }
-
-  Future<void> getCurrentApInvoicesNumber() async {
-    try {
-      var apnId = '';
-      var updateApInvoices = '';
-      var apnDoc = await FirebaseFirestore.instance
-          .collection('counters')
-          .where('code', isEqualTo: 'APIN')
-          // .where('company_id', isEqualTo: companyId.value)
-          .get();
-
-      if (apnDoc.docs.isEmpty) {
-        // Define constants for the new counter values
-        const prefix = 'AI';
-        const separator = '-';
-        const initialValue = 1;
-
-        var newCounter = await FirebaseFirestore.instance
-            .collection('counters')
-            .add({
-              'code': 'APIN',
-              'description': 'AP Invoices Number',
-              'prefix': prefix,
-              'value': initialValue,
-              'length': 0,
-              'separator': separator,
-              'added_date': DateTime.now().toString(),
-              // 'company_id': companyId.value,
-              'status': true,
-            });
-        apnId = newCounter.id;
-        // Set the counter text with prefix and separator
-        referenceNumber.text = '$prefix$separator$initialValue';
-        updateApInvoices = initialValue.toString();
-      } else {
-        var firstDoc = apnDoc.docs.first;
-        apnId = firstDoc.id;
-        var currentValue = firstDoc.data()['value'] ?? 0;
-        // Use the existing prefix and separator from the document
-        referenceNumber.text =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
-        updateApInvoices = (currentValue + 1).toString();
-      }
-
-      await FirebaseFirestore.instance.collection('counters').doc(apnId).update(
-        {'value': int.parse(updateApInvoices)},
-      );
-    } catch (e) {
-      // Optionally handle errors here
-      // print("Error in getCurrentJobCardCounterNumber: $e");
+    if (index != -1) {
+      isInvoiceItemsModified.value = true;
+      allInvoices[index].isDeleted = true;
+      allInvoices.refresh();
     }
+    calculateAmountForSelectedReceipts();
+
+    Get.back();
   }
 
   void searchEngineForJobCards() {
@@ -573,133 +630,6 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  Future<void> searchEngine() async {
-    isScreenLoding.value = true;
-    final collection = FirebaseFirestore.instance.collection('ap_invoices');
-    // .where('company_id', isEqualTo: companyId.value);
-    Query<Map<String, dynamic>> query = collection;
-
-    // 1) زر "All" يجلب كل البيانات فورًا
-    if (isAllSelected.value) {
-      // لا نضيف أي where، نجلب كل الوثائق
-      final snapshot = await query.get();
-      allApInvoices.assignAll(snapshot.docs);
-      // calculateMoneyForAllJobs();
-      // numberOfJobs.value = allJobCards.length;
-
-      isScreenLoding.value = false;
-      return;
-    }
-
-    // 2) زر "Today"
-    if (isTodaySelected.value) {
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay
-          .add(const Duration(days: 1))
-          .subtract(const Duration(milliseconds: 1));
-      fromDate.value.text = textToDate(startOfDay);
-      toDate.value.text = textToDate(endOfDay);
-      query = query
-          .where(
-            'transaction_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
-          )
-          .where(
-            'transaction_date',
-            isLessThanOrEqualTo: Timestamp.fromDate(endOfDay),
-          );
-    }
-    // 3) زر "This Month"
-    else if (isThisMonthSelected.value) {
-      final now = DateTime.now();
-      final startOfMonth = DateTime(now.year, now.month, 1);
-      final startOfNextMonth = (now.month < 12)
-          ? DateTime(now.year, now.month + 1, 1)
-          : DateTime(now.year + 1, 1, 1);
-      final endOfMonth = startOfNextMonth.subtract(
-        const Duration(milliseconds: 1),
-      );
-      fromDate.value.text = textToDate(startOfMonth);
-      toDate.value.text = textToDate(endOfMonth);
-      query = query
-          .where(
-            'transaction_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
-          )
-          .where(
-            'transaction_date',
-            isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth),
-          );
-    }
-    // 4) زر "This Year"
-    else if (isThisYearSelected.value) {
-      final now = DateTime.now();
-      final startOfYear = DateTime(now.year, 1, 1);
-      final startOfNextYear = DateTime(now.year + 1, 1, 1);
-      final endOfYear = startOfNextYear.subtract(
-        const Duration(milliseconds: 1),
-      );
-      fromDate.value.text = textToDate(startOfYear);
-      toDate.value.text = textToDate(endOfYear);
-      query = query
-          .where(
-            'transaction_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
-          )
-          .where(
-            'transaction_date',
-            isLessThanOrEqualTo: Timestamp.fromDate(endOfYear),
-          );
-    }
-    // 5) إذا لم يُختر أي من الأزرار الخاصة بالفترة، نطبق فلتر التواريخ اليدوي
-    else {
-      if (fromDate.value.text.trim().isNotEmpty) {
-        try {
-          final dtFrom = format.parseStrict(fromDate.value.text.trim());
-          query = query.where(
-            'transaction_date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
-          );
-        } catch (_) {}
-      }
-      if (toDate.value.text.trim().isNotEmpty) {
-        try {
-          final dtTo = format.parseStrict(toDate.value.text.trim());
-          query = query.where(
-            'transaction_date',
-            isLessThanOrEqualTo: Timestamp.fromDate(dtTo),
-          );
-        } catch (_) {}
-      }
-    }
-
-    // 6) باقي الفلاتر العامة
-    if (referenceNumberFilter.value.text.trim().isNotEmpty) {
-      query = query.where(
-        'reference_number',
-        isEqualTo: referenceNumberFilter.value.text.trim(),
-      );
-    }
-    if (vendorFilter.value.text.isNotEmpty) {
-      query = query.where('vendor', isEqualTo: vendorFilter.value.text);
-    }
-    if (invoiceTypeFilterId.value.isNotEmpty) {
-      query = query.where('invoice_type', isEqualTo: invoiceTypeFilterId.value);
-    }
-
-    if (statusFilter.value.text.isNotEmpty) {
-      query = query.where('status', isEqualTo: statusFilter.value.text);
-    }
-
-    // 7) تنفيذ الاستعلام وجلب النتائج
-    final snapshot = await query.get();
-    allApInvoices.assignAll(snapshot.docs);
-    // numberOfJobs.value = allJobCards.length;
-    // calculateMoneyForAllJobs();
-    isScreenLoding.value = false;
-  }
-
   void removeFilters() {
     isAllSelected.value = false;
     isTodaySelected.value = false;
@@ -708,11 +638,9 @@ class ApInvoicesController extends GetxController {
   }
 
   void clearAllFilters() {
-    allApInvoices.clear();
-    // numberOfJobs.value = 0;
-    // allJobsTotals.value = 0;
-    // allJobsVATS.value = 0;
-    // allJobsNET.value = 0;
+    numberOfAPInvoices.value = 0;
+    totalAmountForAPInvoices.value = 0;
+    totalVATForAPInvoices.value = 0;
     statusFilter.value.clear();
     isAllSelected.value = false;
     isTodaySelected.value = false;
@@ -722,10 +650,7 @@ class ApInvoicesController extends GetxController {
     invoiceTypeFilterId.value = '';
     invoiceTypeFilter.clear();
     vendorFilter.value = TextEditingController();
-
     fromDate.value.clear();
     toDate.value.clear();
-    isScreenLoding.value = false;
-    update();
   }
 }

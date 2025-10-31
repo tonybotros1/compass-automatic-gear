@@ -181,7 +181,7 @@ class CashManagementBaseController extends GetxController {
 
   void calculateAmountForSelectedReceipts() {
     calculatedAmountForAllSelectedReceipts.value = 0.0;
-    for (var element in selectedAvailableReceipts) {
+    for (var element in selectedAvailableReceipts.where((ite)=>ite.isDeleted != true)) {
       calculatedAmountForAllSelectedReceipts.value += element.receiptAmount;
     }
   }

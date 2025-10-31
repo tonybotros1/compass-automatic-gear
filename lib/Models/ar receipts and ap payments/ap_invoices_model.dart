@@ -1,5 +1,5 @@
-class ApInvoices {
-  ApInvoices({
+class ApInvoicesModel {
+  ApInvoicesModel({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -15,26 +15,30 @@ class ApInvoices {
     required this.items,
     required this.vendorName,
     required this.invoiceTypeName,
+    required this.totalAmount,
+    required this.totalVat,
   });
 
-   String? id;
-   DateTime? createdAt;
-   DateTime? updatedAt;
-   String? companyId;
-   String? description;
-   DateTime? invoiceDate;
-   String? invoiceNumber;
-   String? invoiceType;
-   String? referenceNumber;
-   String? status;
-   DateTime? transactionDate;
-   String? vendor;
-   List<ApInvoicesItem> items;
-   String? vendorName;
-   String? invoiceTypeName;
+  String? id;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  String? companyId;
+  String? description;
+  DateTime? invoiceDate;
+  String? invoiceNumber;
+  String? invoiceType;
+  String? referenceNumber;
+  String? status;
+  DateTime? transactionDate;
+  String? vendor;
+  List<ApInvoicesItem>? items;
+  String? vendorName;
+  String? invoiceTypeName;
+  double totalAmount;
+  double totalVat;
 
-  factory ApInvoices.fromJson(Map<String, dynamic> json) {
-    return ApInvoices(
+  factory ApInvoicesModel.fromJson(Map<String, dynamic> json) {
+    return ApInvoicesModel(
       id: json["_id"],
       createdAt: DateTime.tryParse(json["createdAt"] ?? ""),
       updatedAt: DateTime.tryParse(json["updatedAt"] ?? ""),
@@ -54,6 +58,8 @@ class ApInvoices {
             ),
       vendorName: json["vendor_name"],
       invoiceTypeName: json["invoice_type_name"],
+      totalAmount: json["total_amounts"] ?? 0,
+      totalVat: json['total_vats'] ?? 0,
     );
   }
 
@@ -70,7 +76,7 @@ class ApInvoices {
     "status": status,
     "transaction_date": transactionDate?.toIso8601String(),
     "vendor": vendor,
-    "items": items.map((x) => x.toJson()).toList(),
+    "items": items?.map((x) => x.toJson()).toList() ?? [],
     "vendor_name": vendorName,
     "invoice_type_name": invoiceTypeName,
   };
@@ -94,46 +100,47 @@ class ApInvoicesItem {
     this.isModified,
   });
 
-   String? id;
-   String? uuid;
-   DateTime? ceatedAt;
-   DateTime? updatedAt;
-   double? amount;
-   String? jobNumber;
-   String? note;
-   String? transactionType;
-   double? vat;
-   String? apInvoiceId;
-   String? transactionTypeName;
-   bool? isAdded;
-   bool? isDeleted;
-   bool? isModified;
+  String? id;
+  String? uuid;
+  DateTime? ceatedAt;
+  DateTime? updatedAt;
+  double? amount;
+  String? jobNumber;
+  String? note;
+  String? transactionType;
+  double? vat;
+  String? apInvoiceId;
+  String? transactionTypeName;
+  bool? isAdded;
+  bool? isDeleted;
+  bool? isModified;
 
   factory ApInvoicesItem.fromJson(Map<String, dynamic> json) {
     return ApInvoicesItem(
       id: json["_id"],
       ceatedAt: DateTime.tryParse(json["ceatedAt"] ?? ""),
       updatedAt: DateTime.tryParse(json["updatedAt"] ?? ""),
-      amount: json["amount"],
-      jobNumber: json["job_number"],
-      note: json["note"],
-      transactionType: json["transaction_type"],
-      vat: json["vat"],
-      apInvoiceId: json["ap_invoice_id"],
-      transactionTypeName: json["transaction_type_name"],
+      amount: json["amount"] ?? 0,
+      jobNumber: json["job_number"] ?? '',
+      note: json["note"] ?? '',
+      transactionType: json["transaction_type"] ?? '',
+      vat: json["vat"] ?? 0,
+      apInvoiceId: json["ap_invoice_id"] ?? '',
+      transactionTypeName: json["transaction_type_name"] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-    "_id": id,
-    "ceatedAt": ceatedAt?.toIso8601String(),
-    "updatedAt": updatedAt?.toIso8601String(),
+    "id": id,
+    "uuid": uuid,
     "amount": amount,
     "job_number": jobNumber,
     "note": note,
     "transaction_type": transactionType,
     "vat": vat,
     "ap_invoice_id": apInvoiceId,
-    "transaction_type_name": transactionTypeName,
+    "is_added": isAdded,
+    "is_deleted": isDeleted,
+    "is_modified": isModified,
   };
 }

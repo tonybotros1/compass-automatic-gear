@@ -8,8 +8,9 @@ import '../../consts.dart';
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  final LoginScreenController loginScreenController =
-      Get.put(LoginScreenController());
+  final LoginScreenController loginScreenController = Get.put(
+    LoginScreenController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -34,24 +35,21 @@ class LoginScreen extends StatelessWidget {
                   key: loginScreenController.formKeyForlogin,
                   child: Column(
                     children: [
-                      SizedBox(
-                        height: constraints.maxHeight / 20,
-                      ),
+                      SizedBox(height: constraints.maxHeight / 20),
                       Container(
                         constraints: BoxConstraints(
-                            maxHeight: constraints.maxHeight > 400
-                                ? constraints.maxHeight / 2
-                                : constraints.maxHeight / 1.5,
-                            maxWidth: constraints.maxWidth > 600
-                                ? constraints.maxWidth / 2
-                                : constraints.maxWidth / 1.5),
+                          maxHeight: constraints.maxHeight > 400
+                              ? constraints.maxHeight / 2
+                              : constraints.maxHeight / 1.5,
+                          maxWidth: constraints.maxWidth > 600
+                              ? constraints.maxWidth / 2
+                              : constraints.maxWidth / 1.5,
+                        ),
                         // width: constraints.maxWidth > 600
                         //     ? 400
                         //     : Get.width * 0.8, // Responsive width
                         // height: 300,
-                        child: Image.asset(
-                          'assets/DATAHUB_LIGHT.png',
-                        ),
+                        child: Image.asset('assets/DATAHUB_LIGHT.png'),
                       ),
                       myTextFormField1(
                         constraints: constraints,
@@ -62,71 +60,74 @@ class LoginScreen extends StatelessWidget {
                         keyboardType: TextInputType.emailAddress,
                         validate: true,
                       ),
-                      Obx(() => myTextFormField1(
-                            constraints: constraints,
-                            icon: IconButton(
-                                onPressed: () {
-                                  loginScreenController
-                                      .changeObscureTextValue();
-                                },
-                                icon: Icon(
-                                    loginScreenController.obscureText.value
-                                        ? Icons.remove_red_eye_outlined
-                                        : Icons.visibility_off)),
-                            obscureText:
-                                loginScreenController.obscureText.value,
-                            controller: loginScreenController.pass,
-                            labelText: 'Password',
-                            hintText: 'Enter your password',
-                            validate: true,
-                          )),
-                      SizedBox(
-                        height: constraints.maxHeight / 10,
+                      Obx(
+                        () => myTextFormField1(
+                          constraints: constraints,
+                          icon: IconButton(
+                            onPressed: () {
+                              loginScreenController.changeObscureTextValue();
+                            },
+                            icon: Icon(
+                              loginScreenController.obscureText.value
+                                  ? Icons.remove_red_eye_outlined
+                                  : Icons.visibility_off,
+                            ),
+                          ),
+                          obscureText: loginScreenController.obscureText.value,
+                          controller: loginScreenController.pass,
+                          labelText: 'Password',
+                          hintText: 'Enter your password',
+                          validate: true,
+                        ),
                       ),
-                      Obx(() => Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton(
-                                onPressed:
-                                    loginScreenController.sigingInProcess.value
-                                        ? null
-                                        : () {
-                                            if (!loginScreenController
-                                                .formKeyForlogin.currentState!
-                                                .validate()) {
-                                            } else {
-                                              loginScreenController.singIn();
-                                            }
-                                          },
-                                style: loginButtonStyle,
-                                child: loginScreenController
-                                            .sigingInProcess.value ==
-                                        false
-                                    ? const Text(
-                                        'Login',
-                                        style: TextStyle(color: Colors.white),
-                                      )
-                                    : const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
+                      SizedBox(height: constraints.maxHeight / 10),
+                      Obx(
+                        () => Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed:
+                                  loginScreenController.sigingInProcess.value
+                                  ? null
+                                  : () {
+                                      if (!loginScreenController
+                                          .formKeyForlogin
+                                          .currentState!
+                                          .validate()) {
+                                      } else {
+                                        loginScreenController.singIn();
+                                      }
+                                    },
+                              style: loginButtonStyle,
+                              child:
+                                  loginScreenController.sigingInProcess.value ==
+                                      false
+                                  ? const Text(
+                                      'Login',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
                                       ),
-                              ),
-                              const SizedBox(
-                                width: 20,
-                              ),
-                            kIsWeb ? 
-                              ElevatedButton(
-                                  style: newCompannyButtonStyle,
-                                  onPressed: () {
-                                    Get.toNamed('/registerScreen');
-                                  },
-                                  child: const Text('Are you a new company?')) : const SizedBox()
-                            ],
-                          )) ,
+                                    ),
+                            ),
+                            const SizedBox(width: 20),
+                            kIsWeb
+                                ? ElevatedButton(
+                                    style: newCompannyButtonStyle,
+                                    onPressed: () {
+                                      Get.toNamed('/registerScreen');
+                                    },
+                                    child: const Text('Are you a new company?'),
+                                  )
+                                : const SizedBox(),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -151,12 +152,13 @@ Widget myTextFormField1({
 }) {
   return Container(
     constraints: BoxConstraints(
-        maxHeight: constraints.maxHeight > 400
-            ? constraints.maxHeight / 3
-            : constraints.maxHeight / 1.3,
-        maxWidth: constraints.maxWidth > 600
-            ? constraints.maxWidth / 3
-            : constraints.maxWidth / 1.3),
+      maxHeight: constraints.maxHeight > 400
+          ? constraints.maxHeight / 3
+          : constraints.maxHeight / 1.3,
+      maxWidth: constraints.maxWidth > 600
+          ? constraints.maxWidth / 3
+          : constraints.maxWidth / 1.3,
+    ),
     child: TextFormField(
       obscureText: obscureText,
       keyboardType: keyboardType,

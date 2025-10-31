@@ -6,7 +6,6 @@ import '../../../consts.dart';
 import 'add_new_invoice_for_ap_invoices_or_edit.dart';
 
 Future<dynamic> invoiceItemsForapInvoicesDialog({
-  required String apInvoiceID,
   required ApInvoicesController controller,
   required BuildContext context,
   required BoxConstraints constraints,
@@ -38,7 +37,7 @@ Future<dynamic> invoiceItemsForapInvoicesDialog({
                     style: fontStyleForScreenNameUsedInButtons,
                   ),
                   const Spacer(),
-                  ClickableHoverText(onTap: onPressed, text: 'Add'),
+                  ClickableHoverText(onTap: onPressed, text: 'Ok'),
                   separator(),
                   closeIcon(),
                 ],

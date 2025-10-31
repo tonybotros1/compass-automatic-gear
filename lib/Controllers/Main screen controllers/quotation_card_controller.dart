@@ -278,6 +278,7 @@ class QuotationCardController extends GetxController {
             double.tryParse(quotationWarrentyKM.value.text) ?? 0,
         'quotation_notes': quotationNotes.text,
         'invoice_items': allInvoiceItems
+            .where((inv) => inv.deleted != true)
             .map((item) => item.toJsonForQuotation())
             .toList(),
       };

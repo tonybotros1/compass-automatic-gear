@@ -311,7 +311,7 @@ class JobCardController extends GetxController {
         'job_notes': jobNotes.text,
         'job_delivery_notes': deliveryNotes.text,
         'invoice_number': invoiceCounter.value.text,
-        'invoice_items': allInvoiceItems.map((item) => item.toJson()).toList(),
+        'invoice_items': allInvoiceItems.where((inv)=> inv.deleted != true).map((item) => item.toJson()).toList(),
       };
 
       final rawDate = jobCardDate.value.text.trim();
@@ -321,6 +321,8 @@ class JobCardController extends GetxController {
         } catch (e) {
           showSnackBar('Alert', 'Please enter valid job date');
         }
+      } else {
+        newData['job_date'] = null;
       }
 
       final rawDate2 = invoiceDate.value.text.trim();
@@ -330,6 +332,8 @@ class JobCardController extends GetxController {
         } catch (e) {
           showSnackBar('Alert', 'Please enter valid invoice date');
         }
+      } else {
+        newData['invoice_date'] = null;
       }
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -360,6 +364,7 @@ class JobCardController extends GetxController {
           allInvoiceItems.value = newJob.invoiceItemsDetails ?? [];
           isJobInvoicesModified.value = false;
           isJobModified.value = false;
+          canAddInternalNotesAndInvoiceItems.value = true;
           showSnackBar('Done', 'Job Added Successfully');
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -377,7 +382,7 @@ class JobCardController extends GetxController {
         }
         if (isJobModified.isTrue) {
           Uri updatingJobUrl = Uri.parse(
-            '$backendUrl/job_cards/update_job_card/$curreentJobCardId',
+            '$backendUrl/job_cards/update_job_card/${curreentJobCardId.value}',
           );
           Map newDataToUpdate = newData;
           newDataToUpdate.remove('invoice_items');
@@ -464,7 +469,6 @@ class JobCardController extends GetxController {
           }
         }
       }
-      canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try again');

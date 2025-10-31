@@ -46,7 +46,7 @@ Widget addNewinvoiceForApInvoicesOrEdit({
               children: [
                 Expanded(
                   child: myTextFormFieldWithBorder(
-                    moneyFormat: true,
+                    isDouble: true,
                     focusNode: controller.focusNode2,
                     onEditingComplete: () {
                       FocusScope.of(
@@ -61,7 +61,7 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                 Expanded(
                   child: myTextFormFieldWithBorder(
                     focusNode: controller.focusNode3,
-                    moneyFormat: true,
+                    isDouble: true,
                     onEditingComplete: () {
                       FocusScope.of(
                         context,
@@ -204,7 +204,7 @@ Future<dynamic> jobDialog(BoxConstraints constraints, BuildContext context) {
                     style: fontStyleForScreenNameUsedInButtons,
                   ),
                   const Spacer(),
-                  closeButton,
+                  closeIcon(),
                 ],
               ),
             ),

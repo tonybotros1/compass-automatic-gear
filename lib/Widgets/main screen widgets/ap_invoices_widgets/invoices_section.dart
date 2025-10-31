@@ -108,7 +108,7 @@ Widget tableOfScreens({
         ],
         rows: [
           ...controller.allInvoices.where((item)=> item.isDeleted != true).map<DataRow>((invoiceItems) {
-            final invoiceItemsId = invoiceItems.id ?? invoiceItems.uuid ?? '';
+            String invoiceItemsId = invoiceItems.id ?? invoiceItems.uuid ?? '';
             return dataRowForTheTable(
               invoiceItems,
               context,
@@ -222,7 +222,6 @@ Widget editSection(
         controller.amount.text = invoiceItemsData.amount.toString();
         controller.jobNumber.text = invoiceItemsData.jobNumber ?? '';
         invoiceItemsForapInvoicesDialog(
-          apInvoiceID: invoiceItemsId,
           controller: controller,
           constraints: constraints,
           onPressed: () {
@@ -250,13 +249,12 @@ ElevatedButton newinvoiceItemsButton(
         controller.transactionType.clear();
         controller.transactionTypeId.value = '';
         controller.invoiceNote.clear();
-        controller.vat.text = '0.0';
-        controller.amount.text = '0.0';
+        controller.vat.text = '';
+        controller.amount.text = '';
         controller.jobNumber.clear();
 
         invoiceItemsForapInvoicesDialog(
           context: context,
-          apInvoiceID: apInvoiceID,
           controller: controller,
           constraints: constraints,
           onPressed: () {

@@ -178,7 +178,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
           showSnackBar('Updating', 'Please Wait');
           if (isReceiptModified.isTrue) {
             Uri updatingJobUrl = Uri.parse(
-              '$backendUrl/ar_receipts/update_ar_receipt/$currentReceiptID',
+              '$backendUrl/ar_receipts/update_ar_receipt/${currentReceiptID.value}',
             );
             Map<String, dynamic> newDataToUpdate = newData;
 

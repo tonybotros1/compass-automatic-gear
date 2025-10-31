@@ -466,9 +466,7 @@ class Helpers {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse(
-        '$backendTestURI/entity_information/get_all_vendors',
-      );
+      var url = Uri.parse('$backendTestURI/entity_information/get_all_vendors');
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -752,7 +750,9 @@ class Helpers {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse('$backendTestURI/job_cards/get_customer_outstanding/$customerId');
+      var url = Uri.parse(
+        '$backendTestURI/job_cards/get_customer_outstanding/$customerId',
+      );
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -786,7 +786,9 @@ class Helpers {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse('$backendTestURI/ar_receipts/get_ar_receipt_status/$id');
+      var url = Uri.parse(
+        '$backendTestURI/ar_receipts/get_ar_receipt_status/$id',
+      );
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -817,7 +819,9 @@ class Helpers {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse('$backendTestURI/ap_payment_types/get_all_ap_payment_types');
+      var url = Uri.parse(
+        '$backendTestURI/ap_payment_types/get_all_ap_payment_types',
+      );
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -840,6 +844,39 @@ class Helpers {
       } else if (response.statusCode == 401) {
         logout();
         return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future getAPInvoiceStatus(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendTestURI/ap_invoices/get_ap_invoice_status/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final status = decoded['data'];
+        return status;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getJobCardStatus(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
       } else {
         return {};
       }

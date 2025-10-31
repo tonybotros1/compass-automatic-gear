@@ -39,10 +39,12 @@ Widget paymentHeader(BuildContext context) {
                               onChanged: (key, value) {
                                 controller.invoiceTypeId.value = key;
                                 controller.invoiceType.text = value['name'];
+                                controller.isInvoiceModified.value = true;
                               },
                               onDelete: () {
                                 controller.invoiceTypeId.value = '';
                                 controller.invoiceType.clear();
+                                controller.isInvoiceModified.value = true;
                               },
                               onOpen: () {
                                 return controller.getInvoiceTypes();
@@ -56,6 +58,9 @@ Widget paymentHeader(BuildContext context) {
                             controller: controller.referenceNumber,
                             isEnabled: false,
                             labelText: 'Reference NO.',
+                            onChanged: (_) {
+                              controller.isInvoiceModified.value = true;
+                            },
                           ),
                         ),
                         Expanded(
@@ -69,13 +74,12 @@ Widget paymentHeader(BuildContext context) {
                                 Get.focusScope!.requestFocus(
                                   controller.focusNodePayementHeader3,
                                 );
-                                // FocusScope.of(context).requestFocus(
-                                //     controller.focusNodePayementHeader3);
                               },
                               isDate: true,
                               suffixIcon: IconButton(
                                 focusNode: FocusNode(skipTraversal: true),
                                 onPressed: () {
+                                  controller.isInvoiceModified.value = true;
                                   selectDateContext(
                                     context,
                                     controller.transactionDate,
@@ -89,6 +93,9 @@ Widget paymentHeader(BuildContext context) {
                                   controller.transactionDate.value.text,
                                   controller.transactionDate,
                                 );
+                              },
+                              onChanged: (_) {
+                                controller.isInvoiceModified.value = true;
                               },
                               labelText: 'Transaction Date',
                             ),
@@ -112,6 +119,9 @@ Widget paymentHeader(BuildContext context) {
                             textInputAction: TextInputAction.next,
                             labelText: 'Invoice Number',
                             controller: controller.invoiceNumber,
+                            onChanged: (_) {
+                              controller.isInvoiceModified.value = true;
+                            },
                           ),
                         ),
                         Expanded(
@@ -123,10 +133,14 @@ Widget paymentHeader(BuildContext context) {
                                 context,
                               ).requestFocus(controller.focusNode6);
                             },
+                            onChanged: (_) {
+                              controller.isInvoiceModified.value = true;
+                            },
                             isDate: true,
                             suffixIcon: IconButton(
                               focusNode: FocusNode(skipTraversal: true),
                               onPressed: () {
+                                controller.isInvoiceModified.value = true;
                                 selectDateContext(
                                   context,
                                   controller.invoiceDate,
@@ -162,12 +176,14 @@ Widget paymentHeader(BuildContext context) {
                               textcontroller: controller.vendor.text,
                               hintText: 'Vendor ',
                               onChanged: (key, value) {
+                                controller.isInvoiceModified.value = true;
                                 controller.vendorId.value = key;
                                 controller.vendor.text = value['entity_name'];
                               },
                               onDelete: () {
                                 controller.vendorId.value = '';
                                 controller.vendor.clear();
+                                controller.isInvoiceModified.value = true;
                               },
                               onOpen: () {
                                 return controller.getAllVendors();
@@ -191,6 +207,9 @@ Widget paymentHeader(BuildContext context) {
                   labelText: 'Description',
                   maxLines: 7,
                   controller: controller.description,
+                  onChanged: (_) {
+                    controller.isInvoiceModified.value = true;
+                  },
                 ),
               ),
             ),
