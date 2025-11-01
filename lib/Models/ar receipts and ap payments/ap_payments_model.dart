@@ -1,7 +1,10 @@
+import 'vendor_payments_model.dart';
+
 class APPaymentModel {
   String? id;
   String? account;
   String? chequeNumber;
+  DateTime? chequeDate;
   String? companyId;
   String? currency;
   String? note;
@@ -13,10 +16,11 @@ class APPaymentModel {
   String? vendor;
   DateTime? createdAt;
   DateTime? updatedAt;
-  List<InvoicesDetails>? invoicesDetails;
+  List<VendorPaymentsModel>? invoicesDetails;
   String? vendorName;
   String? paymentTypeName;
   String? accountNumber;
+  double? totalGiven;
 
   APPaymentModel({
     this.id,
@@ -37,12 +41,16 @@ class APPaymentModel {
     this.vendorName,
     this.paymentTypeName,
     this.accountNumber,
+    this.totalGiven,
+    this.chequeDate,
   });
 
   APPaymentModel.fromJson(Map<String, dynamic> json) {
     id = json.containsKey('_id') ? json['_id'] : null;
     account = json.containsKey('account') ? json['account'] : null;
-    chequeNumber = json.containsKey('cheque_number') ? json['cheque_number'] : null;
+    chequeNumber = json.containsKey('cheque_number')
+        ? json['cheque_number']
+        : null;
     companyId = json.containsKey('company_id') ? json['company_id'] : null;
     currency = json.containsKey('currency') ? json['currency'] : null;
     note = json.containsKey('note') ? json['note'] : null;
@@ -60,23 +68,36 @@ class APPaymentModel {
       updatedAt = DateTime.tryParse(json['updatedAt'].toString());
     }
 
-    paymentNumber = json.containsKey('payment_number') ? json['payment_number'] : null;
-    paymentType = json.containsKey('payment_type') ? json['payment_type'] : null;
+    if (json.containsKey('cheque_date') && json['cheque_date'] != null) {
+      chequeDate = DateTime.tryParse(json['cheque_date'].toString());
+    }
+
+    paymentNumber = json.containsKey('payment_number')
+        ? json['payment_number']
+        : null;
+    paymentType = json.containsKey('payment_type')
+        ? json['payment_type']
+        : null;
     rate = json.containsKey('rate') ? json['rate'] : null;
     status = json.containsKey('status') ? json['status'] : null;
     vendor = json.containsKey('vendor') ? json['vendor'] : null;
 
-    if (json.containsKey('invoices_details') && json['invoices_details'] != null) {
-      invoicesDetails = <InvoicesDetails>[];
+    if (json.containsKey('invoices_details') &&
+        json['invoices_details'] != null) {
+      invoicesDetails = <VendorPaymentsModel>[];
       json['invoices_details'].forEach((v) {
-        invoicesDetails!.add(InvoicesDetails.fromJson(v));
+        invoicesDetails!.add(VendorPaymentsModel.fromJson(v));
       });
     }
 
     vendorName = json.containsKey('vendor_name') ? json['vendor_name'] : null;
-    paymentTypeName =
-        json.containsKey('payment_type_name') ? json['payment_type_name'] : null;
-    accountNumber = json.containsKey('account_number') ? json['account_number'] : null;
+    paymentTypeName = json.containsKey('payment_type_name')
+        ? json['payment_type_name']
+        : null;
+    accountNumber = json.containsKey('account_number')
+        ? json['account_number']
+        : null;
+    totalGiven = json.containsKey("total_given") ? json["total_given"] : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -98,66 +119,14 @@ class APPaymentModel {
     data['updatedAt'] = updatedAt?.toIso8601String();
 
     if (invoicesDetails != null) {
-      data['invoices_details'] =
-          invoicesDetails!.map((v) => v.toJson()).toList();
+      data['invoices_details'] = invoicesDetails!
+          .map((v) => v.toJson())
+          .toList();
     }
 
     data['vendor_name'] = vendorName;
     data['payment_type_name'] = paymentTypeName;
     data['account_number'] = accountNumber;
-
-    return data;
-  }
-}
-
-class InvoicesDetails {
-  String? id;
-  int? receiptAmount;
-  int? outstandingAmount;
-  bool? isSelected;
-  String? apInvoiceId;
-  String? invoiceNumber;
-  String? invoiceDate;
-  int? invoiceAmount;
-  String? notes;
-
-  InvoicesDetails({
-    this.id,
-    this.receiptAmount,
-    this.outstandingAmount,
-    this.isSelected,
-    this.apInvoiceId,
-    this.invoiceNumber,
-    this.invoiceDate,
-    this.invoiceAmount,
-    this.notes,
-  });
-
-  InvoicesDetails.fromJson(Map<String, dynamic> json) {
-    id = json.containsKey('_id') ? json['_id'] : null;
-    receiptAmount = json.containsKey('receipt_amount') ? json['receipt_amount'] : null;
-    outstandingAmount =
-        json.containsKey('outstanding_amount') ? json['outstanding_amount'] : null;
-    isSelected = json.containsKey('is_selected') ? json['is_selected'] : null;
-    apInvoiceId = json.containsKey('ap_invoice_id') ? json['ap_invoice_id'] : null;
-    invoiceNumber = json.containsKey('invoice_number') ? json['invoice_number'] : null;
-    invoiceDate = json.containsKey('invoice_date') ? json['invoice_date'] : null;
-    invoiceAmount = json.containsKey('invoice_amount') ? json['invoice_amount'] : null;
-    notes = json.containsKey('notes') ? json['notes'] : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {};
-
-    data['_id'] = id;
-    data['receipt_amount'] = receiptAmount;
-    data['outstanding_amount'] = outstandingAmount;
-    data['is_selected'] = isSelected;
-    data['ap_invoice_id'] = apInvoiceId;
-    data['invoice_number'] = invoiceNumber;
-    data['invoice_date'] = invoiceDate;
-    data['invoice_amount'] = invoiceAmount;
-    data['notes'] = notes;
 
     return data;
   }

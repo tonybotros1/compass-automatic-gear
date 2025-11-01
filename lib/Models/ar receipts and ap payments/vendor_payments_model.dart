@@ -43,8 +43,8 @@ class VendorPaymentsModel extends BaseModelForReceiptsAndPayments {
 
    Map<String, dynamic> toJson() {
     return {
-      'ap_invoice_id': apInvoiceId,
-      'amount': receiptAmount,
+      'ap_invoices_id': apInvoiceId,
+      'amount': paymentAmount,
       'is_added': isAdded,
       'is_modified': isModified,
       'is_deleted': isDeleted,

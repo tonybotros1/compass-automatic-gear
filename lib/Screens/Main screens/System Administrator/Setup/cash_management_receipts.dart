@@ -369,7 +369,7 @@ Widget tableOfScreensForCashManagement({
   required RxList<ARReceiptsModel> data,
   required ScrollController scrollController,
 }) {
-  bool isReceiptsLoading = data.isEmpty;
+  bool areReceiptsLoading = data.isEmpty;
 
   return DataTableTheme(
     data: DataTableThemeData(
@@ -451,7 +451,7 @@ Widget tableOfScreensForCashManagement({
           ),
         ],
         source: CardDataSource(
-          cards: isReceiptsLoading ? [] : data,
+          cards: areReceiptsLoading ? [] : data,
           context: context,
           constraints: constraints,
           controller: controller,

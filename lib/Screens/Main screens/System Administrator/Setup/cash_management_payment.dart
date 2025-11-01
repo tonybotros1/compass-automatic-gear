@@ -1,7 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/ap_payments_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../Controllers/Main screen controllers/cash_management_payments_controller.dart';
 import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
@@ -35,23 +34,23 @@ class CashManagementPayment extends StatelessWidget {
                           Expanded(
                             child: myTextFormFieldWithBorder(
                               labelText: 'Payment NO.',
-                              controller: controller.receiptCounterFilter.value,
+                              controller: controller.paymentCounterFilter.value,
                             ),
                           ),
                           Expanded(
                             child: CustomDropdown(
                               showedSelectedName: 'name',
                               textcontroller:
-                                  controller.receiptTypeFilter.value.text,
+                                  controller.paymentTypeFilter.value.text,
                               hintText: 'Payment Type',
                               onChanged: (key, value) async {
-                                controller.receiptTypeFilterId.value = key;
-                                controller.receiptTypeFilter.value.text =
+                                controller.paymentTypeFilterId.value = key;
+                                controller.paymentTypeFilter.value.text =
                                     value['name'];
                               },
                               onDelete: () {
-                                controller.receiptTypeFilterId.value = '';
-                                controller.receiptTypeFilter.value.clear();
+                                controller.paymentTypeFilterId.value = '';
+                                controller.paymentTypeFilter.value.clear();
                               },
                               onOpen: () {
                                 return controller.getReceiptsAndPaymentsTypes();
@@ -63,16 +62,16 @@ class CashManagementPayment extends StatelessWidget {
                             child: CustomDropdown(
                               showedSelectedName: 'entity_name',
                               textcontroller:
-                                  controller.customerNameFilter.value.text,
+                                  controller.vendorNameFilter.value.text,
                               hintText: 'Vendor Name',
                               onChanged: (key, value) async {
-                                controller.customerNameFilterId.value = key;
-                                controller.customerNameFilter.value.text =
+                                controller.vendorNameFilterId.value = key;
+                                controller.vendorNameFilter.value.text =
                                     value['entity_name'];
                               },
                               onDelete: () {
-                                controller.customerNameFilterId.value = '';
-                                controller.customerNameFilter.value.clear();
+                                controller.vendorNameFilterId.value = '';
+                                controller.vendorNameFilter.value.clear();
                               },
                               onOpen: () {
                                 return controller.getAllVendors();
@@ -116,13 +115,16 @@ class CashManagementPayment extends StatelessWidget {
                                 controller.statusFilter.value.text =
                                     value['name'];
                               },
+                              onDelete: () {
+                                controller.statusFilter.value.clear();
+                              },
                             ),
                           ),
                         ],
                       );
                     },
                   ),
-                  GetBuilder<CashManagementPaymentsController>(
+                  GetX<CashManagementPaymentsController>(
                     builder: (controller) {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -157,20 +159,7 @@ class CashManagementPayment extends StatelessWidget {
                                     },
                                   ),
                                 ),
-                                ElevatedButton(
-                                  style: allButtonStyle,
-                                  onPressed: () {
-                                    controller.clearAllFilters();
-                                    controller.isAllSelected.value = true;
-                                    controller.isTodaySelected.value = false;
-                                    controller.isThisMonthSelected.value =
-                                        false;
-                                    controller.isThisYearSelected.value = false;
 
-                                    controller.searchEngineForPayments();
-                                  },
-                                  child: const Text('All'),
-                                ),
                                 ElevatedButton(
                                   style: todayButtonStyle,
                                   onPressed: controller.isTodaySelected.isFalse
@@ -188,7 +177,9 @@ class CashManagementPayment extends StatelessWidget {
                                           controller.isMonthSelected.value =
                                               false;
                                           controller.isDaySelected.value = true;
-                                          controller.searchEngineForPayments();
+                                          controller.searchEngineForPayments({
+                                            "today": true,
+                                          });
                                         }
                                       : null,
                                   child: const Text('Today'),
@@ -212,7 +203,9 @@ class CashManagementPayment extends StatelessWidget {
                                               true;
                                           controller.isDaySelected.value =
                                               false;
-                                          controller.searchEngineForPayments();
+                                          controller.searchEngineForPayments({
+                                            "this_month": true,
+                                          });
                                         }
                                       : null,
                                   child: const Text('This Month'),
@@ -234,7 +227,9 @@ class CashManagementPayment extends StatelessWidget {
                                               false;
                                           controller.isDaySelected.value =
                                               false;
-                                          controller.searchEngineForPayments();
+                                          controller.searchEngineForPayments({
+                                            "this_year": true,
+                                          });
                                         }
                                       : null,
                                   child: const Text('This Year'),
@@ -242,26 +237,28 @@ class CashManagementPayment extends StatelessWidget {
                                 ElevatedButton(
                                   style: saveButtonStyle,
                                   onPressed:
-                                      controller.isThisYearSelected.isFalse
+                                      controller
+                                          .isScreenLodingForPayments
+                                          .isFalse
                                       ? () async {
-                                          controller.removeFilters();
-                                          controller.searchEngineForPayments();
+                                          controller.filterSearch();
                                         }
                                       : null,
-                                  child: Text(
-                                    'Find',
-                                    style: fontStyleForElevatedButtons,
-                                  ),
+                                  child:
+                                      controller
+                                          .isScreenLodingForPayments
+                                          .isFalse
+                                      ? Text(
+                                          'Find',
+                                          style: fontStyleForElevatedButtons,
+                                        )
+                                      : loadingProcess,
                                 ),
                                 ElevatedButton(
                                   style: clearVariablesButtonStyle,
-                                  onPressed:
-                                      controller.isThisYearSelected.isFalse
-                                      ? () {
-                                          controller.clearAllFilters();
-                                          controller.update();
-                                        }
-                                      : null,
+                                  onPressed: () {
+                                    controller.clearAllFilters();
+                                  },
                                   child: Text(
                                     'Clear Filters',
                                     style: fontStyleForElevatedButtons,
@@ -321,13 +318,6 @@ class CashManagementPayment extends StatelessWidget {
                     ),
                     child: GetX<CashManagementPaymentsController>(
                       builder: (controller) {
-                        if (controller.isScreenLodingForPayments.value &&
-                            controller.allPayements.isEmpty) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(child: loadingProcess),
-                          );
-                        }
                         return SizedBox(
                           width: constraints.maxWidth,
                           child: tableOfScreensForCashManagement(
@@ -365,11 +355,22 @@ ElevatedButton newPaymentButton(
         constraints: constraints,
         controller: controller,
         onPressedForCancel: null,
-        onPressedForPost: controller.postingPayment.isTrue
-            ? null
-            : () {
-                controller.postPayment(controller.currentPaymentID.value);
-              },
+        onPressedForPost: () async {
+          Map currentPaymentStatus = await controller.getCurrentAPPaymentStatus(
+            controller.currentPaymentID.value,
+          );
+          String status1 = currentPaymentStatus['status'];
+          if (status1 == 'Cancelled') {
+            showSnackBar('Alert', 'Can\'t post cancelled payments');
+            return;
+          }
+          if (status1 == 'Posted') {
+            showSnackBar('Alert', 'Status already posted');
+            return;
+          }
+          controller.paymentStatus.value = 'Posted';
+          controller.isPaymentModified.value = true;
+        },
         onPressedForSave: controller.addingNewValue.value
             ? null
             : () {
@@ -385,7 +386,7 @@ ElevatedButton newPaymentButton(
 Widget editSectionForPayments(
   BuildContext context,
   CashManagementPaymentsController controller,
-  Map<String, dynamic> cashManagementData,
+  APPaymentModel cashManagementData,
   constraints,
   cashManagementId,
 ) {
@@ -405,19 +406,43 @@ Widget editSectionForPayments(
                 controller.setButtonLoading(cashManagementId, false);
 
                 paymentDialog(
-                  onPressedForCancel: controller.cancellingPayment.isTrue
-                      ? null
-                      : () {
-                          controller.cancelPayment(cashManagementId);
-                        },
+                  onPressedForCancel: () async {
+                    Map currentPaymentStatus = await controller
+                        .getCurrentAPPaymentStatus(
+                          controller.currentPaymentID.value,
+                        );
+                    String status1 = currentPaymentStatus['status'];
+                    if (status1 == 'Posted') {
+                      showSnackBar('Alert', 'Can\'t cancel posted payments');
+                      return;
+                    }
+                    if (status1 == 'Cancelled') {
+                      showSnackBar('Alert', 'Status already cancelled');
+                      return;
+                    }
+                    controller.paymentStatus.value = 'Cancelled';
+                    controller.isPaymentModified.value = true;
+                  },
                   canEdit: true,
                   constraints: constraints,
                   controller: controller,
-                  onPressedForPost: controller.postingPayment.isTrue
-                      ? null
-                      : () {
-                          controller.postPayment(cashManagementId);
-                        },
+                  onPressedForPost: () async {
+                    Map currentPaymentStatus = await controller
+                        .getCurrentAPPaymentStatus(
+                          controller.currentPaymentID.value,
+                        );
+                    String status1 = currentPaymentStatus['status'];
+                    if (status1 == 'Cancelled') {
+                      showSnackBar('Alert', 'Can\'t post cancelled payments');
+                      return;
+                    }
+                    if (status1 == 'Posted') {
+                      showSnackBar('Alert', 'Status already posted');
+                      return;
+                    }
+                    controller.paymentStatus.value = 'Posted';
+                    controller.isPaymentModified.value = true;
+                  },
                   onPressedForSave: controller.addingNewValue.value
                       ? null
                       : () {
@@ -428,7 +453,7 @@ Widget editSectionForPayments(
                             );
                             return;
                           }
-                          controller.editPayment(cashManagementId);
+                          controller.addNewPayment();
                         },
                   onPressedForDelete: () {
                     alertDialog(
@@ -452,15 +477,11 @@ Widget tableOfScreensForCashManagement({
   required BoxConstraints constraints,
   required BuildContext context,
   required CashManagementPaymentsController controller,
-  required RxList<DocumentSnapshot> data,
+  required RxList<APPaymentModel> data,
   required ScrollController scrollController,
 }) {
-  final dataSource = CardDataSource(
-    cards: data,
-    context: context,
-    constraints: constraints,
-    controller: controller,
-  );
+  bool arePamentsLoading = data.isEmpty;
+
   return DataTableTheme(
     data: DataTableThemeData(
       headingTextStyle: fontStyleForTableHeader,
@@ -481,7 +502,7 @@ Widget tableOfScreensForCashManagement({
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
         columnSpacing: 5,
-        rowsPerPage: 5,
+        rowsPerPage: 10,
         horizontalMargin: horizontalMarginForTable,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
@@ -521,9 +542,6 @@ Widget tableOfScreensForCashManagement({
             label: AutoSizedText(constraints: constraints, text: 'Account'),
           ),
           DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Bank Name'),
-          ),
-          DataColumn(
             label: AutoSizedText(
               constraints: constraints,
               text: 'Cheque Number',
@@ -534,19 +552,24 @@ Widget tableOfScreensForCashManagement({
             // onSort: controller.onSort,
           ),
           DataColumn(
-            headingRowAlignment: MainAxisAlignment.end,
+            numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Paid'),
             // onSort: controller.onSort,
           ),
         ],
-        source: dataSource,
+        source: CardDataSource(
+          cards: arePamentsLoading ? [] : data,
+          context: context,
+          constraints: constraints,
+          controller: controller,
+        ),
       ),
     ),
   );
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> cashManagementData,
+  APPaymentModel cashManagementData,
   context,
   constraints,
   cashManagementId,
@@ -566,104 +589,62 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: cashManagementData['payment_number'] ?? '',
+          text: cashManagementData.paymentNumber ?? '',
 
           formatDouble: false,
         ),
       ),
       DataCell(
-        cashManagementData['status'] != ''
+        cashManagementData.status != ''
             ? statusBox(
-                cashManagementData['status'],
+                cashManagementData.status ?? '',
                 hieght: 35,
+                width: 100,
                 padding: const EdgeInsets.all(0),
               )
             : const SizedBox(),
       ),
       DataCell(
+        textForDataRowInTable(text: textToDate(cashManagementData.paymentDate)),
+      ),
+      DataCell(
         textForDataRowInTable(
-          text:
-              cashManagementData['payment_date'] != null &&
-                  cashManagementData['payment_date'] != ''
-              ? textToDate(cashManagementData['payment_date']) //
-              : 'N/A',
+          formatDouble: false,
+          text: cashManagementData.vendorName ?? '',
+          maxWidth: null,
         ),
       ),
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text: getdataName(
-            cashManagementData['vendor'],
-            controller.allVendors,
-            title: 'entity_name',
-          ),
+          text: cashManagementData.paymentTypeName ?? '',
         ),
       ),
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text: '',
-          // getdataName(
-          //   cashManagementData['payment_type'],
-          //   controller.allReceiptTypes,
-          // ),
+          text: cashManagementData.accountNumber ?? '',
+          maxWidth: null,
+        ),
+      ),
+
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
+          text: cashManagementData.chequeNumber ?? '',
         ),
       ),
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text: '',
-          //  getdataName(
-          //   cashManagementData['account'],
-          //   controller.allAccounts,
-          //   title: 'account_number',
-          // ),
+          text: textToDate(cashManagementData.chequeDate), //
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          formatDouble: false,
-          text: getdataName(
-            cashManagementData['bank_name'],
-            controller.allBanks,
-          ),
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          formatDouble: false,
-          text: cashManagementData['cheque_number'],
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          formatDouble: false,
-          text:
-              cashManagementData['cheque_date'] != null &&
-                  cashManagementData['cheque_date'] != ''
-              ? textToDate(cashManagementData['cheque_date']) //
-              : 'N/A',
-        ),
-      ),
-      DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: FutureBuilder<double>(
-            future: controller.getPaymentPaidAmount(cashManagementId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading...');
-              } else if (snapshot.hasError) {
-                return const Text('Error');
-              } else {
-                return textForDataRowInTable(
-                  color: Colors.red,
-                  isBold: true,
-                  text: '${snapshot.data}',
-                );
-              }
-            },
-          ),
+          color: Colors.red,
+          isBold: true,
+          text: cashManagementData.totalGiven.toString(),
         ),
       ),
     ],
@@ -671,7 +652,7 @@ DataRow dataRowForTheTable(
 }
 
 class CardDataSource extends DataTableSource {
-  final List<DocumentSnapshot> cards;
+  final List<APPaymentModel> cards;
   final BuildContext context;
   final BoxConstraints constraints;
   final CashManagementPaymentsController controller;
@@ -687,12 +668,11 @@ class CardDataSource extends DataTableSource {
   DataRow? getRow(int index) {
     if (index >= cards.length) return null;
 
-    final trade = cards[index];
-    final cardData = trade.data() as Map<String, dynamic>;
-    final cardId = trade.id;
+    final payment = cards[index];
+    final cardId = payment.id;
 
     return dataRowForTheTable(
-      cardData,
+      payment,
       context,
       constraints,
       cardId,

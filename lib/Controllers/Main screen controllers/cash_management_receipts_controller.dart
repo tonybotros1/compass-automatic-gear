@@ -21,6 +21,11 @@ class CashManagementReceiptsController extends CashManagementBaseController {
   String backendUrl = backendTestURI;
   RxBool isInvoicesModified = RxBool(false);
   RxString currentReceiptID = RxString('');
+  Rx<TextEditingController> receiptCounterFilter = TextEditingController().obs;
+  RxString receiptTypeFilterId = RxString('');
+  Rx<TextEditingController> receiptTypeFilter = TextEditingController().obs;
+  RxString customerNameFilterId = RxString('');
+  Rx<TextEditingController> customerNameFilter = TextEditingController().obs;
 
   @override
   void onInit() async {
@@ -301,15 +306,15 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         allReceipts.removeWhere((job) => job.id == deletedJobId);
         numberOfReceipts.value -= 1;
         Get.close(2);
-        showSnackBar('Success', 'Job card deleted successfully');
+        showSnackBar('Success', 'Receipt deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
         final decoded =
-            jsonDecode(response.body) ?? 'Failed to delete job card';
+            jsonDecode(response.body) ?? 'Failed to delete receipt';
         String error = decoded['detail'];
         showSnackBar('Alert', error);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
-        String error = decoded['detail'] ?? 'Only New Job Cards Allowed';
+        String error = decoded['detail'] ?? 'Only New Receipts Allowed';
         showSnackBar('Alert', error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -321,7 +326,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
       } else if (response.statusCode == 500) {
         final decoded = jsonDecode(response.body);
         final error =
-            decoded['detail'] ?? 'Server error while deleting job card';
+            decoded['detail'] ?? 'Server error while deleting receipt';
         showSnackBar('Server Error', error);
       } else if (response.statusCode == 401) {
         logout();

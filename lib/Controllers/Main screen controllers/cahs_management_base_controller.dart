@@ -32,12 +32,7 @@ class CashManagementBaseController extends GetxController {
   final ScrollController scrollController2 = ScrollController();
   var buttonLoadingStates = <String, bool>{}.obs;
   // Filters
-  Rx<TextEditingController> receiptCounterFilter = TextEditingController().obs;
   Rx<TextEditingController> chequeNumberFilter = TextEditingController().obs;
-  Rx<TextEditingController> customerNameFilter = TextEditingController().obs;
-  RxString customerNameFilterId = RxString('');
-  Rx<TextEditingController> receiptTypeFilter = TextEditingController().obs;
-  RxString receiptTypeFilterId = RxString('');
   Rx<TextEditingController> accountFilter = TextEditingController().obs;
   RxString accountFilterId = RxString('');
   Rx<TextEditingController> bankNameFilter = TextEditingController().obs;
@@ -166,7 +161,7 @@ class CashManagementBaseController extends GetxController {
     // Exit edit mode
     calculateAmountForSelectedPayments();
     selectedAvailablePayments[idx].isModified = true;
-    isPaymentModified.value = true;
+    isPaymentInvoicesModified.value = true;
     editingIndex.value = -1;
   }
 
@@ -200,7 +195,7 @@ class CashManagementBaseController extends GetxController {
     // 3) Trigger recalculations and reactive updates
     calculateAmountForSelectedPayments();
     availablePayments.refresh();
-    isPaymentModified.value = true;
+    isPaymentInvoicesModified.value = true;
     selectedAvailablePayments.refresh();
   }
   // ============================================================================================== //
