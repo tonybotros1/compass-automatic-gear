@@ -1,9 +1,11 @@
+import 'package:datahubai/Widgets/text_button.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../Controllers/Main screen controllers/cash_management_payments_controller.dart';
 import 'account_informations_section.dart';
+import 'available_invoices_dialog.dart';
 import 'invoices_table_section.dart';
 import 'payment_header_section.dart';
 
@@ -84,16 +86,9 @@ Widget addNewPaymentOrEdit({
                                             );
                                           }
                                         : () {
-                                            if (controller
-                                                    .availablePayments
-                                                    .isEmpty &&
-                                                controller
-                                                    .loadingInvoices
-                                                    .isFalse) {
-                                              controller.getVendorInvoices(
-                                                controller.vendorNameId.value,
-                                              );
-                                            }
+                                            controller.getVendorInvoices(
+                                              controller.vendorNameId.value,
+                                            );
                                             Get.dialog(
                                               barrierDismissible: false,
                                               Dialog(
@@ -137,33 +132,25 @@ Widget addNewPaymentOrEdit({
                                                                     fontStyleForScreenNameUsedInButtons,
                                                               ),
                                                               const Spacer(),
-                                                              ElevatedButton(
-                                                                style:
-                                                                    new2ButtonStyle,
-                                                                onPressed:
-                                                                    controller
-                                                                        .addSelectedPayments,
-                                                                child: Text(
-                                                                  'Add',
-                                                                  style:
-                                                                      fontStyleForElevatedButtons,
-                                                                ),
+                                                              ClickableHoverText(
+                                                                onTap: controller
+                                                                    .addSelectedPayments,
+                                                                text: 'Add',
                                                               ),
-                                                              closeButton,
+                                                              separator(),
+                                                              closeIcon(),
                                                             ],
                                                           ),
                                                         ),
-                                                        // Expanded(
-                                                        //   child: availableInvoicesDialog(
-                                                        //     dlgConstraints,
-                                                        //     context,
-                                                        //     true,
-                                                        //     controller
-                                                        //         .availablePayments,
-                                                        //     controller
-                                                        //         .selectedAvailablePayments,
-                                                        //   ),
-                                                        // ),
+                                                        Expanded(
+                                                          child:
+                                                              availableInvoicesDialog(
+                                                                dlgConstraints,
+                                                                context,
+                                                                true,
+                                                                controller,
+                                                              ),
+                                                        ),
                                                       ],
                                                     );
                                                   },
@@ -189,7 +176,7 @@ Widget addNewPaymentOrEdit({
                               context: context,
                               constraints: const BoxConstraints(),
                               isPayment: true,
-                              controller: controller
+                              controller: controller,
                             ),
                           ),
                         ),

@@ -68,52 +68,39 @@ Widget tableOfScreens<T extends CashManagementBaseController>({
         ),
       ),
     ],
-    rows:
-        // isPayment
-        //     ? controller.selectedAvailablePayments
-        //           // cast each LinkedMap to a Map<String, dynamic>
-        //           .map((entry) => Map<String, dynamic>.from(entry))
-        //           .toList()
-        //           .asMap()
-        //           .entries
-        //           .map((e) {
-        //             final receipt = e.value;
-        //             // If you need the original index in the full list you can look it up,
-        //             // otherwise just pass `e.key` as the index in this filtered list:
-        //             final originalIndex = controller.selectedAvailablePayments
-        //                 .indexWhere(
-        //                   (r) =>
-        //                       r['reference_number'] == receipt['reference_number'],
-        //                 );
-        //             final invoice = receipt['reference_number'] as String;
-        //             return dataRowForTheTable(
-        //               receipt,
-        //               context,
-        //               constraints,
-        //               controller,
-        //               originalIndex,
-        //               isPayment,
-        //             );
-        //           })
-        //           .toList()
-        // :
-        controller.selectedAvailableReceipts
-            .where((inv) => inv.isDeleted != true)
-            .map((receipt) {
-              // If you need the original index in the full list you can look it up,
-              // otherwise just pass `e.key` as the index in this filtered list:
-              final originalIndex = controller.selectedAvailableReceipts
-                  .indexWhere((r) => r.jobId == receipt.jobId);
-              return dataRowForTheTable(
-                receipt,
-                context,
-                constraints,
-                controller,
-                originalIndex,
-                isPayment,
-              );
-            })
-            .toList(),
+    rows: isPayment
+        ? controller.selectedAvailablePayments
+              .where((inv) => inv.isDeleted != true)
+              .map((pay) {
+                final originalIndex = controller.selectedAvailablePayments
+                    .indexWhere((r) => r.apInvoiceId == pay.apInvoiceId);
+                return dataRowForTheTable(
+                  pay,
+                  context,
+                  constraints,
+                  controller,
+                  originalIndex,
+                  isPayment,
+                );
+              })
+              .toList()
+        : controller.selectedAvailableReceipts
+              .where((inv) => inv.isDeleted != true)
+              .map((receipt) {
+                // If you need the original index in the full list you can look it up,
+                // otherwise just pass `e.key` as the index in this filtered list:
+                final originalIndex = controller.selectedAvailableReceipts
+                    .indexWhere((r) => r.jobId == receipt.jobId);
+                return dataRowForTheTable(
+                  receipt,
+                  context,
+                  constraints,
+                  controller,
+                  originalIndex,
+                  isPayment,
+                );
+              })
+              .toList(),
   );
 }
 
@@ -133,7 +120,7 @@ DataRow dataRowForTheTable<
       DataCell(
         Row(
           children: [
-            deleteSection(context, controller, receiptData.jobId, isPayment),
+            deleteSection(context, controller, receiptData, isPayment),
           ],
         ),
       ),
@@ -184,11 +171,9 @@ DataRow dataRowForTheTable<
                   cursorColor: Theme.of(context).textSelectionTheme.cursorColor,
                   autofocus: true,
                   controller: TextEditingController(
-                    text:
-                        // isPayment
-                        // ? receiptData['payment_amount']
-                        // :
-                        receiptData.receiptAmount.toString(),
+                    text: isPayment
+                        ? receiptData.paymentAmount.toString()
+                        : receiptData.receiptAmount.toString(),
                   ),
                   keyboardType: TextInputType.number,
                   onSubmitted: (value) {
@@ -221,11 +206,9 @@ DataRow dataRowForTheTable<
                         color: Colors.green,
                         isBold: true,
                         maxWidth: null,
-                        text:
-                            //  isPayment
-                            //     ? receiptData['payment_amount']?.toString() ?? ''
-                            //     :
-                            receiptData.receiptAmount.toString(),
+                        text: isPayment
+                            ? receiptData.paymentAmount.toString()
+                            : receiptData.receiptAmount.toString(),
                       ),
                       Icon(Icons.edit_outlined, color: Colors.grey.shade700),
                     ],
@@ -237,17 +220,15 @@ DataRow dataRowForTheTable<
   );
 }
 
-Widget deleteSection<T extends CashManagementBaseController>(
-  BuildContext context,
-  T controller,
-  String id,
-  bool isPayment,
-) {
+Widget deleteSection<
+  T extends CashManagementBaseController,
+  D extends BaseModelForReceiptsAndPayments
+>(BuildContext context, T controller, D data, bool isPayment) {
   return IconButton(
     onPressed: () {
       isPayment
-          ? controller.removeSelectedPayment(id)
-          : controller.removeSelectedReceipt(id);
+          ? controller.removeSelectedPayment(data.apInvoiceId)
+          : controller.removeSelectedReceipt(data.jobId);
     },
     icon: const Icon(Icons.delete, color: Colors.red),
   );

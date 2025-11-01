@@ -1,14 +1,22 @@
 class BaseModelForReceiptsAndPayments {
-  String invoiceNumber;
-  bool isSelected;
+  // receipts
   String jobId;
+  double receiptAmount;
+  // payments
+  String apInvoiceId;
+  double paymentAmount;
+
+  // common
+  String invoiceNumber;
   String invoiceDate;
   double invoiceAmount;
-  double receiptAmount;
   double outstandingAmount;
   String notes;
+  bool isSelected;
 
   BaseModelForReceiptsAndPayments({
+    this.apInvoiceId = '',
+    this.paymentAmount = 0,
     this.invoiceNumber = '',
     this.isSelected = false,
     this.jobId = '',
@@ -18,6 +26,4 @@ class BaseModelForReceiptsAndPayments {
     this.outstandingAmount = 0,
     this.notes = '',
   });
-
- 
 }

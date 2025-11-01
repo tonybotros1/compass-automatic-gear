@@ -2,6 +2,7 @@ import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/customer_in
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../Models/ar receipts and ap payments/vendor_payments_model.dart';
 import 'main_screen_contro.dart';
 
 class CashManagementBaseController extends GetxController {
@@ -56,16 +57,22 @@ class CashManagementBaseController extends GetxController {
   RxString paymentTypeId = RxString('');
   RxString receiptTypeId = RxString('');
   RxBool isAllPaymentsSelected = RxBool(false);
-  RxList availablePayments = RxList([]);
+  RxList<VendorPaymentsModel> availablePayments = RxList<VendorPaymentsModel>(
+    [],
+  );
   RxList<CustomerInvoicesModel> availableReceipts =
       RxList<CustomerInvoicesModel>([]);
-  RxList selectedAvailablePayments = RxList([]);
+  RxList<VendorPaymentsModel> selectedAvailablePayments =
+      RxList<VendorPaymentsModel>([]);
   RxList<CustomerInvoicesModel> selectedAvailableReceipts =
       RxList<CustomerInvoicesModel>([]);
   RxDouble calculatedAmountForAllSelectedReceipts = RxDouble(0.0);
   RxBool isReceiptModified = RxBool(false);
   RxBool isReceiptInvoicesModified = RxBool(false);
+  RxBool isPaymentInvoicesModified = RxBool(false);
   RxBool isPaymentModified = RxBool(false);
+  RxDouble calculatedAmountForAllSelectedPayments = RxDouble(0.0);
+
   Future<Map<String, dynamic>> getReceiptsAndPaymentsTypes() async {
     return await helper.getAllListValues('RECEIPT_TYPES');
   }
@@ -114,6 +121,15 @@ class CashManagementBaseController extends GetxController {
 
   // ============================================================================================== //
 
+  void calculateAmountForSelectedPayments() {
+    calculatedAmountForAllSelectedPayments.value = 0.0;
+    for (var element in selectedAvailablePayments.where(
+      (ite) => ite.isDeleted != true,
+    )) {
+      calculatedAmountForAllSelectedPayments.value += element.paymentAmount;
+    }
+  }
+
   void removeFilters() {
     isAllSelected.value = false;
     isTodaySelected.value = false;
@@ -124,51 +140,68 @@ class CashManagementBaseController extends GetxController {
   void selectAllPayments(bool select) {
     isAllPaymentsSelected.value = select;
 
-    final newList = availablePayments
-        .map((r) => {...r, 'is_selected': select})
-        .toList();
-    availablePayments.assignAll(newList);
+    for (var val in availablePayments) {
+      val.isSelected = select;
+    }
+    availablePayments.refresh();
   }
 
-  void selectPayment(int index, bool isSelected) {
-    // rebuild a new Map object
-    final updated = {...availablePayments[index], 'is_selected': isSelected};
-
-    // reassign into the RxList — that triggers the update
-    availablePayments[index] = updated;
+  void selectPayment(String id, bool isSelected) {
+    final payment = availablePayments.firstWhereOrNull(
+      (vl) => vl.apInvoiceId == id,
+    );
+    if (payment != null) {
+      payment.isSelected = isSelected;
+      availablePayments.refresh();
+    }
   }
 
   void finishEditingForPayments(String newValue, int idx) {
     // Update the data source
-    selectedAvailablePayments[idx]['payment_amount'] = newValue;
-    selectedAvailablePayments[idx]['outstanding_amount'] =
-        (double.parse(
-                  selectedAvailablePayments[idx]['invoice_amount'] ?? '0.0',
-                ) -
-                double.parse(newValue))
-            .toString();
+    selectedAvailablePayments[idx].receiptAmount =
+        double.tryParse(newValue) ?? 0;
+    selectedAvailablePayments[idx].outstandingAmount =
+        selectedAvailablePayments[idx].invoiceAmount -
+        selectedAvailablePayments[idx].paymentAmount;
     // Exit edit mode
-    // calculateAmountForSelectedReceipts();
+    calculateAmountForSelectedPayments();
+    selectedAvailablePayments[idx].isModified = true;
+    isPaymentModified.value = true;
     editingIndex.value = -1;
   }
 
-  void removeSelectedPayment(String number) {
-    // 1) Un‐select it in the main list
-    final availIdx = availablePayments.indexWhere(
-      (r) => r['reference_number'] == number,
-    );
-    if (availIdx != -1) {
-      final updated = {...availablePayments[availIdx], 'is_selected': false};
-      availablePayments[availIdx] = updated;
+  void removeSelectedPayment(String id) {
+    if (status.value != 'New' && status.value != '') {
+      showSnackBar('Alert', 'Only new payments allowed');
+      return;
     }
 
-    // 2) Remove from the selected list
-    selectedAvailablePayments.removeWhere(
-      (r) => r['reference_number'] == number,
-    );
+    final availIdx = availablePayments.indexWhere((r) => r.apInvoiceId == id);
+    if (availIdx != -1) {
+      final r = availablePayments[availIdx];
+      r
+        ..isSelected = false
+        ..isModified = true
+        ..isDeleted = true;
+    }
 
-    // 3) Recalculate totals, etc.
-    // calculateAmountForSelectedReceipts();
+    // 2) Update in selectedAvailableReceipts (single pass)
+    final selIdx = selectedAvailablePayments.indexWhere(
+      (s) => s.apInvoiceId == id,
+    );
+    if (selIdx != -1) {
+      final r = selectedAvailablePayments[selIdx];
+      r
+        ..isDeleted = true
+        ..isModified = true
+        ..isSelected = false;
+    }
+
+    // 3) Trigger recalculations and reactive updates
+    calculateAmountForSelectedPayments();
+    availablePayments.refresh();
+    isPaymentModified.value = true;
+    selectedAvailablePayments.refresh();
   }
   // ============================================================================================== //
 
@@ -181,7 +214,9 @@ class CashManagementBaseController extends GetxController {
 
   void calculateAmountForSelectedReceipts() {
     calculatedAmountForAllSelectedReceipts.value = 0.0;
-    for (var element in selectedAvailableReceipts.where((ite)=>ite.isDeleted != true)) {
+    for (var element in selectedAvailableReceipts.where(
+      (ite) => ite.isDeleted != true,
+    )) {
       calculatedAmountForAllSelectedReceipts.value += element.receiptAmount;
     }
   }

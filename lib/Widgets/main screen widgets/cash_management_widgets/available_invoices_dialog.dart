@@ -1,7 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/cahs_management_base_controller.dart';
+import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/base_model_for_receipts_and_payments.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../Models/ar receipts and ap payments/customer_invoices_model.dart';
 import '../../../consts.dart';
 import '../auto_size_box.dart';
 
@@ -90,62 +90,57 @@ Widget tableOfScreens<T extends CashManagementBaseController>({
       ),
     ],
 
-    rows:
-        //  isPayment
-        //     ? controller.availablePayments
-        //           // filter out already‐selected receipts
-        //           .where(
-        //             (r) => !controller.selectedAvailablePayments.any(
-        //               (sel) => sel['reference_number'] == r['reference_number'],
-        //             ),
-        //           )
-        //           .toList()
-        //           // re‐index the filtered list
-        //           .asMap()
-        //           .entries
-        //           .map((entry) {
-        //             // cast each entry to Map<String,dynamic>
-        //             final receipt = Map<String, dynamic>.from(entry.value);
-        //             final originalIndex = controller.availablePayments.indexWhere(
-        //               (r) => r['reference_number'] == receipt['reference_number'],
-        //             );
-        //             return dataRowForTheTable(
-        //               receipt,
-        //               context,
-        //               constraints,
-        //               controller,
-        //               originalIndex,
-        //               isPayment,
-        //             );
-        //           })
-        //           .toList()
-        //     :
-        controller.availableReceipts
-            // .where((r) => r.isDeleted != true)
-            .where(
-              (r) => !controller.selectedAvailableReceipts.any(
-                (sel) => (sel.jobId == r.jobId) && (sel.isDeleted != true) ,
-              ),
-            )
-            .map((entry) {
-              final originalIndex = controller.availableReceipts.indexWhere(
-                (r) => r.jobId == entry.jobId,
-              );
-              return dataRowForTheTable(
-                entry,
-                context,
-                constraints,
-                controller,
-                originalIndex,
-                isPayment,
-              );
-            })
-            .toList(),
+    rows: isPayment
+        ? controller.availablePayments
+              .where(
+                (r) => !controller.selectedAvailablePayments.any(
+                  (sel) =>
+                      (sel.apInvoiceId == r.apInvoiceId) &&
+                      (sel.isDeleted != true),
+                ),
+              )
+              .map((entry) {
+                final originalIndex = controller.availablePayments.indexWhere(
+                  (r) => r.apInvoiceId == entry.apInvoiceId,
+                );
+                return dataRowForTheTable(
+                  entry,
+                  context,
+                  constraints,
+                  controller,
+                  originalIndex,
+                  isPayment,
+                );
+              })
+              .toList()
+        : controller.availableReceipts
+              .where(
+                (r) => !controller.selectedAvailableReceipts.any(
+                  (sel) => (sel.jobId == r.jobId) && (sel.isDeleted != true),
+                ),
+              )
+              .map((entry) {
+                final originalIndex = controller.availableReceipts.indexWhere(
+                  (r) => r.jobId == entry.jobId,
+                );
+                return dataRowForTheTable(
+                  entry,
+                  context,
+                  constraints,
+                  controller,
+                  originalIndex,
+                  isPayment,
+                );
+              })
+              .toList(),
   );
 }
 
-DataRow dataRowForTheTable<T extends CashManagementBaseController>(
-  CustomerInvoicesModel receiptData,
+DataRow dataRowForTheTable<
+  T extends CashManagementBaseController,
+  D extends BaseModelForReceiptsAndPayments
+>(
+  D receiptData,
   BuildContext context,
   BoxConstraints constraints,
   T controller,
@@ -160,7 +155,7 @@ DataRow dataRowForTheTable<T extends CashManagementBaseController>(
     onSelectChanged: (value) {
       if (value != null) {
         isPayment
-            ? controller.selectPayment(index, value)
+            ? controller.selectPayment(receiptData.apInvoiceId, value)
             : controller.selectJobReceipt(receiptData.jobId, value);
       }
     },

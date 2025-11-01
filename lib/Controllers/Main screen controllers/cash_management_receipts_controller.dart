@@ -84,7 +84,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         );
         String status1 = currentReceiptStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new jobs can be edited');
+          showSnackBar('Alert', 'Only new receipts can be edited');
           return;
         }
       }
