@@ -6,7 +6,7 @@ import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/co
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/countries.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/currency.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/employee_performance.dart';
-import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/inventery_items.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/inventory_items.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/invoice_items.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_card.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_tasks.dart';

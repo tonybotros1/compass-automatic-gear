@@ -1,4 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/inventery_items_controller.dart';
+import 'package:datahubai/Widgets/text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
@@ -6,7 +7,7 @@ import 'add_new_item_or_edit.dart';
 
 Future<dynamic> itemsDialog({
   required BoxConstraints constraints,
-  required InventeryItemsController controller,
+  required InventoryItemsController controller,
   required bool canEdit,
   required void Function()? onPressed,
 }) {
@@ -36,23 +37,12 @@ Future<dynamic> itemsDialog({
                     style: fontStyleForScreenNameUsedInButtons,
                   ),
                   const Spacer(),
-                  GetX<InventeryItemsController>(
-                    builder: (controller) => ElevatedButton(
-                      onPressed: onPressed,
-                      style: new2ButtonStyle,
-                      child: controller.addingNewValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            )
-                          : const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
+                  GetX<InventoryItemsController>(
+                    builder: (controller) => ClickableHoverText(
+                      onTap: onPressed,
+                      text: controller.addingNewValue.value == false
+                          ? 'Save'
+                          : "•••",
                     ),
                   ),
                   closeButton,

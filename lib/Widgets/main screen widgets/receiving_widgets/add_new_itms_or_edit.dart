@@ -1,5 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_controller.dart';
-import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/inventery_items.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/inventory_items.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';

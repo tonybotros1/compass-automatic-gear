@@ -3,7 +3,7 @@ import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 
 Widget addNewItemOrEdit({
-  required InventeryItemsController controller,
+  required InventoryItemsController controller,
   required bool canEdit,
 }) {
   return SingleChildScrollView(
