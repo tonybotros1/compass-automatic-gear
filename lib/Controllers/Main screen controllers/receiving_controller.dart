@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../Models/inventory items/inventory_items_model.dart';
 import '../../Models/receiving_items_model.dart';
 import '../../consts.dart';
+import '../../helpers.dart';
 import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
 
@@ -78,7 +83,6 @@ class ReceivingController extends GetxController {
   RxMap allOrderedBy = RxMap({});
   RxMap allPurchasedBy = RxMap({});
 
-  RxString companyId = RxString('');
   RxString approvedByListId = RxString('');
   RxString orderedByListId = RxString('');
   RxString purchasedByListId = RxString('');
@@ -100,28 +104,20 @@ class ReceivingController extends GetxController {
   RxBool cancellingReceivingDoc = RxBool(false);
   TextEditingController searchForInventeryItems = TextEditingController();
   RxBool loadingInventeryItems = RxBool(false);
-  final RxList<DocumentSnapshot> allInventeryItems = RxList<DocumentSnapshot>(
-    [],
-  );
-  final RxList<DocumentSnapshot> filteredInventeryItems =
-      RxList<DocumentSnapshot>([]);
+  final RxList<InventoryItemsModel> allInventeryItems =
+      RxList<InventoryItemsModel>([]);
+  final RxList<InventoryItemsModel> filteredInventeryItems =
+      RxList<InventoryItemsModel>([]);
   RxString selectedInventeryItemID = RxString('');
   RxString query = RxString('');
   RxDouble itemsTotal = RxDouble(0.0);
   RxDouble finalItemsTotal = RxDouble(0.0);
   RxDouble finalItemsVAT = RxDouble(0.0);
   RxDouble finalItemsNet = RxDouble(0.0);
+  String backendUrl = backendTestURI;
 
   @override
   void onInit() async {
-    await getCompanyId();
-    getAllBranches();
-    getAllVendors();
-    getCountries();
-    getCurrencies();
-    getApprovedBy();
-    getOrderedBy();
-    getPurchasedBy();
     super.onInit();
   }
 
@@ -131,11 +127,70 @@ class ReceivingController extends GetxController {
     return mainScreenController.selectedScreenName.value;
   }
 
-  Future<void> getCompanyId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    companyId.value = prefs.getString('companyId')!;
+  Future<Map<String, dynamic>> getAllBranches() async {
+    return await helper.getBrunches();
   }
 
+  Future<Map<String, dynamic>> getAllVendors() async {
+    return await helper.getVendors();
+  }
+
+  Future<Map<String, dynamic>> getCurrencies() async {
+    return await helper.getCurrencies();
+  }
+
+  Future<Map<String, dynamic>> getApprovedBy() async {
+    return await helper.getAllListValues('APPROVED_BY');
+  }
+
+  Future<Map<String, dynamic>> getOrderedBy() async {
+    return await helper.getAllListValues('ORDERED_BY');
+  }
+
+  Future<Map<String, dynamic>> getPurchasedBy() async {
+    return await helper.getAllListValues('PURCHASED_BY');
+  }
+
+  Future<void> getAllInventeryItems() async {
+    try {
+      loadingInventeryItems.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/inventory_items/get_all_inventory_items',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List items = decoded['inventory_items'];
+        allInventeryItems.assignAll(
+          items.map((item) => InventoryItemsModel.fromJson(item)),
+        );
+        loadingInventeryItems.value = false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllInventeryItems();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        loadingInventeryItems.value = false;
+        logout();
+      } else {
+        loadingInventeryItems.value = false;
+      }
+    } catch (e) {
+      loadingInventeryItems.value = false;
+    }
+  }
+
+  
+  // =============================================================================================================
   void clearValues() {
     canAddItems.value = false;
     receivingNumber.value.clear();
@@ -203,23 +258,6 @@ class ReceivingController extends GetxController {
     amount.value.text = data['amount'].toString();
   }
 
-  Future<void> getAllInventeryItems() async {
-    try {
-      loadingInventeryItems.value = true;
-      allInventeryItems.clear();
-      var items = await FirebaseFirestore.instance
-          .collection('inventery_items')
-          .where('company_id', isEqualTo: companyId.value)
-          .get();
-      for (var item in items.docs) {
-        allInventeryItems.add(item);
-      }
-      loadingInventeryItems.value = false;
-    } catch (e) {
-      loadingInventeryItems.value = false;
-    }
-  }
-
   Future<String> getInventeryItemsCode({required String id}) async {
     try {
       var data = await FirebaseFirestore.instance
@@ -252,28 +290,11 @@ class ReceivingController extends GetxController {
     } else {
       filteredInventeryItems.assignAll(
         allInventeryItems.where((item) {
-          return item['code'].toString().toLowerCase().contains(query) ||
-              item['name'].toString().toLowerCase().contains(query) ||
-              item['min_quantity'].toString().toLowerCase().contains(query);
+          return item.code.toString().toLowerCase().contains(query) ||
+              item.name.toString().toLowerCase().contains(query) ||
+              item.minQuantity.toString().toLowerCase().contains(query);
         }).toList(),
       );
-    }
-  }
-
-  void getAllBranches() {
-    try {
-      FirebaseFirestore.instance
-          .collection('branches')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('name')
-          .snapshots()
-          .listen((branches) {
-            allBranches.value = {
-              for (var doc in branches.docs) doc.id: doc.data(),
-            };
-          });
-    } catch (e) {
-      //
     }
   }
 
@@ -281,7 +302,7 @@ class ReceivingController extends GetxController {
     try {
       FirebaseFirestore.instance
           .collection('currencies')
-          .where('company_id', isEqualTo: companyId.value)
+          // .where('company_id', isEqualTo: companyId.value)
           .orderBy('name')
           .snapshots()
           .listen((branches) {
@@ -292,121 +313,6 @@ class ReceivingController extends GetxController {
     } catch (e) {
       //
     }
-  }
-
-  void getAllVendors() {
-    try {
-      FirebaseFirestore.instance
-          .collection('entity_informations')
-          .where('company_id', isEqualTo: companyId.value)
-          .where('entity_code', arrayContains: 'Vendor')
-          .orderBy('entity_name')
-          .snapshots()
-          .listen((customers) {
-            allVendors.value = {
-              for (var doc in customers.docs) doc.id: doc.data(),
-            };
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getCountries() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_countries')
-          .orderBy('name')
-          .snapshots()
-          .listen((countries) {
-            allCountries.value = {
-              for (var doc in countries.docs) doc.id: doc.data(),
-            };
-          });
-    } catch (e) {
-      //
-    }
-  }
-
-  void getCurrencies() {
-    FirebaseFirestore.instance
-        .collection('currencies')
-        .where('company_id', isEqualTo: companyId.value)
-        .snapshots()
-        .listen((branches) {
-          allCurrencies.value = {
-            for (var doc in branches.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  Future<void> getApprovedBy() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'APPROVED_BY')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-    approvedByListId.value = typeId;
-    approvedByMasterId.value = typeDoc.docs.first.data()['mastered_by'];
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name')
-        .snapshots()
-        .listen((colors) {
-          allApprovedBy.value = {
-            for (var doc in colors.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  Future<void> getOrderedBy() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'ORDERED_BY')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-    orderedByListId.value = typeId;
-    orderedByMasterId.value = typeDoc.docs.first.data()['mastered_by'];
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name')
-        .snapshots()
-        .listen((colors) {
-          allOrderedBy.value = {
-            for (var doc in colors.docs) doc.id: doc.data(),
-          };
-        });
-  }
-
-  Future<void> getPurchasedBy() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'PURCHASED_BY')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-    purchasedByListId.value = typeId;
-    purchasedByMasterId.value = typeDoc.docs.first.data()['mastered_by'];
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name')
-        .snapshots()
-        .listen((colors) {
-          allPurchasedBy.value = {
-            for (var doc in colors.docs) doc.id: doc.data(),
-          };
-        });
   }
 
   void clearItemsValues() {
@@ -437,7 +343,7 @@ class ReceivingController extends GetxController {
 
       // Base data
       final Map<String, dynamic> newData = {
-        'company_id': companyId.value,
+        // 'company_id': companyId.value,
         'branch': branchId.value,
         'reference_number': referenceNumber.value.text.trim(),
         'vendor': vendorId.value,
@@ -553,7 +459,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  void deleteReceivingDoc(String id,BuildContext context) {
+  void deleteReceivingDoc(String id, BuildContext context) {
     try {
       if (status.value == 'New' || status.value == '') {
         deletingReceivingDoc.value = true;
@@ -630,26 +536,7 @@ class ReceivingController extends GetxController {
     }
   }
 
-  // getAllItems(id) {
-  //   try {
-  //     loadingItems.value = true;
-  //     FirebaseFirestore.instance
-  //         .collection('receiving')
-  //         .doc(id)
-  //         .collection('items')
-  //         .snapshots()
-  //         .listen((QuerySnapshot<Map<String, dynamic>> items) {
-  //           allItems.assignAll(
-  //             items.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>(),
-  //           );
-
-  //           loadingItems.value = false;
-  //           calculateAllItemsTotal(allItems);
-  //         });
-  //   } catch (e) {
-  //     loadingItems.value = false;
-  //   }
-  // }
+ 
 
   void getAllItems(String id) {
     try {
@@ -768,7 +655,7 @@ class ReceivingController extends GetxController {
           .doc(id)
           .collection('items')
           .add({
-            'company_id': companyId.value,
+            // 'company_id': companyId.value,
             'added_date': DateTime.now().toString(),
             'code': selectedInventeryItemID.value,
             'quantity': int.tryParse(quantity.value.text) ?? 1,
@@ -776,7 +663,6 @@ class ReceivingController extends GetxController {
             'discount': double.tryParse(discount.value.text) ?? 0,
             'vat': double.tryParse(vat.value.text) ?? 0,
             'collection_parent': 'receiving',
-            
           });
       addingNewItemsValue.value = false;
       Get.back();
@@ -829,7 +715,7 @@ class ReceivingController extends GetxController {
       var rnDoc = await FirebaseFirestore.instance
           .collection('counters')
           .where('code', isEqualTo: 'RN')
-          .where('company_id', isEqualTo: companyId.value)
+          // .where('company_id', isEqualTo: companyId.value)
           .get();
 
       if (rnDoc.docs.isEmpty) {
@@ -848,7 +734,7 @@ class ReceivingController extends GetxController {
               'length': 0,
               'separator': separator,
               'added_date': DateTime.now().toString(),
-              'company_id': companyId.value,
+              // 'company_id': companyId.value,
               'status': true,
             });
         rnId = newCounter.id;
@@ -877,9 +763,10 @@ class ReceivingController extends GetxController {
   void searchEngine() {
     isScreenLoding.value = true;
 
-    Query<Map<String, dynamic>> query = FirebaseFirestore.instance
-        .collection('receiving')
-        .where('company_id', isEqualTo: companyId.value);
+    Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection(
+      'receiving',
+    );
+    // .where('company_id', isEqualTo: companyId.value);
 
     if (!isAllSelected.value) {
       if (isTodaySelected.value) {

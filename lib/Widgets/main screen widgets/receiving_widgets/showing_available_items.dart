@@ -1,6 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../Models/inventory items/inventory_items_model.dart';
 import '../../../consts.dart';
 import '../auto_size_box.dart';
 
@@ -153,16 +154,11 @@ Future<dynamic> showingAvailableItemsDialog({
                                                 (index) {
                                                   final item = controller
                                                       .allInventeryItems[index];
-                                                  final itemDate =
-                                                      item.data()
-                                                          as Map<
-                                                            String,
-                                                            dynamic
-                                                          >;
+
                                                   final itemId = item.id;
 
                                                   return dataRowForTheTable(
-                                                    itemDate,
+                                                    item,
                                                     constraints,
                                                     itemId,
                                                     controller,
@@ -177,16 +173,11 @@ Future<dynamic> showingAvailableItemsDialog({
                                                 (index) {
                                                   final item = controller
                                                       .filteredInventeryItems[index];
-                                                  final itemDate =
-                                                      item.data()
-                                                          as Map<
-                                                            String,
-                                                            dynamic
-                                                          >;
+
                                                   final itemId = item.id;
 
                                                   return dataRowForTheTable(
-                                                    itemDate,
+                                                    item,
                                                     constraints,
                                                     itemId,
                                                     controller,
@@ -213,7 +204,7 @@ Future<dynamic> showingAvailableItemsDialog({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> itemDate,
+  InventoryItemsModel itemDate,
   constraints,
   id,
   ReceivingController controller,
@@ -223,17 +214,16 @@ DataRow dataRowForTheTable(
     onSelectChanged: (_) {
       Get.back();
       controller.selectedInventeryItemID.value = id;
-      controller.itemCode.value.text = itemDate['code'];
-      controller.itemName.value.text = itemDate['name'];
+      controller.itemCode.value.text = itemDate.code;
+      controller.itemName.value.text = itemDate.name;
     },
     color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-      // Alternate row colors
       return index % 2 == 0 ? Colors.grey[200] : Colors.white;
     }),
     cells: [
-      DataCell(Text(itemDate['code'] ?? '')),
-      DataCell(Text(itemDate['name'] ?? '')),
-      DataCell(Text(itemDate['min_quantity'].toString())),
+      DataCell(Text(itemDate.code)),
+      DataCell(Text(itemDate.name)),
+      DataCell(Text(itemDate.minQuantity.toString())),
     ],
   );
 }

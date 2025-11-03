@@ -27,7 +27,6 @@ class Receiving extends StatelessWidget {
                   GetX<ReceivingController>(
                     init: ReceivingController(),
                     builder: (controller) {
-                      bool isVendorLoading = controller.allVendors.isEmpty;
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
@@ -67,9 +66,14 @@ class Receiving extends StatelessWidget {
                                       value['entity_name'];
                                   controller.vendorNameIdFilter.value = key;
                                 },
-                                items: isVendorLoading
-                                    ? {}
-                                    : controller.allVendors,
+                                onDelete: () {
+                                  controller.vendorNameIdFilterName.value
+                                      .clear();
+                                  controller.vendorNameIdFilter.value = '';
+                                },
+                                onOpen: () {
+                                  return controller.getAllVendors();
+                                },
                               ),
                             ),
                             SizedBox(
@@ -84,6 +88,9 @@ class Receiving extends StatelessWidget {
                                 onChanged: (key, value) async {
                                   controller.statusFilter.value.text =
                                       value['name'];
+                                },
+                                onDelete: () {
+                                  controller.statusFilter.value.clear();
                                 },
                               ),
                             ),

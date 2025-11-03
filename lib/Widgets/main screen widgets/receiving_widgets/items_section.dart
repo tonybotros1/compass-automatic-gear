@@ -161,9 +161,7 @@ Widget tableOfScreens({
               const DataCell(Text('')),
               const DataCell(Text('')),
               const DataCell(Text('')),
-               DataCell(
-                textForDataRowInTable(text:  'Totals',isBold: true),
-              ),
+              DataCell(textForDataRowInTable(text: 'Totals', isBold: true)),
               DataCell(
                 textForDataRowInTable(
                   text: '${controller.finalItemsTotal.value}', // '${data[0]}',
@@ -221,9 +219,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         FutureBuilder<String>(
-          future: controller.getInventeryItemsCode(
-            id: receivingItemsData.code,
-          ),
+          future: controller.getInventeryItemsCode(id: receivingItemsData.code),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text('Loading...');
@@ -237,9 +233,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         FutureBuilder<String>(
-          future: controller.getInventeryItemsName(
-            id: receivingItemsData.code,
-          ),
+          future: controller.getInventeryItemsName(id: receivingItemsData.code),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text('Loading...');
@@ -339,12 +333,10 @@ Widget editSection(
         ) {
           controller.itemName.value.text = value;
         });
-        controller.quantity.value.text = receivingItemsData.quantity
-            .toString();
+        controller.quantity.value.text = receivingItemsData.quantity.toString();
         controller.orginalPrice.value.text = receivingItemsData.originalPrice
             .toString();
-        controller.discount.value.text = receivingItemsData.discount
-            .toString();
+        controller.discount.value.text = receivingItemsData.discount.toString();
         controller.vat.value.text = receivingItemsData.vat.toString();
         itemsDialog(
           id: id,
@@ -378,28 +370,19 @@ ElevatedButton newItemButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.canAddItems.isTrue) {
-        if (controller.status.value == 'New') {
-          controller.clearItemsValues();
-
-          itemsDialog(
-            id: id,
-            controller: controller,
-            constraints: constraints,
-            onPressed: controller.addingNewItemsValue.isTrue
-                ? null
-                : () async {
-                    await controller.addNewItem(
-                      id != '' ? id : controller.curreentReceivingId.value,
-                    );
-                  },
-          );
-        } else {
-          showSnackBar('Alert', 'Only New Docs Allowed');
-        }
-      } else {
-        showSnackBar('Alert', 'Please Save Docs First');
-      }
+      controller.clearItemsValues();
+      itemsDialog(
+        id: id,
+        controller: controller,
+        constraints: constraints,
+        onPressed: controller.addingNewItemsValue.isTrue
+            ? null
+            : () async {
+                await controller.addNewItem(
+                  id != '' ? id : controller.curreentReceivingId.value,
+                );
+              },
+      );
     },
     style: new2ButtonStyle,
     child: const Text('New item'),

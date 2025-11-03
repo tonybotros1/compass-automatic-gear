@@ -23,8 +23,9 @@ Container carInformation({
       // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-            flex: 1,
-            child: GetX<CarTradingController>(builder: (controller) {
+          flex: 1,
+          child: GetX<CarTradingController>(
+            builder: (controller) {
               bool isColorsLoading = controller.allColors.isEmpty;
               return Column(
                 spacing: 10,
@@ -34,16 +35,20 @@ Container carInformation({
                     labelText: 'Date',
                     // isDate: true,
                     suffixIcon: IconButton(
-                        onPressed: () {
-                          controller.selectDateContext(
-                              context, controller.date.value);
-                        },
-                        icon: const Icon(Icons.date_range)),
+                      onPressed: () {
+                        controller.selectDateContext(
+                          context,
+                          controller.date.value,
+                        );
+                      },
+                      icon: const Icon(Icons.date_range),
+                    ),
                   ),
                   myTextFormFieldWithBorder(
-                      labelText: 'Mileage',
-                      isnumber: true,
-                      controller: controller.mileage.value),
+                    labelText: 'Mileage',
+                    isnumber: true,
+                    controller: controller.mileage.value,
+                  ),
                   CustomDropdown(
                     textcontroller: controller.colorOut.value.text,
                     hintText: 'Outside Color',
@@ -53,13 +58,16 @@ Container carInformation({
                       controller.colorOut.value.text = value['name'];
                       controller.colorOutId.value = key;
                     },
-                  )
+                  ),
                 ],
               );
-            })),
+            },
+          ),
+        ),
         Expanded(
-            flex: 1,
-            child: GetX<CarTradingController>(builder: (controller) {
+          flex: 1,
+          child: GetX<CarTradingController>(
+            builder: (controller) {
               bool isColorsLoading = controller.allColors.isEmpty;
               bool isCarSpecificationsLoading =
                   controller.allCarSpecifications.isEmpty;
@@ -84,7 +92,7 @@ Container carInformation({
                           },
                         ),
                       ),
-                      const IconButton(onPressed: null, icon: SizedBox())
+                      const IconButton(onPressed: null, icon: SizedBox()),
                     ],
                   ),
                   Row(
@@ -153,10 +161,13 @@ Container carInformation({
                   ),
                 ],
               );
-            })),
+            },
+          ),
+        ),
         Expanded(
-            flex: 1,
-            child: GetX<CarTradingController>(builder: (controller) {
+          flex: 1,
+          child: GetX<CarTradingController>(
+            builder: (controller) {
               bool isModelLoading = controller.allModels.isEmpty;
               bool isEngineSizeLoading = controller.allEngineSizes.isEmpty;
               bool isYearsLoading = controller.allYears.isEmpty;
@@ -180,11 +191,12 @@ Container carInformation({
                         ),
                       ),
                       valSectionInTheTableForBrands(
-                          controller.carBrandsController,
-                          controller.carBrandId.value,
-                          context,
-                          constraints,
-                          'New Model'),
+                        controller.carBrandsController,
+                        controller.carBrandId.value,
+                        context,
+                        constraints,
+                        'New Model',
+                      ),
                     ],
                   ),
                   Row(
@@ -251,10 +263,13 @@ Container carInformation({
                   ),
                 ],
               );
-            })),
+            },
+          ),
+        ),
         Expanded(
-            flex: 1,
-            child: GetX<CarTradingController>(builder: (controller) {
+          flex: 1,
+          child: GetX<CarTradingController>(
+            builder: (controller) {
               bool isBuyersAndSellersLoading =
                   controller.allBuyersAndSellers.isEmpty;
 
@@ -309,78 +324,95 @@ Container carInformation({
                           },
                         ),
                       ),
-                      const IconButton(onPressed: null, icon: SizedBox())
+                      const IconButton(onPressed: null, icon: SizedBox()),
                     ],
                   ),
                 ],
               );
-            })),
+            },
+          ),
+        ),
         Expanded(
           flex: 3,
-          child: GetBuilder<CarTradingController>(builder: (controller) {
-            return myTextFormFieldWithBorder(
-                controller: controller.note, labelText: 'Note', maxLines: 7);
-          }),
-        )
+          child: GetBuilder<CarTradingController>(
+            builder: (controller) {
+              return myTextFormFieldWithBorder(
+                controller: controller.note,
+                labelText: 'Note',
+                maxLines: 7,
+              );
+            },
+          ),
+        ),
       ],
     ),
   );
 }
 
 Widget valSectionInTheTable(
-    ListOfValuesController controller,
-    String listId,
-    BuildContext context,
-    BoxConstraints constraints,
-    String masteredBy,
-    String tooltip,
-    String screenName,
-    Widget screen) {
+  ListOfValuesController controller,
+  String listId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String masteredBy,
+  String tooltip,
+  String screenName,
+  Widget screen, {
+  void Function()? onPressed,
+}) {
   return IconButton(
-      tooltip: tooltip,
-      onPressed: () {
-        controller.searchForValues.value.clear();
-        controller.valueMap.clear();
-        controller.listIDToWorkWithNewValue.value = listId;
-        controller.getListValues(listId, masteredBy);
-        Get.dialog(
-            barrierDismissible: false,
-            Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              child: SizedBox(
-                height: constraints.maxHeight,
-                width: constraints.maxWidth,
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(15),
-                            topRight: Radius.circular(15)),
-                        color: mainColor,
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            screenName,
-                            style: fontStyleForScreenNameUsedInButtons,
-                          ),
-                          const Spacer(),
-                          closeButton
-                        ],
-                      ),
+    tooltip: tooltip,
+    onPressed: () {
+      onPressed?.call();
+      controller.searchForValues.value.clear();
+      controller.valueMap.clear();
+      controller.listIDToWorkWithNewValue.value = listId;
+      controller.getListValues(listId, masteredBy);
+      Get.dialog(
+        barrierDismissible: false,
+        Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: SizedBox(
+            height: constraints.maxHeight,
+            width: constraints.maxWidth,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15),
                     ),
-                    Expanded(
-                        child: Padding(
-                            padding: const EdgeInsets.all(16), child: screen))
-                  ],
+                    color: mainColor,
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        screenName,
+                        style: fontStyleForScreenNameUsedInButtons,
+                      ),
+                      const Spacer(),
+                      closeIcon(),
+                    ],
+                  ),
                 ),
-              ),
-            ));
-      },
-      icon: const Icon(Icons.add));
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: screen,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    icon: const Icon(Icons.add),
+  );
 }
 
 Widget valSectionInTheTableForBrands(
@@ -391,57 +423,62 @@ Widget valSectionInTheTableForBrands(
   String tooltip,
 ) {
   return IconButton(
-      tooltip: tooltip,
-      onPressed: () {
-        if (brandId != '') {
-          controller.searchForModels.value.clear();
-          controller.getModelsValues(brandId);
-          controller.brandIdToWorkWith.value = brandId;
-          Get.dialog(
-              barrierDismissible: false,
-              Dialog(
-                insetPadding: const EdgeInsets.all(25),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),
-                child: SizedBox(
-                  height: constraints.maxHeight,
-                  width: constraints.maxWidth,
-                  child: Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15)),
-                          color: mainColor,
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Text(
-                              'Models',
-                              style: fontStyleForScreenNameUsedInButtons,
-                            ),
-                            const Spacer(),
-                            closeButton
-                          ],
-                        ),
+    tooltip: tooltip,
+    onPressed: () {
+      if (brandId != '') {
+        controller.searchForModels.value.clear();
+        controller.getModelsValues(brandId);
+        controller.brandIdToWorkWith.value = brandId;
+        Get.dialog(
+          barrierDismissible: false,
+          Dialog(
+            insetPadding: const EdgeInsets.all(25),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              width: constraints.maxWidth,
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
                       ),
-                      Expanded(
-                          child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: modelsSection(
-                          constraints: constraints,
-                          context: context,
+                      color: mainColor,
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Models',
+                          style: fontStyleForScreenNameUsedInButtons,
                         ),
-                      ))
-                    ],
+                        const Spacer(),
+                        closeButton,
+                      ],
+                    ),
                   ),
-                ),
-              ));
-        } else {
-          showSnackBar('Alert', 'Please select brand first');
-        }
-      },
-      icon: const Icon(Icons.add));
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: modelsSection(
+                        constraints: constraints,
+                        context: context,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      } else {
+        showSnackBar('Alert', 'Please select brand first');
+      }
+    },
+    icon: const Icon(Icons.add),
+  );
 }

@@ -209,6 +209,43 @@ class Helpers {
     }
   }
 
+  // this function is to get all list values by code for drop down menu
+  Future<Map<String, dynamic>> getListDetails(String code) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendUrl/list_of_values/get_list_details_by_code?code=$code',
+      );
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        Map<String, dynamic> jsonData = decoded["list_details"];
+
+        return jsonData;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllListValues(code);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
   Future<Map<String, dynamic>> getCarBrands() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -781,7 +818,7 @@ class Helpers {
     }
   }
 
-   Future<double> getVendorOutstanding(String vendorId) async {
+  Future<double> getVendorOutstanding(String vendorId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -849,7 +886,8 @@ class Helpers {
       return {};
     }
   }
-   Future getAPPaymentStatus(String id) async {
+
+  Future getAPPaymentStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -952,4 +990,6 @@ class Helpers {
       return {};
     }
   }
+
+ 
 }

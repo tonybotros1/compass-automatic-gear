@@ -17,9 +17,6 @@ Container makerCheckerAndApproverSection(
     decoration: containerDecor,
     child: GetX<ReceivingController>(
       builder: (controller) {
-        bool isallOrderedByLoading = controller.allOrderedBy.isEmpty;
-        bool isallApprovedByLoading = controller.allApprovedBy.isEmpty;
-        bool isallPurchasedByLoading = controller.allPurchasedBy.isEmpty;
         return Column(
           spacing: 10,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,12 +29,16 @@ Container makerCheckerAndApproverSection(
                     textcontroller: controller.approvedBy.value.text,
                     showedSelectedName: 'name',
                     hintText: 'Approved By',
-                    items: isallApprovedByLoading
-                        ? {}
-                        : controller.allApprovedBy,
                     onChanged: (key, value) {
                       controller.approvedBy.value.text = value['name'];
                       controller.approvedById.value = key;
+                    },
+                    onDelete: () {
+                      controller.approvedBy.value.clear();
+                      controller.approvedById.value = '';
+                    },
+                    onOpen: () {
+                      return controller.getApprovedBy();
                     },
                   ),
                 ),
@@ -61,11 +62,17 @@ Container makerCheckerAndApproverSection(
                     textcontroller: controller.orderedBy.value.text,
 
                     showedSelectedName: 'name',
-                    items: isallOrderedByLoading ? {} : controller.allOrderedBy,
                     hintText: 'Ordered By',
                     onChanged: (key, value) {
                       controller.orderedBy.value.text = value['name'];
                       controller.orderedById.value = key;
+                    },
+                    onDelete: () {
+                      controller.orderedBy.value.clear();
+                      controller.orderedById.value = '';
+                    },
+                    onOpen: () {
+                      return controller.getOrderedBy();
                     },
                   ),
                 ),
@@ -90,12 +97,17 @@ Container makerCheckerAndApproverSection(
                     textcontroller: controller.purchasedBy.value.text,
 
                     hintText: 'Purchased By',
-                    items: isallPurchasedByLoading
-                        ? {}
-                        : controller.allPurchasedBy,
+
                     onChanged: (key, value) {
                       controller.purchasedBy.value.text = value['name'];
                       controller.purchasedById.value = key;
+                    },
+                    onDelete: () {
+                      controller.purchasedBy.value.clear();
+                      controller.purchasedById.value = '';
+                    },
+                    onOpen: () {
+                      return controller.getPurchasedBy();
                     },
                   ),
                 ),
@@ -108,6 +120,7 @@ Container makerCheckerAndApproverSection(
                   'New Purchased By',
                   '💵 Purchased By',
                   valuesSection(constraints: constraints, context: context),
+                 
                 ),
               ],
             ),

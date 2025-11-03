@@ -2,8 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_cont
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
-
+import 'package:get/get.dart';
 import '../../../Screens/Main screens/System Administrator/Setup/branches.dart';
 import '../../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../../consts.dart';
@@ -16,59 +15,62 @@ Container mainInfosSection(
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
+    // height: null,
     child: Column(
       spacing: 10,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 150,
-          child: myTextFormFieldWithBorder(
-            labelText: 'Number',
-            isEnabled: false,
-            controller: controller.receivingNumber.value,
-          ),
-        ),
-        SizedBox(
-          width: 150,
-          child: myTextFormFieldWithBorder(
-            onFieldSubmitted: (_) async {
-              normalizeDate(
-                controller.date.value.text,
-                controller.date.value,
-              );
-              // if (nor) {
-              //   controller.searchEngine();
-              // }
-            },
-            controller: controller.date.value,
-            labelText: 'Date',
-            suffixIcon: IconButton(
-              onPressed: () {
-                selectDateContext(context, controller.date.value);
-              },
-              icon: const Icon(Icons.date_range),
+        Row(
+          spacing: 10,
+          children: [
+            myTextFormFieldWithBorder(
+              width: 150,
+              labelText: 'Number',
+              isEnabled: false,
+              controller: controller.receivingNumber.value,
             ),
-            isDate: true,
-          ),
+            myTextFormFieldWithBorder(
+              width: 150,
+              onFieldSubmitted: (_) async {
+                normalizeDate(
+                  controller.date.value.text,
+                  controller.date.value,
+                );
+              },
+              controller: controller.date.value,
+              labelText: 'Date',
+              suffixIcon: IconButton(
+                onPressed: () {
+                  selectDateContext(context, controller.date.value);
+                },
+                icon: const Icon(Icons.date_range),
+              ),
+              isDate: true,
+            ),
+          ],
         ),
+
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            GetX<ReceivingController>(
+            GetBuilder<ReceivingController>(
               builder: (controller) {
-                bool isAllBranchesLoading = controller.allBranches.isEmpty;
-                return SizedBox(
-                  width: 300,
-                  child: CustomDropdown(
-                    textcontroller: controller.branch.value.text,
-                    showedSelectedName: 'name',
-                    hintText: 'Branch',
-                    items: isAllBranchesLoading ? {} : controller.allBranches,
-                    onChanged: (key, value) {
-                      controller.branchId.value = key;
-                      controller.branch.value.text = value['name'];
-                    },
-                  ),
+                return CustomDropdown(
+                  width: 310,
+                  textcontroller: controller.branch.value.text,
+                  showedSelectedName: 'name',
+                  hintText: 'Branch',
+                  onChanged: (key, value) {
+                    controller.branchId.value = key;
+                    controller.branch.value.text = value['name'];
+                  },
+                  onDelete: () {
+                    controller.branchId.value = '';
+                    controller.branch.value.clear();
+                  },
+                  onOpen: () {
+                    return controller.getAllBranches();
+                  },
                 );
               },
             ),
@@ -83,12 +85,10 @@ Container mainInfosSection(
             ),
           ],
         ),
-        SizedBox(
-          width: 300,
-          child: myTextFormFieldWithBorder(
-            labelText: 'Reference Number',
-            controller: controller.referenceNumber.value,
-          ),
+        myTextFormFieldWithBorder(
+          width: 310,
+          labelText: 'Reference Number',
+          controller: controller.referenceNumber.value,
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -106,6 +106,13 @@ Container mainInfosSection(
                     onChanged: (key, value) {
                       controller.vendor.value.text = value['entity_name'];
                       controller.vendorId.value = key;
+                    },
+                    onDelete: () {
+                      controller.vendor.value.clear();
+                      controller.vendorId.value = '';
+                    },
+                    onOpen: () {
+                      return controller.getAllVendors();
                     },
                   );
                 },

@@ -24,48 +24,24 @@ Container currencySection(
           children: [
             SizedBox(
               width: 150,
-              child: GetX<ReceivingController>(
+              child: GetBuilder<ReceivingController>(
                 builder: (controller) {
-                  bool isCurrenciesLoading = controller.allCurrencies.isEmpty;
                   return CustomDropdown(
-                    
-                    showedResult: (key, value) {
-                      return Text(
-                        getdataName(
-                          value['country_id'],
-                          controller.allCountries,
-                          title: 'currency_code',
-                        ),
-                      );
-                    },
                     textcontroller: controller.currency.value.text,
                     hintText: 'Currency',
-                    items: isCurrenciesLoading ? {} : controller.allCurrencies,
-                    itemBuilder: (context, key, value) {
-                      return Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        child: Text(
-                          getdataName(
-                            value['country_id'],
-                            controller.allCountries,
-                            title: 'currency_code',
-                          ),
-                        ),
-                      );
-                    },
+                    showedSelectedName: 'currency_code',
                     onChanged: (key, value) {
-                      controller.currency.value.text = getdataName(
-                        value['country_id'],
-                        controller.allCountries,
-                        title: 'currency_code',
-                      );
+                      controller.currency.value.text = value['currency_code'];
                       controller.currencyId.value = key;
                       controller.rate.value.text = (value['rate'] ?? '1')
                           .toString();
+                    },
+                    onDelete: () {
+                      controller.currency.value.clear();
+                      controller.currencyId.value = '';
+                      controller.rate.value.clear();
+                    },onOpen: (){
+                      return controller.getCurrencies();
                     },
                   );
                 },
@@ -87,7 +63,7 @@ Container currencySection(
           child: myTextFormFieldWithBorder(
             labelText: 'Rate',
             controller: controller.rate.value,
-            isDouble: true
+            isDouble: true,
           ),
         ),
       ],
