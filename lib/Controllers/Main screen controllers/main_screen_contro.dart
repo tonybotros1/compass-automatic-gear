@@ -6,6 +6,7 @@ import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/co
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/countries.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/currency.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/employee_performance.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/employees.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/inventory_items.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/invoice_items.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_card.dart';
@@ -178,7 +179,7 @@ class MainScreenController extends GetxController {
       case '/jobCards':
         return const SizedBox(child: JobCard());
       case '/quotationCards':
-        return SizedBox(child: QuotationCard());
+        return const SizedBox(child: QuotationCard());
       case '/countries':
         return const SizedBox(child: Countries());
       case '/carBrands':
@@ -217,6 +218,9 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: IssueItems());
       case '/carTradingDashboard':
         return const SizedBox(child: CarTradingDashboard());
+      case '/employees':
+        return const SizedBox(child: Employees());
+
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

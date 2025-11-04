@@ -17,6 +17,8 @@ import 'Widgets/text_button.dart';
 String backendTestURI = 'http://127.0.0.1:8000';
 // String backendTestURI = "http://10.0.2.2:8000";
 String webSocketURL = "ws://localhost:8000/ws";
+// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
+
 final formatter = CurrencyInputFormatter();
 
 IconButton dateRange({
@@ -843,11 +845,11 @@ Container statusBox(
     decoration: BoxDecoration(
       border: Border.all(color: Colors.white, width: 2),
       borderRadius: BorderRadius.circular(5),
-      color: status == 'New'
+      color: status == 'New' || status == "Active"
           ? Colors.green
-          : status == 'Posted' || status == 'Sold'
+          : status == 'Posted' || status == 'Sold' || status == "Probation"
           ? Colors.teal
-          : status == 'Cancelled' || status == 'R'
+          : status == 'Cancelled' || status == 'R' || status == "Inactive"
           ? Colors.red
           : status == 'Approved'
           ? const Color(0xffD2665A)
