@@ -15,7 +15,7 @@ Container mainInfosSection(
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
-    // height: null,
+    height: 430,
     child: Column(
       spacing: 10,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,6 +32,7 @@ Container mainInfosSection(
             myTextFormFieldWithBorder(
               width: 150,
               onFieldSubmitted: (_) async {
+                controller.isReceivingModified.value = true;
                 normalizeDate(
                   controller.date.value.text,
                   controller.date.value,
@@ -42,6 +43,7 @@ Container mainInfosSection(
               suffixIcon: IconButton(
                 onPressed: () {
                   selectDateContext(context, controller.date.value);
+                  controller.isReceivingModified.value = true;
                 },
                 icon: const Icon(Icons.date_range),
               ),
@@ -61,10 +63,12 @@ Container mainInfosSection(
                   showedSelectedName: 'name',
                   hintText: 'Branch',
                   onChanged: (key, value) {
+                    controller.isReceivingModified.value = true;
                     controller.branchId.value = key;
                     controller.branch.value.text = value['name'];
                   },
                   onDelete: () {
+                    controller.isReceivingModified.value = true;
                     controller.branchId.value = '';
                     controller.branch.value.clear();
                   },
@@ -89,6 +93,9 @@ Container mainInfosSection(
           width: 310,
           labelText: 'Reference Number',
           controller: controller.referenceNumber.value,
+          onChanged: (_) {
+            controller.isReceivingModified.value = true;
+          },
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -97,19 +104,19 @@ Container mainInfosSection(
             Expanded(
               child: GetX<ReceivingController>(
                 builder: (controller) {
-                  bool isAllVendorsLoading = controller.allVendors.isEmpty;
                   return CustomDropdown(
                     textcontroller: controller.vendor.value.text,
                     hintText: 'Vendor',
                     showedSelectedName: 'entity_name',
-                    items: isAllVendorsLoading ? {} : controller.allVendors,
                     onChanged: (key, value) {
+                      controller.isReceivingModified.value = true;
                       controller.vendor.value.text = value['entity_name'];
                       controller.vendorId.value = key;
                     },
                     onDelete: () {
                       controller.vendor.value.clear();
                       controller.vendorId.value = '';
+                      controller.isReceivingModified.value = true;
                     },
                     onOpen: () {
                       return controller.getAllVendors();
@@ -133,6 +140,9 @@ Container mainInfosSection(
           labelText: 'Note',
           maxLines: 5,
           controller: controller.note.value,
+          onChanged: (_) {
+            controller.isReceivingModified.value = true;
+          },
         ),
       ],
     ),

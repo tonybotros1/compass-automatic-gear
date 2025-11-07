@@ -22,7 +22,9 @@ Container additionalCostsSection(
             labelText: 'Shipping',
             controller: controller.shipping.value,
             isDouble: true,
-           
+            onChanged: (_) {
+              controller.isReceivingModified.value = true;
+            },
           ),
         ),
         SizedBox(
@@ -31,6 +33,9 @@ Container additionalCostsSection(
             labelText: 'Handling',
             controller: controller.handling.value,
             isDouble: true,
+            onChanged: (_) {
+              controller.isReceivingModified.value = true;
+            },
           ),
         ),
         SizedBox(
@@ -39,6 +44,9 @@ Container additionalCostsSection(
             labelText: 'Other',
             controller: controller.other.value,
             isDouble: true,
+            onChanged: (_) {
+              controller.isReceivingModified.value = true;
+            },
           ),
         ),
       ],

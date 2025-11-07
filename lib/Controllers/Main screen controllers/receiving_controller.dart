@@ -1,12 +1,12 @@
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import '../../Models/inventory items/inventory_items_model.dart';
-import '../../Models/receiving_items_model.dart';
+import '../../Models/receiving/receiving_items_model.dart';
+import '../../Models/receiving/receiving_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import 'list_of_values_controller.dart';
@@ -48,14 +48,13 @@ class ReceivingController extends GetxController {
   ListOfValuesController listOfValuesController = Get.put(
     ListOfValuesController(),
   );
-  RxString status = RxString(''); // change to empty
+  RxString status = RxString('');
   Rx<TextEditingController> receivingNumberFilter = TextEditingController().obs;
   Rx<TextEditingController> referenceNumberFilter = TextEditingController().obs;
   Rx<TextEditingController> vendorNameIdFilterName =
       TextEditingController().obs;
   Rx<TextEditingController> statusFilter = TextEditingController().obs;
   RxString vendorNameIdFilter = RxString('');
-  RxMap allVendors = RxMap({});
   Rx<TextEditingController> fromDate = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
   final ScrollController scrollControllerFotTable1 = ScrollController();
@@ -71,37 +70,16 @@ class ReceivingController extends GetxController {
   RxDouble allReceivingTotals = RxDouble(0.0);
   RxDouble allReceivingNET = RxDouble(0.0);
   RxBool isScreenLoding = RxBool(false);
-  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allReceivingDocs =
-      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
+  final RxList<ReceivingModel> allReceivingDocs = RxList<ReceivingModel>([]);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxString curreentReceivingId = RxString('');
-  RxMap allBranches = RxMap({});
-  RxMap allCountries = RxMap({});
-  RxMap allCurrencies = RxMap({});
-  RxMap allApprovedBy = RxMap({});
-  RxMap allOrderedBy = RxMap({});
-  RxMap allPurchasedBy = RxMap({});
-
-  RxString approvedByListId = RxString('');
-  RxString orderedByListId = RxString('');
-  RxString purchasedByListId = RxString('');
-  RxString approvedByMasterId = RxString('');
-  RxString orderedByMasterId = RxString('');
-  RxString purchasedByMasterId = RxString('');
-
   RxBool loadingItems = RxBool(false);
-  // final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems =
-  //     RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
-  RxList<ItemModel> allItems = RxList<ItemModel>();
+  RxList<ReceivingItemsModel> allReceivingItems = RxList<ReceivingItemsModel>();
 
-  RxBool canAddItems = RxBool(false); // change to false
-  RxBool addingNewItemsValue = RxBool(false);
+  // RxBool addingNewItemsValue = RxBool(false);
   RxBool addingNewValue = RxBool(false);
   RxBool receivingDocAdded = RxBool(false);
-  RxBool postingReceivingDoc = RxBool(false);
-  RxBool deletingReceivingDoc = RxBool(false);
-  RxBool cancellingReceivingDoc = RxBool(false);
   TextEditingController searchForInventeryItems = TextEditingController();
   RxBool loadingInventeryItems = RxBool(false);
   final RxList<InventoryItemsModel> allInventeryItems =
@@ -115,9 +93,13 @@ class ReceivingController extends GetxController {
   RxDouble finalItemsVAT = RxDouble(0.0);
   RxDouble finalItemsNet = RxDouble(0.0);
   String backendUrl = backendTestURI;
+  final Uuid _uuid = const Uuid();
+  RxBool isReceivingModified = RxBool(false);
+  RxBool isReceivingItemsModified = RxBool(false);
 
   @override
   void onInit() async {
+    searchEngine({"today": true});
     super.onInit();
   }
 
@@ -139,16 +121,12 @@ class ReceivingController extends GetxController {
     return await helper.getCurrencies();
   }
 
-  Future<Map<String, dynamic>> getApprovedBy() async {
-    return await helper.getAllListValues('APPROVED_BY');
+  Future<Map<String, dynamic>> getEmployeesByDepartment() async {
+    return await helper.getAllEmployeesByDepartment('Receiving');
   }
 
-  Future<Map<String, dynamic>> getOrderedBy() async {
-    return await helper.getAllListValues('ORDERED_BY');
-  }
-
-  Future<Map<String, dynamic>> getPurchasedBy() async {
-    return await helper.getAllListValues('PURCHASED_BY');
+  Future getCurrentReceivingStatus(String id) async {
+    return await helper.getReceivingStatus(id);
   }
 
   Future<void> getAllInventeryItems() async {
@@ -189,10 +167,391 @@ class ReceivingController extends GetxController {
     }
   }
 
-  
+  Future<void> addNewReceivingDoc() async {
+    try {
+      if (curreentReceivingId.isNotEmpty) {
+        Map jobStatus = await getCurrentReceivingStatus(
+          curreentReceivingId.value,
+        );
+
+        String status1 = jobStatus['status'];
+        if (status1 != 'New' && status1 != '') {
+          showSnackBar('Alert', 'Only new receiving docs can be edited');
+          return;
+        }
+      }
+      addingNewValue.value = true;
+
+      // Base data
+      final Map<String, dynamic> newData = {
+        'branch': branchId.value,
+        'reference_number': referenceNumber.value.text.trim(),
+        'vendor': vendorId.value,
+        'note': note.value.text.trim(),
+        'currency': currencyId.value,
+        'rate': double.tryParse(rate.value.text) ?? 1,
+        'approved_by': approvedById.value,
+        'ordered_by': orderedById.value,
+        'purchased_by': purchasedById.value,
+        'shipping': double.tryParse(shipping.value.text) ?? 0,
+        'handling': double.tryParse(handling.value.text) ?? 0,
+        'other': double.tryParse(other.value.text) ?? 0,
+        'amount': double.tryParse(amount.value.text) ?? 0,
+        'status': status.value,
+        'items': allReceivingItems
+            .where((inv) => inv.isDeleted != true)
+            .map((item) => item.toJson())
+            .toList(),
+      };
+
+      // Handle date parsing safely
+      final rawDate = date.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['date'] = convertDateToIson(rawDate);
+        } catch (e) {
+          showSnackBar('Alert', 'Please enter a valid date');
+          addingNewValue.value = false;
+          return;
+        }
+      }
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri addingRecUrl = Uri.parse('$backendUrl/receiving/add_new_receiving');
+
+      if (curreentReceivingId.isEmpty) {
+        showSnackBar('Adding', 'Please Wait');
+        newData['status'] = 'New';
+        final response = await http.post(
+          addingRecUrl,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(newData),
+        );
+        if (response.statusCode == 200) {
+          status.value = 'New';
+          final decoded = jsonDecode(response.body);
+          ReceivingModel newRec = ReceivingModel.fromJson(decoded['receiving']);
+          receivingNumber.value.text = newRec.receivingNumber ?? '';
+          addingNewValue.value = false;
+          curreentReceivingId.value = newRec.id ?? '';
+          allReceivingItems.value = newRec.itemsDetails ?? [];
+          isReceivingItemsModified.value = false;
+          isReceivingModified.value = false;
+          calculateTotalsForSelectedReceive();
+          showSnackBar('Done', 'Receiving Added Successfully');
+        } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) {
+            await addNewReceivingDoc();
+          } else if (refreshed == RefreshResult.invalidToken) {
+            logout();
+          }
+        } else if (response.statusCode == 401) {
+          logout();
+        }
+      } else {
+        if (isReceivingItemsModified.isTrue || isReceivingModified.isTrue) {
+          http.Response? responseForEditingReceving;
+          http.Response? responseForEditingRececingItems;
+
+          showSnackBar('Updating', 'Please Wait');
+
+          if (isReceivingModified.isTrue) {
+            Uri updatingJobUrl = Uri.parse(
+              '$backendUrl/receiving/update_receiving/${curreentReceivingId.value}',
+            );
+            Map newDataToUpdate = newData;
+            newDataToUpdate.remove('items');
+            responseForEditingReceving = await http.patch(
+              updatingJobUrl,
+              headers: {
+                'Authorization': 'Bearer $accessToken',
+                "Content-Type": "application/json",
+              },
+              body: jsonEncode(newDataToUpdate),
+            );
+            if (responseForEditingReceving.statusCode == 200) {
+              final decoded = jsonDecode(responseForEditingReceving.body);
+              ReceivingModel newRec = ReceivingModel.fromJson(
+                decoded['receiving'],
+              );
+              curreentReceivingId.value = newRec.id ?? '';
+              allReceivingItems.value = newRec.itemsDetails ?? [];
+              isReceivingModified.value = false;
+              calculateTotalsForSelectedReceive();
+            } else if (responseForEditingReceving.statusCode == 401 &&
+                refreshToken.isNotEmpty) {
+              final refreshed = await helper.refreshAccessToken(refreshToken);
+              if (refreshed == RefreshResult.success) {
+                await addNewReceivingDoc();
+              } else if (refreshed == RefreshResult.invalidToken) {
+                logout();
+              }
+            } else if (responseForEditingReceving.statusCode == 401) {
+              logout();
+            }
+          }
+          if (isReceivingItemsModified.isTrue) {
+            Uri updatingJobInvoicesUrl = Uri.parse(
+              '$backendUrl/receiving/update_receiving_items',
+            );
+            responseForEditingRececingItems = await http.patch(
+              updatingJobInvoicesUrl,
+              headers: {
+                'Authorization': 'Bearer $accessToken',
+                "Content-Type": "application/json",
+              },
+              body: jsonEncode(
+                allReceivingItems
+                    .where(
+                      (item) =>
+                          (item.isModified == true ||
+                          item.isAdded == true ||
+                          (item.isDeleted == true && item.id != null)),
+                    )
+                    .map((item) => item.toJson())
+                    .toList(),
+              ),
+            );
+            if (responseForEditingRececingItems.statusCode == 200) {
+              final decoded = jsonDecode(responseForEditingRececingItems.body);
+              List updatedItems = decoded['updated_items']['items_details'];
+              if (updatedItems.isNotEmpty) {
+                allReceivingItems.assignAll(
+                  updatedItems.map(
+                    (item) => ReceivingItemsModel.fromJson(item),
+                  ),
+                );
+              }
+              isReceivingItemsModified.value = false;
+              calculateTotalsForSelectedReceive();
+            } else if (responseForEditingRececingItems.statusCode == 401 &&
+                refreshToken.isNotEmpty) {
+              final refreshed = await helper.refreshAccessToken(refreshToken);
+              if (refreshed == RefreshResult.success) {
+                await addNewReceivingDoc();
+              } else if (refreshed == RefreshResult.invalidToken) {
+                logout();
+              }
+            } else if (responseForEditingRececingItems.statusCode == 401) {
+              logout();
+            }
+          }
+          if ((responseForEditingReceving?.statusCode == 200) ||
+              (responseForEditingRececingItems?.statusCode == 200)) {
+            showSnackBar('Done', 'Updated Successfully');
+          }
+        }
+      }
+      addingNewValue.value = false; // Ensure loading flag is reset
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong');
+      addingNewValue.value = false; // Ensure loading flag is reset
+    }
+  }
+
+  void filterSearch() async {
+    Map<String, dynamic> body = {};
+    if (receivingNumberFilter.value.text.isNotEmpty) {
+      body["receiving_number"] = receivingNumberFilter.value.text;
+    }
+    if (referenceNumberFilter.value.text.isNotEmpty) {
+      body["reference_number"] = referenceNumberFilter.value.text;
+    }
+    if (vendorNameIdFilter.value.isNotEmpty) {
+      body["vendor"] = vendorNameIdFilter.value;
+    }
+
+    if (statusFilter.value.text.isNotEmpty) {
+      body["status"] = statusFilter.value.text;
+    }
+    if (isTodaySelected.isTrue) {
+      body["today"] = true;
+    }
+    if (isThisMonthSelected.isTrue) {
+      body["this_month"] = true;
+    }
+    if (isThisYearSelected.isTrue) {
+      body["this_year"] = true;
+    }
+    if (fromDate.value.text.isNotEmpty) {
+      body["from_date"] = convertDateToIson(fromDate.value.text);
+    }
+    if (toDate.value.text.isNotEmpty) {
+      body["to_date"] = convertDateToIson(toDate.value.text);
+    }
+    if (body.isNotEmpty) {
+      await searchEngine(body);
+    } else {
+      await searchEngine({"all": true});
+    }
+  }
+
+  Future<void> searchEngine(Map<String, dynamic> body) async {
+    try {
+      isScreenLoding.value = true;
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/receiving/search_engine_for_receiving');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List receiving = decoded['receiving'];
+        Map grandTotals = decoded['grand_totals'];
+        allReceivingTotals.value = grandTotals['grand_total'];
+        allReceivingVATS.value = grandTotals['grand_vat'];
+        allReceivingNET.value = grandTotals['grand_net'];
+        // print(jobs[0]);
+        allReceivingDocs.assignAll(
+          receiving.map((rec) => ReceivingModel.fromJson(rec)),
+        );
+        numberOfReceivingDocs.value = allReceivingDocs.length;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngine(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      isScreenLoding.value = false;
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
+  }
+
+  Future<void> deleteReceiving(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/receiving/delete_receiving/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        String deletedReceivingId = decoded['receiving_id'];
+        allReceivingDocs.removeWhere((rec) => rec.id == deletedReceivingId);
+        numberOfReceivingDocs.value -= 1;
+        Get.close(2);
+        showSnackBar('Success', 'Receiving deleted successfully');
+      } else if (response.statusCode == 400 || response.statusCode == 404) {
+        final decoded =
+            jsonDecode(response.body) ?? 'Failed to delete receiving';
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'] ?? 'Only New Receiving Allowed';
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteReceiving(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 500) {
+        final decoded = jsonDecode(response.body);
+        final error =
+            decoded['detail'] ?? 'Server error while deleting receiving';
+        showSnackBar('Server Error', error);
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  Future<void> addNewItem() async {
+    final String uniqueId = _uuid.v4();
+    allReceivingItems.add(
+      ReceivingItemsModel(
+        receivingId: curreentReceivingId.value.isEmpty
+            ? null
+            : curreentReceivingId.value,
+        uuid: uniqueId,
+        inventoryItemId: selectedInventeryItemID.value,
+        itemName: itemName.value.text,
+        itemCode: itemCode.value.text,
+        quantity: double.tryParse(quantity.value.text) ?? 1,
+        originalPrice: double.tryParse(orginalPrice.value.text) ?? 0,
+        discount: double.tryParse(discount.value.text) ?? 0,
+        vat: double.tryParse(vat.value.text) ?? 0,
+        isAdded: true,
+      ),
+    );
+    isReceivingItemsModified.value = true;
+    calculateTotalsForSelectedReceive();
+    Get.back();
+  }
+
+  Future<void> editItem(String itemId) async {
+    int index = allReceivingItems.indexWhere(
+      (item) => (item.id == itemId || item.uuid == itemId),
+    );
+    if (index != -1) {
+      final oldItem = allReceivingItems[index];
+      isReceivingItemsModified.value = true;
+
+      allReceivingItems[index] = ReceivingItemsModel(
+        receivingId: oldItem.receivingId,
+        id: oldItem.id,
+        uuid: oldItem.uuid,
+        addCost: oldItem.addCost,
+        addDisc: oldItem.addDisc,
+        localPrice: oldItem.localPrice,
+        total: oldItem.total,
+        net: oldItem.net,
+        inventoryItemId: selectedInventeryItemID.value,
+        itemName: itemName.value.text,
+        itemCode: itemCode.value.text,
+        quantity: double.tryParse(quantity.value.text) ?? 1,
+        originalPrice: double.tryParse(orginalPrice.value.text) ?? 0,
+        discount: double.tryParse(discount.value.text) ?? 0,
+        vat: double.tryParse(vat.value.text) ?? 0,
+        isModified: true,
+      );
+    }
+    calculateTotalsForSelectedReceive();
+
+    Get.back();
+  }
+
+  Future<void> deleteItem(String itemId) async {
+    int index = allReceivingItems.indexWhere(
+      (item) => (item.id == itemId || item.uuid == itemId),
+    );
+    allReceivingItems[index].isDeleted = true;
+    allReceivingItems.refresh();
+    isReceivingItemsModified.value = true;
+    calculateTotalsForSelectedReceive();
+
+    Get.back();
+  }
+
   // =============================================================================================================
   void clearValues() {
-    canAddItems.value = false;
     receivingNumber.value.clear();
     date.value.text = textToDate(DateTime.now());
     branch.value.clear();
@@ -215,71 +574,44 @@ class ReceivingController extends GetxController {
     handling.value.clear();
     other.value.clear();
     amount.value.clear();
-    allItems.clear();
+    allReceivingItems.clear();
     status.value = '';
     receivingDocAdded.value = false;
+    isReceivingItemsModified.value = false;
+    isReceivingModified.value = false;
+    finalItemsNet.value = 0;
+    finalItemsTotal.value = 0;
+    finalItemsVAT.value = 0;
   }
 
-  void loadValues(Map<String, dynamic> data, String id) {
-    getAllItems(id);
-
-    canAddItems.value = true;
-    status.value = data['status'];
-    receivingNumber.value.text = data['number'];
-    date.value.text = textToDate(data['date']);
-    branch.value.text = getdataName(data['branch'], allBranches);
-    branchId.value = data['branch'];
-    referenceNumber.value.text = data['reference_number'];
-    vendor.value.text = getdataName(
-      data['vendor'],
-      allVendors,
-      title: 'entity_name',
-    );
-    vendorId.value = data['vendor'];
-    note.value.text = data['note'];
-    currencyId.value = data['currency'];
-    currency.value.text = data['currency'] != ''
-        ? getdataName(
-            getdataName(data['currency'], allCurrencies, title: 'country_id'),
-            allCountries,
-            title: 'currency_code',
-          )
-        : '';
-    rate.value.text = data['rate'].toString();
-    approvedBy.value.text = getdataName(data['approved_by'], allApprovedBy);
-    orderedBy.value.text = getdataName(data['ordered_by'], allOrderedBy);
-    purchasedBy.value.text = getdataName(data['purchased_by'], allPurchasedBy);
-    approvedById.value = data['approved_by'];
-    orderedById.value = data['ordered_by'];
-    purchasedById.value = data['purchased_by'];
-    shipping.value.text = data['shipping'].toString();
-    handling.value.text = data['handling'].toString();
-    other.value.text = data['other'].toString();
-    amount.value.text = data['amount'].toString();
-  }
-
-  Future<String> getInventeryItemsCode({required String id}) async {
-    try {
-      var data = await FirebaseFirestore.instance
-          .collection('inventery_items')
-          .doc(id)
-          .get();
-      return data.data()?['code'] ?? '';
-    } catch (e) {
-      return '';
-    }
-  }
-
-  Future<String> getInventeryItemsName({required String id}) async {
-    try {
-      var data = await FirebaseFirestore.instance
-          .collection('inventery_items')
-          .doc(id)
-          .get();
-      return data.data()?['name'] ?? '';
-    } catch (e) {
-      return '';
-    }
+  void loadValues(ReceivingModel data) {
+    isReceivingItemsModified.value = false;
+    isReceivingModified.value = false;
+    curreentReceivingId.value = data.id ?? '';
+    allReceivingItems.assignAll(data.itemsDetails ?? []);
+    status.value = data.status ?? '';
+    receivingNumber.value.text = data.receivingNumber ?? '';
+    date.value.text = textToDate(data.date);
+    branch.value.text = data.branchName ?? '';
+    branchId.value = data.branch ?? '';
+    referenceNumber.value.text = data.referenceNumber ?? '';
+    vendor.value.text = data.vendorName ?? '';
+    vendorId.value = data.vendor ?? '';
+    note.value.text = data.note ?? '';
+    currencyId.value = data.currency ?? '';
+    currency.value.text = data.currencyCode ?? '';
+    rate.value.text = data.rate.toString();
+    approvedBy.value.text = data.approvedByName ?? '';
+    orderedBy.value.text = data.orderedByName ?? '';
+    purchasedBy.value.text = data.purchasedByName ?? '';
+    approvedById.value = data.approvedBy ?? '';
+    orderedById.value = data.orderedBy ?? '';
+    purchasedById.value = data.purchasedBy ?? '';
+    shipping.value.text = data.shipping.toString();
+    handling.value.text = data.handling.toString();
+    other.value.text = data.other.toString();
+    amount.value.text = data.amount.toString();
+    calculateTotalsForSelectedReceive();
   }
 
   // this function is to filter the search results for inventery items
@@ -298,20 +630,13 @@ class ReceivingController extends GetxController {
     }
   }
 
-  void getAllCurrencies() {
-    try {
-      FirebaseFirestore.instance
-          .collection('currencies')
-          // .where('company_id', isEqualTo: companyId.value)
-          .orderBy('name')
-          .snapshots()
-          .listen((branches) {
-            allBranches.value = {
-              for (var doc in branches.docs) doc.id: doc.data(),
-            };
-          });
-    } catch (e) {
-      //
+  void calculateTotalsForSelectedReceive() {
+    for (var item in allReceivingItems.where(
+      (item) => item.isDeleted != true,
+    )) {
+      finalItemsTotal.value += item.total ?? 0;
+      finalItemsVAT.value += item.vat ?? 0;
+      finalItemsNet.value += item.net ?? 0;
     }
   }
 
@@ -330,538 +655,49 @@ class ReceivingController extends GetxController {
     net.value.text = '0';
   }
 
-  Future<void> addNewReceivingDoc() async {
-    try {
-      // Prevent editing if status is not allowed
-      if (status.value != 'New' && status.value.isNotEmpty) {
-        showSnackBar('Alert', 'Only new docs can be edited');
-        return;
-      }
-
-      showSnackBar('Adding', 'Please Wait');
-      addingNewValue.value = true;
-
-      // Base data
-      final Map<String, dynamic> newData = {
-        // 'company_id': companyId.value,
-        'branch': branchId.value,
-        'reference_number': referenceNumber.value.text.trim(),
-        'vendor': vendorId.value,
-        'note': note.value.text.trim(),
-        'currency': currencyId.value,
-        'rate': double.tryParse(rate.value.text) ?? 1,
-        'approved_by': approvedById.value,
-        'ordered_by': orderedById.value,
-        'purchased_by': purchasedById.value,
-        'shipping': double.tryParse(shipping.value.text) ?? 0,
-        'handling': double.tryParse(handling.value.text) ?? 0,
-        'other': double.tryParse(other.value.text) ?? 0,
-        'amount': double.tryParse(amount.value.text) ?? 0,
-      };
-
-      // Handle date parsing safely
-      final rawDate = date.value.text.trim();
-      if (rawDate.isNotEmpty) {
-        try {
-          newData['date'] = Timestamp.fromDate(format.parseStrict(rawDate));
-        } catch (e) {
-          showSnackBar('Alert', 'Please enter a valid date');
-          addingNewValue.value = false;
-          return; // Stop execution if date is invalid
-        }
-      }
-
-      // If creating a new doc
-      if (receivingDocAdded.isFalse) {
-        if (receivingNumber.value.text.isEmpty) {
-          await getCurrentReceivingCounterNumber();
-        }
-
-        newData['number'] = receivingNumber.value.text;
-        newData['status'] = 'New';
-        newData['added_date'] = DateTime.now().toIso8601String();
-
-        final newDocRef = await FirebaseFirestore.instance
-            .collection('receiving')
-            .add(newData);
-
-        receivingDocAdded.value = true;
-        curreentReceivingId.value = newDocRef.id;
-
-        getAllItems(newDocRef.id);
-
-        showSnackBar('Done', 'Doc. Added Successfully');
-        status.value = 'New';
-      }
-      // If updating existing doc
-      else {
-        newData.remove('status'); // Don't overwrite status
-        await FirebaseFirestore.instance
-            .collection('receiving')
-            .doc(curreentReceivingId.value)
-            .update(newData);
-
-        showSnackBar('Done', 'Updated Successfully');
-      }
-
-      canAddItems.value = true;
-    } catch (e) {
-      canAddItems.value = false;
-      showSnackBar('Alert', 'Something went wrong: $e');
-    } finally {
-      addingNewValue.value = false; // Ensure loading flag is reset
-    }
-  }
-
-  Future<void> editReceivingDoc(String id) async {
-    try {
-      if (status.value != 'New' && status.value != '') {
-        showSnackBar('Alert', 'Only new docs can be edited');
-        return;
-      }
-      showSnackBar('Editing', 'Please Wait');
-      addingNewValue.value = true;
-
-      Map<String, dynamic> newData = {
-        'branch': branchId.value,
-        'reference_number': referenceNumber.value.text,
-        'vendor': vendorId.value,
-        'note': note.value.text,
-        'currency': currencyId.value,
-        'rate': double.tryParse(rate.value.text) ?? 1,
-        'approved_by': approvedById.value,
-        'ordered_by': orderedById.value,
-        'purchased_by': purchasedById.value,
-        'shipping': double.tryParse(shipping.value.text) ?? 0,
-        'handling': double.tryParse(handling.value.text) ?? 0,
-        'other': double.tryParse(other.value.text) ?? 0,
-        'amount': double.tryParse(amount.value.text) ?? 0,
-      };
-
-      final rawDate = date.value.text.trim();
-      if (rawDate.isNotEmpty) {
-        try {
-          newData['date'] = Timestamp.fromDate(format.parseStrict(rawDate));
-        } catch (e) {
-          showSnackBar('Alert', 'Please enter valid date');
-        }
-      }
-
-      await FirebaseFirestore.instance
-          .collection('receiving')
-          .doc(id)
-          .update(newData);
-      showSnackBar('Done', 'Updated Successfully');
-      addingNewValue.value = false;
-    } catch (e) {
-      addingNewValue.value = false;
-      showSnackBar('Alert', 'Something Went Wrong');
-    }
-  }
-
-  void deleteReceivingDoc(String id, BuildContext context) {
-    try {
-      if (status.value == 'New' || status.value == '') {
-        deletingReceivingDoc.value = true;
-
-        alertDialog(
-          context: context,
-          content: "This will be deleted permanently",
-          onPressed: () {
-            FirebaseFirestore.instance.collection('receiving').doc(id).delete();
-            Get.close(2);
-            deletingReceivingDoc.value = false;
-          },
-        );
-      } else {
-        showSnackBar('Can Not Delete', 'Only New Docs Can be Deleted');
-      }
-    } catch (e) {
-      deletingReceivingDoc.value = false;
-    }
-  }
-
   Future<void> editPostForReceiving(String id) async {
-    try {
-      if (status.value.isEmpty) {
-        showSnackBar('Alert', 'Please save doc first');
-        return;
-      }
-      postingReceivingDoc.value = true;
-      if (status.value == 'Posted') {
-        showSnackBar('Alert', 'Doc is already posted');
-        return;
-      }
-      if (status.value == 'Cancelled') {
-        showSnackBar('Alert', 'Doc is cancelled');
-        return;
-      }
-
-      await FirebaseFirestore.instance.collection('receiving').doc(id).update({
-        // 'number': receivingNumber.value.text,
-        'status': 'Posted',
-      });
-
-      status.value = 'Posted';
-      postingReceivingDoc.value = false;
-      showSnackBar('Done', 'Status is Posted Now');
-    } catch (e) {
-      postingReceivingDoc.value = false;
+    if (status.value.isEmpty) {
+      showSnackBar('Alert', 'Please save doc first');
+      return;
     }
+    Map recStatus = await getCurrentReceivingStatus(curreentReceivingId.value);
+
+    String status1 = recStatus['status'];
+
+    if (status1 == 'Posted') {
+      showSnackBar('Alert', 'Doc is already posted');
+      return;
+    }
+    if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'Doc is cancelled');
+      return;
+    }
+
+    status.value = 'Posted';
+    isReceivingModified.value = true;
   }
 
   Future<void> editCancelForReceiving(String id) async {
-    try {
-      if (status.value.isEmpty) {
-        showSnackBar('Alert', 'Please save doc first');
-        return;
-      }
-
-      if (status.value == 'Cancelled') {
-        showSnackBar('Alert', 'Doc is already cancelled');
-        return;
-      }
-      cancellingReceivingDoc.value = true;
-
-      await FirebaseFirestore.instance.collection('receiving').doc(id).update({
-        // 'number': receivingNumber.value.text,
-        'status': 'Cancelled',
-      });
-
-      status.value = 'Cancelled';
-      cancellingReceivingDoc.value = false;
-      showSnackBar('Done', 'Status is Cancelled Now');
-    } catch (e) {
-      cancellingReceivingDoc.value = false;
+    if (status.value.isEmpty) {
+      showSnackBar('Alert', 'Please save doc first');
+      return;
     }
-  }
+    Map recStatus = await getCurrentReceivingStatus(curreentReceivingId.value);
 
- 
+    String status1 = recStatus['status'];
 
-  void getAllItems(String id) {
-    try {
-      loadingItems.value = true;
-      FirebaseFirestore.instance
-          .collection('receiving')
-          .doc(id)
-          .collection('items')
-          .snapshots()
-          .listen((QuerySnapshot<Map<String, dynamic>> items) {
-            // Map the documents to your ItemModel before assigning
-            final mappedItems = items.docs
-                .map((doc) => ItemModel.fromFirestore(doc))
-                .toList();
-            allItems.assignAll(mappedItems);
-            calculateAllItemsTotal(allItems);
-            loadingItems.value = false;
-          });
-    } catch (e) {
-      loadingItems.value = false;
-      // Consider logging the error for debugging.
-    }
-  }
-
-  Map<String, double> calculateAllItemsTotal(List<ItemModel> items) {
-    // reset
-    itemsTotal.value = 0.0;
-    finalItemsTotal.value = 0.0;
-    finalItemsVAT.value = 0.0;
-    finalItemsNet.value = 0.0;
-
-    double toDouble(dynamic v) => v is double
-        ? v
-        : v is int
-        ? v.toDouble()
-        : double.tryParse(v?.toString() ?? '') ?? 0.0;
-    int toInt(dynamic v) => v is int
-        ? v
-        : v is double
-        ? v.toInt()
-        : int.tryParse(v?.toString() ?? '') ?? 0;
-
-    for (var item in items) {
-      final double orgPrice = toDouble(item.originalPrice);
-      final double discountVal = toDouble(item.discount);
-      final int qty = toInt(item.quantity);
-      itemsTotal.value += (orgPrice - discountVal) * qty;
+    if (status1 == 'Posted') {
+      showSnackBar('Alert', 'Doc is posted');
+      return;
     }
 
-    final double amountVal = double.tryParse(amount.value.text) ?? 0.0;
-    final double handlingVal = double.tryParse(handling.value.text) ?? 0.0;
-    final double otherVal = double.tryParse(other.value.text) ?? 0.0;
-    final double shippingVal = double.tryParse(shipping.value.text) ?? 0.0;
-    final double rateVal = double.tryParse(rate.value.text) ?? 1.0;
-
-    final double totalForAll = itemsTotal.value;
-    final double extraCosts = handlingVal + shippingVal + otherVal;
-
-    for (var item in items) {
-      final double orgPrice = toDouble(item.originalPrice);
-      final double discountVal = toDouble(item.discount);
-      final int qty = toInt(item.quantity);
-      final double vatRaw = toDouble(item.vat);
-
-      final double unitBase = orgPrice - discountVal;
-
-      final double addCostPerUnit = totalForAll > 0
-          ? (unitBase / totalForAll) * extraCosts
-          : 0.0;
-
-      final double addDiscPerUnit = totalForAll > 0
-          ? (unitBase / totalForAll) * amountVal
-          : 0.0;
-
-      final double localPricePerUnit =
-          (unitBase + addCostPerUnit - addDiscPerUnit) * rateVal;
-
-      final double lineTotal = localPricePerUnit * qty;
-
-      // final double vatAmount = lineTotal * (vatRaw / 100.0);
-
-      finalItemsTotal.value += lineTotal;
-      finalItemsVAT.value += vatRaw;
-      finalItemsNet.value += lineTotal + vatRaw;
-    }
-    return {
-      'total': finalItemsTotal.value,
-      'vat': finalItemsVAT.value,
-      'net': finalItemsNet.value,
-    };
-  }
-
-  Future<Map<String, double>> calculateTotalsForTable(String docId) async {
-    try {
-      var data = await FirebaseFirestore.instance
-          .collection('receiving')
-          .doc(docId)
-          .collection('items')
-          .get();
-      // Map the documents to your ItemModel before assigning
-      final mappedItems = data.docs
-          .map((doc) => ItemModel.fromFirestore(doc))
-          .toList();
-      Map<String, double> calulated = calculateAllItemsTotal(mappedItems);
-      return calulated;
-    } catch (e) {
-      return {};
-    }
-  }
-
-  Future<void> addNewItem(String id) async {
-    try {
-      addingNewItemsValue.value = true;
-      await FirebaseFirestore.instance
-          .collection('receiving')
-          .doc(id)
-          .collection('items')
-          .add({
-            // 'company_id': companyId.value,
-            'added_date': DateTime.now().toString(),
-            'code': selectedInventeryItemID.value,
-            'quantity': int.tryParse(quantity.value.text) ?? 1,
-            'orginal_price': double.tryParse(orginalPrice.value.text) ?? 0,
-            'discount': double.tryParse(discount.value.text) ?? 0,
-            'vat': double.tryParse(vat.value.text) ?? 0,
-            'collection_parent': 'receiving',
-          });
-      addingNewItemsValue.value = false;
-      Get.back();
-    } catch (e) {
-      addingNewItemsValue.value = false;
-    }
-  }
-
-  Future<void> editItem(String docId, String itemId) async {
-    try {
-      addingNewItemsValue.value = true;
-      await FirebaseFirestore.instance
-          .collection('receiving')
-          .doc(docId)
-          .collection('items')
-          .doc(itemId)
-          .update({
-            'code': selectedInventeryItemID.value,
-            'quantity': int.tryParse(quantity.value.text) ?? 1,
-            'orginal_price': double.tryParse(orginalPrice.value.text) ?? 0,
-            'discount': double.tryParse(discount.value.text) ?? 0,
-            'vat': double.tryParse(vat.value.text) ?? 0,
-          });
-      addingNewItemsValue.value = false;
-      Get.back();
-    } catch (e) {
-      addingNewItemsValue.value = false;
-    }
-  }
-
-  Future<void> deleteItem(String docId, String itemId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('receiving')
-          .doc(docId)
-          .collection('items')
-          .doc(itemId)
-          .delete();
-      Get.back();
-    } catch (e) {
-      //
-    }
-  }
-
-  // this function is to generate a new receiving number
-  Future<void> getCurrentReceivingCounterNumber() async {
-    try {
-      var rnId = '';
-      var updateReceiveDoc = '';
-      var rnDoc = await FirebaseFirestore.instance
-          .collection('counters')
-          .where('code', isEqualTo: 'RN')
-          // .where('company_id', isEqualTo: companyId.value)
-          .get();
-
-      if (rnDoc.docs.isEmpty) {
-        // Define constants for the new counter values
-        const prefix = 'R';
-        const separator = '-';
-        const initialValue = 1;
-
-        var newCounter = await FirebaseFirestore.instance
-            .collection('counters')
-            .add({
-              'code': 'RN',
-              'description': 'Receiving Number',
-              'prefix': prefix,
-              'value': initialValue,
-              'length': 0,
-              'separator': separator,
-              'added_date': DateTime.now().toString(),
-              // 'company_id': companyId.value,
-              'status': true,
-            });
-        rnId = newCounter.id;
-        // Set the counter text with prefix and separator
-        receivingNumber.value.text = '$prefix$separator$initialValue';
-        updateReceiveDoc = initialValue.toString();
-      } else {
-        var firstDoc = rnDoc.docs.first;
-        rnId = firstDoc.id;
-        var currentValue = firstDoc.data()['value'] ?? 0;
-        // Use the existing prefix and separator from the document
-        receivingNumber.value.text =
-            '${firstDoc.data()['prefix']}${firstDoc.data()['separator']}${(currentValue + 1).toString().padLeft(firstDoc.data()['length'], '0')}';
-        updateReceiveDoc = (currentValue + 1).toString();
-      }
-
-      await FirebaseFirestore.instance.collection('counters').doc(rnId).update({
-        'value': int.parse(updateReceiveDoc),
-      });
-    } catch (e) {
-      // Optionally handle errors here
-      // print("Error in getCurrentJobCardCounterNumber: $e");
-    }
-  }
-
-  void searchEngine() {
-    isScreenLoding.value = true;
-
-    Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection(
-      'receiving',
-    );
-    // .where('company_id', isEqualTo: companyId.value);
-
-    if (!isAllSelected.value) {
-      if (isTodaySelected.value) {
-        final now = DateTime.now();
-        final startOfDay = DateTime(now.year, now.month, now.day);
-        final endOfDay = startOfDay.add(const Duration(days: 1));
-        fromDate.value.text = textToDate(startOfDay);
-        toDate.value.text = textToDate(endOfDay);
-        query = query
-            .where(
-              'date',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
-            )
-            .where('date', isLessThan: Timestamp.fromDate(endOfDay));
-      } else if (isThisMonthSelected.value) {
-        final now = DateTime.now();
-        final startOfMonth = DateTime(now.year, now.month, 1);
-        final endOfMonth = (now.month < 12)
-            ? DateTime(now.year, now.month + 1, 1)
-            : DateTime(now.year + 1, 1, 1);
-        fromDate.value.text = textToDate(startOfMonth);
-        toDate.value.text = textToDate(endOfMonth);
-        query = query
-            .where(
-              'date',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
-            )
-            .where('date', isLessThan: Timestamp.fromDate(endOfMonth));
-      } else if (isThisYearSelected.value) {
-        final now = DateTime.now();
-        final startOfYear = DateTime(now.year, 1, 1);
-        final endOfYear = DateTime(now.year + 1, 1, 1);
-        fromDate.value.text = textToDate(startOfYear);
-        toDate.value.text = textToDate(endOfYear);
-        query = query
-            .where(
-              'date',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear),
-            )
-            .where('date', isLessThan: Timestamp.fromDate(endOfYear));
-      } else {
-        if (fromDate.value.text.trim().isNotEmpty) {
-          try {
-            final dtFrom = format.parseStrict(fromDate.value.text.trim());
-            query = query.where(
-              'date',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(dtFrom),
-            );
-          } catch (_) {}
-        }
-        if (toDate.value.text.trim().isNotEmpty) {
-          try {
-            final dtTo = format
-                .parseStrict(toDate.value.text.trim())
-                .add(const Duration(days: 1));
-            query = query.where('date', isLessThan: Timestamp.fromDate(dtTo));
-          } catch (_) {}
-        }
-      }
+    if (status1 == 'Cancelled') {
+      showSnackBar('Alert', 'Doc is already cancelled');
+      return;
     }
 
-    // Listen to changes in real-time
-    query.snapshots().listen((snapshot) {
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> fetchedData =
-          snapshot.docs;
-
-      // Apply client-side filters
-      final filteredReceivingDocs = fetchedData.where((doc) {
-        final data = doc.data();
-
-        if (receivingNumberFilter.value.text.trim().isNotEmpty &&
-            data['number'] != receivingNumberFilter.value.text.trim()) {
-          return false;
-        }
-        if (statusFilter.value.text.trim().isNotEmpty &&
-            data['status'] != statusFilter.value.text.trim()) {
-          return false;
-        }
-        if (vendorNameIdFilter.value.isNotEmpty &&
-            data['vendor'] != vendorNameIdFilter.value) {
-          return false;
-        }
-        if (referenceNumberFilter.value.text.trim().isNotEmpty &&
-            data['reference_number'] !=
-                referenceNumberFilter.value.text.trim()) {
-          return false;
-        }
-        return true;
-      }).toList();
-
-      // Update UI instantly
-      allReceivingDocs.assignAll(filteredReceivingDocs);
-      numberOfReceivingDocs.value = allReceivingDocs.length;
-      isScreenLoding.value = false;
-    });
+    status.value = 'Cancelled';
+    isReceivingModified.value = true;
   }
 
   void removeFilters() {

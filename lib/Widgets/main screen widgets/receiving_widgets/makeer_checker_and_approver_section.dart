@@ -1,11 +1,11 @@
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/employees.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Main screen controllers/receiving_controller.dart';
-import '../../Trade screen widgets/car_information_section.dart';
-import '../lists_widgets/values_section_in_list_of_values.dart';
+import 'add_new_value_for_screen_button.dart';
 
 Container makerCheckerAndApproverSection(
   BuildContext context,
@@ -30,27 +30,28 @@ Container makerCheckerAndApproverSection(
                     showedSelectedName: 'name',
                     hintText: 'Approved By',
                     onChanged: (key, value) {
+                      controller.isReceivingModified.value = true;
                       controller.approvedBy.value.text = value['name'];
                       controller.approvedById.value = key;
                     },
                     onDelete: () {
                       controller.approvedBy.value.clear();
                       controller.approvedById.value = '';
+                      controller.isReceivingModified.value = true;
                     },
                     onOpen: () {
-                      return controller.getApprovedBy();
+                      return controller.getEmployeesByDepartment();
                     },
                   ),
                 ),
-                valSectionInTheTable(
-                  controller.listOfValuesController,
-                  controller.approvedByListId.value,
-                  context,
-                  constraints,
-                  controller.approvedByMasterId.value,
-                  'New Approved By',
-                  '✅ Approved By',
-                  valuesSection(constraints: constraints, context: context),
+                IconButton(
+                  onPressed: () {
+                    addNewValueToScreenButtonDialog(
+                      screenName: '🌿 Employees',
+                      widget: const Employees(),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
                 ),
               ],
             ),
@@ -66,25 +67,26 @@ Container makerCheckerAndApproverSection(
                     onChanged: (key, value) {
                       controller.orderedBy.value.text = value['name'];
                       controller.orderedById.value = key;
+                      controller.isReceivingModified.value = true;
                     },
                     onDelete: () {
                       controller.orderedBy.value.clear();
                       controller.orderedById.value = '';
+                      controller.isReceivingModified.value = true;
                     },
                     onOpen: () {
-                      return controller.getOrderedBy();
+                      return controller.getEmployeesByDepartment();
                     },
                   ),
                 ),
-                valSectionInTheTable(
-                  controller.listOfValuesController,
-                  controller.orderedByListId.value,
-                  context,
-                  constraints,
-                  controller.orderedByMasterId.value,
-                  'New Ordered By',
-                  '📜 Ordered By',
-                  valuesSection(constraints: constraints, context: context),
+                IconButton(
+                  onPressed: () {
+                    addNewValueToScreenButtonDialog(
+                      screenName: '🌿 Employees',
+                      widget: const Employees(),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
                 ),
               ],
             ),
@@ -95,32 +97,30 @@ Container makerCheckerAndApproverSection(
                   child: CustomDropdown(
                     showedSelectedName: 'name',
                     textcontroller: controller.purchasedBy.value.text,
-
                     hintText: 'Purchased By',
-
                     onChanged: (key, value) {
                       controller.purchasedBy.value.text = value['name'];
                       controller.purchasedById.value = key;
+                      controller.isReceivingModified.value = true;
                     },
                     onDelete: () {
                       controller.purchasedBy.value.clear();
                       controller.purchasedById.value = '';
+                      controller.isReceivingModified.value = true;
                     },
                     onOpen: () {
-                      return controller.getPurchasedBy();
+                      return controller.getEmployeesByDepartment();
                     },
                   ),
                 ),
-                valSectionInTheTable(
-                  controller.listOfValuesController,
-                  controller.purchasedByListId.value,
-                  context,
-                  constraints,
-                  controller.purchasedByMasterId.value,
-                  'New Purchased By',
-                  '💵 Purchased By',
-                  valuesSection(constraints: constraints, context: context),
-                 
+                IconButton(
+                  onPressed: () {
+                    addNewValueToScreenButtonDialog(
+                      screenName: '🌿 Employees',
+                      widget: const Employees(),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
                 ),
               ],
             ),

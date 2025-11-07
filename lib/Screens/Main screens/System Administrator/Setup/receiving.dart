@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/receiving_controller.dart';
+import '../../../../Models/receiving/receiving_model.dart';
 import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
@@ -100,7 +100,7 @@ class Receiving extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 10),
-                  GetBuilder<ReceivingController>(
+                  GetX<ReceivingController>(
                     builder: (controller) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -143,20 +143,7 @@ class Receiving extends StatelessWidget {
                                       },
                                     ),
                                   ),
-                                  ElevatedButton(
-                                    style: allButtonStyle,
-                                    onPressed: () {
-                                      controller.clearAllFilters();
-                                      controller.isAllSelected.value = true;
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      controller.searchEngine();
-                                    },
-                                    child: const Text('All'),
-                                  ),
+
                                   ElevatedButton(
                                     style: todayButtonStyle,
                                     onPressed:
@@ -180,7 +167,9 @@ class Receiving extends StatelessWidget {
                                                 false;
                                             controller.isDaySelected.value =
                                                 true;
-                                            controller.searchEngine();
+                                            controller.searchEngine({
+                                              "today": true,
+                                            });
                                           }
                                         : null,
                                     child: const Text('Today'),
@@ -208,7 +197,9 @@ class Receiving extends StatelessWidget {
                                                 true;
                                             controller.isDaySelected.value =
                                                 false;
-                                            controller.searchEngine();
+                                            controller.searchEngine({
+                                              "this_month": true,
+                                            });
                                           }
                                         : null,
                                     child: const Text('This Month'),
@@ -234,33 +225,32 @@ class Receiving extends StatelessWidget {
                                                 false;
                                             controller.isDaySelected.value =
                                                 false;
-                                            controller.searchEngine();
+                                            controller.searchEngine({
+                                              "this_year": true,
+                                            });
                                           }
                                         : null,
                                     child: const Text('This Year'),
                                   ),
                                   ElevatedButton(
                                     style: saveButtonStyle,
-                                    onPressed:
-                                        controller.isThisYearSelected.isFalse
+                                    onPressed: controller.isScreenLoding.isFalse
                                         ? () async {
-                                            controller.removeFilters();
-                                            controller.searchEngine();
+                                            controller.filterSearch();
                                           }
                                         : null,
-                                    child: Text(
-                                      'Find',
-                                      style: fontStyleForElevatedButtons,
-                                    ),
+                                    child: controller.isScreenLoding.isFalse
+                                        ? Text(
+                                            'Find',
+                                            style: fontStyleForElevatedButtons,
+                                          )
+                                        : loadingProcess,
                                   ),
                                   ElevatedButton(
                                     style: clearVariablesButtonStyle,
-                                    onPressed:
-                                        controller.isThisYearSelected.isFalse
-                                        ? () {
-                                            controller.clearAllFilters();
-                                          }
-                                        : null,
+                                    onPressed: () {
+                                      controller.clearAllFilters();
+                                    },
                                     child: Text(
                                       'Clear Filters',
                                       style: fontStyleForElevatedButtons,
@@ -336,27 +326,17 @@ class Receiving extends StatelessWidget {
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Column(
-                          children: [
-                            controller.isScreenLoding.isTrue &&
-                                    controller.allReceivingDocs.isEmpty
-                                ? Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: loadingProcess,
-                                  )
-                                : SizedBox(
-                                    width: constraints.maxWidth,
-                                    child: tableOfScreens(
-                                      showHistoryButton: true,
-                                      scrollController:
-                                          controller.scrollControllerFotTable1,
-                                      constraints: constraints,
-                                      context: context,
-                                      controller: controller,
-                                      data: controller.allReceivingDocs,
-                                    ),
-                                  ),
-                          ],
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            showHistoryButton: true,
+                            scrollController:
+                                controller.scrollControllerFotTable1,
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
+                            data: controller.allReceivingDocs,
+                          ),
                         ),
                       );
                     },
@@ -375,16 +355,12 @@ Widget tableOfScreens({
   required BoxConstraints constraints,
   required BuildContext context,
   required ReceivingController controller,
-  required RxList<DocumentSnapshot> data,
+  required RxList<ReceivingModel> data,
   required ScrollController scrollController,
   required bool showHistoryButton,
 }) {
-  final dataSource = CardDataSource(
-    cards: data,
-    context: context,
-    constraints: constraints,
-    controller: controller,
-  );
+  bool isReceivingLoading = data.isEmpty;
+
   return DataTableTheme(
     data: DataTableThemeData(
       headingTextStyle: fontStyleForTableHeader,
@@ -401,7 +377,7 @@ Widget tableOfScreens({
       controller: scrollController,
       child: PaginatedDataTable(
         controller: scrollController,
-        rowsPerPage: 5,
+        rowsPerPage: 10,
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
@@ -417,7 +393,14 @@ Widget tableOfScreens({
           ),
           DataColumn(
             label: AutoSizedText(text: 'Number', constraints: constraints),
-
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: AutoSizedText(text: 'Date', constraints: constraints),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: AutoSizedText(text: 'Status', constraints: constraints),
             // onSort: controller.onSort,
           ),
           DataColumn(
@@ -427,26 +410,17 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
-            label: AutoSizedText(text: 'Status', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
+
           DataColumn(
             label: AutoSizedText(text: 'Vendor Name', constraints: constraints),
             // onSort: controller.onSort,
           ),
-          DataColumn(
-            label: AutoSizedText(text: 'Date', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
+
           DataColumn(
             label: AutoSizedText(text: 'Branch', constraints: constraints),
             // onSort: controller.onSort,
           ),
-          DataColumn(
-            label: AutoSizedText(text: 'Note', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
+
           DataColumn(
             numeric: true,
             label: AutoSizedText(text: 'Total', constraints: constraints),
@@ -464,14 +438,19 @@ Widget tableOfScreens({
             // onSort: controller.onSort,
           ),
         ],
-        source: dataSource,
+        source: CardDataSource(
+          cards: isReceivingLoading ? [] : data,
+          context: context,
+          constraints: constraints,
+          controller: controller,
+        ),
       ),
     ),
   );
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> docData,
+  ReceivingModel docData,
   context,
   constraints,
   docId,
@@ -493,7 +472,7 @@ DataRow dataRowForTheTable(
             editReceivingButton(
               controller: controller,
               id: docId,
-              docData: docData,
+              data: docData,
               context: context,
             ),
           ],
@@ -502,90 +481,59 @@ DataRow dataRowForTheTable(
 
       DataCell(
         textForDataRowInTable(
-          text: '${docData['number']}',
+          text: docData.receivingNumber ?? '',
           formatDouble: false,
         ),
       ),
-      DataCell(
-        textForDataRowInTable(
-          text: '${docData['reference_number']}',
-          formatDouble: false,
-        ),
-      ),
+      DataCell(textForDataRowInTable(text: textToDate(docData.date))),
       DataCell(
         statusBox(
-          docData['status'],
+          docData.status ?? '',
           hieght: 35,
+          width: 100,
           padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: getdataName(
-            docData['vendor'],
-            controller.allVendors,
-            title: 'entity_name',
-          ),
-          formatDouble: false,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: docData['date'] != null && docData['date'] != ''
-              ? textToDate(docData['date'])
-              : 'N/A',
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: getdataName(docData['branch'], controller.allBranches),
+          text: docData.referenceNumber ?? '',
           formatDouble: false,
         ),
       ),
 
       DataCell(
-        textForDataRowInTable(text: '${docData['note']}', formatDouble: false),
-      ),
-      DataCell(
-        FutureBuilder<Map<String, double>>(
-          future: controller.calculateTotalsForTable(docId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(text: '${snapshot.data?['total']}');
-            }
-          },
+        textForDataRowInTable(
+          text: docData.vendorName ?? '',
+          maxWidth: null,
+          formatDouble: false,
         ),
       ),
       DataCell(
-        FutureBuilder<Map<String, double>>(
-          future: controller.calculateTotalsForTable(docId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(text: '${snapshot.data?['vat']}');
-            }
-          },
+        textForDataRowInTable(
+          text: docData.branchName ?? '',
+          formatDouble: false,
+        ),
+      ),
+
+      DataCell(
+        textForDataRowInTable(
+          text: docData.totals.toString(),
+          color: Colors.green,
+          isBold: true,
         ),
       ),
       DataCell(
-        FutureBuilder<Map<String, double>>(
-          future: controller.calculateTotalsForTable(docId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return textForDataRowInTable(text: '${snapshot.data?['net']}');
-            }
-          },
+        textForDataRowInTable(
+          text: docData.vats.toString(),
+          color: Colors.red,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: docData.net.toString(),
+          color: Colors.blueGrey,
+          isBold: true,
         ),
       ),
     ],
@@ -593,7 +541,7 @@ DataRow dataRowForTheTable(
 }
 
 class CardDataSource extends DataTableSource {
-  final List<DocumentSnapshot> cards;
+  final List<ReceivingModel> cards;
   final BuildContext context;
   final BoxConstraints constraints;
   final ReceivingController controller;
@@ -609,12 +557,11 @@ class CardDataSource extends DataTableSource {
   DataRow? getRow(int index) {
     if (index >= cards.length) return null;
 
-    final trade = cards[index];
-    final cardData = trade.data() as Map<String, dynamic>;
-    final cardId = trade.id;
+    final rec = cards[index];
+    final cardId = rec.id;
 
     return dataRowForTheTable(
-      cardData,
+      rec,
       context,
       constraints,
       cardId,
@@ -661,12 +608,12 @@ ElevatedButton newReceivingButton(
 IconButton editReceivingButton({
   required ReceivingController controller,
   required String id,
-  required Map<String, dynamic> docData,
+  required ReceivingModel data,
   required BuildContext context,
 }) {
   return IconButton(
     onPressed: () async {
-      controller.loadValues(docData, id);
+      controller.loadValues(data);
       receivigDialog(
         id: id,
         controller: controller,
@@ -674,10 +621,20 @@ IconButton editReceivingButton({
           await controller.editPostForReceiving(id);
         },
         onTapForSave: () async {
-          await controller.editReceivingDoc(id);
+          await controller.addNewReceivingDoc();
         },
         onTapForDelete: () {
-          controller.deleteReceivingDoc(id, context);
+          if (controller.status.value == 'New') {
+            alertDialog(
+              context: context,
+              content: "This will be deleted permanently",
+              onPressed: () {
+                controller.deleteReceiving(id);
+              },
+            );
+          } else {
+            showSnackBar('Alert', 'Only New Receiving Allowed');
+          }
         },
         onTapForCancel: () {
           controller.editCancelForReceiving(id);

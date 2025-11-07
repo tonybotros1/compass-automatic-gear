@@ -210,6 +210,45 @@ class Helpers {
   }
 
   // this function is to get all list values by code for drop down menu
+  Future<Map<String, dynamic>> getAllEmployeesByDepartment(String department) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendUrl/employees/get_employees_by_department?department=$department',
+      );
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> jsonData = decoded["employees"];
+        Map<String, dynamic> map = {
+          for (var role in jsonData) role['_id']: role,
+        };
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllEmployeesByDepartment(department);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // this function is to get all list values by code for drop down menu
   Future<Map<String, dynamic>> getListDetails(String code) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -619,6 +658,37 @@ class Helpers {
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse('$backendTestURI/job_cards/get_job_card_status/$id');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final status = decoded['data'];
+        return status;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getJobCardStatus(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+   Future getReceivingStatus(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendTestURI/receiving/get_receiving_status/$id');
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},

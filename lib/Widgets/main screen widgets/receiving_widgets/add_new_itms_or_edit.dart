@@ -41,7 +41,7 @@ Widget addNewitemsOrEdit({required ReceivingController controller,required BoxCo
                   onPressed: () {
                     controller.searchForInventeryItems.clear();
                     controller.getAllInventeryItems();
-                    showingAvailableItemsDialog(screenName: '📜 Inventery Items',constraints: constraints);
+                    showingAvailableItemsDialog(screenName: '📜 Inventory Items',constraints: constraints);
                   },
                   icon: Icon(Icons.more_vert_rounded, color: mainColor),
                 ),

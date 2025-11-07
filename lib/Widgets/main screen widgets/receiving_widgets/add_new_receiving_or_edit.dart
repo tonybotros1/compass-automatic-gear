@@ -13,7 +13,6 @@ Widget addNewReceiveOrEdit({
   required BuildContext context,
   required ReceivingController controller,
   bool? canEdit,
-  required String id,
 }) {
   return SingleChildScrollView(
     child: Column(
@@ -105,11 +104,11 @@ Widget addNewReceiveOrEdit({
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Items', style: fontStyle1),
-              newItemButton(context, constraints, controller, id),
+              newItemButton(context, constraints, controller),
             ],
           ),
         ),
-        itemsSection(context: context, constraints: constraints, id: id),
+        itemsSection(context: context, constraints: constraints,),
       ],
     ),
   );

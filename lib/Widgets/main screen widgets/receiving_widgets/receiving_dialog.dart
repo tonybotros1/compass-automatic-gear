@@ -79,21 +79,14 @@ Future<dynamic> receivigDialog({
                                       point(),
 
                                       ClickableHoverText(
-                                        onTap:
-                                            controller
-                                                .deletingReceivingDoc
-                                                .isFalse
-                                            ? onTapForDelete
-                                            : null,
+                                        onTap: onTapForDelete,
                                         text: 'Delete',
                                       ),
                                     ],
                                   ),
                                 separator(),
                                 ClickableHoverText(
-                                  onTap: controller.postingReceivingDoc.isFalse
-                                      ? onTapForPost
-                                      : null,
+                                  onTap: onTapForPost,
                                   text: 'Post',
                                 ),
                                 if (onTapForCancel != null)
@@ -102,12 +95,7 @@ Future<dynamic> receivigDialog({
                                     children: [
                                       point(),
                                       ClickableHoverText(
-                                        onTap:
-                                            controller
-                                                .cancellingReceivingDoc
-                                                .isFalse
-                                            ? onTapForCancel
-                                            : null,
+                                        onTap: onTapForCancel,
                                         text: 'Cancel',
                                       ),
                                     ],
@@ -127,7 +115,6 @@ Future<dynamic> receivigDialog({
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: addNewReceiveOrEdit(
-                    id: id ?? '',
                     controller: controller,
                     constraints: constraints,
                     context: context,

@@ -1,11 +1,11 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_controller.dart';
+import 'package:datahubai/Widgets/text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
 import 'add_new_itms_or_edit.dart';
 
 Future<dynamic> itemsDialog({
-  required String id,
   required ReceivingController controller,
   required BoxConstraints constraints,
   required void Function()? onPressed,
@@ -33,26 +33,9 @@ Future<dynamic> itemsDialog({
                 children: [
                   Text('💵 Items', style: fontStyleForScreenNameUsedInButtons),
                   const Spacer(),
-                  GetX<ReceivingController>(
-                    builder: (controller) => ElevatedButton(
-                      onPressed: onPressed,
-                      style: new2ButtonStyle,
-                      child: controller.addingNewItemsValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            )
-                          : const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                    ),
-                  ),
-                  closeButton,
+                  ClickableHoverText(onTap: onPressed, text: "Add"),
+                  separator(),
+                  closeIcon(),
                 ],
               ),
             ),

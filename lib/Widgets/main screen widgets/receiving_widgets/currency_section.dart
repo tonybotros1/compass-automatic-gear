@@ -35,12 +35,15 @@ Container currencySection(
                       controller.currencyId.value = key;
                       controller.rate.value.text = (value['rate'] ?? '1')
                           .toString();
+                      controller.isReceivingModified.value = true;
                     },
                     onDelete: () {
                       controller.currency.value.clear();
                       controller.currencyId.value = '';
                       controller.rate.value.clear();
-                    },onOpen: (){
+                      controller.isReceivingModified.value = true;
+                    },
+                    onOpen: () {
                       return controller.getCurrencies();
                     },
                   );
@@ -64,6 +67,9 @@ Container currencySection(
             labelText: 'Rate',
             controller: controller.rate.value,
             isDouble: true,
+            onChanged: (_) {
+              controller.isReceivingModified.value = true;
+            },
           ),
         ),
       ],

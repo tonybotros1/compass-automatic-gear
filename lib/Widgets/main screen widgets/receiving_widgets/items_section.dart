@@ -1,8 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../Models/receiving_items_model.dart';
-import '../../../Models/receiving_items_model_for_table.dart';
+import '../../../Models/receiving/receiving_items_model.dart';
 import '../../../consts.dart';
 import '../auto_size_box.dart';
 import 'items_dialog.dart';
@@ -10,14 +9,14 @@ import 'items_dialog.dart';
 Widget itemsSection({
   required BuildContext context,
   required BoxConstraints constraints,
-  required String id,
 }) {
   return Container(
     decoration: containerDecor,
     child: GetX<ReceivingController>(
       builder: (controller) {
-        if (controller.loadingItems.value && controller.allItems.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+        if (controller.loadingItems.value &&
+            controller.allReceivingItems.isEmpty) {
+          return Center(child: loadingProcess);
         }
 
         return SingleChildScrollView(
@@ -26,7 +25,6 @@ Widget itemsSection({
             constraints: constraints,
             context: context,
             controller: controller,
-            id: id,
           ),
         );
       },
@@ -38,10 +36,7 @@ Widget tableOfScreens({
   required BoxConstraints constraints,
   required BuildContext context,
   required ReceivingController controller,
-  required String id,
 }) {
-  // List data = controller.calculateTotals();
-
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: SizedBox(
@@ -120,36 +115,20 @@ Widget tableOfScreens({
           ),
         ],
         rows: [
-          ...controller.allItems.map<DataRow>((invoiceItems) {
-            // final receivingItemsData = invoiceItems.data();
-            final invoiceItemsId = invoiceItems.id;
-            // final itemsData = controller.getInventeryItemsData(
-            //   id: receivingItemsData['code'],
-            // );
-            // print(itemsData);
+          ...controller.allReceivingItems
+              .where((item) => item.isDeleted != true)
+              .map<DataRow>((invoiceItems) {
+                final invoiceItemsId =
+                    invoiceItems.id ?? invoiceItems.uuid ?? '';
 
-            ReceivingItemsModel data = ReceivingItemsModel(
-              handling: double.tryParse(controller.handling.value.text) ?? 0,
-              shipping: double.tryParse(controller.shipping.value.text) ?? 0,
-              other: double.tryParse(controller.other.value.text) ?? 0,
-              discount: invoiceItems.discount,
-              orginalPrice: invoiceItems.originalPrice,
-              quantity: invoiceItems.quantity,
-              rate: double.tryParse(controller.rate.value.text) ?? 1,
-              totalForAllItems: controller.itemsTotal.value,
-              vat: invoiceItems.vat,
-              amount: double.tryParse(controller.amount.value.text) ?? 0,
-            );
-            return dataRowForTheTable(
-              data,
-              invoiceItems,
-              context,
-              constraints,
-              invoiceItemsId,
-              controller,
-              id,
-            );
-          }),
+                return dataRowForTheTable(
+                  invoiceItems,
+                  context,
+                  constraints,
+                  invoiceItemsId,
+                  controller,
+                );
+              }),
           DataRow(
             selected: true,
             cells: [
@@ -164,21 +143,21 @@ Widget tableOfScreens({
               DataCell(textForDataRowInTable(text: 'Totals', isBold: true)),
               DataCell(
                 textForDataRowInTable(
-                  text: '${controller.finalItemsTotal.value}', // '${data[0]}',
+                  text: '${controller.finalItemsTotal.value}',
                   color: Colors.green,
                   isBold: true,
                 ),
               ),
               DataCell(
                 textForDataRowInTable(
-                  text: '${controller.finalItemsVAT.value}', //'${data[1]}',
+                  text: '${controller.finalItemsVAT.value}',
                   color: Colors.blue,
                   isBold: true,
                 ),
               ),
               DataCell(
                 textForDataRowInTable(
-                  text: '${controller.finalItemsNet.value}', //'${data[2]}',
+                  text: '${controller.finalItemsNet.value}',
                   color: Colors.red,
                   isBold: true,
                 ),
@@ -193,83 +172,49 @@ Widget tableOfScreens({
 
 DataRow dataRowForTheTable(
   ReceivingItemsModel data,
-  ItemModel receivingItemsData,
-  context,
-  constraints,
+  BuildContext context,
+  BoxConstraints constraints,
   String invoiceItemsId,
   ReceivingController controller,
-  String id,
 ) {
   return DataRow(
     cells: [
       DataCell(
         Row(
           children: [
-            deleteSection(id, context, controller, invoiceItemsId),
-            editSection(
-              id,
-              controller,
-              receivingItemsData,
-              context,
-              constraints,
-              invoiceItemsId,
-            ),
+            deleteSection(context, controller, invoiceItemsId),
+            editSection(controller, context, constraints, data, invoiceItemsId),
           ],
         ),
       ),
-      DataCell(
-        FutureBuilder<String>(
-          future: controller.getInventeryItemsCode(id: receivingItemsData.code),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('');
-            } else {
-              return textForDataRowInTable(text: '${snapshot.data}');
-            }
-          },
-        ),
-      ),
-      DataCell(
-        FutureBuilder<String>(
-          future: controller.getInventeryItemsName(id: receivingItemsData.code),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            } else if (snapshot.hasError) {
-              return const Text('');
-            } else {
-              return textForDataRowInTable(text: '${snapshot.data}');
-            }
-          },
-        ),
-      ),
+      DataCell(textForDataRowInTable(text: data.itemCode ?? '')),
+      DataCell(textForDataRowInTable(text: data.itemName ?? '')),
+
       DataCell(
         textForDataRowInTable(
-          text: '${data.quantity}',
+          text: '${data.quantity ?? ''}',
           color: Colors.deepOrangeAccent,
           isBold: true,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: '${data.orginalPrice}',
+          text: '${data.originalPrice ?? ''}',
           color: Colors.deepPurpleAccent,
           isBold: true,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: '${data.discount}',
+          text: '${data.discount ?? ''}',
           color: Colors.redAccent,
           isBold: true,
         ),
       ),
-      DataCell(textForDataRowInTable(text: '${data.addCost}')),
-      DataCell(textForDataRowInTable(text: '${data.addDisc}')),
-      DataCell(textForDataRowInTable(text: '${data.localPrice}')),
-      DataCell(textForDataRowInTable(text: '${data.total}')),
+      DataCell(textForDataRowInTable(text: '${data.addCost ?? ""}')),
+      DataCell(textForDataRowInTable(text: '${data.addDisc ?? ''}')),
+      DataCell(textForDataRowInTable(text: '${data.localPrice ?? ''}')),
+      DataCell(textForDataRowInTable(text: '${data.total ?? ''}')),
       DataCell(
         textForDataRowInTable(
           text: '${data.vat}',
@@ -277,35 +222,29 @@ DataRow dataRowForTheTable(
           isBold: true,
         ),
       ),
-      DataCell(textForDataRowInTable(text: '${data.net}')),
+      DataCell(textForDataRowInTable(text: '${data.net ?? ''}')),
     ],
   );
 }
 
 Widget deleteSection(
-  String id,
-  context,
+  BuildContext context,
   ReceivingController controller,
-  invoiceItemsId,
+  String invoiceItemsId,
 ) {
   return IconButton(
     onPressed: () {
-      if (controller.status.value == 'New') {
+      if (controller.status.value == 'New' || controller.status.isEmpty) {
         alertDialog(
           context: context,
 
           content: 'This will be deleted permanently',
           onPressed: () {
-            controller.deleteItem(
-              controller.curreentReceivingId.value != ''
-                  ? controller.curreentReceivingId.value
-                  : id,
-              invoiceItemsId,
-            );
+            controller.deleteItem(invoiceItemsId);
           },
         );
       } else {
-        showSnackBar('Alert', 'Only New Jobs Allowed');
+        showSnackBar('Alert', 'Only New Receiving Allowed');
       }
     },
     icon: const Icon(Icons.delete, color: Colors.red),
@@ -313,50 +252,39 @@ Widget deleteSection(
 }
 
 Widget editSection(
-  String id,
   ReceivingController controller,
-  ItemModel receivingItemsData,
-  context,
-  constraints,
-  String itemsId,
+  BuildContext context,
+  BoxConstraints constraints,
+  ReceivingItemsModel data,
+  String invoiceItemsId,
 ) {
   return IconButton(
     onPressed: () async {
-      if (controller.status.value == 'New') {
-        controller.getInventeryItemsCode(id: receivingItemsData.code).then((
-          value,
-        ) {
-          controller.itemCode.value.text = value;
-        });
-        controller.getInventeryItemsName(id: receivingItemsData.code).then((
-          value,
-        ) {
-          controller.itemName.value.text = value;
-        });
-        controller.quantity.value.text = receivingItemsData.quantity.toString();
-        controller.orginalPrice.value.text = receivingItemsData.originalPrice
-            .toString();
-        controller.discount.value.text = receivingItemsData.discount.toString();
-        controller.vat.value.text = receivingItemsData.vat.toString();
-        itemsDialog(
-          id: id,
-          controller: controller,
-          constraints: constraints,
-          onPressed: controller.addingNewItemsValue.value
-              ? null
-              : () {
-                  controller.editItem(
-                    controller.curreentReceivingId.value != ''
-                        ? controller.curreentReceivingId.value
-                        : id,
-                    itemsId,
-                    // mode: 'edit',
-                  );
-                },
+      if (controller.curreentReceivingId.value.isNotEmpty) {
+        Map recStatus = await controller.getCurrentReceivingStatus(
+          controller.curreentReceivingId.value,
         );
-      } else {
-        showSnackBar('Alert', 'Only New Jobs Allowed');
+
+        String status1 = recStatus['status'];
+        if (status1 != 'New') {
+          showSnackBar('Alert', 'Only New Receiving Docs Allowd');
+          return;
+        }
       }
+      controller.itemCode.value.text = data.itemCode ?? '';
+      controller.itemName.value.text = data.itemName ?? '';
+      controller.selectedInventeryItemID.value = data.inventoryItemId ?? '';
+      controller.quantity.value.text = data.quantity.toString();
+      controller.orginalPrice.value.text = data.originalPrice.toString();
+      controller.discount.value.text = data.discount.toString();
+      controller.vat.value.text = data.vat.toString();
+      itemsDialog(
+        controller: controller,
+        constraints: constraints,
+        onPressed: () {
+          controller.editItem(invoiceItemsId);
+        },
+      );
     },
     icon: const Icon(Icons.edit_note_rounded, color: Colors.blue),
   );
@@ -366,22 +294,27 @@ ElevatedButton newItemButton(
   BuildContext context,
   BoxConstraints constraints,
   ReceivingController controller,
-  String id,
 ) {
   return ElevatedButton(
-    onPressed: () {
+    onPressed: () async {
+      if (controller.curreentReceivingId.value.isNotEmpty) {
+        Map recStatus = await controller.getCurrentReceivingStatus(
+          controller.curreentReceivingId.value,
+        );
+
+        String status1 = recStatus['status'];
+        if (status1 != 'New') {
+          showSnackBar('Alert', 'Only New Receiving Docs Allowd');
+          return;
+        }
+      }
       controller.clearItemsValues();
       itemsDialog(
-        id: id,
         controller: controller,
         constraints: constraints,
-        onPressed: controller.addingNewItemsValue.isTrue
-            ? null
-            : () async {
-                await controller.addNewItem(
-                  id != '' ? id : controller.curreentReceivingId.value,
-                );
-              },
+        onPressed: () {
+          controller.addNewItem();
+        },
       );
     },
     style: new2ButtonStyle,

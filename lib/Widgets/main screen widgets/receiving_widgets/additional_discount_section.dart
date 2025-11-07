@@ -9,6 +9,7 @@ Container additionalDiscountSection(
   ReceivingController controller,
 ) {
   return Container(
+    height: 155,
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     width: double.infinity,
@@ -22,6 +23,9 @@ Container additionalDiscountSection(
             labelText: 'Amount',
             controller: controller.amount.value,
             isDouble: true,
+            onChanged: (_) {
+              controller.isReceivingModified.value = true;
+            },
           ),
         ),
       ],
