@@ -588,7 +588,11 @@ class ReceivingController extends GetxController {
     isReceivingItemsModified.value = false;
     isReceivingModified.value = false;
     curreentReceivingId.value = data.id ?? '';
-    allReceivingItems.assignAll(data.itemsDetails ?? []);
+    // allReceivingItems.assignAll(data.itemsDetails ?? []);
+    allReceivingItems.assignAll(
+      (data.itemsDetails ?? []).map((e) => e.copyJson()).toList(),
+    );
+
     status.value = data.status ?? '';
     receivingNumber.value.text = data.receivingNumber ?? '';
     date.value.text = textToDate(data.date);

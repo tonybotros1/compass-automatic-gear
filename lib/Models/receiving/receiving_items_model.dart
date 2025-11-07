@@ -1,5 +1,5 @@
 class ReceivingItemsModel {
-   String? id;
+  String? id;
   final String? uuid;
   final String? inventoryItemId;
   final String? itemName;
@@ -83,42 +83,38 @@ class ReceivingItemsModel {
     return data;
   }
 
-  // double safeNumber(double number) {
-  //   if (number.isNaN || number.isInfinite) return 0;
-  //   return number;
-  // }
+  ReceivingItemsModel copyJson() {
+    return ReceivingItemsModel(
+      id: id,
+      uuid: uuid,
+      inventoryItemId: inventoryItemId,
+      itemCode: itemCode,
+      itemName: itemName,
+      quantity: quantity,
+      originalPrice: originalPrice,
+      discount: discount,
+      addCost: addCost,
+      addDisc: addDisc,
+      localPrice: localPrice,
+      total: total,
+      vat: vat,
+      net: net,
+      totalForAllItems: totalForAllItems,
+      createdAt: createdAt != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              createdAt!.millisecondsSinceEpoch,
+            )
+          : null,
+      updatedAt: updatedAt != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              updatedAt!.millisecondsSinceEpoch,
+            )
+          : null,
+      isDeleted: isDeleted,
+      isModified: isModified,
+      isAdded: isAdded,
+      receivingId: receivingId,
+    );
+  }
 
-  // double get addCostValue {
-  //   if (quantity == 0 || totalForAllItems == 0) return 0;
-
-  //   final basePrice = (originalPrice! - discount!) * quantity!;
-  //   final extraCosts = handling! + shipping! + other!;
-  //   final cost = (basePrice / totalForAllItems!) * extraCosts / quantity!;
-
-  //   return safeNumber(cost);
-  // }
-
-  // double get addDiscValue {
-  //   if (quantity == 0 || totalForAllItems == 0) return 0;
-
-  //   final basePrice = (originalPrice! - discount!) * quantity!;
-  //   final extraDiscs = amount;
-  //   final disc = (basePrice / totalForAllItems!) * extraDiscs! / quantity!;
-
-  //   return safeNumber(disc);
-  // }
-
-  // double get localPriceValue {
-  //   return safeNumber(
-  //     (originalPrice! - discount! + addCost! - addDisc!) * rate!,
-  //   );
-  // }
-
-  // double get totalValue {
-  //   return safeNumber(localPrice! * quantity!);
-  // }
-
-  // double get netValue {
-  //   return safeNumber(total! + vat!);
-  // }
 }
