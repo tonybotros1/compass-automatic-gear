@@ -570,10 +570,10 @@ class ReceivingController extends GetxController {
     approvedById.value = '';
     orderedById.value = '';
     purchasedById.value = '';
-    shipping.value.clear();
-    handling.value.clear();
-    other.value.clear();
-    amount.value.clear();
+    shipping.value.text = '0';
+    handling.value.text = '0';
+    other.value.text = '0';
+    amount.value.text = '0';
     allReceivingItems.clear();
     status.value = '';
     receivingDocAdded.value = false;
