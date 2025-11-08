@@ -52,7 +52,7 @@ class IssueItemsController extends GetxController {
   RxMap allBranches = RxMap({});
   RxMap allIssueTypes = RxMap({});
   RxMap allBrands = RxMap({});
-  RxMap allTechs = RxMap({});
+  // RxMap allTechs = RxMap({});
   RxMap allCustomers = RxMap({});
 
   final FocusNode focusNode1 = FocusNode();
@@ -60,7 +60,7 @@ class IssueItemsController extends GetxController {
   final FocusNode focusNode3 = FocusNode();
   final FocusNode focusNode4 = FocusNode();
   final FocusNode focusNode5 = FocusNode();
-  RxString companyId = RxString('');
+  // RxString companyId = RxString('slowXdVvhLdsVQItgO3n');
   RxBool loadingJobCards = RxBool(false);
   final RxList<DocumentSnapshot> allInventeryItems = RxList<DocumentSnapshot>(
     [],
@@ -86,12 +86,6 @@ class IssueItemsController extends GetxController {
 
   @override
   void onInit() async {
-    await getCompanyId();
-    getAllBranches();
-    getIssueTypes();
-    getCarBrands();
-    getAllEntities();
-    getAllTechs();
     super.onInit();
   }
 
@@ -101,49 +95,21 @@ class IssueItemsController extends GetxController {
     return mainScreenController.selectedScreenName.value;
   }
 
-  Future<void> getCompanyId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    companyId.value = prefs.getString('companyId')!;
+  Future<Map<String, dynamic>> getBranches() async {
+    return await helper.getBrunches();
   }
 
-  void getAllBranches() {
-    try {
-      FirebaseFirestore.instance
-          .collection('branches')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('name')
-          .snapshots()
-          .listen((branches) {
-            allBranches.value = {
-              for (var doc in branches.docs) doc.id: doc.data(),
-            };
-          });
-    } catch (e) {
-      //
-    }
+  Future<Map<String, dynamic>> getIssueTypes() async {
+    return await helper.getAllListValues('ISSUE_TYPES');
   }
 
-  Future<void> getIssueTypes() async {
-    var typeDoc = await FirebaseFirestore.instance
-        .collection('all_lists')
-        .where('code', isEqualTo: 'ISSUE_TYPES')
-        .get();
-
-    var typeId = typeDoc.docs.first.id;
-
-    FirebaseFirestore.instance
-        .collection('all_lists')
-        .doc(typeId)
-        .collection('values')
-        .where('available', isEqualTo: true)
-        .orderBy('name')
-        .snapshots()
-        .listen((colors) {
-          allIssueTypes.value = {
-            for (var doc in colors.docs) doc.id: doc.data(),
-          };
-        });
+   Future<Map<String, dynamic>> getEmployeesByDepartment() async {
+    return await helper.getAllEmployeesByDepartment('Issueing');
   }
+
+  
+
+  // ======================================================================================================================
 
   void selectedJobOrConverter(String selected) {
     if (selected != '') {
@@ -158,7 +124,7 @@ class IssueItemsController extends GetxController {
       loadingJobCards.value = true;
       var job = await FirebaseFirestore.instance
           .collection('job_cards')
-          .where('company_id', isEqualTo: companyId.value)
+          // .where('company_id', isEqualTo: companyId.value)
           .get();
       allJobCards.assignAll(job.docs);
     } catch (e) {
@@ -195,67 +161,40 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  void getCarBrands() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .orderBy('name')
-          .snapshots()
-          .listen((brands) {
-            allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
-          });
-    } catch (e) {
-      //
-    }
-  }
+ 
+ 
+  // void getAllEntities() {
+  //   try {
+  //     FirebaseFirestore.instance
+  //         .collection('entity_informations')
+  //         // .where('company_id', isEqualTo: companyId.value)
+  //         .orderBy('entity_name')
+  //         .snapshots()
+  //         .listen((entitiesSnapshot) {
+  //           // Temporary maps to hold filtered entities
+  //           Map<String, dynamic> customersMap = {};
 
-  void getAllTechs() {
-    try {
-      FirebaseFirestore.instance
-          .collection('all_technicians')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('name')
-          .snapshots()
-          .listen((teck) {
-            allTechs.value = {for (var doc in teck.docs) doc.id: doc.data()};
-          });
-    } catch (e) {
-      //
-    }
-  }
+  //           for (var doc in entitiesSnapshot.docs) {
+  //             var data = doc.data();
 
-  void getAllEntities() {
-    try {
-      FirebaseFirestore.instance
-          .collection('entity_informations')
-          .where('company_id', isEqualTo: companyId.value)
-          .orderBy('entity_name')
-          .snapshots()
-          .listen((entitiesSnapshot) {
-            // Temporary maps to hold filtered entities
-            Map<String, dynamic> customersMap = {};
+  //             // Safety check: entity_code must be a list
+  //             if (data['entity_code'] is List) {
+  //               List entityCodes = data['entity_code'];
 
-            for (var doc in entitiesSnapshot.docs) {
-              var data = doc.data();
+  //               // If 'Customer' is in the list
+  //               if (entityCodes.contains('Customer')) {
+  //                 customersMap[doc.id] = data;
+  //               }
+  //             }
+  //           }
 
-              // Safety check: entity_code must be a list
-              if (data['entity_code'] is List) {
-                List entityCodes = data['entity_code'];
-
-                // If 'Customer' is in the list
-                if (entityCodes.contains('Customer')) {
-                  customersMap[doc.id] = data;
-                }
-              }
-            }
-
-            // Assign to your observable maps
-            allCustomers.value = customersMap;
-          });
-    } catch (e) {
-      // print('Error fetching entities: $e');
-    }
-  }
+  //           // Assign to your observable maps
+  //           allCustomers.value = customersMap;
+  //         });
+  //   } catch (e) {
+  //     // print('Error fetching entities: $e');
+  //   }
+  // }
 
   Future<void> getAllInventeryItems() async {
     try {
@@ -263,7 +202,7 @@ class IssueItemsController extends GetxController {
       allInventeryItems.clear();
       var items = await FirebaseFirestore.instance
           .collection('inventery_items')
-          .where('company_id', isEqualTo: companyId.value)
+          // .where('company_id', isEqualTo: companyId.value)
           .get();
       for (var item in items.docs) {
         allInventeryItems.add(item);
@@ -280,13 +219,13 @@ class IssueItemsController extends GetxController {
         FirebaseFirestore.instance
             .collectionGroup('items')
             .where('collection_parent', isEqualTo: 'receiving')
-            .where('company_id', isEqualTo: companyId.value)
+            // .where('company_id', isEqualTo: companyId.value)
             .where('code', isEqualTo: itemId)
             .get(),
         FirebaseFirestore.instance
             .collectionGroup('items')
             .where('collection_parent', isEqualTo: 'issue_items')
-            .where('company_id', isEqualTo: companyId.value)
+            // .where('company_id', isEqualTo: companyId.value)
             .where('code', isEqualTo: itemId)
             .get(),
       ];

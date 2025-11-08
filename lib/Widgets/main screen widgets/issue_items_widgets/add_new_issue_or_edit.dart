@@ -17,7 +17,6 @@ Widget addNewIssueOrEdit({
   return SingleChildScrollView(
     child: FocusTraversalGroup(
       policy: OrderedTraversalPolicy(),
-
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -81,57 +80,71 @@ Widget addNewIssueOrEdit({
                                     ),
                                   ],
                                 ),
-                                FocusTraversalOrder(
-                                  order: const NumericFocusOrder(2),
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    GetBuilder<IssueItemsController>(
+                                      builder: (controller) {
+                                        return CustomDropdown(
+                                          focusNode: controller.focusNode3,
+                                          nextFocusNode: controller.focusNode4,
+                                          hintText: 'Issue Types',
+                                          showedSelectedName: 'name',
+                                          textcontroller:
+                                              controller.issueType.value,
+                                          width: 150,
 
-                                  child: GetX<IssueItemsController>(
-                                    builder: (controller) {
-                                      bool isAllBranchesLoading =
-                                          controller.allBranches.isEmpty;
-                                      return CustomDropdown(
-                                        focusNode: controller.focusNode2,
-                                        nextFocusNode: controller.focusNode3,
-                                        textcontroller:
-                                            controller.branch.value.text,
-                                        showedSelectedName: 'name',
-                                        hintText: 'Branch',
-                                        items: isAllBranchesLoading
-                                            ? {}
-                                            : controller.allBranches,
-                                        onChanged: (key, value) {
-                                          controller.branchId.value = key;
-                                          controller.branch.value.text =
-                                              value['name'];
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                                GetX<IssueItemsController>(
-                                  builder: (controller) {
-                                    bool isIssueTypesLoading =
-                                        controller.allIssueTypes.isEmpty;
-                                    return CustomDropdown(
-                                      focusNode: controller.focusNode3,
-                                      nextFocusNode: controller.focusNode4,
-                                      hintText: 'Issue Types',
-                                      showedSelectedName: 'name',
-                                      textcontroller:
-                                          controller.issueType.value,
-                                      width: 150,
-                                      items: isIssueTypesLoading
-                                          ? {}
-                                          : controller.allIssueTypes,
-                                      onChanged: (key, value) {
-                                        controller.issueTypeId.value = key;
-                                        controller.issueType.value =
-                                            value['name'];
-                                        controller.jobDetails.clear();
-                                        controller.allJobCards.clear();
+                                          onChanged: (key, value) {
+                                            controller.issueTypeId.value = key;
+                                            controller.issueType.value =
+                                                value['name'];
+                                            controller.jobDetails.clear();
+                                            controller.allJobCards.clear();
+                                          },
+                                          onDelete: () {
+                                            controller.issueTypeId.value = '';
+                                            controller.issueType.value = '';
+                                            controller.jobDetails.clear();
+                                            controller.allJobCards.clear();
+                                          },
+                                          onOpen: () {
+                                            return controller.getIssueTypes();
+                                          },
+                                        );
                                       },
-                                    );
-                                  },
+                                    ),
+                                    FocusTraversalOrder(
+                                      order: const NumericFocusOrder(2),
+
+                                      child: GetBuilder<IssueItemsController>(
+                                        builder: (controller) {
+                                          return CustomDropdown(
+                                            focusNode: controller.focusNode2,
+                                            nextFocusNode:
+                                                controller.focusNode3,
+                                            textcontroller:
+                                                controller.branch.value.text,
+                                            showedSelectedName: 'name',
+                                            hintText: 'Branch',
+                                            onChanged: (key, value) {
+                                              controller.branchId.value = key;
+                                              controller.branch.value.text =
+                                                  value['name'];
+                                            },
+                                            onDelete: () {
+                                              controller.branchId.value = '';
+                                              controller.branch.value.clear();
+                                            },
+                                            onOpen: () {
+                                              return controller.getBranches();
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
+
                                 GetX<IssueItemsController>(
                                   builder: (controller) {
                                     var selectedType = controller.issueType;
@@ -195,23 +208,26 @@ Widget addNewIssueOrEdit({
                                     );
                                   },
                                 ),
-                                GetX<IssueItemsController>(
+                                GetBuilder<IssueItemsController>(
                                   builder: (controller) {
-                                    bool isAllTechsLoading =
-                                        controller.allTechs.isEmpty;
                                     return CustomDropdown(
                                       textcontroller:
                                           controller.receivedBy.value.text,
                                       hintText: 'Received By',
                                       showedSelectedName: 'name',
                                       width: 310,
-                                      items: isAllTechsLoading
-                                          ? {}
-                                          : controller.allTechs,
                                       onChanged: (key, value) {
                                         controller.receivedBy.value.text =
                                             value['name'];
                                         controller.receivedById.value = key;
+                                      },
+                                      onDelete: () {
+                                        controller.receivedBy.value.clear();
+                                        controller.receivedById.value = '';
+                                      },
+                                      onOpen: () {
+                                        return controller
+                                            .getEmployeesByDepartment();
                                       },
                                     );
                                   },
@@ -375,7 +391,8 @@ Expanded jobCardTable(
       builder: (controller) {
         return controller.loadingJobCards.value
             ? Center(child: loadingProcess)
-            : controller.loadingJobCards.isFalse && controller.allJobCards.isEmpty
+            : controller.loadingJobCards.isFalse &&
+                  controller.allJobCards.isEmpty
             ? const Center(child: Text('No Data'))
             : SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -430,29 +447,32 @@ Expanded jobCardTable(
                       rows:
                           (controller.filteredJobCards.isEmpty &&
                               controller.searchForJobCards.value.text.isEmpty)
-                          ? List<DataRow>.generate(controller.allJobCards.length, (
-                              index,
-                            ) {
-                              final job = controller.allJobCards[index];
-                              final jobData = job.data() as Map<String, dynamic>;
-                              final jobId = job.id;
-        
-                              return dataRowForTheTable(
-                                jobData,
-                                context,
-                                constraints,
-                                jobId,
-                                controller,
-                                index,
-                              );
-                            })
+                          ? List<DataRow>.generate(
+                              controller.allJobCards.length,
+                              (index) {
+                                final job = controller.allJobCards[index];
+                                final jobData =
+                                    job.data() as Map<String, dynamic>;
+                                final jobId = job.id;
+
+                                return dataRowForTheTable(
+                                  jobData,
+                                  context,
+                                  constraints,
+                                  jobId,
+                                  controller,
+                                  index,
+                                );
+                              },
+                            )
                           : List<DataRow>.generate(
                               controller.filteredJobCards.length,
                               (index) {
                                 final job = controller.filteredJobCards[index];
-                                final jobData = job.data() as Map<String, dynamic>;
+                                final jobData =
+                                    job.data() as Map<String, dynamic>;
                                 final jobId = job.id;
-        
+
                                 return dataRowForTheTable(
                                   jobData,
                                   context,
@@ -467,7 +487,7 @@ Expanded jobCardTable(
                   ),
                 ),
               );
-      }
+      },
     ),
   );
 }

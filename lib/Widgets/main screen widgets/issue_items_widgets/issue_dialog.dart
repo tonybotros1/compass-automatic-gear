@@ -16,7 +16,6 @@ Future<dynamic> issueDialog({
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
-      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       insetPadding: const EdgeInsets.all(8),
       child: LayoutBuilder(
