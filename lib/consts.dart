@@ -13,11 +13,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // String backendURI = 'https://datahubai-backend.onrender.com';
-// String backendTestURI = 'https://datahubai-backend.onrender.com';
-String backendTestURI = 'http://127.0.0.1:8000';
+String backendTestURI = 'https://datahubai-backend.onrender.com';
+// String backendTestURI = 'http://127.0.0.1:8000';
 // String backendTestURI = "http://10.0.2.2:8000";
-String webSocketURL = "ws://localhost:8000/ws";
-// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
+// String webSocketURL = "ws://localhost:8000/ws";
+String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
 
 final formatter = CurrencyInputFormatter();
 
