@@ -536,7 +536,9 @@ var textStyleForInspectionHints = TextStyle(
 
 var mainColor = const Color(0xff005f95);
 // var mainColor = const Color(0xff27374D);
-var secColor = const Color(0xff7E99A3);
+// var secColor = const Color(0xff7E99A3);
+ var secColor =  const Color(0xff9ab0bf);
+// var secColor =  const Color(0xff688f98);
 // var secColor = const Color(0xff526D82);
 var containerColor = const Color(0xffF5F5F5);
 var textStyleForCardBottomBar = const TextStyle(color: Colors.blueGrey);
@@ -779,6 +781,7 @@ Container labelContainer({required Widget lable}) {
 }
 
 Decoration containerDecor = BoxDecoration(
+  color: Colors.grey.shade100,
   border: Border(
     left: BorderSide(color: secColor),
     right: BorderSide(color: secColor),

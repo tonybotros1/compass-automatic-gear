@@ -35,7 +35,7 @@ Widget customerDetailsSection() {
                           hintText: 'Customer',
                           onChanged: (key, value) {
                             controller.customerName.text = value['entity_name'];
-                            controller.onSelectForCustomers(key,value);
+                            controller.onSelectForCustomers(key, value);
                             controller.customerId.value = key;
                             controller.isJobModified.value = true;
                           },
@@ -194,7 +194,8 @@ Widget customerDetailsSection() {
                       controller.customerSaleMan.value = "";
                       controller.customerSaleManId.value = "";
                       controller.isJobModified.value = true;
-                    },onOpen: (){
+                    },
+                    onOpen: () {
                       return controller.getSalesMan();
                     },
                   ),
@@ -214,7 +215,8 @@ Widget customerDetailsSection() {
                   controller.customerBranch.clear();
                   controller.customerBranchId.value = "";
                   controller.isJobModified.value = true;
-                },onOpen: (){
+                },
+                onOpen: () {
                   return controller.getBranches();
                 },
               ),
@@ -238,7 +240,8 @@ Widget customerDetailsSection() {
                       controller.customerCurrencyId.value = "";
                       controller.customerCurrencyRate.clear();
                       controller.isJobModified.value = true;
-                    },onOpen: (){
+                    },
+                    onOpen: () {
                       return controller.getCurrencies();
                     },
                   ),
@@ -257,10 +260,7 @@ Widget customerDetailsSection() {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
-                        child: Text(
-                          'Payment Method',
-                          style: textFieldLabelStyle,
-                        ),
+                        child: Text('Payment Type', style: textFieldLabelStyle),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -269,7 +269,7 @@ Widget customerDetailsSection() {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: Colors.grey),
-                          color: Colors.grey.shade200,
+                          color: Colors.white,
                         ),
                         child: RadioGroup<String>(
                           groupValue: controller.payType.value,
@@ -285,6 +285,7 @@ Widget customerDetailsSection() {
                                 value: 'Cash',
                                 fillColor: mainColor,
                                 activeColor: Colors.white,
+                                
                               ),
                               Text('Cash', style: textFieldFontStyle),
                               CupertinoRadio<String>(

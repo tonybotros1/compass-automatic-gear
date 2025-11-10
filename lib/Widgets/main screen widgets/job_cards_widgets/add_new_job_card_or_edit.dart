@@ -3,6 +3,7 @@ import 'package:datahubai/Widgets/main%20screen%20widgets/job_cards_widgets/invo
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
+import '../../my_text_field.dart';
 import '../../text_button.dart';
 import 'car_details_section.dart';
 import 'customer_details_section.dart';
@@ -26,7 +27,9 @@ Widget addNewJobCardOrEdit({
             Expanded(
               child: Column(
                 children: [
-                  labelContainer(lable: Text('Car Details', style: fontStyle1)),
+                  labelContainer(
+                    lable: Text('Car Details', style: fontStyle1),
+                  ),
                   carDetailsSection(),
                 ],
               ),
@@ -52,7 +55,10 @@ Widget addNewJobCardOrEdit({
                         Text('Job Details', style: fontStyle1),
                         GetX<JobCardController>(
                           builder: (controller) {
-                            return controller.quotationCounter.value.isNotEmpty
+                            return controller
+                                    .quotationCounter
+                                    .value
+                                    .isNotEmpty
                                 ? ClickableHoverText(
                                     color2:
                                         controller
@@ -73,7 +79,9 @@ Widget addNewJobCardOrEdit({
                                         ? () async {
                                             controller
                                                 .openQuotationCardScreenByNumber(
-                                                  controller.quotationId.value,
+                                                  controller
+                                                      .quotationId
+                                                      .value,
                                                 );
                                           }
                                         : null,
@@ -90,6 +98,38 @@ Widget addNewJobCardOrEdit({
             ),
           ],
         ),
+    
+        labelContainer(lable: Text('Notes', style: fontStyle1)),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: containerDecor,
+          child: Row(
+            spacing: 50,
+            children: [
+              Expanded(
+                child: myTextFormFieldWithBorder(
+                  labelText: 'Job Notes',
+                  controller: controller.jobNotes,
+                  maxLines: 3,
+                  onChanged: (_) {
+                    controller.isJobModified.value = true;
+                  },
+                ),
+              ),
+              Expanded(
+                child: myTextFormFieldWithBorder(
+                  labelText: 'Delivery Notes',
+                  controller: controller.deliveryNotes,
+                  maxLines: 3,
+                  onChanged: (_) {
+                    controller.isJobModified.value = true;
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
         labelContainer(
           lable: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

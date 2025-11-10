@@ -871,6 +871,7 @@ class DropdownController extends GetxController {
                 return KeyEventResult.ignored;
               },
               child: Material(
+                color: Colors.white,
                 elevation: 4,
                 borderRadius: BorderRadius.circular(5),
                 child: ConstrainedBox(
@@ -907,6 +908,12 @@ class DropdownController extends GetxController {
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.grey,
+                                  width: 2,
+                                ),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
                                 vertical: 8,
@@ -1180,7 +1187,7 @@ class CustomDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     BoxDecoration defaultEnabledDecoration = BoxDecoration(
-      color: Colors.grey.shade200,
+      color: Colors.white,
       border: Border.all(
         color: controller.isValid.value ? Colors.grey : Colors.red,
       ),

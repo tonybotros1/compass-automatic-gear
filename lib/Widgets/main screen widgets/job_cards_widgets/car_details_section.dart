@@ -146,7 +146,8 @@ Widget carDetailsSection() {
                 controller.allCities.clear();
                 controller.countryId.value = "";
                 controller.isJobModified.value = true;
-              },onOpen: (){
+              },
+              onOpen: () {
                 return controller.getCountries();
               },
             ),
@@ -171,7 +172,7 @@ Widget carDetailsSection() {
               spacing: 10,
               children: [
                 myTextFormFieldWithBorder(
-                  width: 200,
+                  width: 240,
                   controller: controller.transmissionType,
                   labelText: 'Transmission Type',
                   hintText: 'Enter Transmission Type',
@@ -194,7 +195,8 @@ Widget carDetailsSection() {
                     controller.engineType.clear();
                     controller.engineTypeId.value = "";
                     controller.isJobModified.value = true;
-                  },onOpen: (){
+                  },
+                  onOpen: () {
                     return controller.getEngineTypes();
                   },
                 ),
@@ -249,7 +251,16 @@ Widget carDetailsSection() {
                   width: 115,
                   isEnabled: false,
                   controller: controller.inOutDiff.value,
-                  labelText: 'In Out Diff',
+                  labelText: 'Difference',
+                ),
+                myTextFormFieldWithBorder(
+                  width: 115,
+                  isnumber: true,
+                  controller: controller.minTestKms.value,
+                  labelText: 'Testing KMs',
+                  onChanged: (_) {
+                    controller.isJobModified.value = true;
+                  },
                 ),
               ],
             ),

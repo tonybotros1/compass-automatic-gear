@@ -540,14 +540,16 @@ class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
             ),
             isPaused
                 ? Positioned(
-                    top: 5,
-                    right: 5,
+                    top: 10,
+                    right: 10,
                     child: Container(
                       height: 50,
                       width: 50,
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 200),
-                        borderRadius: BorderRadius.circular(12),
+                        // color: Colors.black.withValues(alpha: 200),
+                        color: Colors.orange.shade200,
+                        // borderRadius: BorderRadius.circular(12),
+                        shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
                       child: const Icon(

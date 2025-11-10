@@ -133,8 +133,9 @@ class QuotationCard extends StatelessWidget {
                               onChanged: (key, value) async {
                                 controller.statusFilter.value.text =
                                     value['name'];
-                              },onDelete: (){
-                                  controller.statusFilter.value.clear();
+                              },
+                              onDelete: () {
+                                controller.statusFilter.value.clear();
                               },
                             ),
                           ),
@@ -197,31 +198,23 @@ class QuotationCard extends StatelessWidget {
                                     controller.isTodaySelected.value = true;
                                     controller.isThisMonthSelected.value =
                                         false;
-                                    controller.isThisYearSelected.value =
-                                        false;
+                                    controller.isThisYearSelected.value = false;
                                     controller.isYearSelected.value = false;
-                                    controller.isMonthSelected.value =
-                                        false;
+                                    controller.isMonthSelected.value = false;
                                     controller.isDaySelected.value = true;
-                                    controller.searchEngine({
-                                      "today": true,
-                                    });
+                                    controller.searchEngine({"today": true});
                                   }
                                 : null,
                             child: const Text('Today'),
                           ),
                           ElevatedButton(
                             style: thisMonthButtonStyle,
-                            onPressed:
-                                controller.isThisMonthSelected.isFalse
+                            onPressed: controller.isThisMonthSelected.isFalse
                                 ? () {
                                     controller.isAllSelected.value = false;
-                                    controller.isTodaySelected.value =
-                                        false;
-                                    controller.isThisMonthSelected.value =
-                                        true;
-                                    controller.isThisYearSelected.value =
-                                        false;
+                                    controller.isTodaySelected.value = false;
+                                    controller.isThisMonthSelected.value = true;
+                                    controller.isThisYearSelected.value = false;
                                     controller.isYearSelected.value = false;
                                     controller.isMonthSelected.value = true;
                                     controller.isDaySelected.value = false;
@@ -236,15 +229,12 @@ class QuotationCard extends StatelessWidget {
                             style: thisYearButtonStyle,
                             onPressed: controller.isThisYearSelected.isFalse
                                 ? () {
-                                    controller.isTodaySelected.value =
-                                        false;
+                                    controller.isTodaySelected.value = false;
                                     controller.isThisMonthSelected.value =
                                         false;
-                                    controller.isThisYearSelected.value =
-                                        true;
+                                    controller.isThisYearSelected.value = true;
                                     controller.isYearSelected.value = true;
-                                    controller.isMonthSelected.value =
-                                        false;
+                                    controller.isMonthSelected.value = false;
                                     controller.isDaySelected.value = false;
                                     controller.searchEngine({
                                       "this_year": true,
@@ -605,6 +595,7 @@ DataRow dataRowForTheTable(
             ? statusBox(
                 '${cardData.quotationStatus}',
                 hieght: 35,
+                width: 100,
                 padding: const EdgeInsets.symmetric(horizontal: 5),
               )
             : const SizedBox(),

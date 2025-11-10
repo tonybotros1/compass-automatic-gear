@@ -575,6 +575,7 @@ DataRow dataRowForTheTable(
                     : 'Warranty')
               : (jobData.jobStatus2 ?? ''),
           hieght: 35,
+          width: 100,
           padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),
@@ -825,6 +826,7 @@ ElevatedButton newJobCardButton(
       Get.dialog(
         barrierDismissible: false,
         Dialog(
+          backgroundColor: const Color(0xffF6F9FC),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           insetPadding: const EdgeInsets.all(8),
           child: LayoutBuilder(

@@ -39,7 +39,16 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'DataHub AI',
       debugShowCheckedModeBanner: false,
-
+      theme: ThemeData(
+        // 👇 This sets the default background color for all Scaffold pages
+        dialogTheme: const DialogThemeData(
+          backgroundColor: Color(0xffF6F9FC),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+          ),
+          elevation: 10,
+        ),
+      ),
       initialRoute: '/',
       getPages: [
         GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),
