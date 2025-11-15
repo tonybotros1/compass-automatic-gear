@@ -12,12 +12,17 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
-// String backendURI = 'https://datahubai-backend.onrender.com';
-String backendTestURI = 'https://datahubai-backend.onrender.com';
-// String backendTestURI = 'http://127.0.0.1:8000';
+// ======== testing urls for web ========
+String backendTestURI = 'http://127.0.0.1:8000';
+String webSocketURL = "ws://localhost:8000/ws";
+
+// ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
-// String webSocketURL = "ws://localhost:8000/ws";
-String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
+// String webSocketURL = "ws://10.0.2.2:8000/ws";
+
+// ======== production urls ========
+// String backendTestURI = 'https://datahubai-backend.onrender.com';
+// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
 
 final formatter = CurrencyInputFormatter();
 
@@ -537,7 +542,7 @@ var textStyleForInspectionHints = TextStyle(
 var mainColor = const Color(0xff005f95);
 // var mainColor = const Color(0xff27374D);
 // var secColor = const Color(0xff7E99A3);
- var secColor =  const Color(0xff9ab0bf);
+var secColor = const Color(0xff9ab0bf);
 // var secColor =  const Color(0xff688f98);
 // var secColor = const Color(0xff526D82);
 var containerColor = const Color(0xffF5F5F5);

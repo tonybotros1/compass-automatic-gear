@@ -42,7 +42,7 @@ class InspectionReposrt extends StatelessWidget {
             builder: (controller) {
               return TextButton(
                 onPressed: () {
-                  controller.addInspectionCard(context);
+                  controller.addInspectionCard();
                 },
                 child: const Text(
                   'Done',

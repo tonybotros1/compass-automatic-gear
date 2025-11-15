@@ -1,11 +1,9 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:signature/signature.dart';
-
 import '../../../Controllers/Mobile section controllers/cards_screen_controller.dart';
 import '../../../consts.dart';
 import '../../drop_down_menu3.dart';
@@ -21,353 +19,268 @@ Padding buildInspectionReportBody(BuildContext context) {
         labelContainer(lable: Text('MAIN DETAILS', style: fontStyle1)),
         GetX<CardsScreenController>(
           builder: (controller) {
-            bool techniciansLoading = controller.allTechnicians.isEmpty;
-
             return Container(
               padding: const EdgeInsets.all(10),
               decoration: containerDecor,
               child: Column(
                 spacing: 10,
                 children: [
-                  Row(
-                    spacing: 10,
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: CustomDropdown(
-                          textcontroller: controller.technicianName.value.text,
-                          showedSelectedName: 'name',
-                          hintText: 'Technician',
-                          items: techniciansLoading
-                              ? {}
-                              : controller.allTechnicians,
-
-                          onChanged: (key, value) {
-                            controller.technicianId.value = key;
-                          },
-                          onDelete: () {
-                            controller.technicianName.value.clear();
-                            controller.technicianId.value = "";
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: myTextFormFieldWithBorder(
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              controller.selectDateContext(
-                                context,
-                                controller.date,
-                              );
-                            },
-                            icon: const Icon(Icons.date_range),
-                          ),
-                          labelText: 'Date',
-                          isDate: true,
-                          controller: controller.date,
-                        ),
-                      ),
-                    ],
+                  myTextFormFieldWithBorder(
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        controller.selectDateContext(context, controller.date);
+                      },
+                      icon: const Icon(Icons.date_range),
+                    ),
+                    labelText: 'Job Date',
+                    isDate: true,
+                    controller: controller.date,
                   ),
-                  GetX<CardsScreenController>(
-                    builder: (controller) {
-                      bool customerLoading = controller.allCustomers.isEmpty;
-                      return CustomDropdown(
-                        width: double.infinity,
-                        textcontroller: controller.customer.text,
-                        showedSelectedName: 'entity_name',
-                        hintText: 'Customer',
-                        items: customerLoading ? {} : controller.allCustomers,
-                        onChanged: (key, value) {
-                          controller.customerId.value = key;
-                          controller.onSelectForCustomers(key);
-                        },
-                        onDelete: () {
-                          controller.customerId.value = "";
-                          controller.customerEntityPhoneNumber.clear();
-                          controller.customerEntityName.clear();
-                          controller.customerEntityEmail.clear();
-                          controller.customerCreditNumber.clear();
-                          controller.customerSaleManId.value = '';
-                        },
-                      );
+                  CustomDropdown(
+                    width: double.infinity,
+                    textcontroller: controller.technicianName.value.text,
+                    showedSelectedName: 'name',
+                    hintText: 'Technician',
+                    onChanged: (key, value) {
+                      controller.technicianId.value = key;
+                    },
+                    onDelete: () {
+                      controller.technicianName.value.clear();
+                      controller.technicianId.value = "";
+                    },
+                    onOpen: () {
+                      return controller.getTechnicians();
                     },
                   ),
-                  GetX<CardsScreenController>(
-                    builder: (controller) {
-                      bool brandsLoading = controller.allBrands.isEmpty;
-                      bool modelLoading = controller.allModels.isEmpty;
-                      return Row(
-                        spacing: 10,
-                        children: [
-                          Expanded(
-                            child: CustomDropdown(
-                              showedSelectedName: 'name',
-                              hintText: 'Brand',
-                              textcontroller: controller.brand.text,
-                              items: brandsLoading ? {} : controller.allBrands,
-                              onChanged: (key, value) {
-                                controller.carBrandLogo.value = value['logo'];
-                                controller.getModelsByCarBrand(key);
-                                controller.model.clear();
-                                controller.brandId.value = key;
-                                controller.brand.text = value['name'];
-                              },
-                              onDelete: () {
-                                controller.carBrandLogo.value = '';
-                                controller.model = TextEditingController();
-                                controller.modelId.value = '';
-                                controller.allModels.clear();
-                                controller.brandId.value = '';
-                                controller.brand.text = '';
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: CustomDropdown(
-                              showedSelectedName: 'name',
-                              hintText: 'Model',
-                              textcontroller: controller.model.text,
-                              items: modelLoading ? {} : controller.allModels,
-                              onChanged: (key, value) {
-                                controller.model.text = value['name'];
-                                controller.modelId.value = key;
-                              },
-                              onDelete: () {
-                                controller.model.clear();
-                                controller.modelId.value = '';
-                              },
-                            ),
-                          ),
-                        ],
-                      );
+                  CustomDropdown(
+                    width: double.infinity,
+                    textcontroller: controller.customer.text,
+                    showedSelectedName: 'entity_name',
+                    hintText: 'Customer',
+                    onChanged: (key, value) {
+                      controller.customerId.value = key;
+                      controller.onSelectForCustomers(value);
+                    },
+                    onDelete: () {
+                      controller.customerId.value = "";
+                      controller.customerEntityPhoneNumber.clear();
+                      controller.customerEntityName.clear();
+                      controller.customerEntityEmail.clear();
+                      controller.customerCreditNumber.clear();
+                      controller.customerSaleManId.value = '';
+                    },
+                    onOpen: () {
+                      return controller.getAllCustomers();
                     },
                   ),
-                  GetX<CardsScreenController>(
-                    builder: (controller) {
-                      bool isColorsLoading = controller.allColors.isEmpty;
-                      return Row(
-                        spacing: 10,
-                        children: [
-                          Expanded(
-                            child: CustomDropdown(
-                              hintText: 'Color',
-                              showedSelectedName: 'name',
-                              textcontroller: controller.color.text,
-                              items: isColorsLoading
-                                  ? {}
-                                  : controller.allColors,
-                              onChanged: (key, value) {
-                                controller.colorId.value = key;
-                              },
-                              onDelete: () {
-                                controller.colorId.value = '';
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: myTextFormFieldWithBorder(
-                              labelText: 'Plate Number',
-                              controller: controller.plateNumber,
-                            ),
-                          ),
-                        ],
-                      );
+                  CustomDropdown(
+                    width: double.infinity,
+                    showedSelectedName: 'name',
+                    hintText: 'Brand',
+                    textcontroller: controller.brand.text,
+                    onChanged: (key, value) {
+                      controller.carBrandLogo.value = value['logo'] ?? '';
+                      controller.getModelsByCarBrand(key);
+                      controller.model.clear();
+                      controller.brandId.value = key;
+                      controller.brand.text = value['name'];
+                    },
+                    onDelete: () {
+                      controller.carBrandLogo.value = '';
+                      controller.model = TextEditingController();
+                      controller.modelId.value = '';
+                      controller.allModels.clear();
+                      controller.brandId.value = '';
+                      controller.brand.text = '';
+                    },
+                    onOpen: () {
+                      return controller.getCarBrands();
                     },
                   ),
-                  GetBuilder<CardsScreenController>(
-                    builder: (controller) {
-                      return Row(
-                        spacing: 10,
-                        children: [
-                          Expanded(
-                            child: myTextFormFieldWithBorder(
-                              labelText: 'Code',
-                              controller: controller.code,
-                            ),
-                          ),
-                          Expanded(
-                            child: myTextFormFieldWithBorder(
-                              isDouble: true,
-                              labelText: 'Mileage',
-                              keyboardType: TextInputType.number,
-                              controller: controller.mileage,
-                            ),
-                          ),
-                        ],
-                      );
+                  CustomDropdown(
+                    width: double.infinity,
+                    showedSelectedName: 'name',
+                    hintText: 'Model',
+                    items: controller.allModels,
+                    textcontroller: controller.model.text,
+                    onChanged: (key, value) {
+                      controller.model.text = value['name'];
+                      controller.modelId.value = key;
+                    },
+                    onDelete: () {
+                      controller.model.clear();
+                      controller.modelId.value = '';
                     },
                   ),
-                  GetX<CardsScreenController>(
-                    builder: (controller) {
-                      bool isEngineLoading = controller.allEngineTypes.isEmpty;
-                      return Column(
-                        spacing: 10,
-                        children: [
-                          Row(
-                            spacing: 10,
-                            children: [
-                              Expanded(
-                                child: CustomDropdown(
-                                  hintText: 'Engine Type',
-                                  showedSelectedName: 'name',
-                                  textcontroller: controller.engineType.text,
-                                  items: isEngineLoading
-                                      ? {}
-                                      : controller.allEngineTypes,
-                                  onChanged: (key, value) {
-                                    controller.engineTypeId.value = key;
-                                  },onDelete: (){
-                                    controller.engineTypeId.value = '';
-                            
-                                  },
-                                ),
-                              ),
-                              Expanded(
-                                child: myTextFormFieldWithBorder(
-                                  isnumber: true,
-                                  labelText: 'Year',
-                                  keyboardType: TextInputType.number,
-                                  controller: controller.year,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            spacing: 10,
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: myTextFormFieldWithBorder(
-                                  labelText: 'Transmission Type',
-                                  controller: controller.transmissionType,
-                                ),
-                              ),
-                              Expanded(
-                                flex: 1,
-                                child: myTextFormFieldWithBorder(
-                                  suffixIcon: const IconButton(
-                                    onPressed: null,
-                                    icon: Icon(Icons.percent_rounded, size: 15),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  isnumber: true,
-                                  labelText: 'Fuel Amount',
-                                  controller: controller.fuelAmount,
-                                ),
-                              ),
-                            ],
-                          ),
-                          myTextFormFieldWithBorder(
-                            labelText: 'VIN Number',
-                            controller: controller.vin,
-                          ),
-                        ],
-                      );
+                  CustomDropdown(
+                    width: double.infinity,
+                    hintText: 'Color',
+                    showedSelectedName: 'name',
+                    textcontroller: controller.color.text,
+                    onChanged: (key, value) {
+                      controller.colorId.value = key;
                     },
+                    onDelete: () {
+                      controller.colorId.value = '';
+                    },
+                    onOpen: () {
+                      return controller.getColors();
+                    },
+                  ),
+                  myTextFormFieldWithBorder(
+                    labelText: 'Plate Number',
+                    controller: controller.plateNumber,
+                  ),
+                  myTextFormFieldWithBorder(
+                    labelText: 'Code',
+                    controller: controller.code,
+                  ),
+                  myTextFormFieldWithBorder(
+                    isDouble: true,
+                    labelText: 'Mileage',
+                    keyboardType: TextInputType.number,
+                    controller: controller.mileage,
+                  ),
+                  CustomDropdown(
+                    width: double.infinity,
+                    hintText: 'Engine Type',
+                    showedSelectedName: 'name',
+                    textcontroller: controller.engineType.text,
+                    onChanged: (key, value) {
+                      controller.engineTypeId.value = key;
+                    },
+                    onDelete: () {
+                      controller.engineTypeId.value = '';
+                    },
+                    onOpen: () {
+                      return controller.getEngineTypes();
+                    },
+                  ),
+                  myTextFormFieldWithBorder(
+                    isnumber: true,
+                    labelText: 'Year',
+                    keyboardType: TextInputType.number,
+                    controller: controller.year,
+                  ),
+                  myTextFormFieldWithBorder(
+                    labelText: 'Transmission Type',
+                    controller: controller.transmissionType,
+                  ),
+                  myTextFormFieldWithBorder(
+                    suffixIcon: const IconButton(
+                      onPressed: null,
+                      icon: Icon(Icons.percent_rounded, size: 15),
+                    ),
+                    keyboardType: TextInputType.number,
+                    isnumber: true,
+                    labelText: 'Fuel Amount',
+                    controller: controller.fuelAmount,
+                  ),
+                  myTextFormFieldWithBorder(
+                    labelText: 'VIN Number',
+                    controller: controller.vin,
                   ),
                 ],
               ),
             );
           },
         ),
-        const SizedBox(height: 10),
-        labelContainer(
-          lable: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('PRIOR BODY DAMAGE', style: fontStyle1),
-              GetBuilder<CardsScreenController>(
-                builder: (controller) {
-                  return controller.damagePoints.isNotEmpty &&
-                          controller.inEditMode.isFalse
-                      ? IconButton(
-                          onPressed: () {
-                            controller.removeLastMark();
-                          },
-                          icon: const Icon(
-                            Icons.repartition_outlined,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const SizedBox();
-                },
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: Column(
-            children: [
-              GetBuilder<CardsScreenController>(
-                builder: (controller) {
-                  return controller.inEditMode.isFalse
-                      ? LayoutBuilder(
-                          builder: (context, constraints) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (controller
-                                      .repaintBoundaryKey
-                                      .currentContext !=
-                                  null) {
-                                controller.updateDamagePoints();
-                                // Optionally, call your image capture function here
-                              }
-                            });
-                            return GestureDetector(
-                              onTapDown: (details) =>
-                                  controller.addDamagePoint(details),
-                              child: RepaintBoundary(
-                                key: controller.repaintBoundaryKey,
-                                child: Stack(
-                                  children: [
-                                    Image.asset(
-                                      'assets/vehicle.jpg',
-                                      width: constraints.maxWidth,
-                                      height: 500,
-                                      key: controller.imageKey,
-                                    ),
-                                    CustomPaint(
-                                      size: Size(constraints.maxWidth, 500),
-                                      painter: DamagePainter(
-                                        controller.damagePoints,
-                                      ),
-                                      child: SizedBox(
-                                        width: constraints.maxWidth,
-                                        height: 500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        )
-                      : CachedNetworkImage(
-                          cacheManager: controller.customCachedManeger,
-                          progressIndicatorBuilder: (context, url, progress) =>
-                              Padding(
-                                padding: const EdgeInsets.all(30.0),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    value: progress.progress,
-                                    color: mainColor,
-                                    strokeWidth: 3,
-                                  ),
-                                ),
-                              ),
-                          imageUrl: controller.carDialogImageURL.value,
-                          key: UniqueKey(),
-                          errorWidget: (context, url, error) =>
-                              const Icon(Icons.error),
-                        );
-                },
-              ),
-            ],
-          ),
-        ),
+        // const SizedBox(height: 10),
+        // labelContainer(
+        //   lable: Row(
+        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //     children: [
+        //       Text('PRIOR BODY DAMAGE', style: fontStyle1),
+        //       GetBuilder<CardsScreenController>(
+        //         builder: (controller) {
+        //           return controller.damagePoints.isNotEmpty &&
+        //                   controller.inEditMode.isFalse
+        //               ? IconButton(
+        //                   onPressed: () {
+        //                     controller.removeLastMark();
+        //                   },
+        //                   icon: const Icon(
+        //                     Icons.repartition_outlined,
+        //                     color: Colors.white,
+        //                   ),
+        //                 )
+        //               : const SizedBox();
+        //         },
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        // Container(
+        //   padding: const EdgeInsets.all(10),
+        //   decoration: containerDecor,
+        //   child: Column(
+        //     children: [
+        //       GetBuilder<CardsScreenController>(
+        //         builder: (controller) {
+        //           return controller.inEditMode.isFalse
+        //               ? LayoutBuilder(
+        //                   builder: (context, constraints) {
+        //                     WidgetsBinding.instance.addPostFrameCallback((_) {
+        //                       if (controller
+        //                               .repaintBoundaryKey
+        //                               .currentContext !=
+        //                           null) {
+        //                         controller.updateDamagePoints();
+        //                         // Optionally, call your image capture function here
+        //                       }
+        //                     });
+        //                     return GestureDetector(
+        //                       onTapDown: (details) =>
+        //                           controller.addDamagePoint(details),
+        //                       child: RepaintBoundary(
+        //                         key: controller.repaintBoundaryKey,
+        //                         child: Stack(
+        //                           children: [
+        //                             Image.asset(
+        //                               'assets/vehicle.jpg',
+        //                               width: constraints.maxWidth,
+        //                               height: 500,
+        //                               key: controller.imageKey,
+        //                             ),
+        //                             CustomPaint(
+        //                               size: Size(constraints.maxWidth, 500),
+        //                               painter: DamagePainter(
+        //                                 controller.damagePoints,
+        //                               ),
+        //                               child: SizedBox(
+        //                                 width: constraints.maxWidth,
+        //                                 height: 500,
+        //                               ),
+        //                             ),
+        //                           ],
+        //                         ),
+        //                       ),
+        //                     );
+        //                   },
+        //                 )
+        //               : CachedNetworkImage(
+        //                   cacheManager: controller.customCachedManeger,
+        //                   progressIndicatorBuilder: (context, url, progress) =>
+        //                       Padding(
+        //                         padding: const EdgeInsets.all(30.0),
+        //                         child: Center(
+        //                           child: CircularProgressIndicator(
+        //                             value: progress.progress,
+        //                             color: mainColor,
+        //                             strokeWidth: 3,
+        //                           ),
+        //                         ),
+        //                       ),
+        //                   imageUrl: controller.carDialogImageURL.value,
+        //                   key: UniqueKey(),
+        //                   errorWidget: (context, url, error) =>
+        //                       const Icon(Icons.error),
+        //                 );
+        //         },
+        //       ),
+        //     ],
+        //   ),
+        // ),
         const SizedBox(height: 10),
         labelContainer(
           lable: Row(
@@ -592,162 +505,6 @@ Padding buildInspectionReportBody(BuildContext context) {
                   )
                 : const SizedBox();
           },
-        ),
-        const SizedBox(height: 10),
-        labelContainer(lable: Text('INTERIOIR / EXTERIOIR', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: GetBuilder<CardsScreenController>(
-            builder: (controller) {
-              return Column(
-                children: List.generate(
-                  controller.entrioirExterioirList.length * 2 - 1,
-                  (index) {
-                    if (index.isEven) {
-                      int itemIndex = index ~/ 2;
-                      return checkBoxesSection(
-                        label: controller.entrioirExterioirList[itemIndex],
-                        dataMap: controller
-                            .selectedCheckBoxIndicesForInteriorExterior,
-                      );
-                    } else {
-                      return const Divider();
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        labelContainer(lable: Text('UNDER VEHICLE', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: GetBuilder<CardsScreenController>(
-            builder: (controller) {
-              return Column(
-                children: List.generate(
-                  controller.underVehicleList.length * 2 - 1,
-                  (index) {
-                    if (index.isEven) {
-                      int itemIndex = index ~/ 2;
-                      return checkBoxesSection(
-                        label: controller.underVehicleList[itemIndex],
-                        dataMap:
-                            controller.selectedCheckBoxIndicesForUnderVehicle,
-                      );
-                    } else {
-                      return const Divider();
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        labelContainer(lable: Text('UNDER HOOD', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: GetBuilder<CardsScreenController>(
-            builder: (controller) {
-              return Column(
-                children: List.generate(
-                  controller.underHoodList.length * 2 - 1,
-                  (index) {
-                    if (index.isEven) {
-                      int itemIndex = index ~/ 2;
-                      return checkBoxesSection(
-                        label: controller.underHoodList[itemIndex],
-                        dataMap: controller.selectedCheckBoxIndicesForUnderHood,
-                      );
-                    } else {
-                      return const Divider();
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        labelContainer(lable: Text('BATTERY PERFORMANCE', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: GetBuilder<CardsScreenController>(
-            builder: (controller) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    children: List.generate(
-                      controller.batteryPerformanceList.length * 2 - 1,
-                      (index) {
-                        if (index.isEven) {
-                          int itemIndex = index ~/ 2;
-                          return checkBoxesSection(
-                            label: controller
-                                .batteryPerformanceList[itemIndex], // Corrected label
-                            dataMap: controller
-                                .selectedCheckBoxIndicesForBatteryPerformance,
-                          );
-                        } else {
-                          return const Divider();
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Battery Cold Cranking Amps',
-                    style: textStyleForInspectionHints,
-                  ),
-                  Row(
-                    spacing: 10,
-                    children: [
-                      Expanded(
-                        child: myTextFormFieldWithBorder(
-                          controller:
-                              controller.batteryColdCrankingAmpsFactorySpecs,
-                          onChanged: (value) {
-                            controller.updateEnteredField(
-                              'Battery Cold Cranking Amps',
-                              'Factory Specs',
-                              value,
-                              controller
-                                  .selectedCheckBoxIndicesForBatteryPerformance,
-                            );
-                          },
-                          isnumber: true,
-                          labelText: 'Factory Specs',
-                        ),
-                      ),
-                      Expanded(
-                        child: myTextFormFieldWithBorder(
-                          controller: controller.batteryColdCrankingAmpsActual,
-                          onChanged: (value) {
-                            controller.updateEnteredField(
-                              'Battery Cold Cranking Amps',
-                              'Actual',
-                              value,
-                              controller
-                                  .selectedCheckBoxIndicesForBatteryPerformance,
-                            );
-                          },
-                          isnumber: true,
-                          labelText: 'Actual',
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            },
-          ),
         ),
         const SizedBox(height: 10),
         labelContainer(lable: Text('BREAK AND TIRE', style: fontStyle1)),
@@ -1022,6 +779,162 @@ Padding buildInspectionReportBody(BuildContext context) {
                 },
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        labelContainer(lable: Text('INTERIOIR / EXTERIOIR', style: fontStyle1)),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: containerDecor,
+          child: GetBuilder<CardsScreenController>(
+            builder: (controller) {
+              return Column(
+                children: List.generate(
+                  controller.entrioirExterioirList.length * 2 - 1,
+                  (index) {
+                    if (index.isEven) {
+                      int itemIndex = index ~/ 2;
+                      return checkBoxesSection(
+                        label: controller.entrioirExterioirList[itemIndex],
+                        dataMap: controller
+                            .selectedCheckBoxIndicesForInteriorExterior,
+                      );
+                    } else {
+                      return const Divider();
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        labelContainer(lable: Text('UNDER VEHICLE', style: fontStyle1)),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: containerDecor,
+          child: GetBuilder<CardsScreenController>(
+            builder: (controller) {
+              return Column(
+                children: List.generate(
+                  controller.underVehicleList.length * 2 - 1,
+                  (index) {
+                    if (index.isEven) {
+                      int itemIndex = index ~/ 2;
+                      return checkBoxesSection(
+                        label: controller.underVehicleList[itemIndex],
+                        dataMap:
+                            controller.selectedCheckBoxIndicesForUnderVehicle,
+                      );
+                    } else {
+                      return const Divider();
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        labelContainer(lable: Text('UNDER HOOD', style: fontStyle1)),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: containerDecor,
+          child: GetBuilder<CardsScreenController>(
+            builder: (controller) {
+              return Column(
+                children: List.generate(
+                  controller.underHoodList.length * 2 - 1,
+                  (index) {
+                    if (index.isEven) {
+                      int itemIndex = index ~/ 2;
+                      return checkBoxesSection(
+                        label: controller.underHoodList[itemIndex],
+                        dataMap: controller.selectedCheckBoxIndicesForUnderHood,
+                      );
+                    } else {
+                      return const Divider();
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        labelContainer(lable: Text('BATTERY PERFORMANCE', style: fontStyle1)),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: containerDecor,
+          child: GetBuilder<CardsScreenController>(
+            builder: (controller) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    children: List.generate(
+                      controller.batteryPerformanceList.length * 2 - 1,
+                      (index) {
+                        if (index.isEven) {
+                          int itemIndex = index ~/ 2;
+                          return checkBoxesSection(
+                            label: controller
+                                .batteryPerformanceList[itemIndex], // Corrected label
+                            dataMap: controller
+                                .selectedCheckBoxIndicesForBatteryPerformance,
+                          );
+                        } else {
+                          return const Divider();
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Battery Cold Cranking Amps',
+                    style: textStyleForInspectionHints,
+                  ),
+                  Row(
+                    spacing: 10,
+                    children: [
+                      Expanded(
+                        child: myTextFormFieldWithBorder(
+                          controller:
+                              controller.batteryColdCrankingAmpsFactorySpecs,
+                          onChanged: (value) {
+                            controller.updateEnteredField(
+                              'Battery Cold Cranking Amps',
+                              'Factory Specs',
+                              value,
+                              controller
+                                  .selectedCheckBoxIndicesForBatteryPerformance,
+                            );
+                          },
+                          isnumber: true,
+                          labelText: 'Factory Specs',
+                        ),
+                      ),
+                      Expanded(
+                        child: myTextFormFieldWithBorder(
+                          controller: controller.batteryColdCrankingAmpsActual,
+                          onChanged: (value) {
+                            controller.updateEnteredField(
+                              'Battery Cold Cranking Amps',
+                              'Actual',
+                              value,
+                              controller
+                                  .selectedCheckBoxIndicesForBatteryPerformance,
+                            );
+                          },
+                          isnumber: true,
+                          labelText: 'Actual',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
           ),
         ),
         const SizedBox(height: 10),

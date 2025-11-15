@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -6,12 +7,16 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
-import '../../Models/car_card_model.dart';
+import '../../Models/job cards/inspection_report_model.dart';
 import '../../Screens/mobile Screens/card_details_screen.dart';
 import '../../consts.dart';
+import '../../helpers.dart';
 
 class CardsScreenController extends GetxController {
   TextEditingController customer = TextEditingController();
@@ -35,12 +40,13 @@ class CardsScreenController extends GetxController {
   TextEditingController transmissionType = TextEditingController();
   TextEditingController fuelAmount = TextEditingController();
   TextEditingController customerEntityPhoneNumber = TextEditingController();
-  final RxList<DocumentSnapshot> allCarCards = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> newCarCards = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> doneCarCards = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredCarCards = RxList<DocumentSnapshot>(
-    [],
-  );
+  // final RxList<DocumentSnapshot> allCarCards = RxList<DocumentSnapshot>([]);
+  final RxList<InspectionReportModel> newCarCards =
+      RxList<InspectionReportModel>([]);
+  final RxList<InspectionReportModel> doneCarCards =
+      RxList<InspectionReportModel>([]);
+  final RxList<InspectionReportModel> filteredCarCards =
+      RxList<InspectionReportModel>([]);
   Rx<TextEditingController> search = TextEditingController().obs;
   RxString query = RxString('');
   final RxBool loading = RxBool(false);
@@ -56,13 +62,13 @@ class CardsScreenController extends GetxController {
   // RxString companyId = RxString('');
   // RxString userId = RxString('');
   RxString customerSaleManId = RxString('');
-  RxMap allCustomers = RxMap({});
-  RxMap allTechnicians = RxMap({});
-  RxMap allBrands = RxMap({});
+  // RxMap allCustomers = RxMap({});
+  // RxMap allTechnicians = RxMap({});
+  // RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
-  RxMap allColors = RxMap({});
-  RxMap allEngineTypes = RxMap({});
-  RxList carImagesURLs = RxList([]);
+  // RxMap allColors = RxMap({});
+  // RxMap allEngineTypes = RxMap({});
+  RxList<String> carImagesURLs = RxList<String>([]);
   RxString carDialogImageURL = RxString('');
   Uint8List? customerSignatureAsImage;
   Uint8List? advisorSignatureAsImage;
@@ -130,6 +136,7 @@ class CardsScreenController extends GetxController {
   GlobalKey repaintBoundaryKey = GlobalKey();
   RxList<File> imagesList = RxList([]);
   final ImagePicker picker = ImagePicker();
+  String backendUrl = backendTestURI;
 
   // interioir / exterioir
   RxList entrioirExterioirList = RxList([
@@ -186,91 +193,362 @@ class CardsScreenController extends GetxController {
 
   @override
   void onInit() async {
-    getCarBrands();
-    getAllCustomers();
-    getColors();
-    getEngineTypes();
-    getTechnicians();
-
+    getAllInspectionReporst();
     // getAllCards();
     super.onInit();
   }
 
-  Future<void> getAllCustomers() async {
-    allCustomers.assignAll(await helper.getCustomers());
+  Future<Map<String, dynamic>> getAllCustomers() async {
+    return await helper.getCustomers();
   }
 
-  Future<void> getCarBrands() async {
-    allBrands.assignAll(await helper.getCarBrands());
+  Future<Map<String, dynamic>> getCarBrands() async {
+    return await helper.getCarBrands();
   }
 
   Future<void> getModelsByCarBrand(String brandID) async {
     allModels.assignAll(await helper.getModelsValues(brandID));
   }
 
-  Future<void> getColors() async {
-    allColors.assignAll(await helper.getAllListValues('COLORS'));
+  Future<Map<String, dynamic>> getColors() async {
+    return await helper.getAllListValues('COLORS');
   }
 
-  Future<void> getEngineTypes() async {
-    allEngineTypes.assignAll(await helper.getAllListValues('ENGINE_TYPES'));
+  Future<Map<String, dynamic>> getEngineTypes() async {
+    return await helper.getAllListValues('ENGINE_TYPES');
   }
 
-  Future<void> getTechnicians() async {
-    allTechnicians.assignAll(await helper.getAllTechnicians());
+  Future<Map<String, dynamic>> getTechnicians() async {
+    return await helper.getAllEmployeesByDepartment('Job Cards');
   }
+
+  Future<void> getAllInspectionReporst() async {
+    try {
+      loading.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/inspection_reports/get_new_job_cards_inspection_reports',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List cards = decoded['inspection_reports'];
+        newCarCards.assignAll(
+          cards.map((card) => InspectionReportModel.fromJson(card)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllInspectionReporst();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
+      }
+
+      loading.value = false;
+    } catch (e) {
+      loading.value = false;
+    }
+  }
+
+  Future<void> addInspectionCard() async {
+    try {
+      loadingScreen();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/inspection_reports/create_job_from_inspection_report',
+      );
+      final request = http.MultipartRequest("POST", url);
+
+      request.fields['fuel_amount'] = fuelAmount.text;
+      request.fields['job_date'] = convertDateToIson(date.text).toString();
+      request.fields['job_note'] = comments.text;
+      request.fields['technician'] = technicianId.value;
+      request.fields['customer'] = customerId.value;
+      request.fields['car_brand'] = brandId.value;
+      request.fields['car_model'] = modelId.value;
+      request.fields['plate_number'] = plateNumber.text;
+      request.fields['code'] = code.text;
+      request.fields['mileage_in'] = mileage.text;
+      request.fields['engine_type'] = engineTypeId.value;
+      request.fields['year'] = year.text;
+      request.fields['transmission_type'] = transmissionType.text;
+      request.fields['vin'] = vin.text;
+      request.fields['color'] = colorId.value;
+      request.fields['car_brand_logo'] = carBrandLogo.value;
+      request.fields['customer_name'] = customerEntityName.text;
+      request.fields['customer_email'] = customerEntityEmail.text;
+      request.fields['customer_phone'] = customerEntityPhoneNumber.text;
+      request.fields['credit_limit'] = customerCreditNumber.text;
+      request.fields['salesman'] = customerSaleManId.value;
+
+      request.fields['interior_exterior'] = jsonEncode(
+        selectedCheckBoxIndicesForInteriorExterior,
+      );
+      request.fields['under_vehicle'] = jsonEncode(
+        selectedCheckBoxIndicesForUnderVehicle,
+      );
+      request.fields['under_hood'] = jsonEncode(
+        selectedCheckBoxIndicesForUnderHood,
+      );
+      request.fields['left_front_wheel'] = jsonEncode(
+        selectedCheckBoxIndicesForLeftFront,
+      );
+      request.fields['right_front_wheel'] = jsonEncode(
+        selectedCheckBoxIndicesForRightFront,
+      );
+      request.fields['left_rear_wheel'] = jsonEncode(
+        selectedCheckBoxIndicesForLeftRear,
+      );
+      request.fields['right_rear_wheel'] = jsonEncode(
+        selectedCheckBoxIndicesForRightRear,
+      );
+      request.fields['battery_performance'] = jsonEncode(
+        selectedCheckBoxIndicesForBatteryPerformance,
+      );
+      request.fields['extra_checks'] = jsonEncode(
+        selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
+      );
+
+      for (var imgFile in imagesList) {
+        final bytes = await imgFile.readAsBytes();
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'car_images',
+            bytes,
+            filename: imgFile.path.split('/').last,
+          ),
+        );
+      }
+      if (damagePoints.isNotEmpty) {
+        // save car dialog
+        Uint8List dialogResult = await saveCarDialogImageModified();
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'car_dialog',
+            dialogResult,
+            filename:
+                'car_dialog${customer.text}_${DateTime.now().millisecondsSinceEpoch}.png',
+          ),
+        );
+      }
+
+      // Save signature images.
+      customerSignatureAsImage = await signatureControllerForCustomer
+          .toPngBytes();
+      advisorSignatureAsImage = await signatureControllerForAdvisor
+          .toPngBytes();
+
+      if (customerSignatureAsImage != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'customer_signature',
+            customerSignatureAsImage!,
+            filename:
+                'customer_signature${customer.text}_${DateTime.now().millisecondsSinceEpoch}.png',
+          ),
+        );
+      }
+      if (advisorSignatureAsImage != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'advisor_signature',
+            advisorSignatureAsImage!,
+            filename:
+                'advisor_signature_${DateTime.now().millisecondsSinceEpoch}.png',
+          ),
+        );
+      }
+      request.headers.addAll({
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'multipart/form-data',
+      });
+      final response = await request.send();
+      // final resBody = await response.stream.bytesToString();
+      if (response.statusCode == 200) {
+        Get.back();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addInspectionCard();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
+      }
+    } catch (e) {
+      // print("+++++++++++++++++++++++");
+      // print(e);
+      // print("+++++++++++++++++++++++");
+      Get.back();
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+  // Future<void> addInspectionCard(BuildContext context) async {
+  //   // List to track all successfully uploaded storage references.
+  //   List<Reference> uploadedStorageRefs = [];
+
+  //   try {
+  //     Map<String, dynamic> newData = {
+  //       'fuel_amount': fuelAmount.text,
+  //       'added_date': DateTime.now().toString(),
+  //       'label': 'Draft',
+  //       'job_status_1': '',
+  //       'job_status_2': '',
+  //       'quotation_status': '',
+  //       'car_brand_logo': carBrandLogo.value,
+  //       'technician': technicianId.value,
+  //       // 'company_id': companyId.value,
+  //       'car_brand': brandId.value,
+  //       'car_model': modelId.value,
+  //       'plate_number': plateNumber.text,
+  //       'plate_code': code.text,
+  //       'country': '',
+  //       'city': '',
+  //       'year': year.text,
+  //       'color': colorId.value,
+  //       'engine_type': engineTypeId.value,
+  //       'vehicle_identification_number': vin.text,
+  //       'transmission_type': transmissionType.text,
+  //       'mileage_in': mileage.text,
+  //       'mileage_out': '',
+  //       'mileage_in_out_diff': '',
+  //       'customer': customerId.value,
+  //       'contact_name': customerEntityName.text,
+  //       'contact_number': customerEntityPhoneNumber.text,
+  //       'contact_email': customerEntityEmail.text,
+  //       'credit_limit': customerCreditNumber.text,
+  //       'outstanding': '',
+  //       'saleMan': customerSaleManId.value,
+  //       'branch': '',
+  //       'currency': '',
+  //       'rate': '',
+  //       'payment_method': 'Cash',
+  //       'quotation_number': '',
+  //       'quotation_date': '',
+  //       'validity_days': '',
+  //       'validity_end_date': '',
+  //       'reference_number': '',
+  //       'delivery_time': '',
+  //       'quotation_warrenty_days': '',
+  //       'quotation_warrenty_km': '',
+  //       'quotation_notes': '',
+  //       'job_number': '',
+  //       'invoice_number': '',
+  //       'lpo_number': '',
+  //       'job_date': '',
+  //       'invoice_date': '',
+  //       'job_approval_date': '',
+  //       'job_start_date': '',
+  //       'job_cancelation_date': '',
+  //       'job_finish_date': '',
+  //       'job_delivery_date': '',
+  //       'job_warrenty_days': '',
+  //       'job_warrenty_km': '',
+  //       'job_warrenty_end_date': '',
+  //       'job_min_test_km': '',
+  //       'job_reference_1': '',
+  //       'job_reference_2': '',
+  //       'job_reference_3': '',
+  //       'job_notes': '',
+  //       'job_delivery_notes': '',
+  //       'inspection_report_comments': comments.text.trim(),
+  //       'left_front_wheel': selectedCheckBoxIndicesForLeftFront,
+  //       'right_front_wheel': selectedCheckBoxIndicesForRightFront,
+  //       'left_rear_wheel': selectedCheckBoxIndicesForLeftRear,
+  //       'right_rear_wheel': selectedCheckBoxIndicesForRightRear,
+  //       'interior_exterior': selectedCheckBoxIndicesForInteriorExterior,
+  //       'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
+  //       'under_hood': selectedCheckBoxIndicesForUnderHood,
+  //       'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
+  //       'extra_checks': selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
+  //     };
+
+  //     loadingScreen(context);
+
+  //     // Save car images if available.
+  //     if (imagesList.isNotEmpty) {
+  //       List<Map<String, dynamic>> uploadedImages = await saveCarImages();
+  //       // Add URLs to the data.
+  //       newData['car_images'] = uploadedImages
+  //           .map((item) => item['url'])
+  //           .toList();
+  //       // Track each uploaded image reference.
+  //       for (var item in uploadedImages) {
+  //         uploadedStorageRefs.add(item['ref']);
+  //       }
+  //     } else {
+  //       newData['car_images'] = [];
+  //     }
+
+  //     // Save car dialog image.
+  //     Map<String, dynamic> dialogResult = await saveCarDialogImageModified();
+  //     newData['car_dialog'] = dialogResult['url'];
+  //     uploadedStorageRefs.add(dialogResult['ref']);
+
+  //     // Save signature images.
+  //     customerSignatureAsImage = await signatureControllerForCustomer
+  //         .toPngBytes();
+  //     advisorSignatureAsImage = await signatureControllerForAdvisor
+  //         .toPngBytes();
+
+  //     if (customerSignatureAsImage != null) {
+  //       Map<String, dynamic> custResult = await saveSignatureImage(
+  //         customerSignatureAsImage,
+  //       );
+  //       newData['customer_signature'] = custResult['url'];
+  //       uploadedStorageRefs.add(custResult['ref']);
+  //     }
+
+  //     if (advisorSignatureAsImage != null) {
+  //       Map<String, dynamic> advResult = await saveSignatureImage(
+  //         advisorSignatureAsImage,
+  //       );
+  //       newData['advisor_signature'] = advResult['url'];
+  //       uploadedStorageRefs.add(advResult['ref']);
+  //     }
+
+  //     // Save data to Firestore.
+  //     await FirebaseFirestore.instance.collection('job_cards').add(newData);
+
+  //     Get.back();
+  //     showSnackBar('Done', 'Added Successfully');
+  //   } catch (e) {
+  //     // Rollback: delete all uploaded files in case of any error.
+  //     for (Reference ref in uploadedStorageRefs) {
+  //       try {
+  //         await ref.delete();
+  //       } catch (deleteError) {
+  //         // Optionally log the deletion error.
+  //       }
+  //     }
+  //     Get.back();
+  //     showSnackBar('Failed', 'Please try again');
+  //   }
+  // }
 
   // ==================================================================================================
-  Future<void> loadingDetailsVariables(dynamic carCard) async {
-    var carData = carCard.data() as Map<String, dynamic>;
-    String carBrandName = carCard['car_brand'] != ''
-        ? getdataName(carCard['car_brand'], allBrands)
-        : '';
-    String carModelName = carCard['car_brand'] != ''
-        ? await getModelName(carCard['car_brand'], carCard['car_model'])
-        : '';
-    String customerName = carCard['customer'] != ''
-        ? getdataName(carCard['customer'], allCustomers, title: 'entity_name')
-        : '';
-    String carColor = carCard['color'] != ''
-        ? getdataName(carCard['color'], allColors)
-        : '';
-    String technician = carCard['technician'] != ''
-        ? getdataName(carCard['technician'], allTechnicians)
-        : '';
-    String engineType = carCard['engine_type'] != ''
-        ? getdataName(carCard['engine_type'], allEngineTypes)
-        : '';
+  Future<void> loadingDetailsVariables(InspectionReportModel carCard) async {
     Get.to(
       () => CarDetailsScreen(),
-      arguments: CarCardModel(
-        vin: carCard['vehicle_identification_number']?.toString() ?? '',
-        engineType: engineType,
-        technician: technician,
-        year: carData['year']?.toString() ?? '',
-        code: carData['plate_code']?.toString() ?? '',
-        fuelAmount:
-            double.tryParse(carData['fuel_amount']?.toString() ?? '') ?? 0,
-        data: carData,
-        carImages: List<String>.from(carData['car_images'] ?? []),
-        customerSignature: carData['customer_signature']?.toString() ?? '',
-        advisorSignature: carData['advisor_signature']?.toString() ?? '',
-        carBrand: carBrandName,
-        carMileage: carData['mileage_in']?.toString() ?? '',
-        carModel: carModelName,
-        chassisNumber:
-            carData['vehicle_identification_number']?.toString() ?? '',
-        color: carColor,
-        customerName: customerName,
-        date: carData['added_date']?.toString() ?? '',
-        emailAddress: carData['contact_email']?.toString() ?? '',
-        phoneNumber: carData['contact_number']?.toString() ?? '',
-        plateNumber: carData['plate_number']?.toString() ?? '',
-        comments: carData['inspection_report_comments']?.toString() ?? '',
-        docID: carCard.id, // Document ID is directly from the snapshot
-        status1: carData['job_status_1']?.toString() ?? '',
-        status2: carData['job_status_2']?.toString() ?? '',
-      ),
+      arguments: carCard,
       transition: Transition.leftToRight,
     );
   }
@@ -418,14 +696,14 @@ class CardsScreenController extends GetxController {
         'car_images': carImagesURLs,
       };
 
-      loadingScreen(context);
+      // loadingScreen(context);
 
       if (imagesList.isNotEmpty) {
-        List<Map<String, dynamic>> uploadedImages = await saveCarImages();
+        // List<Map<String, dynamic>> uploadedImages = await saveCarImages();
         // Add URLs to the data.
-        carImagesURLs.addAll(
-          uploadedImages.map((item) => item['url']).toList(),
-        );
+        // carImagesURLs.addAll(
+        //   uploadedImages.map((item) => item['url']).toList(),
+        // );
 
         myData['car_images'] = carImagesURLs;
       }
@@ -442,166 +720,13 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  Future<void> addInspectionCard(BuildContext context) async {
-    // List to track all successfully uploaded storage references.
-    List<Reference> uploadedStorageRefs = [];
-
-    try {
-      Map<String, dynamic> newData = {
-        'fuel_amount': fuelAmount.text,
-        'added_date': DateTime.now().toString(),
-        'label': 'Draft',
-        'job_status_1': '',
-        'job_status_2': '',
-        'quotation_status': '',
-        'car_brand_logo': carBrandLogo.value,
-        'technician': technicianId.value,
-        // 'company_id': companyId.value,
-        'car_brand': brandId.value,
-        'car_model': modelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': code.text,
-        'country': '',
-        'city': '',
-        'year': year.text,
-        'color': colorId.value,
-        'engine_type': engineTypeId.value,
-        'vehicle_identification_number': vin.text,
-        'transmission_type': transmissionType.text,
-        'mileage_in': mileage.text,
-        'mileage_out': '',
-        'mileage_in_out_diff': '',
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'outstanding': '',
-        'saleMan': customerSaleManId.value,
-        'branch': '',
-        'currency': '',
-        'rate': '',
-        'payment_method': 'Cash',
-        'quotation_number': '',
-        'quotation_date': '',
-        'validity_days': '',
-        'validity_end_date': '',
-        'reference_number': '',
-        'delivery_time': '',
-        'quotation_warrenty_days': '',
-        'quotation_warrenty_km': '',
-        'quotation_notes': '',
-        'job_number': '',
-        'invoice_number': '',
-        'lpo_number': '',
-        'job_date': '',
-        'invoice_date': '',
-        'job_approval_date': '',
-        'job_start_date': '',
-        'job_cancelation_date': '',
-        'job_finish_date': '',
-        'job_delivery_date': '',
-        'job_warrenty_days': '',
-        'job_warrenty_km': '',
-        'job_warrenty_end_date': '',
-        'job_min_test_km': '',
-        'job_reference_1': '',
-        'job_reference_2': '',
-        'job_reference_3': '',
-        'job_notes': '',
-        'job_delivery_notes': '',
-        'inspection_report_comments': comments.text.trim(),
-        'left_front_wheel': selectedCheckBoxIndicesForLeftFront,
-        'right_front_wheel': selectedCheckBoxIndicesForRightFront,
-        'left_rear_wheel': selectedCheckBoxIndicesForLeftRear,
-        'right_rear_wheel': selectedCheckBoxIndicesForRightRear,
-        'interior_exterior': selectedCheckBoxIndicesForInteriorExterior,
-        'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
-        'under_hood': selectedCheckBoxIndicesForUnderHood,
-        'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
-        'extra_checks': selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
-      };
-
-      loadingScreen(context);
-
-      // Save car images if available.
-      if (imagesList.isNotEmpty) {
-        List<Map<String, dynamic>> uploadedImages = await saveCarImages();
-        // Add URLs to the data.
-        newData['car_images'] = uploadedImages
-            .map((item) => item['url'])
-            .toList();
-        // Track each uploaded image reference.
-        for (var item in uploadedImages) {
-          uploadedStorageRefs.add(item['ref']);
-        }
-      } else {
-        newData['car_images'] = [];
-      }
-
-      // Save car dialog image.
-      Map<String, dynamic> dialogResult = await saveCarDialogImageModified();
-      newData['car_dialog'] = dialogResult['url'];
-      uploadedStorageRefs.add(dialogResult['ref']);
-
-      // Save signature images.
-      customerSignatureAsImage = await signatureControllerForCustomer
-          .toPngBytes();
-      advisorSignatureAsImage = await signatureControllerForAdvisor
-          .toPngBytes();
-
-      if (customerSignatureAsImage != null) {
-        Map<String, dynamic> custResult = await saveSignatureImage(
-          customerSignatureAsImage,
-        );
-        newData['customer_signature'] = custResult['url'];
-        uploadedStorageRefs.add(custResult['ref']);
-      }
-
-      if (advisorSignatureAsImage != null) {
-        Map<String, dynamic> advResult = await saveSignatureImage(
-          advisorSignatureAsImage,
-        );
-        newData['advisor_signature'] = advResult['url'];
-        uploadedStorageRefs.add(advResult['ref']);
-      }
-
-      // Save data to Firestore.
-      await FirebaseFirestore.instance.collection('job_cards').add(newData);
-
-      Get.back();
-      showSnackBar('Done', 'Added Successfully');
-    } catch (e) {
-      // Rollback: delete all uploaded files in case of any error.
-      for (Reference ref in uploadedStorageRefs) {
-        try {
-          await ref.delete();
-        } catch (deleteError) {
-          // Optionally log the deletion error.
-        }
-      }
-      Get.back();
-      showSnackBar('Failed', 'Please try again');
-    }
-  }
-
-  Future<dynamic> loadingScreen(BuildContext context) {
+  Future<dynamic> loadingScreen() {
     return showDialog(
       barrierDismissible: false,
-      context: context,
+      context: Get.context!,
       builder: (context) {
         return const Center(
-          child: Row(
-            spacing: 20,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: Colors.white),
-              Text(
-                'Please Wait...',
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ],
-          ),
+          child: SpinKitDoubleBounce(color: Colors.grey, size: 30),
         );
       },
     );
@@ -626,7 +751,7 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  Future<Map<String, dynamic>> saveCarDialogImageModified() async {
+  Future<Uint8List> saveCarDialogImageModified() async {
     try {
       final BuildContext? context = repaintBoundaryKey.currentContext;
       if (context == null) {
@@ -645,15 +770,19 @@ class CardsScreenController extends GetxController {
         throw Exception('Error: Failed to convert image to byte data');
       }
       Uint8List pngBytes = byteData.buffer.asUint8List();
-      final Reference storageRef = FirebaseStorage.instance.ref().child(
-        'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png',
-      );
-      final UploadTask uploadTask = storageRef.putData(pngBytes);
-      await uploadTask;
-      final String imageUrl = await storageRef.getDownloadURL();
-      carDialogImageURL.value = imageUrl;
-      return {'url': imageUrl, 'ref': storageRef};
+      // final Reference storageRef = FirebaseStorage.instance.ref().child(
+      //   'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png',
+      // );
+      // final UploadTask uploadTask = storageRef.putData(pngBytes);
+      // await uploadTask;
+      // final String imageUrl = await storageRef.getDownloadURL();
+      // carDialogImageURL.value = imageUrl;
+      return pngBytes;
     } catch (e) {
+      print("=======================");
+      print(e);
+      print("=======================");
+
       rethrow;
     }
   }
@@ -863,40 +992,40 @@ class CardsScreenController extends GetxController {
   Future<void> filterResults(String query) async {
     query = query.toLowerCase();
 
-    List<DocumentSnapshot> filteredResults = [];
+    // List<DocumentSnapshot> filteredResults = [];
 
-    for (var documentSnapshot in allCarCards) {
-      final data = documentSnapshot.data() as Map<String, dynamic>?;
+    // for (var documentSnapshot in allCarCards) {
+    //   final data = documentSnapshot.data() as Map<String, dynamic>?;
 
-      // Fetch the model name asynchronously
-      final modelName = await getModelName(
-        data?['car_brand'],
-        data?['car_model'],
-      );
+    //   // Fetch the model name asynchronously
+    //   final modelName = await getModelName(
+    //     data?['car_brand'],
+    //     data?['car_model'],
+    //   );
 
-      final customerName = getdataName(
-        data?['customer'],
-        allCustomers,
-        title: 'entity_name',
-      );
-      final brandName = getdataName(data?['car_brand'], allBrands);
-      final platNumber = data?['plate_number'] ?? '';
-      final date = textToDate(data?['added_date']);
+    //   final customerName = getdataName(
+    //     data?['customer'],
+    //     allCustomers,
+    //     title: 'entity_name',
+    //   );
+    //   final brandName = getdataName(data?['car_brand'], allBrands);
+    //   final platNumber = data?['plate_number'] ?? '';
+    //   final date = textToDate(data?['added_date']);
 
-      // Check if any of the fields contain the query
-      if (customerName.toString().toLowerCase().contains(query) ||
-          brandName.toString().toLowerCase().contains(query) ||
-          modelName.toString().toLowerCase().contains(
-            query,
-          ) || // Now modelName is included
-          platNumber.toString().toLowerCase().contains(query) ||
-          date.toString().toLowerCase().contains(query)) {
-        filteredResults.add(documentSnapshot);
-      }
-    }
+    //   // Check if any of the fields contain the query
+    //   if (customerName.toString().toLowerCase().contains(query) ||
+    //       brandName.toString().toLowerCase().contains(query) ||
+    //       modelName.toString().toLowerCase().contains(
+    //         query,
+    //       ) || // Now modelName is included
+    //       platNumber.toString().toLowerCase().contains(query) ||
+    //       date.toString().toLowerCase().contains(query)) {
+    //     filteredResults.add(documentSnapshot);
+    //   }
+    // }
 
     // Update the list with the filtered results
-    filteredCarCards.assignAll(filteredResults);
+    // filteredCarCards.assignAll(filteredResults);
   }
 
   Future<String> getModelName(String brandId, String modelId) async {
@@ -918,24 +1047,19 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  void onSelectForCustomers(String selectedId) {
-    var currentUserDetails = allCustomers.entries.firstWhere((entry) {
-      return entry.key.toString().toLowerCase().contains(
-        selectedId.toLowerCase(),
-      );
-    });
-
-    var phoneDetails = currentUserDetails.value['entity_phone'].firstWhere(
-      (value) => value['isPrimary'] == true,
-      orElse: () => {'phone': ''},
-    );
+  void onSelectForCustomers(Map data) {
+    var phoneDetails =
+        (data['entity_phone'] as List?)?.firstWhere(
+          (value) => value['isPrimary'] == true,
+          orElse: () => {'number': ''},
+        ) ??
+        {'number': ''};
 
     customerEntityPhoneNumber.text = phoneDetails['number'] ?? '';
     customerEntityName.text = phoneDetails['name'] ?? '';
-    customerEntityEmail.text = phoneDetails['email'];
+    customerEntityEmail.text = phoneDetails['email'] ?? '';
 
-    customerCreditNumber.text =
-        (currentUserDetails.value['credit_limit'] ?? '0').toString();
-    customerSaleManId.value = currentUserDetails.value['sales_man'];
+    customerCreditNumber.text = data["credit_limit"]?.toString() ?? '0';
+    customerSaleManId.value = data['salesman_id'] ?? '';
   }
 }

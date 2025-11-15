@@ -1,10 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 import '../../Controllers/Mobile section controllers/cards_screen_controller.dart';
+import '../../Models/job cards/inspection_report_model.dart';
 import '../../Widgets/Mobile widgets/cards screen widgets/card_style.dart';
 import '../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../consts.dart';
@@ -13,7 +13,7 @@ import '../../main.dart';
 Scaffold cardsScreen(
     {required BuildContext context,
     required String pageName,
-    required RxList<DocumentSnapshot<Object?>> listOfData,
+    required RxList<InspectionReportModel> listOfData,
     required CardsScreenController controller,
     required RxInt numberOfCars}) {
   return Scaffold(
