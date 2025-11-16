@@ -19,6 +19,7 @@ class CompanyVariablesModel {
   double? vatPercentage;
   double? incentivePercentage;
   String? taxNumber;
+  List<String>? inspectionReport;
 
   CompanyVariablesModel({
     this.sId,
@@ -41,6 +42,7 @@ class CompanyVariablesModel {
     this.vatPercentage,
     this.incentivePercentage,
     this.taxNumber,
+    this.inspectionReport,
   });
 
   CompanyVariablesModel.fromJson(Map<String, dynamic> json) {
@@ -49,7 +51,10 @@ class CompanyVariablesModel {
     ownerId = json['owner_id']?.toString();
 
     // Normalize boolean
-    status = json['status'] == true || json['status'] == 1 || json['status'] == 'true';
+    status =
+        json['status'] == true ||
+        json['status'] == 1 ||
+        json['status'] == 'true';
 
     // Parse date fields safely
     createdAt = _parseDate(json['createdAt']);
@@ -59,15 +64,28 @@ class CompanyVariablesModel {
     companyLogoUrl = json['company_logo_url']?.toString();
     companyLogoPublicId = json['company_logo_public_id']?.toString();
 
-    vatPercentage = (json['vat_percentage'] != null)
-        ? (json['vat_percentage'] as num).toDouble()
+    vatPercentage = json.containsKey('vat_percentage')
+        ? (json['vat_percentage'] != null)
+              ? (json['vat_percentage'] as num).toDouble()
+              : null
         : null;
 
-    incentivePercentage = (json['incentive_percentage'] != null)
-        ? (json['incentive_percentage'] as num).toDouble()
+    incentivePercentage = json.containsKey('incentive_percentage')
+        ? (json['incentive_percentage'] != null)
+              ? (json['incentive_percentage'] as num).toDouble()
+              : null
         : null;
 
-    taxNumber = json['tax_number']?.toString();
+    taxNumber = json.containsKey('tax_number')
+        ? json['tax_number']?.toString()
+        : null;
+    inspectionReport =
+        json.containsKey('inspection_report') &&
+            json['inspection_report'] != null
+        ? List<String>.from(
+            (json['inspection_report'] as List).map((e) => e.toString()),
+          )
+        : null;
 
     // Parse roles list
     if (json['roles_details'] != null) {

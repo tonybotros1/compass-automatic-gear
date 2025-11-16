@@ -38,6 +38,11 @@ IconButton dateRange({
   );
 }
 
+var fontStyleForCheckBoxes = TextStyle(
+  color: Colors.grey.shade800,
+  fontWeight: FontWeight.bold,
+);
+
 var fontStyleForAppBar = TextStyle(
   fontSize: 20,
   color: Colors.grey.shade700,

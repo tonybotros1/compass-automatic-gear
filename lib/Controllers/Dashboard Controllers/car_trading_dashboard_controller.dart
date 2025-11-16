@@ -60,7 +60,7 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalNETsForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAll = RxDouble(0.0);
   RxDouble totalNetProfit = RxDouble(0.0);
-  RxInt pagesPerPage = RxInt(8);
+  RxInt pagesPerPage = RxInt(7);
   DateFormat inputFormat = DateFormat("dd-MM-yyyy");
   RxBool isNewStatusSelected = RxBool(false);
   RxBool isSoldStatusSelected = RxBool(false);

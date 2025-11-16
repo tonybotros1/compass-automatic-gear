@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/company_variables_controller.dart';
 import '../../../../Widgets/main screen widgets/company_variables_widgets/variables_dialog.dart';
@@ -125,47 +127,292 @@ class CompanyVariables extends StatelessWidget {
                         }),
                       ),
                       const Divider(),
-                      labelBox(
-                        'Variables',
-                        onPressed: () {
-                          controller
-                              .incentivePercentage
-                              .text = controller.removePercent(
-                            controller.companyVariables['Incentive Percentage'],
-                          );
-                          controller.vatPercentage.text = controller
-                              .removePercent(
-                                controller.companyVariables['VAT Percentage'],
-                              );
-                          controller.taxNumber.text =
-                              controller.companyVariables['TAX Number'] ?? '';
-                          variablesDialog(
-                            constraints: constraints,
-                            controller: controller,
-                            onPressed: controller.updatingVariables.isFalse
-                                ? () {
-                                    controller.updateVariables();
-                                  }
-                                : null,
-                          );
-                        },
-                      ),
-                      Column(
-                        spacing: 2,
-                        children: List.generate(
-                          controller.companyVariables.length,
-                          (i) {
-                            final key = controller.companyVariables.keys
-                                .elementAt(i);
-                            final val = controller.companyVariables[key];
-                            return dataLine(
-                              constraints: constraints,
-                              index: i,
-                              title: key,
-                              value: val.toString(),
-                            );
-                          },
-                        ),
+                      Row(
+                        spacing: 40,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              spacing: 20,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                labelBox(
+                                  'Variables',
+                                  onPressed: () {
+                                    controller
+                                        .incentivePercentage
+                                        .text = controller.removePercent(
+                                      controller
+                                          .companyVariables['Incentive Percentage'],
+                                    );
+                                    controller
+                                        .vatPercentage
+                                        .text = controller.removePercent(
+                                      controller
+                                          .companyVariables['VAT Percentage'],
+                                    );
+                                    controller.taxNumber.text =
+                                        controller
+                                            .companyVariables['TAX Number'] ??
+                                        '';
+                                    variablesDialog(
+                                      constraints: constraints,
+                                      controller: controller,
+                                      onPressed:
+                                          controller.updatingVariables.isFalse
+                                          ? () {
+                                              controller.updateVariables();
+                                            }
+                                          : null,
+                                    );
+                                  },
+                                ),
+                                Column(
+                                  spacing: 2,
+                                  children: List.generate(
+                                    controller.companyVariables.length,
+                                    (i) {
+                                      final key = controller
+                                          .companyVariables
+                                          .keys
+                                          .elementAt(i);
+                                      final val =
+                                          controller.companyVariables[key];
+                                      return dataLine(
+                                        constraints: constraints,
+                                        index: i,
+                                        title: key,
+                                        value: val.toString(),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              spacing: 20,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GetX<CompanyVariablesController>(
+                                  builder: (controller) {
+                                    return labelBox(
+                                      'Inspection Report',
+                                      icon:
+                                          controller
+                                              .updatingInspectionReport
+                                              .isFalse
+                                          ? const Icon(Icons.save_outlined)
+                                          : const SpinKitDoubleBounce(
+                                              color: Colors.grey,
+                                              size: 20,
+                                            ),
+                                      onPressed:
+                                          controller
+                                              .updatingInspectionReport
+                                              .isFalse
+                                          ? () {
+                                              controller
+                                                  .updateInspectionReport();
+                                            }
+                                          : null,
+                                      iconToolTip: 'Save',
+                                    );
+                                  },
+                                ),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 300,
+                                        child: Row(
+                                          children: [
+                                            GetX<CompanyVariablesController>(
+                                              builder: (controller) {
+                                                return CupertinoCheckbox(
+                                                  checkColor: mainColor,
+                                                  activeColor:
+                                                      Colors.grey.shade200,
+                                                  value: controller
+                                                      .isBreakeAndTireSelected
+                                                      .value,
+                                                  onChanged: (value) {
+                                                    controller
+                                                        .selectForInspectionReport(
+                                                          "Break And Tire",
+                                                          value!,
+                                                        );
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                            Text(
+                                              'Break And Tire',
+                                              style: fontStyleForCheckBoxes,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 300,
+                                        child: Row(
+                                          children: [
+                                            GetX<CompanyVariablesController>(
+                                              builder: (controller) {
+                                                return CupertinoCheckbox(
+                                                  checkColor: mainColor,
+                                                  activeColor:
+                                                      Colors.grey.shade200,
+                                                  value: controller
+                                                      .isInteriorExteriorSelected
+                                                      .value,
+                                                  onChanged: (value) {
+                                                    controller
+                                                        .selectForInspectionReport(
+                                                          "Interior / Exterior",
+                                                          value!,
+                                                        );
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                            Text(
+                                              'Interior / Exterior',
+                                              style: fontStyleForCheckBoxes,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          GetX<CompanyVariablesController>(
+                                            builder: (controller) {
+                                              return CupertinoCheckbox(
+                                                checkColor: mainColor,
+                                                activeColor:
+                                                    Colors.grey.shade200,
+                                                value: controller
+                                                    .isUnderVehicleSelected
+                                                    .value,
+                                                onChanged: (value) {
+                                                  controller
+                                                      .selectForInspectionReport(
+                                                        "Under Vehicle",
+                                                        value!,
+                                                      );
+                                                },
+                                              );
+                                            },
+                                          ),
+                                          Text(
+                                            'Under Vehicle',
+                                            style: fontStyleForCheckBoxes,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 300,
+                                        child: Row(
+                                          children: [
+                                            GetX<CompanyVariablesController>(
+                                              builder: (controller) {
+                                                return CupertinoCheckbox(
+                                                  checkColor: mainColor,
+                                                  activeColor:
+                                                      Colors.grey.shade200,
+                                                  value: controller
+                                                      .isUnderHoodSelected
+                                                      .value,
+                                                  onChanged: (value) {
+                                                    controller
+                                                        .selectForInspectionReport(
+                                                          "Under Hood",
+                                                          value!,
+                                                        );
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                            Text(
+                                              'Under Hood',
+                                              style: fontStyleForCheckBoxes,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 300,
+                                        child: Row(
+                                          children: [
+                                            GetX<CompanyVariablesController>(
+                                              builder: (controller) {
+                                                return CupertinoCheckbox(
+                                                  checkColor: mainColor,
+                                                  activeColor:
+                                                      Colors.grey.shade200,
+                                                  value: controller
+                                                      .isBatteryPerformaceSelected
+                                                      .value,
+                                                  onChanged: (value) {
+                                                    controller
+                                                        .selectForInspectionReport(
+                                                          "Battery Performace",
+                                                          value!,
+                                                        );
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                            Text(
+                                              'Battery Performace',
+                                              style: fontStyleForCheckBoxes,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          GetX<CompanyVariablesController>(
+                                            builder: (controller) {
+                                              return CupertinoCheckbox(
+                                                checkColor: mainColor,
+                                                activeColor:
+                                                    Colors.grey.shade200,
+                                                value: controller
+                                                    .isBodyDamageSelected
+                                                    .value,
+                                                onChanged: (value) {
+                                                  controller
+                                                      .selectForInspectionReport(
+                                                        "Body Damage",
+                                                        value!,
+                                                      );
+                                                },
+                                              );
+                                            },
+                                          ),
+                                          Text(
+                                            'Body Damage',
+                                            style: fontStyleForCheckBoxes,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   );
@@ -178,7 +425,12 @@ class CompanyVariables extends StatelessWidget {
     );
   }
 
-  Row labelBox(String label, {void Function()? onPressed}) {
+  Row labelBox(
+    String label, {
+    void Function()? onPressed,
+    Widget? icon,
+    String? iconToolTip,
+  }) {
     return Row(
       spacing: 20,
       children: [
@@ -193,10 +445,10 @@ class CompanyVariables extends StatelessWidget {
         onPressed != null
             ? IconButton(
                 iconSize: 20,
-                tooltip: 'Edit',
+                tooltip: iconToolTip ?? 'Edit',
                 color: Colors.grey.shade700,
                 onPressed: onPressed,
-                icon: const Icon(Icons.edit),
+                icon: icon ?? const Icon(Icons.edit),
               )
             : const SizedBox(),
       ],
