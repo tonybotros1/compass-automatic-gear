@@ -185,102 +185,113 @@ Padding buildInspectionReportBody(BuildContext context) {
             );
           },
         ),
-        // const SizedBox(height: 10),
-        // labelContainer(
-        //   lable: Row(
-        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //     children: [
-        //       Text('PRIOR BODY DAMAGE', style: fontStyle1),
-        //       GetBuilder<CardsScreenController>(
-        //         builder: (controller) {
-        //           return controller.damagePoints.isNotEmpty &&
-        //                   controller.inEditMode.isFalse
-        //               ? IconButton(
-        //                   onPressed: () {
-        //                     controller.removeLastMark();
-        //                   },
-        //                   icon: const Icon(
-        //                     Icons.repartition_outlined,
-        //                     color: Colors.white,
-        //                   ),
-        //                 )
-        //               : const SizedBox();
-        //         },
-        //       ),
-        //     ],
-        //   ),
-        // ),
-        // Container(
-        //   padding: const EdgeInsets.all(10),
-        //   decoration: containerDecor,
-        //   child: Column(
-        //     children: [
-        //       GetBuilder<CardsScreenController>(
-        //         builder: (controller) {
-        //           return controller.inEditMode.isFalse
-        //               ? LayoutBuilder(
-        //                   builder: (context, constraints) {
-        //                     WidgetsBinding.instance.addPostFrameCallback((_) {
-        //                       if (controller
-        //                               .repaintBoundaryKey
-        //                               .currentContext !=
-        //                           null) {
-        //                         controller.updateDamagePoints();
-        //                         // Optionally, call your image capture function here
-        //                       }
-        //                     });
-        //                     return GestureDetector(
-        //                       onTapDown: (details) =>
-        //                           controller.addDamagePoint(details),
-        //                       child: RepaintBoundary(
-        //                         key: controller.repaintBoundaryKey,
-        //                         child: Stack(
-        //                           children: [
-        //                             Image.asset(
-        //                               'assets/vehicle.jpg',
-        //                               width: constraints.maxWidth,
-        //                               height: 500,
-        //                               key: controller.imageKey,
-        //                             ),
-        //                             CustomPaint(
-        //                               size: Size(constraints.maxWidth, 500),
-        //                               painter: DamagePainter(
-        //                                 controller.damagePoints,
-        //                               ),
-        //                               child: SizedBox(
-        //                                 width: constraints.maxWidth,
-        //                                 height: 500,
-        //                               ),
-        //                             ),
-        //                           ],
-        //                         ),
-        //                       ),
-        //                     );
-        //                   },
-        //                 )
-        //               : CachedNetworkImage(
-        //                   cacheManager: controller.customCachedManeger,
-        //                   progressIndicatorBuilder: (context, url, progress) =>
-        //                       Padding(
-        //                         padding: const EdgeInsets.all(30.0),
-        //                         child: Center(
-        //                           child: CircularProgressIndicator(
-        //                             value: progress.progress,
-        //                             color: mainColor,
-        //                             strokeWidth: 3,
-        //                           ),
-        //                         ),
-        //                       ),
-        //                   imageUrl: controller.carDialogImageURL.value,
-        //                   key: UniqueKey(),
-        //                   errorWidget: (context, url, error) =>
-        //                       const Icon(Icons.error),
-        //                 );
-        //         },
-        //       ),
-        //     ],
-        //   ),
-        // ),
+        GetX<CardsScreenController>(
+          builder: (controller) {
+            return controller.canShowBodyDamage.isTrue
+                ? Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      labelContainer(
+                        lable: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('PRIOR BODY DAMAGE', style: fontStyle1),
+                            controller.damagePoints.isNotEmpty &&
+                                    controller.inEditMode.isFalse
+                                ? IconButton(
+                                    onPressed: () {
+                                      controller.removeLastMark();
+                                    },
+                                    icon: const Icon(
+                                      Icons.repartition_outlined,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const SizedBox(),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: containerDecor,
+                        child: Column(
+                          children: [
+                            controller.inEditMode.isFalse
+                                ? LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      WidgetsBinding.instance.addPostFrameCallback((
+                                        _,
+                                      ) {
+                                        if (controller
+                                                .repaintBoundaryKey
+                                                .currentContext !=
+                                            null) {
+                                          controller.updateDamagePoints();
+                                          // Optionally, call your image capture function here
+                                        }
+                                      });
+                                      return GestureDetector(
+                                        onTapDown: (details) =>
+                                            controller.addDamagePoint(details),
+                                        child: RepaintBoundary(
+                                          key: controller.repaintBoundaryKey,
+                                          child: Stack(
+                                            children: [
+                                              Image.asset(
+                                                'assets/vehicle.jpg',
+                                                width: constraints.maxWidth,
+                                                height: 500,
+                                                key: controller.imageKey,
+                                              ),
+                                              CustomPaint(
+                                                size: Size(
+                                                  constraints.maxWidth,
+                                                  500,
+                                                ),
+                                                painter: DamagePainter(
+                                                  controller.damagePoints,
+                                                ),
+                                                child: SizedBox(
+                                                  width: constraints.maxWidth,
+                                                  height: 500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : controller.carDialogImageURL.value.isNotEmpty
+                                ? CachedNetworkImage(
+                                    cacheManager:
+                                        controller.customCachedManeger,
+                                    progressIndicatorBuilder:
+                                        (context, url, progress) => Padding(
+                                          padding: const EdgeInsets.all(30.0),
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                              value: progress.progress,
+                                              color: mainColor,
+                                              strokeWidth: 3,
+                                            ),
+                                          ),
+                                        ),
+                                    imageUrl:
+                                        controller.carDialogImageURL.value,
+                                    key: UniqueKey(),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  )
+                                : const SizedBox(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
         const SizedBox(height: 10),
         labelContainer(
           lable: Row(
@@ -506,437 +517,522 @@ Padding buildInspectionReportBody(BuildContext context) {
                 : const SizedBox();
           },
         ),
-        const SizedBox(height: 10),
-        labelContainer(lable: Text('BREAK AND TIRE', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: Column(
-            spacing: 10,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        GetX<CardsScreenController>(
+          builder: (controller) {
+            return controller.canShowBreakAndTire.isTrue
+                ? Column(
                     children: [
-                      hintSection(hint: 'Checked And Ok', color: Colors.green),
-                      hintSection(
-                        hint: 'May Need Future Attention',
-                        color: Colors.yellow,
+                      const SizedBox(height: 10),
+                      labelContainer(
+                        lable: Text('BREAK AND TIRE', style: fontStyle1),
                       ),
-                      hintSection(
-                        hint: 'Requires Immediate Attention',
-                        color: Colors.red,
-                      ),
-                    ],
-                  ),
-                  Image.asset('assets/car_wheel.png', width: 70),
-                ],
-              ),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  bool isMobile =
-                      constraints.maxWidth < 600; // Adjust breakpoint as needed
-                  return Column(
-                    children: [
-                      // Front Section
-                      Row(
-                        mainAxisAlignment: isMobile
-                            ? MainAxisAlignment.start
-                            : MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Left Front',
-                            style: textStyleForInspectionHints,
-                          ),
-                          if (!isMobile)
-                            Text(
-                              'Right Front',
-                              style: textStyleForInspectionHints,
-                            ),
-                        ],
-                      ),
-                      GetBuilder<CardsScreenController>(
-                        builder: (controller) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: isMobile
-                                ? [
-                                    breakAndTireWheel(
-                                      brakeLiningTextcontroller:
-                                          controller.leftFrontBrakeLining,
-                                      tireTreadTextController:
-                                          controller.leftFrontTireTread,
-                                      wearPatternTextController:
-                                          controller.leftFrontWearPattern,
-                                      tirePressureBeforeTextController:
-                                          controller
-                                              .leftFrontTirePressureBefore,
-                                      tirePressureAfterTextController:
-                                          controller.leftFrontTirePressureAfter,
-                                      dataMap: controller
-                                          .selectedCheckBoxIndicesForLeftFront,
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: containerDecor,
+                        child: Column(
+                          spacing: 10,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    hintSection(
+                                      hint: 'Checked And Ok',
+                                      color: Colors.green,
                                     ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      'Right Front',
-                                      style: textStyleForInspectionHints,
+                                    hintSection(
+                                      hint: 'May Need Future Attention',
+                                      color: Colors.yellow,
                                     ),
-                                    breakAndTireWheel(
-                                      brakeLiningTextcontroller:
-                                          controller.rightFrontBrakeLining,
-                                      tireTreadTextController:
-                                          controller.rightFrontTireTread,
-                                      wearPatternTextController:
-                                          controller.rightFrontWearPattern,
-                                      tirePressureBeforeTextController:
-                                          controller
-                                              .rightFrontTirePressureBefore,
-                                      tirePressureAfterTextController:
-                                          controller
-                                              .rightFrontTirePressureAfter,
-                                      dataMap: controller
-                                          .selectedCheckBoxIndicesForRightFront,
-                                    ),
-                                  ]
-                                : [
-                                    Row(
-                                      spacing: 5,
-                                      children: [
-                                        Expanded(
-                                          child: breakAndTireWheel(
-                                            brakeLiningTextcontroller:
-                                                controller.leftFrontBrakeLining,
-                                            tireTreadTextController:
-                                                controller.leftFrontTireTread,
-                                            wearPatternTextController:
-                                                controller.leftFrontWearPattern,
-                                            tirePressureBeforeTextController:
-                                                controller
-                                                    .leftFrontTirePressureBefore,
-                                            tirePressureAfterTextController:
-                                                controller
-                                                    .leftFrontTirePressureAfter,
-                                            dataMap: controller
-                                                .selectedCheckBoxIndicesForLeftFront,
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: breakAndTireWheel(
-                                            brakeLiningTextcontroller:
-                                                controller
-                                                    .rightFrontBrakeLining,
-                                            tireTreadTextController:
-                                                controller.rightFrontTireTread,
-                                            wearPatternTextController:
-                                                controller
-                                                    .rightFrontWearPattern,
-                                            tirePressureBeforeTextController:
-                                                controller
-                                                    .rightFrontTirePressureBefore,
-                                            tirePressureAfterTextController:
-                                                controller
-                                                    .rightFrontTirePressureAfter,
-                                            dataMap: controller
-                                                .selectedCheckBoxIndicesForRightFront,
-                                          ),
-                                        ),
-                                      ],
+                                    hintSection(
+                                      hint: 'Requires Immediate Attention',
+                                      color: Colors.red,
                                     ),
                                   ],
-                          );
-                        },
+                                ),
+                                Image.asset('assets/car_wheel.png', width: 70),
+                              ],
+                            ),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                bool isMobile =
+                                    constraints.maxWidth <
+                                    600; // Adjust breakpoint as needed
+                                return Column(
+                                  children: [
+                                    // Front Section
+                                    Row(
+                                      mainAxisAlignment: isMobile
+                                          ? MainAxisAlignment.start
+                                          : MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Left Front',
+                                          style: textStyleForInspectionHints,
+                                        ),
+                                        if (!isMobile)
+                                          Text(
+                                            'Right Front',
+                                            style: textStyleForInspectionHints,
+                                          ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: isMobile
+                                          ? [
+                                              breakAndTireWheel(
+                                                brakeLiningTextcontroller:
+                                                    controller
+                                                        .leftFrontBrakeLining,
+                                                tireTreadTextController:
+                                                    controller
+                                                        .leftFrontTireTread,
+                                                wearPatternTextController:
+                                                    controller
+                                                        .leftFrontWearPattern,
+                                                tirePressureBeforeTextController:
+                                                    controller
+                                                        .leftFrontTirePressureBefore,
+                                                tirePressureAfterTextController:
+                                                    controller
+                                                        .leftFrontTirePressureAfter,
+                                                dataMap: controller
+                                                    .selectedCheckBoxIndicesForLeftFront,
+                                              ),
+                                              const SizedBox(height: 10),
+                                              Text(
+                                                'Right Front',
+                                                style:
+                                                    textStyleForInspectionHints,
+                                              ),
+                                              breakAndTireWheel(
+                                                brakeLiningTextcontroller:
+                                                    controller
+                                                        .rightFrontBrakeLining,
+                                                tireTreadTextController:
+                                                    controller
+                                                        .rightFrontTireTread,
+                                                wearPatternTextController:
+                                                    controller
+                                                        .rightFrontWearPattern,
+                                                tirePressureBeforeTextController:
+                                                    controller
+                                                        .rightFrontTirePressureBefore,
+                                                tirePressureAfterTextController:
+                                                    controller
+                                                        .rightFrontTirePressureAfter,
+                                                dataMap: controller
+                                                    .selectedCheckBoxIndicesForRightFront,
+                                              ),
+                                            ]
+                                          : [
+                                              Row(
+                                                spacing: 5,
+                                                children: [
+                                                  Expanded(
+                                                    child: breakAndTireWheel(
+                                                      brakeLiningTextcontroller:
+                                                          controller
+                                                              .leftFrontBrakeLining,
+                                                      tireTreadTextController:
+                                                          controller
+                                                              .leftFrontTireTread,
+                                                      wearPatternTextController:
+                                                          controller
+                                                              .leftFrontWearPattern,
+                                                      tirePressureBeforeTextController:
+                                                          controller
+                                                              .leftFrontTirePressureBefore,
+                                                      tirePressureAfterTextController:
+                                                          controller
+                                                              .leftFrontTirePressureAfter,
+                                                      dataMap: controller
+                                                          .selectedCheckBoxIndicesForLeftFront,
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: breakAndTireWheel(
+                                                      brakeLiningTextcontroller:
+                                                          controller
+                                                              .rightFrontBrakeLining,
+                                                      tireTreadTextController:
+                                                          controller
+                                                              .rightFrontTireTread,
+                                                      wearPatternTextController:
+                                                          controller
+                                                              .rightFrontWearPattern,
+                                                      tirePressureBeforeTextController:
+                                                          controller
+                                                              .rightFrontTirePressureBefore,
+                                                      tirePressureAfterTextController:
+                                                          controller
+                                                              .rightFrontTirePressureAfter,
+                                                      dataMap: controller
+                                                          .selectedCheckBoxIndicesForRightFront,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                    ),
+                                    const SizedBox(height: 10),
+
+                                    // Rear Section
+                                    Row(
+                                      mainAxisAlignment: isMobile
+                                          ? MainAxisAlignment.start
+                                          : MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Left Rear',
+                                          style: textStyleForInspectionHints,
+                                        ),
+                                        if (!isMobile)
+                                          Text(
+                                            'Right Rear',
+                                            style: textStyleForInspectionHints,
+                                          ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: isMobile
+                                          ? [
+                                              breakAndTireWheel(
+                                                brakeLiningTextcontroller:
+                                                    controller
+                                                        .leftRearBrakeLining,
+                                                tireTreadTextController:
+                                                    controller
+                                                        .leftRearTireTread,
+                                                wearPatternTextController:
+                                                    controller
+                                                        .leftRearWearPattern,
+                                                tirePressureBeforeTextController:
+                                                    controller
+                                                        .leftRearTirePressureBefore,
+                                                tirePressureAfterTextController:
+                                                    controller
+                                                        .leftRearTirePressureAfter,
+                                                dataMap: controller
+                                                    .selectedCheckBoxIndicesForLeftRear,
+                                              ),
+                                              const SizedBox(height: 10),
+                                              Text(
+                                                'Right Rear',
+                                                style:
+                                                    textStyleForInspectionHints,
+                                              ),
+                                              breakAndTireWheel(
+                                                brakeLiningTextcontroller:
+                                                    controller
+                                                        .rightRearBrakeLining,
+                                                tireTreadTextController:
+                                                    controller
+                                                        .rightRearTireTread,
+                                                wearPatternTextController:
+                                                    controller
+                                                        .rightRearWearPattern,
+                                                tirePressureBeforeTextController:
+                                                    controller
+                                                        .rightRearTirePressureBefore,
+                                                tirePressureAfterTextController:
+                                                    controller
+                                                        .rightRearTirePressureAfter,
+                                                dataMap: controller
+                                                    .selectedCheckBoxIndicesForRightRear,
+                                              ),
+                                            ]
+                                          : [
+                                              Row(
+                                                spacing: 5,
+                                                children: [
+                                                  Expanded(
+                                                    child: breakAndTireWheel(
+                                                      brakeLiningTextcontroller:
+                                                          controller
+                                                              .leftRearBrakeLining,
+                                                      tireTreadTextController:
+                                                          controller
+                                                              .leftRearTireTread,
+                                                      wearPatternTextController:
+                                                          controller
+                                                              .leftRearWearPattern,
+                                                      tirePressureBeforeTextController:
+                                                          controller
+                                                              .leftRearTirePressureBefore,
+                                                      tirePressureAfterTextController:
+                                                          controller
+                                                              .leftRearTirePressureAfter,
+                                                      dataMap: controller
+                                                          .selectedCheckBoxIndicesForLeftRear,
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: breakAndTireWheel(
+                                                      brakeLiningTextcontroller:
+                                                          controller
+                                                              .rightRearBrakeLining,
+                                                      tireTreadTextController:
+                                                          controller
+                                                              .rightRearTireTread,
+                                                      wearPatternTextController:
+                                                          controller
+                                                              .rightRearWearPattern,
+                                                      tirePressureBeforeTextController:
+                                                          controller
+                                                              .rightRearTirePressureBefore,
+                                                      tirePressureAfterTextController:
+                                                          controller
+                                                              .rightRearTirePressureAfter,
+                                                      dataMap: controller
+                                                          .selectedCheckBoxIndicesForRightRear,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                            Column(
+                              children: List.generate(
+                                controller
+                                            .singleCheckBoxForBrakeAndTireList
+                                            .length *
+                                        2 -
+                                    1,
+                                (index) {
+                                  if (index.isEven) {
+                                    int itemIndex = index ~/ 2;
+                                    return singleCheckBoxesSection(
+                                      label: controller
+                                          .singleCheckBoxForBrakeAndTireList[itemIndex],
+                                      dataMap: controller
+                                          .selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
+                                    );
+                                  } else {
+                                    return const Divider();
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
+
+        GetX<CardsScreenController>(
+          builder: (controller) {
+            return controller.canShowInteriorExterior.isTrue
+                ? Column(
+                    children: [
                       const SizedBox(height: 10),
 
-                      // Rear Section
-                      Row(
-                        mainAxisAlignment: isMobile
-                            ? MainAxisAlignment.start
-                            : MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Left Rear', style: textStyleForInspectionHints),
-                          if (!isMobile)
+                      labelContainer(
+                        lable: Text('INTERIOIR / EXTERIOIR', style: fontStyle1),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: containerDecor,
+                        child: Column(
+                          children: List.generate(
+                            controller.entrioirExterioirList.length * 2 - 1,
+                            (index) {
+                              if (index.isEven) {
+                                int itemIndex = index ~/ 2;
+                                return checkBoxesSection(
+                                  label: controller
+                                      .entrioirExterioirList[itemIndex],
+                                  dataMap: controller
+                                      .selectedCheckBoxIndicesForInteriorExterior,
+                                );
+                              } else {
+                                return const Divider();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
+
+        GetX<CardsScreenController>(
+          builder: (controller) {
+            return controller.canShowUnderVehicle.isTrue
+                ? Column(
+                    children: [
+                      const SizedBox(height: 10),
+
+                      labelContainer(
+                        lable: Text('UNDER VEHICLE', style: fontStyle1),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: containerDecor,
+                        child: Column(
+                          children: List.generate(
+                            controller.underVehicleList.length * 2 - 1,
+                            (index) {
+                              if (index.isEven) {
+                                int itemIndex = index ~/ 2;
+                                return checkBoxesSection(
+                                  label: controller.underVehicleList[itemIndex],
+                                  dataMap: controller
+                                      .selectedCheckBoxIndicesForUnderVehicle,
+                                );
+                              } else {
+                                return const Divider();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
+
+        GetX<CardsScreenController>(
+          builder: (controller) {
+            return controller.canShowUnderHood.isTrue
+                ? Column(
+                    children: [
+                      const SizedBox(height: 10),
+
+                      labelContainer(
+                        lable: Text('UNDER HOOD', style: fontStyle1),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: containerDecor,
+                        child: Column(
+                          children: List.generate(
+                            controller.underHoodList.length * 2 - 1,
+                            (index) {
+                              if (index.isEven) {
+                                int itemIndex = index ~/ 2;
+                                return checkBoxesSection(
+                                  label: controller.underHoodList[itemIndex],
+                                  dataMap: controller
+                                      .selectedCheckBoxIndicesForUnderHood,
+                                );
+                              } else {
+                                return const Divider();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
+
+        GetX<CardsScreenController>(
+          builder: (controller) {
+            return controller.canShowBatteryPerformance.isTrue
+                ? Column(
+                    children: [
+                      const SizedBox(height: 10),
+
+                      labelContainer(
+                        lable: Text('BATTERY PERFORMANCE', style: fontStyle1),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: containerDecor,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              children: List.generate(
+                                controller.batteryPerformanceList.length * 2 -
+                                    1,
+                                (index) {
+                                  if (index.isEven) {
+                                    int itemIndex = index ~/ 2;
+                                    return checkBoxesSection(
+                                      label: controller
+                                          .batteryPerformanceList[itemIndex], // Corrected label
+                                      dataMap: controller
+                                          .selectedCheckBoxIndicesForBatteryPerformance,
+                                    );
+                                  } else {
+                                    return const Divider();
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 10),
                             Text(
-                              'Right Rear',
+                              'Battery Cold Cranking Amps',
                               style: textStyleForInspectionHints,
                             ),
-                        ],
-                      ),
-                      GetBuilder<CardsScreenController>(
-                        builder: (controller) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: isMobile
-                                ? [
-                                    breakAndTireWheel(
-                                      brakeLiningTextcontroller:
-                                          controller.leftRearBrakeLining,
-                                      tireTreadTextController:
-                                          controller.leftRearTireTread,
-                                      wearPatternTextController:
-                                          controller.leftRearWearPattern,
-                                      tirePressureBeforeTextController:
-                                          controller.leftRearTirePressureBefore,
-                                      tirePressureAfterTextController:
-                                          controller.leftRearTirePressureAfter,
-                                      dataMap: controller
-                                          .selectedCheckBoxIndicesForLeftRear,
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      'Right Rear',
-                                      style: textStyleForInspectionHints,
-                                    ),
-                                    breakAndTireWheel(
-                                      brakeLiningTextcontroller:
-                                          controller.rightRearBrakeLining,
-                                      tireTreadTextController:
-                                          controller.rightRearTireTread,
-                                      wearPatternTextController:
-                                          controller.rightRearWearPattern,
-                                      tirePressureBeforeTextController:
-                                          controller
-                                              .rightRearTirePressureBefore,
-                                      tirePressureAfterTextController:
-                                          controller.rightRearTirePressureAfter,
-                                      dataMap: controller
-                                          .selectedCheckBoxIndicesForRightRear,
-                                    ),
-                                  ]
-                                : [
-                                    Row(
-                                      spacing: 5,
-                                      children: [
-                                        Expanded(
-                                          child: breakAndTireWheel(
-                                            brakeLiningTextcontroller:
-                                                controller.leftRearBrakeLining,
-                                            tireTreadTextController:
-                                                controller.leftRearTireTread,
-                                            wearPatternTextController:
-                                                controller.leftRearWearPattern,
-                                            tirePressureBeforeTextController:
-                                                controller
-                                                    .leftRearTirePressureBefore,
-                                            tirePressureAfterTextController:
-                                                controller
-                                                    .leftRearTirePressureAfter,
-                                            dataMap: controller
-                                                .selectedCheckBoxIndicesForLeftRear,
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: breakAndTireWheel(
-                                            brakeLiningTextcontroller:
-                                                controller.rightRearBrakeLining,
-                                            tireTreadTextController:
-                                                controller.rightRearTireTread,
-                                            wearPatternTextController:
-                                                controller.rightRearWearPattern,
-                                            tirePressureBeforeTextController:
-                                                controller
-                                                    .rightRearTirePressureBefore,
-                                            tirePressureAfterTextController:
-                                                controller
-                                                    .rightRearTirePressureAfter,
-                                            dataMap: controller
-                                                .selectedCheckBoxIndicesForRightRear,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-              GetX<CardsScreenController>(
-                builder: (controller) {
-                  return Column(
-                    children: List.generate(
-                      controller.singleCheckBoxForBrakeAndTireList.length * 2 -
-                          1,
-                      (index) {
-                        if (index.isEven) {
-                          int itemIndex = index ~/ 2;
-                          return singleCheckBoxesSection(
-                            label: controller
-                                .singleCheckBoxForBrakeAndTireList[itemIndex],
-                            dataMap: controller
-                                .selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
-                          );
-                        } else {
-                          return const Divider();
-                        }
-                      },
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        labelContainer(lable: Text('INTERIOIR / EXTERIOIR', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: GetBuilder<CardsScreenController>(
-            builder: (controller) {
-              return Column(
-                children: List.generate(
-                  controller.entrioirExterioirList.length * 2 - 1,
-                  (index) {
-                    if (index.isEven) {
-                      int itemIndex = index ~/ 2;
-                      return checkBoxesSection(
-                        label: controller.entrioirExterioirList[itemIndex],
-                        dataMap: controller
-                            .selectedCheckBoxIndicesForInteriorExterior,
-                      );
-                    } else {
-                      return const Divider();
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        labelContainer(lable: Text('UNDER VEHICLE', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: GetBuilder<CardsScreenController>(
-            builder: (controller) {
-              return Column(
-                children: List.generate(
-                  controller.underVehicleList.length * 2 - 1,
-                  (index) {
-                    if (index.isEven) {
-                      int itemIndex = index ~/ 2;
-                      return checkBoxesSection(
-                        label: controller.underVehicleList[itemIndex],
-                        dataMap:
-                            controller.selectedCheckBoxIndicesForUnderVehicle,
-                      );
-                    } else {
-                      return const Divider();
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        labelContainer(lable: Text('UNDER HOOD', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: GetBuilder<CardsScreenController>(
-            builder: (controller) {
-              return Column(
-                children: List.generate(
-                  controller.underHoodList.length * 2 - 1,
-                  (index) {
-                    if (index.isEven) {
-                      int itemIndex = index ~/ 2;
-                      return checkBoxesSection(
-                        label: controller.underHoodList[itemIndex],
-                        dataMap: controller.selectedCheckBoxIndicesForUnderHood,
-                      );
-                    } else {
-                      return const Divider();
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        labelContainer(lable: Text('BATTERY PERFORMANCE', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: containerDecor,
-          child: GetBuilder<CardsScreenController>(
-            builder: (controller) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    children: List.generate(
-                      controller.batteryPerformanceList.length * 2 - 1,
-                      (index) {
-                        if (index.isEven) {
-                          int itemIndex = index ~/ 2;
-                          return checkBoxesSection(
-                            label: controller
-                                .batteryPerformanceList[itemIndex], // Corrected label
-                            dataMap: controller
-                                .selectedCheckBoxIndicesForBatteryPerformance,
-                          );
-                        } else {
-                          return const Divider();
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Battery Cold Cranking Amps',
-                    style: textStyleForInspectionHints,
-                  ),
-                  Row(
-                    spacing: 10,
-                    children: [
-                      Expanded(
-                        child: myTextFormFieldWithBorder(
-                          controller:
-                              controller.batteryColdCrankingAmpsFactorySpecs,
-                          onChanged: (value) {
-                            controller.updateEnteredField(
-                              'Battery Cold Cranking Amps',
-                              'Factory Specs',
-                              value,
-                              controller
-                                  .selectedCheckBoxIndicesForBatteryPerformance,
-                            );
-                          },
-                          isnumber: true,
-                          labelText: 'Factory Specs',
-                        ),
-                      ),
-                      Expanded(
-                        child: myTextFormFieldWithBorder(
-                          controller: controller.batteryColdCrankingAmpsActual,
-                          onChanged: (value) {
-                            controller.updateEnteredField(
-                              'Battery Cold Cranking Amps',
-                              'Actual',
-                              value,
-                              controller
-                                  .selectedCheckBoxIndicesForBatteryPerformance,
-                            );
-                          },
-                          isnumber: true,
-                          labelText: 'Actual',
+                            Row(
+                              spacing: 10,
+                              children: [
+                                Expanded(
+                                  child: myTextFormFieldWithBorder(
+                                    controller: controller
+                                        .batteryColdCrankingAmpsFactorySpecs,
+                                    onChanged: (value) {
+                                      controller.updateEnteredField(
+                                        'Battery Cold Cranking Amps',
+                                        'Factory Specs',
+                                        value,
+                                        controller
+                                            .selectedCheckBoxIndicesForBatteryPerformance,
+                                      );
+                                    },
+                                    isnumber: true,
+                                    labelText: 'Factory Specs',
+                                  ),
+                                ),
+                                Expanded(
+                                  child: myTextFormFieldWithBorder(
+                                    controller: controller
+                                        .batteryColdCrankingAmpsActual,
+                                    onChanged: (value) {
+                                      controller.updateEnteredField(
+                                        'Battery Cold Cranking Amps',
+                                        'Actual',
+                                        value,
+                                        controller
+                                            .selectedCheckBoxIndicesForBatteryPerformance,
+                                      );
+                                    },
+                                    isnumber: true,
+                                    labelText: 'Actual',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
-                ],
-              );
-            },
-          ),
+                  )
+                : const SizedBox();
+          },
         ),
+
         const SizedBox(height: 10),
         labelContainer(lable: Text('COMMENTS', style: fontStyle1)),
         Container(

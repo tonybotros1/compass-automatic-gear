@@ -11,9 +11,9 @@ import '../../consts.dart';
 class MainCardScreenController extends GetxController {
   List<Widget> buildScreens() {
     return [
-      NewCardsScreen(),
+      const NewCardsScreen(),
       const InspectionReposrt(),
-      DoneCardsScreen(),
+      const DoneCardsScreen(),
     ];
   }
 

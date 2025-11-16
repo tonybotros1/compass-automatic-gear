@@ -5,17 +5,22 @@ import '../../Controllers/Mobile section controllers/cards_screen_controller.dar
 import 'building_cards_screen.dart';
 
 class NewCardsScreen extends StatelessWidget {
-  NewCardsScreen({super.key});
-  final CardsScreenController cardsScreenController =
-      Get.put(CardsScreenController());
-
+  const NewCardsScreen({super.key});
+  
   @override
   Widget build(BuildContext context) {
-    return cardsScreen(
-      numberOfCars: cardsScreenController.numberOfNewCars,
-        context: context,
-        pageName: 'New Cards',
-        listOfData: cardsScreenController.newCarCards,
-        controller: cardsScreenController);
+    return GetBuilder<CardsScreenController>(
+      init: CardsScreenController(),
+      builder: (controller) {
+        return cardsScreen(
+          numberOfCars: controller.numberOfNewCars,
+          context: context,
+          pageName: 'New Cards',
+          listOfData: controller.newCarCards,
+          controller: controller,
+          isDoneScreen: false
+        );
+      },
+    );
   }
 }

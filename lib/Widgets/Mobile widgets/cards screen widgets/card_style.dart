@@ -16,15 +16,6 @@ Widget cardStyle({
       var carCard = listName[i];
       List<CarImage> carImages =
           carCard.inspectionReportDetails?.carImages ?? [];
-
-      // for (var item in carCard.inspectionReportDetails?.carImages ?? []) {
-      //   try {
-      //     carImages.add(item.toString());
-      //   } catch (e) {
-      //     // Handle the exception, or skip the item if necessary
-      //   }
-      // }
-
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Container(
@@ -120,7 +111,10 @@ Widget cardStyle({
               carImages.isNotEmpty
                   ? InkWell(
                       onTap: () {
-                        controller.openImageViewer(carImages, 0);
+                        controller.openImageViewer(
+                          carImages.map((img) => img.url).toList(),
+                          0,
+                        );
                       },
                       child: Container(
                         height: 270,
@@ -130,7 +124,11 @@ Widget cardStyle({
                           borderRadius: BorderRadius.circular(0),
                           child: CachedNetworkImage(
                             cacheManager: controller.customCachedManeger,
-                            imageUrl: carImages[0].url ?? '',
+                            imageUrl:
+                                carImages.isNotEmpty &&
+                                    controller.isValidUrl(carImages[0].url)
+                                ? carImages[0].url!
+                                : 'https://dummyimage.com/600x400/cccccc/000000&text=No+Image',
                             key: UniqueKey(),
                             fit: BoxFit.cover,
                             width: double.infinity,
@@ -183,139 +181,3 @@ Widget cardStyle({
     },
   );
 }
-
-
-// Row(
-//                 children: [
-//                   Expanded(
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         const Text(
-//                           'Customer:',
-//                           style: TextStyle(
-//                             fontSize: 19,
-//                             fontWeight: FontWeight.bold,
-//                             color: Colors.black54,
-//                           ),
-//                         ),
-//                         FittedBox(
-//                           child: Text(
-//                             '${carCard['customer']}',
-//                             style: const TextStyle(
-//                               fontSize: 16,
-//                               color: Colors.black54,
-//                             ),
-//                           ),
-//                         ),
-//                         const SizedBox(height: 8),
-//                         const Text(
-//                           'Car:',
-//                           style: TextStyle(
-//                             fontSize: 19,
-//                             fontWeight: FontWeight.bold,
-//                             color: Colors.black54,
-//                           ),
-//                         ),
-//                         Text(
-//                           '${carCard['car_brand']} | ${carCard['car_model']}',
-//                           style: const TextStyle(
-//                             fontSize: 16,
-//                             color: Colors.black54,
-//                           ),
-//                         ),
-//                         const SizedBox(height: 8),
-//                         const Text(
-//                           'Plate Number:',
-//                           style: TextStyle(
-//                             fontSize: 19,
-//                             fontWeight: FontWeight.bold,
-//                             color: Colors.black54,
-//                           ),
-//                         ),
-//                         FittedBox(
-//                           child: Text(
-//                             '${carCard['plate_number']}',
-//                             style: const TextStyle(
-//                               fontSize: 16,
-//                               color: Colors.black54,
-//                             ),
-//                           ),
-//                         ),
-//                         const SizedBox(height: 8),
-//                       ],
-//                     ),
-//                   ),
-//                   const SizedBox(width: 16),
-//                   Expanded(
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.end,
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         Text(
-//                           'Received On:',
-//                           style: TextStyle(
-//                             fontSize: 19,
-//                             fontWeight: FontWeight.bold,
-//                             color: mainColor,
-//                           ),
-//                         ),
-//                         Text(
-//                           textToDate(carCard['added_date']),
-//                           style: const TextStyle(
-//                             fontSize: 16,
-//                             color: Colors.black54,
-//                           ),
-//                         ),
-//                         const SizedBox(height: 15),
-//                         Row(
-//                           mainAxisAlignment: MainAxisAlignment.end,
-//                           children: [
-//                             Container(
-//                               width: 70,
-//                               height: 30,
-//                               decoration: BoxDecoration(
-//                                   borderRadius: BorderRadius.circular(25),
-//                                   color: color
-//                                   // carCard['status'] == true
-//                                   //     ? const Color.fromARGB(255, 50, 212, 56)
-//                                   //     : Colors.grey,
-//                                   ),
-//                               child: Center(
-//                                   child: Text(
-//                                 status,
-//                                 style: const TextStyle(color: Colors.white),
-//                               )
-//                                   //  carCard['label'] == true
-//                                   //     ? const Text(
-//                                   //         'New',
-//                                   //         style: TextStyle(color: Colors.white),
-//                                   //       )
-//                                   //     : const Text(
-//                                   //         'Added',
-//                                   //         style: TextStyle(color: Colors.white),
-//                                   //       ),
-//                                   ),
-//                             ),
-//                             const SizedBox(
-//                               width: 20,
-//                             ),
-//                             IconButton(
-//                               onPressed: () {
-//                                 controller.shareToSocialMedia(
-//                                   'Dear ${carCard['customer_name']},\n\nWe are pleased to inform you that we have received your car. Here are its details:\n\nBrand & Model: ${carCard['car_brand']}, ${carCard['car_model']}\nPlate:  ${carCard['plate_number']}\nMileage: ${carCard['car_mileage']} km\nChassis No.: ${carCard['chassis_number']}\nColor:  ${carCard['color']}\nReceived on: ${carCard['date']}\nShould you have any queries, please do not hesitate to reach out. Thank you for trusting us with your vehicle.\n\nWarm regards,\nCompass Automatic Gear',
-//                                 );
-//                               },
-//                               icon: Icon(
-//                                 Icons.share,
-//                                 color: mainColor,
-//                                 size: 35,
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ],
-//               ),

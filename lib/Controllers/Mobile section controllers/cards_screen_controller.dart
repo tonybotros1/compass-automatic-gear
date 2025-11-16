@@ -43,8 +43,10 @@ class CardsScreenController extends GetxController {
   // final RxList<DocumentSnapshot> allCarCards = RxList<DocumentSnapshot>([]);
   final RxList<InspectionReportModel> newCarCards =
       RxList<InspectionReportModel>([]);
+
   final RxList<InspectionReportModel> doneCarCards =
       RxList<InspectionReportModel>([]);
+
   final RxList<InspectionReportModel> filteredCarCards =
       RxList<InspectionReportModel>([]);
   Rx<TextEditingController> search = TextEditingController().obs;
@@ -137,6 +139,13 @@ class CardsScreenController extends GetxController {
   RxList<File> imagesList = RxList([]);
   final ImagePicker picker = ImagePicker();
   String backendUrl = backendTestURI;
+  RxMap companyDetails = RxMap({});
+  RxBool canShowBreakAndTire = RxBool(false);
+  RxBool canShowInteriorExterior = RxBool(false);
+  RxBool canShowUnderVehicle = RxBool(false);
+  RxBool canShowUnderHood = RxBool(false);
+  RxBool canShowBatteryPerformance = RxBool(false);
+  RxBool canShowBodyDamage = RxBool(false);
 
   // interioir / exterioir
   RxList entrioirExterioirList = RxList([
@@ -193,8 +202,8 @@ class CardsScreenController extends GetxController {
 
   @override
   void onInit() async {
-    getAllInspectionReporst();
-    // getAllCards();
+    getCurrentCompanyDetails();
+    getNewInspectionReporst();
     super.onInit();
   }
 
@@ -222,7 +231,41 @@ class CardsScreenController extends GetxController {
     return await helper.getAllEmployeesByDepartment('Job Cards');
   }
 
-  Future<void> getAllInspectionReporst() async {
+  bool isValidUrl(String? url) {
+    if (url == null || url.trim().isEmpty) return false;
+
+    try {
+      final uri = Uri.parse(url);
+      return uri.hasScheme && uri.host.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> getCurrentCompanyDetails() async {
+    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
+    List inspectionReport = companyDetails['inspection_report'];
+    if (inspectionReport.contains('Break And Tire')) {
+      canShowBreakAndTire.value = true;
+    }
+    if (inspectionReport.contains('Interior / Exterior')) {
+      canShowInteriorExterior.value = true;
+    }
+    if (inspectionReport.contains('Under Vehicle')) {
+      canShowUnderVehicle.value = true;
+    }
+    if (inspectionReport.contains('Under Hood')) {
+      canShowUnderHood.value = true;
+    }
+    if (inspectionReport.contains('Battery Performace')) {
+      canShowBatteryPerformance.value = true;
+    }
+    if (inspectionReport.contains('Body Damage')) {
+      canShowBodyDamage.value = true;
+    }
+  }
+
+  Future<void> getNewInspectionReporst() async {
     try {
       loading.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -241,10 +284,51 @@ class CardsScreenController extends GetxController {
         newCarCards.assignAll(
           cards.map((card) => InspectionReportModel.fromJson(card)),
         );
+        numberOfNewCars.value = newCarCards.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllInspectionReporst();
+          await getNewInspectionReporst();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
+      }
+
+      loading.value = false;
+    } catch (e) {
+      loading.value = false;
+    }
+  }
+
+  Future<void> getDoneInspectionReporst() async {
+    try {
+      loading.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/inspection_reports/get_done_job_cards_inspection_reports',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List cards = decoded['inspection_reports'];
+        doneCarCards.assignAll(
+          cards.map((card) => InspectionReportModel.fromJson(card)),
+        );
+        numberOfDoneCars.value = doneCarCards.length;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getDoneInspectionReporst();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -779,10 +863,6 @@ class CardsScreenController extends GetxController {
       // carDialogImageURL.value = imageUrl;
       return pngBytes;
     } catch (e) {
-      print("=======================");
-      print(e);
-      print("=======================");
-
       rethrow;
     }
   }
@@ -882,8 +962,6 @@ class CardsScreenController extends GetxController {
     damagePoints.value = relativePoints.map((rel) {
       return Offset(rel.dx * imageSize.width, rel.dy * imageSize.height);
     }).toList();
-
-    update();
   }
 
   // to check a box and save its value in the map
@@ -940,59 +1018,11 @@ class CardsScreenController extends GetxController {
     }
   }
 
-  // this function is to get the data name from id
-  String getdataName(String id, Map allData, {title = 'name'}) {
-    try {
-      final data = allData.entries.firstWhere((data) => data.key == id);
-      return data.value[title];
-    } catch (e) {
-      return '';
-    }
-  }
-
-  Future<void> getAllCards() async {
-    // try {
-    //   loading.value = true;
-
-    //   FirebaseFirestore.instance
-    //       .collection('job_cards')
-    //       .where('company_id', isEqualTo: companyId.value)
-    //       .orderBy('added_date', descending: true)
-    //       .snapshots()
-    //       .listen((QuerySnapshot<Map<String, dynamic>> event) {
-    //     // 1) Cast the underlying JSArray<dynamic> to the correct typed list:
-    //     final docs =
-    //         event.docs.cast<QueryDocumentSnapshot<Map<String, dynamic>>>();
-
-    //     // 2) Assign all cards first
-    //     allCarCards.assignAll(docs);
-
-    //     // 3) Clear and repartition into Draft vs Done
-    //     newCarCards
-    //       ..clear()
-    //       ..addAll(docs.where((doc) => doc.data()['label'] == 'Draft'));
-
-    //     doneCarCards
-    //       ..clear()
-    //       ..addAll(docs.where((doc) => doc.data()['label'] != 'Draft'));
-
-    //     // 4) Update counts and loading state
-    //     numberOfNewCars.value = newCarCards.length;
-    //     numberOfDoneCars.value = doneCarCards.length;
-    //     loading.value = false;
-    //   }, onError: (e) {
-    //     loading.value = false;
-    //   });
-    // } catch (e) {
-    //   loading.value = false;
-    // }
-  }
-
   // Function to filter the list based on search criteria
   Future<void> filterResults(String query) async {
     query = query.toLowerCase();
 
-    // List<DocumentSnapshot> filteredResults = [];
+    // List<InspectionReportModel> filteredResults = [];
 
     // for (var documentSnapshot in allCarCards) {
     //   final data = documentSnapshot.data() as Map<String, dynamic>?;
@@ -1026,25 +1056,6 @@ class CardsScreenController extends GetxController {
 
     // Update the list with the filtered results
     // filteredCarCards.assignAll(filteredResults);
-  }
-
-  Future<String> getModelName(String brandId, String modelId) async {
-    try {
-      var cities = await FirebaseFirestore.instance
-          .collection('all_brands')
-          .doc(brandId)
-          .collection('values')
-          .doc(modelId)
-          .get();
-
-      if (cities.exists) {
-        return cities.data()!['name'];
-      } else {
-        return '';
-      }
-    } catch (e) {
-      return ''; // Return empty string on error
-    }
   }
 
   void onSelectForCustomers(Map data) {
