@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -37,6 +36,7 @@ class CardsScreenController extends GetxController {
   TextEditingController vin = TextEditingController();
   TextEditingController mileage = TextEditingController();
   TextEditingController comments = TextEditingController();
+  TextEditingController jobNumber = TextEditingController();
   TextEditingController transmissionType = TextEditingController();
   TextEditingController fuelAmount = TextEditingController();
   TextEditingController customerEntityPhoneNumber = TextEditingController();
@@ -70,7 +70,7 @@ class CardsScreenController extends GetxController {
   RxMap allModels = RxMap({});
   // RxMap allColors = RxMap({});
   // RxMap allEngineTypes = RxMap({});
-  RxList<String> carImagesURLs = RxList<String>([]);
+  RxList<CarImage> carImagesURLs = RxList<CarImage>([]);
   RxString carDialogImageURL = RxString('');
   Uint8List? customerSignatureAsImage;
   Uint8List? advisorSignatureAsImage;
@@ -139,7 +139,7 @@ class CardsScreenController extends GetxController {
   RxList<File> imagesList = RxList([]);
   final ImagePicker picker = ImagePicker();
   String backendUrl = backendTestURI;
-  RxMap companyDetails = RxMap({});
+  // RxMap companyDetails = RxMap({});
   RxBool canShowBreakAndTire = RxBool(false);
   RxBool canShowInteriorExterior = RxBool(false);
   RxBool canShowUnderVehicle = RxBool(false);
@@ -202,9 +202,23 @@ class CardsScreenController extends GetxController {
 
   @override
   void onInit() async {
-    getCurrentCompanyDetails();
+    await getCurrentCompanyDetails();
     getNewInspectionReporst();
     super.onInit();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    scheduleUpdateDamagePoints();
+  }
+
+  void scheduleUpdateDamagePoints() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (repaintBoundaryKey.currentContext != null) {
+        updateDamagePoints();
+      }
+    });
   }
 
   Future<Map<String, dynamic>> getAllCustomers() async {
@@ -243,7 +257,7 @@ class CardsScreenController extends GetxController {
   }
 
   Future<void> getCurrentCompanyDetails() async {
-    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
+    Map companyDetails = await helper.getCurrentCompanyDetails();
     List inspectionReport = companyDetails['inspection_report'];
     if (inspectionReport.contains('Break And Tire')) {
       canShowBreakAndTire.value = true;
@@ -358,7 +372,7 @@ class CardsScreenController extends GetxController {
 
       request.fields['fuel_amount'] = fuelAmount.text;
       request.fields['job_date'] = convertDateToIson(date.text).toString();
-      request.fields['job_note'] = comments.text;
+      request.fields['comment'] = comments.text;
       request.fields['technician'] = technicianId.value;
       request.fields['customer'] = customerId.value;
       request.fields['car_brand'] = brandId.value;
@@ -463,6 +477,7 @@ class CardsScreenController extends GetxController {
       // final resBody = await response.stream.bytesToString();
       if (response.statusCode == 200) {
         Get.back();
+        showSnackBar('Done', 'Added Successfully');
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -477,156 +492,119 @@ class CardsScreenController extends GetxController {
         showSnackBar('Alert', 'Something went wrong please try again');
       }
     } catch (e) {
-      // print("+++++++++++++++++++++++");
-      // print(e);
-      // print("+++++++++++++++++++++++");
       Get.back();
       showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
 
-  // Future<void> addInspectionCard(BuildContext context) async {
-  //   // List to track all successfully uploaded storage references.
-  //   List<Reference> uploadedStorageRefs = [];
+  Future<void> updateInspectionCard() async {
+    try {
+      loadingScreen();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/inspection_reports/update_job_from_inspection_report/$currenyJobId',
+      );
+      final request = http.MultipartRequest("PUT", url);
 
-  //   try {
-  //     Map<String, dynamic> newData = {
-  //       'fuel_amount': fuelAmount.text,
-  //       'added_date': DateTime.now().toString(),
-  //       'label': 'Draft',
-  //       'job_status_1': '',
-  //       'job_status_2': '',
-  //       'quotation_status': '',
-  //       'car_brand_logo': carBrandLogo.value,
-  //       'technician': technicianId.value,
-  //       // 'company_id': companyId.value,
-  //       'car_brand': brandId.value,
-  //       'car_model': modelId.value,
-  //       'plate_number': plateNumber.text,
-  //       'plate_code': code.text,
-  //       'country': '',
-  //       'city': '',
-  //       'year': year.text,
-  //       'color': colorId.value,
-  //       'engine_type': engineTypeId.value,
-  //       'vehicle_identification_number': vin.text,
-  //       'transmission_type': transmissionType.text,
-  //       'mileage_in': mileage.text,
-  //       'mileage_out': '',
-  //       'mileage_in_out_diff': '',
-  //       'customer': customerId.value,
-  //       'contact_name': customerEntityName.text,
-  //       'contact_number': customerEntityPhoneNumber.text,
-  //       'contact_email': customerEntityEmail.text,
-  //       'credit_limit': customerCreditNumber.text,
-  //       'outstanding': '',
-  //       'saleMan': customerSaleManId.value,
-  //       'branch': '',
-  //       'currency': '',
-  //       'rate': '',
-  //       'payment_method': 'Cash',
-  //       'quotation_number': '',
-  //       'quotation_date': '',
-  //       'validity_days': '',
-  //       'validity_end_date': '',
-  //       'reference_number': '',
-  //       'delivery_time': '',
-  //       'quotation_warrenty_days': '',
-  //       'quotation_warrenty_km': '',
-  //       'quotation_notes': '',
-  //       'job_number': '',
-  //       'invoice_number': '',
-  //       'lpo_number': '',
-  //       'job_date': '',
-  //       'invoice_date': '',
-  //       'job_approval_date': '',
-  //       'job_start_date': '',
-  //       'job_cancelation_date': '',
-  //       'job_finish_date': '',
-  //       'job_delivery_date': '',
-  //       'job_warrenty_days': '',
-  //       'job_warrenty_km': '',
-  //       'job_warrenty_end_date': '',
-  //       'job_min_test_km': '',
-  //       'job_reference_1': '',
-  //       'job_reference_2': '',
-  //       'job_reference_3': '',
-  //       'job_notes': '',
-  //       'job_delivery_notes': '',
-  //       'inspection_report_comments': comments.text.trim(),
-  //       'left_front_wheel': selectedCheckBoxIndicesForLeftFront,
-  //       'right_front_wheel': selectedCheckBoxIndicesForRightFront,
-  //       'left_rear_wheel': selectedCheckBoxIndicesForLeftRear,
-  //       'right_rear_wheel': selectedCheckBoxIndicesForRightRear,
-  //       'interior_exterior': selectedCheckBoxIndicesForInteriorExterior,
-  //       'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
-  //       'under_hood': selectedCheckBoxIndicesForUnderHood,
-  //       'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
-  //       'extra_checks': selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
-  //     };
+      // جميع الحقول كما في إضافة
+      request.fields['fuel_amount'] = fuelAmount.text;
+      request.fields['job_date'] = convertDateToIson(date.text).toString();
+      request.fields['comment'] = comments.text;
+      request.fields['technician'] = technicianId.value;
+      request.fields['customer'] = customerId.value;
+      request.fields['car_brand'] = brandId.value;
+      request.fields['car_model'] = modelId.value;
+      request.fields['plate_number'] = plateNumber.text;
+      request.fields['code'] = code.text;
+      request.fields['mileage_in'] = mileage.text;
+      request.fields['engine_type'] = engineTypeId.value;
+      request.fields['year'] = year.text;
+      request.fields['transmission_type'] = transmissionType.text;
+      request.fields['vin'] = vin.text;
+      request.fields['color'] = colorId.value;
+      request.fields['car_brand_logo'] = carBrandLogo.value;
+      request.fields['customer_name'] = customerEntityName.text;
+      request.fields['customer_email'] = customerEntityEmail.text;
+      request.fields['customer_phone'] = customerEntityPhoneNumber.text;
+      request.fields['credit_limit'] = customerCreditNumber.text;
+      request.fields['salesman'] = customerSaleManId.value;
 
-  //     loadingScreen(context);
+      // فحص الخيارات
+      request.fields['interior_exterior'] = jsonEncode(
+        selectedCheckBoxIndicesForInteriorExterior,
+      );
+      request.fields['under_vehicle'] = jsonEncode(
+        selectedCheckBoxIndicesForUnderVehicle,
+      );
+      request.fields['under_hood'] = jsonEncode(
+        selectedCheckBoxIndicesForUnderHood,
+      );
+      request.fields['left_front_wheel'] = jsonEncode(
+        selectedCheckBoxIndicesForLeftFront,
+      );
+      request.fields['right_front_wheel'] = jsonEncode(
+        selectedCheckBoxIndicesForRightFront,
+      );
+      request.fields['left_rear_wheel'] = jsonEncode(
+        selectedCheckBoxIndicesForLeftRear,
+      );
+      request.fields['right_rear_wheel'] = jsonEncode(
+        selectedCheckBoxIndicesForRightRear,
+      );
+      request.fields['battery_performance'] = jsonEncode(
+        selectedCheckBoxIndicesForBatteryPerformance,
+      );
+      request.fields['extra_checks'] = jsonEncode(
+        selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
+      );
 
-  //     // Save car images if available.
-  //     if (imagesList.isNotEmpty) {
-  //       List<Map<String, dynamic>> uploadedImages = await saveCarImages();
-  //       // Add URLs to the data.
-  //       newData['car_images'] = uploadedImages
-  //           .map((item) => item['url'])
-  //           .toList();
-  //       // Track each uploaded image reference.
-  //       for (var item in uploadedImages) {
-  //         uploadedStorageRefs.add(item['ref']);
-  //       }
-  //     } else {
-  //       newData['car_images'] = [];
-  //     }
+      // الصور الجديدة
+      for (var imgFile in imagesList) {
+        final bytes = await imgFile.readAsBytes();
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'new_images',
+            bytes,
+            filename: imgFile.path.split('/').last,
+          ),
+        );
+      }
 
-  //     // Save car dialog image.
-  //     Map<String, dynamic> dialogResult = await saveCarDialogImageModified();
-  //     newData['car_dialog'] = dialogResult['url'];
-  //     uploadedStorageRefs.add(dialogResult['ref']);
+      // kept images IDs
+      request.fields['kept_images'] = jsonEncode(
+        carImagesURLs.map((img) => img.imagePublicId).toList(),
+      );
 
-  //     // Save signature images.
-  //     customerSignatureAsImage = await signatureControllerForCustomer
-  //         .toPngBytes();
-  //     advisorSignatureAsImage = await signatureControllerForAdvisor
-  //         .toPngBytes();
+      request.headers.addAll({
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'multipart/form-data',
+      });
 
-  //     if (customerSignatureAsImage != null) {
-  //       Map<String, dynamic> custResult = await saveSignatureImage(
-  //         customerSignatureAsImage,
-  //       );
-  //       newData['customer_signature'] = custResult['url'];
-  //       uploadedStorageRefs.add(custResult['ref']);
-  //     }
+      final response = await request.send();
 
-  //     if (advisorSignatureAsImage != null) {
-  //       Map<String, dynamic> advResult = await saveSignatureImage(
-  //         advisorSignatureAsImage,
-  //       );
-  //       newData['advisor_signature'] = advResult['url'];
-  //       uploadedStorageRefs.add(advResult['ref']);
-  //     }
-
-  //     // Save data to Firestore.
-  //     await FirebaseFirestore.instance.collection('job_cards').add(newData);
-
-  //     Get.back();
-  //     showSnackBar('Done', 'Added Successfully');
-  //   } catch (e) {
-  //     // Rollback: delete all uploaded files in case of any error.
-  //     for (Reference ref in uploadedStorageRefs) {
-  //       try {
-  //         await ref.delete();
-  //       } catch (deleteError) {
-  //         // Optionally log the deletion error.
-  //       }
-  //     }
-  //     Get.back();
-  //     showSnackBar('Failed', 'Please try again');
-  //   }
-  // }
+      if (response.statusCode == 200) {
+        Get.back();
+        showSnackBar('Done', 'Updated Successfully');
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateInspectionCard();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        Get.back();
+        showSnackBar('Alert', 'Something went wrong please try again');
+      }
+    } catch (e) {
+      Get.back();
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
 
   // ==================================================================================================
   Future<void> loadingDetailsVariables(InspectionReportModel carCard) async {
@@ -639,7 +617,9 @@ class CardsScreenController extends GetxController {
 
   void clearAllValues() {
     // Clear all TextEditingControllers
+    inEditMode.value = false;
     fuelAmount.clear();
+    jobNumber.text = '';
     transmissionType.clear();
     batteryColdCrankingAmpsFactorySpecs.clear();
     currenyJobId.value = '';
@@ -694,8 +674,6 @@ class CardsScreenController extends GetxController {
 
     // Reset Booleans and Integers
     loading.value = false;
-    numberOfNewCars.value = 0;
-    numberOfDoneCars.value = 0;
 
     // Reset RxString values
     customerId.value = '';
@@ -743,66 +721,6 @@ class CardsScreenController extends GetxController {
   final customCachedManeger = CacheManager(
     Config('customCacheKey', stalePeriod: const Duration(days: 3)),
   );
-
-  Future<void> editInspectionCard(BuildContext context, String jobId) async {
-    try {
-      var myData = {
-        'fuel_amount': fuelAmount.text,
-        'transmission_type': transmissionType.text,
-        'car_brand_logo': carBrandLogo.value,
-        'technician': technicianId.value,
-        // 'company_id': companyId.value,
-        'car_brand': brandId.value,
-        'car_model': modelId.value,
-        'plate_number': plateNumber.text,
-        'plate_code': code.text,
-        'year': year.text,
-        'color': colorId.value,
-        'engine_type': engineTypeId.value,
-        'vehicle_identification_number': vin.text,
-        'mileage_in': mileage.text,
-        'customer': customerId.value,
-        'contact_name': customerEntityName.text,
-        'contact_number': customerEntityPhoneNumber.text,
-        'contact_email': customerEntityEmail.text,
-        'credit_limit': customerCreditNumber.text,
-        'saleMan': customerSaleManId.value,
-        'inspection_report_comments': comments.text.trim(),
-        'left_front_wheel': selectedCheckBoxIndicesForLeftFront,
-        'right_front_wheel': selectedCheckBoxIndicesForRightFront,
-        'left_rear_wheel': selectedCheckBoxIndicesForLeftRear,
-        'right_rear_wheel': selectedCheckBoxIndicesForRightRear,
-        'interior_exterior': selectedCheckBoxIndicesForInteriorExterior,
-        'under_vehicle': selectedCheckBoxIndicesForUnderVehicle,
-        'under_hood': selectedCheckBoxIndicesForUnderHood,
-        'battery_performance': selectedCheckBoxIndicesForBatteryPerformance,
-        'extra_checks': selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire,
-        'car_images': carImagesURLs,
-      };
-
-      // loadingScreen(context);
-
-      if (imagesList.isNotEmpty) {
-        // List<Map<String, dynamic>> uploadedImages = await saveCarImages();
-        // Add URLs to the data.
-        // carImagesURLs.addAll(
-        //   uploadedImages.map((item) => item['url']).toList(),
-        // );
-
-        myData['car_images'] = carImagesURLs;
-      }
-      await FirebaseFirestore.instance
-          .collection('job_cards')
-          .doc(jobId)
-          .update(myData);
-      Get.back();
-      imagesList.clear();
-      showSnackBar('Done', 'Addedd Successfully');
-    } catch (e) {
-      Get.back();
-      showSnackBar('Failed', 'Please ty again');
-    }
-  }
 
   Future<dynamic> loadingScreen() {
     return showDialog(
@@ -854,17 +772,42 @@ class CardsScreenController extends GetxController {
         throw Exception('Error: Failed to convert image to byte data');
       }
       Uint8List pngBytes = byteData.buffer.asUint8List();
-      // final Reference storageRef = FirebaseStorage.instance.ref().child(
-      //   'car_images/${formatPhrase(brand.text)}_${DateTime.now().millisecondsSinceEpoch}.png',
-      // );
-      // final UploadTask uploadTask = storageRef.putData(pngBytes);
-      // await uploadTask;
-      // final String imageUrl = await storageRef.getDownloadURL();
-      // carDialogImageURL.value = imageUrl;
       return pngBytes;
     } catch (e) {
       rethrow;
     }
+  }
+
+  void addDamagePoint(TapDownDetails details) {
+    if (imageKey.currentContext == null) return;
+
+    final RenderBox imageBox =
+        imageKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset imagePosition = imageBox.localToGlobal(Offset.zero);
+    final Size imageSize = imageBox.size;
+
+    // Convert tap position to be relative to the image size (0.0 - 1.0)
+    final Offset localPosition = details.globalPosition - imagePosition;
+    final Offset relativePosition = Offset(
+      localPosition.dx / imageSize.width,
+      localPosition.dy / imageSize.height,
+    );
+
+    relativePoints.add(relativePosition);
+    updateDamagePoints(); // Convert to absolute positions for rendering
+  }
+
+  void updateDamagePoints() {
+    if (imageKey.currentContext == null) return;
+
+    final RenderBox imageBox =
+        imageKey.currentContext!.findRenderObject() as RenderBox;
+    final Size imageSize = imageBox.size;
+
+    // Convert relative positions back to absolute positions
+    damagePoints.value = relativePoints.map((rel) {
+      return Offset(rel.dx * imageSize.width, rel.dy * imageSize.height);
+    }).toList();
   }
 
   Future<Map<String, dynamic>> saveSignatureImage(
@@ -932,38 +875,6 @@ class CardsScreenController extends GetxController {
     relativePoints.removeLast();
   }
 
-  void addDamagePoint(TapDownDetails details) {
-    if (imageKey.currentContext == null) return;
-
-    final RenderBox imageBox =
-        imageKey.currentContext!.findRenderObject() as RenderBox;
-    final Offset imagePosition = imageBox.localToGlobal(Offset.zero);
-    final Size imageSize = imageBox.size;
-
-    // Convert tap position to be relative to the image size (0.0 - 1.0)
-    final Offset localPosition = details.globalPosition - imagePosition;
-    final Offset relativePosition = Offset(
-      localPosition.dx / imageSize.width,
-      localPosition.dy / imageSize.height,
-    );
-
-    relativePoints.add(relativePosition);
-    updateDamagePoints(); // Convert to absolute positions for rendering
-  }
-
-  void updateDamagePoints() {
-    if (imageKey.currentContext == null) return;
-
-    final RenderBox imageBox =
-        imageKey.currentContext!.findRenderObject() as RenderBox;
-    final Size imageSize = imageBox.size;
-
-    // Convert relative positions back to absolute positions
-    damagePoints.value = relativePoints.map((rel) {
-      return Offset(rel.dx * imageSize.width, rel.dy * imageSize.height);
-    }).toList();
-  }
-
   // to check a box and save its value in the map
   void updateSelectedBox(
     String label,
@@ -1019,43 +930,36 @@ class CardsScreenController extends GetxController {
   }
 
   // Function to filter the list based on search criteria
-  Future<void> filterResults(String query) async {
+  Future<void> filterResults(
+    String query,
+    List<InspectionReportModel> cards,
+  ) async {
     query = query.toLowerCase();
 
-    // List<InspectionReportModel> filteredResults = [];
+    List<InspectionReportModel> filteredResults = [];
 
-    // for (var documentSnapshot in allCarCards) {
-    //   final data = documentSnapshot.data() as Map<String, dynamic>?;
+    for (var card in cards) {
+      // Fetch the model name asynchronously
+      final modelName = card.carModelName ?? '';
+      final customerName = card.customerName ?? '';
+      final brandName = card.carBrandName ?? '';
+      final platNumber = card.plateNumber ?? '';
+      final date = textToDate(card.jobDate);
 
-    //   // Fetch the model name asynchronously
-    //   final modelName = await getModelName(
-    //     data?['car_brand'],
-    //     data?['car_model'],
-    //   );
-
-    //   final customerName = getdataName(
-    //     data?['customer'],
-    //     allCustomers,
-    //     title: 'entity_name',
-    //   );
-    //   final brandName = getdataName(data?['car_brand'], allBrands);
-    //   final platNumber = data?['plate_number'] ?? '';
-    //   final date = textToDate(data?['added_date']);
-
-    //   // Check if any of the fields contain the query
-    //   if (customerName.toString().toLowerCase().contains(query) ||
-    //       brandName.toString().toLowerCase().contains(query) ||
-    //       modelName.toString().toLowerCase().contains(
-    //         query,
-    //       ) || // Now modelName is included
-    //       platNumber.toString().toLowerCase().contains(query) ||
-    //       date.toString().toLowerCase().contains(query)) {
-    //     filteredResults.add(documentSnapshot);
-    //   }
-    // }
+      // Check if any of the fields contain the query
+      if (customerName.toString().toLowerCase().contains(query) ||
+          brandName.toString().toLowerCase().contains(query) ||
+          modelName.toString().toLowerCase().contains(
+            query,
+          ) || // Now modelName is included
+          platNumber.toString().toLowerCase().contains(query) ||
+          date.toString().toLowerCase().contains(query)) {
+        filteredResults.add(card);
+      }
+    }
 
     // Update the list with the filtered results
-    // filteredCarCards.assignAll(filteredResults);
+    filteredCarCards.assignAll(filteredResults);
   }
 
   void onSelectForCustomers(Map data) {

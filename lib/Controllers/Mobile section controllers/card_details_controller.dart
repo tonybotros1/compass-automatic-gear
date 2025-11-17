@@ -389,6 +389,7 @@ class CardDetailsController extends GetxController {
     controller.mileage.text = data.mileageIn.toString();
     controller.vin.text = data.vehicleIdentificationNumber ?? '';
     controller.comments.text = details.comment ?? '';
+    controller.jobNumber.text = data.jobNumber ?? '';
 
     // left front inside break and tire
     controller.selectedCheckBoxIndicesForLeftFront.assignAll(
@@ -525,7 +526,7 @@ class CardDetailsController extends GetxController {
     List<CarImage> urls = details.carImages ?? [];
 
     if (urls.isNotEmpty) {
-      controller.carImagesURLs.assignAll(urls.map((img) => img.url ?? ''));
+      controller.carImagesURLs.assignAll(urls);
     }
 
     controller.customerSignatureURL.value = details.customerSugnature ?? '';

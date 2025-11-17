@@ -181,3 +181,19 @@ Widget cardStyle({
     },
   );
 }
+
+
+// Dear Customer,
+
+// We are pleased to inform you that we have received your car. Here are its details:
+
+// Brand & Model: Mercedes GLE 43, 2018
+// Plate:  15/24704
+// Mileage: 131321 km
+// Chassis No.: 
+// Color:  white
+// Received on: 2025-11-17
+// Should you have any queries, please do not hesitate to reach out. Thank you for trusting us with your vehicle.
+
+// Warm regards,
+// Compass Automatic Gear

@@ -1,7 +1,6 @@
 import 'package:datahubai/Widgets/Mobile%20widgets/inspection%20report%20widgets/inspection_report_body.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../Controllers/Mobile section controllers/cards_screen_controller.dart';
 import '../../consts.dart';
 
@@ -13,18 +12,11 @@ class EditInspectionReport extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: FittedBox(
-          child: GetBuilder<CardsScreenController>(builder: (controller) {
-            return IconButton(
-                onPressed: () {
-                  controller.inEditMode.value = false;
-                  Get.back();
-                },
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                ));
-          }),
+        leading: IconButton(
+          onPressed: () {
+            Get.back();
+          },
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
         ),
         title: const Text(
           'Edit Details',
@@ -33,17 +25,16 @@ class EditInspectionReport extends StatelessWidget {
         centerTitle: true,
         backgroundColor: mainColor,
         actions: [
-          GetBuilder<CardsScreenController>(builder: (controller) {
-            return IconButton(
+          GetBuilder<CardsScreenController>(
+            builder: (controller) {
+              return IconButton(
                 onPressed: () {
-                  controller.editInspectionCard(
-                      context, controller.currenyJobId.value);
+                  controller.updateInspectionCard();
                 },
-                icon: const Icon(
-                  Icons.done_outline_rounded,
-                  color: Colors.white,
-                ));
-          })
+                icon: const Icon(Icons.done, color: Colors.white),
+              );
+            },
+          ),
         ],
       ),
       body: buildInspectionReportBody(context),

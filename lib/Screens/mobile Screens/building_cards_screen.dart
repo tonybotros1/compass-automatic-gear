@@ -166,8 +166,12 @@ class DataSearch extends SearchDelegate {
         final CardsScreenController cardsScreenController = Get.put(
           CardsScreenController(),
         );
+        RxList<InspectionReportModel> cards = RxList<InspectionReportModel>([
+          ...controller.newCarCards,
+          ...controller.doneCarCards,
+        ]);
 
-        cardsScreenController.filterResults(query);
+        cardsScreenController.filterResults(query, cards);
 
         if (controller.filteredCarCards.isEmpty) {
           return Center(

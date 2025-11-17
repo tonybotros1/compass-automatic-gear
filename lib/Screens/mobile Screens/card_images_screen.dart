@@ -98,7 +98,7 @@ class CardImagesScreen extends StatelessWidget {
                                                 controller.carImages
                                                     .map((img) => img.url)
                                                     .toList(),
-                                                index,
+                                                i,
                                               );
                                             },
                                             child: CachedNetworkImage(
@@ -141,10 +141,10 @@ class CardImagesScreen extends StatelessWidget {
                           );
                         },
                       )
-                    : Center(
+                    :const Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(25.0),
-                          child: CircularProgressIndicator(color: mainColor),
+                          padding:  EdgeInsets.all(25.0),
+                          child: Text('No Images...'),
                         ),
                       );
               },
