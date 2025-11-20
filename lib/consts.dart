@@ -879,6 +879,63 @@ Container statusBox(
   );
 }
 
+Text statusText(String status) {
+  return Text(
+    status,
+    style: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+      color: status == 'New' || status == "Active"
+          ? Colors.green
+          : status == 'Posted' || status == 'Sold' || status == "Probation"
+          ? Colors.teal
+          : status == 'Cancelled' || status == 'R' || status == "Inactive"
+          ? Colors.red
+          : status == 'Approved'
+          ? const Color(0xffD2665A)
+          : status == 'Ready' || status == 'D'
+          ? const Color(0xff7886C7)
+          : status == 'Closed' || status == 'Warranty'
+          ? Colors.black
+          : Colors.brown,
+    ),
+  );
+}
+Widget statusDot(String status, {double size = 14}) {
+  // Determine color based on status
+  Color statusColor = status == 'New' || status == "Active"
+      ? Colors.green
+      : status == 'Posted' || status == 'Sold' || status == "Probation"
+      ? Colors.teal
+      : status == 'Cancelled' || status == 'R' || status == "Inactive"
+      ? Colors.red
+      : status == 'Approved'
+      ? const Color(0xffD2665A)
+      : status == 'Ready' || status == 'D'
+      ? const Color(0xff7886C7)
+      : status == 'Closed' || status == 'Warranty'
+      ? Colors.black
+      : Colors.brown;
+
+  return Container(
+    height: size,
+    width: size,
+    decoration: BoxDecoration(
+      color: statusColor,
+      shape: BoxShape.circle,
+      boxShadow: [
+        BoxShadow(
+          color: statusColor.withValues(alpha: 0.4), 
+          spreadRadius: 1,
+          blurRadius: 6,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+  );
+}
+
+
 // final NumberFormat _formatter = NumberFormat("#,##0.00", "en_US");
 
 // void _formatInput(dynamic value) {

@@ -102,6 +102,7 @@ class CardImagesScreen extends StatelessWidget {
                                               );
                                             },
                                             child: CachedNetworkImage(
+                                              memCacheWidth: 1000,
                                               cacheManager: controller
                                                   .customCachedManeger,
                                               progressIndicatorBuilder:
@@ -125,7 +126,7 @@ class CardImagesScreen extends StatelessWidget {
                                                     ),
                                                   ),
                                               imageUrl: image.imageUrl,
-                                              key: UniqueKey(),
+                                              key: ValueKey(i),
                                               errorWidget:
                                                   (context, url, error) =>
                                                       const Icon(Icons.error),

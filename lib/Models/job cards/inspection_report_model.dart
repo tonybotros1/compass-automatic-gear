@@ -1,11 +1,3 @@
-// Refactored, type-safe, null-safe Dart models for the inspection/job-card
-// - Uses robust fromJson checks with json.containsKey
-// - Supports MongoDB extended JSON ("$oid", "$date") and plain values
-// - Converts date strings to DateTime
-// - Uses explicit classes instead of loose Map where practical
-// - Fixed car_images handling (List<String>)
-// - Added copyWith helpers and clean toJson implementations
-
 class InspectionReportModel {
   final String? id;
   final String? companyId;
@@ -35,6 +27,7 @@ class InspectionReportModel {
   final String? vehicleIdentificationNumber;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final DateTime? jobWarrantyEndDate;
   final InspectionReportDetails? inspectionReportDetails;
   final String? carBrandName;
   final String? carModelName;
@@ -77,6 +70,7 @@ class InspectionReportModel {
     this.carLogo,
     this.colorId,
     this.colorName,
+    this.jobWarrantyEndDate,
   });
 
   InspectionReportModel copyWith({
@@ -231,6 +225,11 @@ class InspectionReportModel {
           : null,
       updatedAt: json.containsKey('updatedAt')
           ? DateTime.tryParse(json['updatedAt'])
+          : null,
+      jobWarrantyEndDate: json.containsKey('job_warranty_end_date')
+          ? json['job_warranty_end_date'] != null
+                ? DateTime.tryParse(json['job_warranty_end_date'])
+                : null
           : null,
       inspectionReportDetails:
           json.containsKey('inspection_report_details') &&

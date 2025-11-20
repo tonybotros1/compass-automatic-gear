@@ -1,6 +1,7 @@
 import 'package:datahubai/Controllers/Mobile%20section%20controllers/cards_screen_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import '../../Widgets/Mobile widgets/inspection report widgets/inspection_report_body.dart';
 import '../../consts.dart';
 
@@ -9,6 +10,8 @@ class InspectionReposrt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomBarController = Get.find<PersistentTabController>();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -16,9 +19,10 @@ class InspectionReposrt extends StatelessWidget {
           builder: (controller) {
             return IconButton(
               onPressed: () {
+                bottomBarController.index = 0;
                 controller.clearAllValues();
               },
-              icon: const Icon(Icons.clear, color: Colors.white),
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
             );
           },
         ),
@@ -33,7 +37,12 @@ class InspectionReposrt extends StatelessWidget {
             builder: (controller) {
               return IconButton(
                 onPressed: () {
-                  controller.addInspectionCard();
+                  if (controller.formKey.currentState!.validate()) {
+                    // All required fields are valid
+                    controller.addInspectionCard();
+                  } else {
+                    // Show errors
+                  }
                 },
                 icon: const Icon(Icons.done_rounded, color: Colors.white),
               );

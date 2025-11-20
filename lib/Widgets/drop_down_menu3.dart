@@ -1211,12 +1211,22 @@ class CustomDropdown extends StatelessWidget {
       child: FormField<dynamic>(
         validator: (value) {
           if (validator == true) {
-            if (value == null || value.isEmpty) {
-              return "    Please Select an Option";
+            // if textcontroller has a value, accept it as valid automatically
+            if (controller.textController.value.isNotEmpty) {
+              return null;
             }
+
+            // if user selected a value, it's valid
+            if (controller.selectedKey.isNotEmpty) {
+              return null;
+            }
+
+            // otherwise invalid
+            return "    Please Select an Option";
           }
           return null;
         },
+
         builder: (FormFieldState<dynamic> state) {
           if (state.hasError) {
             controller.isValid.value = false;
@@ -1262,7 +1272,7 @@ class CustomDropdown extends StatelessWidget {
                                 controller.selectedValue.value = value;
                                 controller.isValid.value = true;
                                 controller.hideDropdown();
-                                state.didChange(value);
+                                state.didChange(key);
                                 onChanged?.call(key, value);
                                 if (nextFocusNode != null) {
                                   FocusScope.of(
@@ -1310,7 +1320,21 @@ class CustomDropdown extends StatelessWidget {
                                         child: Text(v[showedSelectedName]),
                                       );
                                     },
-                                onChanged: onChanged,
+                                onChanged: (key, value) {
+                                  controller.textController.value = '';
+                                  controller.selectedKey.value = key;
+                                  controller.selectedValue.value = value;
+                                  controller.isValid.value = true;
+
+                                  state.didChange(key); // ✔ IMPORTANT
+                                  onChanged?.call(key, value); // callback
+
+                                  if (nextFocusNode != null) {
+                                    FocusScope.of(
+                                      context,
+                                    ).requestFocus(nextFocusNode);
+                                  }
+                                },
                                 layerLink: _layerLink,
                               );
 
@@ -1434,6 +1458,7 @@ class CustomDropdown extends StatelessWidget {
                                       controller.selectedValue.value = {};
                                       controller.textController.value = '';
                                       controller.isValid.value = true;
+                                      state.didChange(null);
                                       onDelete?.call();
                                     },
                                   ),

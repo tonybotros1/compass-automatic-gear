@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -52,7 +53,10 @@ class ImageGalleryViewer extends StatelessWidget {
                 return PhotoViewGalleryPageOptions(
                   imageProvider: imageViewerController.imagesURLs[index]
                           is String
-                      ? NetworkImage(imageViewerController.imagesURLs[index])
+                      ? CachedNetworkImageProvider(
+                          imageViewerController.imagesURLs[index],
+                          cacheManager: imageViewerController.customCachedManeger,
+                        )
                       : FileImage(imageViewerController.imagesURLs[index]),
                   minScale: PhotoViewComputedScale.contained,
                   maxScale: PhotoViewComputedScale.covered * 2,

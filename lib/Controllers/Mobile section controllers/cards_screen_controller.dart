@@ -10,12 +10,14 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
 import '../../Models/job cards/inspection_report_model.dart';
 import '../../Screens/mobile Screens/card_details_screen.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
+import '../Main screen controllers/websocket_controller.dart';
 
 class CardsScreenController extends GetxController {
   TextEditingController customer = TextEditingController();
@@ -139,13 +141,15 @@ class CardsScreenController extends GetxController {
   RxList<File> imagesList = RxList([]);
   final ImagePicker picker = ImagePicker();
   String backendUrl = backendTestURI;
-  // RxMap companyDetails = RxMap({});
+  RxMap companyDetails = RxMap({});
   RxBool canShowBreakAndTire = RxBool(false);
   RxBool canShowInteriorExterior = RxBool(false);
   RxBool canShowUnderVehicle = RxBool(false);
   RxBool canShowUnderHood = RxBool(false);
   RxBool canShowBatteryPerformance = RxBool(false);
   RxBool canShowBodyDamage = RxBool(false);
+  final bottomBarController = Get.put(PersistentTabController());
+  final formKey = GlobalKey<FormState>();
 
   // interioir / exterioir
   RxList entrioirExterioirList = RxList([
@@ -199,24 +203,46 @@ class CardsScreenController extends GetxController {
   TextEditingController batteryColdCrankingAmpsFactorySpecs =
       TextEditingController();
   TextEditingController batteryColdCrankingAmpsActual = TextEditingController();
+  WebSocketService ws = Get.find<WebSocketService>();
 
   @override
   void onInit() async {
     await getCurrentCompanyDetails();
+    connectWebSocket();
+    assignTheWidgetsInInspectionReportScreen();
     getNewInspectionReporst();
     super.onInit();
   }
 
   @override
-  void onReady() {
-    super.onReady();
+  void onReady() async {
     scheduleUpdateDamagePoints();
+    super.onReady();
   }
 
   void scheduleUpdateDamagePoints() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (repaintBoundaryKey.currentContext != null) {
         updateDamagePoints();
+      }
+    });
+  }
+
+  void connectWebSocket() {
+    ws.events.listen((message) {
+      switch (message["type"]) {
+        case "inspection_report_added":
+          final newCounter = InspectionReportModel.fromJson(message["data"]);
+          newCarCards.insert(0,newCounter);
+          break;
+
+        case "inspection_report_updated":
+          final updated = InspectionReportModel.fromJson(message["data"]);
+          final index = newCarCards.indexWhere((m) => m.id == updated.id);
+          if (index != -1) {
+            newCarCards[index] = updated;
+          }
+          break;
       }
     });
   }
@@ -245,6 +271,10 @@ class CardsScreenController extends GetxController {
     return await helper.getAllEmployeesByDepartment('Job Cards');
   }
 
+  Future getCurrentJobCardStatus(String id) async {
+    return await helper.getJobCardStatus(id);
+  }
+
   bool isValidUrl(String? url) {
     if (url == null || url.trim().isEmpty) return false;
 
@@ -257,8 +287,16 @@ class CardsScreenController extends GetxController {
   }
 
   Future<void> getCurrentCompanyDetails() async {
-    Map companyDetails = await helper.getCurrentCompanyDetails();
-    List inspectionReport = companyDetails['inspection_report'];
+    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
+  }
+
+  void assignTheWidgetsInInspectionReportScreen() {
+    List inspectionReport = companyDetails.containsKey('inspection_report')
+        ? companyDetails['inspection_report'] ?? []
+        : [];
+    if (inspectionReport.isEmpty) {
+      return;
+    }
     if (inspectionReport.contains('Break And Tire')) {
       canShowBreakAndTire.value = true;
     }
@@ -477,6 +515,8 @@ class CardsScreenController extends GetxController {
       // final resBody = await response.stream.bytesToString();
       if (response.statusCode == 200) {
         Get.back();
+        bottomBarController.index = 0;
+        clearAllValues();
         showSnackBar('Done', 'Added Successfully');
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -499,6 +539,12 @@ class CardsScreenController extends GetxController {
 
   Future<void> updateInspectionCard() async {
     try {
+      Map jobStatus = await getCurrentJobCardStatus(currenyJobId.value);
+      String status1 = jobStatus['job_status_1'];
+      if (status1 != 'New' && status1 != '') {
+        showSnackBar('Alert', 'Only new jobs can be edited');
+        return;
+      }
       loadingScreen();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -585,7 +631,8 @@ class CardsScreenController extends GetxController {
       final response = await request.send();
 
       if (response.statusCode == 200) {
-        Get.back();
+        clearAllValues();
+        Get.close(3);
         showSnackBar('Done', 'Updated Successfully');
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -601,7 +648,7 @@ class CardsScreenController extends GetxController {
         showSnackBar('Alert', 'Something went wrong please try again');
       }
     } catch (e) {
-      Get.back();
+      Get.close(2);
       showSnackBar('Alert', 'Something went wrong please try again');
     }
   }

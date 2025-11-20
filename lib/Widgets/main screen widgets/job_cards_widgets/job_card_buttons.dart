@@ -138,61 +138,76 @@ Widget internalNotesButton(
 
 Widget inspectionFormButton(
   JobCardController controller,
-  jobId,
+  String jobId,
   JobCardModel jobData,
   BuildContext context,
 ) {
-  return ClickableHoverText(
-    // style: inspectionFormButtonStyle,
-    onTap: () {
-      controller.loadInspectionFormValues(jobId, jobData);
-      Get.dialog(
-        barrierDismissible: false,
-        Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          insetPadding: const EdgeInsets.all(20),
-          child: SizedBox(
-            width: 600,
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(5),
-                      topRight: Radius.circular(5),
+  return GetX<JobCardController>(
+    builder: (controller) {
+      return ClickableHoverText(
+        onTap: controller.loadingIspectionReport.isFalse
+            ? () {
+                controller.loadInspectionFormValues(jobId);
+                Get.dialog(
+                  barrierDismissible: false,
+                  Dialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
                     ),
-                    color: mainColor,
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        '🚘 Inspection Form',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
+                    insetPadding: const EdgeInsets.all(20),
+                    child: SizedBox(
+                      width: 600,
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                topRight: Radius.circular(5),
+                              ),
+                              color: mainColor,
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  '🚘 Inspection Form',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: buildInspectionReportBody(context),
+                            ),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: buildInspectionReportBody(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+                );
+              }
+            : null,
+        text: controller.loadingIspectionReport.isFalse
+            ? 'Inspection Form'
+            : "•••",
       );
     },
-    text: 'Inspection Form',
   );
 }
 

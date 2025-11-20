@@ -203,6 +203,7 @@ class CarDetailsScreen extends StatelessWidget {
                                                         );
                                                   },
                                                   child: CachedNetworkImage(
+                                                    memCacheWidth: 1000,
                                                     cacheManager:
                                                         cardDetailsController
                                                             .customCachedManeger,
@@ -233,7 +234,7 @@ class CarDetailsScreen extends StatelessWidget {
                                                             .carImages[index]
                                                             .url ??
                                                         '',
-                                                    key: UniqueKey(),
+                                                    key: ValueKey(index),
                                                     errorWidget:
                                                         (context, url, error) =>
                                                             const Icon(

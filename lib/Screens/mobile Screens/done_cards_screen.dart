@@ -16,10 +16,10 @@ class DoneCardsScreen extends StatelessWidget {
         return cardsScreen(
           numberOfCars: controller.numberOfDoneCars,
           context: context,
-          pageName: 'Finished Cards',
+          pageName: 'Other Cards',
           listOfData: controller.doneCarCards,
           controller: controller,
-          isDoneScreen: true
+          isDoneScreen: true,
         );
       },
     );

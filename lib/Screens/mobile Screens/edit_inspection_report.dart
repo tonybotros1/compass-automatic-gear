@@ -29,7 +29,12 @@ class EditInspectionReport extends StatelessWidget {
             builder: (controller) {
               return IconButton(
                 onPressed: () {
-                  controller.updateInspectionCard();
+                  if (controller.formKey.currentState!.validate()) {
+                    // All required fields are valid
+                    controller.updateInspectionCard();
+                  } else {
+                    // Show errors
+                  }
                 },
                 icon: const Icon(Icons.done, color: Colors.white),
               );

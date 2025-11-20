@@ -8,7 +8,6 @@ import '../../Models/job cards/inspection_report_model.dart';
 import '../../Widgets/Mobile widgets/cards screen widgets/card_style.dart';
 import '../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../consts.dart';
-import '../../main.dart';
 
 Scaffold cardsScreen({
   required BuildContext context,
@@ -35,21 +34,13 @@ Scaffold cardsScreen({
                         onPressed: () {
                           Get.back();
                         },
-                        child: Text('No', style: TextStyle(color: mainColor)),
+                        child: const Text('No'),
                       ),
                       CupertinoDialogAction(
+                        isDestructiveAction: true,
                         child: const Text('Yes'),
                         onPressed: () {
-                          alertDialog(
-                            context: context,
-                            content: "Are you sure you want to logout?",
-                            onPressed: () async {
-                              await globalPrefs?.remove('userId');
-                              await globalPrefs?.remove('companyId');
-                              await globalPrefs?.remove('userEmail');
-                              Get.offAllNamed('/');
-                            },
-                          );
+                          logout();
                         },
                       ),
                     ],

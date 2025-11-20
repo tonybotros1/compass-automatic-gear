@@ -49,6 +49,7 @@ class MyApp extends StatelessWidget {
           elevation: 10,
         ),
       ),
+      // home: PdfPreviewScreen(),
       initialRoute: '/',
       getPages: [
         GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),
