@@ -13,12 +13,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-// String backendTestURI = 'http://127.0.0.1:8000';
-// String webSocketURL = "ws://localhost:8000/ws";
+String backendTestURI = 'http://127.0.0.1:8000';
+String webSocketURL = "ws://localhost:8000/ws";
 
 // ======== testing urls for mobile ========
-String backendTestURI = "http://10.0.2.2:8000";
-String webSocketURL = "ws://10.0.2.2:8000/ws";
+// String backendTestURI = "http://10.0.2.2:8000";
+// String webSocketURL = "ws://10.0.2.2:8000/ws";
 
 // ======== production urls ========
 // String backendTestURI = 'https://datahubai-backend.onrender.com';

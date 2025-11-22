@@ -210,7 +210,9 @@ class Helpers {
   }
 
   // this function is to get all list values by code for drop down menu
-  Future<Map<String, dynamic>> getAllEmployeesByDepartment(String department) async {
+  Future<Map<String, dynamic>> getAllEmployeesByDepartment(
+    String department,
+  ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -428,7 +430,7 @@ class Helpers {
     }
   }
 
-  Future getCurrentCompanyDetails() async {
+  Future<Map<String, dynamic>> getCurrentCompanyDetails() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -443,11 +445,11 @@ class Helpers {
       if (response.statusCode == 200) {
         final decode = jsonDecode(response.body);
         final jsonData = decode['company_details'];
-        return jsonData;
+        return jsonData ?? {};
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCurrentCompanyDetails();
+          return await getCurrentCompanyDetails();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -456,6 +458,7 @@ class Helpers {
       } else {
         return {};
       }
+      return {};
     } catch (e) {
       return {};
     }
@@ -683,7 +686,7 @@ class Helpers {
     }
   }
 
-   Future getReceivingStatus(String id) async {
+  Future getReceivingStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -1060,6 +1063,4 @@ class Helpers {
       return {};
     }
   }
-
- 
 }

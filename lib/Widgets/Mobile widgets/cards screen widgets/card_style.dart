@@ -188,7 +188,7 @@ Widget cardStyle({
                                           : 'https://dummyimage.com/600x400/cccccc/000000&text=No+Image',
                                       key: ValueKey(carImages[index].url),
                                       fit: BoxFit.cover,
-                                      width: 380,
+                                      width: 370,
                                       height: 270,
 
                                       fadeInDuration: Duration.zero,

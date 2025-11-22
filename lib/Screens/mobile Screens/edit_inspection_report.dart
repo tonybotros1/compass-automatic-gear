@@ -29,12 +29,22 @@ class EditInspectionReport extends StatelessWidget {
             builder: (controller) {
               return IconButton(
                 onPressed: () {
-                  if (controller.formKey.currentState!.validate()) {
-                    // All required fields are valid
-                    controller.updateInspectionCard();
+                  if (controller.brand.text.isEmpty ||
+                      controller.model.text.isEmpty ||
+                      controller.plateNumber.text.isEmpty) {
+                    showSnackBar(
+                      'Alert',
+                      'Make sure to fill brand, model and plate number',
+                    );
                   } else {
-                    // Show errors
+                    controller.updateInspectionCard();
                   }
+                  // if (controller.formKey.currentState!.validate()) {
+                  //   // All required fields are valid
+                  //   controller.updateInspectionCard();
+                  // } else {
+                  //   // Show errors
+                  // }
                 },
                 icon: const Icon(Icons.done, color: Colors.white),
               );

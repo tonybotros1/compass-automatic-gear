@@ -149,7 +149,7 @@ class CardsScreenController extends GetxController {
   RxBool canShowBatteryPerformance = RxBool(false);
   RxBool canShowBodyDamage = RxBool(false);
   final bottomBarController = Get.put(PersistentTabController());
-  final formKey = GlobalKey<FormState>();
+  // final formKey = GlobalKey<FormState>();
 
   // interioir / exterioir
   RxList entrioirExterioirList = RxList([

@@ -37,12 +37,22 @@ class InspectionReposrt extends StatelessWidget {
             builder: (controller) {
               return IconButton(
                 onPressed: () {
-                  if (controller.formKey.currentState!.validate()) {
-                    // All required fields are valid
-                    controller.addInspectionCard();
+                  if (controller.brand.text.isEmpty ||
+                      controller.model.text.isEmpty ||
+                      controller.plateNumber.text.isEmpty) {
+                    showSnackBar(
+                      'Alert',
+                      'Make sure to fill brand, model and plate number',
+                    );
                   } else {
-                    // Show errors
+                    controller.addInspectionCard();
                   }
+                  // if (controller.formKey.currentState!.validate()) {
+                  //   // All required fields are valid
+                  //   controller.addInspectionCard();
+                  // } else {
+                  //   // Show errors
+                  // }
                 },
                 icon: const Icon(Icons.done_rounded, color: Colors.white),
               );

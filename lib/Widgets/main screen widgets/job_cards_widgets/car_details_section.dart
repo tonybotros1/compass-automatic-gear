@@ -94,7 +94,7 @@ Widget carDetailsSection() {
                   },
                 ),
                 myTextFormFieldWithBorder(
-                  width: 120,
+                  width: 119,
                   controller: controller.year,
                   labelText: 'Year',
                   hintText: 'Enter Year',

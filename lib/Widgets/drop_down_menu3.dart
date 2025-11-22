@@ -997,7 +997,11 @@ class DropdownController extends GetxController {
       ),
     );
 
-    Overlay.of(Get.overlayContext!).insert(overlayEntry!);
+    // Overlay.of(Get.overlayContext!).insert(overlayEntry!);
+    // searchFocusNode.requestFocus();
+    final overlayState = Overlay.of(context);
+
+    overlayState.insert(overlayEntry!);
     searchFocusNode.requestFocus();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
