@@ -139,15 +139,15 @@ Widget internalNotesButton(
 Widget inspectionFormButton(
   JobCardController controller,
   String jobId,
-  JobCardModel jobData,
+  // JobCardModel jobData,
   BuildContext context,
 ) {
   return GetX<JobCardController>(
     builder: (controller) {
       return ClickableHoverText(
         onTap: controller.loadingIspectionReport.isFalse
-            ? () {
-                controller.loadInspectionFormValues(jobId);
+            ? () async{
+             await  controller.loadInspectionFormValues(jobId);
                 Get.dialog(
                   barrierDismissible: false,
                   Dialog(
@@ -193,7 +193,7 @@ Widget inspectionFormButton(
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: buildInspectionReportBody(context),
+                              child: buildInspectionReportBody(Get.context!),
                             ),
                           ),
                         ],

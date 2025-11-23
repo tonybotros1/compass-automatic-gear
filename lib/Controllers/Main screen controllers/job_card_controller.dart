@@ -226,25 +226,6 @@ class JobCardController extends GetxController {
 
   Future<void> getCompanyDetails() async {
     companyDetails.assignAll(await helper.getCurrentCompanyDetails());
-    List inspectionReport = companyDetails['inspection_report'] ?? [];
-    if (inspectionReport.contains('Break And Tire')) {
-      controller.canShowBreakAndTire.value = true;
-    }
-    if (inspectionReport.contains('Interior / Exterior')) {
-      controller.canShowInteriorExterior.value = true;
-    }
-    if (inspectionReport.contains('Under Vehicle')) {
-      controller.canShowUnderVehicle.value = true;
-    }
-    if (inspectionReport.contains('Under Hood')) {
-      controller.canShowUnderHood.value = true;
-    }
-    if (inspectionReport.contains('Battery Performace')) {
-      controller.canShowBatteryPerformance.value = true;
-    }
-    if (inspectionReport.contains('Body Damage')) {
-      controller.canShowBodyDamage.value = true;
-    }
   }
 
   Future<Map<String, dynamic>> getBranches() async {
@@ -948,7 +929,7 @@ class JobCardController extends GetxController {
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse(
-        '$backendUrl/job_cards/get_current_job_card_inspection_report_details/$id',
+        '$backendUrl/inspection_reports/get_current_job_card_inspection_report_details/$id',
       );
       final response = await http.get(
         url,
@@ -959,11 +940,12 @@ class JobCardController extends GetxController {
         InspectionReportModel resport = InspectionReportModel.fromJson(
           decoded['inspection_report'],
         );
+        loadingIspectionReport.value = false;
         return resport;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await createQuotationCard(id);
+          await getJobCardInspctionReport(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1223,22 +1205,55 @@ class JobCardController extends GetxController {
     InspectionReportModel report = await getJobCardInspctionReport(id);
     InspectionReportDetails details =
         report.inspectionReportDetails ?? InspectionReportDetails();
+
+    List inspectionReport = companyDetails['inspection_report'] ?? [];
+    if (inspectionReport.contains('Break And Tire')) {
+      controller.canShowBreakAndTire.value = true;
+    } else {
+      controller.canShowBreakAndTire.value = false;
+    }
+    if (inspectionReport.contains('Interior / Exterior')) {
+      controller.canShowInteriorExterior.value = true;
+    } else {
+      controller.canShowInteriorExterior.value = false;
+    }
+    if (inspectionReport.contains('Under Vehicle')) {
+      controller.canShowUnderVehicle.value = true;
+    } else {
+      controller.canShowUnderVehicle.value = false;
+    }
+    if (inspectionReport.contains('Under Hood')) {
+      controller.canShowUnderHood.value = true;
+    } else {
+      controller.canShowUnderHood.value = false;
+    }
+    if (inspectionReport.contains('Battery Performace')) {
+      controller.canShowBatteryPerformance.value = true;
+    } else {
+      controller.canShowBatteryPerformance.value = false;
+    }
+    if (inspectionReport.contains('Body Damage')) {
+      controller.canShowBodyDamage.value = true;
+    } else {
+      controller.canShowBodyDamage.value = false;
+    }
+
     controller.imagesList.clear();
     controller.currenyJobId.value = id;
     controller.inEditMode.value = true;
     controller.technicianId.value = report.technicianId ?? '';
     controller.date.text = textToDate(report.jobDate);
-    controller.customer.text = customerName.text;
+    controller.customer.text = report.customerName ?? '';
     controller.customerId.value = report.customerId ?? '';
-    controller.brand.text = carBrand.text;
+    controller.brand.text = report.carBrandName ?? '';
     controller.brandId.value = report.carBrandId ?? '';
-    controller.model.text = carModel.text;
+    controller.model.text = report.carModelName ?? '';
     controller.modelId.value = report.carModelId ?? '';
-    controller.color.text = color.text;
+    controller.color.text = report.colorName ?? '';
     controller.colorId.value = report.colorId ?? '';
-    controller.plateNumber.text = plateNumber.text;
+    controller.plateNumber.text = report.plateNumber ?? '';
     controller.code.text = report.plateCode ?? '';
-    controller.engineType.text = engineType.text;
+    controller.engineType.text = report.engineTypeName ?? '';
     controller.year.text = report.year?.toString() ?? '';
     controller.mileage.text = report.mileageIn?.toString() ?? '';
     controller.vin.text = report.vehicleIdentificationNumber ?? '';
@@ -1360,6 +1375,15 @@ class JobCardController extends GetxController {
     controller.selectedCheckBoxIndicesForBatteryPerformance.assignAll(
       batteryPerformanceToMap(details.batteryPerformance),
     );
+
+    controller.batteryColdCrankingAmpsFactorySpecs.text =
+        controller
+            .selectedCheckBoxIndicesForBatteryPerformance['Battery Cold Cranking Amps']?['Factory Specs'] ??
+        '';
+    controller.batteryColdCrankingAmpsActual.text =
+        controller
+            .selectedCheckBoxIndicesForBatteryPerformance['Battery Cold Cranking Amps']?['Actual'] ??
+        '';
 
     controller.selectedCheckBoxIndicesForSingleCheckBoxForBrakeAndTire
         .assignAll(extraChecksToMap(details.extraChecks));

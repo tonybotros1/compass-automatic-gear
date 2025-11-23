@@ -376,7 +376,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                               controller.openImageViewer(
                                 controller.inEditMode.isFalse
                                     ? controller.imagesList
-                                    : controller.carImagesURLs,
+                                    : controller.carImagesURLs.map((img)=> img.url).toList(),
                                 i,
                               );
                             },

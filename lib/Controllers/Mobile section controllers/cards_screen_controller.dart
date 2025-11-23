@@ -233,7 +233,7 @@ class CardsScreenController extends GetxController {
       switch (message["type"]) {
         case "inspection_report_added":
           final newCounter = InspectionReportModel.fromJson(message["data"]);
-          newCarCards.insert(0,newCounter);
+          newCarCards.insert(0, newCounter);
           break;
 
         case "inspection_report_updated":
@@ -294,26 +294,38 @@ class CardsScreenController extends GetxController {
     List inspectionReport = companyDetails.containsKey('inspection_report')
         ? companyDetails['inspection_report'] ?? []
         : [];
-    if (inspectionReport.isEmpty) {
-      return;
-    }
+    // if (inspectionReport.isEmpty) {
+    //   return;
+    // }
     if (inspectionReport.contains('Break And Tire')) {
       canShowBreakAndTire.value = true;
+    } else {
+      canShowBreakAndTire.value = false;
     }
     if (inspectionReport.contains('Interior / Exterior')) {
       canShowInteriorExterior.value = true;
+    } else {
+      canShowInteriorExterior.value = false;
     }
     if (inspectionReport.contains('Under Vehicle')) {
       canShowUnderVehicle.value = true;
+    } else {
+      canShowUnderVehicle.value = false;
     }
     if (inspectionReport.contains('Under Hood')) {
       canShowUnderHood.value = true;
+    } else {
+      canShowUnderHood.value = false;
     }
     if (inspectionReport.contains('Battery Performace')) {
       canShowBatteryPerformance.value = true;
+    } else {
+      canShowBatteryPerformance.value = false;
     }
     if (inspectionReport.contains('Body Damage')) {
       canShowBodyDamage.value = true;
+    } else {
+      canShowBodyDamage.value = false;
     }
   }
 

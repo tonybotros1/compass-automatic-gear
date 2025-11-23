@@ -766,7 +766,6 @@ Future<dynamic> editJobCardDialog(
                             inspectionFormButton(
                               controller,
                               jobId,
-                              jobData,
                               context,
                             ),
                             point(),
