@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/state_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Models/job cards/job_card_model.dart';
 import 'consts.dart';
 
 enum RefreshResult {
@@ -271,7 +273,7 @@ class Helpers {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllListValues(code);
+          await getListDetails(code);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -672,7 +674,7 @@ class Helpers {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getJobCardStatus(id);
+          return await getJobCardStatus(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -703,7 +705,7 @@ class Helpers {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getJobCardStatus(id);
+          return await getReceivingStatus(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -736,7 +738,73 @@ class Helpers {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getJobCardStatus(id);
+          return await getQuotationCardStatus(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future getConverterStatus(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendTestURI/converters/get_converter_status/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final status = decoded['data'];
+        return status;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getConverterStatus(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future getIssuingStatus(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendTestURI/issue_items/get_issuing_status/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final status = decoded['data'];
+        return status;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getIssuingStatus(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1050,7 +1118,7 @@ class Helpers {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getJobCardStatus(id);
+          await getAPInvoiceStatus(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1061,6 +1129,41 @@ class Helpers {
       }
     } catch (e) {
       return {};
+    }
+  }
+
+  Future<List<JobCardModel>> getAllJobCards() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendTestURI/job_cards/get_all_job_cards');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decode = jsonDecode(response.body);
+        List<dynamic> jsonData = decode['all_jobs'];
+        List<JobCardModel> listOfJobs = [];
+        listOfJobs.assignAll(jsonData.map((job) => JobCardModel.fromJson(job)));
+        return listOfJobs;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getAllJobCards();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return [];
+      } else if (response.statusCode == 401) {
+        logout();
+        return [];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
     }
   }
 }

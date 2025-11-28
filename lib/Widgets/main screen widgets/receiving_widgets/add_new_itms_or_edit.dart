@@ -1,12 +1,14 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_controller.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/inventory_items.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
-import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'add_new_value_for_screen_button.dart';
 import 'showing_available_items.dart';
 
-Widget addNewitemsOrEdit({required ReceivingController controller,required BoxConstraints constraints}) {
+Widget addNewitemsOrEdit({
+  required ReceivingController controller,
+  required BoxConstraints constraints,
+}) {
   return SingleChildScrollView(
     child: SizedBox(
       width: double.infinity,
@@ -26,6 +28,17 @@ Widget addNewitemsOrEdit({required ReceivingController controller,required BoxCo
                   child: myTextFormFieldWithBorder(
                     labelText: 'Item Code',
                     controller: controller.itemCode.value,
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.more_horiz_outlined),
+                      onPressed: () {
+                        controller.searchForInventeryItems.clear();
+                        controller.getAllInventeryItems();
+                        showingAvailableItemsDialog(
+                          screenName: '📜 Inventory Items',
+                          constraints: constraints,
+                        );
+                      },
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -35,15 +48,6 @@ Widget addNewitemsOrEdit({required ReceivingController controller,required BoxCo
                     isEnabled: false,
                     controller: controller.itemName.value,
                   ),
-                ),
-                IconButton(
-                  tooltip: 'Selecet Value',
-                  onPressed: () {
-                    controller.searchForInventeryItems.clear();
-                    controller.getAllInventeryItems();
-                    showingAvailableItemsDialog(screenName: '📜 Inventory Items',constraints: constraints);
-                  },
-                  icon: Icon(Icons.more_vert_rounded, color: mainColor),
                 ),
                 IconButton(
                   tooltip: 'Add New Value',
@@ -100,4 +104,3 @@ Widget addNewitemsOrEdit({required ReceivingController controller,required BoxCo
     ),
   );
 }
-

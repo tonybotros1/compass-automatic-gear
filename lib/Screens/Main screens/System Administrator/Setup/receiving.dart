@@ -324,7 +324,12 @@ class Receiving extends StatelessWidget {
                       return Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(15),
+                            bottomRight: Radius.circular(15),
+                            topLeft: Radius.circular(2),
+                            topRight: Radius.circular(2),
+                          ),
                         ),
                         child: SizedBox(
                           width: constraints.maxWidth,

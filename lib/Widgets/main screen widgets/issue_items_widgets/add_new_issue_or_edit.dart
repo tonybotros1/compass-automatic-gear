@@ -1,9 +1,11 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/issue_items_controller.dart';
+import 'package:datahubai/Models/converters/converter_model.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../Models/job cards/job_card_model.dart';
 import '../../../consts.dart';
 import 'details_table.dart';
 
@@ -148,63 +150,86 @@ Widget addNewIssueOrEdit({
                                 GetX<IssueItemsController>(
                                   builder: (controller) {
                                     var selectedType = controller.issueType;
-                                    return Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        myTextFormFieldWithBorder(
-                                          controller: controller.jobDetails,
-                                          labelText: selectedType.value == ''
-                                              ? 'Not Selected'
-                                              : selectedType.value,
-                                          width: 310,
-                                          focusNode: controller.focusNode4,
-                                          onEditingComplete: () {
-                                            FocusScope.of(context).requestFocus(
-                                              controller.focusNode5,
-                                            );
-                                          },
-                                          textInputAction: TextInputAction.next,
+                                    return myTextFormFieldWithBorder(
+                                      controller: controller.jobDetails,
+                                      labelText: selectedType.value == ''
+                                          ? 'Not Selected'
+                                          : selectedType.value,
+                                      width: 310,
+                                      focusNode: controller.focusNode4,
+                                      onEditingComplete: () {
+                                        FocusScope.of(
+                                          context,
+                                        ).requestFocus(controller.focusNode5);
+                                      },
+                                      textInputAction: TextInputAction.next,
+                                      suffixIcon: IconButton(
+                                        focusNode: FocusNode(
+                                          skipTraversal: true,
                                         ),
-                                        IconButton(
-                                          focusNode: FocusNode(
-                                            skipTraversal: true,
-                                          ),
-                                          onPressed: () {
-                                            controller.selectedJobOrConverter(
-                                              selectedType.value,
-                                            );
-                                            dialog(
-                                              constraints: constraints,
-                                              context: context,
-                                              dialogName: '💳 Job Cards',
-                                              onPressedForClearSearch: () {
+                                        onPressed: () {
+                                          if (controller.issueType.isEmpty) {
+                                            return;
+                                          }
+                                          bool isJobSelected =
+                                              selectedType.value == 'Job Card';
+                                          controller.selectedJobOrConverter(
+                                            selectedType.value,
+                                          );
+                                          dialog(
+                                            constraints: constraints,
+                                            context: context,
+                                            dialogName: isJobSelected == true
+                                                ? '💳 Job Cards'
+                                                : "🚘 Converters",
+                                            onPressedForClearSearch: () {
+                                              if (isJobSelected) {
                                                 controller.searchForJobCards
                                                     .clear();
                                                 controller
                                                     .searchEngineForJobCards();
-                                              },
-                                              hintText: 'Search for jobs',
-                                              controllerForSearchField:
-                                                  controller.searchForJobCards,
-                                              onChangedForSearchField: (_) {
+                                              } else {
+                                                controller.searchForConverters
+                                                    .clear();
+                                                controller
+                                                    .searchEngineForConverters();
+                                              }
+                                            },
+                                            hintText: isJobSelected == true
+                                                ? 'Search for jobs'
+                                                : 'Search for converters',
+                                            controllerForSearchField:
+                                                isJobSelected == true
+                                                ? controller.searchForJobCards
+                                                : controller
+                                                      .searchForConverters,
+                                            onChangedForSearchField: (_) {
+                                              if (isJobSelected) {
                                                 controller
                                                     .searchEngineForJobCards();
-                                              },
+                                              } else {
+                                                controller
+                                                    .searchEngineForConverters();
+                                              }
+                                            },
 
-                                              table: jobCardTable(
-                                                constraints,
-                                                controller,
-                                                context,
-                                              ),
-                                            );
-                                          },
-                                          icon: Icon(
-                                            Icons.more_vert_rounded,
-                                            color: mainColor,
-                                          ),
+                                            table: isJobSelected == true
+                                                ? jobCardTable(
+                                                    constraints,
+                                                    controller,
+                                                    context,
+                                                  )
+                                                : converterTable(
+                                                    constraints,
+                                                    controller,
+                                                    context,
+                                                  ),
+                                          );
+                                        },
+                                        icon: const Icon(
+                                          Icons.more_horiz_rounded,
                                         ),
-                                      ],
+                                      ),
                                     );
                                   },
                                 ),
@@ -256,35 +281,64 @@ Widget addNewIssueOrEdit({
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Item Details', style: fontStyle1),
-                newItemsButton(context, constraints, controller, id),
+                newItemsButton(context, constraints, controller,false),
               ],
             ),
           ),
           detailsTableSection(
             context: context,
             constraints: constraints,
-            id: id,
-            firstColumnName: 'Item Details',
-            allItems: controller.allItems,
-            loadingItems: controller.loadingItems,
+            isConverter: false,
           ),
           const SizedBox(height: 10),
-          labelContainer(
-            lable: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Converter Details', style: fontStyle1),
-                // newItemButton(context, constraints, controller, id),
-              ],
-            ),
-          ),
-          detailsTableSection(
-            context: context,
-            constraints: constraints,
-            id: id,
-            firstColumnName: 'Converter Details',
-            allItems: controller.allConverters,
-            loadingItems: controller.loadingConverters,
+          GetX<IssueItemsController>(
+            builder: (controller) {
+              final showSection =
+                  controller.issueType.value != 'Converter' &&
+                  controller.issueType.isNotEmpty;
+
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.1),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                child: showSection
+                    ? Column(
+                        key: const ValueKey('converter_section'),
+                        children: [
+                          labelContainer(
+                            lable: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Converter Details', style: fontStyle1),
+                                newItemsButton(
+                                  context,
+                                  constraints,
+                                  controller,
+                                  true
+                                ),
+                              ],
+                            ),
+                          ),
+                          detailsTableSection(
+                            context: context,
+                            constraints: constraints,
+                            isConverter: true,
+                          ),
+                        ],
+                      )
+                    : const SizedBox(key: ValueKey('empty')),
+              );
+            },
           ),
         ],
       ),
@@ -308,7 +362,7 @@ Future<dynamic> dialog({
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
         width: constraints.maxWidth / 1.5,
-        height: 500,
+        // height: 600,
         child: Column(
           children: [
             // Header
@@ -325,7 +379,7 @@ Future<dynamic> dialog({
                 children: [
                   Text(dialogName, style: fontStyleForScreenNameUsedInButtons),
                   const Spacer(),
-                  closeButton,
+                  closeIcon(),
                 ],
               ),
             ),
@@ -343,6 +397,7 @@ Future<dynamic> dialog({
                       width: 400,
                       height: 50,
                       child: SearchBar(
+                        backgroundColor: WidgetStateProperty.all(Colors.white),
                         trailing: [
                           IconButton(
                             onPressed: onPressedForClearSearch,
@@ -352,7 +407,7 @@ Future<dynamic> dialog({
                         leading: const Icon(Icons.search, color: Colors.grey),
                         shape: WidgetStateProperty.all(
                           RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(5),
                           ),
                         ),
                         hintText: hintText,
@@ -368,7 +423,6 @@ Future<dynamic> dialog({
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Full-width Scrollable Table
                     table ?? const SizedBox(),
                   ],
                 ),
@@ -408,6 +462,11 @@ Expanded jobCardTable(
                       dataRowMaxHeight: 40,
                       dataRowMinHeight: 30,
                       columnSpacing: 5,
+
+                      border: TableBorder.symmetric(
+                        outside: const BorderSide(),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       showBottomBorder: true,
                       dataTextStyle: regTextStyle,
                       headingTextStyle: fontStyleForTableHeader,
@@ -423,6 +482,12 @@ Expanded jobCardTable(
                           label: AutoSizedText(
                             constraints: constraints,
                             text: 'Car Brand',
+                          ),
+                        ),
+                        DataColumn(
+                          label: AutoSizedText(
+                            constraints: constraints,
+                            text: 'Car Model',
                           ),
                         ),
                         DataColumn(
@@ -450,13 +515,13 @@ Expanded jobCardTable(
                           ? List<DataRow>.generate(
                               controller.allJobCards.length,
                               (index) {
-                                final job = controller.allJobCards[index];
-                                final jobData =
-                                    job.data() as Map<String, dynamic>;
-                                final jobId = job.id;
+                                JobCardModel job =
+                                    controller.allJobCards[index];
+
+                                String jobId = job.id ?? '';
 
                                 return dataRowForTheTable(
-                                  jobData,
+                                  job,
                                   context,
                                   constraints,
                                   jobId,
@@ -468,13 +533,13 @@ Expanded jobCardTable(
                           : List<DataRow>.generate(
                               controller.filteredJobCards.length,
                               (index) {
-                                final job = controller.filteredJobCards[index];
-                                final jobData =
-                                    job.data() as Map<String, dynamic>;
-                                final jobId = job.id;
+                                JobCardModel job =
+                                    controller.filteredJobCards[index];
+
+                                String jobId = job.id ?? '';
 
                                 return dataRowForTheTable(
-                                  jobData,
+                                  job,
                                   context,
                                   constraints,
                                   jobId,
@@ -493,10 +558,10 @@ Expanded jobCardTable(
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> jobData,
-  context,
-  constraints,
-  jobId,
+  JobCardModel jobData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String jobId,
   IssueItemsController controller,
   int index,
 ) {
@@ -504,24 +569,215 @@ DataRow dataRowForTheTable(
     onSelectChanged: (_) {
       Get.back();
       controller.jobDetails.text =
-          '${jobData['job_number']} [${getdataName(jobData['car_brand'], controller.allBrands)}] [${jobData['plate_number']}]';
+          '${jobData.jobNumber ?? ''} [${jobData.carBrandName ?? ''} ${jobData.carModelName ?? ''}] [${jobData.plateNumber ?? ''}]';
     },
     color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-      // Alternate row colors
       return index % 2 == 0 ? Colors.grey[200] : Colors.white;
     }),
     cells: [
-      DataCell(Text(jobData['job_number'] ?? '')),
-      DataCell(Text((getdataName(jobData['car_brand'], controller.allBrands)))),
-      DataCell(Text(jobData['plate_number'] ?? '')),
-      DataCell(Text(jobData['vehicle_identification_number'] ?? '')),
       DataCell(
-        Text(
-          getdataName(
-            jobData['customer'],
-            controller.allCustomers,
-            title: 'entity_name',
-          ),
+        textForDataRowInTable(
+          text: jobData.jobNumber ?? '',
+          formatDouble: false,
+          color: Colors.green,
+          isBold: true,
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.carBrandName ?? '',
+          formatDouble: false,
+          color: Colors.red,
+          isBold: true,
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.carModelName ?? '',
+          formatDouble: false,
+          color: Colors.blueGrey,
+          isBold: true,
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.plateNumber ?? '',
+          formatDouble: false,
+          isBold: true,
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.vehicleIdentificationNumber ?? '',
+          formatDouble: false,
+          isBold: true,
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.customerName ?? '',
+          formatDouble: false,
+          color: Colors.teal,
+          isBold: true,
+          maxWidth: null,
+        ),
+      ),
+    ],
+  );
+}
+
+Expanded converterTable(
+  BoxConstraints constraints,
+  IssueItemsController controller,
+  BuildContext context,
+) {
+  return Expanded(
+    child: GetX<IssueItemsController>(
+      builder: (controller) {
+        return controller.loadingConverters.value
+            ? Center(child: loadingProcess)
+            : controller.loadingConverters.isFalse &&
+                  controller.allConverters.isEmpty
+            ? const Center(child: Text('No Data'))
+            : SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: constraints.maxWidth / 1.5 - 20,
+                    ),
+                    child: DataTable(
+                      showCheckboxColumn: false,
+                      horizontalMargin: horizontalMarginForTable,
+                      dataRowMaxHeight: 40,
+                      dataRowMinHeight: 30,
+                      columnSpacing: 5,
+
+                      border: TableBorder.symmetric(
+                        outside: const BorderSide(),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      showBottomBorder: true,
+                      dataTextStyle: regTextStyle,
+                      headingTextStyle: fontStyleForTableHeader,
+                      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+                      columns: [
+                        DataColumn(
+                          label: AutoSizedText(
+                            constraints: constraints,
+                            text: 'Converter Number',
+                          ),
+                        ),
+                        DataColumn(
+                          label: AutoSizedText(
+                            constraints: constraints,
+                            text: 'Converter Name',
+                          ),
+                        ),
+                        DataColumn(
+                          label: AutoSizedText(
+                            constraints: constraints,
+                            text: 'Description',
+                          ),
+                        ),
+                      ],
+                      rows:
+                          (controller.filteredConverters.isEmpty &&
+                              controller.searchForConverters.value.text.isEmpty)
+                          ? List<DataRow>.generate(
+                              controller.allConverters.length,
+                              (index) {
+                                ConverterModel converter =
+                                    controller.allConverters[index];
+
+                                String converterId = converter.id ?? '';
+
+                                return dataRowForTheConverterTable(
+                                  converter,
+                                  context,
+                                  constraints,
+                                  converterId,
+                                  controller,
+                                  index,
+                                );
+                              },
+                            )
+                          : List<DataRow>.generate(
+                              controller.filteredConverters.length,
+                              (index) {
+                                ConverterModel converter =
+                                    controller.filteredConverters[index];
+
+                                String converterId = converter.id ?? '';
+
+                                return dataRowForTheConverterTable(
+                                  converter,
+                                  context,
+                                  constraints,
+                                  converterId,
+                                  controller,
+                                  index,
+                                );
+                              },
+                            ),
+                    ),
+                  ),
+                ),
+              );
+      },
+    ),
+  );
+}
+
+DataRow dataRowForTheConverterTable(
+  ConverterModel converterData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String converterId,
+  IssueItemsController controller,
+  int index,
+) {
+  return DataRow(
+    onSelectChanged: (_) {
+      Get.back();
+      controller.jobDetails.text =
+          '${converterData.converterNumber ?? ''} [${converterData.name ?? ''}]';
+    },
+    color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      return index % 2 == 0 ? Colors.grey[200] : Colors.white;
+    }),
+    cells: [
+      DataCell(
+        textForDataRowInTable(
+          text: converterData.converterNumber ?? '',
+          formatDouble: false,
+          color: Colors.green,
+          isBold: true,
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: converterData.name ?? '',
+          formatDouble: false,
+          color: Colors.red,
+          isBold: true,
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: converterData.description ?? '',
+          formatDouble: false,
+          color: Colors.blueGrey,
+          isBold: true,
+          maxWidth: null,
         ),
       ),
     ],

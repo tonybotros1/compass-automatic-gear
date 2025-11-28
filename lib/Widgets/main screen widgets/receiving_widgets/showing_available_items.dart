@@ -32,7 +32,7 @@ Future<dynamic> showingAvailableItemsDialog({
                 children: [
                   Text(screenName, style: fontStyleForScreenNameUsedInButtons),
                   const Spacer(),
-                  closeButton,
+                  closeIcon(),
                 ],
               ),
             ),

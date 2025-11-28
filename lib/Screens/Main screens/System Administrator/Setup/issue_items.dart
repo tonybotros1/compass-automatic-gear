@@ -142,20 +142,20 @@ class IssueItems extends StatelessWidget {
                                       },
                                     ),
                                   ),
-                                  ElevatedButton(
-                                    style: allButtonStyle,
-                                    onPressed: () {
-                                      // controller.clearAllFilters();
-                                      controller.isAllSelected.value = true;
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      // controller.searchEngine();
-                                    },
-                                    child: const Text('All'),
-                                  ),
+                                  // ElevatedButton(
+                                  //   style: allButtonStyle,
+                                  //   onPressed: () {
+                                  //     // controller.clearAllFilters();
+                                  //     controller.isAllSelected.value = true;
+                                  //     controller.isTodaySelected.value = false;
+                                  //     controller.isThisMonthSelected.value =
+                                  //         false;
+                                  //     controller.isThisYearSelected.value =
+                                  //         false;
+                                  //     // controller.searchEngine();
+                                  //   },
+                                  //   child: const Text('All'),
+                                  // ),
                                   ElevatedButton(
                                     style: todayButtonStyle,
                                     onPressed:
@@ -330,7 +330,12 @@ class IssueItems extends StatelessWidget {
                       return Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(15),
+                            bottomRight: Radius.circular(15),
+                            topLeft: Radius.circular(2),
+                            topRight: Radius.circular(2),
+                          ),
                         ),
                         child: Column(
                           children: [
@@ -397,7 +402,7 @@ Widget tableOfScreens({
       controller: scrollController,
       child: PaginatedDataTable(
         controller: scrollController,
-        rowsPerPage: 5,
+        rowsPerPage: 10,
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,

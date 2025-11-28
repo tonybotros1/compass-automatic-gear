@@ -96,7 +96,7 @@ Widget myTextFormFieldWithBorder({
             suffixIcon: suffixIcon,
             suffixIconConstraints: const BoxConstraints(
               maxHeight: 30,
-              maxWidth: 30,
+              maxWidth: 40,
             ),
             prefixIconConstraints: const BoxConstraints(
               maxHeight: 15,

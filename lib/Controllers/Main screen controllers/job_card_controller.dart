@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/formatters/currency_input_formatter.dart';
@@ -142,7 +141,7 @@ class JobCardController extends GetxController {
   RxDouble allJobsVATS = RxDouble(0.0);
   RxDouble allJobsTotals = RxDouble(0.0);
   RxDouble allJobsNET = RxDouble(0.0);
-  DocumentSnapshot? lastDocument;
+  // DocumentSnapshot? lastDocument;
   bool hasMore = true;
   RxBool isYearSelected = RxBool(false);
   RxBool isMonthSelected = RxBool(false);

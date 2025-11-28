@@ -1,36 +1,28 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/issue_items_controller.dart';
+import '../../../Models/issuing/base_model_for_issing_items.dart';
 import '../../../consts.dart';
+import '../../decimal_text_field.dart';
 import '../auto_size_box.dart';
 import 'add_new_issue_or_edit.dart';
 
 Widget detailsTableSection({
   required BuildContext context,
   required BoxConstraints constraints,
-  required RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems,
-  required RxBool loadingItems,
-  required String id,
-  required String firstColumnName,
+  required bool isConverter,
 }) {
   return Container(
     decoration: containerDecor,
     child: GetX<IssueItemsController>(
       builder: (controller) {
-        if (loadingItems.value && allItems.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
         return SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: tableOfScreens(
             constraints: constraints,
             context: context,
             controller: controller,
-            id: id,
-            allItems: allItems,
-            firstColumnName: firstColumnName,
+            isConverter: isConverter,
           ),
         );
       },
@@ -42,9 +34,7 @@ Widget tableOfScreens({
   required BoxConstraints constraints,
   required BuildContext context,
   required IssueItemsController controller,
-  required String id,
-  required RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allItems,
-  required String firstColumnName,
+  required bool isConverter,
 }) {
   // List data = controller.calculateTotals();
 
@@ -66,62 +56,92 @@ Widget tableOfScreens({
         columns: [
           DataColumn(
             columnWidth: const IntrinsicColumnWidth(flex: 0.5),
-
             label: AutoSizedText(constraints: constraints, text: ''),
           ),
           DataColumn(
             columnWidth: const IntrinsicColumnWidth(flex: 2.0),
             label: AutoSizedText(
               constraints: constraints,
-              text: firstColumnName,
+              text: isConverter == false
+                  ? 'Inventory Code'
+                  : 'Converter Number',
+            ),
+          ),
+          DataColumn(
+            columnWidth: const IntrinsicColumnWidth(flex: 2.0),
+            label: AutoSizedText(
+              constraints: constraints,
+              text: isConverter == false ? 'Inventory Name' : 'Converter Name',
             ),
           ),
           DataColumn(
             columnWidth: const IntrinsicColumnWidth(flex: 1.0),
-
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Quantity'),
           ),
           DataColumn(
             columnWidth: const IntrinsicColumnWidth(flex: 1.0),
-
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Price'),
           ),
 
           DataColumn(
             columnWidth: const IntrinsicColumnWidth(flex: 1.0),
-
             numeric: true,
             label: AutoSizedText(constraints: constraints, text: 'Total'),
           ),
         ],
         rows: [
-          ...allItems.map<DataRow>((invoiceItems) {
-            final invoiceItemsData = invoiceItems.data();
-            final invoiceItemsId = invoiceItems.id;
-            return dataRowForTheTable(
-              invoiceItemsData,
-              context,
-              constraints,
-              invoiceItemsId,
-              controller,
-              id,
-            );
-          }),
-          DataRow(
+          if (isConverter == false)
+            ...controller.selectedInventeryItems
+                .where((item) => item.isDeleted != true)
+                .map((item) {
+                  final itemId = item.id ?? '';
+                  final originalIndex = controller.selectedInventeryItems
+                      .indexWhere((r) => r.id == item.id);
+                  return dataRowForTheTable(
+                    item,
+                    context,
+                    constraints,
+                    itemId,
+                    controller,
+                    isConverter,
+                    originalIndex,
+                  );
+                })
+          else
+            ...controller.selectedConvertersDetails
+                .where((item) => item.isDeleted != true)
+                .map((item) {
+                  final itemId = item.id ?? '';
+                  final originalIndex = controller.selectedConvertersDetails
+                      .indexWhere((r) => r.id == item.id);
+                  return dataRowForTheTable(
+                    item,
+                    context,
+                    constraints,
+                    itemId,
+                    controller,
+                    isConverter,
+                    originalIndex,
+                  );
+                }),
+
+          // --- Totals row ---
+          const DataRow(
             selected: true,
             cells: [
-              const DataCell(Text('')),
-              const DataCell(Text('')),
-              const DataCell(Text('')),
-              const DataCell(
+              DataCell(Text('')),
+              DataCell(Text('')),
+              DataCell(Text('')),
+              DataCell(Text('')),
+              DataCell(
                 Align(alignment: Alignment.centerRight, child: Text('Totals')),
               ),
               DataCell(
                 Align(
                   alignment: Alignment.centerRight,
-                  child: textForDataRowInTable(text: '', color: Colors.blue),
+                  child: Text('', style: TextStyle(color: Colors.blue)),
                 ),
               ),
             ],
@@ -133,48 +153,98 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> invoiceItemsData,
-  context,
-  constraints,
+  BaseModelForIssuingItems invoiceItemsData,
+  BuildContext context,
+  BoxConstraints constraints,
   String invoiceItemsId,
   IssueItemsController controller,
-  String itemId,
+  bool isConverter,
+  int index,
 ) {
   return DataRow(
     cells: [
+      DataCell(deleteSection(context, controller, invoiceItemsId, isConverter)),
       DataCell(
-        Row(
-          children: [
-            deleteSection(itemId, context, controller, invoiceItemsId),
-            editSection(
-              itemId,
-              controller,
-              invoiceItemsData,
-              context,
-              constraints,
-              invoiceItemsId,
-            ),
-          ],
-        ),
-      ),
-      DataCell(textForDataRowInTable(text: '', maxWidth: null)),
-      DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: textForDataRowInTable(text: '${invoiceItemsData['quantity']}'),
+        textForDataRowInTable(
+          text: isConverter == false ? invoiceItemsData.code ?? '' : '',
+          maxWidth: null,
         ),
       ),
       DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: textForDataRowInTable(text: '${invoiceItemsData['price']}'),
+        textForDataRowInTable(
+          text: isConverter == false ? invoiceItemsData.name ?? '' : '',
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        controller.editingIndex.value == index
+            ? SizedBox(
+                width: double.infinity,
+                child: TextField(
+                  inputFormatters: [DecimalTextInputFormatter()],
+                  textAlign: TextAlign.right,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  cursorColor: Theme.of(context).textSelectionTheme.cursorColor,
+                  autofocus: true,
+                  controller: TextEditingController(
+                    text: invoiceItemsData.finalQuantity.toString(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onSubmitted: (value) {
+                    final submittedValue = value.trim().isEmpty ? '0.0' : value;
+                    isConverter == false
+                        ? controller.finishEditingForInventoryItems(
+                            submittedValue,
+                            index,
+                          )
+                        : controller.finishEditingForConverters(
+                            submittedValue,
+                            index,
+                          );
+                  },
+                  onTapOutside: (_) {
+                    controller.editingIndex.value = -1;
+                  },
+                ),
+              )
+            : InkWell(
+                onTap: () => controller.startEditing(index),
+                child: SizedBox(
+                  height: double.infinity,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    spacing: 10,
+                    children: [
+                      textForDataRowInTable(
+                        isSelectable: false,
+                        color: Colors.green,
+                        isBold: true,
+                        maxWidth: null,
+                        text: invoiceItemsData.finalQuantity.toString(),
+                      ),
+                      Icon(Icons.edit_outlined, color: Colors.grey.shade700),
+                    ],
+                  ),
+                ),
+              ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: '${invoiceItemsData.lastPrice ?? ''}',
+          color: Colors.red,
+          isBold: true,
         ),
       ),
 
       DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: textForDataRowInTable(text: '${invoiceItemsData['total']}'),
+        textForDataRowInTable(
+          text: '${invoiceItemsData.total ?? ''}',
+          color: Colors.blueGrey,
+          isBold: true,
         ),
       ),
     ],
@@ -182,73 +252,24 @@ DataRow dataRowForTheTable(
 }
 
 Widget deleteSection(
-  String itemId,
-  context,
+  BuildContext context,
   IssueItemsController controller,
-  invoiceItemsId,
+  String invoiceItemsId,
+  bool isConverter,
 ) {
   return IconButton(
     onPressed: () {
-      // if (controller.jobStatus1.value == 'New') {
-      //   alertDialog(
-      //       context: context,
-      //       content: 'This will be deleted permanently',
-      //       onPressed: () {
-      //         controller.deleteInvoiceItem(
-      //             controller.curreentJobCardId.value != ''
-      //                 ? controller.curreentJobCardId.value
-      //                 : itemId,
-      //             invoiceItemsId);
-      //       });
-      // } else {
-      //   showSnackBar('Alert', 'Only New Jobs Allowed');
-      // }
+      alertDialog(
+        context: context,
+        content: 'This will be deleted permanently',
+        onPressed: () {
+          isConverter == false
+              ? controller.removeSelectedInventoryItems(invoiceItemsId)
+              : controller.removeSelectedConvertersDetails(invoiceItemsId);
+        },
+      );
     },
     icon: const Icon(Icons.delete, color: Colors.red),
-  );
-}
-
-Widget editSection(
-  String itemId,
-  IssueItemsController controller,
-  Map<String, dynamic> invoiceItemsData,
-  context,
-  constraints,
-  String invoiceItemsId,
-) {
-  return IconButton(
-    onPressed: () {
-      // if (controller.jobStatus1.value == 'New') {
-      //   controller.invoiceItemNameId.value = invoiceItemsData['name'];
-      //   controller.invoiceItemName.text = controller.getdataName(
-      //       invoiceItemsData['name'],
-      //       controller.allInvoiceItemsFromCollection);
-      //   controller.lineNumber.text =
-      //       (invoiceItemsData['line_number'] ?? '').toString();
-      //   controller.description.text = invoiceItemsData['description'];
-      //   controller.quantity.text = invoiceItemsData['quantity'];
-      //   controller.price.text = invoiceItemsData['price'];
-      //   controller.amount.text = invoiceItemsData['amount'];
-      //   controller.discount.text = invoiceItemsData['discount'];
-      //   controller.total.text = invoiceItemsData['total'];
-      //   controller.vat.text = invoiceItemsData['vat'];
-      //   controller.net.text = invoiceItemsData['net'];
-      //   invoiceItemsForJobDialog(
-      //       itemId: itemId,
-      //       controller: controller,
-      //       constraints: constraints,
-      //       onPressed: controller.addingNewinvoiceItemsValue.value
-      //           ? null
-      //           : () {
-      //               controller.editInvoiceItem(  controller.curreentJobCardId.value != ''
-      //                 ? controller.curreentJobCardId.value
-      //                 : itemId, invoiceItemsId);
-      //             });
-      // } else {
-      //   showSnackBar('Alert', 'Only New Jobs Allowed');
-      // }
-    },
-    icon: const Icon(Icons.edit_note_rounded, color: Colors.blue),
   );
 }
 
@@ -256,31 +277,42 @@ ElevatedButton newItemsButton(
   BuildContext context,
   BoxConstraints constraints,
   IssueItemsController controller,
-  String id,
+  bool isConverter,
 ) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.canAddItemsAndConverter.isTrue) {
-        if (controller.status.value == 'New') {
-          controller.getAllInventeryItems();
-          dialog(
-            constraints: constraints,
-            context: context,
-            dialogName: 'Inventery Items',
-            hintText: 'Search of items',
-            controllerForSearchField: controller.searchForItems,
-            onChangedForSearchField: (_) {},
-            onPressedForClearSearch: () {
-              controller.searchForItems.clear();
-            },
-            table: itemsTable(constraints, controller, context),
-          );
-        } else {
-          showSnackBar('Alert', 'Only New Jobs Allowed');
-        }
+      if (isConverter == false) {
+        controller.searchForInventoryItems.clear();
+        controller.getAllInventeryItems();
       } else {
-        showSnackBar('Alert', 'Please Save Job First');
+        controller.searchForConvertersDetails.clear();
       }
+      dialog(
+        constraints: constraints,
+        context: context,
+        dialogName: isConverter == false ? 'Inventery Items' : 'Converters',
+        hintText: isConverter == false
+            ? 'Search of items'
+            : "Search for converters",
+        controllerForSearchField: isConverter == false
+            ? controller.searchForInventoryItems
+            : controller.searchForConvertersDetails,
+        onChangedForSearchField: (_) {
+          isConverter == false
+              ? controller.searchEngineForInverntoryItems()
+              : controller.searchEngineForConvertersDetails();
+        },
+        onPressedForClearSearch: () {
+          if (isConverter == false) {
+            controller.searchForInventoryItems.clear();
+            controller.searchEngineForInverntoryItems();
+          } else {
+            controller.searchForConvertersDetails.clear();
+            controller.searchEngineForConvertersDetails();
+          }
+        },
+        table: itemsTable(constraints, controller, context, isConverter),
+      );
     },
     style: new2ButtonStyle,
     child: const Text(
@@ -294,6 +326,7 @@ Expanded itemsTable(
   BoxConstraints constraints,
   IssueItemsController controller,
   BuildContext context,
+  bool isConverter,
 ) {
   return Expanded(
     child: GetX<IssueItemsController>(
@@ -301,7 +334,9 @@ Expanded itemsTable(
         return controller.loadingItemsTable.value
             ? Center(child: loadingProcess)
             : controller.loadingItemsTable.isFalse &&
-                  controller.allInventeryItems.isEmpty
+                  (isConverter == false
+                      ? controller.allInventeryItems.isEmpty
+                      : controller.allConvertersDetails.isEmpty)
             ? const Center(child: Text('No Data'))
             : SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -317,6 +352,10 @@ Expanded itemsTable(
                       dataRowMaxHeight: 40,
                       dataRowMinHeight: 30,
                       columnSpacing: 5,
+                      border: TableBorder.symmetric(
+                        outside: const BorderSide(),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       showBottomBorder: true,
                       dataTextStyle: regTextStyle,
                       headingTextStyle: fontStyleForTableHeader,
@@ -325,7 +364,7 @@ Expanded itemsTable(
                         DataColumn(
                           label: AutoSizedText(
                             constraints: constraints,
-                            text: 'Code',
+                            text: isConverter == false ? 'Code' : 'Number',
                           ),
                         ),
                         DataColumn(
@@ -338,51 +377,108 @@ Expanded itemsTable(
                           numeric: true,
                           label: AutoSizedText(
                             constraints: constraints,
-                            text: 'Min.',
+                            text: 'Quantity',
+                          ),
+                        ),
+                        DataColumn(
+                          numeric: true,
+                          label: AutoSizedText(
+                            constraints: constraints,
+                            text: 'Price',
+                          ),
+                        ),
+                        DataColumn(
+                          numeric: true,
+                          label: AutoSizedText(
+                            constraints: constraints,
+                            text: 'Total',
                           ),
                         ),
                       ],
-                      rows:
-                          (controller.filteredInventeryItems.isEmpty &&
-                              controller.searchForItems.value.text.isEmpty)
-                          ? List<DataRow>.generate(
-                              controller.allInventeryItems.length,
-                              (index) {
-                                final item =
-                                    controller.allInventeryItems[index];
-                                final itemData =
-                                    item.data() as Map<String, dynamic>;
-                                final itemId = item.id;
+                      rows: isConverter == false
+                          // -------- INVENTORY MODE --------
+                          ? (controller.filteredInventeryItems.isEmpty &&
+                                    controller
+                                        .searchForInventoryItems
+                                        .value
+                                        .text
+                                        .isEmpty
+                                ? List<DataRow>.generate(
+                                    controller.allInventeryItems.length,
+                                    (index) {
+                                      final item =
+                                          controller.allInventeryItems[index];
+                                      final itemId = item.id ?? '';
 
-                                return dataRowForTheItemTable(
-                                  itemData,
-                                  context,
-                                  constraints,
-                                  itemId,
-                                  controller,
-                                  index,
-                                );
-                              },
-                            )
-                          : List<DataRow>.generate(
-                              controller.filteredInventeryItems.length,
-                              (index) {
-                                final item =
-                                    controller.filteredInventeryItems[index];
-                                final itemData =
-                                    item.data() as Map<String, dynamic>;
-                                final itemId = item.id;
-
-                                return dataRowForTheItemTable(
-                                  itemData,
-                                  context,
-                                  constraints,
-                                  itemId,
-                                  controller,
-                                  index,
-                                );
-                              },
-                            ),
+                                      return dataRowForTheItemTable(
+                                        item,
+                                        context,
+                                        constraints,
+                                        itemId,
+                                        controller,
+                                        index,
+                                        isConverter,
+                                      );
+                                    },
+                                  )
+                                : List<DataRow>.generate(
+                                    controller.filteredInventeryItems.length,
+                                    (index) {
+                                      final item = controller
+                                          .filteredInventeryItems[index];
+                                      final itemId = item.id ?? '';
+                                      return dataRowForTheItemTable(
+                                        item,
+                                        context,
+                                        constraints,
+                                        itemId,
+                                        controller,
+                                        index,
+                                        isConverter,
+                                      );
+                                    },
+                                  ))
+                          // -------- CONVERTER MODE --------
+                          : (controller.filteredConvertersDetails.isEmpty &&
+                                    controller
+                                        .searchForInventoryItems
+                                        .value
+                                        .text
+                                        .isEmpty
+                                ? List<DataRow>.generate(
+                                    controller.allConvertersDetails.length,
+                                    (index) {
+                                      final item = controller
+                                          .allConvertersDetails[index];
+                                      final itemId = item.id ?? '';
+                                      return dataRowForTheItemTable(
+                                        item,
+                                        context,
+                                        constraints,
+                                        itemId,
+                                        controller,
+                                        index,
+                                        isConverter,
+                                      );
+                                    },
+                                  )
+                                : List<DataRow>.generate(
+                                    controller.filteredConvertersDetails.length,
+                                    (index) {
+                                      final item = controller
+                                          .filteredConvertersDetails[index];
+                                      final itemId = item.id ?? '';
+                                      return dataRowForTheItemTable(
+                                        item,
+                                        context,
+                                        constraints,
+                                        itemId,
+                                        controller,
+                                        index,
+                                        isConverter,
+                                      );
+                                    },
+                                  )),
                     ),
                   ),
                 ),
@@ -393,26 +489,60 @@ Expanded itemsTable(
 }
 
 DataRow dataRowForTheItemTable(
-  Map<String, dynamic> itemData,
-  context,
-  constraints,
-  itemId,
+  BaseModelForIssuingItems itemData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String itemId,
   IssueItemsController controller,
   int index,
+  bool isConverter,
 ) {
   return DataRow(
     onSelectChanged: (_) {
-      // Get.back();
-      controller.getItemDetails(itemId);
+      if (isConverter == false) {
+        controller.allInventeryItems[index].isSelected = true;
+        controller.addSelectedInventoryItems();
+      } else {
+        controller.allConvertersDetails[index].isSelected = true;
+        controller.addSelectedConvertersDetails();
+      }
     },
     color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-      // Alternate row colors
       return index % 2 == 0 ? Colors.grey[200] : Colors.white;
     }),
     cells: [
-      DataCell(Text(itemData['code'] ?? '')),
-      DataCell(Text(itemData['name'] ?? '')),
-      DataCell(Text(itemData['min_quantity'].toString())),
+      DataCell(
+        textForDataRowInTable(
+          text: isConverter == false
+              ? itemData.code ?? ''
+              : itemData.number ?? '',
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(text: itemData.name ?? '', formatDouble: false),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.finalQuantity.toString(),
+          color: Colors.green,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.lastPrice.toString(),
+          color: Colors.red,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.total.toString(),
+          color: Colors.blueGrey,
+          isBold: true,
+        ),
+      ),
     ],
   );
 }

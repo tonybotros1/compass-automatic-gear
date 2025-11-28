@@ -30,6 +30,7 @@ import '../../Screens/Main screens/System Administrator/Setup/banks_and_others.d
 import '../../Screens/Main screens/System Administrator/Setup/branches.dart';
 import '../../Screens/Main screens/System Administrator/Setup/cash_management_payment.dart';
 import '../../Screens/Main screens/System Administrator/Setup/cash_management_receipts.dart';
+import '../../Screens/Main screens/System Administrator/Setup/converters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../Screens/Main screens/System Administrator/Setup/issue_items.dart';
@@ -220,6 +221,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: CarTradingDashboard());
       case '/employees':
         return const SizedBox(child: Employees());
+      case '/converters':
+        return const SizedBox(child: Converters());
 
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));

@@ -33,7 +33,7 @@ Future<dynamic> itemsDialog({
                 children: [
                   Text('💵 Items', style: fontStyleForScreenNameUsedInButtons),
                   const Spacer(),
-                  ClickableHoverText(onTap: onPressed, text: "Add"),
+                  ClickableHoverText(onTap: onPressed, text: "Ok"),
                   separator(),
                   closeIcon(),
                 ],
