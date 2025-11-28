@@ -144,7 +144,7 @@ class TimeSheetsController extends GetxController {
 
   Future getAllTechnicians() async {
     isScreenLodingForTechnicians.value = true;
-    allTechnician.assignAll(await helper.getAllTechnicians());
+    allTechnician.assignAll(await helper.getAllEmployeesByDepartment('Time Sheets'));
     isScreenLodingForTechnicians.value = false;
   }
 
@@ -371,7 +371,6 @@ class TimeSheetsController extends GetxController {
       pausingAllOpenTimeSheets.value = false;
     }
   }
-
 
   // ============================================================================================================
   bool hasActiveTask(String employeeId) {

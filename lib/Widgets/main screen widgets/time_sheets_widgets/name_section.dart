@@ -69,8 +69,9 @@ Future<dynamic> nameDialog({
                                     String tecName = data.containsKey('name')
                                         ? data['name'] ?? ''
                                         : '';
-                                    String tecJob = data.containsKey('job')
-                                        ? data['job'] ?? ''
+                                    String tecJob =
+                                        data.containsKey('job_title')
+                                        ? data['job_title'] ?? ''
                                         : '';
                                     String tecid = tec.key;
 
