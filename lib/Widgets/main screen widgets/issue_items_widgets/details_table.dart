@@ -166,13 +166,15 @@ DataRow dataRowForTheTable(
       DataCell(deleteSection(context, controller, invoiceItemsId, isConverter)),
       DataCell(
         textForDataRowInTable(
-          text: isConverter == false ? invoiceItemsData.code ?? '' : '',
+          text: isConverter == false
+              ? invoiceItemsData.code ?? ''
+              : invoiceItemsData.number ?? '',
           maxWidth: null,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: isConverter == false ? invoiceItemsData.name ?? '' : '',
+          text:  invoiceItemsData.name  ?? '',
           maxWidth: null,
         ),
       ),
@@ -286,6 +288,7 @@ ElevatedButton newItemsButton(
         controller.getAllInventeryItems();
       } else {
         controller.searchForConvertersDetails.clear();
+        controller.getAllConvertersDetails();
       }
       dialog(
         constraints: constraints,
@@ -315,9 +318,9 @@ ElevatedButton newItemsButton(
       );
     },
     style: new2ButtonStyle,
-    child: const Text(
-      'New item',
-      style: TextStyle(fontWeight: FontWeight.bold),
+    child: Text(
+      isConverter == false ? 'New item' : 'New Converter',
+      style: const TextStyle(fontWeight: FontWeight.bold),
     ),
   );
 }

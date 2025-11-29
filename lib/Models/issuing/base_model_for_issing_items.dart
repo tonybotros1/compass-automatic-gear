@@ -1,4 +1,3 @@
-
 class BaseModelForIssuingItems {
   String? id;
   String? issueId;
@@ -13,9 +12,9 @@ class BaseModelForIssuingItems {
   bool? isDeleted;
   bool? isSelected;
 
-
   BaseModelForIssuingItems({
-    this.id,this.issueId,
+    this.id,
+    this.issueId,
     this.name,
     this.code,
     this.finalQuantity,
@@ -23,10 +22,14 @@ class BaseModelForIssuingItems {
     this.isAdded,
     this.isDeleted,
     this.isModified,
-    this.total,this.isSelected,
+    this.total,
+    this.isSelected,
+    this.number,
   });
 
-  BaseModelForIssuingItems.fromJsonForInventoryItems(Map<String, dynamic> json) {
+  BaseModelForIssuingItems.fromJsonForInventoryItems(
+    Map<String, dynamic> json,
+  ) {
     id = json['_id'];
     name = json.containsKey('name') ? json['name'] ?? '' : '';
     code = json.containsKey('code') ? json['code'] ?? '' : '';
@@ -44,6 +47,9 @@ class BaseModelForIssuingItems {
     finalQuantity = json.containsKey('final_quantity')
         ? json['final_quantity'] ?? ''
         : '';
+    number = json.containsKey('converter_number')
+        ? json['converter_number'] ?? ''
+        : '';
     lastPrice = json.containsKey('last_price') ? json['last_price'] ?? '' : '';
     total = json.containsKey('total') ? json['total'] ?? 0 : 0;
   }
@@ -51,7 +57,7 @@ class BaseModelForIssuingItems {
   Map<String, dynamic> toJsonForinventoryItems() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['_id'] = id;
-    data['issue_id'] =issueId;
+    data['issue_id'] = issueId;
     data['name'] = name;
     data['code'] = code;
     data['final_quantity'] = finalQuantity;
@@ -67,7 +73,7 @@ class BaseModelForIssuingItems {
   Map<String, dynamic> toJsonForConverters() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['_id'] = id;
-    data['issue_id'] =issueId;
+    data['issue_id'] = issueId;
     data['name'] = name;
     data['code'] = code;
     data['final_quantity'] = finalQuantity;

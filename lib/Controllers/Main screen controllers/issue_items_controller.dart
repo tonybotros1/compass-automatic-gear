@@ -173,7 +173,7 @@ class IssueItemsController extends GetxController {
         Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
         String status1 = jobStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new jobs can be edited');
+          showSnackBar('Alert', 'Only new converters can be edited');
           return;
         }
       }
@@ -192,6 +192,51 @@ class IssueItemsController extends GetxController {
         allInventeryItems.assignAll(
           items.map(
             (item) => BaseModelForIssuingItems.fromJsonForInventoryItems(item),
+          ),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllInventeryItems();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      loadingItemsTable.value = false;
+    } catch (e) {
+      loadingItemsTable.value = false;
+    }
+  }
+
+  Future<void> getAllConvertersDetails() async {
+    try {
+      if (currentIssuingId.isNotEmpty) {
+        Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
+        String status1 = jobStatus['status'];
+        if (status1 != 'New' && status1 != '') {
+          showSnackBar('Alert', 'Only new converters can be edited');
+          return;
+        }
+      }
+      loadingItemsTable.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/issue_items/get_converters_details_section',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List items = decoded['converters_details'];
+        allConvertersDetails.assignAll(
+          items.map(
+            (item) => BaseModelForIssuingItems.fromJsonForConverters(item),
           ),
         );
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
@@ -334,7 +379,6 @@ class IssueItemsController extends GetxController {
     Get.back();
   }
 
-  
   void removeSelectedConvertersDetails(String id) {
     if (status.value != 'New' && status.value != '') {
       showSnackBar('Alert', 'Only new issuing allowed');
