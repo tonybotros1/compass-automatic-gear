@@ -165,7 +165,6 @@ class ConvertersController extends GetxController {
       }
       addingNewValue.value = false;
     } catch (e) {
-      print(e);
       showSnackBar('Alert', 'Something went wrong please try again');
       addingNewValue.value = false;
     }

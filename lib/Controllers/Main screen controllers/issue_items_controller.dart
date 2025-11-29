@@ -189,7 +189,6 @@ class IssueItemsController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List items = decoded['items_details'];
-        print(items);
         allInventeryItems.assignAll(
           items.map(
             (item) => BaseModelForIssuingItems.fromJsonForInventoryItems(item),
