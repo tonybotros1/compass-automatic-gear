@@ -2,6 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/converters_con
 import 'package:flutter/material.dart';
 import '../../../consts.dart';
 import 'converter_details_section.dart';
+import 'items_section.dart';
 
 Widget addNewConverterOrEdit({
   required BoxConstraints constraints,
@@ -32,7 +33,7 @@ Widget addNewConverterOrEdit({
         ),
         const SizedBox(height: 10),
         labelContainer(lable: Text('Items', style: fontStyle1)),
-        // itemsSection(context: context, constraints: constraints,),
+        itemsSection(context: context, constraints: constraints),
       ],
     ),
   );

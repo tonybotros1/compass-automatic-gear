@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/converters_controller.dart';
 import '../../../../Models/converters/converter_model.dart';
 import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
+import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/converters_widgets/converter_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
@@ -46,6 +47,20 @@ class Converters extends StatelessWidget {
                               width: 300,
                               labelText: 'Description',
                               controller: controller.converterDescriptionFilter,
+                            ),
+                            CustomDropdown(
+                              width: 150,
+                              textcontroller:
+                                  controller.statusFilter.value.text,
+                              showedSelectedName: 'name',
+                              hintText: 'Status',
+                              items: allStatus,
+                              onChanged: (key, value) async {
+                                controller.statusFilter.text = value['name'];
+                              },
+                              onDelete: () {
+                                controller.statusFilter.clear();
+                              },
                             ),
                           ],
                         ),
@@ -114,7 +129,9 @@ class Converters extends StatelessWidget {
                                                 false;
                                             controller.isDaySelected.value =
                                                 true;
-                                            // controller.searchEngine({"today": true});
+                                            controller.searchEngine({
+                                              "today": true,
+                                            });
                                           }
                                         : null,
                                     child: const Text('Today'),
@@ -142,9 +159,9 @@ class Converters extends StatelessWidget {
                                                 true;
                                             controller.isDaySelected.value =
                                                 false;
-                                            // controller.searchEngine({
-                                            //   "this_month": true,
-                                            // });
+                                            controller.searchEngine({
+                                              "this_month": true,
+                                            });
                                           }
                                         : null,
                                     child: const Text('This Month'),
@@ -170,9 +187,9 @@ class Converters extends StatelessWidget {
                                                 false;
                                             controller.isDaySelected.value =
                                                 false;
-                                            // controller.searchEngine({
-                                            //   "this_year": true,
-                                            // });
+                                            controller.searchEngine({
+                                              "this_year": true,
+                                            });
                                           }
                                         : null,
                                     child: const Text('This Year'),
@@ -181,7 +198,7 @@ class Converters extends StatelessWidget {
                                     style: saveButtonStyle,
                                     onPressed: controller.isScreenLoding.isFalse
                                         ? () async {
-                                            // controller.filterSearch();
+                                            controller.filterSearch();
                                           }
                                         : null,
                                     child: controller.isScreenLoding.isFalse
@@ -194,7 +211,7 @@ class Converters extends StatelessWidget {
                                   ElevatedButton(
                                     style: clearVariablesButtonStyle,
                                     onPressed: () {
-                                      // controller.clearAllFilters();
+                                      controller.clearAllFilters();
                                     },
                                     child: Text(
                                       'Clear Filters',
@@ -223,6 +240,7 @@ class Converters extends StatelessWidget {
                           spacing: 10,
                           children: [
                             customBox(
+                              width: Get.width / 5,
                               title: 'NUMBER OF CONVERTERS',
                               value: Text(
                                 '${controller.numberOfConverters.value}',
@@ -234,30 +252,13 @@ class Converters extends StatelessWidget {
                               ),
                             ),
                             customBox(
+                              width: Get.width / 5,
                               title: 'TOTALS',
                               value: textForDataRowInTable(
                                 fontSize: 16,
                                 color: Colors.green,
                                 isBold: true,
                                 text: '${controller.allConvertersTotals.value}',
-                              ),
-                            ),
-                            customBox(
-                              title: 'VATS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.red,
-                                isBold: true,
-                                text: '${controller.allConvertersVATS.value}',
-                              ),
-                            ),
-                            customBox(
-                              title: 'NETS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.blueGrey,
-                                isBold: true,
-                                text: '${controller.allConvertersNET.value}',
                               ),
                             ),
                           ],
@@ -374,18 +375,6 @@ Widget tableOfScreens({
             label: AutoSizedText(text: 'Total', constraints: constraints),
             // onSort: controller.onSort,
           ),
-          DataColumn(
-            columnWidth: const IntrinsicColumnWidth(flex: 1),
-            numeric: true,
-            label: AutoSizedText(text: 'VAT', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            columnWidth: const IntrinsicColumnWidth(flex: 1),
-            numeric: true,
-            label: AutoSizedText(text: 'NET', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
         ],
         source: ConverterDataSource(
           cards: isReceivingLoading ? [] : data,
@@ -400,9 +389,9 @@ Widget tableOfScreens({
 
 DataRow dataRowForTheTable(
   ConverterModel docData,
-  context,
-  constraints,
-  docId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String docId,
   ConvertersController controller,
   int index,
 ) {
@@ -415,18 +404,7 @@ DataRow dataRowForTheTable(
       return isEvenRow ? Colors.grey.shade200 : Colors.white;
     }),
     cells: [
-      // DataCell(
-      //   Row(
-      //     children: [
-      //       editReceivingButton(
-      //         controller: controller,
-      //         id: docId,
-      //         data: docData,
-      //         context: context,
-      //       ),
-      //     ],
-      //   ),
-      // ),
+      DataCell(editConverterButton(context, constraints, controller, docData)),
       DataCell(
         textForDataRowInTable(
           text: docData.converterNumber ?? '',
@@ -443,9 +421,13 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
+        textForDataRowInTable(text: docData.name ?? '', formatDouble: false),
+      ),
+      DataCell(
         textForDataRowInTable(
-          text: docData.converterNumber ?? '',
+          text: docData.description ?? '',
           formatDouble: false,
+          maxWidth: null,
         ),
       ),
 
@@ -453,20 +435,6 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: docData.total.toString(),
           color: Colors.green,
-          isBold: true,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: docData.vat.toString(),
-          color: Colors.red,
-          isBold: true,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: docData.net.toString(),
-          color: Colors.blueGrey,
           isBold: true,
         ),
       ),
@@ -485,7 +453,7 @@ ElevatedButton newConverterButton(
       converterDialog(
         controller: controller,
         onTapForPost: () async {
-          controller.status.value = 'Posted';
+          controller.editPostedStatus();
         },
         onTapForSave: () async {
           await controller.addNewConverter();
@@ -494,6 +462,38 @@ ElevatedButton newConverterButton(
     },
     style: newButtonStyle,
     child: const Text('New Converter'),
+  );
+}
+
+IconButton editConverterButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  ConvertersController controller,
+  ConverterModel data,
+) {
+  return IconButton(
+    onPressed: () {
+      controller.loadValues(data);
+      converterDialog(
+        controller: controller,
+        onTapForPost: () async {
+          controller.editPostedStatus();
+        },
+        onTapForSave: () async {
+          await controller.addNewConverter();
+        },
+        onTapForDelete: () {
+          alertDialog(
+            context: context,
+            content: "This will be deleted permanently",
+            onPressed: () {
+              controller.deleteConverterCard(data.id ?? '');
+            },
+          );
+        },
+      );
+    },
+    icon: editIcon,
   );
 }
 
@@ -515,7 +515,7 @@ class ConverterDataSource extends DataTableSource {
     if (index >= cards.length) return null;
 
     final rec = cards[index];
-    final cardId = rec.id;
+    final cardId = rec.id ?? '';
 
     return dataRowForTheTable(
       rec,
