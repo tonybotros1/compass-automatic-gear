@@ -1,9 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../Controllers/Main screen controllers/issue_items_controller.dart';
+import '../../../../Models/issuing/issung_model.dart';
 import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/main screen widgets/issue_items_widgets/issue_dialog.dart';
@@ -28,70 +27,75 @@ class IssueItems extends StatelessWidget {
                   GetX<IssueItemsController>(
                     init: IssueItemsController(),
                     builder: (controller) {
-                      bool isJobConverterLoading =
-                          controller.alljobConverters.isEmpty;
-                      bool isReceivedByLoading =
-                          controller.allReceivedBy.isEmpty;
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           spacing: 10,
                           children: [
-                            SizedBox(
+                            myTextFormFieldWithBorder(
                               width: 150,
-                              child: myTextFormFieldWithBorder(
-                                labelText: 'Number',
-                                controller: controller.issueNumberFilter.value,
-                              ),
+                              labelText: 'Number',
+                              controller: controller.issueNumberFilter.value,
                             ),
-                            SizedBox(
+                            // myTextFormFieldWithBorder(
+                            //   width: 300,
+                            //   labelText: 'Job Card',
+                            //   controller: controller.issueNumberFilter.value,
+                            // ),
+                            // myTextFormFieldWithBorder(
+                            //   width: 300,
+                            //   labelText: 'Converter',
+                            //   controller: controller.issueNumberFilter.value,
+                            // ),
+                            // CustomDropdown(
+                            //   width: 300,
+                            //   textcontroller:
+                            //       controller.jobConverterFilter.value.text,
+                            //   showedSelectedName: 'name',
+                            //   hintText: 'Job / Converter',
+                            //   onChanged: (key, value) async {
+                            //     controller.jobConverterFilter.value.text =
+                            //         value['name'];
+                            //     controller.jobConverterIdFilter.value = key;
+                            //   },
+                            //   items: isJobConverterLoading
+                            //       ? {}
+                            //       : controller.alljobConverters,
+                            // ),
+                            CustomDropdown(
                               width: 300,
-                              child: CustomDropdown(
-                                textcontroller:
-                                    controller.jobConverterFilter.value.text,
-                                showedSelectedName: 'name',
-                                hintText: 'Job / Converter',
-                                onChanged: (key, value) async {
-                                  controller.jobConverterFilter.value.text =
-                                      value['name'];
-                                  controller.jobConverterIdFilter.value = key;
-                                },
-                                items: isJobConverterLoading
-                                    ? {}
-                                    : controller.alljobConverters,
-                              ),
+                              textcontroller:
+                                  controller.receivedByFilter.value.text,
+                              showedSelectedName: 'name',
+                              hintText: 'Received By',
+                              onChanged: (key, value) async {
+                                controller.receivedByFilter.value.text =
+                                    value['name'];
+                                controller.receivedByIdFilter.value = key;
+                              },
+                              onDelete: () {
+                                controller.receivedByFilter.value.clear();
+                                controller.receivedByIdFilter.value = '';
+                              },
+                              onOpen: () {
+                                return controller.getEmployeesByDepartment();
+                              },
                             ),
-                            SizedBox(
-                              width: 300,
-                              child: CustomDropdown(
-                                textcontroller:
-                                    controller.receivedByFilter.value.text,
-                                showedSelectedName: 'name',
-                                hintText: 'Received By',
-                                onChanged: (key, value) async {
-                                  controller.receivedByFilter.value.text =
-                                      value['name'];
-                                  controller.receivedByIdFilter.value = key;
-                                },
-                                items: isReceivedByLoading
-                                    ? {}
-                                    : controller.allReceivedBy,
-                              ),
-                            ),
-                            SizedBox(
+                            CustomDropdown(
                               width: 120,
-                              child: CustomDropdown(
-                                textcontroller:
-                                    controller.statusFilter.value.text,
-                                showedSelectedName: 'name',
-                                hintText: 'Status',
-                                items: allStatus,
-                                onChanged: (key, value) async {
-                                  controller.statusFilter.value.text =
-                                      value['name'];
-                                },
-                              ),
+                              textcontroller:
+                                  controller.statusFilter.value.text,
+                              showedSelectedName: 'name',
+                              hintText: 'Status',
+                              items: allStatus,
+                              onChanged: (key, value) async {
+                                controller.statusFilter.value.text =
+                                    value['name'];
+                              },
+                              onDelete: () {
+                                controller.statusFilter.value.clear();
+                              },
                             ),
                           ],
                         ),
@@ -99,7 +103,7 @@ class IssueItems extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 10),
-                  GetBuilder<IssueItemsController>(
+                  GetX<IssueItemsController>(
                     builder: (controller) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -142,20 +146,6 @@ class IssueItems extends StatelessWidget {
                                       },
                                     ),
                                   ),
-                                  // ElevatedButton(
-                                  //   style: allButtonStyle,
-                                  //   onPressed: () {
-                                  //     // controller.clearAllFilters();
-                                  //     controller.isAllSelected.value = true;
-                                  //     controller.isTodaySelected.value = false;
-                                  //     controller.isThisMonthSelected.value =
-                                  //         false;
-                                  //     controller.isThisYearSelected.value =
-                                  //         false;
-                                  //     // controller.searchEngine();
-                                  //   },
-                                  //   child: const Text('All'),
-                                  // ),
                                   ElevatedButton(
                                     style: todayButtonStyle,
                                     onPressed:
@@ -179,7 +169,9 @@ class IssueItems extends StatelessWidget {
                                                 false;
                                             controller.isDaySelected.value =
                                                 true;
-                                            // controller.searchEngine();
+                                            controller.searchEngine({
+                                              "today": true,
+                                            });
                                           }
                                         : null,
                                     child: const Text('Today'),
@@ -207,7 +199,9 @@ class IssueItems extends StatelessWidget {
                                                 true;
                                             controller.isDaySelected.value =
                                                 false;
-                                            // controller.searchEngine();
+                                            controller.searchEngine({
+                                              "this_month": true,
+                                            });
                                           }
                                         : null,
                                     child: const Text('This Month'),
@@ -233,33 +227,32 @@ class IssueItems extends StatelessWidget {
                                                 false;
                                             controller.isDaySelected.value =
                                                 false;
-                                            // controller.searchEngine();
+                                            controller.searchEngine({
+                                              "this_year": true,
+                                            });
                                           }
                                         : null,
                                     child: const Text('This Year'),
                                   ),
                                   ElevatedButton(
                                     style: saveButtonStyle,
-                                    onPressed:
-                                        controller.isThisYearSelected.isFalse
+                                    onPressed: controller.isScreenLoding.isFalse
                                         ? () async {
-                                            // await controller.removeFilters();
-                                            // controller.searchEngine();
+                                            controller.filterSearch();
                                           }
                                         : null,
-                                    child: Text(
-                                      'Find',
-                                      style: fontStyleForElevatedButtons,
-                                    ),
+                                    child: controller.isScreenLoding.isFalse
+                                        ? Text(
+                                            'Find',
+                                            style: fontStyleForElevatedButtons,
+                                          )
+                                        : loadingProcess,
                                   ),
                                   ElevatedButton(
                                     style: clearVariablesButtonStyle,
-                                    onPressed:
-                                        controller.isThisYearSelected.isFalse
-                                        ? () {
-                                            // controller.clearAllFilters();
-                                          }
-                                        : null,
+                                    onPressed: () {
+                                      controller.clearAllFilters();
+                                    },
                                     child: Text(
                                       'Clear Filters',
                                       style: fontStyleForElevatedButtons,
@@ -337,27 +330,17 @@ class IssueItems extends StatelessWidget {
                             topRight: Radius.circular(2),
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            controller.isScreenLoding.isTrue &&
-                                    controller.allIssuesDocs.isEmpty
-                                ? Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: loadingProcess,
-                                  )
-                                : SizedBox(
-                                    width: constraints.maxWidth,
-                                    child: tableOfScreens(
-                                      showHistoryButton: true,
-                                      scrollController:
-                                          controller.scrollControllerFotTable1,
-                                      constraints: constraints,
-                                      context: context,
-                                      controller: controller,
-                                      data: controller.allIssuesDocs,
-                                    ),
-                                  ),
-                          ],
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            showHistoryButton: true,
+                            scrollController:
+                                controller.scrollControllerFotTable1,
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
+                            data: controller.allIssuesDocs,
+                          ),
                         ),
                       );
                     },
@@ -376,16 +359,12 @@ Widget tableOfScreens({
   required BoxConstraints constraints,
   required BuildContext context,
   required IssueItemsController controller,
-  required RxList<DocumentSnapshot> data,
+  required RxList<IssuingModel> data,
   required ScrollController scrollController,
   required bool showHistoryButton,
 }) {
-  final dataSource = CardDataSource(
-    cards: data,
-    context: context,
-    constraints: constraints,
-    controller: controller,
-  );
+  bool isJobsLoading = data.isEmpty;
+
   return DataTableTheme(
     data: DataTableThemeData(
       headingTextStyle: fontStyleForTableHeader,
@@ -422,10 +401,7 @@ Widget tableOfScreens({
             // onSort: controller.onSort,
           ),
           DataColumn(
-            label: AutoSizedText(
-              text: 'Job / Converter',
-              constraints: constraints,
-            ),
+            label: AutoSizedText(text: 'Date', constraints: constraints),
             // onSort: controller.onSort,
           ),
           DataColumn(
@@ -433,13 +409,21 @@ Widget tableOfScreens({
             // onSort: controller.onSort,
           ),
           DataColumn(
-            label: AutoSizedText(text: 'Received By', constraints: constraints),
+            label: AutoSizedText(
+              text: 'Job / Converter',
+              constraints: constraints,
+            ),
             // onSort: controller.onSort,
           ),
           DataColumn(
-            label: AutoSizedText(text: 'Date', constraints: constraints),
+            label: AutoSizedText(text: 'Name', constraints: constraints),
             // onSort: controller.onSort,
           ),
+          DataColumn(
+            label: AutoSizedText(text: 'Received By', constraints: constraints),
+            // onSort: controller.onSort,
+          ),
+
           DataColumn(
             label: AutoSizedText(text: 'Branch', constraints: constraints),
             // onSort: controller.onSort,
@@ -465,17 +449,22 @@ Widget tableOfScreens({
             // onSort: controller.onSort,
           ),
         ],
-        source: dataSource,
+        source: CardDataSource(
+          cards: isJobsLoading ? [] : data,
+          context: context,
+          constraints: constraints,
+          controller: controller,
+        ),
       ),
     ),
   );
 }
 
 DataRow dataRowForTheTable(
-  Map<String, dynamic> docData,
-  context,
-  constraints,
-  docId,
+  IssuingModel docData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String docId,
   IssueItemsController controller,
   int index,
 ) {
@@ -489,51 +478,63 @@ DataRow dataRowForTheTable(
     }),
     cells: [
       DataCell(
-        Row(
-          children: [
-            editReceivingButton(
-              controller: controller,
-              id: docId,
-              docData: docData,
-              context: context,
-            ),
-          ],
+        editReceivingButton(
+          controller: controller,
+          id: docId,
+          docData: docData,
+          context: context,
         ),
       ),
 
       DataCell(
         textForDataRowInTable(
-          text: '${docData['number']}',
+          text: docData.issuingNumber ?? '',
           formatDouble: false,
         ),
       ),
-      DataCell(
-        textForDataRowInTable(text: '${docData['']}', formatDouble: false),
-      ),
+      DataCell(textForDataRowInTable(text: textToDate(docData.date))),
       DataCell(
         statusBox(
-          docData['status'],
+          docData.status ?? '',
           hieght: 35,
+          width: 100,
           padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),
-      DataCell(textForDataRowInTable(text: '', formatDouble: false)),
+
       DataCell(
         textForDataRowInTable(
-          text: docData['date'] != null && docData['date'] != ''
-              ? textToDate(docData['date'])
-              : 'N/A',
+          text: docData.issueTypeName ?? '',
+          formatDouble: false,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: '', //getdataName(docData['branch'], controller.allBranches),
+          text: docData.detailsString ?? '',
+          formatDouble: false,
+          maxWidth: null,
+        ),
+      ),
+
+      DataCell(
+        textForDataRowInTable(
+          text: docData.receivedByName ?? '',
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: docData.branchName ?? '',
           formatDouble: false,
         ),
       ),
 
       DataCell(
-        textForDataRowInTable(text: '${docData['note']}', formatDouble: false),
+        textForDataRowInTable(
+          text: docData.note ?? '',
+          formatDouble: false,
+          maxWidth: null,
+        ),
       ),
       const DataCell(SizedBox()),
       const DataCell(SizedBox()),
@@ -543,7 +544,7 @@ DataRow dataRowForTheTable(
 }
 
 class CardDataSource extends DataTableSource {
-  final List<DocumentSnapshot> cards;
+  final List<IssuingModel> cards;
   final BuildContext context;
   final BoxConstraints constraints;
   final IssueItemsController controller;
@@ -560,11 +561,10 @@ class CardDataSource extends DataTableSource {
     if (index >= cards.length) return null;
 
     final trade = cards[index];
-    final cardData = trade.data() as Map<String, dynamic>;
-    final cardId = trade.id;
+    final cardId = trade.id ?? '';
 
     return dataRowForTheTable(
-      cardData,
+      trade,
       context,
       constraints,
       cardId,
@@ -590,16 +590,14 @@ ElevatedButton newIssueButton(
 ) {
   return ElevatedButton(
     onPressed: () async {
-      // controller.clearValues();
+      controller.clearValues();
       issueDialog(
         controller: controller,
         onTapForPost: () async {
-          // await controller.editPostForReceiving(
-          //   controller.curreentReceivingId.value,
-          // );
+          controller.updateToPostedStatus();
         },
         onTapForSave: () async {
-          // await controller.addNewReceivingDoc();
+          await controller.addNewIssuingDoc();
         },
       );
     },
@@ -611,29 +609,39 @@ ElevatedButton newIssueButton(
 IconButton editReceivingButton({
   required IssueItemsController controller,
   required String id,
-  required Map<String, dynamic> docData,
+  required IssuingModel docData,
   required BuildContext context,
 }) {
   return IconButton(
     onPressed: () async {
-      // controller.loadValues(docData, id);
-      // receivigDialog(
-      //   id: id,
-      //   controller: controller,
-      //   onTapForPost: () async {
-      //     await controller.editPostForReceiving(id);
-      //   },
-      //   onTapForSave: () async {
-      //     await controller.editReceivingDoc(id);
-      //   },
-      //   onTapForDelete: () {
-      //     controller.deleteReceivingDoc(id, context);
-      //   },
-      //   onTapForCancel: () {
-      //     controller.editCancelForReceiving(id);
-      //   },
-      // );
+      controller.loadValues(docData);
+      issueDialog(
+        id: id,
+        controller: controller,
+        onTapForPost: () {
+          controller.updateToPostedStatus();
+        },
+        onTapForSave: () async {
+          await controller.addNewIssuingDoc();
+        },
+        onTapForDelete: () {
+          if (controller.status.value == 'New') {
+            alertDialog(
+              context: context,
+              content: "This will be deleted permanently",
+              onPressed: () {
+                controller.deleteIssuing(id);
+              },
+            );
+          } else {
+            showSnackBar('Alert', 'Only New Issuing Allowed');
+          }
+        },
+        onTapForCancel: () {
+          controller.updateToCanelledStatus();
+        },
+      );
     },
-    icon: const Icon(Icons.edit_note_rounded, color: Colors.blue),
+    icon: editIcon,
   );
 }

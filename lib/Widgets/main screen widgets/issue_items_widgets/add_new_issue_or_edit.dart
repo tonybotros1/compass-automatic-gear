@@ -48,6 +48,7 @@ Widget addNewIssueOrEdit({
                                   spacing: 10,
                                   children: [
                                     myTextFormFieldWithBorder(
+                                      controller: controller.issueNumber.value,
                                       isEnabled: false,
                                       width: 150,
                                       labelText: 'Number',
@@ -57,11 +58,21 @@ Widget addNewIssueOrEdit({
 
                                       child: myTextFormFieldWithBorder(
                                         controller: controller.date.value,
+                                        onFieldSubmitted: (_) async {
+                                          normalizeDate(
+                                            controller.date.value.text,
+                                            controller.date.value,
+                                          );
+                                          controller.isIssuingModified.value =
+                                              true;
+                                        },
                                         suffixIcon: IconButton(
                                           focusNode: FocusNode(
                                             skipTraversal: true,
                                           ),
                                           onPressed: () {
+                                            controller.isIssuingModified.value =
+                                                true;
                                             selectDateContext(
                                               context,
                                               controller.date.value,
@@ -71,12 +82,6 @@ Widget addNewIssueOrEdit({
                                         ),
                                         width: 150,
                                         labelText: 'Date',
-                                        // focusNode: controller.focusNode1,
-                                        // onEditingComplete: () {
-                                        //   FocusScope.of(
-                                        //     context,
-                                        //   ).requestFocus(controller.focusNode2);
-                                        // },
                                         textInputAction: TextInputAction.next,
                                       ),
                                     ),
@@ -102,12 +107,18 @@ Widget addNewIssueOrEdit({
                                                 value['name'];
                                             controller.jobDetails.clear();
                                             controller.allJobCards.clear();
+                                            controller.allConverters.clear();
+                                            controller.isIssuingModified.value =
+                                                true;
                                           },
                                           onDelete: () {
                                             controller.issueTypeId.value = '';
                                             controller.issueType.value = '';
                                             controller.jobDetails.clear();
                                             controller.allJobCards.clear();
+                                            controller.allConverters.clear();
+                                            controller.isIssuingModified.value =
+                                                true;
                                           },
                                           onOpen: () {
                                             return controller.getIssueTypes();
@@ -117,7 +128,6 @@ Widget addNewIssueOrEdit({
                                     ),
                                     FocusTraversalOrder(
                                       order: const NumericFocusOrder(2),
-
                                       child: GetBuilder<IssueItemsController>(
                                         builder: (controller) {
                                           return CustomDropdown(
@@ -132,10 +142,18 @@ Widget addNewIssueOrEdit({
                                               controller.branchId.value = key;
                                               controller.branch.value.text =
                                                   value['name'];
+                                              controller
+                                                      .isIssuingModified
+                                                      .value =
+                                                  true;
                                             },
                                             onDelete: () {
                                               controller.branchId.value = '';
                                               controller.branch.value.clear();
+                                              controller
+                                                      .isIssuingModified
+                                                      .value =
+                                                  true;
                                             },
                                             onOpen: () {
                                               return controller.getBranches();
@@ -155,7 +173,7 @@ Widget addNewIssueOrEdit({
                                       labelText: selectedType.value == ''
                                           ? 'Not Selected'
                                           : selectedType.value,
-                                      width: 310,
+                                      width: 400,
                                       focusNode: controller.focusNode4,
                                       onEditingComplete: () {
                                         FocusScope.of(
@@ -240,15 +258,19 @@ Widget addNewIssueOrEdit({
                                           controller.receivedBy.value.text,
                                       hintText: 'Received By',
                                       showedSelectedName: 'name',
-                                      width: 310,
+                                      width: 400,
                                       onChanged: (key, value) {
                                         controller.receivedBy.value.text =
                                             value['name'];
                                         controller.receivedById.value = key;
+                                        controller.isIssuingModified.value =
+                                            true;
                                       },
                                       onDelete: () {
                                         controller.receivedBy.value.clear();
                                         controller.receivedById.value = '';
+                                        controller.isIssuingModified.value =
+                                            true;
                                       },
                                       onOpen: () {
                                         return controller
@@ -262,9 +284,13 @@ Widget addNewIssueOrEdit({
                           ),
                           Expanded(
                             child: myTextFormFieldWithBorder(
+                              controller: controller.note.value,
                               focusNode: controller.focusNode5,
                               labelText: 'Note',
                               maxLines: 10,
+                              onChanged: (_) {
+                                controller.isIssuingModified.value = true;
+                              },
                             ),
                           ),
                         ],
@@ -281,7 +307,7 @@ Widget addNewIssueOrEdit({
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Item Details', style: fontStyle1),
-                newItemsButton(context, constraints, controller,false),
+                newItemsButton(context, constraints, controller, false),
               ],
             ),
           ),
@@ -324,7 +350,7 @@ Widget addNewIssueOrEdit({
                                   context,
                                   constraints,
                                   controller,
-                                  true
+                                  true,
                                 ),
                               ],
                             ),
@@ -567,7 +593,9 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     onSelectChanged: (_) {
+      controller.isIssuingModified.value = true;
       Get.back();
+      controller.jobCardId.value = jobId;
       controller.jobDetails.text =
           '${jobData.jobNumber ?? ''} [${jobData.carBrandName ?? ''} ${jobData.carModelName ?? ''}] [${jobData.plateNumber ?? ''}]';
     },
@@ -745,7 +773,9 @@ DataRow dataRowForTheConverterTable(
 ) {
   return DataRow(
     onSelectChanged: (_) {
+      controller.isIssuingModified.value = true;
       Get.back();
+      controller.converterId.value = converterId;
       controller.jobDetails.text =
           '${converterData.converterNumber ?? ''} [${converterData.name ?? ''}]';
     },

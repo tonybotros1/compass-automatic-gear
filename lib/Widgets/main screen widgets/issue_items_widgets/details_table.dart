@@ -128,20 +128,23 @@ Widget tableOfScreens({
                 }),
 
           // --- Totals row ---
-          const DataRow(
+          DataRow(
             selected: true,
             cells: [
-              DataCell(Text('')),
-              DataCell(Text('')),
-              DataCell(Text('')),
-              DataCell(Text('')),
+              const DataCell(Text('')),
+              const DataCell(Text('')),
+              const DataCell(Text('')),
+              const DataCell(Text('')),
+              const DataCell(Text('Totals')),
               DataCell(
-                Align(alignment: Alignment.centerRight, child: Text('Totals')),
-              ),
-              DataCell(
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text('', style: TextStyle(color: Colors.blue)),
+                textForDataRowInTable(
+                  text: isConverter == false
+                      ? controller.totalsForSelectedInventoryItemsDetails.value
+                            .toString()
+                      : controller.totalsForSelectedConvertersDetails.value
+                            .toString(),
+                  color: Colors.blue,
+                  isBold: true,
                 ),
               ),
             ],
@@ -174,12 +177,14 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text:  invoiceItemsData.name  ?? '',
+          text: invoiceItemsData.name ?? '',
           maxWidth: null,
         ),
       ),
       DataCell(
-        controller.editingIndex.value == index
+        (isConverter == false
+                ? controller.editingIndexForInventoryDetails.value == index
+                : controller.editingIndexForConvertersDetails.value == index)
             ? SizedBox(
                 width: double.infinity,
                 child: TextField(
@@ -209,12 +214,15 @@ DataRow dataRowForTheTable(
                           );
                   },
                   onTapOutside: (_) {
-                    controller.editingIndex.value = -1;
+                    isConverter == false
+                        ? controller.editingIndexForInventoryDetails.value = -1
+                        : controller.editingIndexForConvertersDetails.value =
+                              -1;
                   },
                 ),
               )
             : InkWell(
-                onTap: () => controller.startEditing(index),
+                onTap: () => controller.startEditing(isConverter, index),
                 child: SizedBox(
                   height: double.infinity,
                   child: Row(
@@ -399,89 +407,67 @@ Expanded itemsTable(
                         ),
                       ],
                       rows: isConverter == false
-                          // -------- INVENTORY MODE --------
-                          ? (controller.filteredInventeryItems.isEmpty &&
-                                    controller
+                          // ---------------- INVENTORY MODE ----------------
+                          ? (controller
                                         .searchForInventoryItems
                                         .value
                                         .text
                                         .isEmpty
-                                ? List<DataRow>.generate(
-                                    controller.allInventeryItems.length,
-                                    (index) {
-                                      final item =
-                                          controller.allInventeryItems[index];
-                                      final itemId = item.id ?? '';
-
-                                      return dataRowForTheItemTable(
-                                        item,
-                                        context,
-                                        constraints,
-                                        itemId,
-                                        controller,
-                                        index,
-                                        isConverter,
-                                      );
-                                    },
-                                  )
-                                : List<DataRow>.generate(
-                                    controller.filteredInventeryItems.length,
-                                    (index) {
-                                      final item = controller
-                                          .filteredInventeryItems[index];
-                                      final itemId = item.id ?? '';
-                                      return dataRowForTheItemTable(
-                                        item,
-                                        context,
-                                        constraints,
-                                        itemId,
-                                        controller,
-                                        index,
-                                        isConverter,
-                                      );
-                                    },
-                                  ))
-                          // -------- CONVERTER MODE --------
-                          : (controller.filteredConvertersDetails.isEmpty &&
-                                    controller
+                                    ? controller.allInventeryItems
+                                    : controller.filteredInventeryItems)
+                                .where(
+                                  (r) => !controller.selectedInventeryItems.any(
+                                    (sel) =>
+                                        (sel.inventoryItemId == r.id) &&
+                                        (sel.isDeleted != true),
+                                  ),
+                                )
+                                .map((item) {
+                                  final itemId = item.id ?? '';
+                                  final index = controller.allInventeryItems
+                                      .indexWhere((r) => r.id == itemId);
+                                  return dataRowForTheItemTable(
+                                    item,
+                                    context,
+                                    constraints,
+                                    itemId,
+                                    controller,
+                                    index,
+                                    isConverter,
+                                  );
+                                })
+                                .toList()
+                          // ---------------- CONVERTER MODE ----------------
+                          : (controller
                                         .searchForInventoryItems
                                         .value
                                         .text
                                         .isEmpty
-                                ? List<DataRow>.generate(
-                                    controller.allConvertersDetails.length,
-                                    (index) {
-                                      final item = controller
-                                          .allConvertersDetails[index];
-                                      final itemId = item.id ?? '';
-                                      return dataRowForTheItemTable(
-                                        item,
-                                        context,
-                                        constraints,
-                                        itemId,
-                                        controller,
-                                        index,
-                                        isConverter,
-                                      );
-                                    },
-                                  )
-                                : List<DataRow>.generate(
-                                    controller.filteredConvertersDetails.length,
-                                    (index) {
-                                      final item = controller
-                                          .filteredConvertersDetails[index];
-                                      final itemId = item.id ?? '';
-                                      return dataRowForTheItemTable(
-                                        item,
-                                        context,
-                                        constraints,
-                                        itemId,
-                                        controller,
-                                        index,
-                                        isConverter,
-                                      );
-                                    },
-                                  )),
+                                    ? controller.allConvertersDetails
+                                    : controller.filteredConvertersDetails)
+                                .where(
+                                  (r) =>
+                                      !controller.selectedConvertersDetails.any(
+                                        (sel) =>
+                                            (sel.id == r.id) &&
+                                            (sel.isDeleted != true),
+                                      ),
+                                )
+                                .map((item) {
+                                  final itemId = item.id ?? '';
+                                  final index = controller.allConvertersDetails
+                                      .indexWhere((r) => r.id == itemId);
+                                  return dataRowForTheItemTable(
+                                    item,
+                                    context,
+                                    constraints,
+                                    itemId,
+                                    controller,
+                                    index,
+                                    isConverter,
+                                  );
+                                })
+                                .toList(),
                     ),
                   ),
                 ),

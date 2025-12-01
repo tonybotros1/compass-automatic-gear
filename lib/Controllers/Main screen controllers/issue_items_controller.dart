@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../../Models/issuing/base_model_for_issing_items.dart';
+import '../../Models/issuing/issung_model.dart';
 import '../../Models/job cards/job_card_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
@@ -15,6 +16,8 @@ import 'main_screen_contro.dart';
 class IssueItemsController extends GetxController {
   Rx<TextEditingController> date = TextEditingController().obs;
   Rx<TextEditingController> branch = TextEditingController().obs;
+  Rx<TextEditingController> note = TextEditingController().obs;
+  Rx<TextEditingController> issueNumber = TextEditingController().obs;
   RxString issueType = RxString('');
   // Rx<TextEditingController> issueType = TextEditingController().obs;
   RxString branchId = RxString('');
@@ -43,8 +46,7 @@ class IssueItemsController extends GetxController {
   RxDouble allIssuesTotals = RxDouble(0.0);
   RxDouble allIssuesNET = RxDouble(0.0);
   RxBool isScreenLoding = RxBool(false);
-  final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allIssuesDocs =
-      RxList<QueryDocumentSnapshot<Map<String, dynamic>>>([]);
+  final RxList<IssuingModel> allIssuesDocs = RxList<IssuingModel>([]);
   final ScrollController scrollControllerFotTable1 = ScrollController();
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
@@ -98,7 +100,15 @@ class IssueItemsController extends GetxController {
   TextEditingController searchForConvertersDetails = TextEditingController();
   String backendUrl = backendTestURI;
   RxString currentIssuingId = RxString('');
-  var editingIndex = (-1).obs;
+  var editingIndexForInventoryDetails = (-1).obs;
+  var editingIndexForConvertersDetails = (-1).obs;
+  RxString jobCardId = RxString('');
+  RxString converterId = RxString('');
+  RxBool isIssuingModified = RxBool(false);
+  RxBool isIssuingItemsDetailsModified = RxBool(false);
+  RxBool isIssuingConvertersDetailsModified = RxBool(false);
+  RxDouble totalsForSelectedInventoryItemsDetails = RxDouble(0.0);
+  RxDouble totalsForSelectedConvertersDetails = RxDouble(0.0);
 
   @override
   void onInit() async {
@@ -255,6 +265,387 @@ class IssueItemsController extends GetxController {
     }
   }
 
+  Future<void> addNewIssuingDoc() async {
+    try {
+      if (currentIssuingId.isNotEmpty) {
+        Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
+
+        String status1 = jobStatus['status'];
+        if (status1 != 'New' && status1 != '') {
+          showSnackBar('Alert', 'Only new issuing docs can be edited');
+          return;
+        }
+      }
+      addingNewValue.value = true;
+
+      // Base data
+      final Map<String, dynamic> newData = {
+        'branch': branchId.value,
+        'issue_type': issueTypeId.value,
+        'job_card_id': jobCardId.value,
+        'converter_id': converterId.value,
+        'note': note.value.text.trim(),
+        'received_by': receivedById.value,
+        'status': status.value,
+        'items_details': selectedInventeryItems
+            .where((inv) => inv.isDeleted != true)
+            .map((item) => item.toJsonForinventoryItems())
+            .toList(),
+        'converters_details': selectedConvertersDetails
+            .where((inv) => inv.isDeleted != true)
+            .map((item) => item.toJsonForConverters())
+            .toList(),
+      };
+
+      // Handle date parsing safely
+      final rawDate = date.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          newData['date'] = convertDateToIson(rawDate);
+        } catch (e) {
+          showSnackBar('Alert', 'Please enter a valid date');
+          addingNewValue.value = false;
+          return;
+        }
+      }
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+
+      if (currentIssuingId.isEmpty) {
+        Uri addingRecUrl = Uri.parse('$backendUrl/issue_items/add_new_issuing');
+
+        showSnackBar('Adding', 'Please Wait');
+        newData['status'] = 'New';
+        final response = await http.post(
+          addingRecUrl,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(newData),
+        );
+        if (response.statusCode == 200) {
+          status.value = 'New';
+          final decoded = jsonDecode(response.body);
+          String issNumber = decoded['issuing_number'];
+          String issId = decoded['issuing_id'];
+          addingNewValue.value = false;
+          issueNumber.value.text = issNumber;
+          currentIssuingId.value = issId;
+          isIssuingModified.value = false;
+          isIssuingConvertersDetailsModified.value = false;
+          isIssuingItemsDetailsModified.value = false;
+          showSnackBar('Done', 'Issuing Added Successfully');
+        } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) {
+            await addNewIssuingDoc();
+          } else if (refreshed == RefreshResult.invalidToken) {
+            logout();
+          }
+        } else if (response.statusCode == 401) {
+          logout();
+        }
+      } else {
+        if (isIssuingModified.isTrue ||
+            isIssuingConvertersDetailsModified.isTrue ||
+            isIssuingItemsDetailsModified.isTrue) {
+          http.Response? responseForEditingIssuing;
+          http.Response? responseForEditingIssuingItemsDetails;
+          http.Response? responseForEditingIssuingConvertersDetails;
+
+          showSnackBar('Updating', 'Please Wait');
+
+          if (isIssuingModified.isTrue) {
+            Uri updatingJobUrl = Uri.parse(
+              '$backendUrl/issue_items/update_issuing/${currentIssuingId.value}',
+            );
+            Map newDataToUpdate = newData;
+            newDataToUpdate.remove('items_details');
+            newDataToUpdate.remove('converters_details');
+            responseForEditingIssuing = await http.patch(
+              updatingJobUrl,
+              headers: {
+                'Authorization': 'Bearer $accessToken',
+                "Content-Type": "application/json",
+              },
+              body: jsonEncode(newDataToUpdate),
+            );
+            if (responseForEditingIssuing.statusCode == 200) {
+              final decoded = jsonDecode(responseForEditingIssuing.body);
+              IssuingModel newIss = IssuingModel.fromJson(decoded['issuing']);
+              currentIssuingId.value = newIss.id ?? '';
+              // selectedInventeryItems.value = newIss.itemsDetailsSection ?? [];
+              // selectedConvertersDetails.value = newIss.convertersDetailsSection ?? [];
+              isIssuingModified.value = false;
+              // calculateTotalsForSelectedReceive();
+            } else if (responseForEditingIssuing.statusCode == 401 &&
+                refreshToken.isNotEmpty) {
+              final refreshed = await helper.refreshAccessToken(refreshToken);
+              if (refreshed == RefreshResult.success) {
+                await addNewIssuingDoc();
+              } else if (refreshed == RefreshResult.invalidToken) {
+                logout();
+              }
+            } else if (responseForEditingIssuing.statusCode == 401) {
+              logout();
+            }
+          }
+          if (isIssuingItemsDetailsModified.isTrue) {
+            Uri updatingJobInvoicesUrl = Uri.parse(
+              '$backendUrl/issue_items/update_issuing_items_details',
+            );
+            responseForEditingIssuingItemsDetails = await http.patch(
+              updatingJobInvoicesUrl,
+              headers: {
+                'Authorization': 'Bearer $accessToken',
+                "Content-Type": "application/json",
+              },
+              body: jsonEncode(
+                selectedInventeryItems
+                    .where(
+                      (item) =>
+                          (item.isModified == true ||
+                          item.isAdded == true ||
+                          (item.isDeleted == true && item.id != null)),
+                    )
+                    .map((item) => item.toJsonForinventoryItems())
+                    .toList(),
+              ),
+            );
+            if (responseForEditingIssuingItemsDetails.statusCode == 200) {
+              // final decoded = jsonDecode(
+              //   responseForEditingIssuingItemsDetails.body,
+              // );
+              // List updatedItems = decoded['updated_items']['items_details'];
+              // if (updatedItems.isNotEmpty) {
+              //   selectedInventeryItems.assignAll(
+              //     updatedItems.map(
+              //       (item) =>
+              //           BaseModelForIssuingItems.fromJsonForInventoryItems(
+              //             item,
+              //           ),
+              //     ),
+              //   );
+              // }
+              isIssuingItemsDetailsModified.value = false;
+            } else if (responseForEditingIssuingItemsDetails.statusCode ==
+                    401 &&
+                refreshToken.isNotEmpty) {
+              final refreshed = await helper.refreshAccessToken(refreshToken);
+              if (refreshed == RefreshResult.success) {
+                await addNewIssuingDoc();
+              } else if (refreshed == RefreshResult.invalidToken) {
+                logout();
+              }
+            } else if (responseForEditingIssuingItemsDetails.statusCode ==
+                401) {
+              logout();
+            }
+          }
+          if (isIssuingConvertersDetailsModified.isTrue) {
+            Uri updatingIssueConverterUrl = Uri.parse(
+              '$backendUrl/issue_items/update_issuing_converters_details',
+            );
+            responseForEditingIssuingConvertersDetails = await http.patch(
+              updatingIssueConverterUrl,
+              headers: {
+                'Authorization': 'Bearer $accessToken',
+                "Content-Type": "application/json",
+              },
+              body: jsonEncode(
+                selectedConvertersDetails
+                    .where(
+                      (item) =>
+                          (item.isModified == true ||
+                          item.isAdded == true ||
+                          (item.isDeleted == true && item.id != null)),
+                    )
+                    .map((item) => item.toJsonForConverters())
+                    .toList(),
+              ),
+            );
+            if (responseForEditingIssuingConvertersDetails.statusCode == 200) {
+              // final decoded = jsonDecode(
+              //   responseForEditingIssuingConvertersDetails.body,
+              // );
+              // List updatedItems = decoded['updated_items']['items_details'];
+              // if (updatedItems.isNotEmpty) {
+              //   allInventeryItems.assignAll(
+              //     updatedItems.map(
+              //       (item) =>
+              //           BaseModelForIssuingItems.fromJsonForInventoryItems(
+              //             item,
+              //           ),
+              //     ),
+              //   );
+              // }
+              isIssuingConvertersDetailsModified.value = false;
+              // calculateTotalsForSelectedReceive();
+            } else if (responseForEditingIssuingConvertersDetails.statusCode ==
+                    401 &&
+                refreshToken.isNotEmpty) {
+              final refreshed = await helper.refreshAccessToken(refreshToken);
+              if (refreshed == RefreshResult.success) {
+                await addNewIssuingDoc();
+              } else if (refreshed == RefreshResult.invalidToken) {
+                logout();
+              }
+            } else if (responseForEditingIssuingConvertersDetails.statusCode ==
+                401) {
+              logout();
+            }
+          }
+          if ((responseForEditingIssuing?.statusCode == 200) ||
+              (responseForEditingIssuingItemsDetails?.statusCode == 200 ||
+                  responseForEditingIssuingConvertersDetails?.statusCode ==
+                      200)) {
+            showSnackBar('Done', 'Updated Successfully');
+          }
+        }
+      }
+      addingNewValue.value = false; // Ensure loading flag is reset
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong');
+      addingNewValue.value = false; // Ensure loading flag is reset
+    }
+  }
+
+  
+  Future<void> deleteIssuing(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/issue_items/delete_issuing/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        String deletedIssuingId = decoded['issuing_id'];
+        allIssuesDocs.removeWhere((rec) => rec.id == deletedIssuingId);
+        numberOfIssuesgDocs.value -= 1;
+        Get.close(2);
+        showSnackBar('Success', 'Issuing deleted successfully');
+      } else if (response.statusCode == 400 || response.statusCode == 404) {
+        final decoded =
+            jsonDecode(response.body) ?? 'Failed to delete receiving';
+        String error = decoded['detail'];
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 403) {
+        final decoded = jsonDecode(response.body);
+        String error = decoded['detail'] ?? 'Only New Issuing Allowed';
+        showSnackBar('Alert', error);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteIssuing(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 500) {
+        final decoded = jsonDecode(response.body);
+        final error =
+            decoded['detail'] ?? 'Server error while deleting issuing';
+        showSnackBar('Server Error', error);
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+    }
+  }
+
+
+  void filterSearch() async {
+    Map<String, dynamic> body = {};
+    if (issueNumberFilter.value.text.isNotEmpty) {
+      body["issuing_number"] = issueNumberFilter.value.text;
+    }
+    // if (referenceNumberFilter.value.text.isNotEmpty) {
+    //   body["reference_number"] = referenceNumberFilter.value.text;
+    // }
+    // if (vendorNameIdFilter.value.isNotEmpty) {
+    //   body["vendor"] = vendorNameIdFilter.value;
+    // }
+    if (receivedByIdFilter.value.isNotEmpty) {
+      body["received_by"] = receivedByIdFilter.value;
+    }
+
+    if (statusFilter.value.text.isNotEmpty) {
+      body["status"] = statusFilter.value.text;
+    }
+    if (isTodaySelected.isTrue) {
+      body["today"] = true;
+    }
+    if (isThisMonthSelected.isTrue) {
+      body["this_month"] = true;
+    }
+    if (isThisYearSelected.isTrue) {
+      body["this_year"] = true;
+    }
+    if (fromDate.value.text.isNotEmpty) {
+      body["from_date"] = convertDateToIson(fromDate.value.text);
+    }
+    if (toDate.value.text.isNotEmpty) {
+      body["to_date"] = convertDateToIson(toDate.value.text);
+    }
+    if (body.isNotEmpty) {
+      await searchEngine(body);
+    } else {
+      await searchEngine({"all": true});
+    }
+  }
+
+  Future<void> searchEngine(Map<String, dynamic> body) async {
+    try {
+      isScreenLoding.value = true;
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/issue_items/search_engine_for_issuing');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List receiving = decoded['issuing'];
+        Map grandTotals = decoded['grand_totals'];
+        allIssuesTotals.value = grandTotals['grand_total'];
+        allIssuesVATS.value = grandTotals['grand_vat'];
+        allIssuesNET.value = grandTotals['grand_net'];
+        // print(jobs[0]);
+        allIssuesDocs.assignAll(
+          receiving.map((rec) => IssuingModel.fromJson(rec)),
+        );
+        numberOfIssuesgDocs.value = allIssuesDocs.length;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngine(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      isScreenLoding.value = false;
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
+  }
+
   void addSelectedInventoryItems() {
     // Build a set of existing jobIds for O(1) lookup instead of O(n) search
     final existingInventoryIds = selectedInventeryItems
@@ -295,7 +686,8 @@ class IssueItemsController extends GetxController {
         existingInventoryIds.add(item.id);
       }
     }
-
+    calculateTotalsForSelectedInventoryItemsDetails();
+    isIssuingItemsDetailsModified.value = true;
     selectedInventeryItems.refresh();
     allInventeryItems.refresh();
     Get.back();
@@ -321,7 +713,7 @@ class IssueItemsController extends GetxController {
             ..isDeleted = false
             ..isAdded = true
             ..isSelected = true
-            ..finalQuantity = 0;
+            ..finalQuantity = 1;
         }
 
         item
@@ -329,21 +721,22 @@ class IssueItemsController extends GetxController {
           ..isDeleted = false
           ..isAdded = true
           ..isSelected = true
-          ..finalQuantity = 0;
+          ..finalQuantity = 1;
       } else {
         item
           ..issueId = currentIssuingId.value
           ..isAdded = true
           ..isSelected = true
           ..isDeleted = false
-          ..finalQuantity = 0;
+          ..finalQuantity = 1;
 
         selectedConvertersDetails.add(item);
         existingConvertersIds.add(item.id);
       }
     }
-
+    calculateTotalsForSelectedConvertersDetails();
     selectedConvertersDetails.refresh();
+    isIssuingConvertersDetailsModified.value = true;
     allConvertersDetails.refresh();
     Get.back();
   }
@@ -373,8 +766,9 @@ class IssueItemsController extends GetxController {
     }
 
     // 3) Trigger recalculations and reactive updates
-    // calculateAmountForSelectedReceipts();
+    calculateTotalsForSelectedInventoryItemsDetails();
     allInventeryItems.refresh();
+    isIssuingItemsDetailsModified.value = true;
     selectedInventeryItems.refresh();
     Get.back();
   }
@@ -402,7 +796,9 @@ class IssueItemsController extends GetxController {
         ..isModified = true
         ..isSelected = false;
     }
+    calculateTotalsForSelectedConvertersDetails();
     allConvertersDetails.refresh();
+    isIssuingConvertersDetailsModified.value = true;
     selectedConvertersDetails.refresh();
     Get.back();
   }
@@ -412,27 +808,44 @@ class IssueItemsController extends GetxController {
     selectedInventeryItems[idx].total =
         selectedInventeryItems[idx].finalQuantity! *
         selectedInventeryItems[idx].lastPrice!;
-    // calculateAmountForSelectedPayments();
+    calculateTotalsForSelectedInventoryItemsDetails();
     selectedInventeryItems[idx].isModified = true;
-    // isPaymentInvoicesModified.value = true;
-    editingIndex.value = -1;
+    isIssuingItemsDetailsModified.value = true;
+    editingIndexForInventoryDetails.value = -1;
+    print( selectedInventeryItems[idx].toJsonForinventoryItems());
+
   }
 
   void finishEditingForConverters(String newValue, int idx) {
-    // // Update the data source
-    // selectedInventeryItems[idx].finalQuantity = int.tryParse(newValue) ?? 0;
-    // selectedInventeryItems[idx].total =
-    //     selectedInventeryItems[idx].finalQuantity! *
-    //     selectedInventeryItems[idx].lastPrice!;
-    // // Exit edit mode
-    // // calculateAmountForSelectedPayments();
-    // selectedInventeryItems[idx].isModified = true;
-    // // isPaymentInvoicesModified.value = true;
-    // editingIndex.value = -1;
+    selectedConvertersDetails[idx].finalQuantity = int.tryParse(newValue) ?? 0;
+    selectedConvertersDetails[idx].total =
+        selectedConvertersDetails[idx].finalQuantity! *
+        selectedConvertersDetails[idx].lastPrice!;
+    calculateTotalsForSelectedConvertersDetails();
+    selectedConvertersDetails[idx].isModified = true;
+    isIssuingConvertersDetailsModified.value = true;
+    editingIndexForConvertersDetails.value = -1;
+    print( selectedConvertersDetails[idx].toJsonForConverters());
   }
 
-  void startEditing(int idx) {
-    editingIndex.value = idx;
+  void startEditing(bool isConverter, int idx) {
+    isConverter == false
+        ? editingIndexForInventoryDetails.value = idx
+        : editingIndexForConvertersDetails.value = idx;
+  }
+
+  void calculateTotalsForSelectedInventoryItemsDetails() {
+    totalsForSelectedInventoryItemsDetails.value = 0;
+    for (var item in selectedInventeryItems) {
+      totalsForSelectedInventoryItemsDetails.value += item.total ?? 0;
+    }
+  }
+
+  void calculateTotalsForSelectedConvertersDetails() {
+    totalsForSelectedConvertersDetails.value = 0;
+    for (var item in selectedConvertersDetails) {
+      totalsForSelectedConvertersDetails.value += item.total ?? 0;
+    }
   }
 
   // ======================================================================================================================
@@ -446,6 +859,48 @@ class IssueItemsController extends GetxController {
       }
     }
   }
+
+  void updateToPostedStatus() async {
+    if (currentIssuingId.isNotEmpty) {
+      Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
+
+      String status1 = jobStatus['status'];
+     if (status1 == 'Posted') {
+        showSnackBar('Alert', 'Status is already posted');
+        return;
+      } else if (status1 == 'Cancelled') {
+        showSnackBar('Alert', 'Status is cancelled');
+        return;
+      } else {
+        status.value = 'Posted';
+        isIssuingModified.value = true;
+      }
+    } else {
+      showSnackBar('Alert', 'Please save the issue doc first');
+    }
+  }
+
+  void updateToCanelledStatus() async {
+    if (currentIssuingId.isNotEmpty) {
+      Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
+
+      String status1 = jobStatus['status'];
+      if (status1 == 'Cancelled') {
+        showSnackBar('Alert', 'Status is already cancelled');
+        return;
+      } else if (status1 == 'Poste') {
+        showSnackBar('Alert', 'Status is cancelled');
+        return;
+      } else {
+        status.value = 'Cancelled';
+        isIssuingModified.value = true;
+
+      }
+    } else {
+      showSnackBar('Alert', 'Please save the issue doc first');
+    }
+  }
+
 
   void searchEngineForJobCards() {
     jobQuery.value = searchForJobCards.value.text.toLowerCase();
@@ -517,114 +972,66 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  // Future<void> getAllInventeryItems() async {
-  //   try {
-  //     loadingItemsTable.value = true;
-  //     allInventeryItems.clear();
-  //     var items = await FirebaseFirestore.instance
-  //         .collection('inventery_items')
-  //         // .where('company_id', isEqualTo: companyId.value)
-  //         .get();
-  //     for (var item in items.docs) {
-  //       allInventeryItems.add(item);
-  //     }
-  //     loadingItemsTable.value = false;
-  //   } catch (e) {
-  //     loadingItemsTable.value = false;
-  //   }
-  // }
+  void clearValues() {
+    currentIssuingId.value = '';
+    branch.value.clear();
+    branchId.value = '';
+    date.value.text = textToDate(DateTime.now());
+    issueNumber.value.clear();
+    issueType.value = '';
+    issueTypeId.value = '';
+    jobDetails.clear();
+    allJobCards.clear();
+    allConverters.clear();
+    allConvertersDetails.clear();
+    allInventeryItems.clear();
+    selectedConvertersDetails.clear();
+    note.value.clear();
+    selectedInventeryItems.clear();
+    receivedBy.value.clear();
+    receivedById.value = '';
+    status.value = '';
+    totalsForSelectedConvertersDetails.value = 0.0;
+    totalsForSelectedInventoryItemsDetails.value = 0.0;
+  }
 
-  // Future<void> getItemDetails(String itemId) async {
-  //   try {
-  //     final futures = [
-  //       FirebaseFirestore.instance
-  //           .collectionGroup('items')
-  //           .where('collection_parent', isEqualTo: 'receiving')
-  //           // .where('company_id', isEqualTo: companyId.value)
-  //           .where('code', isEqualTo: itemId)
-  //           .get(),
-  //       FirebaseFirestore.instance
-  //           .collectionGroup('items')
-  //           .where('collection_parent', isEqualTo: 'issue_items')
-  //           // .where('company_id', isEqualTo: companyId.value)
-  //           .where('code', isEqualTo: itemId)
-  //           .get(),
-  //     ];
+  void loadValues(IssuingModel data) {
+    List<BaseModelForIssuingItems> items = data.itemsDetailsSection ?? [];
+    List<BaseModelForIssuingItems> converters =
+        data.convertersDetailsSection ?? [];
+    currentIssuingId.value = data.id ?? '';
+    issueNumber.value.text = data.issuingNumber ?? '';
+    date.value.text = textToDate(data.date);
+    issueType.value = data.issueTypeName ?? '';
+    issueTypeId.value = data.issueType ?? '';
+    branch.value.text = data.branchName ?? '';
+    branchId.value = data.branch ?? '';
+    jobDetails.text = data.detailsString ?? '';
+    receivedBy.value.text = data.receivedByName ?? '';
+    receivedById.value = data.receivedBy ?? '';
+    selectedInventeryItems.assignAll(items);
+    selectedConvertersDetails.assignAll(converters);
+    status.value = data.status ?? '';
+    isIssuingModified.value = false;
+    isIssuingConvertersDetailsModified.value = false;
+    isIssuingItemsDetailsModified.value = false;
+    note.value.text = data.note ?? '';
+    calculateTotalsForSelectedConvertersDetails();
+    calculateTotalsForSelectedInventoryItemsDetails();
+    print(selectedInventeryItems[0].inventoryItemId);
+    print(selectedInventeryItems[0].isDeleted);
+  }
 
-  //     final results = await Future.wait(futures);
-
-  //     int receivingQty = 0;
-  //     double originalPrice = 0.0;
-  //     double localPrice = 0.0;
-  //     double discount = 0.0;
-  //     int quantity = 1;
-  //     double total = 0.0;
-  //     double vat = 0.0;
-  //     double totalForAllItems = 0.0;
-  //     DateTime? lastDate;
-  //     DocumentSnapshot<Map<String, dynamic>>? lastDoc;
-
-  //     for (var doc in results[0].docs) {
-  //       final data = doc.data();
-  //       receivingQty += (data['quantity'] ?? 0) as int;
-
-  //       final dateStr = data['added_date'];
-  //       if (dateStr != null) {
-  //         final currentDate = DateTime.parse(dateStr);
-  //         if (lastDate == null || currentDate.isAfter(lastDate)) {
-  //           lastDate = currentDate;
-  //           originalPrice = (data['orginal_price'] ?? 0).toDouble();
-  //           discount = (data['discount'] ?? 0).toDouble();
-  //           vat = (data['vat'] ?? 0).toDouble();
-  //           quantity = (data['quantity'] ?? 0).toInt();
-  //           lastDoc = doc;
-  //         }
-  //       }
-  //     }
-
-  //     int issueQty = 0;
-  //     for (var doc in results[1].docs) {
-  //       issueQty += (doc['quantity'] ?? 0) as int;
-  //     }
-
-  //     final balance = receivingQty - issueQty;
-
-  //     // 🔹 جلب معلومات من parent receiving doc
-  //     if (lastDoc != null) {
-  //       final parentDocRef = lastDoc.reference.parent.parent;
-  //       if (parentDocRef != null) {
-  //         final parentSnapshot = await parentDocRef.get();
-  //         final itemsSnapshot = await parentDocRef.collection('items').get();
-  //         for (var item in itemsSnapshot.docs) {
-  //           final double orgPrice = item['orginal_price'];
-  //           final double discountVal = item['discount'];
-  //           final int qty = item['quantity'];
-  //           totalForAllItems += (orgPrice - discountVal) * qty;
-  //         }
-  //         Map data = parentSnapshot.data() as Map<String, dynamic>;
-  //         ReceivingItemsModel model = ReceivingItemsModel(
-  //           amount: data['amount'],
-  //           handling: data['handling'],
-  //           other: data['other'],
-  //           shipping: data['shipping'],
-  //           quantity: quantity,
-  //           orginalPrice: originalPrice,
-  //           discount: discount,
-  //           vat: vat,
-  //           rate: data['rate'],
-  //           totalForAllItems: totalForAllItems,
-  //         );
-  //         localPrice = model.localPrice;
-  //         total = model.total;
-  //       }
-  //     }
-
-  //     // print("quantity: $balance");
-  //     // print("Last Price: $localPrice");
-  //     // print("total: $total");
-  //     // print("Last Date: $lastDate");
-  //   } catch (e) {
-  //     // print("Error: $e");
-  //   }
-  // }
+  void clearAllFilters() {
+    issueNumberFilter.value.clear();
+    receivedByFilter.value.clear();
+    receivedById.value = '';
+    statusFilter.value.clear();
+    fromDate.value.clear();
+    toDate.value.clear();
+    isAllSelected.value = false;
+    isTodaySelected.value = false;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+  }
 }

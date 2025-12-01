@@ -1,6 +1,8 @@
 class BaseModelForIssuingItems {
   String? id;
   String? issueId;
+  String? inventoryItemId;
+  String? converterId;
   String? name;
   String? code;
   String? number;
@@ -25,6 +27,8 @@ class BaseModelForIssuingItems {
     this.total,
     this.isSelected,
     this.number,
+    this.inventoryItemId,
+    this.converterId,
   });
 
   BaseModelForIssuingItems.fromJsonForInventoryItems(
@@ -36,14 +40,18 @@ class BaseModelForIssuingItems {
     finalQuantity = json.containsKey('final_quantity')
         ? json['final_quantity'] ?? ''
         : '';
+    inventoryItemId = json.containsKey('inventory_item_id')
+        ? json['inventory_item_id'] ?? ''
+        : '';
     lastPrice = json.containsKey('last_price') ? json['last_price'] ?? '' : '';
+    issueId = json.containsKey('issue_id') ? json['issue_id'] ?? '' : '';
     total = json.containsKey('total') ? json['total'] ?? 0 : 0;
   }
 
   BaseModelForIssuingItems.fromJsonForConverters(Map<String, dynamic> json) {
     id = json['_id'];
     name = json.containsKey('name') ? json['name'] ?? '' : '';
-    code = json.containsKey('code') ? json['code'] ?? '' : '';
+    converterId = json.containsKey('converter_id') ? json['converter_id'] ?? '' : '';
     finalQuantity = json.containsKey('final_quantity')
         ? json['final_quantity'] ?? ''
         : '';
@@ -51,37 +59,36 @@ class BaseModelForIssuingItems {
         ? json['converter_number'] ?? ''
         : '';
     lastPrice = json.containsKey('last_price') ? json['last_price'] ?? '' : '';
+    issueId = json.containsKey('issue_id') ? json['issue_id'] ?? '' : '';
     total = json.containsKey('total') ? json['total'] ?? 0 : 0;
   }
 
   Map<String, dynamic> toJsonForinventoryItems() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['_id'] = id;
+    data['id'] = id;
     data['issue_id'] = issueId;
-    data['name'] = name;
-    data['code'] = code;
-    data['final_quantity'] = finalQuantity;
-    data['last_price'] = lastPrice;
+    data['inventory_item_id'] = id;
+    data['quantity'] = finalQuantity;
+    data['price'] = lastPrice;
     data['total'] = total;
     data['is_added'] = isAdded;
     data['is_deleted'] = isDeleted;
-    data['is_midified'] = isModified;
+    data['is_modified'] = isModified;
     data['is_selected'] = isSelected;
     return data;
   }
 
   Map<String, dynamic> toJsonForConverters() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['_id'] = id;
+    data['id'] = id;
     data['issue_id'] = issueId;
-    data['name'] = name;
-    data['code'] = code;
-    data['final_quantity'] = finalQuantity;
-    data['last_price'] = lastPrice;
+    data['converter_id'] = id;
+    data['quantity'] = finalQuantity;
+    data['price'] = lastPrice;
     data['total'] = total;
     data['is_added'] = isAdded;
     data['is_deleted'] = isDeleted;
-    data['is_midified'] = isModified;
+    data['is_modified'] = isModified;
     data['is_selected'] = isSelected;
     return data;
   }
