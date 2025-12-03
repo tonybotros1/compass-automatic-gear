@@ -48,6 +48,17 @@ class MyApp extends StatelessWidget {
           ),
           elevation: 10,
         ),
+        // colorScheme: ColorScheme.fromSeed(
+        //   seedColor: Colors.red, // <-- global focus color
+        // ),
+        inputDecorationTheme: const InputDecorationTheme(
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Colors.blue, // <-- Global focus color
+              width: 2,
+            ),
+          ),
+        ),
       ),
       // home: PdfPreviewScreen(),
       initialRoute: '/',

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 import '../../Models/issuing/base_model_for_issing_items.dart';
 import '../../Models/issuing/issung_model.dart';
 import '../../Models/job cards/job_card_model.dart';
@@ -109,6 +110,7 @@ class IssueItemsController extends GetxController {
   RxBool isIssuingConvertersDetailsModified = RxBool(false);
   RxDouble totalsForSelectedInventoryItemsDetails = RxDouble(0.0);
   RxDouble totalsForSelectedConvertersDetails = RxDouble(0.0);
+  final Uuid _uuid = const Uuid();
 
   @override
   void onInit() async {
@@ -513,7 +515,6 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  
   Future<void> deleteIssuing(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -559,7 +560,6 @@ class IssueItemsController extends GetxController {
       showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
-
 
   void filterSearch() async {
     Map<String, dynamic> body = {};
@@ -619,14 +619,11 @@ class IssueItemsController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        List receiving = decoded['issuing'];
+        List issuing = decoded['issuing'];
         Map grandTotals = decoded['grand_totals'];
         allIssuesTotals.value = grandTotals['grand_total'];
-        allIssuesVATS.value = grandTotals['grand_vat'];
-        allIssuesNET.value = grandTotals['grand_net'];
-        // print(jobs[0]);
         allIssuesDocs.assignAll(
-          receiving.map((rec) => IssuingModel.fromJson(rec)),
+          issuing.map((iss) => IssuingModel.fromJson(iss)),
         );
         numberOfIssuesgDocs.value = allIssuesDocs.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
@@ -647,49 +644,27 @@ class IssueItemsController extends GetxController {
   }
 
   void addSelectedInventoryItems() {
-    // Build a set of existing jobIds for O(1) lookup instead of O(n) search
-    final existingInventoryIds = selectedInventeryItems
-        .map((r) => r.id)
-        .toSet();
-
-    // Filter once for selected receipts
     for (final item in allInventeryItems.where((r) => r.isSelected == true)) {
-      if (existingInventoryIds.contains(item.id)) {
-        // Find the existing receipt just once
-        final idx = selectedInventeryItems.indexWhere((i) => i.id == item.id);
+      final String uniqueId = _uuid.v4();
 
-        if (idx != -1) {
-          final existing = selectedInventeryItems[idx];
-          existing
-            ..issueId = currentIssuingId.value
-            ..isDeleted = false
-            ..isAdded = true
-            ..isSelected = true
-            ..finalQuantity = 0;
-        }
-
-        item
-          ..issueId = currentIssuingId.value
-          ..isDeleted = false
-          ..isAdded = true
-          ..isSelected = true
-          ..finalQuantity = 0;
-      } else {
-        item
-          ..issueId = currentIssuingId.value
-          ..isAdded = true
-          ..isSelected = true
-          ..isDeleted = false
-          ..finalQuantity = 0;
-
-        selectedInventeryItems.add(item);
-        existingInventoryIds.add(item.id);
-      }
+      selectedInventeryItems.add(
+        BaseModelForIssuingItems(
+          id: uniqueId,
+          inventoryItemId: item.id,
+          code: item.code,
+          name: item.name,
+          finalQuantity: 0,
+          lastPrice: item.lastPrice,
+          isDeleted: false,
+          isAdded: true,
+          isSelected: true,
+          issueId: currentIssuingId.value,
+        ),
+      );
     }
     calculateTotalsForSelectedInventoryItemsDetails();
     isIssuingItemsDetailsModified.value = true;
     selectedInventeryItems.refresh();
-    allInventeryItems.refresh();
     Get.back();
   }
 
@@ -747,15 +722,6 @@ class IssueItemsController extends GetxController {
       return;
     }
 
-    final availIdx = allInventeryItems.indexWhere((r) => r.id == id);
-    if (availIdx != -1) {
-      final r = allInventeryItems[availIdx];
-      r
-        ..isSelected = false
-        ..isModified = true
-        ..isDeleted = true;
-    }
-
     final selIdx = selectedInventeryItems.indexWhere((s) => s.id == id);
     if (selIdx != -1) {
       final r = selectedInventeryItems[selIdx];
@@ -767,7 +733,7 @@ class IssueItemsController extends GetxController {
 
     // 3) Trigger recalculations and reactive updates
     calculateTotalsForSelectedInventoryItemsDetails();
-    allInventeryItems.refresh();
+    // allInventeryItems.refresh();
     isIssuingItemsDetailsModified.value = true;
     selectedInventeryItems.refresh();
     Get.back();
@@ -812,8 +778,6 @@ class IssueItemsController extends GetxController {
     selectedInventeryItems[idx].isModified = true;
     isIssuingItemsDetailsModified.value = true;
     editingIndexForInventoryDetails.value = -1;
-    print( selectedInventeryItems[idx].toJsonForinventoryItems());
-
   }
 
   void finishEditingForConverters(String newValue, int idx) {
@@ -825,7 +789,6 @@ class IssueItemsController extends GetxController {
     selectedConvertersDetails[idx].isModified = true;
     isIssuingConvertersDetailsModified.value = true;
     editingIndexForConvertersDetails.value = -1;
-    print( selectedConvertersDetails[idx].toJsonForConverters());
   }
 
   void startEditing(bool isConverter, int idx) {
@@ -865,7 +828,7 @@ class IssueItemsController extends GetxController {
       Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
 
       String status1 = jobStatus['status'];
-     if (status1 == 'Posted') {
+      if (status1 == 'Posted') {
         showSnackBar('Alert', 'Status is already posted');
         return;
       } else if (status1 == 'Cancelled') {
@@ -888,19 +851,17 @@ class IssueItemsController extends GetxController {
       if (status1 == 'Cancelled') {
         showSnackBar('Alert', 'Status is already cancelled');
         return;
-      } else if (status1 == 'Poste') {
+      } else if (status1 == 'Posted') {
         showSnackBar('Alert', 'Status is cancelled');
         return;
       } else {
         status.value = 'Cancelled';
         isIssuingModified.value = true;
-
       }
     } else {
       showSnackBar('Alert', 'Please save the issue doc first');
     }
   }
-
 
   void searchEngineForJobCards() {
     jobQuery.value = searchForJobCards.value.text.toLowerCase();
@@ -1003,6 +964,8 @@ class IssueItemsController extends GetxController {
     issueNumber.value.text = data.issuingNumber ?? '';
     date.value.text = textToDate(data.date);
     issueType.value = data.issueTypeName ?? '';
+    jobCardId.value = data.jobCardId ?? '';
+    converterId.value = data.converterId ?? '';
     issueTypeId.value = data.issueType ?? '';
     branch.value.text = data.branchName ?? '';
     branchId.value = data.branch ?? '';
@@ -1018,8 +981,6 @@ class IssueItemsController extends GetxController {
     note.value.text = data.note ?? '';
     calculateTotalsForSelectedConvertersDetails();
     calculateTotalsForSelectedInventoryItemsDetails();
-    print(selectedInventeryItems[0].inventoryItemId);
-    print(selectedInventeryItems[0].isDeleted);
   }
 
   void clearAllFilters() {

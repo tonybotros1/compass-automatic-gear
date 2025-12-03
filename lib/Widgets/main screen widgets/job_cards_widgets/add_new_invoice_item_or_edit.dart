@@ -8,208 +8,223 @@ import '../../my_text_field.dart';
 
 Widget addNewinvoiceItemsOrEdit({required JobCardController controller}) {
   return SingleChildScrollView(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Left Column (75%)
-            Expanded(
-              flex: 3,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Item Information',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: myTextFormFieldWithBorder(
-                          isnumber: true,
-                          controller: controller.lineNumber,
-                          labelText: 'Line Number',
-                          hintText: 'Enter Line Number',
-                          validate: true,
-                        ),
+    child: FocusTraversalGroup(
+      policy: WidgetOrderTraversalPolicy(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left Column (75%)
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Item Information',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const Expanded(flex: 4, child: SizedBox()),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: CustomDropdown(
-                          hintText: 'Name',
-                          textcontroller: controller.invoiceItemName.text,
-                          showedSelectedName: 'name',
-                          validator: true,
-                          onChanged: (key, value) {
-                            controller.invoiceItemName.text = value['name'];
-                            controller.description.text = value['description'];
-                            controller.invoiceItemNameId.value = key;
-                          },
-                          onOpen: () {
-                            return controller.getInvoiceItemsFromCollection();
-                          },
-                          onDelete: () {
-                            controller.invoiceItemName.clear();
-                            controller.invoiceItemNameId.value = '';
-                          },
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: myTextFormFieldWithBorder(
+                            focusNode: controller.focusNodeForItemsDetails1,
+                            isnumber: true,
+                            controller: controller.lineNumber,
+                            labelText: 'Line Number',
+                            hintText: 'Enter Line Number',
+                            validate: true,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          Get.dialog(
-                            barrierDismissible: false,
-                            Dialog(
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              insetPadding: const EdgeInsets.all(8),
-                              child: LayoutBuilder(
-                                builder: (context, constraints) {
-                                  return Column(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(5),
-                                            topRight: Radius.circular(5),
+                        const Expanded(flex: 4, child: SizedBox()),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: CustomDropdown(
+                            focusNode: controller.focusNodeForItemsDetails2,
+                            nextFocusNode: controller.focusNodeForItemsDetails3,
+                            hintText: 'Name',
+                            textcontroller: controller.invoiceItemName.text,
+                            showedSelectedName: 'name',
+                            validator: true,
+                            onChanged: (key, value) {
+                              controller.invoiceItemName.text = value['name'];
+                              controller.description.text =
+                                  value['description'];
+                              controller.invoiceItemNameId.value = key;
+                            },
+                            onOpen: () {
+                              return controller.getInvoiceItemsFromCollection();
+                            },
+                            onDelete: () {
+                              controller.invoiceItemName.clear();
+                              controller.invoiceItemNameId.value = '';
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Get.dialog(
+                              barrierDismissible: false,
+                              Dialog(
+                                backgroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                insetPadding: const EdgeInsets.all(8),
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    return Column(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                                  topLeft: Radius.circular(5),
+                                                  topRight: Radius.circular(5),
+                                                ),
+                                            color: mainColor,
                                           ),
-                                          color: mainColor,
+                                          padding: const EdgeInsets.all(16),
+                                          width: constraints.maxWidth,
+                                          child: Row(
+                                            spacing: 10,
+                                            children: [
+                                              Text(
+                                                'Invoice Items',
+                                                style:
+                                                    fontStyleForScreenNameUsedInButtons,
+                                              ),
+                                              const Spacer(),
+                                              closeIcon(),
+                                            ],
+                                          ),
                                         ),
-                                        padding: const EdgeInsets.all(16),
-                                        width: constraints.maxWidth,
-                                        child: Row(
-                                          spacing: 10,
-                                          children: [
-                                            Text(
-                                              'Invoice Items',
-                                              style:
-                                                  fontStyleForScreenNameUsedInButtons,
-                                            ),
-                                            const Spacer(),
-                                            closeIcon(),
-                                          ],
+                                        const Expanded(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(8),
+                                            child: InvoiceItems(),
+                                          ),
                                         ),
-                                      ),
-                                      const Expanded(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(8),
-                                          child: InvoiceItems(),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
+                                      ],
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.add),
+                            );
+                          },
+                          icon: const Icon(Icons.add),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    myTextFormFieldWithBorder(
+                      focusNode: controller.focusNodeForItemsDetails3,
+                      maxLines: 13,
+                      controller: controller.description,
+                      labelText: 'Description',
+                      hintText: 'Enter Description',
+                      validate: true,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 24),
+
+              // Right Column (25%)
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Pricing Details',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  myTextFormFieldWithBorder(
-                    maxLines: 13,
-                    controller: controller.description,
-                    labelText: 'Description',
-                    hintText: 'Enter Description',
-                    validate: true,
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 12),
+                    myTextFormFieldWithBorder(
+                      onChanged: (_) => controller.updateCalculating(),
+                      isnumber: true,
+                      controller: controller.quantity,
+                      labelText: 'Quantity',
+                      hintText: 'Enter Quantity',
+                      validate: true,
+                    ),
+                    const SizedBox(height: 12),
+                    myTextFormFieldWithBorder(
+                      onChanged: (_) => controller.updateCalculating(),
+                      isDouble: true,
+                      controller: controller.price,
+                      labelText: 'Price',
+                      hintText: 'Enter Price',
+                      validate: true,
+                    ),
+                    const SizedBox(height: 12),
+                    myTextFormFieldWithBorder(
+                      onChanged: (_) => controller.updateCalculating(),
+                      isEnabled: false,
+                      controller: controller.amount,
+                      labelText: 'Amount',
+                      hintText: 'Auto-calculated',
+                      validate: true,
+                    ),
+                    const SizedBox(height: 12),
+                    myTextFormFieldWithBorder(
+                      onChanged: (_) => controller.updateCalculating(),
+                      isDouble: true,
+                      controller: controller.discount,
+                      labelText: 'Discount',
+                      hintText: 'Enter Discount',
+                      validate: true,
+                    ),
+                    const SizedBox(height: 12),
+                    myTextFormFieldWithBorder(
+                      isEnabled: false,
+                      controller: controller.total,
+                      labelText: 'Total',
+                      hintText: 'Auto-calculated',
+                      validate: true,
+                    ),
+                    const SizedBox(height: 12),
+                    myTextFormFieldWithBorder(
+                      isEnabled: false,
+                      onChanged: (_) => controller.updateCalculating(),
+                      isDouble: true,
+                      controller: controller.vat,
+                      labelText: 'VAT',
+                      hintText: 'Auto-calculated',
+                      validate: true,
+                    ),
+                    const SizedBox(height: 12),
+                    myTextFormFieldWithBorder(
+                      onChanged: (_) => controller.updateAmount(),
+                      isDouble: true,
+                      controller: controller.net,
+                      labelText: 'Net',
+                      hintText: 'Enter Net',
+                      validate: true,
+                    ),
+                  ],
+                ),
               ),
-            ),
-
-            const SizedBox(width: 24),
-
-            // Right Column (25%)
-            Expanded(
-              flex: 1,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Pricing Details',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  myTextFormFieldWithBorder(
-                    onChanged: (_) => controller.updateCalculating(),
-                    isnumber: true,
-                    controller: controller.quantity,
-                    labelText: 'Quantity',
-                    hintText: 'Enter Quantity',
-                    validate: true,
-                  ),
-                  const SizedBox(height: 12),
-                  myTextFormFieldWithBorder(
-                    onChanged: (_) => controller.updateCalculating(),
-                    isDouble: true,
-                    controller: controller.price,
-                    labelText: 'Price',
-                    hintText: 'Enter Price',
-                    validate: true,
-                  ),
-                  const SizedBox(height: 12),
-                  myTextFormFieldWithBorder(
-                    onChanged: (_) => controller.updateCalculating(),
-                    isEnabled: false,
-                    controller: controller.amount,
-                    labelText: 'Amount',
-                    hintText: 'Auto-calculated',
-                    validate: true,
-                  ),
-                  const SizedBox(height: 12),
-                  myTextFormFieldWithBorder(
-                    onChanged: (_) => controller.updateCalculating(),
-                    isDouble: true,
-                    controller: controller.discount,
-                    labelText: 'Discount',
-                    hintText: 'Enter Discount',
-                    validate: true,
-                  ),
-                  const SizedBox(height: 12),
-                  myTextFormFieldWithBorder(
-                    isEnabled: false,
-                    controller: controller.total,
-                    labelText: 'Total',
-                    hintText: 'Auto-calculated',
-                    validate: true,
-                  ),
-                  const SizedBox(height: 12),
-                  myTextFormFieldWithBorder(
-                    isEnabled: false,
-                    onChanged: (_) => controller.updateCalculating(),
-                    isDouble: true,
-                    controller: controller.vat,
-                    labelText: 'VAT',
-                    hintText: 'Auto-calculated',
-                    validate: true,
-                  ),
-                  const SizedBox(height: 12),
-                  myTextFormFieldWithBorder(
-                    onChanged: (_) => controller.updateAmount(),
-                    isDouble: true,
-                    controller: controller.net,
-                    labelText: 'Net',
-                    hintText: 'Enter Net',
-                    validate: true,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     ),
   );
 }

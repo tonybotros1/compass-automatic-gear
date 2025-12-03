@@ -26,38 +26,38 @@ Widget customerDetailsSection() {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(1),
-                      child: Focus(
-                        child: CustomDropdown(
-                          showedSelectedName: 'entity_name',
-                          textcontroller: controller.customerName.text,
-                          hintText: 'Customer',
-                          onChanged: (key, value) {
-                            controller.customerName.text = value['entity_name'];
-                            controller.onSelectForCustomers(key, value);
-                            controller.customerId.value = key;
-                            controller.isJobModified.value = true;
-                          },
-                          onDelete: () {
-                            controller.customerName.clear();
-                            controller.customerEntityPhoneNumber.clear();
-                            controller.customerEntityName.clear();
-                            controller.customerEntityEmail.clear();
-                            controller.customerCreditNumber.clear();
-                            controller.customerSaleManId.value = "";
-                            controller.customerSaleMan.value = "";
-                            controller.customerId.value = "";
-                            controller.isJobModified.value = true;
-                          },
-                          onOpen: () {
-                            return controller.getAllCustomers();
-                          },
-                        ),
+                    child: Focus(
+                      child: CustomDropdown(
+                        focusNode: controller.focusNodeForCustomerDetails1,
+                        nextFocusNode: controller.focusNodeForCustomerDetails2,
+                        showedSelectedName: 'entity_name',
+                        textcontroller: controller.customerName.text,
+                        hintText: 'Customer',
+                        onChanged: (key, value) {
+                          controller.customerName.text = value['entity_name'];
+                          controller.onSelectForCustomers(key, value);
+                          controller.customerId.value = key;
+                          controller.isJobModified.value = true;
+                        },
+                        onDelete: () {
+                          controller.customerName.clear();
+                          controller.customerEntityPhoneNumber.clear();
+                          controller.customerEntityName.clear();
+                          controller.customerEntityEmail.clear();
+                          controller.customerCreditNumber.clear();
+                          controller.customerSaleManId.value = "";
+                          controller.customerSaleMan.value = "";
+                          controller.customerId.value = "";
+                          controller.isJobModified.value = true;
+                        },
+                        onOpen: () {
+                          return controller.getAllCustomers();
+                        },
                       ),
                     ),
                   ),
                   IconButton(
+                    focusNode: FocusNode(skipTraversal: true),
                     onPressed: () {
                       Get.dialog(
                         barrierDismissible: false,
@@ -111,31 +111,28 @@ Widget customerDetailsSection() {
                   ),
                 ],
               ),
-              FocusTraversalOrder(
-                order: const NumericFocusOrder(2),
-                child: myTextFormFieldWithBorder(
-                  width: 250,
-                  controller: controller.customerEntityName,
-                  labelText: 'Contact Name',
-                  hintText: 'Enter Contact Name',
-                  onChanged: (_) {
-                    controller.isJobModified.value = true;
-                  },
-                ),
-              ),
-              FocusTraversalOrder(
-                order: const NumericFocusOrder(3),
-                child: myTextFormFieldWithBorder(
-                  width: 250,
-                  controller: controller.customerEntityPhoneNumber,
-                  labelText: 'Contact Number',
-                  hintText: 'Enter Contact Number',
-                  onChanged: (_) {
-                    controller.isJobModified.value = true;
-                  },
-                ),
+              myTextFormFieldWithBorder(
+                focusNode: controller.focusNodeForCustomerDetails2,
+                width: 250,
+                controller: controller.customerEntityName,
+                labelText: 'Contact Name',
+                hintText: 'Enter Contact Name',
+                onChanged: (_) {
+                  controller.isJobModified.value = true;
+                },
               ),
               myTextFormFieldWithBorder(
+                focusNode: controller.focusNodeForCustomerDetails3,
+                width: 250,
+                controller: controller.customerEntityPhoneNumber,
+                labelText: 'Contact Number',
+                hintText: 'Enter Contact Number',
+                onChanged: (_) {
+                  controller.isJobModified.value = true;
+                },
+              ),
+              myTextFormFieldWithBorder(
+                focusNode: controller.focusNodeForCustomerDetails4,
                 width: 250,
                 controller: controller.customerEntityEmail,
                 labelText: 'Contact Email',
@@ -181,6 +178,9 @@ Widget customerDetailsSection() {
                 order: const NumericFocusOrder(6),
                 child: Focus(
                   child: CustomDropdown(
+                    focusNode: controller.focusNodeForCustomerDetails5,
+                    nextFocusNode: controller.focusNodeForCustomerDetails6,
+
                     width: 250,
                     showedSelectedName: 'name',
                     textcontroller: controller.customerSaleMan.value,
@@ -202,6 +202,8 @@ Widget customerDetailsSection() {
                 ),
               ),
               CustomDropdown(
+                focusNode: controller.focusNodeForCustomerDetails6,
+                nextFocusNode: controller.focusNodeForCustomerDetails7,
                 width: 170,
                 showedSelectedName: 'name',
                 textcontroller: controller.customerBranch.text,
@@ -224,6 +226,9 @@ Widget customerDetailsSection() {
                 spacing: 10,
                 children: [
                   CustomDropdown(
+                    focusNode: controller.focusNodeForCustomerDetails7,
+                    nextFocusNode: controller.focusNodeForCustomerDetails8,
+
                     width: 170,
                     textcontroller: controller.customerCurrency.value.text,
                     hintText: 'Currency',
@@ -246,6 +251,7 @@ Widget customerDetailsSection() {
                     },
                   ),
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForCustomerDetails8,
                     width: 100,
                     isDouble: true,
                     controller: controller.customerCurrencyRate,
@@ -285,7 +291,6 @@ Widget customerDetailsSection() {
                                 value: 'Cash',
                                 fillColor: mainColor,
                                 activeColor: Colors.white,
-                                
                               ),
                               Text('Cash', style: textFieldFontStyle),
                               CupertinoRadio<String>(

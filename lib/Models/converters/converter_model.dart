@@ -131,6 +131,7 @@ class Issues {
   DateTime? date;
   String? itemName;
   String? itemCode;
+  String? status;
   int? quantity;
   double? price;
   double? total;
@@ -144,6 +145,7 @@ class Issues {
     this.quantity,
     this.price,
     this.total,
+    this.status,
   });
 
   Issues.fromJson(Map<String, dynamic> json) {
@@ -157,6 +159,7 @@ class Issues {
     quantity = json.containsKey('quantity') ? json['quantity'] ?? 0 : 0;
     price = json.containsKey('price') ? json['price'] ?? 0 : 0;
     total = json.containsKey('total') ? json['total'] ?? 0 : 0;
+    status = json.containsKey('status') ? json['status'] ?? '' : '';
   }
 
   Map<String, dynamic> toJson() {

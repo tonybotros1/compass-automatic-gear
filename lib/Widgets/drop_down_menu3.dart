@@ -866,6 +866,12 @@ class DropdownController extends GetxController {
                   } else if (event.logicalKey == LogicalKeyboardKey.enter) {
                     _selectHighlightedItem(onChanged);
                     return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.tab) {
+                    if (nextFocusNode != null) {
+                      hideDropdown();
+                      FocusScope.of(context).requestFocus(nextFocusNode);
+                      isValid.refresh();
+                    }
                   }
                 }
                 return KeyEventResult.ignored;
@@ -888,6 +894,7 @@ class DropdownController extends GetxController {
                           height: textFieldHeight,
                           child: TextField(
                             autofocus: true,
+
                             focusNode: searchFocusNode,
                             controller: query.value,
                             onChanged: (q) {
@@ -911,7 +918,7 @@ class DropdownController extends GetxController {
                               ),
                               focusedBorder: const OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Colors.grey,
+                                  color: Colors.blue,
                                   width: 2,
                                 ),
                               ),
@@ -1190,13 +1197,29 @@ class CustomDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // BoxDecoration defaultEnabledDecoration = BoxDecoration(
+    //   color: Colors.white,
+    //   border: Border.all(
+    //     color: controller.isValid.value ? Colors.grey : Colors.red,
+    //   ),
+    //   borderRadius: BorderRadius.circular(5),
+    // );
+    focusNode?.addListener(() {
+      controller.isValid.refresh();
+    });
     BoxDecoration defaultEnabledDecoration = BoxDecoration(
       color: Colors.white,
       border: Border.all(
-        color: controller.isValid.value ? Colors.grey : Colors.red,
+        color: focusNode?.hasFocus == true
+            ? Colors.blue
+            : controller.isValid.value
+            ? Colors.grey
+            : Colors.red,
+        width: focusNode?.hasFocus == true ? 2 : 1,
       ),
       borderRadius: BorderRadius.circular(5),
     );
+
     BoxDecoration defaultDisabledDecoration = BoxDecoration(
       border: Border.all(color: Colors.grey.shade400),
       borderRadius: BorderRadius.circular(5),
@@ -1287,16 +1310,42 @@ class CustomDropdown extends StatelessWidget {
                               layerLink: _layerLink,
                               onOpen: onOpen, // ✅ call the callback
                             );
+                            if (onOpen != null) {
+                              controller.isLoading.value =
+                                  true; // start loading
+
+                              onOpen!()
+                                  .then((fetchedItems) {
+                                    controller.allItems = fetchedItems;
+                                    controller.filteredItems.assignAll(
+                                      fetchedItems,
+                                    );
+
+                                    // Set initial highlight
+                                    controller.highlightedKey.value =
+                                        fetchedItems.isNotEmpty
+                                        ? fetchedItems.keys.first
+                                        : '';
+                                    controller.isLoading.value =
+                                        false; // stop loading
+                                  })
+                                  .catchError((e) {
+                                    controller.isLoading.value =
+                                        false; // stop loading even on error
+                                  });
+                            }
                           } else {
                             controller.hideDropdown();
                             if (nextFocusNode != null) {
                               FocusScope.of(
                                 context,
                               ).requestFocus(nextFocusNode);
+                              controller.isValid.refresh();
                             }
                           }
                         } else if (nextFocusNode != null) {
                           FocusScope.of(context).requestFocus(nextFocusNode);
+                          controller.isValid.refresh();
                         }
                         return null;
                       },
@@ -1369,6 +1418,7 @@ class CustomDropdown extends StatelessWidget {
                               }
                             } else {
                               controller.hideDropdown();
+                              
                             }
                           }
                         : null,

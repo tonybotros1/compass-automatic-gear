@@ -1,5 +1,6 @@
 class BaseModelForIssuingItems {
   String? id;
+  String? uuid;
   String? issueId;
   String? inventoryItemId;
   String? converterId;
@@ -16,6 +17,7 @@ class BaseModelForIssuingItems {
 
   BaseModelForIssuingItems({
     this.id,
+    this.uuid,
     this.issueId,
     this.name,
     this.code,
@@ -67,7 +69,7 @@ class BaseModelForIssuingItems {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['issue_id'] = issueId;
-    data['inventory_item_id'] = id;
+    data['inventory_item_id'] = inventoryItemId;
     data['quantity'] = finalQuantity;
     data['price'] = lastPrice;
     data['total'] = total;

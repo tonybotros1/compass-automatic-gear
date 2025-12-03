@@ -173,6 +173,39 @@ class JobCardController extends GetxController {
   final formatter = CurrencyInputFormatter();
   RxBool loadingIspectionReport = RxBool(false);
 
+  
+  // // for the payment header
+  final FocusNode focusNodeForCardDetails1 = FocusNode();
+  final FocusNode focusNodeForCardDetails2 = FocusNode();
+  final FocusNode focusNodeForCardDetails3 = FocusNode();
+  final FocusNode focusNodeForCardDetails4 = FocusNode();
+  final FocusNode focusNodeForCardDetails5 = FocusNode();
+  final FocusNode focusNodeForCardDetails6 = FocusNode();
+  final FocusNode focusNodeForCardDetails7 = FocusNode();
+  final FocusNode focusNodeForCardDetails8 = FocusNode();
+  final FocusNode focusNodeForCardDetails9 = FocusNode();
+  final FocusNode focusNodeForCardDetails10 = FocusNode();
+  final FocusNode focusNodeForCardDetails11 = FocusNode();
+  final FocusNode focusNodeForCardDetails12 = FocusNode();
+  final FocusNode focusNodeForCardDetails13 = FocusNode();
+  final FocusNode focusNodeForCardDetails14 = FocusNode();
+  
+  final FocusNode focusNodeForCustomerDetails1 = FocusNode();
+  final FocusNode focusNodeForCustomerDetails2 = FocusNode();
+  final FocusNode focusNodeForCustomerDetails3 = FocusNode();
+  final FocusNode focusNodeForCustomerDetails4 = FocusNode();
+  final FocusNode focusNodeForCustomerDetails5 = FocusNode();
+  final FocusNode focusNodeForCustomerDetails6 = FocusNode();
+  final FocusNode focusNodeForCustomerDetails7 = FocusNode();
+  final FocusNode focusNodeForCustomerDetails8 = FocusNode();
+  
+  final FocusNode focusNodeForItemsDetails1 = FocusNode();
+  final FocusNode focusNodeForItemsDetails2 = FocusNode();
+  final FocusNode focusNodeForItemsDetails3 = FocusNode();
+
+  
+
+
   @override
   void onInit() async {
     super.onInit();

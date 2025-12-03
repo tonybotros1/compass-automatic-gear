@@ -276,6 +276,7 @@ class IssueItems extends StatelessWidget {
                           spacing: 10,
                           children: [
                             customBox(
+                              width: Get.width / 5,
                               title: 'NUMBER OF Docs',
                               value: Text(
                                 '${controller.numberOfIssuesgDocs.value}',
@@ -287,30 +288,13 @@ class IssueItems extends StatelessWidget {
                               ),
                             ),
                             customBox(
+                              width: Get.width / 5,
                               title: 'TOTALS',
                               value: textForDataRowInTable(
                                 fontSize: 16,
                                 color: Colors.green,
                                 isBold: true,
                                 text: '${controller.allIssuesTotals.value}',
-                              ),
-                            ),
-                            customBox(
-                              title: 'VATS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.red,
-                                isBold: true,
-                                text: '${controller.allIssuesVATS.value}',
-                              ),
-                            ),
-                            customBox(
-                              title: 'NETS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.blueGrey,
-                                isBold: true,
-                                text: '${controller.allIssuesNET.value}',
                               ),
                             ),
                           ],
@@ -437,17 +421,6 @@ Widget tableOfScreens({
             label: AutoSizedText(text: 'Total', constraints: constraints),
             // onSort: controller.onSort,
           ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(text: 'VAT', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(text: 'NET', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
         ],
         source: CardDataSource(
           cards: isJobsLoading ? [] : data,
@@ -536,9 +509,14 @@ DataRow dataRowForTheTable(
           maxWidth: null,
         ),
       ),
-      const DataCell(SizedBox()),
-      const DataCell(SizedBox()),
-      const DataCell(SizedBox()),
+      DataCell(
+        textForDataRowInTable(
+          text: docData.total.toString(),
+          formatDouble: true,
+          isBold: true,
+          color: Colors.green,
+        ),
+      ),
     ],
   );
 }

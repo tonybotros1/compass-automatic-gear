@@ -452,9 +452,7 @@ ElevatedButton newConverterButton(
       controller.clearValues();
       converterDialog(
         controller: controller,
-        onTapForPost: () async {
-          controller.editPostedStatus();
-        },
+
         onTapForSave: () async {
           await controller.addNewConverter();
         },
@@ -477,7 +475,7 @@ IconButton editConverterButton(
       converterDialog(
         controller: controller,
         onTapForPost: () async {
-          controller.editPostedStatus();
+          controller.editPostedStatus(data.issues ?? []);
         },
         onTapForSave: () async {
           await controller.addNewConverter();
@@ -490,6 +488,9 @@ IconButton editConverterButton(
               controller.deleteConverterCard(data.id ?? '');
             },
           );
+        },
+        onTapForCancel: () {
+          controller.editCancelledStatus();
         },
       );
     },

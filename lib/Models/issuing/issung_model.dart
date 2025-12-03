@@ -18,6 +18,7 @@ class IssuingModel {
   String? issueTypeName;
   String? receivedByName;
   String? detailsString;
+  double? total;
   List<BaseModelForIssuingItems>? itemsDetailsSection;
   List<BaseModelForIssuingItems>? convertersDetailsSection;
 
@@ -40,6 +41,7 @@ class IssuingModel {
       this.receivedByName,
       this.detailsString,
       this.itemsDetailsSection,
+      this.total,
       this.convertersDetailsSection});
 
   IssuingModel.fromJson(Map<String, dynamic> json) {
@@ -60,6 +62,7 @@ class IssuingModel {
     issueTypeName = json['issue_type_name'];
     receivedByName = json['received_by_name'];
     detailsString = json['details_string'];
+    total = json['totals'];
     if (json['items_details_section'] != null) {
       itemsDetailsSection = <BaseModelForIssuingItems>[];
       json['items_details_section'].forEach((v) {

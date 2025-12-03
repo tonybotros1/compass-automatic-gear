@@ -225,7 +225,7 @@ class ConvertersController extends GetxController {
     }
   }
 
-  void editPostedStatus() async {
+  void editPostedStatus(List<Issues> issues) async {
     if (curreentConverterId.isNotEmpty) {
       Map converterStatus = await getCurrentConverterStatus(
         curreentConverterId.value,
@@ -233,11 +233,46 @@ class ConvertersController extends GetxController {
       String status1 = converterStatus.containsKey('status')
           ? converterStatus['status']
           : null;
-      if (status1 != 'New' && status1 != '') {
-        showSnackBar('Alert', 'Only new converters can be edited');
+      if (status1 == 'Posted') {
+        showSnackBar('Alert', 'Status is already posted');
+        return;
+      } else if (status1 == 'Cancelled') {
+        showSnackBar('Alert', 'Status is cancelled');
         return;
       } else {
-        status.value = 'Posted';
+        bool canPost = true;
+        for (var element in issues) {
+          if (element.status == 'New') {
+            canPost = false;
+          }
+        }
+        if (canPost) {
+          status.value = 'Posted';
+        } else {
+          showSnackBar('Alert', 'Please close new issues first');
+        }
+      }
+    } else {
+      showSnackBar('Alert', 'Please save the converter first');
+    }
+  }
+
+  void editCancelledStatus() async {
+    if (curreentConverterId.isNotEmpty) {
+      Map converterStatus = await getCurrentConverterStatus(
+        curreentConverterId.value,
+      );
+      String status1 = converterStatus.containsKey('status')
+          ? converterStatus['status']
+          : null;
+      if (status1 == 'Posted') {
+        showSnackBar('Alert', 'Status is posted');
+        return;
+      } else if (status1 == 'Cancelled') {
+        showSnackBar('Alert', 'Status is already cancelled');
+        return;
+      } else {
+        status.value = 'Cancelled';
       }
     } else {
       showSnackBar('Alert', 'Please save the converter first');

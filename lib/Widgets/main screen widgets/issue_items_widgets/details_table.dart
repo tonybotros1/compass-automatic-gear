@@ -415,13 +415,13 @@ Expanded itemsTable(
                                         .isEmpty
                                     ? controller.allInventeryItems
                                     : controller.filteredInventeryItems)
-                                .where(
-                                  (r) => !controller.selectedInventeryItems.any(
-                                    (sel) =>
-                                        (sel.inventoryItemId == r.id) &&
-                                        (sel.isDeleted != true),
-                                  ),
-                                )
+                                // .where(
+                                //   (r) => !controller.selectedInventeryItems.any(
+                                //     (sel) =>
+                                //         (sel.inventoryItemId == r.id) &&
+                                //         (sel.isDeleted != true),
+                                //   ),
+                                // )
                                 .map((item) {
                                   final itemId = item.id ?? '';
                                   final index = controller.allInventeryItems

@@ -114,10 +114,10 @@ Widget myTextFormFieldWithBorder({
             ),
             filled: isEnabled == true,
             fillColor: Colors.white,
-            focusedBorder: const OutlineInputBorder(
-              // borderRadius: BorderRadius.circular(borderRadius!),
-              borderSide: BorderSide(color: Colors.grey, width: 2.0),
-            ),
+            // focusedBorder: const OutlineInputBorder(
+            //   // borderRadius: BorderRadius.circular(borderRadius!),
+            //   borderSide: BorderSide(color: Colors.grey, width: 2.0),
+            // ),
             enabledBorder: const OutlineInputBorder(
               // borderRadius: BorderRadius.circular(borderRadius),
               borderSide: BorderSide(color: Colors.grey, width: 1.0),

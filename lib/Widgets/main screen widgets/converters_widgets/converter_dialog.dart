@@ -83,11 +83,19 @@ Future<dynamic> converterDialog({
                                       ),
                                     ],
                                   ),
-                                separator(),
-                                ClickableHoverText(
-                                  onTap: onTapForPost,
-                                  text: 'Post',
-                                ),
+                                onTapForPost != null
+                                    ? Row(
+                                        spacing: 10,
+                                        children: [
+                                          separator(),
+
+                                          ClickableHoverText(
+                                            onTap: onTapForPost,
+                                            text: 'Post',
+                                          ),
+                                        ],
+                                      )
+                                    : const SizedBox(),
                                 if (onTapForCancel != null)
                                   Row(
                                     spacing: 10,

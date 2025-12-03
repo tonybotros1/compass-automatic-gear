@@ -59,6 +59,13 @@ Widget tableOfScreens({
             label: AutoSizedText(constraints: constraints, text: 'Issue Date'),
           ),
           DataColumn(
+            columnWidth: const IntrinsicColumnWidth(flex: 1.5),
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Issue Status',
+            ),
+          ),
+          DataColumn(
             columnWidth: const IntrinsicColumnWidth(flex: 2),
             label: AutoSizedText(constraints: constraints, text: 'Item Code'),
           ),
@@ -99,6 +106,7 @@ Widget tableOfScreens({
               const DataCell(Text('')),
               const DataCell(Text('')),
               const DataCell(Text('')),
+              const DataCell(Text('')),
               DataCell(textForDataRowInTable(text: 'Totals', isBold: true)),
               DataCell(
                 textForDataRowInTable(
@@ -125,6 +133,14 @@ DataRow dataRowForTheTable(
     cells: [
       DataCell(textForDataRowInTable(text: data.issuingNumber ?? '')),
       DataCell(textForDataRowInTable(text: textToDate(data.date))),
+      DataCell(
+        statusBox(
+          data.status ?? '',
+          hieght: 35,
+          width: 100,
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+        ),
+      ),
       DataCell(textForDataRowInTable(text: data.itemCode ?? '')),
       DataCell(textForDataRowInTable(text: data.itemName ?? '')),
       DataCell(

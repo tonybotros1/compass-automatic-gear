@@ -26,6 +26,7 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             myTextFormFieldWithBorder(
               width: 150,
               suffixIcon: IconButton(
+                focusNode: FocusNode(skipTraversal: true),
                 onPressed: () async {
                   selectDateContext(context, controller.jobCardDate.value);
                   controller.isJobModified.value = true;
@@ -61,6 +62,7 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             myTextFormFieldWithBorder(
               width: 150,
               suffixIcon: IconButton(
+                focusNode: FocusNode(skipTraversal: true),
                 onPressed: () async {
                   selectDateContext(context, controller.invoiceDate.value);
                   controller.isJobModified.value = true;
@@ -92,6 +94,7 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
         myTextFormFieldWithBorder(
           width: 150,
           suffixIcon: IconButton(
+            focusNode: FocusNode(skipTraversal: true),
             onPressed: () async {
               selectDateContext(context, controller.approvalDate.value);
               controller.isJobModified.value = true;
@@ -117,6 +120,7 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             myTextFormFieldWithBorder(
               width: 150,
               suffixIcon: IconButton(
+                focusNode: FocusNode(skipTraversal: true),
                 onPressed: () async {
                   selectDateContext(context, controller.startDate.value);
                   controller.isJobModified.value = true;
@@ -138,6 +142,7 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             myTextFormFieldWithBorder(
               width: 150,
               suffixIcon: IconButton(
+                focusNode: FocusNode(skipTraversal: true),
                 onPressed: () async {
                   selectDateContext(context, controller.finishDate.value);
                   controller.isJobModified.value = true;
@@ -164,6 +169,7 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             myTextFormFieldWithBorder(
               width: 150,
               suffixIcon: IconButton(
+                focusNode: FocusNode(skipTraversal: true),
                 onPressed: () async {
                   selectDateContext(context, controller.deliveryDate.value);
                   controller.isJobModified.value = true;
@@ -194,6 +200,7 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             myTextFormFieldWithBorder(
               width: 150,
               suffixIcon: IconButton(
+                focusNode: FocusNode(skipTraversal: true),
                 onPressed: () async {
                   selectDateContext(
                     context,
@@ -249,6 +256,7 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             myTextFormFieldWithBorder(
               width: 150,
               suffixIcon: IconButton(
+                focusNode: FocusNode(skipTraversal: true),
                 onPressed: () async {
                   selectDateContext(
                     context,

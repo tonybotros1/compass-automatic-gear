@@ -87,6 +87,7 @@ Widget addNewIssueOrEdit({
                                     ),
                                   ],
                                 ),
+
                                 Row(
                                   spacing: 10,
                                   children: [
@@ -126,6 +127,103 @@ Widget addNewIssueOrEdit({
                                         );
                                       },
                                     ),
+                                    GetX<IssueItemsController>(
+                                      builder: (controller) {
+                                        var selectedType = controller.issueType;
+                                        return myTextFormFieldWithBorder(
+                                          controller: controller.jobDetails,
+                                          labelText: selectedType.value == ''
+                                              ? 'Not Selected'
+                                              : selectedType.value,
+                                          width: 400,
+                                          focusNode: controller.focusNode4,
+                                          onEditingComplete: () {
+                                            FocusScope.of(context).requestFocus(
+                                              controller.focusNode5,
+                                            );
+                                          },
+                                          textInputAction: TextInputAction.next,
+                                          suffixIcon: IconButton(
+                                            focusNode: FocusNode(
+                                              skipTraversal: true,
+                                            ),
+                                            onPressed: () {
+                                              if (controller
+                                                  .issueType
+                                                  .isEmpty) {
+                                                return;
+                                              }
+                                              bool isJobSelected =
+                                                  selectedType.value ==
+                                                  'Job Card';
+                                              controller.selectedJobOrConverter(
+                                                selectedType.value,
+                                              );
+                                              dialog(
+                                                constraints: constraints,
+                                                context: context,
+                                                dialogName:
+                                                    isJobSelected == true
+                                                    ? '💳 Job Cards'
+                                                    : "🚘 Converters",
+                                                onPressedForClearSearch: () {
+                                                  if (isJobSelected) {
+                                                    controller.searchForJobCards
+                                                        .clear();
+                                                    controller
+                                                        .searchEngineForJobCards();
+                                                  } else {
+                                                    controller
+                                                        .searchForConverters
+                                                        .clear();
+                                                    controller
+                                                        .searchEngineForConverters();
+                                                  }
+                                                },
+                                                hintText: isJobSelected == true
+                                                    ? 'Search for jobs'
+                                                    : 'Search for converters',
+                                                controllerForSearchField:
+                                                    isJobSelected == true
+                                                    ? controller
+                                                          .searchForJobCards
+                                                    : controller
+                                                          .searchForConverters,
+                                                onChangedForSearchField: (_) {
+                                                  if (isJobSelected) {
+                                                    controller
+                                                        .searchEngineForJobCards();
+                                                  } else {
+                                                    controller
+                                                        .searchEngineForConverters();
+                                                  }
+                                                },
+
+                                                table: isJobSelected == true
+                                                    ? jobCardTable(
+                                                        constraints,
+                                                        controller,
+                                                        context,
+                                                      )
+                                                    : converterTable(
+                                                        constraints,
+                                                        controller,
+                                                        context,
+                                                      ),
+                                              );
+                                            },
+                                            icon: const Icon(
+                                              Icons.more_horiz_rounded,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  spacing: 10,
+                                  children: [
                                     FocusTraversalOrder(
                                       order: const NumericFocusOrder(2),
                                       child: GetBuilder<IssueItemsController>(
@@ -162,122 +260,36 @@ Widget addNewIssueOrEdit({
                                         },
                                       ),
                                     ),
+
+                                    GetBuilder<IssueItemsController>(
+                                      builder: (controller) {
+                                        return CustomDropdown(
+                                          textcontroller:
+                                              controller.receivedBy.value.text,
+                                          hintText: 'Received By',
+                                          showedSelectedName: 'name',
+                                          width: 400,
+                                          onChanged: (key, value) {
+                                            controller.receivedBy.value.text =
+                                                value['name'];
+                                            controller.receivedById.value = key;
+                                            controller.isIssuingModified.value =
+                                                true;
+                                          },
+                                          onDelete: () {
+                                            controller.receivedBy.value.clear();
+                                            controller.receivedById.value = '';
+                                            controller.isIssuingModified.value =
+                                                true;
+                                          },
+                                          onOpen: () {
+                                            return controller
+                                                .getEmployeesByDepartment();
+                                          },
+                                        );
+                                      },
+                                    ),
                                   ],
-                                ),
-
-                                GetX<IssueItemsController>(
-                                  builder: (controller) {
-                                    var selectedType = controller.issueType;
-                                    return myTextFormFieldWithBorder(
-                                      controller: controller.jobDetails,
-                                      labelText: selectedType.value == ''
-                                          ? 'Not Selected'
-                                          : selectedType.value,
-                                      width: 400,
-                                      focusNode: controller.focusNode4,
-                                      onEditingComplete: () {
-                                        FocusScope.of(
-                                          context,
-                                        ).requestFocus(controller.focusNode5);
-                                      },
-                                      textInputAction: TextInputAction.next,
-                                      suffixIcon: IconButton(
-                                        focusNode: FocusNode(
-                                          skipTraversal: true,
-                                        ),
-                                        onPressed: () {
-                                          if (controller.issueType.isEmpty) {
-                                            return;
-                                          }
-                                          bool isJobSelected =
-                                              selectedType.value == 'Job Card';
-                                          controller.selectedJobOrConverter(
-                                            selectedType.value,
-                                          );
-                                          dialog(
-                                            constraints: constraints,
-                                            context: context,
-                                            dialogName: isJobSelected == true
-                                                ? '💳 Job Cards'
-                                                : "🚘 Converters",
-                                            onPressedForClearSearch: () {
-                                              if (isJobSelected) {
-                                                controller.searchForJobCards
-                                                    .clear();
-                                                controller
-                                                    .searchEngineForJobCards();
-                                              } else {
-                                                controller.searchForConverters
-                                                    .clear();
-                                                controller
-                                                    .searchEngineForConverters();
-                                              }
-                                            },
-                                            hintText: isJobSelected == true
-                                                ? 'Search for jobs'
-                                                : 'Search for converters',
-                                            controllerForSearchField:
-                                                isJobSelected == true
-                                                ? controller.searchForJobCards
-                                                : controller
-                                                      .searchForConverters,
-                                            onChangedForSearchField: (_) {
-                                              if (isJobSelected) {
-                                                controller
-                                                    .searchEngineForJobCards();
-                                              } else {
-                                                controller
-                                                    .searchEngineForConverters();
-                                              }
-                                            },
-
-                                            table: isJobSelected == true
-                                                ? jobCardTable(
-                                                    constraints,
-                                                    controller,
-                                                    context,
-                                                  )
-                                                : converterTable(
-                                                    constraints,
-                                                    controller,
-                                                    context,
-                                                  ),
-                                          );
-                                        },
-                                        icon: const Icon(
-                                          Icons.more_horiz_rounded,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                GetBuilder<IssueItemsController>(
-                                  builder: (controller) {
-                                    return CustomDropdown(
-                                      textcontroller:
-                                          controller.receivedBy.value.text,
-                                      hintText: 'Received By',
-                                      showedSelectedName: 'name',
-                                      width: 400,
-                                      onChanged: (key, value) {
-                                        controller.receivedBy.value.text =
-                                            value['name'];
-                                        controller.receivedById.value = key;
-                                        controller.isIssuingModified.value =
-                                            true;
-                                      },
-                                      onDelete: () {
-                                        controller.receivedBy.value.clear();
-                                        controller.receivedById.value = '';
-                                        controller.isIssuingModified.value =
-                                            true;
-                                      },
-                                      onOpen: () {
-                                        return controller
-                                            .getEmployeesByDepartment();
-                                      },
-                                    );
-                                  },
                                 ),
                               ],
                             ),
@@ -287,7 +299,7 @@ Widget addNewIssueOrEdit({
                               controller: controller.note.value,
                               focusNode: controller.focusNode5,
                               labelText: 'Note',
-                              maxLines: 10,
+                              maxLines: 7,
                               onChanged: (_) {
                                 controller.isIssuingModified.value = true;
                               },
