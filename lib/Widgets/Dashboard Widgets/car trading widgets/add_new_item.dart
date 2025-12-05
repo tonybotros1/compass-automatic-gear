@@ -13,10 +13,8 @@ Widget addNewItemOrEdit({
   required bool isGeneralExpenses,
   required bool isTrade,
 }) {
-  return GetX<CarTradingDashboardController>(
+  return GetBuilder<CarTradingDashboardController>(
     builder: (controller) {
-      bool isItemsLoading = controller.allItems.isEmpty;
-      bool isNamesLoading = controller.allNames.isEmpty;
       return ListView(
         children: [
           Row(
@@ -52,7 +50,6 @@ Widget addNewItemOrEdit({
                               textcontroller: controller.item.text,
                               showedSelectedName: 'name',
                               hintText: 'Item',
-                              items: isItemsLoading ? {} : controller.allItems,
                               onChanged: (key, value) {
                                 controller.item.text = value['name'];
                                 controller.itemId.value = key;
@@ -60,6 +57,9 @@ Widget addNewItemOrEdit({
                               onDelete: () {
                                 controller.item.clear();
                                 controller.itemId.value = '';
+                              },
+                              onOpen: () {
+                                return controller.getItems();
                               },
                             ),
                           ),
@@ -89,7 +89,6 @@ Widget addNewItemOrEdit({
                               textcontroller: controller.name.text,
                               showedSelectedName: 'name',
                               hintText: 'Name',
-                              items: isNamesLoading ? {} : controller.allNames,
                               onChanged: (key, value) {
                                 controller.name.text = value['name'];
                                 controller.nameId.value = key;
@@ -97,6 +96,9 @@ Widget addNewItemOrEdit({
                               onDelete: () {
                                 controller.name.clear();
                                 controller.nameId.value = '';
+                              },
+                              onOpen: () {
+                                return controller.getNamesOfPeople();
                               },
                             ),
                           ),

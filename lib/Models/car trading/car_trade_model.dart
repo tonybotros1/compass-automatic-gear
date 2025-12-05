@@ -25,8 +25,12 @@ class CarTradeModel {
   String? engineSize;
   String? boughtFromId;
   String? boughtFrom;
+  String? boughtBy;
+  String? boughtById;
   String? soldToId;
   String? soldTo;
+  String? soldBy;
+  String? soldById;
   String? note;
   DateTime? date;
   double? net;
@@ -61,6 +65,10 @@ class CarTradeModel {
     this.totalPay,
     this.totalReceive,
     this.yearId,
+    this.boughtBy,
+    this.boughtById,
+    this.soldBy,
+    this.soldById,
   });
 
   DateTime? parseDate(String? dateStr) {
@@ -98,6 +106,10 @@ class CarTradeModel {
     yearId = json['year_id'] ?? '';
     note = json['note'] ?? '';
     status = json['status'] ?? '';
+    soldBy = json.containsKey('sold_by') ? json['sold_by'] ?? '' : '';
+    soldById = json.containsKey('sold_by_id') ? json['sold_by_id'] ?? '' : '';
+    boughtBy = json.containsKey('bought_by') ? json['bought_by'] ?? '' : '';
+    boughtById = json.containsKey('bought_by_id') ? json['bought_by_id'] ?? '' : '';
     totalPay = (json['total_pay'] is num)
         ? (json['total_pay'] as num).toDouble()
         : 0;

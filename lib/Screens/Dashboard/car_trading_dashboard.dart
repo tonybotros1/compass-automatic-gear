@@ -25,280 +25,369 @@ class CarTradingDashboard extends StatelessWidget {
               slivers: [
                 SliverToBoxAdapter(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 10,
                     children: [
                       GetX<CarTradingDashboardController>(
                         init: CarTradingDashboardController(),
                         builder: (controller) {
-                          bool isBrandLoading = controller.allBrands.isEmpty;
                           bool isModelLoading = controller.allModels.isEmpty;
-                          bool isEngineSizeLoading =
-                              controller.allEngineSizes.isEmpty;
-                          bool isBoughtFromLoading =
-                              controller.allBuyersAndSellers.isEmpty;
-                          bool isSoldToLoading =
-                              controller.allBuyersAndSellers.isEmpty;
-                          bool isSpecificationsLoading =
-                              controller.allCarSpecifications.isEmpty;
-                          return Row(
-                            spacing: 10,
-                            children: [
-                              CustomDropdown(
-                                width: 170,
-                                showedSelectedName: 'name',
-                                textcontroller:
-                                    controller.carBrandFilter.value.text,
-                                hintText: 'Car Brand',
-                                items: isBrandLoading
-                                    ? {}
-                                    : controller.allBrands,
-                                onChanged: (key, value) {
-                                  controller.carModelFilter.value.clear();
-                                  controller.getModelsByCarBrand(key);
-                                  controller.carBrandFilter.value.text =
-                                      value['name'];
-                                  controller.carBrandFilterId.value = key;
-                                  controller.carModelFilterId.value = '';
-                                },
-                                onDelete: () {
-                                  controller.allModels.clear();
-                                  controller.carModelFilter.value.clear();
-                                  controller.carBrandFilter.value.clear();
-                                  controller.carBrandFilterId.value = '';
-                                  controller.carModelFilterId.value = '';
-                                },
-                              ),
-                              CustomDropdown(
-                                width: 170,
-                                showedSelectedName: 'name',
-                                textcontroller:
-                                    controller.carModelFilter.value.text,
-                                hintText: 'Car Model',
-                                items: isModelLoading
-                                    ? {}
-                                    : controller.allModels,
-                                onChanged: (key, value) {
-                                  controller.carModelFilter.value.text =
-                                      value['name'];
-                                  controller.carModelFilterId.value = key;
-                                },
-                                onDelete: () {
-                                  controller.carModelFilter.value.clear();
-                                  controller.carModelFilterId.value = '';
-                                },
-                              ),
-                              CustomDropdown(
-                                width: 150,
-                                hintText: 'Specification',
-                                showedSelectedName: 'name',
-                                textcontroller: controller
-                                    .carSpecificationFilter
-                                    .value
-                                    .text,
-                                items: isSpecificationsLoading
-                                    ? {}
-                                    : controller.allCarSpecifications,
-                                onChanged: (key, value) {
-                                  controller.carSpecificationFilter.value.text =
-                                      value["name"];
-                                  controller.carSpecificationFilterId.value =
-                                      key;
-                                },
-                                onDelete: () {
-                                  controller.carSpecificationFilter.value
-                                      .clear();
-                                  controller.carSpecificationFilterId.value =
-                                      '';
-                                },
-                              ),
-                              CustomDropdown(
-                                width: 150,
-                                hintText: 'Engine Size',
-                                showedSelectedName: 'name',
-                                textcontroller:
-                                    controller.carEngineSizeFilter.value.text,
-                                items: isEngineSizeLoading
-                                    ? {}
-                                    : controller.allEngineSizes,
-                                onChanged: (key, value) {
-                                  controller.carEngineSizeFilter.value.text =
-                                      value['name'];
-                                  controller.carEngineSizeFilterId.value = key;
-                                },
-                                onDelete: () {
-                                  controller.carEngineSizeFilter.value.clear();
-                                  controller.carEngineSizeFilterId.value = '';
-                                },
-                              ),
-                              CustomDropdown(
-                                width: 150,
-                                hintText: 'Bought From',
-                                textcontroller:
-                                    controller.carBoughtFromFilter.value.text,
-                                showedSelectedName: 'name',
-                                items: isBoughtFromLoading
-                                    ? {}
-                                    : controller.allBuyersAndSellers,
-                                onChanged: (key, value) {
-                                  controller.carBoughtFromFilter.value.text =
-                                      value['name'];
-                                  controller.carBoughtFromFilterId.value = key;
-                                },
-                                onDelete: () {
-                                  controller.carBoughtFromFilter.value.clear();
-                                  controller.carBoughtFromFilterId.value = '';
-                                },
-                              ),
-                              CustomDropdown(
-                                width: 150,
-                                hintText: 'Sold To',
-                                items: isSoldToLoading
-                                    ? {}
-                                    : controller.allBuyersAndSellers,
-                                textcontroller:
-                                    controller.carSoldToFilter.value.text,
-                                showedSelectedName: 'name',
-                                onChanged: (key, value) {
-                                  controller.carSoldToFilter.value.text =
-                                      value['name'];
-                                  controller.carSoldToFilterId.value = key;
-                                },
-                                onDelete: () {
-                                  controller.carSoldToFilter.value.clear();
-                                  controller.carSoldToFilterId.value = '';
-                                },
-                              ),
-                            ],
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              spacing: 10,
+                              children: [
+                                CustomDropdown(
+                                  width: 170,
+                                  showedSelectedName: 'name',
+                                  textcontroller:
+                                      controller.carBrandFilter.value.text,
+                                  hintText: 'Car Brand',
+                                  onChanged: (key, value) {
+                                    controller.carModelFilter.value.clear();
+                                    controller.getModelsByCarBrand(key);
+                                    controller.carBrandFilter.value.text =
+                                        value['name'];
+                                    controller.carBrandFilterId.value = key;
+                                    controller.carModelFilterId.value = '';
+                                  },
+                                  onDelete: () {
+                                    controller.allModels.clear();
+                                    controller.carModelFilter.value.clear();
+                                    controller.carBrandFilter.value.clear();
+                                    controller.carBrandFilterId.value = '';
+                                    controller.carModelFilterId.value = '';
+                                  },
+                                  onOpen: () {
+                                    return controller.getCarBrands();
+                                  },
+                                ),
+                                CustomDropdown(
+                                  width: 170,
+                                  showedSelectedName: 'name',
+                                  textcontroller:
+                                      controller.carModelFilter.value.text,
+                                  hintText: 'Car Model',
+                                  items: isModelLoading
+                                      ? {}
+                                      : controller.allModels,
+                                  onChanged: (key, value) {
+                                    controller.carModelFilter.value.text =
+                                        value['name'];
+                                    controller.carModelFilterId.value = key;
+                                  },
+                                  onDelete: () {
+                                    controller.carModelFilter.value.clear();
+                                    controller.carModelFilterId.value = '';
+                                  },
+                                ),
+                                CustomDropdown(
+                                  width: 180,
+                                  hintText: 'Specification',
+                                  showedSelectedName: 'name',
+                                  textcontroller: controller
+                                      .carSpecificationFilter
+                                      .value
+                                      .text,
+                                  onChanged: (key, value) {
+                                    controller
+                                            .carSpecificationFilter
+                                            .value
+                                            .text =
+                                        value["name"];
+                                    controller.carSpecificationFilterId.value =
+                                        key;
+                                  },
+                                  onDelete: () {
+                                    controller.carSpecificationFilter.value
+                                        .clear();
+                                    controller.carSpecificationFilterId.value =
+                                        '';
+                                  },
+                                  onOpen: () {
+                                    return controller.getCarSpecefications();
+                                  },
+                                ),
+                                CustomDropdown(
+                                  width: 180,
+                                  hintText: 'Engine Size',
+                                  showedSelectedName: 'name',
+                                  textcontroller:
+                                      controller.carEngineSizeFilter.value.text,
+                                  onChanged: (key, value) {
+                                    controller.carEngineSizeFilter.value.text =
+                                        value['name'];
+                                    controller.carEngineSizeFilterId.value =
+                                        key;
+                                  },
+                                  onDelete: () {
+                                    controller.carEngineSizeFilter.value
+                                        .clear();
+                                    controller.carEngineSizeFilterId.value = '';
+                                  },
+                                  onOpen: () {
+                                    return controller.getEngineTypes();
+                                  },
+                                ),
+                                CustomDropdown(
+                                  width: 200,
+                                  hintText: 'Bought From',
+                                  textcontroller:
+                                      controller.carBoughtFromFilter.value.text,
+                                  showedSelectedName: 'name',
+                                  onChanged: (key, value) {
+                                    controller.carBoughtFromFilter.value.text =
+                                        value['name'];
+                                    controller.carBoughtFromFilterId.value =
+                                        key;
+                                  },
+                                  onDelete: () {
+                                    controller.carBoughtFromFilter.value
+                                        .clear();
+                                    controller.carBoughtFromFilterId.value = '';
+                                  },
+                                  onOpen: () {
+                                    return controller.getBuyersAndSellers();
+                                  },
+                                ),
+                                CustomDropdown(
+                                  width: 200,
+                                  hintText: 'Sold To',
+
+                                  textcontroller:
+                                      controller.carSoldToFilter.value.text,
+                                  showedSelectedName: 'name',
+                                  onChanged: (key, value) {
+                                    controller.carSoldToFilter.value.text =
+                                        value['name'];
+                                    controller.carSoldToFilterId.value = key;
+                                  },
+                                  onDelete: () {
+                                    controller.carSoldToFilter.value.clear();
+                                    controller.carSoldToFilterId.value = '';
+                                  },
+                                  onOpen: () {
+                                    return controller.getBuyersAndSellers();
+                                  },
+                                ),
+                                CustomDropdown(
+                                  width: 200,
+                                  hintText: 'Bought By',
+
+                                  textcontroller:
+                                      controller.carBoughtByFilter.value.text,
+                                  showedSelectedName: 'name',
+                                  onChanged: (key, value) {
+                                    controller.carBoughtByFilter.value.text =
+                                        value['name'];
+                                    controller.carBoughtByFilterId.value = key;
+                                  },
+                                  onDelete: () {
+                                    controller.carBoughtByFilter.value.clear();
+                                    controller.carBoughtByFilterId.value = '';
+                                  },
+                                  onOpen: () {
+                                    return controller.getBuyersAndSellersBy();
+                                  },
+                                ),
+                                CustomDropdown(
+                                  width: 200,
+                                  hintText: 'Sold By',
+
+                                  textcontroller:
+                                      controller.carSoldByFilter.value.text,
+                                  showedSelectedName: 'name',
+                                  onChanged: (key, value) {
+                                    controller.carSoldByFilter.value.text =
+                                        value['name'];
+                                    controller.carSoldByFilterId.value = key;
+                                  },
+                                  onDelete: () {
+                                    controller.carSoldByFilter.value.clear();
+                                    controller.carSoldByFilterId.value = '';
+                                  },
+                                  onOpen: () {
+                                    return controller.getBuyersAndSellersBy();
+                                  },
+                                ),
+                              ],
+                            ),
                           );
                         },
                       ),
                       GetX<CarTradingDashboardController>(
                         builder: (controller) {
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            spacing: 10,
-                            children: [
-                              myTextFormFieldWithBorder(
-                                width: 130,
-                                controller: controller.fromDate.value,
-                                labelText: 'From Date',
-                                onFieldSubmitted: (_) async {
-                                  normalizeDate(
-                                    controller.fromDate.value.text,
-                                    controller.fromDate.value,
-                                  );
-                                },
-                              ),
-                              myTextFormFieldWithBorder(
-                                width: 130,
-                                controller: controller.toDate.value,
-                                labelText: 'To Date',
-                                onFieldSubmitted: (_) async {
-                                  normalizeDate(
-                                    controller.toDate.value.text,
-                                    controller.toDate.value,
-                                  );
-                                },
-                              ),
-                              ElevatedButton(
-                                style: allButtonStyle,
-                                onPressed: () {
-                                  controller.onTapForAll();
-                                },
-                                child: const Text('All'),
-                              ),
-                              ElevatedButton(
-                                style: todayButtonStyle,
-                                onPressed: controller.isTodaySelected.isFalse
-                                    ? () {
-                                        controller.isTodaySelected.value = true;
-                                        controller.isThisMonthSelected.value =
-                                            false;
-                                        controller.isThisYearSelected.value =
-                                            false;
-                                      }
-                                    : null,
-                                child: const Text('Today'),
-                              ),
-                              ElevatedButton(
-                                style: thisMonthButtonStyle,
-                                onPressed:
-                                    controller.isThisMonthSelected.isFalse
-                                    ? () {
-                                        controller.isTodaySelected.value =
-                                            false;
-                                        controller.isThisMonthSelected.value =
-                                            true;
-                                        controller.isThisYearSelected.value =
-                                            false;
-                                      }
-                                    : null,
-                                child: const Text('This Month'),
-                              ),
-                              ElevatedButton(
-                                style: thisYearButtonStyle,
-                                onPressed: controller.isThisYearSelected.isFalse
-                                    ? () {
-                                        controller.isTodaySelected.value =
-                                            false;
-                                        controller.isThisMonthSelected.value =
-                                            false;
-                                        controller.isThisYearSelected.value =
-                                            true;
-                                      }
-                                    : null,
-                                child: const Text('This Year'),
-                              ),
-                              ElevatedButton(
-                                style: controller.isNewStatusSelected.isFalse
-                                    ? isNotPressedButtonStyle
-                                    : newButtonStyle,
-                                onPressed: () {
-                                  if (controller.isNewStatusSelected.isFalse) {
-                                    controller.isNewStatusSelected.value = true;
-                                    controller.isSoldStatusSelected.value =
-                                        false;
-                                  } else {
-                                    controller.isNewStatusSelected.value =
-                                        false;
-                                  }
-                                  controller.filterTradesByDate();
-                                },
-                                child: const Text('New'),
-                              ),
-                              ElevatedButton(
-                                style: controller.isSoldStatusSelected.isFalse
-                                    ? isNotPressedButtonStyle
-                                    : soldButtonStyle,
-                                onPressed: () {
-                                  if (controller.isSoldStatusSelected.isFalse) {
-                                    controller.isSoldStatusSelected.value =
-                                        true;
-                                    controller.isNewStatusSelected.value =
-                                        false;
-                                  } else {
-                                    controller.isSoldStatusSelected.value =
-                                        false;
-                                  }
-                                  controller.filterTradesByDate();
-                                },
-                                child: const Text('Sold'),
-                              ),
-                              ElevatedButton(
-                                style: saveButtonStyle,
-                                onPressed: controller.searching.isFalse
-                                    ? () {
-                                        controller.filterSearch();
-                                      }
-                                    : null,
-                                child: controller.searching.isFalse
-                                    ? Text(
-                                        'Find',
-                                        style: fontStyleForElevatedButtons,
-                                      )
-                                    : loadingProcess,
-                              ),
-                            ],
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              spacing: 10,
+                              children: [
+                                myTextFormFieldWithBorder(
+                                  width: 170,
+                                  controller: controller.fromDate.value,
+                                  labelText: 'From Date',
+                                  onFieldSubmitted: (_) async {
+                                    normalizeDate(
+                                      controller.fromDate.value.text,
+                                      controller.fromDate.value,
+                                    );
+                                  },
+                                ),
+                                myTextFormFieldWithBorder(
+                                  width: 170,
+                                  controller: controller.toDate.value,
+                                  labelText: 'To Date',
+                                  onFieldSubmitted: (_) async {
+                                    normalizeDate(
+                                      controller.toDate.value.text,
+                                      controller.toDate.value,
+                                    );
+                                  },
+                                ),
+                                // ElevatedButton(
+                                //   style: allButtonStyle,
+                                //   onPressed: () {
+                                //     controller.onTapForAll();
+                                //   },
+                                //   child: const Text('All'),
+                                // ),
+                                ElevatedButton(
+                                  style: todayButtonStyle,
+                                  onPressed: controller.isTodaySelected.isFalse
+                                      ? () async {
+                                          controller.isTodaySelected.value =
+                                              true;
+                                          controller.isThisMonthSelected.value =
+                                              false;
+                                          controller.isThisYearSelected.value =
+                                              false;
+                                          controller.searching.value = true;
+
+                                          await controller.searchEngine({
+                                            "today": true,
+                                          });
+                                          controller.searching.value = false;
+                                        }
+                                      : null,
+                                  child: const Text('Today'),
+                                ),
+                                ElevatedButton(
+                                  style: thisMonthButtonStyle,
+                                  onPressed:
+                                      controller.isThisMonthSelected.isFalse
+                                      ? () async {
+                                          controller.isTodaySelected.value =
+                                              false;
+                                          controller.isThisMonthSelected.value =
+                                              true;
+                                          controller.isThisYearSelected.value =
+                                              false;
+                                          controller.searching.value = true;
+
+                                          await controller.searchEngine({
+                                            "this_month": true,
+                                          });
+                                          controller.searching.value = false;
+                                        }
+                                      : null,
+                                  child: const Text('This Month'),
+                                ),
+                                ElevatedButton(
+                                  style: thisYearButtonStyle,
+                                  onPressed:
+                                      controller.isThisYearSelected.isFalse
+                                      ? () async {
+                                          controller.isTodaySelected.value =
+                                              false;
+                                          controller.isThisMonthSelected.value =
+                                              false;
+                                          controller.isThisYearSelected.value =
+                                              true;
+                                          controller.searching.value = true;
+
+                                          await controller.searchEngine({
+                                            "this_year": true,
+                                          });
+                                          controller.searching.value = false;
+                                        }
+                                      : null,
+                                  child: const Text('This Year'),
+                                ),
+                                ElevatedButton(
+                                  style: controller.isNewStatusSelected.isFalse
+                                      ? isNotPressedButtonStyle
+                                      : newButtonStyle,
+                                  onPressed: () async {
+                                    if (controller
+                                        .isNewStatusSelected
+                                        .isFalse) {
+                                      controller.isNewStatusSelected.value =
+                                          true;
+                                      controller.isSoldStatusSelected.value =
+                                          false;
+                                    } else {
+                                      controller.isNewStatusSelected.value =
+                                          false;
+                                    }
+                                    controller.searching.value = true;
+                                    await controller.searchEngine({
+                                      "status": 'New',
+                                    });
+                                    controller.searching.value = false;
+                                  },
+                                  child: const Text('New'),
+                                ),
+                                ElevatedButton(
+                                  style: controller.isSoldStatusSelected.isFalse
+                                      ? isNotPressedButtonStyle
+                                      : soldButtonStyle,
+                                  onPressed: () async {
+                                    if (controller
+                                        .isSoldStatusSelected
+                                        .isFalse) {
+                                      controller.isSoldStatusSelected.value =
+                                          true;
+                                      controller.isNewStatusSelected.value =
+                                          false;
+                                    } else {
+                                      controller.isSoldStatusSelected.value =
+                                          false;
+                                    }
+                                    controller.searching.value = true;
+                                    await controller.searchEngine({
+                                      "status": 'Sold',
+                                    });
+                                    controller.searching.value = false;
+                                  },
+                                  child: const Text('Sold'),
+                                ),
+                                ElevatedButton(
+                                  style: saveButtonStyle,
+                                  onPressed: controller.searching.isFalse
+                                      ? () {
+                                          controller.filterSearch();
+                                        }
+                                      : null,
+                                  child: controller.searching.isFalse
+                                      ? Text(
+                                          'Find',
+                                          style: fontStyleForElevatedButtons,
+                                        )
+                                      : loadingProcess,
+                                ),
+                                ElevatedButton(
+                                  style: clearVariablesButtonStyle,
+                                  onPressed: () {
+                                    controller.clearFilters();
+                                  },
+                                  child: Text(
+                                    'Clear Filters',
+                                    style: fontStyleForElevatedButtons,
+                                  ),
+                                ),
+                              ],
+                            ),
                           );
                         },
                       ),

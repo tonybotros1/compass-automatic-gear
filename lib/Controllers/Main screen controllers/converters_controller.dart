@@ -46,7 +46,7 @@ class ConvertersController extends GetxController {
 
   @override
   void onInit() async {
-    //
+    searchEngine({"today": true});
     super.onInit();
   }
 

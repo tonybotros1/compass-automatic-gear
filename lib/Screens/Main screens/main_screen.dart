@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Main screen controllers/main_screen_contro.dart';
 import '../../Widgets/main screen widgets/first_main_screen_widgets/left_tree.dart';
@@ -17,124 +18,118 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: sideMenuWidget(mainScreenController),
-      body: Row(
+      body: Column(
         children: [
-          // if (ScreenSize.isWeb(context)) sideMenuWidget(),
-          Expanded(
-            flex: 5,
-            child: Column(
-              children: [
-                Container(
-                  width: Get.width,
-                  color: Colors.white,
-                  height: 80,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // if (!ScreenSize.isWeb(context))
-                      Builder(
-                        builder: (context) => IconButton(
-                          onPressed: () {
-                            Scaffold.of(context).openDrawer();
-                          },
-                          icon: const Icon(Icons.menu, size: 25),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Container(
+                width: constraints.maxWidth,
+                color: Colors.white,
+                height: 80,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Builder(
+                      builder: (context) => IconButton(
+                        onPressed: () {
+                          Scaffold.of(context).openDrawer();
+                        },
+                        icon: const Icon(Icons.menu, size: 25),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15),
+                      child: Obx(
+                        () => Text(
+                          mainScreenController.selectedScreenName.value,
+                          style: fontStyleForAppBar,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 15),
-                        child: Obx(
-                          () => Text(
-                            mainScreenController.selectedScreenName.value,
-                            style: fontStyleForAppBar,
-                          ),
-                        ),
-                      ),
-                      Row(
-                        spacing: 20,
-                        children: [
-                          Obx(() {
-                            final currentRoute =
-                                mainScreenController.selectedScreenRoute.value;
-                            final isFavorite = mainScreenController
-                                .favoriteScreens
-                                .any((doc) => doc.routeName == currentRoute);
+                    ),
+                    Row(
+                      spacing: 20,
+                      children: [
+                        Obx(() {
+                          final currentRoute =
+                              mainScreenController.selectedScreenRoute.value;
+                          final isFavorite = mainScreenController
+                              .favoriteScreens
+                              .any((doc) => doc.routeName == currentRoute);
 
-                            return currentRoute != '/home'
-                                ? CircleAvatar(
-                                    backgroundColor: Colors.pink.shade400,
-                                    radius: 25,
-                                    child: IconButton(
-                                      tooltip: isFavorite
-                                          ? 'Remove from favorites'
-                                          : 'Add to favorites',
-                                      onPressed: () {
-                                        if (isFavorite) {
-                                          mainScreenController
-                                              .removeScreenFromFavorite(
-                                                mainScreenController
-                                                    .selectedScreenId
-                                                    .value,
-                                              );
-                                        } else {
-                                          mainScreenController
-                                              .addScreenToFavorite();
-                                        }
-                                      },
-                                      icon: Icon(
-                                        Icons.star,
-                                        color: isFavorite
-                                            ? Colors.yellow
-                                            : Colors.white,
-                                        size: 20,
-                                      ),
+                          return currentRoute != '/home'
+                              ? CircleAvatar(
+                                  backgroundColor: Colors.pink.shade400,
+                                  radius: 25,
+                                  child: IconButton(
+                                    tooltip: isFavorite
+                                        ? 'Remove from favorites'
+                                        : 'Add to favorites',
+                                    onPressed: () {
+                                      if (isFavorite) {
+                                        mainScreenController
+                                            .removeScreenFromFavorite(
+                                              mainScreenController
+                                                  .selectedScreenId
+                                                  .value,
+                                            );
+                                      } else {
+                                        mainScreenController
+                                            .addScreenToFavorite();
+                                      }
+                                    },
+                                    icon: Icon(
+                                      Icons.star,
+                                      color: isFavorite
+                                          ? Colors.yellow
+                                          : Colors.white,
+                                      size: 20,
                                     ),
+                                  ),
+                                )
+                              : const SizedBox();
+                        }),
+                        CircleAvatar(
+                          backgroundColor: Colors.teal,
+                          radius: 25,
+                          child: IconButton(
+                            tooltip: 'Home',
+                            onPressed: () {
+                              mainScreenController.selectedScreen.value =
+                                  mainScreenController.getScreenFromRoute(
+                                    '/home',
+                                  );
+                              mainScreenController.selectedScreenName.value =
+                                  '🏡 Home';
+                              mainScreenController.selectedScreenRoute.value =
+                                  '/home';
+                            },
+                            icon: const Icon(
+                              Icons.home,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: Obx(
+                            () => mainScreenController.isLoading.isFalse
+                                ? personalDetailsSection(
+                                    context,
+                                    mainScreenController,
                                   )
-                                : const SizedBox();
-                          }),
-                          CircleAvatar(
-                            backgroundColor: Colors.teal,
-                            radius: 25,
-                            child: IconButton(
-                              tooltip: 'Home',
-                              onPressed: () {
-                                mainScreenController.selectedScreen.value =
-                                    mainScreenController.getScreenFromRoute(
-                                      '/home',
-                                    );
-                                mainScreenController.selectedScreenName.value =
-                                    '🏡 Home';
-                                mainScreenController.selectedScreenRoute.value =
-                                    '/home';
-                              },
-                              icon: const Icon(
-                                Icons.home,
-                                size: 20,
-                                color: Colors.white,
-                              ),
-                            ),
+                                : const SizedBox(),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 16),
-                            child: Obx(
-                              () => mainScreenController.isLoading.isFalse
-                                  ? personalDetailsSection(
-                                      context,
-                                      mainScreenController,
-                                    )
-                                  : const SizedBox(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: Obx(() => mainScreenController.selectedScreen.value),
-                ),
-              ],
-            ),
+              );
+            },
           ),
+          Expanded(child: Obx(() => mainScreenController.selectedScreen.value)),
         ],
       ),
     );

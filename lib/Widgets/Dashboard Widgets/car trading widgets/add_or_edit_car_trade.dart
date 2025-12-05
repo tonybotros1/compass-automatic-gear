@@ -27,7 +27,7 @@ Widget addNewCarTradeOrEdit({
                   labelContainer(
                     lable: Text('Car Information', style: fontStyle1),
                   ),
-                  carInformation(context: context, constraints: constraints),
+                  carInformation(context: context, constraints: constraints,controller: controller),
                   const SizedBox(height: 10),
                   labelContainer(lable: Text('Items', style: fontStyle1)),
                 ],

@@ -22,6 +22,8 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> carEngineSizeFilter = TextEditingController().obs;
   Rx<TextEditingController> carBoughtFromFilter = TextEditingController().obs;
   Rx<TextEditingController> carSoldToFilter = TextEditingController().obs;
+  Rx<TextEditingController> carSoldByFilter = TextEditingController().obs;
+  Rx<TextEditingController> carBoughtByFilter = TextEditingController().obs;
   Rx<TextEditingController> carSpecificationFilter =
       TextEditingController().obs;
   RxString carBrandFilterId = RxString('');
@@ -29,6 +31,8 @@ class CarTradingDashboardController extends GetxController {
   RxString carEngineSizeFilterId = RxString('');
   RxString carBoughtFromFilterId = RxString('');
   RxString carSoldToFilterId = RxString('');
+  RxString carSoldByFilterId = RxString('');
+  RxString carBoughtByFilterId = RxString('');
   RxString carSpecificationFilterId = RxString('');
   final RxList<CapitalsModel> allCapitals = RxList<CapitalsModel>([]);
   final RxList<OutstandingModel> allOutstanding = RxList<OutstandingModel>([]);
@@ -41,7 +45,6 @@ class CarTradingDashboardController extends GetxController {
   );
   final RxList<GeneralExpensesModel> filteredGeneralExpenses =
       RxList<GeneralExpensesModel>([]);
-  RxMap allYears = RxMap({});
   RxInt numberOfCars = RxInt(0);
   RxInt numberOfCapitalsDocs = RxInt(0);
   RxInt numberOfOutstandingDocs = RxInt(0);
@@ -67,7 +70,6 @@ class CarTradingDashboardController extends GetxController {
   RxBool isTodaySelected = RxBool(false);
   RxBool isThisMonthSelected = RxBool(false);
   RxBool isThisYearSelected = RxBool(false);
-  RxMap allBrands = RxMap({});
   RxMap allModels = RxMap({});
   RxString status = RxString('');
   RxString currentTradId = RxString('');
@@ -77,18 +79,16 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> date = TextEditingController().obs;
   Rx<TextEditingController> mileage = TextEditingController().obs;
   Rx<TextEditingController> colorOut = TextEditingController().obs;
-  RxMap allColors = RxMap({});
-  RxMap allCarSpecifications = RxMap({});
-  RxMap allEngineSizes = RxMap({});
-  RxMap allBuyersAndSellers = RxMap({});
   Rx<TextEditingController> colorIn = TextEditingController().obs;
   Rx<TextEditingController> carSpecification = TextEditingController().obs;
   Rx<TextEditingController> carBrand = TextEditingController().obs;
   Rx<TextEditingController> carModel = TextEditingController().obs;
   Rx<TextEditingController> engineSize = TextEditingController().obs;
   Rx<TextEditingController> boughtFrom = TextEditingController().obs;
+  Rx<TextEditingController> boughtBy = TextEditingController().obs;
   Rx<TextEditingController> year = TextEditingController().obs;
   Rx<TextEditingController> soldTo = TextEditingController().obs;
+  Rx<TextEditingController> soldBy = TextEditingController().obs;
   TextEditingController pay = TextEditingController();
   TextEditingController receive = TextEditingController();
   Rx<TextEditingController> comments = TextEditingController().obs;
@@ -105,8 +105,10 @@ class CarTradingDashboardController extends GetxController {
   RxString carBrandId = RxString('');
   RxString engineSizeId = RxString('');
   RxString boughtFromId = RxString('');
+  RxString boughtById = RxString('');
   RxString yearId = RxString('');
   RxString soldToId = RxString('');
+  RxString soldById = RxString('');
   RxString itemId = RxString('');
   RxString nameId = RxString('');
   RxList<CarTradingItemsModel> addedItems = RxList([]);
@@ -115,8 +117,6 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalNETs = RxDouble(0.0);
   RxList<CarTradingItemsModel> filteredAddedItems =
       RxList<CarTradingItemsModel>([]);
-  RxMap allItems = RxMap({});
-  RxMap allNames = RxMap({});
   RxBool isCapitalLoading = RxBool(false);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
@@ -132,6 +132,7 @@ class CarTradingDashboardController extends GetxController {
   RxBool searching = RxBool(false);
   final ScrollController scrollControllerForTable = ScrollController();
   var buttonLoadingStates = <String, bool>{}.obs;
+  final ScrollController scrollController = ScrollController();
 
   @override
   void onInit() async {
@@ -139,14 +140,6 @@ class CarTradingDashboardController extends GetxController {
     getCapitalsOROutstandingSummary('capitals');
     getCapitalsOROutstandingSummary('outstanding');
     getGeneralExpensesSummary();
-    getCarBrands();
-    getYears();
-    getColors();
-    getEngineTypes();
-    getCarSpecefications();
-    getBuyersAndSellers();
-    getNamesOfPeople();
-    getItems();
     everAll(
       [
         totalNETsForAllTrades,
@@ -252,40 +245,40 @@ class CarTradingDashboardController extends GetxController {
     });
   }
 
-  Future<void> getYears() async {
-    allYears.assignAll(await helper.getAllListValues('YEARS'));
+  Future<Map<String, dynamic>> getYears() async {
+    return await helper.getAllListValues('YEARS');
   }
 
-  Future<void> getItems() async {
-    allItems.assignAll(await helper.getAllListValues('ITEMS'));
+  Future<Map<String, dynamic>> getItems() async {
+    return await helper.getAllListValues('ITEMS');
   }
 
-  Future<void> getColors() async {
-    allColors.assignAll(await helper.getAllListValues('COLORS'));
+  Future<Map<String, dynamic>> getColors() async {
+    return await helper.getAllListValues('COLORS');
   }
 
-  Future<void> getCarSpecefications() async {
-    allCarSpecifications.assignAll(
-      await helper.getAllListValues('CAR_SPECIFICATIONS'),
-    );
+  Future<Map<String, dynamic>> getCarSpecefications() async {
+    return await helper.getAllListValues('CAR_SPECIFICATIONS');
   }
 
-  Future<void> getEngineTypes() async {
-    allEngineSizes.assignAll(await helper.getAllListValues('ENGINE_TYPES'));
+  Future<Map<String, dynamic>> getEngineTypes() async {
+    return await helper.getAllListValues('ENGINE_TYPES');
   }
 
-  Future<void> getBuyersAndSellers() async {
-    allBuyersAndSellers.assignAll(
-      await helper.getAllListValues('BUYERS_AND_SELLERS'),
-    );
+  Future<Map<String, dynamic>> getBuyersAndSellers() async {
+    return await helper.getAllListValues('BUYERS_AND_SELLERS');
   }
 
-  Future<void> getNamesOfPeople() async {
-    allNames.assignAll(await helper.getAllListValues('NAMES_OF_PEOPLE'));
+  Future<Map<String, dynamic>> getBuyersAndSellersBy() async {
+    return await helper.getAllListValues('BOUGHT_SOLD_BY');
   }
 
-  Future<void> getCarBrands() async {
-    allBrands.assignAll(await helper.getCarBrands());
+  Future<Map<String, dynamic>> getNamesOfPeople() async {
+    return await helper.getAllListValues('NAMES_OF_PEOPLE');
+  }
+
+  Future<Map<String, dynamic>> getCarBrands() async {
+    return await helper.getCarBrands();
   }
 
   Future<void> getModelsByCarBrand(String brandId) async {
@@ -855,6 +848,8 @@ class CarTradingDashboardController extends GetxController {
       Map<String, dynamic> body = {
         'bought_from': boughtFromId.value,
         'sold_to': soldToId.value,
+        'bought_by': boughtById.value,
+        'sold_by': soldById.value,
         'date': isoDate,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
@@ -1025,6 +1020,12 @@ class CarTradingDashboardController extends GetxController {
     if (carSoldToFilterId.value != '') {
       body["sold_to"] = carSoldToFilterId.value;
     }
+    if (carBoughtByFilterId.value != '') {
+      body["bought_by"] = carBoughtByFilterId.value;
+    }
+    if (carSoldByFilterId.value != '') {
+      body["sold_by"] = carSoldByFilterId.value;
+    }
     if (isSoldStatusSelected.isTrue) {
       body["status"] = "Sold";
     }
@@ -1082,7 +1083,6 @@ class CarTradingDashboardController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         final data = decoded is List ? decoded[0] : decoded;
-
         List trades = data["trades"] ?? [];
         totalPaysForAllTrades.value = data['grand_total_pay'] ?? 0;
         totalReceivesForAllTrades.value = data['grand_total_receive'] ?? 0;
@@ -1153,264 +1153,6 @@ class CarTradingDashboardController extends GetxController {
         totalNETsForAllTrades.value + totalNETsForAllGeneralExpenses.value;
   }
 
-  void filterTradesForChart() {
-    try {
-      // final DateTime now = DateTime.now();
-
-      // int? selectedYear = year.value.text.isNotEmpty
-      //     ? int.tryParse(year.value.text)
-      //     : null;
-      // int? selectedMonth = month.value.text.isNotEmpty
-      //     ? monthNameToNumber(month.value.text)
-      //     : null;
-      // int? selectedDay = day.value.text.isNotEmpty
-      //     ? int.tryParse(day.value.text)
-      //     : null;
-
-      // // 2. If partial date provided, default missing parts to 'now'
-      // if (selectedDay != null) {
-      //   selectedMonth ??= now.month;
-      //   selectedYear ??= now.year;
-      // } else if (selectedMonth != null) {
-      //   selectedYear ??= now.year;
-      // }
-      // final String mode =
-      //     (selectedYear != null && selectedMonth != null && selectedDay != null)
-      //     ? 'day'
-      //     : (selectedYear != null && selectedMonth != null)
-      //     ? 'month'
-      //     : (selectedYear != null)
-      //     ? 'year'
-      //     : 'all';
-
-      // switch (mode) {
-      //   case 'year':
-      //     revenue.assignAll(List.filled(12, 0.0));
-      //     expenses.assignAll(List.filled(12, 0.0));
-      //     net.assignAll(List.filled(12, 0.0));
-      //     carsNumber.assignAll(List.filled(12, 0.0));
-      //     break;
-      //   case 'month':
-      //     final daysInMonth = DateTime(
-      //       selectedYear!,
-      //       selectedMonth! + 1,
-      //       0,
-      //     ).day;
-      //     revenue.assignAll(List.filled(daysInMonth, 0.0));
-      //     expenses.assignAll(List.filled(daysInMonth, 0.0));
-      //     net.assignAll(List.filled(daysInMonth, 0.0));
-      //     carsNumber.assignAll(List.filled(daysInMonth, 0.0));
-      //     break;
-      //   case 'day':
-      //     revenue.assignAll(List.filled(1, 0.0));
-      //     expenses.assignAll(List.filled(1, 0.0));
-      //     net.assignAll(List.filled(1, 0.0));
-      //     carsNumber.assignAll(List.filled(1, 0.0));
-      //     break;
-      //   default:
-      //     revenue.assignAll(List.filled(12, 0.0));
-      //     expenses.assignAll(List.filled(12, 0.0));
-      //     net.assignAll(List.filled(12, 0.0));
-      //     carsNumber.assignAll(List.filled(12, 0.0));
-      // }
-      // final String dateType = isSoldStatusSelected.value ? 'SELL' : 'BUY';
-
-      // for (var trade in filteredTrades) {
-      //   DateTime? parsed;
-
-      //   var pay = 0.0;
-      //   var receive = 0.0;
-      //   final items = trade['items'] as List<dynamic>?;
-      //   if (items == null || items.isEmpty) continue;
-      //   for (var item in items) {
-      //     try {
-      //       // if (getdataName(item['item'], allItems) == dateType) {
-      //       //   parsed = itemformat.parse(item['date']);
-      //       // }
-      //     } catch (_) {
-      //       continue;
-      //     }
-      //     pay += double.tryParse(item['pay']) ?? 0;
-      //     receive += double.tryParse(item['receive']) ?? 0;
-      //   }
-      //   int idx;
-      //   switch (mode) {
-      //     case 'year':
-      //       idx = parsed!.month - 1;
-      //       break;
-      //     case 'month':
-      //       idx = parsed!.day - 1;
-      //       break;
-      //     case 'day':
-      //       idx = 0;
-      //       break;
-      //     default:
-      //       idx = -1;
-      //   }
-      //   revenue[idx] += receive; // sum of all receives
-      //   expenses[idx] += pay; // sum of all pays
-      //   net[idx] += (receive - pay); // net = receive minus pay
-      //   carsNumber[idx] += 1;
-      //   // if (idx >= 0 && idx < revenue.length) {
-      //   //   revenue[idx] += receive; // sum of all receives
-      //   //   expenses[idx] += pay; // sum of all pays
-      //   //   net[idx] += (receive - pay); // net = receive minus pay
-      //   // }
-      // }
-    } catch (e) {
-      // print(e);
-    }
-  }
-
-  void filterTradesByDate() {
-    // final int? selectedYear = year.value.text.isNotEmpty
-    //     ? int.tryParse(year.value.text)
-    //     : null;
-    // final int? selectedMonth = month.value.text.isNotEmpty
-    //     ? monthNameToNumber(month.value.text)
-    //     : null;
-    // final int? selectedDay = day.value.text.isNotEmpty
-    //     ? int.tryParse(day.value.text)
-    //     : null;
-
-    // final String? selectedBrand = carBrandId.value != ''
-    //     ? carBrandId.value
-    //     : null;
-    // final String? selectedModel = carModelId.value != ''
-    //     ? carModelId.value
-    //     : null;
-
-    // // 1️⃣ New: read “new status” toggle
-    // final bool isNewSelected = isNewStatusSelected.value;
-
-    // final String dateType = isSoldStatusSelected.value ? 'SELL' : 'BUY';
-
-    // final List<Map<String, dynamic>> temp = [];
-
-    // for (var trade in allTrades) {
-    //   // 2️⃣ New: if we only want “new” trades, skip all others
-    //   if (isNewSelected) {
-    //     final String? status = trade['status'] as String?;
-    //     if (status?.toLowerCase() != 'new') continue;
-    //   }
-
-    //   final String? tradeBrand = trade['car_brand'] as String?;
-    //   final String? tradeModel = trade['car_model'] as String?;
-    //   if (selectedBrand != null && tradeBrand != selectedBrand) continue;
-    //   if (selectedModel != null && tradeModel != selectedModel) continue;
-    //   final items = trade['items'] as List<dynamic>?;
-    //   if (items == null || items.isEmpty) continue;
-
-    //   DateTime? latestForThisTrade;
-
-    //   for (var item in items) {
-    //     if (getdataName(item['item'], allItems) != dateType) continue;
-
-    //     DateTime parsed;
-    //     try {
-    //       parsed = itemformat.parse(item['date']);
-    //     } catch (_) {
-    //       continue;
-    //     }
-
-    //     if (selectedYear != null && parsed.year != selectedYear) continue;
-    //     if (selectedMonth != null && parsed.month != selectedMonth) continue;
-    //     if (selectedDay != null && parsed.day != selectedDay) continue;
-
-    //     if (latestForThisTrade == null || parsed.isAfter(latestForThisTrade)) {
-    //       latestForThisTrade = parsed;
-    //     }
-    //   }
-
-    //   if (latestForThisTrade != null) {
-    //     temp.add({'trade': trade, 'date': latestForThisTrade});
-    //   }
-    // }
-
-    // if (selectedYear == null && selectedMonth == null && selectedDay == null) {
-    //   temp.sort(
-    //     (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
-    //   );
-    // }
-
-    // filteredTrades.value = temp
-    //     .map((e) => e['trade'] as DocumentSnapshot<Object?>)
-    //     .toList();
-
-    // calculateTotalsForAllTrades();
-    // filterTradesForChart();
-    // numberOfCars.value = filteredTrades.length;
-  }
-
-  // void filterTradesByDate() {
-  //   final int? selectedYear =
-  //       year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
-  //   final int? selectedMonth = month.value.text.isNotEmpty
-  //       ? _monthNameToNumber(month.value.text)
-  //       : null;
-  //   final int? selectedDay =
-  //       day.value.text.isNotEmpty ? int.tryParse(day.value.text) : null;
-
-  //   final String? selectedBrand =
-  //       carBrandId.value != '' ? carBrandId.value : null;
-  //   final String? selectedModel =
-  //       carModelId.value != '' ? carModelId.value : null;
-
-  //   final String dateType = isSoldStatusSelected.value ? 'SELL' : 'BUY';
-
-  //   final List<Map<String, dynamic>> temp = [];
-
-  //   for (var trade in allTrades) {
-  //     final String? tradeBrand = trade['car_brand'] as String?;
-  //     final String? tradeModel = trade['car_model'] as String?;
-  //     if (selectedBrand != null && tradeBrand != selectedBrand) continue;
-  //     if (selectedModel != null && tradeModel != selectedModel) continue;
-  //     final items = trade['items'] as List<dynamic>?;
-  //     if (items == null || items.isEmpty) continue;
-
-  //     DateTime? latestForThisTrade;
-
-  //     for (var item in items) {
-  //       if (getdataName(item['item'], allItems) != dateType) continue;
-
-  //       DateTime parsed;
-  //       try {
-  //         parsed = itemformat.parse(item['date']);
-  //       } catch (_) {
-  //         continue;
-  //       }
-
-  //       if (selectedYear != null && parsed.year != selectedYear) continue;
-  //       if (selectedMonth != null && parsed.month != selectedMonth) continue;
-  //       if (selectedDay != null && parsed.day != selectedDay) continue;
-
-  //       if (latestForThisTrade == null || parsed.isAfter(latestForThisTrade)) {
-  //         latestForThisTrade = parsed;
-  //       }
-  //     }
-
-  //     if (latestForThisTrade != null) {
-  //       temp.add({
-  //         'trade': trade,
-  //         'date': latestForThisTrade,
-  //       });
-  //     }
-  //   }
-
-  //   if (selectedYear == null && selectedMonth == null && selectedDay == null) {
-  //     temp.sort(
-  //       (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
-  //     );
-  //   }
-
-  //   filteredTrades.value =
-  //       temp.map((e) => e['trade'] as DocumentSnapshot<Object?>).toList();
-
-  //   calculateTotalsForAllTrades();
-  //   filterTradesForChart();
-  //   numberOfCars.value = filteredTrades.length;
-  // }
-
   void calculateTotalsForCapitals(RxList allMap) {
     totalPays.value = 0;
     totalReceives.value = 0;
@@ -1476,6 +1218,10 @@ class CarTradingDashboardController extends GetxController {
   Future loadValues(CarTradeModel data) async {
     boughtFrom.value.text = data.boughtFrom ?? '';
     boughtFromId.value = data.boughtFromId ?? '';
+    boughtById.value = data.boughtById ?? '';
+    boughtBy.value.text = data.boughtBy ?? '';
+    soldById.value = data.soldById ?? '';
+    soldBy.value.text = data.soldBy ?? '';
     soldTo.value.text = data.soldTo ?? '';
     soldToId.value = data.soldToId ?? '';
     totalPays.value = data.totalPay ?? 0.0;
@@ -1511,7 +1257,11 @@ class CarTradingDashboardController extends GetxController {
 
   void clearValues() {
     boughtFrom.value.clear();
+    boughtBy.value.clear();
+    soldBy.value.clear();
     boughtFromId.value = '';
+    boughtById.value = '';
+    soldById.value = '';
     soldTo.value.clear();
     soldToId.value = '';
     totalPays.value = 0.0;
@@ -1543,7 +1293,7 @@ class CarTradingDashboardController extends GetxController {
     currentTradId.value = '';
   }
 
-  void onTapForAll() {
+  void clearFilters() {
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;
