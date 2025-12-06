@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Main screen controllers/main_screen_contro.dart';
 import '../../Widgets/main screen widgets/first_main_screen_widgets/left_tree.dart';
@@ -128,6 +127,10 @@ class MainScreen extends StatelessWidget {
                 ),
               );
             },
+          ),
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16),
+            child: Divider(indent: 20, endIndent: 20),
           ),
           Expanded(child: Obx(() => mainScreenController.selectedScreen.value)),
         ],

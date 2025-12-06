@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
@@ -115,16 +114,16 @@ class LoginScreen extends StatelessWidget {
                                       ),
                                     ),
                             ),
-                            const SizedBox(width: 20),
-                            kIsWeb
-                                ? ElevatedButton(
-                                    style: newCompannyButtonStyle,
-                                    onPressed: () {
-                                      Get.toNamed('/registerScreen');
-                                    },
-                                    child: const Text('Are you a new company?'),
-                                  )
-                                : const SizedBox(),
+                            // const SizedBox(width: 20),
+                            // kIsWeb
+                            //     ? ElevatedButton(
+                            //         style: newCompannyButtonStyle,
+                            //         onPressed: () {
+                            //           Get.toNamed('/registerScreen');
+                            //         },
+                            //         child: const Text('Are you a new company?'),
+                            //       )
+                            //     : const SizedBox(),
                           ],
                         ),
                       ),

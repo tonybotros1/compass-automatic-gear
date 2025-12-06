@@ -267,8 +267,6 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         Map<String, dynamic> jsonData = decoded["list_details"];
-        print(jsonData);
-
         return jsonData;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);

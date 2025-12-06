@@ -133,7 +133,8 @@ class CarTradingDashboardController extends GetxController {
   RxBool searching = RxBool(false);
   final ScrollController scrollControllerForTable = ScrollController();
   var buttonLoadingStates = <String, bool>{}.obs;
-  final ScrollController scrollController = ScrollController();
+  final ScrollController scrollControllerForCarInformation = ScrollController();
+  final ScrollController scrollControllerForBuySell = ScrollController();
   final carBrandsController = Get.put(CarBrandsController());
   final listOfValuesController = Get.put(ListOfValuesController());
 

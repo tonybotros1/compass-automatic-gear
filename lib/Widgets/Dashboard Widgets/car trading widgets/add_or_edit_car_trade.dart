@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../Models/car trading/car_trading_items_model.dart';
 import '../../../consts.dart';
-import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../../main screen widgets/auto_size_box.dart';
 import 'buy_sell_section.dart';
 import 'car_information_section.dart';
@@ -79,7 +77,15 @@ Widget addNewCarTradeOrEdit({
                   ),
 
                   const SizedBox(height: 10),
-                  labelContainer(lable: Text('Items', style: fontStyle1)),
+                  labelContainer(
+                    lable: Row(
+                      children: [
+                        Text('Items', style: fontStyle1),
+                        const Spacer(),
+                        newItemButton(context, controller),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -87,53 +93,40 @@ Widget addNewCarTradeOrEdit({
               hasScrollBody: true,
               child: Container(
                 decoration: containerDecor,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Container(
-                    width: constraints.maxWidth,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(10),
+                child: Column(
+                  children: [
+                    // searchBar(
+                    //   onChanged: (_) {
+                    //     controller.filterItems();
+                    //   },
+                    //   onPressedForClearSearch: () {
+                    //     controller.searchForItems.value.clear();
+                    //     controller.filterItems();
+                    //   },
+                    //   search: controller.searchForItems,
+                    //   constraints: constraints,
+                    //   context: context,
+                    //   title: 'Search for Items',
+                    //   // button: newItemButton(context, controller),
+                    // ),
+                    Expanded(
+                      child: GetX<CarTradingDashboardController>(
+                        builder: (controller) {
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: SizedBox(
+                              width: constraints.maxWidth,
+                              child: tableOfScreens(
+                                constraints: constraints,
+                                context: context,
+                                controller: controller,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    child: Column(
-                      children: [
-                        searchBar(
-                          onChanged: (_) {
-                            controller.filterItems();
-                          },
-                          onPressedForClearSearch: () {
-                            controller.searchForItems.value.clear();
-                            controller.filterItems();
-                          },
-                          search: controller.searchForItems,
-                          constraints: constraints,
-                          context: context,
-                          title: 'Search for Items',
-                          button: newItemButton(context, controller),
-                        ),
-                        Expanded(
-                          child: GetX<CarTradingDashboardController>(
-                            builder: (controller) {
-                              if (controller.addedItems.isEmpty) {
-                                return const Center(child: Text('No Element'));
-                              }
-                              return SingleChildScrollView(
-                                scrollDirection: Axis.vertical,
-                                child: SizedBox(
-                                  width: constraints.maxWidth,
-                                  child: tableOfScreens(
-                                    constraints: constraints,
-                                    context: context,
-                                    controller: controller,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -409,7 +402,7 @@ ElevatedButton newItemButton(
         },
       );
     },
-    style: newButtonStyle,
+    style: new2ButtonStyle,
     child: const Text('New Line'),
   );
 }
