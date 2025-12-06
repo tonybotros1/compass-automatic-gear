@@ -6,8 +6,10 @@ import '../../../Models/car trading/car_trading_items_model.dart';
 import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../../main screen widgets/auto_size_box.dart';
+import 'buy_sell_section.dart';
 import 'car_information_section.dart';
 import 'item_dialog.dart';
+import 'note_section.dart';
 
 Widget addNewCarTradeOrEdit({
   required BuildContext context,
@@ -24,10 +26,58 @@ Widget addNewCarTradeOrEdit({
             SliverToBoxAdapter(
               child: Column(
                 children: [
-                  labelContainer(
-                    lable: Text('Car Information', style: fontStyle1),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 10,
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Column(
+                          children: [
+                            labelContainer(
+                              lable: Text('Car Information', style: fontStyle1),
+                            ),
+                            carInformation(
+                              context: context,
+                              constraints: constraints,
+                              controller: controller,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Column(
+                          children: [
+                            labelContainer(
+                              lable: Text('Buy / Sell', style: fontStyle1),
+                            ),
+                            buySellSection(
+                              context: context,
+                              constraints: constraints,
+                              controller: controller,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          children: [
+                            labelContainer(
+                              lable: Text('Note', style: fontStyle1),
+                            ),
+                            noteSection(
+                              context: context,
+                              constraints: constraints,
+                              controller: controller,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  carInformation(context: context, constraints: constraints,controller: controller),
+
                   const SizedBox(height: 10),
                   labelContainer(lable: Text('Items', style: fontStyle1)),
                 ],

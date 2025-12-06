@@ -252,7 +252,6 @@ class Helpers {
     }
   }
 
-  // this function is to get all list values by code for drop down menu
   Future<Map<String, dynamic>> getListDetails(String code) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -268,6 +267,7 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         Map<String, dynamic> jsonData = decoded["list_details"];
+        print(jsonData);
 
         return jsonData;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
@@ -790,9 +790,7 @@ class Helpers {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse(
-        '$backendTestURI/issue_items/get_issuing_status/$id',
-      );
+      var url = Uri.parse('$backendTestURI/issue_items/get_issuing_status/$id');
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},

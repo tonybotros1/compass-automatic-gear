@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/car_brands_controller.dart';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -120,7 +122,6 @@ class CarTradingDashboardController extends GetxController {
   RxBool isCapitalLoading = RxBool(false);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
-  final focusNode = FocusNode();
   RxBool gettingCapitalsSummary = RxBool(false);
   RxBool gettingOutstandingSummary = RxBool(false);
   RxBool gettingGeneralExpensesSummary = RxBool(false);
@@ -133,6 +134,29 @@ class CarTradingDashboardController extends GetxController {
   final ScrollController scrollControllerForTable = ScrollController();
   var buttonLoadingStates = <String, bool>{}.obs;
   final ScrollController scrollController = ScrollController();
+  final carBrandsController = Get.put(CarBrandsController());
+  final listOfValuesController = Get.put(ListOfValuesController());
+
+  final FocusNode focusNodeForitems1 = FocusNode();
+  final FocusNode focusNodeForitems2 = FocusNode();
+  final FocusNode focusNodeForitems3 = FocusNode();
+  final FocusNode focusNodeForitems4 = FocusNode();
+  final FocusNode focusNodeForitems5 = FocusNode();
+
+  final FocusNode focusNodeForCarInformation1 = FocusNode();
+  final FocusNode focusNodeForCarInformation2 = FocusNode();
+  final FocusNode focusNodeForCarInformation3 = FocusNode();
+  final FocusNode focusNodeForCarInformation4 = FocusNode();
+  final FocusNode focusNodeForCarInformation5 = FocusNode();
+  final FocusNode focusNodeForCarInformation6 = FocusNode();
+  final FocusNode focusNodeForCarInformation7 = FocusNode();
+  final FocusNode focusNodeForCarInformation8 = FocusNode();
+  final FocusNode focusNodeForCarInformation9 = FocusNode();
+
+  final FocusNode focusNodeForBuySell1 = FocusNode();
+  final FocusNode focusNodeForBuySell2 = FocusNode();
+  final FocusNode focusNodeForBuySell3 = FocusNode();
+  final FocusNode focusNodeForBuySell4 = FocusNode();
 
   @override
   void onInit() async {
@@ -151,8 +175,8 @@ class CarTradingDashboardController extends GetxController {
         calculateTotalsForAllAndNetProfit();
       },
     );
-    focusNode.addListener(() {
-      if (!focusNode.hasFocus) {
+    focusNodeForitems1.addListener(() {
+      if (!focusNodeForitems1.hasFocus) {
         normalizeDate(itemDate.value.text, itemDate.value);
       }
     });
@@ -161,7 +185,7 @@ class CarTradingDashboardController extends GetxController {
 
   @override
   void dispose() {
-    focusNode.dispose();
+    focusNodeForitems1.dispose();
     super.dispose();
   }
 
@@ -275,6 +299,10 @@ class CarTradingDashboardController extends GetxController {
 
   Future<Map<String, dynamic>> getNamesOfPeople() async {
     return await helper.getAllListValues('NAMES_OF_PEOPLE');
+  }
+
+  Future<Map<String, dynamic>> getListDetils(String code) async {
+    return await helper.getListDetails(code);
   }
 
   Future<Map<String, dynamic>> getCarBrands() async {

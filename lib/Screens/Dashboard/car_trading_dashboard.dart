@@ -427,7 +427,7 @@ class CarTradingDashboard extends StatelessWidget {
                               },
                               child: const Icon(
                                 Icons.add,
-                                color: Colors.grey,
+                                color: Colors.blue,
                                 size: 20,
                               ),
                             ),
@@ -526,7 +526,7 @@ class CarTradingDashboard extends StatelessWidget {
                                   : null,
                               child: const Icon(
                                 Icons.add,
-                                color: Colors.grey,
+                                color: Colors.blue,
                                 size: 20,
                               ),
                             ),
@@ -542,11 +542,11 @@ class CarTradingDashboard extends StatelessWidget {
                               child: controller.gettingCapitalsSummary.isFalse
                                   ? const Icon(
                                       Icons.refresh,
-                                      color: Colors.grey,
+                                      color: Colors.green,
                                       size: 20,
                                     )
                                   : const SpinKitDoubleBounce(
-                                      color: Colors.grey,
+                                      color: Colors.green,
                                       size: 20,
                                     ),
                             ),
@@ -630,7 +630,7 @@ class CarTradingDashboard extends StatelessWidget {
                                   : null,
                               child: const Icon(
                                 Icons.add,
-                                color: Colors.grey,
+                                color: Colors.blue,
                                 size: 20,
                               ),
                             ),
@@ -649,11 +649,11 @@ class CarTradingDashboard extends StatelessWidget {
                                   controller.gettingOutstandingSummary.isFalse
                                   ? const Icon(
                                       Icons.refresh,
-                                      color: Colors.grey,
+                                      color: Colors.green,
                                       size: 20,
                                     )
                                   : const SpinKitDoubleBounce(
-                                      color: Colors.grey,
+                                      color: Colors.green,
                                       size: 20,
                                     ),
                             ),
@@ -735,7 +735,7 @@ class CarTradingDashboard extends StatelessWidget {
                                   : null,
                               child: const Icon(
                                 Icons.add,
-                                color: Colors.grey,
+                                color: Colors.blue,
                                 size: 20,
                               ),
                             ),
@@ -753,11 +753,11 @@ class CarTradingDashboard extends StatelessWidget {
                                       .isFalse
                                   ? const Icon(
                                       Icons.refresh,
-                                      color: Colors.grey,
+                                      color: Colors.green,
                                       size: 20,
                                     )
                                   : const SpinKitDoubleBounce(
-                                      color: Colors.grey,
+                                      color: Colors.green,
                                       size: 20,
                                     ),
                             ),
