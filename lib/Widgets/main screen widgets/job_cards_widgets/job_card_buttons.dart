@@ -253,3 +253,26 @@ GetBuilder<JobCardController> creatQuotationButton(
     },
   );
 }
+
+
+
+GetBuilder<JobCardController> creatReceiptButton(
+  JobCardController controller,
+  String jobId,
+) {
+  return GetBuilder<JobCardController>(
+    builder: (context) {
+      return ClickableHoverText(
+        // style: creatJobOrQuotationButtonStyle,
+        onTap: () {
+          if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
+            // controller.createQuotationCard(jobId);
+          } else {
+            showSnackBar('Alert', 'Please Save Job First');
+          }
+        },
+        text: 'Create Receipt',
+      );
+    },
+  );
+}

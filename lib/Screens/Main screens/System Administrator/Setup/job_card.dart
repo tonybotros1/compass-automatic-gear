@@ -790,6 +790,8 @@ Future<dynamic> editJobCardDialog(
                             separator(),
                             creatQuotationButton(controller, jobId),
                             point(),
+                            creatReceiptButton(controller, jobId),
+                            point(),
                             inspectionFormButton(controller, jobId, context),
                             point(),
                             internalNotesButton(controller, constraints, jobId),
@@ -913,6 +915,13 @@ ElevatedButton newJobCardButton(
                                       controller,
                                       controller.curreentJobCardId.value,
                                     ),
+                                    point(),
+
+                                    creatReceiptButton(
+                                      controller,
+                                      controller.curreentJobCardId.value,
+                                    ),
+
                                     point(),
                                     internalNotesButton(
                                       controller,

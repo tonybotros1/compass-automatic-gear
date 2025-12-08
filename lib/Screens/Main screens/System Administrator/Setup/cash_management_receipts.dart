@@ -554,8 +554,8 @@ Widget editSection(
   BuildContext context,
   CashManagementReceiptsController controller,
   ARReceiptsModel cashManagementData,
-  constraints,
-  cashManagementId,
+  BoxConstraints constraints,
+  String cashManagementId,
 ) {
   return GetX<CashManagementReceiptsController>(
     builder: (controller) {
@@ -615,13 +615,19 @@ Widget editSection(
                       : () {
                           controller.addNewReceipts();
                         },
-                  onPressedForDelete: () {
-                    if (controller.status.value != ' New') {
-                      showSnackBar('Alert', 'Only new receipts can be delted');
+                  onPressedForDelete: () async {
+                    Map currentReceiptStatus = await controller
+                        .getCurrentARReceiptStatus(
+                          controller.currentReceiptID.value,
+                        );
+                    String status1 = currentReceiptStatus['status'];
+
+                    if (status1 != 'New') {
+                      showSnackBar('Alert', 'Only new receipts can be deleted');
                       return;
                     }
                     alertDialog(
-                      context: context,
+                      context: Get.context!,
                       content: "This will be deleted permanently",
                       onPressed: () {
                         controller.deleteReceipt(cashManagementId);

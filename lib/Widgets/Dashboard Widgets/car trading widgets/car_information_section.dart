@@ -40,8 +40,8 @@ Widget carInformation({
                     spacing: 10,
                     children: [
                       myTextFormFieldWithBorder(
-                        focusNode: controller.focusNodeForCarInformation1,
-                        nextFocusNode: controller.focusNodeForCarInformation2,
+                        // focusNode: controller.focusNodeForCarInformation1,
+                        // nextFocusNode: controller.focusNodeForCarInformation2,
                         width: 130,
                         controller: controller.date.value,
                         labelText: 'Date',
@@ -99,9 +99,9 @@ Widget carInformation({
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           CustomDropdown(
-                            focusNode: controller.focusNodeForCarInformation2,
-                            nextFocusNode:
-                                controller.focusNodeForCarInformation3,
+                            // focusNode: controller.focusNodeForCarInformation2,
+                            // nextFocusNode:
+                            //     controller.focusNodeForCarInformation3,
                             width: 180,
                             showedSelectedName: 'name',
                             textcontroller: controller.carBrand.value.text,
@@ -221,9 +221,9 @@ Widget carInformation({
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           CustomDropdown(
-                            focusNode: controller.focusNodeForCarInformation3,
-                            nextFocusNode:
-                                controller.focusNodeForCarInformation4,
+                            // focusNode: controller.focusNodeForCarInformation3,
+                            // nextFocusNode:
+                            //     controller.focusNodeForCarInformation4,
                             width: 180,
                             showedSelectedName: 'name',
                             textcontroller: controller.carModel.value.text,

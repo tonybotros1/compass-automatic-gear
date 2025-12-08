@@ -5,7 +5,7 @@ class CustomerInvoicesModel extends BaseModelForReceiptsAndPayments {
   bool? isAdded;
   bool? isModified;
   bool? isDeleted;
-  String id;
+  String? id;
   // String jobId;
   // String invoiceDate;
 
@@ -33,6 +33,7 @@ class CustomerInvoicesModel extends BaseModelForReceiptsAndPayments {
       isSelected: json['is_selected'] == true,
       jobId: json['job_id']?.toString() ?? '',
       invoiceDate: json['invoice_date']?.toString() ?? '',
+      receiptId:json.containsKey('receipt_id') ? json['receipt_id'] ?? '' : "",
       invoiceAmount:
           double.tryParse(json['invoice_amount']?.toString() ?? '') ?? 0,
       receiptAmount:

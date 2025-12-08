@@ -429,7 +429,7 @@ class CarTradingDashboard extends StatelessWidget {
                             ),
                           ),
                           customBox(
-                            title: 'EXPENSES',
+                            title: 'PAID',
                             value: textForDataRowInTable(
                               text: '${controller.totalPaysForAllTrades.value}',
                               color: Colors.red,
@@ -438,7 +438,7 @@ class CarTradingDashboard extends StatelessWidget {
                             ),
                           ),
                           customBox(
-                            title: 'REVENUE',
+                            title: 'RECEIVED',
                             value: textForDataRowInTable(
                               text:
                                   '${controller.totalReceivesForAllTrades.value}',
@@ -544,7 +544,7 @@ class CarTradingDashboard extends StatelessWidget {
                             ),
                           ),
                           customBox(
-                            title: 'EXPENSES',
+                            title: 'PAID',
                             value: textForDataRowInTable(
                               text:
                                   '${controller.totalPaysForAllCapitals.value}',
@@ -554,7 +554,7 @@ class CarTradingDashboard extends StatelessWidget {
                             ),
                           ),
                           customBox(
-                            title: 'REVENUE',
+                            title: 'RECEIVED',
                             value: textForDataRowInTable(
                               text:
                                   '${controller.totalReceivesForAllCapitals.value}',
@@ -647,7 +647,7 @@ class CarTradingDashboard extends StatelessWidget {
                             ),
                           ),
                           customBox(
-                            title: 'EXPENSES',
+                            title: 'PAID',
                             value: textForDataRowInTable(
                               text:
                                   '${controller.totalPaysForAllOutstanding.value}',
@@ -657,7 +657,7 @@ class CarTradingDashboard extends StatelessWidget {
                             ),
                           ),
                           customBox(
-                            title: 'REVENUE',
+                            title: 'RECEIVED',
                             value: textForDataRowInTable(
                               text:
                                   '${controller.totalReceivesForAllOutstanding.value}',
@@ -747,7 +747,7 @@ class CarTradingDashboard extends StatelessWidget {
                             ),
                           ),
                           customBox(
-                            title: 'EXPENSES',
+                            title: 'PAID',
                             value: textForDataRowInTable(
                               text:
                                   '${controller.totalPaysForAllGeneralExpenses.value}',
@@ -757,7 +757,7 @@ class CarTradingDashboard extends StatelessWidget {
                             ),
                           ),
                           customBox(
-                            title: 'REVENUE',
+                            title: 'RECEIVED',
                             value: textForDataRowInTable(
                               text:
                                   '${controller.totalReceivesForAllGeneralExpenses.value}',

@@ -227,7 +227,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
                       (item) =>
                           (item.isModified == true ||
                           item.isAdded == true ||
-                          (item.isDeleted == true)),
+                          (item.isDeleted == true && item.id != '')),
                     )
                     .map((item) => item.toJson())
                     .toList(),
@@ -237,31 +237,56 @@ class CashManagementReceiptsController extends CashManagementBaseController {
               final decoded = jsonDecode(
                 responseForEditingReceiptInvoices.body,
               );
-              List updatedItems = decoded['updated_items'];
-              List deletedItems = decoded['deleted_items'];
-              if (deletedItems.isNotEmpty) {
-                for (var id in deletedItems) {
-                  selectedAvailableReceipts.removeWhere(
-                    (item) => item.id == id,
-                  );
-                }
+              ARReceiptsModel newReceipt = ARReceiptsModel.fromJson(
+                decoded['receipt'],
+              );
+              selectedAvailableReceipts.assignAll(
+                newReceipt.invoicesDetails ?? [],
+              );
+              for (var element in selectedAvailableReceipts) {
+                element.isAdded = null;
+                element.isDeleted = null;
+                element.isModified = null;
               }
-              if (updatedItems.isNotEmpty) {
-                for (var item in updatedItems) {
-                  var jobId = item['job_id'];
-                  var id = item['_id'];
-                  final localIndex = selectedAvailableReceipts.indexWhere(
-                    (item) => item.jobId == jobId,
-                  );
+              if (customerNameId.value != '') {
+                outstanding.clear();
+                outstanding.value = formatter.formatEditUpdate(
+                  outstanding.value,
+                  TextEditingValue(
+                    text:
+                        await calculateCustomerOutstanding(
+                          customerNameId.value,
+                        ).then((value) {
+                          return value.toString();
+                        }),
+                  ),
+                );
+              }
+              // List updatedItems = decoded['updated_items'];
+              // List deletedItems = decoded['deleted_items'];
+              // if (deletedItems.isNotEmpty) {
+              //   for (var id in deletedItems) {
+              //     selectedAvailableReceipts.removeWhere(
+              //       (item) => item.id == id,
+              //     );
+              //   }
+              // }
+              // if (updatedItems.isNotEmpty) {
+              //   for (var item in updatedItems) {
+              //     var jobId = item['job_id'];
+              //     var id = item['_id'];
+              //     final localIndex = selectedAvailableReceipts.indexWhere(
+              //       (item) => item.jobId == jobId,
+              //     );
 
-                  if (localIndex != -1) {
-                    selectedAvailableReceipts[localIndex].id = id;
-                    selectedAvailableReceipts[localIndex].isAdded = false;
-                    selectedAvailableReceipts[localIndex].isModified = false;
-                    selectedAvailableReceipts[localIndex].isDeleted = false;
-                  }
-                }
-              }
+              //     if (localIndex != -1) {
+              //       selectedAvailableReceipts[localIndex].id = id;
+              //       selectedAvailableReceipts[localIndex].isAdded = false;
+              //       selectedAvailableReceipts[localIndex].isModified = false;
+              //       selectedAvailableReceipts[localIndex].isDeleted = false;
+              //     }
+              //   }
+              // }
               isReceiptInvoicesModified.value = false;
             } else if (responseForEditingReceiptInvoices.statusCode == 401 &&
                 refreshToken.isNotEmpty) {
@@ -284,6 +309,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
 
       addingNewValue.value = false;
     } catch (e) {
+      print(e);
       showSnackBar('Alert', 'Something went wrong please try again');
       addingNewValue.value = false;
     }
@@ -291,7 +317,6 @@ class CashManagementReceiptsController extends CashManagementBaseController {
 
   Future<void> deleteReceipt(String id) async {
     try {
-     
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -308,8 +333,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         Get.close(2);
         showSnackBar('Success', 'Receipt deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
-        final decoded =
-            jsonDecode(response.body) ?? 'Failed to delete receipt';
+        final decoded = jsonDecode(response.body) ?? 'Failed to delete receipt';
         String error = decoded['detail'];
         showSnackBar('Alert', error);
       } else if (response.statusCode == 403) {
@@ -441,6 +465,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         if (idx != -1) {
           final existing = selectedAvailableReceipts[idx];
           existing
+            ..receiptAmount = existing.outstandingAmount
             ..receiptId = currentReceiptID.value
             ..isDeleted = false
             ..isAdded = true
@@ -448,12 +473,14 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         }
 
         receipt
+          ..receiptAmount = receipt.outstandingAmount
           ..receiptId = currentReceiptID.value
           ..isDeleted = false
           ..isAdded = true
           ..isSelected = true;
       } else {
         receipt
+          ..receiptAmount = receipt.outstandingAmount
           ..receiptId = currentReceiptID.value
           ..isAdded = true
           ..isSelected = true
@@ -482,8 +509,9 @@ class CashManagementReceiptsController extends CashManagementBaseController {
     receiptDate.value.text = textToDate(data.receiptDate);
     customerName.text = data.customerName ?? '';
     customerNameId.value = data.customer ?? '';
-    final customerId = data.customer;
-    if (customerId != null) {
+    String customerId = data.customer ?? '';
+    outstanding.clear();
+    if (customerId != '') {
       outstanding.value = formatter.formatEditUpdate(
         outstanding.value,
         TextEditingValue(

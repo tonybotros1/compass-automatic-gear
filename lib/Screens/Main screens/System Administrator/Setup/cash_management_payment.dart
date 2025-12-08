@@ -455,9 +455,19 @@ Widget editSectionForPayments(
                           }
                           controller.addNewPayment();
                         },
-                  onPressedForDelete: () {
+                  onPressedForDelete: () async {
+                    Map currentPaymentStatus = await controller
+                        .getCurrentAPPaymentStatus(
+                          controller.currentPaymentID.value,
+                        );
+                    String status1 = currentPaymentStatus['status'];
+                    if (status1 != 'New') {
+                      showSnackBar('Alert', 'Only new payments can be deleted');
+                      return;
+                    }
+
                     alertDialog(
-                      context: context,
+                      context: Get.context!,
                       content: "This will be deleted permanently",
                       onPressed: () {
                         controller.deletePayment(cashManagementId);

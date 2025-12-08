@@ -229,10 +229,6 @@ class CashManagementBaseController extends GetxController {
     // Update the data source
     selectedAvailableReceipts[idx].receiptAmount =
         double.tryParse(newValue) ?? 0;
-    selectedAvailableReceipts[idx].outstandingAmount =
-        selectedAvailableReceipts[idx].invoiceAmount -
-        selectedAvailableReceipts[idx].receiptAmount;
-    // Exit edit mode
     calculateAmountForSelectedReceipts();
     selectedAvailableReceipts[idx].isModified = true;
     isReceiptInvoicesModified.value = true;

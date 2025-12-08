@@ -13,29 +13,26 @@ Widget availableInvoicesDialog<T extends CashManagementBaseController>(
 ) {
   return SizedBox(
     width: constraints.maxWidth / 1.1,
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GetX<T>(
-        builder: (controller) {
-          if (isPayment) {
-            if (controller.loadingInvoices.isTrue &&
-                controller.availablePayments.isEmpty) {
-              return Center(child: loadingProcess);
-            }
-          } else {
-            if (controller.loadingInvoices.isTrue &&
-                controller.availableReceipts.isEmpty) {
-              return Center(child: loadingProcess);
-            }
+    child: GetX<T>(
+      builder: (controller) {
+        if (isPayment) {
+          if (controller.loadingInvoices.isTrue &&
+              controller.availablePayments.isEmpty) {
+            return Center(child: loadingProcess);
           }
-          return tableOfScreens(
-            constraints: constraints,
-            context: context,
-            controller: controller,
-            isPayment: isPayment,
-          );
-        },
-      ),
+        } else {
+          if (controller.loadingInvoices.isTrue &&
+              controller.availableReceipts.isEmpty) {
+            return Center(child: loadingProcess);
+          }
+        }
+        return tableOfScreens(
+          constraints: constraints,
+          context: context,
+          controller: controller,
+          isPayment: isPayment,
+        );
+      },
     ),
   );
 }

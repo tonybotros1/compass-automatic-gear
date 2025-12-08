@@ -102,13 +102,10 @@ Future<dynamic> receiptDialog({
                 ),
               ),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: addNewReceiptOrEdit(
-                    context: context,
-                    controller: controller,
-                    canEdit: canEdit,
-                  ),
+                child: addNewReceiptOrEdit(
+                  context: context,
+                  controller: controller,
+                  canEdit: canEdit,
                 ),
               ),
             ],

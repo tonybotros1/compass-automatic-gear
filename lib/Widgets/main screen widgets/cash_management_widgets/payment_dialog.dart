@@ -102,13 +102,10 @@ Future<dynamic> paymentDialog({
                 ),
               ),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: addNewPaymentOrEdit(
-                    context: context,
-                    controller: controller,
-                    canEdit: canEdit,
-                  ),
+                child: addNewPaymentOrEdit(
+                  context: context,
+                  controller: controller,
+                  canEdit: canEdit,
                 ),
               ),
             ],
