@@ -6,6 +6,7 @@ import '../../Widgets/Dashboard Widgets/car trading widgets/capital_dialog.dart'
 import '../../Widgets/Dashboard Widgets/car trading widgets/car_trade_dialog.dart';
 import '../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_car_trading.dart';
+import '../../Widgets/filter_button.dart';
 import '../../Widgets/my_text_field.dart';
 import '../../consts.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -245,79 +246,120 @@ class CarTradingDashboard extends StatelessWidget {
                                     );
                                   },
                                 ),
+                                filterButton(
+                                  title: 'Today',
+                                  onPressed: () async {
+                                    controller.isTodaySelected.value = true;
+                                    controller.isThisMonthSelected.value =
+                                        false;
+                                    controller.isThisYearSelected.value = false;
+                                    controller.searching.value = true;
+
+                                    await controller.searchEngine({
+                                      "today": true,
+                                    });
+                                    controller.searching.value = false;
+                                  },
+                                  isSelected: controller.isTodaySelected.value,
+                                ),
                                 // ElevatedButton(
-                                //   style: allButtonStyle,
-                                //   onPressed: () {
-                                //     controller.onTapForAll();
-                                //   },
-                                //   child: const Text('All'),
+                                //   style: todayButtonStyle,
+                                //   onPressed: controller.isTodaySelected.isFalse
+                                //       ? () async {
+                                //           controller.isTodaySelected.value =
+                                //               true;
+                                //           controller.isThisMonthSelected.value =
+                                //               false;
+                                //           controller.isThisYearSelected.value =
+                                //               false;
+                                //           controller.searching.value = true;
+
+                                //           await controller.searchEngine({
+                                //             "today": true,
+                                //           });
+                                //           controller.searching.value = false;
+                                //         }
+                                //       : null,
+                                //   child: const Text('Today'),
                                 // ),
-                                ElevatedButton(
-                                  style: todayButtonStyle,
-                                  onPressed: controller.isTodaySelected.isFalse
-                                      ? () async {
-                                          controller.isTodaySelected.value =
-                                              true;
-                                          controller.isThisMonthSelected.value =
-                                              false;
-                                          controller.isThisYearSelected.value =
-                                              false;
-                                          controller.searching.value = true;
+                                filterButton(
+                                  title: 'This Month',
+                                  onPressed: () async {
+                                    controller.isTodaySelected.value = false;
+                                    controller.isThisMonthSelected.value = true;
+                                    controller.isThisYearSelected.value = false;
+                                    controller.searching.value = true;
 
-                                          await controller.searchEngine({
-                                            "today": true,
-                                          });
-                                          controller.searching.value = false;
-                                        }
-                                      : null,
-                                  child: const Text('Today'),
+                                    await controller.searchEngine({
+                                      "this_month": true,
+                                    });
+                                    controller.searching.value = false;
+                                  },
+                                  isSelected:
+                                      controller.isThisMonthSelected.value,
                                 ),
-                                ElevatedButton(
-                                  style: thisMonthButtonStyle,
-                                  onPressed:
-                                      controller.isThisMonthSelected.isFalse
-                                      ? () async {
-                                          controller.isTodaySelected.value =
-                                              false;
-                                          controller.isThisMonthSelected.value =
-                                              true;
-                                          controller.isThisYearSelected.value =
-                                              false;
-                                          controller.searching.value = true;
+                                // ElevatedButton(
+                                //   style: thisMonthButtonStyle,
+                                //   onPressed:
+                                //       controller.isThisMonthSelected.isFalse
+                                //       ? () async {
+                                //           controller.isTodaySelected.value =
+                                //               false;
+                                //           controller.isThisMonthSelected.value =
+                                //               true;
+                                //           controller.isThisYearSelected.value =
+                                //               false;
+                                //           controller.searching.value = true;
 
-                                          await controller.searchEngine({
-                                            "this_month": true,
-                                          });
-                                          controller.searching.value = false;
-                                        }
-                                      : null,
-                                  child: const Text('This Month'),
-                                ),
-                                ElevatedButton(
-                                  style: thisYearButtonStyle,
-                                  onPressed:
-                                      controller.isThisYearSelected.isFalse
-                                      ? () async {
-                                          controller.isTodaySelected.value =
-                                              false;
-                                          controller.isThisMonthSelected.value =
-                                              false;
-                                          controller.isThisYearSelected.value =
-                                              true;
-                                          controller.searching.value = true;
+                                //           await controller.searchEngine({
+                                //             "this_month": true,
+                                //           });
+                                //           controller.searching.value = false;
+                                //         }
+                                //       : null,
+                                //   child: const Text('This Month'),
+                                // ),
+                                filterButton(
+                                  title: 'This Year',
+                                  onPressed: () async {
+                                    controller.isTodaySelected.value = false;
+                                    controller.isThisMonthSelected.value =
+                                        false;
+                                    controller.isThisYearSelected.value = true;
+                                    controller.searching.value = true;
 
-                                          await controller.searchEngine({
-                                            "this_year": true,
-                                          });
-                                          controller.searching.value = false;
-                                        }
-                                      : null,
-                                  child: const Text('This Year'),
+                                    await controller.searchEngine({
+                                      "this_year": true,
+                                    });
+                                    controller.searching.value = false;
+                                  },
+                                  isSelected:
+                                      controller.isThisYearSelected.value,
                                 ),
-                                ElevatedButton(
-                                  style: controller.isNewStatusSelected.isFalse
-                                      ? isNotPressedButtonStyle
-                                      : newButtonStyle,
+                                // ElevatedButton(
+                                //   style: thisYearButtonStyle,
+                                //   onPressed:
+                                //       controller.isThisYearSelected.isFalse
+                                //       ? () async {
+                                //           controller.isTodaySelected.value =
+                                //               false;
+                                //           controller.isThisMonthSelected.value =
+                                //               false;
+                                //           controller.isThisYearSelected.value =
+                                //               true;
+                                //           controller.searching.value = true;
+
+                                //           await controller.searchEngine({
+                                //             "this_year": true,
+                                //           });
+                                //           controller.searching.value = false;
+                                //         }
+                                //       : null,
+                                //   child: const Text('This Year'),
+                                // ),
+                                filterButton(
+                                  isStatus: true,
+                                  title: 'New',
                                   onPressed: () async {
                                     if (controller
                                         .isNewStatusSelected
@@ -336,12 +378,36 @@ class CarTradingDashboard extends StatelessWidget {
                                     });
                                     controller.searching.value = false;
                                   },
-                                  child: const Text('New'),
+                                  isSelected:
+                                      controller.isNewStatusSelected.value,
                                 ),
-                                ElevatedButton(
-                                  style: controller.isSoldStatusSelected.isFalse
-                                      ? isNotPressedButtonStyle
-                                      : soldButtonStyle,
+                                // ElevatedButton(
+                                //   style: controller.isNewStatusSelected.isFalse
+                                //       ? isNotPressedButtonStyle
+                                //       : newButtonStyle,
+                                //   onPressed: () async {
+                                //     if (controller
+                                //         .isNewStatusSelected
+                                //         .isFalse) {
+                                //       controller.isNewStatusSelected.value =
+                                //           true;
+                                //       controller.isSoldStatusSelected.value =
+                                //           false;
+                                //     } else {
+                                //       controller.isNewStatusSelected.value =
+                                //           false;
+                                //     }
+                                //     controller.searching.value = true;
+                                //     await controller.searchEngine({
+                                //       "status": 'New',
+                                //     });
+                                //     controller.searching.value = false;
+                                //   },
+                                //   child: const Text('New'),
+                                // ),
+                                filterButton(
+                                  isStatus: true,
+                                  title: 'Sold',
                                   onPressed: () async {
                                     if (controller
                                         .isSoldStatusSelected
@@ -360,8 +426,34 @@ class CarTradingDashboard extends StatelessWidget {
                                     });
                                     controller.searching.value = false;
                                   },
-                                  child: const Text('Sold'),
+                                  isSelected:
+                                      controller.isSoldStatusSelected.value,
                                 ),
+                                // ElevatedButton(
+                                //   style: controller.isSoldStatusSelected.isFalse
+                                //       ? isNotPressedButtonStyle
+                                //       : soldButtonStyle,
+                                //   onPressed: () async {
+                                //     if (controller
+                                //         .isSoldStatusSelected
+                                //         .isFalse) {
+                                //       controller.isSoldStatusSelected.value =
+                                //           true;
+                                //       controller.isNewStatusSelected.value =
+                                //           false;
+                                //     } else {
+                                //       controller.isSoldStatusSelected.value =
+                                //           false;
+                                //     }
+                                //     controller.searching.value = true;
+                                //     await controller.searchEngine({
+                                //       "status": 'Sold',
+                                //     });
+                                //     controller.searching.value = false;
+                                //   },
+                                //   child: const Text('Sold'),
+                                // ),
+                                const SizedBox(width: 10),
                                 ElevatedButton(
                                   style: saveButtonStyle,
                                   onPressed: controller.searching.isFalse

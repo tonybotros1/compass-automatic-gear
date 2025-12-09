@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../consts.dart';
-import '../../main screen widgets/lists_widgets/values_section_in_list_of_values.dart';
 import 'car_information_section.dart';
 
 Widget addNewItemOrEdit({
@@ -48,80 +47,72 @@ Widget addNewItemOrEdit({
             const SizedBox(height: 10),
             isTrade == true || isGeneralExpenses == true
                 ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: CustomDropdown(
-                        // focusNode: controller.focusNodeForitems2,
-                        // nextFocusNode: controller.focusNodeForitems3,
-                        validator: true,
-                        textcontroller: controller.item.text,
-                        showedSelectedName: 'name',
-                        hintText: 'Item',
-                        onChanged: (key, value) {
-                          controller.item.text = value['name'];
-                          controller.itemId.value = key;
-                        },
-                        onDelete: () {
-                          controller.item.clear();
-                          controller.itemId.value = '';
-                        },
-                        onOpen: () {
-                          return controller.getItems();
-                        },
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: CustomDropdown(
+                          // focusNode: controller.focusNodeForitems2,
+                          // nextFocusNode: controller.focusNodeForitems3,
+                          validator: true,
+                          textcontroller: controller.item.text,
+                          showedSelectedName: 'name',
+                          hintText: 'Item',
+                          onChanged: (key, value) {
+                            controller.item.text = value['name'];
+                            controller.itemId.value = key;
+                          },
+                          onDelete: () {
+                            controller.item.clear();
+                            controller.itemId.value = '';
+                          },
+                          onOpen: () {
+                            return controller.getItems();
+                          },
+                        ),
                       ),
-                    ),
-                    valSectionInTheTable(
-                      controller.listOfValuesController,
-                      context,
-                      constraints,
-                      'ITEMS',
-                      'New Item',
-                      'Items',
-                      valuesSection(
-                        constraints: constraints,
-                        context: context,
+                      valSectionInTheTable(
+                        controller.listOfValuesController,
+                        context,
+                        constraints,
+                        'ITEMS',
+                        'New Item',
+                        'Items',
                       ),
-                    ),
-                  ],
-                )
+                    ],
+                  )
                 : Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: CustomDropdown(
-                        // focusNode: controller.focusNodeForitems2,
-                        validator: true,
-                        textcontroller: controller.name.text,
-                        showedSelectedName: 'name',
-                        hintText: 'Name',
-                        onChanged: (key, value) {
-                          controller.name.text = value['name'];
-                          controller.nameId.value = key;
-                        },
-                        onDelete: () {
-                          controller.name.clear();
-                          controller.nameId.value = '';
-                        },
-                        onOpen: () {
-                          return controller.getNamesOfPeople();
-                        },
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: CustomDropdown(
+                          // focusNode: controller.focusNodeForitems2,
+                          validator: true,
+                          textcontroller: controller.name.text,
+                          showedSelectedName: 'name',
+                          hintText: 'Name',
+                          onChanged: (key, value) {
+                            controller.name.text = value['name'];
+                            controller.nameId.value = key;
+                          },
+                          onDelete: () {
+                            controller.name.clear();
+                            controller.nameId.value = '';
+                          },
+                          onOpen: () {
+                            return controller.getNamesOfPeople();
+                          },
+                        ),
                       ),
-                    ),
-                    valSectionInTheTable(
-                      controller.listOfValuesController,
-                      context,
-                      constraints,
-                      'NAMES_OF_PEOPLE',
-                      'New Name',
-                      'Names of People',
-                      valuesSection(
-                        constraints: constraints,
-                        context: context,
+                      valSectionInTheTable(
+                        controller.listOfValuesController,
+                        context,
+                        constraints,
+                        'NAMES_OF_PEOPLE',
+                        'New Name',
+                        'Names of People',
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
 
             const SizedBox(height: 10),
             Row(

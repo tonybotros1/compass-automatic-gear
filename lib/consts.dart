@@ -43,6 +43,7 @@ var fontStyleForCheckBoxes = TextStyle(
   fontWeight: FontWeight.bold,
 );
 
+
 final createButton = Container(
   padding: const EdgeInsets.symmetric(horizontal: 12),
   decoration: BoxDecoration(
@@ -478,6 +479,10 @@ DocumentSnapshot<Object?>? getDocumentById(
 var deleteIcon = const Icon(Icons.delete_forever, color: Colors.red);
 
 var editIcon = const Icon(Icons.edit_note_rounded, color: Colors.blue);
+var valuesIcon = const Icon(
+  Icons.dashboard_customize_outlined,
+  color: Colors.purple,
+);
 
 var activeIcon = const Icon(Icons.check, color: Color(0xff9ACBD0));
 var inActiveIcon = const Icon(
@@ -862,14 +867,14 @@ Widget textForDataRowInTable({
 Container statusBox(
   String status, {
   hieght = 30.0,
-  width,
-  EdgeInsetsGeometry? padding = const EdgeInsets.symmetric(horizontal: 16),
+  width = 100,
+  EdgeInsetsGeometry? padding = const EdgeInsets.symmetric(horizontal: 4),
 }) {
   return Container(
-    alignment: Alignment.center,
+    alignment: Alignment.centerLeft,
     decoration: BoxDecoration(
-      border: Border.all(color: Colors.white, width: 2),
-      borderRadius: BorderRadius.circular(5),
+      border: Border.all(color: Colors.grey.shade300, width: 2),
+      borderRadius: BorderRadius.circular(2),
       color: status == 'New' || status == "Active"
           ? Colors.green
           : status == 'Posted' || status == 'Sold' || status == "Probation"

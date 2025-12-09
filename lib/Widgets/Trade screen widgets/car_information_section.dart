@@ -123,7 +123,6 @@ Container carInformation({
                         'New Car Specification',
                         'Car Specification',
                         valuesSection(
-                          constraints: constraints,
                           context: context,
                         ),
                       ),
@@ -153,7 +152,6 @@ Container carInformation({
                         'New Color',
                         'Colors',
                         valuesSection(
-                          constraints: constraints,
                           context: context,
                         ),
                       ),
@@ -225,7 +223,6 @@ Container carInformation({
                         'New Engine Size',
                         'Engine Size',
                         valuesSection(
-                          constraints: constraints,
                           context: context,
                         ),
                       ),
@@ -255,7 +252,6 @@ Container carInformation({
                         'New Year',
                         'Years',
                         valuesSection(
-                          constraints: constraints,
                           context: context,
                         ),
                       ),
@@ -302,7 +298,6 @@ Container carInformation({
                         'New Buyers and Sellers',
                         'Buyers and Sellers',
                         valuesSection(
-                          constraints: constraints,
                           context: context,
                         ),
                       ),
@@ -465,7 +460,6 @@ Widget valSectionInTheTableForBrands(
                     child: Padding(
                       padding: const EdgeInsets.all(20),
                       child: modelsSection(
-                        constraints: constraints,
                         context: context,
                       ),
                     ),

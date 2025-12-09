@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../consts.dart';
 import '../../drop_down_menu3.dart';
-import '../../main screen widgets/lists_widgets/values_section_in_list_of_values.dart';
 import 'car_information_section.dart';
 
 Widget buySellSection({
@@ -63,10 +62,6 @@ Widget buySellSection({
                           'BUYERS_AND_SELLERS',
                           'New Buyers and Sellers',
                           'Buyers and Sellers',
-                          valuesSection(
-                            constraints: constraints,
-                            context: context,
-                          ),
                         ),
                       ],
                     ),
@@ -132,10 +127,6 @@ Widget buySellSection({
                           'BOUGHT_SOLD_BY',
                           'New Buyers and Sellers',
                           'Buyers and Sellers',
-                          valuesSection(
-                            constraints: constraints,
-                            context: context,
-                          ),
                         ),
                       ],
                     ),

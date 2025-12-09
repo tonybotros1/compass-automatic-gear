@@ -95,26 +95,30 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
+      const DataColumn(
+        label: SizedBox(),
+        columnWidth: IntrinsicColumnWidth(flex: 0.5),
+      ),
       DataColumn(
         label: AutoSizedText(text: 'Code', constraints: constraints),
         onSort: controller.onSortForLists,
+        columnWidth: const IntrinsicColumnWidth(flex: 1.5),
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Name'),
         onSort: controller.onSortForLists,
+        columnWidth: const IntrinsicColumnWidth(flex: 1.5),
       ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Parent (LOV)'),
         onSort: controller.onSortForLists,
+        columnWidth: const IntrinsicColumnWidth(flex: 1.5),
       ),
-      DataColumn(
-        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
-        onSort: controller.onSortForLists,
-      ),
-      const DataColumn(
-        headingRowAlignment: MainAxisAlignment.center,
-        label: Text(''),
-      ),
+      // DataColumn(
+      //   label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
+      //   onSort: controller.onSortForLists,
+      //   columnWidth: const IntrinsicColumnWidth(flex: 1),
+      // ),
     ],
     rows:
         controller.filteredLists.isEmpty &&
@@ -144,22 +148,20 @@ Widget tableOfScreens({
 
 DataRow dataRowForTheTable(
   Map<String, dynamic> listData,
-  context,
-  constraints,
-  listId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String listId,
   ListOfValuesController controller,
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(listData['code'])),
-      DataCell(Text(listData['name'])),
-      DataCell(Text(listData['mastered_by'])),
-      DataCell(Text(textToDate(listData['createdAt']))),
       DataCell(
         Row(
-          spacing: 10,
-          mainAxisAlignment: MainAxisAlignment.end,
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            deleteSection(controller, listId, context),
+            editButton(controller, listData, listId, context, constraints),
             valSectionInTheTable(
               controller,
               listId,
@@ -168,11 +170,13 @@ DataRow dataRowForTheTable(
               listData,
             ),
             // publicPrivateSection(listData, controller, listId),
-            editButton(controller, listData, listId, context, constraints),
-            deleteSection(controller, listId, context),
           ],
         ),
       ),
+      DataCell(Text(listData['code'])),
+      DataCell(Text(listData['name'])),
+      DataCell(Text(listData['mastered_by'])),
+      // DataCell(Text(textToDate(listData['createdAt']))),
     ],
   );
 }
@@ -199,15 +203,14 @@ DataRow dataRowForTheTable(
 //   );
 // }
 
-ElevatedButton valSectionInTheTable(
+IconButton valSectionInTheTable(
   ListOfValuesController controller,
-  listId,
-  context,
+  String listId,
+  BuildContext context,
   BoxConstraints constraints,
-  listData,
+  Map<String, dynamic> listData,
 ) {
-  return ElevatedButton(
-    style: viewButtonStyle,
+  return IconButton(
     onPressed: () {
       controller.searchForValues.value.clear();
       controller.valueMap.clear();
@@ -216,20 +219,18 @@ ElevatedButton valSectionInTheTable(
       Get.dialog(
         barrierDismissible: false,
         Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           child: SizedBox(
             height: constraints.maxHeight,
-            width: constraints.maxWidth,
+            width: constraints.maxWidth / 2,
             child: Column(
               children: [
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(15),
-                      topRight: Radius.circular(15),
+                      topLeft: Radius.circular(5),
+                      topRight: Radius.circular(5),
                     ),
                     color: mainColor,
                   ),
@@ -240,17 +241,13 @@ ElevatedButton valSectionInTheTable(
                         style: fontStyleForScreenNameUsedInButtons,
                       ),
                       const Spacer(),
-                      closeButton,
+                      closeIcon(),
                     ],
                   ),
                 ),
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: valuesSection(
-                      constraints: constraints,
-                      context: context,
-                    ),
+                  child: valuesSection(
+                    context: context,
                   ),
                 ),
               ],
@@ -259,17 +256,16 @@ ElevatedButton valSectionInTheTable(
         ),
       );
     },
-    child: const Text('Values'),
+    icon: valuesIcon,
   );
 }
 
-ElevatedButton deleteSection(
+IconButton deleteSection(
   ListOfValuesController controller,
   String listId,
   BuildContext context,
 ) {
-  return ElevatedButton(
-    style: deleteButtonStyle,
+  return IconButton(
     onPressed: () {
       alertDialog(
         context: context,
@@ -279,18 +275,18 @@ ElevatedButton deleteSection(
         },
       );
     },
-    child: const Text("Delete"),
+    icon: deleteIcon,
   );
 }
 
-ElevatedButton editButton(
+IconButton editButton(
   ListOfValuesController controller,
   Map<String, dynamic> listData,
-  listId,
-  context,
-  constraints,
+  String listId,
+  BuildContext context,
+  BoxConstraints constraints,
 ) {
-  return ElevatedButton(
+  return IconButton(
     onPressed: () {
       controller.listName.text = listData['name'] ?? '';
       controller.code.text = listData['code'] ?? '';
@@ -310,8 +306,7 @@ ElevatedButton editButton(
               },
       );
     },
-    style: editButtonStyle,
-    child: const Text('Edit'),
+    icon: editIcon,
   );
 }
 

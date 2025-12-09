@@ -9,61 +9,58 @@ import '../auto_size_box.dart';
 import 'values_dialog.dart';
 
 Widget valuesSection({
-  required BoxConstraints constraints,
   required BuildContext context,
 }) {
-  return Container(
-    width: constraints.maxWidth,
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Column(
-      children: [
-        GetX<ListOfValuesController>(
-          init: ListOfValuesController(),
-          builder: (controller) {
-            return searchBar(
-              onChanged: (_) {
-                controller.filterValues();
-              },
-              onPressedForClearSearch: () {
-                controller.searchForValues.value.clear();
-                controller.filterValues();
-              },
-              search: controller.searchForValues,
-              constraints: constraints,
-              context: context,
-              title: 'Search for values',
-              button: newValueButton(context, constraints, controller),
-            );
-          },
-        ),
-        Expanded(
-          child: GetX<ListOfValuesController>(
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      return Column(
+        children: [
+          GetX<ListOfValuesController>(
+            init: ListOfValuesController(),
             builder: (controller) {
-              if (controller.loadingValues.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (controller.allValues.isEmpty) {
-                return const Center(child: Text('No Element'));
-              }
-              return SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SizedBox(
-                  width: constraints.maxWidth,
-                  child: tableOfScreens(
-                    constraints: constraints,
-                    context: context,
-                    controller: controller,
-                  ),
-                ),
+              return searchBar(
+                width: constraints.maxWidth / 3,
+                onChanged: (_) {
+                  controller.filterValues();
+                },
+                onPressedForClearSearch: () {
+                  controller.searchForValues.value.clear();
+                  controller.filterValues();
+                },
+                search: controller.searchForValues,
+                constraints: constraints,
+                context: context,
+                title: 'Search for values',
+                button: newValueButton(context, constraints, controller),
               );
             },
           ),
-        ),
-      ],
-    ),
+          Expanded(
+            child: GetX<ListOfValuesController>(
+              builder: (controller) {
+                if (controller.loadingValues.value) {
+                  return Center(child: loadingProcess);
+                }
+                if (controller.allValues.isEmpty) {
+                  return const Center(child: Text('No Element'));
+                }
+                return SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    child: tableOfScreens(
+                      constraints: constraints,
+                      context: context,
+                      controller: controller,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      );
+    },
   );
 }
 
@@ -84,6 +81,7 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
+      const DataColumn(label: Text('')),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Name'),
         onSort: controller.onSortForValues,
@@ -92,11 +90,6 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Parent (Value)'),
         onSort: controller.onSortForValues,
       ),
-      DataColumn(
-        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
-        onSort: controller.onSortForValues,
-      ),
-      const DataColumn(label: Text('')),
     ],
     rows:
         controller.filteredValues.isEmpty &&
@@ -126,46 +119,37 @@ Widget tableOfScreens({
 
 DataRow dataRowForTheTable(
   ValueModel valueData,
-  context,
-  constraints,
+  BuildContext context,
+  BoxConstraints constraints,
   String valueId,
   ListOfValuesController controller,
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(valueData.name)),
-      DataCell(Text(valueData.masteredBy)),
-      DataCell(Text(textToDate(valueData.createdAt))),
       DataCell(
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // activeInActiveSection(valueData, controller, valueId),
-            Padding(
-              padding: const EdgeInsets.only(left: 5, right: 5),
-              child: editSection(
-                controller,
-                valueData,
-                context,
-                constraints,
-                valueId,
-              ),
-            ),
             deleteSection(context, controller, valueId),
+
+            // activeInActiveSection(valueData, controller, valueId),
+            editSection(controller, valueData, context, constraints, valueId),
           ],
         ),
       ),
+      DataCell(Text(valueData.name)),
+      DataCell(Text(valueData.masteredBy)),
     ],
   );
 }
 
-ElevatedButton deleteSection(
+IconButton deleteSection(
   BuildContext context,
   ListOfValuesController controller,
-  valueId,
+  String valueId,
 ) {
-  return ElevatedButton(
-    style: deleteButtonStyle,
+  return IconButton(
     onPressed: () {
       alertDialog(
         context: context,
@@ -175,19 +159,18 @@ ElevatedButton deleteSection(
         },
       );
     },
-    child: const Text('Delete'),
+    icon: deleteIcon,
   );
 }
 
-ElevatedButton editSection(
+IconButton editSection(
   ListOfValuesController controller,
   ValueModel valueData,
-  context,
-  constraints,
+  BuildContext context,
+  BoxConstraints constraints,
   String valueId,
 ) {
-  return ElevatedButton(
-    style: editButtonStyle,
+  return IconButton(
     onPressed: () {
       controller.valueName.text = valueData.name;
       controller.masteredBy.text = valueData.masteredBy;
@@ -206,7 +189,7 @@ ElevatedButton editSection(
               },
       );
     },
-    child: const Text('Edit'),
+    icon: editIcon,
   );
 }
 

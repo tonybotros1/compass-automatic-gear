@@ -74,7 +74,6 @@ Widget addNewItemOrEdit({
                     'New Item',
                     'Items',
                     valuesSection(
-                      constraints: constraints,
                       context: context,
                     ),
                   ),
@@ -106,7 +105,6 @@ Widget addNewItemOrEdit({
                     'New Name',
                     'Names of People',
                     valuesSection(
-                      constraints: constraints,
                       context: context,
                     ),
                   ),

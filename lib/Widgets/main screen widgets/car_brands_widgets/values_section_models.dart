@@ -8,62 +8,56 @@ import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../auto_size_box.dart';
 import 'cars_models_dialog.dart';
 
-Widget modelsSection({
-  required BoxConstraints constraints,
-  required BuildContext context,
-}) {
-  return Container(
-    width: constraints.maxWidth,
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Column(
-      children: [
-        GetX<CarBrandsController>(
-          builder: (controller) {
-            return searchBar(
-              onChanged: (_) {
-                controller.filterModels();
-              },
-              onPressedForClearSearch: () {
-                controller.searchForModels.value.clear();
-                controller.filterModels();
-              },
-              search: controller.searchForModels,
-              constraints: constraints,
-              context: context,
-              // controller: controller,
-              title: 'Search for models',
-              button: newModelButton(context, constraints, controller),
-            );
-          },
-        ),
-        Expanded(
-          child: GetX<CarBrandsController>(
+Widget modelsSection({required BuildContext context}) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      return Column(
+        children: [
+          GetX<CarBrandsController>(
             builder: (controller) {
-              if (controller.loadingModels.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (controller.allModels.isEmpty) {
-                return const Center(child: Text('No Element'));
-              }
-              return SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SizedBox(
-                  width: constraints.maxWidth,
-                  child: tableOfScreens(
-                    constraints: constraints,
-                    context: context,
-                    controller: controller,
-                  ),
-                ),
+              return searchBar(
+                width: constraints.maxWidth / 2.5,
+                onChanged: (_) {
+                  controller.filterModels();
+                },
+                onPressedForClearSearch: () {
+                  controller.searchForModels.value.clear();
+                  controller.filterModels();
+                },
+                search: controller.searchForModels,
+                constraints: constraints,
+                context: context,
+                title: 'Search for models',
+                button: newModelButton(context, constraints, controller),
               );
             },
           ),
-        ),
-      ],
-    ),
+          Expanded(
+            child: GetX<CarBrandsController>(
+              builder: (controller) {
+                if (controller.loadingModels.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (controller.allModels.isEmpty) {
+                  return const Center(child: Text('No Element'));
+                }
+                return SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    child: tableOfScreens(
+                      constraints: constraints,
+                      context: context,
+                      controller: controller,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      );
+    },
   );
 }
 
@@ -84,15 +78,20 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
+      const DataColumn(
+        label: Text(''),
+        columnWidth: IntrinsicColumnWidth(flex: 1),
+      ),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Name'),
+        columnWidth: const IntrinsicColumnWidth(flex: 1.5),
+
         // onSort: controller.onSortForModels,
       ),
-      DataColumn(
-        label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
-        // onSort: controller.onSortForModels,
-      ),
-      const DataColumn(label: Text('')),
+      // DataColumn(
+      //   label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
+      //   // onSort: controller.onSortForModels,
+      // ),
     ],
     rows:
         controller.filteredModels.isEmpty &&
@@ -124,41 +123,37 @@ Widget tableOfScreens({
 
 DataRow dataRowForTheTable(
   Model modelData,
-  context,
-  constraints,
+  BuildContext context,
+  BoxConstraints constraints,
   String modelId,
   CarBrandsController controller,
 ) {
   return DataRow(
     cells: [
-      DataCell(Text(modelData.name)),
-      DataCell(Text(textToDate(modelData.createdAt))),
       DataCell(
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            activeInActiveSection(modelData, controller, modelId),
-            Padding(
-              padding: const EdgeInsets.only(left: 5, right: 5),
-              child: editSection(
-                controller,
-                modelData,
-                context,
-                constraints,
-                modelId,
-              ),
-            ),
             deleteSection(context, controller, modelId),
+            editSection(controller, modelData, context, constraints, modelId),
+            activeInActiveSection(modelData, controller, modelId),
           ],
         ),
       ),
+      DataCell(Text(modelData.name)),
+
+      // DataCell(Text(textToDate(modelData.createdAt))),
     ],
   );
 }
 
-ElevatedButton deleteSection(BuildContext context, CarBrandsController controller,String modelId) {
-  return ElevatedButton(
-    style: deleteButtonStyle,
+IconButton deleteSection(
+  BuildContext context,
+  CarBrandsController controller,
+  String modelId,
+) {
+  return IconButton(
     onPressed: () {
       alertDialog(
         context: context,
@@ -168,19 +163,18 @@ ElevatedButton deleteSection(BuildContext context, CarBrandsController controlle
         },
       );
     },
-    child: const Text('Delete'),
+    icon: deleteIcon,
   );
 }
 
-ElevatedButton editSection(
+IconButton editSection(
   CarBrandsController controller,
   Model modelData,
   context,
   constraints,
   String modelId,
 ) {
-  return ElevatedButton(
-    style: editButtonStyle,
+  return IconButton(
     onPressed: () {
       controller.modelName.text = modelData.name;
       carModelsDialog(
@@ -192,24 +186,21 @@ ElevatedButton editSection(
                 if (!controller.formKeyForAddingNewvalue.currentState!
                     .validate()) {
                 } else {
-                  controller.editModel(
-                    modelId,
-                  );
+                  controller.editModel(modelId);
                 }
               },
       );
     },
-    child: const Text('Edit'),
+    icon: editIcon,
   );
 }
 
-ElevatedButton activeInActiveSection(
+IconButton activeInActiveSection(
   Model modelData,
   CarBrandsController controller,
   String modelId,
 ) {
-  return ElevatedButton(
-    style: modelData.status == false ? inActiveButtonStyle : activeButtonStyle,
+  return IconButton(
     onPressed: () {
       bool status;
       if (modelData.status == false) {
@@ -219,9 +210,7 @@ ElevatedButton activeInActiveSection(
       }
       controller.editActiveOrInActiveStatusForModels(modelId, status);
     },
-    child: modelData.status == true
-        ? const Text('Active')
-        : const Text('Inactive'),
+    icon: modelData.status == true ? activeIcon : inActiveIcon,
   );
 }
 

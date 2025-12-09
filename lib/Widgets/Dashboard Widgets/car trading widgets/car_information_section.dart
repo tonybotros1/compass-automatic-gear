@@ -161,10 +161,6 @@ Widget carInformation({
                             'CAR_SPECIFICATIONS',
                             'New Car Specification',
                             'Car Specification',
-                            valuesSection(
-                              constraints: constraints,
-                              context: context,
-                            ),
                           ),
                         ],
                       ),
@@ -199,10 +195,6 @@ Widget carInformation({
                             'COLORS',
                             'New Color',
                             'Colors',
-                            valuesSection(
-                              constraints: constraints,
-                              context: context,
-                            ),
                           ),
                         ],
                       ),
@@ -281,10 +273,6 @@ Widget carInformation({
                             'ENGINE_TYPES',
                             'New Engine Size',
                             'Engine Size',
-                            valuesSection(
-                              constraints: constraints,
-                              context: context,
-                            ),
                           ),
                         ],
                       ),
@@ -319,10 +307,6 @@ Widget carInformation({
                             'CAR_SPECIFICATIONS',
                             'New Year',
                             'Years',
-                            valuesSection(
-                              constraints: constraints,
-                              context: context,
-                            ),
                           ),
                         ],
                       ),
@@ -345,7 +329,7 @@ Widget valSectionInTheTable(
   String code,
   String tooltip,
   String screenName,
-  Widget screen,
+  // Widget screen,
 ) {
   return IconButton(
     tooltip: tooltip,
@@ -360,20 +344,18 @@ Widget valSectionInTheTable(
       Get.dialog(
         barrierDismissible: false,
         Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           child: SizedBox(
             height: constraints.maxHeight,
-            width: constraints.maxWidth,
+            width: constraints.maxWidth / 2,
             child: Column(
               children: [
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(15),
-                      topRight: Radius.circular(15),
+                      topLeft: Radius.circular(5),
+                      topRight: Radius.circular(5),
                     ),
                     color: mainColor,
                   ),
@@ -388,12 +370,7 @@ Widget valSectionInTheTable(
                     ],
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: screen,
-                  ),
-                ),
+                Expanded(child: valuesSection(context: Get.context!)),
               ],
             ),
           ),
@@ -427,7 +404,7 @@ Widget valSectionInTheTableForBrands(
             ),
             child: SizedBox(
               height: constraints.maxHeight,
-              width: constraints.maxWidth,
+              width: constraints.maxWidth / 2.5,
               child: Column(
                 children: [
                   Container(
@@ -450,15 +427,7 @@ Widget valSectionInTheTableForBrands(
                       ],
                     ),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: modelsSection(
-                        constraints: constraints,
-                        context: context,
-                      ),
-                    ),
-                  ),
+                  Expanded(child: modelsSection(context: context)),
                 ],
               ),
             ),

@@ -9,6 +9,7 @@ Row searchBar({
   // required controller,
   required title,
   Widget? button,
+  double? width,
   void Function(String)? onChanged,
   required Rx<TextEditingController> search,
   void Function()? onPressedForClearSearch,
@@ -18,7 +19,7 @@ Row searchBar({
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
-          width: constraints.maxWidth / 2.5,
+          width: width ?? constraints.maxWidth / 2.5,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
             // color: Colors.grey.shade300,
@@ -51,9 +52,11 @@ Row searchBar({
               ),
               FittedBox(
                 child: IconButton(
-                  onPressed: onPressedForClearSearch ?? () {
-                          search.value.clear();
-                        },
+                  onPressed:
+                      onPressedForClearSearch ??
+                      () {
+                        search.value.clear();
+                      },
                   icon: const Icon(Icons.close, color: iconColor, size: 25),
                 ),
               ),

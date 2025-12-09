@@ -61,8 +61,7 @@ class CarBrands extends StatelessWidget {
                           return const Center(child: Text('No Element'));
                         }
                         return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, 
+                          scrollDirection: Axis.vertical,
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
@@ -102,6 +101,7 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
+      const DataColumn(label: Text('')),
       DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Name'),
         // onSort: controller.onSort,
@@ -113,7 +113,6 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         // onSort: controller.onSort,
       ),
-      const DataColumn(label: Text('')),
     ],
     rows:
         controller.filteredBrands.isEmpty &&
@@ -154,6 +153,24 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
+      DataCell(
+        Row(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            deleteSection(controller, brandId, context),
+            editSection(context, controller, brandData, constraints, brandId),
+            activeInActiveSection(controller, brandData, brandId),
+            valSectionInTheTable(
+              controller,
+              brandId,
+              context,
+              constraints,
+              brandData,
+            ),
+          ],
+        ),
+      ),
       DataCell(Text(brandData.name.toString())),
       DataCell(
         Image.network(
@@ -166,37 +183,18 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(Text(textToDate(brandData.createdAt))),
-      DataCell(
-        Row(
-          spacing: 5,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            valSectionInTheTable(
-              controller,
-              brandId,
-              context,
-              constraints,
-              brandData,
-            ),
-            activeInActiveSection(controller, brandData, brandId),
-            editSection(context, controller, brandData, constraints, brandId),
-            deleteSection(controller, brandId, context),
-          ],
-        ),
-      ),
     ],
   );
 }
 
-ElevatedButton valSectionInTheTable(
+IconButton valSectionInTheTable(
   CarBrandsController controller,
-  brandId,
-  context,
+  String brandId,
+  BuildContext context,
   BoxConstraints constraints,
   brandData,
 ) {
-  return ElevatedButton(
-    style: viewButtonStyle,
+  return IconButton(
     onPressed: () {
       controller.getModelsValues(brandId);
       controller.brandIdToWorkWith.value = brandId;
@@ -209,7 +207,7 @@ ElevatedButton valSectionInTheTable(
           ),
           child: SizedBox(
             height: constraints.maxHeight,
-            width: constraints.maxWidth,
+            width: constraints.maxWidth / 2.5,
             child: Column(
               children: [
                 Container(
@@ -228,36 +226,27 @@ ElevatedButton valSectionInTheTable(
                         style: fontStyleForScreenNameUsedInButtons,
                       ),
                       const Spacer(),
-                      closeButton,
+                      closeIcon(),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: modelsSection(
-                      constraints: constraints,
-                      context: context,
-                    ),
-                  ),
-                ),
+                Expanded(child: modelsSection(context: context)),
               ],
             ),
           ),
         ),
       );
     },
-    child: const Text('Models'),
+    icon: const Icon(Icons.car_repair_outlined),
   );
 }
 
-ElevatedButton activeInActiveSection(
+IconButton activeInActiveSection(
   CarBrandsController controller,
   Brand brandData,
   String brandId,
 ) {
-  return ElevatedButton(
-    style: brandData.status == false ? inActiveButtonStyle : activeButtonStyle,
+  return IconButton(
     onPressed: () {
       bool status;
       if (brandData.status == false) {
@@ -267,15 +256,16 @@ ElevatedButton activeInActiveSection(
       }
       controller.editActiveOrInActiveStatus(brandId, status);
     },
-    child: brandData.status == true
-        ? const Text('Active')
-        : const Text('Inactive'),
+    icon: brandData.status == true ? activeIcon : inActiveIcon,
   );
 }
 
-ElevatedButton deleteSection(CarBrandsController controller,String brandId,BuildContext context) {
-  return ElevatedButton(
-    style: deleteButtonStyle,
+IconButton deleteSection(
+  CarBrandsController controller,
+  String brandId,
+  BuildContext context,
+) {
+  return IconButton(
     onPressed: () {
       alertDialog(
         context: context,
@@ -285,19 +275,18 @@ ElevatedButton deleteSection(CarBrandsController controller,String brandId,Build
         },
       );
     },
-    child: const Text("Delete"),
+    icon: deleteIcon,
   );
 }
 
-ElevatedButton editSection(
+IconButton editSection(
   BuildContext context,
   CarBrandsController controller,
   Brand brandData,
   BoxConstraints constraints,
   String brandId,
 ) {
-  return ElevatedButton(
-    style: editButtonStyle,
+  return IconButton(
     onPressed: () {
       controller.brandName.text = brandData.name.toString();
       controller.logoUrl.value = brandData.logo.toString();
@@ -320,7 +309,7 @@ ElevatedButton editSection(
               },
       );
     },
-    child: const Text('Edit'),
+    icon: editIcon,
   );
 }
 
