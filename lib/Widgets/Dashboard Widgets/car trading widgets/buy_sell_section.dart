@@ -66,6 +66,7 @@ Widget buySellSection({
                       ],
                     ),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         CustomDropdown(
                           width: 200,
@@ -86,7 +87,14 @@ Widget buySellSection({
                             return controller.getBuyersAndSellers();
                           },
                         ),
-                        const IconButton(onPressed: null, icon: SizedBox()),
+                        valSectionInTheTable(
+                          controller.listOfValuesController,
+                          context,
+                          constraints,
+                          'BUYERS_AND_SELLERS',
+                          'New Buyers and Sellers',
+                          'Buyers and Sellers',
+                        ),
                       ],
                     ),
                   ],
@@ -131,6 +139,7 @@ Widget buySellSection({
                       ],
                     ),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         CustomDropdown(
                           width: 200,
@@ -151,7 +160,14 @@ Widget buySellSection({
                             return controller.getBuyersAndSellersBy();
                           },
                         ),
-                        const IconButton(onPressed: null, icon: SizedBox()),
+                        valSectionInTheTable(
+                          controller.listOfValuesController,
+                          context,
+                          constraints,
+                          'BOUGHT_SOLD_BY',
+                          'New Buyers and Sellers',
+                          'Buyers and Sellers',
+                        ),
                       ],
                     ),
                   ],
