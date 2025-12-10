@@ -654,6 +654,14 @@ Future<dynamic> editReceipt(
         alertMessage(context: Get.context!, content: 'Status already posted');
         return;
       }
+      if (controller.receiptTypeId.value.isEmpty ||
+          controller.accountId.value.isEmpty) {
+        alertMessage(
+          context: Get.context!,
+          content: 'You need to fill receipt type and account',
+        );
+        return;
+      }
       alertDialog(
         context: Get.context!,
         content: 'Are you sure you want to post this receipt?',
