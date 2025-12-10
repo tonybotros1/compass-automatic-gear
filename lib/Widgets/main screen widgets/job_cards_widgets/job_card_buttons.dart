@@ -146,8 +146,8 @@ Widget inspectionFormButton(
     builder: (controller) {
       return ClickableHoverText(
         onTap: controller.loadingIspectionReport.isFalse
-            ? () async{
-             await  controller.loadInspectionFormValues(jobId);
+            ? () async {
+                await controller.loadInspectionFormValues(jobId);
                 Get.dialog(
                   barrierDismissible: false,
                   Dialog(
@@ -233,11 +233,11 @@ GetBuilder<JobCardController> copyJobButton(
   );
 }
 
-GetBuilder<JobCardController> creatQuotationButton(
+GetX<JobCardController> creatQuotationButton(
   JobCardController controller,
   String jobId,
 ) {
-  return GetBuilder<JobCardController>(
+  return GetX<JobCardController>(
     builder: (context) {
       return ClickableHoverText(
         // style: creatJobOrQuotationButtonStyle,
@@ -248,30 +248,29 @@ GetBuilder<JobCardController> creatQuotationButton(
             showSnackBar('Alert', 'Please Save Job First');
           }
         },
-        text: 'Create Quotation',
+        text: controller.creatingNewQuotation.isFalse
+            ? 'Create Quotation'
+            : '•••',
       );
     },
   );
 }
 
-
-
-GetBuilder<JobCardController> creatReceiptButton(
+GetX<JobCardController> creatReceiptButton(
   JobCardController controller,
   String jobId,
 ) {
-  return GetBuilder<JobCardController>(
+  return GetX<JobCardController>(
     builder: (context) {
       return ClickableHoverText(
-        // style: creatJobOrQuotationButtonStyle,
         onTap: () {
           if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
-            // controller.createQuotationCard(jobId);
+            controller.createReceipt(jobId, controller.customerId.value);
           } else {
             showSnackBar('Alert', 'Please Save Job First');
           }
         },
-        text: 'Create Receipt',
+        text: controller.creatingNewReceipt.isFalse ? 'Create Receipt' : '•••',
       );
     },
   );

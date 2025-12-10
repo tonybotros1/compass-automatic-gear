@@ -168,12 +168,14 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           maxWidth: null,
+          formatDouble: false,
           text: entityData.entityName ?? '',
         ),
       ),
       DataCell(
         textForDataRowInTable(
           maxWidth: null,
+          formatDouble: false,
           text: (addresses != null && addresses.isNotEmpty)
               ? addresses
                     .where((address) => address.isPrimary == true)
@@ -186,6 +188,7 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           maxWidth: null,
+          formatDouble: false,
           text: (addresses != null && addresses.isNotEmpty)
               ? addresses
                     .where((address) => address.isPrimary == true)
@@ -198,6 +201,7 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           maxWidth: 300,
+          formatDouble: false,
           text: entityData.entityPhone!
               .map((phoneData) => phoneData.number)
               .take(2)

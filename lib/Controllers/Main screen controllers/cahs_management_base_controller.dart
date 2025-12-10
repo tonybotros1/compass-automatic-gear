@@ -153,12 +153,9 @@ class CashManagementBaseController extends GetxController {
 
   void finishEditingForPayments(String newValue, int idx) {
     // Update the data source
-    selectedAvailablePayments[idx].receiptAmount =
+    selectedAvailablePayments[idx].paymentAmount =
         double.tryParse(newValue) ?? 0;
-    selectedAvailablePayments[idx].outstandingAmount =
-        selectedAvailablePayments[idx].invoiceAmount -
-        selectedAvailablePayments[idx].paymentAmount;
-    // Exit edit mode
+
     calculateAmountForSelectedPayments();
     selectedAvailablePayments[idx].isModified = true;
     isPaymentInvoicesModified.value = true;

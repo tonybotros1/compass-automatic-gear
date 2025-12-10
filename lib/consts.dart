@@ -43,7 +43,6 @@ var fontStyleForCheckBoxes = TextStyle(
   fontWeight: FontWeight.bold,
 );
 
-
 final createButton = Container(
   padding: const EdgeInsets.symmetric(horizontal: 12),
   decoration: BoxDecoration(
@@ -639,21 +638,6 @@ void showSnackBar(String title, String body) {
 //     showDesktopToast(title,body);
 //   }
 
-Future<dynamic> alertMessage({
-  required BuildContext context,
-  required String content,
-  required void Function() onPressed,
-}) {
-  return Get.defaultDialog(
-    title: 'Alert',
-    middleText: 'This is an alert message!',
-    confirm: ElevatedButton(
-      onPressed: () => Get.back(),
-      child: const Text('OK'),
-    ),
-  );
-}
-
 Future<dynamic> alertDialog({
   required BuildContext context,
   required String content,
@@ -677,6 +661,31 @@ Future<dynamic> alertDialog({
             isDefaultAction: true,
             onPressed: onPressed,
             child: const Text('Ok', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<dynamic> alertMessage( {
+  required BuildContext context,
+  required String content,
+  String? title,
+}) {
+  return showCupertinoDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CupertinoAlertDialog(
+        title: Text(title ?? "Alert"),
+        content: Text(content),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text("Ok"),
+            onPressed: () {
+              Get.back();
+            },
           ),
         ],
       );

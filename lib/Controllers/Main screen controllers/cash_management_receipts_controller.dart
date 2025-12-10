@@ -76,7 +76,10 @@ class CashManagementReceiptsController extends CashManagementBaseController {
       } else {}
       loadingInvoices.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       loadingInvoices.value = false;
     }
   }
@@ -89,7 +92,10 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         );
         String status1 = currentReceiptStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new receipts can be edited');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new receipts can be edited',
+          );
           return;
         }
       }
@@ -118,7 +124,10 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         try {
           newData['receipt_date'] = convertDateToIson(rawDate);
         } catch (e) {
-          showSnackBar('Alert', 'Please Enter Valid Receipt Date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please Enter Valid Receipt Date',
+          );
           return;
         }
       }
@@ -127,7 +136,10 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         try {
           newData['cheque_date'] = convertDateToIson(rawDate2);
         } catch (e) {
-          showSnackBar('Alert', 'Please Enter Valid Cheque Date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please Enter Valid Cheque Date',
+          );
           return;
         }
       }
@@ -136,7 +148,10 @@ class CashManagementReceiptsController extends CashManagementBaseController {
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
 
       if (currentReceiptID.isEmpty) {
-        showSnackBar('Adding', 'Please Wait');
+        alertMessage(
+          context: Get.context!,
+          content: 'Please Enter Valid Cheque Date',
+        );
         newData['status'] = 'New';
 
         Uri url = Uri.parse('$backendUrl/ar_receipts/add_new_receipt');
@@ -164,7 +179,6 @@ class CashManagementReceiptsController extends CashManagementBaseController {
             element.isModified = null;
           }
           isReceiptInvoicesModified.value = false;
-          showSnackBar('Done', 'Added Successfully');
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -180,7 +194,6 @@ class CashManagementReceiptsController extends CashManagementBaseController {
           http.Response? responseForEditingReceipt;
           http.Response? responseForEditingReceiptInvoices;
 
-          showSnackBar('Updating', 'Please Wait');
           if (isReceiptModified.isTrue) {
             Uri updatingJobUrl = Uri.parse(
               '$backendUrl/ar_receipts/update_ar_receipt/${currentReceiptID.value}',
@@ -300,16 +313,15 @@ class CashManagementReceiptsController extends CashManagementBaseController {
               logout();
             }
           }
-          if ((responseForEditingReceiptInvoices?.statusCode == 200) ||
-              (responseForEditingReceipt?.statusCode == 200)) {
-            showSnackBar('Done', 'Updated Successfully');
-          }
         }
       }
 
       addingNewValue.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       addingNewValue.value = false;
     }
   }
@@ -330,15 +342,14 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         allReceipts.removeWhere((job) => job.id == deletedJobId);
         numberOfReceipts.value -= 1;
         Get.close(2);
-        showSnackBar('Success', 'Receipt deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
         final decoded = jsonDecode(response.body) ?? 'Failed to delete receipt';
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'] ?? 'Only New Receipts Allowed';
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -350,12 +361,15 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         final decoded = jsonDecode(response.body);
         final error =
             decoded['detail'] ?? 'Server error while deleting receipt';
-        showSnackBar('Server Error', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401) {
         logout();
       }
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 

@@ -606,12 +606,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         cashManagementData.status != ''
-            ? statusBox(
-                cashManagementData.status ?? '',
-                hieght: 35,
-                width: 100,
-                padding: const EdgeInsets.all(0),
-              )
+            ? statusBox(cashManagementData.status ?? '', hieght: 35, width: 100)
             : const SizedBox(),
       ),
       DataCell(

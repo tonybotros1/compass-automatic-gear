@@ -8,14 +8,17 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:datahubai/consts.dart';
 import 'package:uuid/uuid.dart';
+import '../../Models/ar receipts and ap payments/ar_receipts_model.dart';
 import '../../Models/job cards/inspection_report_model.dart';
 import '../../Models/job cards/internal_notes_model.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/job cards/job_card_model.dart';
+import '../../Screens/Main screens/System Administrator/Setup/cash_management_receipts.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../Widgets/Mobile widgets/inspection report widgets/inspection_reports_hekpers.dart';
 import '../../helpers.dart';
 import '../Mobile section controllers/cards_screen_controller.dart';
+import 'cash_management_receipts_controller.dart';
 import 'main_screen_contro.dart';
 import 'quotation_card_controller.dart';
 
@@ -91,6 +94,7 @@ class JobCardController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
   RxBool creatingNewQuotation = RxBool(false);
+  RxBool creatingNewReceipt = RxBool(false);
   RxMap companyDetails = RxMap({});
   RxMap allCities = RxMap({});
   RxBool loadingCopyJob = RxBool(false);
@@ -173,7 +177,6 @@ class JobCardController extends GetxController {
   final formatter = CurrencyInputFormatter();
   RxBool loadingIspectionReport = RxBool(false);
 
-  
   // // for the payment header
   final FocusNode focusNodeForCardDetails1 = FocusNode();
   final FocusNode focusNodeForCardDetails2 = FocusNode();
@@ -189,7 +192,7 @@ class JobCardController extends GetxController {
   final FocusNode focusNodeForCardDetails12 = FocusNode();
   final FocusNode focusNodeForCardDetails13 = FocusNode();
   final FocusNode focusNodeForCardDetails14 = FocusNode();
-  
+
   final FocusNode focusNodeForCustomerDetails1 = FocusNode();
   final FocusNode focusNodeForCustomerDetails2 = FocusNode();
   final FocusNode focusNodeForCustomerDetails3 = FocusNode();
@@ -198,13 +201,10 @@ class JobCardController extends GetxController {
   final FocusNode focusNodeForCustomerDetails6 = FocusNode();
   final FocusNode focusNodeForCustomerDetails7 = FocusNode();
   final FocusNode focusNodeForCustomerDetails8 = FocusNode();
-  
+
   final FocusNode focusNodeForItemsDetails1 = FocusNode();
   final FocusNode focusNodeForItemsDetails2 = FocusNode();
   final FocusNode focusNodeForItemsDetails3 = FocusNode();
-
-  
-
 
   @override
   void onInit() async {
@@ -290,7 +290,10 @@ class JobCardController extends GetxController {
         Map jobStatus = await getCurrentJobCardStatus(curreentJobCardId.value);
         String status1 = jobStatus['job_status_1'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new jobs can be edited');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new jobs can be edited',
+          );
           return;
         }
       }
@@ -357,7 +360,10 @@ class JobCardController extends GetxController {
         try {
           newData['job_date'] = convertDateToIson(rawDate);
         } catch (e) {
-          showSnackBar('Alert', 'Please enter valid job date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please enter valid job date',
+          );
         }
       } else {
         newData['job_date'] = null;
@@ -368,7 +374,10 @@ class JobCardController extends GetxController {
         try {
           newData['invoice_date'] = convertDateToIson(rawDate2);
         } catch (e) {
-          showSnackBar('Alert', 'Please enter valid invoice date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please enter valid invoice date',
+          );
         }
       } else {
         newData['invoice_date'] = null;
@@ -379,7 +388,6 @@ class JobCardController extends GetxController {
       Uri addingJobUrl = Uri.parse('$backendUrl/job_cards/add_new_job_card');
 
       if (jobCardAdded.isFalse && curreentJobCardId.isEmpty) {
-        showSnackBar('Adding', 'Please Wait');
         newData['job_status_1'] = 'New';
         newData['job_status_2'] = 'New';
         final response = await http.post(
@@ -403,7 +411,7 @@ class JobCardController extends GetxController {
           isJobInvoicesModified.value = false;
           isJobModified.value = false;
           canAddInternalNotesAndInvoiceItems.value = true;
-          showSnackBar('Done', 'Job Added Successfully');
+          allJobCards.insert(0, newJob);
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -415,9 +423,7 @@ class JobCardController extends GetxController {
           logout();
         }
       } else {
-        if (isJobInvoicesModified.isTrue || isJobModified.isTrue) {
-          showSnackBar('Updating', 'Please Wait');
-        }
+        if (isJobInvoicesModified.isTrue || isJobModified.isTrue) {}
         if (isJobModified.isTrue) {
           Uri updatingJobUrl = Uri.parse(
             '$backendUrl/job_cards/update_job_card/${curreentJobCardId.value}',
@@ -433,7 +439,15 @@ class JobCardController extends GetxController {
             body: jsonEncode(newDataToUpdate),
           );
           if (response.statusCode == 200) {
-            showSnackBar('Done', 'Updated Successfully');
+            final decoded = jsonDecode(response.body);
+            JobCardModel updatedJob = JobCardModel.fromJson(
+              decoded['job_card'],
+            );
+            invoiceCounter.value.text = updatedJob.invoiceNumber ?? '';
+            int ind = allJobCards.indexWhere((job) => job.id == updatedJob.id);
+            if (ind != -1) {
+              allJobCards[ind] = updatedJob;
+            }
             isJobModified.value = false;
           } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
             final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -493,7 +507,6 @@ class JobCardController extends GetxController {
                 }
               }
             }
-            showSnackBar('Done', 'Updated Successfully');
             isJobInvoicesModified.value = false;
           } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
             final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -509,7 +522,10 @@ class JobCardController extends GetxController {
       }
       addingNewValue.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       addingNewValue.value = false;
     }
   }
@@ -530,16 +546,15 @@ class JobCardController extends GetxController {
         allJobCards.removeWhere((job) => job.id == deletedJobId);
         numberOfJobs.value -= 1;
         Get.close(2);
-        showSnackBar('Success', 'Job card deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
         final decoded =
             jsonDecode(response.body) ?? 'Failed to delete job card';
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'] ?? 'Only New Job Cards Allowed';
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -551,12 +566,19 @@ class JobCardController extends GetxController {
         final decoded = jsonDecode(response.body);
         final error =
             decoded['detail'] ?? 'Server error while deleting job card';
-        showSnackBar('Server Error', error);
+        alertMessage(
+          title: 'Server Error',
+          context: Get.context!,
+          content: error,
+        );
       } else if (response.statusCode == 401) {
         logout();
       }
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -720,11 +742,13 @@ class JobCardController extends GetxController {
       Map jobStatus = await getCurrentJobCardStatus(id);
       final status1 = jobStatus['job_status_1'];
       if (status1 == 'New' || status1 == 'Approved' || status1 == 'Ready') {
-        showSnackBar('Alert', 'Only Posted / Cancelled Jobs Can be Copied');
+        alertMessage(
+          context: Get.context!,
+          content: 'Only Posted / Cancelled Jobs Can be Copied',
+        );
         return;
       }
       Get.back();
-      showSnackBar('Copying', 'Please Wait');
 
       loadingCopyJob.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -744,11 +768,11 @@ class JobCardController extends GetxController {
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -763,7 +787,10 @@ class JobCardController extends GetxController {
       loadingCopyJob.value = false;
     } catch (e) {
       loadingCopyJob.value = false;
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -789,11 +816,11 @@ class JobCardController extends GetxController {
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -806,7 +833,10 @@ class JobCardController extends GetxController {
       }
       isJobInternalNotesLoading.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       isJobInternalNotesLoading.value = false;
     }
   }
@@ -855,11 +885,11 @@ class JobCardController extends GetxController {
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -872,21 +902,27 @@ class JobCardController extends GetxController {
       }
       addingNewInternalNotProcess.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       addingNewInternalNotProcess.value = false;
     }
   }
 
   Future<void> createQuotationCard(String id) async {
     try {
+      creatingNewQuotation.value = true;
       Map quotationStatus = await getCurrentJobCardStatus(id);
       final status1 = quotationStatus['job_status_1'];
       if (status1 != 'Posted') {
-        showSnackBar('Alert', 'Only Posted Jobs Allowed');
+        alertMessage(
+          context: Get.context!,
+          content: 'Only Posted Jobs Allowed',
+        );
+        creatingNewQuotation.value = false;
         return;
       }
-      creatingNewQuotation.value = true;
-      showSnackBar('Creating', 'Please wait');
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -901,21 +937,25 @@ class JobCardController extends GetxController {
         },
       );
       if (response.statusCode == 200) {
-        showSnackBar('Done', 'Quotation created successfully');
+        alertMessage(
+          title: 'Done',
+          context: Get.context!,
+          content: 'Only Posted Jobs Allowed',
+        );
         final decoded = jsonDecode(response.body);
         quotationCounter.value = decoded['quotation_number'];
         quotationId.value = decoded['quotation_card_id'];
       } else if (response.statusCode == 409) {
         final decoded = jsonDecode(response.body);
-        showSnackBar('Alert', decoded['detail']);
+        alertMessage(context: Get.context!, content: decoded['detail']);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -929,13 +969,74 @@ class JobCardController extends GetxController {
       creatingNewQuotation.value = false;
     } catch (e) {
       creatingNewQuotation.value = false;
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> createReceipt(String jobId, String customerId) async {
+    try {
+      creatingNewReceipt.value = true;
+      Map quotationStatus = await getCurrentJobCardStatus(jobId);
+      final status1 = quotationStatus['job_status_1'];
+      if (status1 != 'Posted') {
+        alertMessage(
+          context: Get.context!,
+          content: 'Only Posted Jobs Allowed',
+        );
+        creatingNewReceipt.value = false;
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/ar_receipts/create_receipt_for_job_card/$jobId/$customerId',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'multipart/form-data',
+        },
+      );
+      if (response.statusCode == 200) {
+        CashManagementReceiptsController receiptController = Get.put(
+          CashManagementReceiptsController(),
+        );
+        final decoded = jsonDecode(response.body);
+        ARReceiptsModel receipt = ARReceiptsModel.fromJson(decoded['receipt']);
+        await receiptController.loadValuesForReceipts(receipt);
+        await editReceipt(receiptController, receipt.id ?? '');
+      } else if (response.statusCode == 422) {
+        final decoded = jsonDecode(response.body);
+        alertMessage(context: Get.context!, content: decoded['detail']);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await createReceipt(jobId, customerId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      creatingNewReceipt.value = false;
+    } catch (e) {
+      creatingNewReceipt.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
   Future<void> editApproveForJobCard(String jobId, String status) async {
     if (jobStatus1.value.isEmpty) {
-      showSnackBar('Alert', 'Please Save The Job First');
+      alertMessage(context: Get.context!, content: 'Please Save The Job First');
       return;
     }
     Map jobStatus = await getCurrentJobCardStatus(jobId);
@@ -945,12 +1046,13 @@ class JobCardController extends GetxController {
       approvalDate.value.text = textToDate(DateTime.now());
       jobStatus2.value = 'Approved';
       isJobModified.value = true;
+      addNewJobCard();
     } else if (status2 == 'Approved') {
-      showSnackBar('Alert', 'Job is Already Approved');
+      alertMessage(context: Get.context!, content: 'Job is Already Approved');
     } else if (status1 == 'Posted') {
-      showSnackBar('Alert', 'Job is Posted');
+      alertMessage(context: Get.context!, content: 'Job is Posted');
     } else if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'Job is Cancelled');
+      alertMessage(context: Get.context!, content: 'Job is Cancelled');
     }
   }
 
@@ -1034,11 +1136,11 @@ class JobCardController extends GetxController {
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -1516,7 +1618,7 @@ class JobCardController extends GetxController {
 
   Future<void> editReadyForJobCard(String jobId, String status) async {
     if (jobStatus1.value.isEmpty) {
-      showSnackBar('Alert', 'Please Save The Job First');
+      alertMessage(context: Get.context!, content: 'Please Save The Job First');
       return;
     }
     Map jobStatus = await getCurrentJobCardStatus(jobId);
@@ -1526,18 +1628,19 @@ class JobCardController extends GetxController {
       jobStatus2.value = 'Ready';
       finishDate.value.text = textToDate(DateTime.now());
       isJobModified.value = true;
+      addNewJobCard();
     } else if (status2 == 'Ready') {
-      showSnackBar('Alert', 'Job is Already Ready');
+      alertMessage(context: Get.context!, content: 'Job is Already Ready');
     } else if (status1 == 'Posted') {
-      showSnackBar('Alert', 'Job is Posted');
+      alertMessage(context: Get.context!, content: 'Job is Posted');
     } else if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'Job is Cancelled');
+      alertMessage(context: Get.context!, content: 'Job is Cancelled');
     }
   }
 
   Future<void> editNewForJobCard(String jobId, String status) async {
     if (jobStatus1.value.isEmpty) {
-      showSnackBar('Alert', 'Please Save The Job First');
+      alertMessage(context: Get.context!, content: 'Please Save The Job First');
       return;
     }
     Map jobStatus = await getCurrentJobCardStatus(jobId);
@@ -1549,67 +1652,84 @@ class JobCardController extends GetxController {
       jobStatus2.value = status;
       jobStatus1.value = status;
       isJobModified.value = true;
+      await addNewJobCard();
     } else if (status2 == 'New') {
-      showSnackBar('Alert', 'Job is Already New');
+      alertMessage(context: Get.context!, content: 'Job is Already New');
     } else if (status1 == 'Cancelled') {
-      // showSnackBar('Alert', 'Job is Cancelled');
       finishDate.value.text = '';
       approvalDate.value.text = '';
       jobStatus2.value = status;
       jobStatus1.value = status;
       isJobModified.value = true;
     } else if (status1 == 'Posted') {
-      showSnackBar('Alert', 'Job is Posted');
+      alertMessage(context: Get.context!, content: 'Job is Posted');
     }
   }
 
   Future<void> editCancelForJobCard(String jobId, String status) async {
     if (jobStatus1.value.isEmpty) {
-      showSnackBar('Alert', 'Please Save The Job First');
+      alertMessage(context: Get.context!, content: 'Please Save The Job First');
       return;
     }
     Map jobStatus = await getCurrentJobCardStatus(jobId);
     String status1 = jobStatus['job_status_1'];
     String status2 = jobStatus['job_status_2'];
     if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'Job is Already Cancelled');
+      alertMessage(context: Get.context!, content: 'Job is Already Cancelled');
     } else if (status1 == 'Posted') {
-      showSnackBar('Alert', 'Job is Posted');
+      alertMessage(context: Get.context!, content: 'Job is Posted');
     } else if (status1 != 'Cancelled' &&
         status2 != 'Cancelled' &&
         status1 != '') {
-      jobCancelationDate.value.text = textToDate(DateTime.now());
-      jobStatus1.value = status;
-      jobStatus2.value = status;
-      isJobModified.value = true;
+      alertDialog(
+        context: Get.context!,
+        content: 'Are you sure you want to cancel this job card?',
+        onPressed: () async {
+          jobCancelationDate.value.text = textToDate(DateTime.now());
+          jobStatus1.value = status;
+          jobStatus2.value = status;
+          isJobModified.value = true;
+          await addNewJobCard();
+        },
+      );
     }
   }
 
   Future<void> editPostForJobCard(String jobId) async {
     if (jobStatus1.value.isEmpty) {
-      showSnackBar('Alert', 'Please Save The Job First');
+      alertMessage(context: Get.context!, content: 'Please Save The Job First');
       return;
     }
     Map jobStatus = await getCurrentJobCardStatus(jobId);
     String status1 = jobStatus['job_status_1'];
     if (status1 == 'Posted') {
-      showSnackBar('Alert', 'Job is Already Posted');
+      alertMessage(context: Get.context!, content: 'Job is Already Posted');
     } else if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'Job is Cancelled');
+      alertMessage(context: Get.context!, content: 'Job is Cancelled');
     } else if (jobWarrentyEndDate.value.text.isEmpty &&
         status1.isNotEmpty &&
         status1 != 'Cancelled' &&
         status1 != 'Posted') {
-      showSnackBar('Alert', 'You Must Enter Warranty End Date First');
+      alertMessage(
+        context: Get.context!,
+        content: 'You Must Enter Warranty End Date First',
+      );
     } else {
-      // controllerr.editPostForJobCard(jobId);
-      if (isBeforeToday(jobWarrentyEndDate.value.text)) {
-        jobStatus2.value = 'Closed';
-      } else {
-        jobStatus2.value = 'Warranty';
-      }
-      jobStatus1.value = 'Posted';
-      isJobModified.value = true;
+      alertDialog(
+        context: Get.context!,
+        content: 'Are you sure you want to post this job card?',
+        onPressed: () async {
+          if (isBeforeToday(jobWarrentyEndDate.value.text)) {
+            jobStatus2.value = 'Closed';
+          } else {
+            jobStatus2.value = 'Warranty';
+          }
+          jobStatus1.value = 'Posted';
+          isJobModified.value = true;
+          Get.back();
+          await addNewJobCard();
+        },
+      );
     }
   }
 

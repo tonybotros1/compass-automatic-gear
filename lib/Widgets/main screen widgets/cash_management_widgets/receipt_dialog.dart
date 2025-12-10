@@ -6,7 +6,6 @@ import '../../text_button.dart';
 import 'add_new_receipt_or_edit.dart';
 
 Future<dynamic> receiptDialog({
-  required BoxConstraints constraints,
   required CashManagementReceiptsController controller,
   required void Function()? onPressedForSave,
   required void Function()? onPressedForPost,
@@ -41,6 +40,7 @@ Future<dynamic> receiptDialog({
                       style: fontStyleForScreenNameUsedInButtons,
                     ),
                     GetX<CashManagementReceiptsController>(
+                      init: CashManagementReceiptsController(),
                       builder: (controller) {
                         return controller.status.value != ''
                             ? statusBox(controller.status.value)
