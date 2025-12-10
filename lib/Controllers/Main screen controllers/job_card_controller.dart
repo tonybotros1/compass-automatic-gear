@@ -1656,11 +1656,13 @@ class JobCardController extends GetxController {
     } else if (status2 == 'New') {
       alertMessage(context: Get.context!, content: 'Job is Already New');
     } else if (status1 == 'Cancelled') {
-      finishDate.value.text = '';
-      approvalDate.value.text = '';
-      jobStatus2.value = status;
-      jobStatus1.value = status;
-      isJobModified.value = true;
+      alertMessage(context: Get.context!, content: 'Job is Cancelled');
+
+      // finishDate.value.text = '';
+      // approvalDate.value.text = '';
+      // jobStatus2.value = status;
+      // jobStatus1.value = status;
+      // isJobModified.value = true;
     } else if (status1 == 'Posted') {
       alertMessage(context: Get.context!, content: 'Job is Posted');
     }
@@ -1689,6 +1691,7 @@ class JobCardController extends GetxController {
           jobStatus1.value = status;
           jobStatus2.value = status;
           isJobModified.value = true;
+          Get.back();
           await addNewJobCard();
         },
       );
