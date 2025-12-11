@@ -78,7 +78,10 @@ class CashManagementPaymentsController extends CashManagementBaseController {
       } else {}
       loadingInvoices.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       loadingInvoices.value = false;
     }
   }
@@ -91,7 +94,10 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         );
         String status1 = currentPaymentStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new payments can be edited');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new payments can be edited',
+          );
           return;
         }
       }
@@ -120,7 +126,10 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         try {
           newData['payment_date'] = convertDateToIson(rawDate);
         } catch (e) {
-          showSnackBar('Alert', 'Please Enter Valid Receipt Date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please Enter Valid Receipt Date',
+          );
           return;
         }
       }
@@ -129,7 +138,10 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         try {
           newData['cheque_date'] = convertDateToIson(rawDate2);
         } catch (e) {
-          showSnackBar('Alert', 'Please Enter Valid Cheque Date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please Enter Valid Receipt Date',
+          );
           return;
         }
       }
@@ -138,7 +150,6 @@ class CashManagementPaymentsController extends CashManagementBaseController {
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
 
       if (currentPaymentID.isEmpty) {
-        showSnackBar('Adding', 'Please Wait');
         newData['status'] = 'New';
 
         Uri url = Uri.parse('$backendUrl/ap_payments/add_new_payment');
@@ -166,7 +177,6 @@ class CashManagementPaymentsController extends CashManagementBaseController {
             element.isModified = null;
           }
           isPaymentInvoicesModified.value = false;
-          showSnackBar('Done', 'Added Successfully');
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -182,7 +192,6 @@ class CashManagementPaymentsController extends CashManagementBaseController {
           http.Response? responseForEditingPayment;
           http.Response? responseForEditingPaymentInvoices;
 
-          showSnackBar('Updating', 'Please Wait');
           if (isPaymentModified.isTrue) {
             Uri updatingJobUrl = Uri.parse(
               '$backendUrl/ap_payments/update_ap_payment/${currentPaymentID.value}',
@@ -215,7 +224,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
           }
           if (isPaymentInvoicesModified.isTrue) {
             Uri updatingPaymentInvoicesUrl = Uri.parse(
-              '$backendUrl/ap_payment/update_payment_invoices',
+              '$backendUrl/ap_payments/update_payment_invoices',
             );
             responseForEditingPaymentInvoices = await http.patch(
               updatingPaymentInvoicesUrl,
@@ -239,31 +248,54 @@ class CashManagementPaymentsController extends CashManagementBaseController {
               final decoded = jsonDecode(
                 responseForEditingPaymentInvoices.body,
               );
-              List updatedItems = decoded['updated_items'];
-              List deletedItems = decoded['deleted_items'];
-              if (deletedItems.isNotEmpty) {
-                for (var id in deletedItems) {
-                  selectedAvailablePayments.removeWhere(
-                    (item) => item.id == id,
-                  );
-                }
+              APPaymentModel updatedPayment = APPaymentModel.fromJson(
+                decoded['payment'],
+              );
+              selectedAvailablePayments.assignAll(
+                updatedPayment.invoicesDetails ?? [],
+              );
+              for (var element in selectedAvailablePayments) {
+                element.isAdded = null;
+                element.isDeleted = null;
+                element.isModified = null;
               }
-              if (updatedItems.isNotEmpty) {
-                for (var item in updatedItems) {
-                  var jobId = item['ap_invoice_id'];
-                  var id = item['_id'];
-                  final localIndex = selectedAvailablePayments.indexWhere(
-                    (item) => item.jobId == jobId,
-                  );
+              if (vendorNameId.value != '') {
+                outstanding.clear();
+                outstanding.value = formatter.formatEditUpdate(
+                  outstanding.value,
+                  TextEditingValue(
+                    text: await calculateVendorOutstanding(vendorNameId.value)
+                        .then((value) {
+                          return value.toString();
+                        }),
+                  ),
+                );
+              }
+              // List updatedItems = decoded['updated_items'];
+              // List deletedItems = decoded['deleted_items'];
+              // if (deletedItems.isNotEmpty) {
+              //   for (var id in deletedItems) {
+              //     selectedAvailablePayments.removeWhere(
+              //       (item) => item.id == id,
+              //     );
+              //   }
+              // }
+              // if (updatedItems.isNotEmpty) {
+              //   for (var item in updatedItems) {
+              //     var jobId = item['ap_invoice_id'];
+              //     var id = item['_id'];
+              //     final localIndex = selectedAvailablePayments.indexWhere(
+              //       (item) => item.jobId == jobId,
+              //     );
 
-                  if (localIndex != -1) {
-                    selectedAvailablePayments[localIndex].id = id;
-                    selectedAvailablePayments[localIndex].isAdded = false;
-                    selectedAvailablePayments[localIndex].isModified = false;
-                    selectedAvailablePayments[localIndex].isDeleted = false;
-                  }
-                }
-              }
+              //     if (localIndex != -1) {
+              //       selectedAvailablePayments[localIndex].id = id;
+              //       selectedAvailablePayments[localIndex].isAdded = false;
+              //       selectedAvailablePayments[localIndex].isModified = false;
+              //       selectedAvailablePayments[localIndex].isDeleted = false;
+              //     }
+              //   }
+              // }
               isPaymentInvoicesModified.value = false;
             } else if (responseForEditingPaymentInvoices.statusCode == 401 &&
                 refreshToken.isNotEmpty) {
@@ -277,24 +309,25 @@ class CashManagementPaymentsController extends CashManagementBaseController {
               logout();
             }
           }
-          if ((responseForEditingPaymentInvoices?.statusCode == 200) ||
-              (responseForEditingPayment?.statusCode == 200)) {
-            showSnackBar('Done', 'Updated Successfully');
-          }
+          // if ((responseForEditingPaymentInvoices?.statusCode == 200) ||
+          //     (responseForEditingPayment?.statusCode == 200)) {
+          //   showSnackBar('Done', 'Updated Successfully');
+          // }
         }
       }
 
       addingNewValue.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       addingNewValue.value = false;
     }
   }
 
-  
   Future<void> deletePayment(String id) async {
     try {
-     
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -309,16 +342,14 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         allPayements.removeWhere((job) => job.id == deletedpaymentId);
         numberOfPayments.value -= 1;
         Get.close(2);
-        showSnackBar('Success', 'Payment deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
-        final decoded =
-            jsonDecode(response.body) ?? 'Failed to delete payment';
+        final decoded = jsonDecode(response.body) ?? 'Failed to delete payment';
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'] ?? 'Only New Payments Allowed';
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -330,15 +361,17 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         final decoded = jsonDecode(response.body);
         final error =
             decoded['detail'] ?? 'Server error while deleting payment';
-        showSnackBar('Server Error', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401) {
         logout();
       }
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
-
 
   void filterSearch() async {
     Map<String, dynamic> body = {};
@@ -439,6 +472,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         if (idx != -1) {
           final existing = selectedAvailablePayments[idx];
           existing
+            ..paymentAmount = existing.outstandingAmount
             ..paymentId = currentPaymentID.value
             ..isDeleted = false
             ..isAdded = true
@@ -446,12 +480,14 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         }
 
         payment
+          ..paymentAmount = payment.outstandingAmount
           ..paymentId = currentPaymentID.value
           ..isDeleted = false
           ..isAdded = true
           ..isSelected = true;
       } else {
         payment
+          ..paymentAmount = payment.outstandingAmount
           ..paymentId = currentPaymentID.value
           ..isAdded = true
           ..isSelected = true

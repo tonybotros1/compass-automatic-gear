@@ -165,7 +165,7 @@ class QuotationCardController extends GetxController {
       RxList<InternalNotesModel>([]);
   CarBrandsController carBrandsController = Get.put(CarBrandsController());
   CountriesController countriesController = Get.put(CountriesController());
-ListOfValuesController listOfValuesController = Get.put(
+  ListOfValuesController listOfValuesController = Get.put(
     ListOfValuesController(),
   );
 
@@ -241,7 +241,10 @@ ListOfValuesController listOfValuesController = Get.put(
         );
         String status1 = jobStatus['quotation_status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new quotation can be edited');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new quotation can be edited',
+          );
           return;
         }
       }
@@ -291,7 +294,10 @@ ListOfValuesController listOfValuesController = Get.put(
         try {
           newData['quotation_date'] = convertDateToIson(rawDate);
         } catch (e) {
-          showSnackBar('Alert', 'Please enter valid job date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please enter valid job date',
+          );
         }
       }
 
@@ -303,7 +309,6 @@ ListOfValuesController listOfValuesController = Get.put(
       );
 
       if (quotationCardAdded.isFalse && curreentQuotationCardId.isEmpty) {
-        showSnackBar('Adding', 'Please Wait');
         newData['quotation_status'] = 'New';
         final response = await http.post(
           addingJobUrl,
@@ -326,7 +331,6 @@ ListOfValuesController listOfValuesController = Get.put(
           allInvoiceItems.value = newQuotation.invoiceItemsDetails ?? [];
           isQuotationInvoicesModified.value = false;
           isQuotationModified.value = false;
-          showSnackBar('Done', 'Quotation Added Successfully');
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -338,9 +342,6 @@ ListOfValuesController listOfValuesController = Get.put(
           logout();
         }
       } else {
-        if (isQuotationInvoicesModified.isTrue || isQuotationModified.isTrue) {
-          showSnackBar('Updating', 'Please Wait');
-        }
         if (isQuotationModified.isTrue) {
           Uri updatingJobUrl = Uri.parse(
             '$backendUrl/quotation_cards/update_quotation_card/$curreentQuotationCardId',
@@ -356,7 +357,6 @@ ListOfValuesController listOfValuesController = Get.put(
             body: jsonEncode(newDataToUpdate),
           );
           if (response.statusCode == 200) {
-            showSnackBar('Done', 'Updated Successfully');
             isQuotationModified.value = false;
           } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
             final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -416,7 +416,6 @@ ListOfValuesController listOfValuesController = Get.put(
                 }
               }
             }
-            showSnackBar('Done', 'Updated Successfully');
             isQuotationInvoicesModified.value = false;
           } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
             final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -433,7 +432,10 @@ ListOfValuesController listOfValuesController = Get.put(
       canAddInternalNotesAndInvoiceItems.value = true;
       addingNewValue.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       addingNewValue.value = false;
     }
   }
@@ -519,16 +521,15 @@ ListOfValuesController listOfValuesController = Get.put(
         allQuotationCards.removeWhere((job) => job.id == deletedQuotationId);
         numberOfQuotations.value -= 1;
         Get.close(2);
-        showSnackBar('Success', 'Quotation card deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
         final decoded =
             jsonDecode(response.body) ?? 'Failed to delete quotation card';
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'] ?? 'Only New Quotation Cards Allowed';
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -540,27 +541,36 @@ ListOfValuesController listOfValuesController = Get.put(
         final decoded = jsonDecode(response.body);
         final error =
             decoded['detail'] ?? 'Server error while deleting job card';
-        showSnackBar('Server Error', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401) {
         logout();
       }
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
   Future<void> editPostForQuotation(String id) async {
     if (quotationStatus.value.isEmpty) {
-      showSnackBar('Alert', 'Please save the quotation first');
+      alertMessage(
+        context: Get.context!,
+        content: 'Please save the quotation first',
+      );
       return;
     }
 
     Map currentQuotationStatus = await getCurrentQuotationCardStatus(id);
     String qstatus = currentQuotationStatus['quotation_status'];
     if (qstatus == 'Posted') {
-      showSnackBar('Alert', 'Quotation is Already Posted');
+      alertMessage(
+        context: Get.context!,
+        content: 'Quotation is Already Posted',
+      );
     } else if (qstatus == 'Cancelled') {
-      showSnackBar('Alert', 'Quotation is Cancelled');
+      alertMessage(context: Get.context!, content: 'Quotation is Cancelled');
     } else {
       quotationStatus.value = 'Posted';
       isQuotationModified.value = true;
@@ -569,15 +579,22 @@ ListOfValuesController listOfValuesController = Get.put(
 
   Future<void> editCancelForQuotation(String id) async {
     if (quotationStatus.value.isEmpty) {
-      showSnackBar('Alert', 'Please Save The Quotation First');
+      alertMessage(
+        context: Get.context!,
+        content: 'Please Save The Quotation First',
+      );
+
       return;
     }
     Map currentQuotationStatus = await getCurrentQuotationCardStatus(id);
     String status1 = currentQuotationStatus['quotation_status'];
     if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'Quotation is Already Cancelled');
+      alertMessage(
+        context: Get.context!,
+        content: 'Quotation is Already Cancelled',
+      );
     } else if (status1 == 'Posted') {
-      showSnackBar('Alert', 'Quotation is Posted');
+      alertMessage(context: Get.context!, content: 'Quotation is Posted');
     } else {
       quotationStatus.value = 'Cancelled';
       isQuotationModified.value = true;
@@ -682,14 +699,14 @@ ListOfValuesController listOfValuesController = Get.put(
       Map quotationStatus = await getCurrentQuotationCardStatus(id);
       final status1 = quotationStatus['quotation_status'];
       if (status1 == 'New' || status1 == 'Approved' || status1 == 'Ready') {
-        showSnackBar(
-          'Alert',
-          'Only Posted / Cancelled Quotations Can be Copied',
+        alertMessage(
+          context: Get.context!,
+          content: 'Only Posted / Cancelled Quotations Can be Copied',
         );
+
         return;
       }
       Get.back();
-      showSnackBar('Copying', 'Please Wait');
 
       loadingCopyQuotation.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -713,11 +730,11 @@ ListOfValuesController listOfValuesController = Get.put(
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -732,7 +749,10 @@ ListOfValuesController listOfValuesController = Get.put(
       loadingCopyQuotation.value = false;
     } catch (e) {
       loadingCopyQuotation.value = false;
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -758,11 +778,11 @@ ListOfValuesController listOfValuesController = Get.put(
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -775,7 +795,10 @@ ListOfValuesController listOfValuesController = Get.put(
       }
       isQuotationInternalNotesLoading.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       isQuotationInternalNotesLoading.value = false;
     }
   }
@@ -821,11 +844,11 @@ ListOfValuesController listOfValuesController = Get.put(
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -838,7 +861,10 @@ ListOfValuesController listOfValuesController = Get.put(
       }
       addingNewInternalNotProcess.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       addingNewInternalNotProcess.value = false;
     }
   }
@@ -848,11 +874,13 @@ ListOfValuesController listOfValuesController = Get.put(
       Map quotationStatus = await getCurrentQuotationCardStatus(id);
       final status1 = quotationStatus['quotation_status'];
       if (status1 != 'Posted') {
-        showSnackBar('Alert', 'Only Posted Quotations Allowed');
+        alertMessage(
+          context: Get.context!,
+          content: 'Only Posted Quotations Allowed',
+        );
         return;
       }
       creatingNewJob.value = true;
-      showSnackBar('Creating', 'Please wait');
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -867,22 +895,20 @@ ListOfValuesController listOfValuesController = Get.put(
         },
       );
       if (response.statusCode == 200) {
-        showSnackBar('Done', 'Job created successfully');
         final decoded = jsonDecode(response.body);
         jobCardCounter.value = decoded['job_number'];
         jobCardId.value = decoded['job_card_id'];
       } else if (response.statusCode == 409) {
         final decoded = jsonDecode(response.body);
-
-        showSnackBar('Alert', decoded['detail']);
+        alertMessage(context: Get.context!, content: decoded['detail']);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -896,7 +922,10 @@ ListOfValuesController listOfValuesController = Get.put(
       creatingNewJob.value = false;
     } catch (e) {
       creatingNewJob.value = false;
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -933,11 +962,11 @@ ListOfValuesController listOfValuesController = Get.put(
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 404) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

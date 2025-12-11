@@ -31,6 +31,8 @@ class VendorPaymentsModel extends BaseModelForReceiptsAndPayments {
       isSelected: json['is_selected'] == true,
       apInvoiceId: json['ap_invoice_id']?.toString() ?? '',
       invoiceDate: json['invoice_date']?.toString() ?? '',
+      paymentId:json.containsKey('payment_id') ? json['payment_id'] ?? '' : "",
+
       invoiceAmount:
           double.tryParse(json['invoice_amount']?.toString() ?? '') ?? 0,
       paymentAmount:
