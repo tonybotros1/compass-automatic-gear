@@ -12,6 +12,7 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
       spacing: 10,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           spacing: 10,
           children: [
             myTextFormFieldWithBorder(
@@ -44,6 +45,15 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
               onChanged: (_) {
                 controller.isJobModified.value = true;
               },
+            ),
+            Container(
+              height: 35,
+              width: 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.grey),
+                color: Colors.white,
+              ),
             ),
           ],
         ),

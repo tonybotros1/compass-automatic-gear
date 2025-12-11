@@ -140,7 +140,8 @@ class JobCardController extends GetxController {
   TextEditingController discount = TextEditingController();
   TextEditingController total = TextEditingController();
   TextEditingController vat = TextEditingController();
-  RxString currentCountryVAT = RxString('');
+  // RxString currentCountryVAT = RxString('');
+  RxDouble currentCountryVAT = RxDouble(0.0);
   TextEditingController net = TextEditingController();
   CardsScreenController controller = Get.put(CardsScreenController());
   RxBool openingQuotationCardScreen = RxBool(false);
@@ -212,6 +213,13 @@ class JobCardController extends GetxController {
   final FocusNode focusNodeForItemsDetails1 = FocusNode();
   final FocusNode focusNodeForItemsDetails2 = FocusNode();
   final FocusNode focusNodeForItemsDetails3 = FocusNode();
+
+  RxMap allStatus = RxMap({
+    '1': {'name': 'New'},
+    '2': {'name': 'Posted'},
+    '3': {'name': 'Cancelled'},
+    '4': {'name': 'Draft'},
+  });
 
   @override
   void onInit() async {
@@ -1214,11 +1222,8 @@ class JobCardController extends GetxController {
     amount.text = (currwnQquanity * currentPrice).toStringAsFixed(2);
     total.text = (double.tryParse(amount.text)! - currentDiscount)
         .toStringAsFixed(2);
-    vat.text =
-        ((double.tryParse(total.text))! *
-                (double.parse(currentCountryVAT.value)) /
-                100)
-            .toStringAsFixed(2);
+    vat.text = ((double.tryParse(total.text))! * currentCountryVAT.value / 100)
+        .toStringAsFixed(2);
     net.text = (double.tryParse(total.text)! + double.tryParse(vat.text)!)
         .toStringAsFixed(2);
   }
@@ -1227,8 +1232,7 @@ class JobCardController extends GetxController {
     if (net.text.isEmpty) net.text = '0';
     if (net.text != '0') {
       total.text =
-          (double.tryParse(net.text)! /
-                  (1 + double.tryParse(currentCountryVAT.value)! / 100))
+          (double.tryParse(net.text)! / (1 + currentCountryVAT.value / 100))
               .toStringAsFixed(2);
       amount.text =
           (double.tryParse(total.text)! + double.tryParse(discount.text)!)
@@ -1237,9 +1241,7 @@ class JobCardController extends GetxController {
           (double.tryParse(amount.text)! / double.tryParse(quantity.text)!)
               .toStringAsFixed(2);
       vat.text =
-          ((double.tryParse(total.text))! *
-                  (double.parse(currentCountryVAT.value)) /
-                  100)
+          ((double.tryParse(total.text))! * (currentCountryVAT.value) / 100)
               .toStringAsFixed(2);
     }
 
@@ -1263,9 +1265,17 @@ class JobCardController extends GetxController {
 
   void clearValues() {
     quotationId.value = '';
-    currentCountryVAT.value = companyDetails.containsKey('country_vat')
-        ? companyDetails['country_vat'].toString()
-        : "";
+    currentCountryVAT.value =
+        (companyDetails['vat_percentage'] != null
+            ? companyDetails['vat_percentage'] * 100
+            : null) ??
+        companyDetails['country_vat'] ??
+        0;
+
+    print(currentCountryVAT.value);
+    // currentCountryVAT.value = companyDetails.containsKey('country_vat')
+    //     ? companyDetails['country_vat'].toString()
+    //     : "";
     country.text = companyDetails.containsKey('country')
         ? companyDetails['country'] ?? ""
         : "";

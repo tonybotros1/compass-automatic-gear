@@ -13,8 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://127.0.0.1:8000';
-String webSocketURL = "ws://localhost:8000/ws";
+String backendTestURI = 'http://192.168.1.105:8000';
+String webSocketURL = "ws://192.168.1.105:8000/ws";
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -668,7 +668,7 @@ Future<dynamic> alertDialog({
   );
 }
 
-Future<dynamic> alertMessage( {
+Future<dynamic> alertMessage({
   required BuildContext context,
   required String content,
   String? title,
@@ -896,6 +896,10 @@ Container statusBox(
           ? const Color(0xff7886C7)
           : status == 'Closed' || status == 'Warranty'
           ? Colors.black
+          : status == 'Returned'
+          ? Colors.redAccent
+          : status == 'Draft'
+          ? Colors.blueGrey
           : Colors.brown,
     ),
     height: hieght,

@@ -140,7 +140,9 @@ class CompanyVariablesController extends GetxController {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          'vat_percentage': (double.tryParse(vatPercentage.text) ?? 0) / 100,
+          'vat_percentage': vatPercentage.text.isNotEmpty
+              ? (double.tryParse(vatPercentage.text) ?? 0) / 100
+              : null,
           'incentive_percentage':
               (double.tryParse(incentivePercentage.text) ?? 0) / 100,
           'tax_number': taxNumber.text,

@@ -1,4 +1,5 @@
 import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
+import 'package:datahubai/Widgets/filter_button.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -175,76 +176,46 @@ class QuotationCard extends StatelessWidget {
                               );
                             },
                           ),
-                          // ElevatedButton(
-                          //   style: allButtonStyle,
-                          //   onPressed: () {
-                          //     controller.clearAllFilters();
-                          //     controller.isAllSelected.value = true;
-                          //     controller.isTodaySelected.value = false;
-                          //     controller.isThisMonthSelected.value =
-                          //         false;
-                          //     controller.isThisYearSelected.value = false;
-                          //     controller.carBrand.clear();
-                          //     controller.carModel.clear();
-                          //     controller.carBrandId.value = '';
-                          //     controller.carModelId.value = '';
-                          //     controller.allModels.clear();
-                          //     controller.searchEngine({"all": true});
-                          //   },
-                          //   child: const Text('All'),
-                          // ),
-                          ElevatedButton(
-                            style: todayButtonStyle,
-                            onPressed: controller.isTodaySelected.isFalse
-                                ? () {
-                                    controller.isAllSelected.value = false;
-                                    controller.isTodaySelected.value = true;
-                                    controller.isThisMonthSelected.value =
-                                        false;
-                                    controller.isThisYearSelected.value = false;
-                                    controller.isYearSelected.value = false;
-                                    controller.isMonthSelected.value = false;
-                                    controller.isDaySelected.value = true;
-                                    controller.searchEngine({"today": true});
-                                  }
-                                : null,
-                            child: const Text('Today'),
+                          filterButton(
+                            title: 'Today',
+                            onPressed: () {
+                              controller.isAllSelected.value = false;
+                              controller.isTodaySelected.value = true;
+                              controller.isThisMonthSelected.value = false;
+                              controller.isThisYearSelected.value = false;
+                              controller.isYearSelected.value = false;
+                              controller.isMonthSelected.value = false;
+                              controller.isDaySelected.value = true;
+                              controller.searchEngine({"today": true});
+                            },
+                            isSelected: controller.isTodaySelected.canUpdate,
                           ),
-                          ElevatedButton(
-                            style: thisMonthButtonStyle,
-                            onPressed: controller.isThisMonthSelected.isFalse
-                                ? () {
-                                    controller.isAllSelected.value = false;
-                                    controller.isTodaySelected.value = false;
-                                    controller.isThisMonthSelected.value = true;
-                                    controller.isThisYearSelected.value = false;
-                                    controller.isYearSelected.value = false;
-                                    controller.isMonthSelected.value = true;
-                                    controller.isDaySelected.value = false;
-                                    controller.searchEngine({
-                                      "this_month": true,
-                                    });
-                                  }
-                                : null,
-                            child: const Text('This Month'),
+                          filterButton(
+                            title: 'This Month',
+                            onPressed: () {
+                              controller.isAllSelected.value = false;
+                              controller.isTodaySelected.value = false;
+                              controller.isThisMonthSelected.value = true;
+                              controller.isThisYearSelected.value = false;
+                              controller.isYearSelected.value = false;
+                              controller.isMonthSelected.value = true;
+                              controller.isDaySelected.value = false;
+                              controller.searchEngine({"this_month": true});
+                            },
+                            isSelected: controller.isThisMonthSelected.value,
                           ),
-                          ElevatedButton(
-                            style: thisYearButtonStyle,
-                            onPressed: controller.isThisYearSelected.isFalse
-                                ? () {
-                                    controller.isTodaySelected.value = false;
-                                    controller.isThisMonthSelected.value =
-                                        false;
-                                    controller.isThisYearSelected.value = true;
-                                    controller.isYearSelected.value = true;
-                                    controller.isMonthSelected.value = false;
-                                    controller.isDaySelected.value = false;
-                                    controller.searchEngine({
-                                      "this_year": true,
-                                    });
-                                  }
-                                : null,
-                            child: const Text('This Year'),
+                          filterButton(
+                            title: 'This Year',
+                            onPressed: () {
+                              controller.isTodaySelected.value = false;
+                              controller.isThisMonthSelected.value = false;
+                              controller.isThisYearSelected.value = true;
+                              controller.isYearSelected.value = true;
+                              controller.isMonthSelected.value = false;
+                              controller.isDaySelected.value = false;
+                              controller.searchEngine({"this_year": true});
+                            },
+                            isSelected: controller.isThisYearSelected.value,
                           ),
                           ElevatedButton(
                             style: saveButtonStyle,

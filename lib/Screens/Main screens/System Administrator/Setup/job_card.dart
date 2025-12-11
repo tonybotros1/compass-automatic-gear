@@ -128,7 +128,7 @@ class JobCard extends StatelessWidget {
                                   controller.statusFilter.value.text,
                               showedSelectedName: 'name',
                               hintText: 'Status',
-                              items: allStatus,
+                              items: controller.allStatus,
                               onChanged: (key, value) async {
                                 controller.statusFilter.value.text =
                                     value['name'];
@@ -553,7 +553,7 @@ DataRow dataRowForTheTable(
         jobData.label == 'Draft'
             ? statusBox('D')
             : jobData.label == 'Returned'
-            ? statusBox('R')
+            ? statusBox('Returned')
             : const SizedBox(),
       ),
 
@@ -645,9 +645,16 @@ Widget editSection(
 
                 try {
                   controller.currentCountryVAT.value =
-                      controller.companyDetails.containsKey('country_vat')
-                      ? controller.companyDetails['country_vat'].toString()
-                      : "";
+                      (controller.companyDetails['vat_percentage'] != null
+                          ? controller.companyDetails['vat_percentage'] * 100
+                          : null) ??
+                      controller.companyDetails['country_vat'] ??
+                      0;
+
+                  // controller.currentCountryVAT.value =
+                  //     controller.companyDetails.containsKey('country_vat')
+                  //     ? controller.companyDetails['country_vat'].toString()
+                  //     : "";
                   await controller.loadValues(jobData);
                   editJobCardDialog(controller, jobData, jobId);
                 } finally {
