@@ -628,9 +628,15 @@ Widget editSection(
             ? () async {
                 controller.setButtonLoading(cardId, true);
                 controller.currentCountryVAT.value =
-                    controller.companyDetails.containsKey('country_vat')
-                    ? controller.companyDetails['country_vat'].toString()
-                    : "";
+                    (controller.companyDetails['vat_percentage'] != null
+                        ? controller.companyDetails['vat_percentage'] * 100
+                        : null) ??
+                    controller.companyDetails['country_vat'] ??
+                    0;
+                // controller.currentCountryVAT.value =
+                // controller.companyDetails.containsKey('country_vat')
+                // ? controller.companyDetails['country_vat'].toString()
+                // : "";
                 await controller.loadValues(cardData);
                 editQuotationCardDialog(controller, cardData, cardId);
                 controller.setButtonLoading(cardId, false);

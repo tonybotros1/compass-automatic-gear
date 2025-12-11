@@ -1271,8 +1271,6 @@ class JobCardController extends GetxController {
             : null) ??
         companyDetails['country_vat'] ??
         0;
-
-    print(currentCountryVAT.value);
     // currentCountryVAT.value = companyDetails.containsKey('country_vat')
     //     ? companyDetails['country_vat'].toString()
     //     : "";
