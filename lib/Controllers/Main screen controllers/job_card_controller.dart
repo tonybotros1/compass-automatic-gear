@@ -214,6 +214,8 @@ class JobCardController extends GetxController {
   final FocusNode focusNodeForItemsDetails2 = FocusNode();
   final FocusNode focusNodeForItemsDetails3 = FocusNode();
 
+  RxBool isReturned = RxBool(false);
+
   RxMap allStatus = RxMap({
     '1': {'name': 'New'},
     '2': {'name': 'Posted'},
@@ -304,7 +306,7 @@ class JobCardController extends GetxController {
       if (curreentJobCardId.isNotEmpty) {
         Map jobStatus = await getCurrentJobCardStatus(curreentJobCardId.value);
         String status1 = jobStatus['job_status_1'];
-        if (status1 != 'New' && status1 != '') {
+        if ((status1 != 'New' && status1 != '')&& status1 != 'Draft') {
           alertMessage(
             context: Get.context!,
             content: 'Only new jobs can be edited',
@@ -314,7 +316,7 @@ class JobCardController extends GetxController {
       }
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
-        'label': '',
+        'label': isReturned.isTrue ? 'Returned' : '',
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'car_brand_logo': carBrandLogo.value,
@@ -1550,6 +1552,7 @@ class JobCardController extends GetxController {
   Future<void> loadValues(JobCardModel data) async {
     quotationId.value = data.quotationId ?? '';
     jobCardAdded.value = true;
+    isReturned.value = data.label == 'Returned' ? true : false;
     curreentJobCardId.value = data.id ?? '';
     allInvoiceItems.value = data.invoiceItemsDetails ?? [];
     quotationCounter.value = data.quotationNumber ?? '';
@@ -1660,7 +1663,7 @@ class JobCardController extends GetxController {
     Map jobStatus = await getCurrentJobCardStatus(jobId);
     String status1 = jobStatus['job_status_1'];
     String status2 = jobStatus['job_status_2'];
-    if (status1 == 'New' && status2 != 'New') {
+    if ((status1 == 'New' && status2 != 'New') || (status1 == 'Draft' && status2 == 'Draft')) {
       finishDate.value.text = '';
       approvalDate.value.text = '';
       jobStatus2.value = status;

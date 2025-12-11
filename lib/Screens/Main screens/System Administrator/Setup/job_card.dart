@@ -553,7 +553,7 @@ DataRow dataRowForTheTable(
         jobData.label == 'Draft'
             ? statusBox('D')
             : jobData.label == 'Returned'
-            ? statusBox('Returned')
+            ? statusBox('Returned', hieght: 35)
             : const SizedBox(),
       ),
 

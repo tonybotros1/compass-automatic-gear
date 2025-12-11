@@ -1,5 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../consts.dart';
 import '../../my_text_field.dart';
 
@@ -48,11 +50,36 @@ Container jobCardSection(BuildContext context, JobCardController controller) {
             ),
             Container(
               height: 35,
-              width: 100,
+              width: 130,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(color: Colors.grey),
                 color: Colors.white,
+              ),
+              child: Row(
+                children: [
+                  GetX<JobCardController>(
+                    builder: (controller) {
+                      return CupertinoCheckbox(
+                        value: controller.isReturned.value,
+                        onChanged: (value) {
+                          controller.isReturned.value = value!;
+                          controller.isJobModified.value = true;
+                        },
+                        fillColor: WidgetStateProperty.resolveWith<Color?>((
+                          Set<WidgetState> states,
+                        ) {
+                          if (!states.contains(WidgetState.selected)) {
+                            return Colors.grey.shade300;
+                          }
+                          return mainColor;
+                        }),
+                      );
+                    },
+                  ),
+
+                  Text('Returned', style: textFieldFontStyle),
+                ],
               ),
             ),
           ],
