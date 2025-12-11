@@ -1,4 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/branches.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/currency.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/sales_man.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,8 +9,9 @@ import '../../../Screens/Main screens/System Administrator/Setup/entity_informat
 import '../../../consts.dart';
 import '../../drop_down_menu3.dart';
 import '../../my_text_field.dart';
+import '../add_new_values_button.dart';
 
-Widget customerDetailsSection() {
+Widget customerDetailsSection(BoxConstraints constraints) {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
@@ -56,58 +60,11 @@ Widget customerDetailsSection() {
                       ),
                     ),
                   ),
-                  IconButton(
-                    focusNode: FocusNode(skipTraversal: true),
-                    onPressed: () {
-                      Get.dialog(
-                        barrierDismissible: false,
-                        Dialog(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          insetPadding: const EdgeInsets.all(8),
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              return Column(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(5),
-                                        topRight: Radius.circular(5),
-                                      ),
-                                      color: mainColor,
-                                    ),
-                                    padding: const EdgeInsets.all(16),
-                                    width: constraints.maxWidth,
-                                    child: Row(
-                                      spacing: 10,
-                                      children: [
-                                        Text(
-                                          'Entity Information',
-                                          style:
-                                              fontStyleForScreenNameUsedInButtons,
-                                        ),
-                                        const Spacer(),
-                                        closeIcon(),
-                                      ],
-                                    ),
-                                  ),
-                                  const Expanded(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: EntityInformations(),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.add),
+                  newValueButton(
+                    constraints,
+                    'Add New Customer',
+                    'Entity Information',
+                    const EntityInformations(),
                   ),
                 ],
               ),
@@ -177,53 +134,75 @@ Widget customerDetailsSection() {
               FocusTraversalOrder(
                 order: const NumericFocusOrder(6),
                 child: Focus(
-                  child: CustomDropdown(
-                    focusNode: controller.focusNodeForCustomerDetails5,
-                    nextFocusNode: controller.focusNodeForCustomerDetails6,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      CustomDropdown(
+                        focusNode: controller.focusNodeForCustomerDetails5,
+                        nextFocusNode: controller.focusNodeForCustomerDetails6,
 
-                    width: 250,
-                    showedSelectedName: 'name',
-                    textcontroller: controller.customerSaleMan.value,
-                    hintText: 'Salesman',
-                    onChanged: (key, value) {
-                      controller.customerSaleMan.value = value['name'];
-                      controller.customerSaleManId.value = key;
-                      controller.isJobModified.value = true;
-                    },
-                    onDelete: () {
-                      controller.customerSaleMan.value = "";
-                      controller.customerSaleManId.value = "";
-                      controller.isJobModified.value = true;
-                    },
-                    onOpen: () {
-                      return controller.getSalesMan();
-                    },
+                        width: 250,
+                        showedSelectedName: 'name',
+                        textcontroller: controller.customerSaleMan.value,
+                        hintText: 'Salesman',
+                        onChanged: (key, value) {
+                          controller.customerSaleMan.value = value['name'];
+                          controller.customerSaleManId.value = key;
+                          controller.isJobModified.value = true;
+                        },
+                        onDelete: () {
+                          controller.customerSaleMan.value = "";
+                          controller.customerSaleManId.value = "";
+                          controller.isJobModified.value = true;
+                        },
+                        onOpen: () {
+                          return controller.getSalesMan();
+                        },
+                      ),
+                      newValueButton(
+                        constraints,
+                        'Add New Salesman',
+                        'Salesman',
+                        const SalesMan(),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              CustomDropdown(
-                focusNode: controller.focusNodeForCustomerDetails6,
-                nextFocusNode: controller.focusNodeForCustomerDetails7,
-                width: 170,
-                showedSelectedName: 'name',
-                textcontroller: controller.customerBranch.text,
-                hintText: 'Branch',
-                onChanged: (key, value) {
-                  controller.customerBranch.text = value['name'];
-                  controller.customerBranchId.value = key;
-                  controller.isJobModified.value = true;
-                },
-                onDelete: () {
-                  controller.customerBranch.clear();
-                  controller.customerBranchId.value = "";
-                  controller.isJobModified.value = true;
-                },
-                onOpen: () {
-                  return controller.getBranches();
-                },
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  CustomDropdown(
+                    focusNode: controller.focusNodeForCustomerDetails6,
+                    nextFocusNode: controller.focusNodeForCustomerDetails7,
+                    width: 170,
+                    showedSelectedName: 'name',
+                    textcontroller: controller.customerBranch.text,
+                    hintText: 'Branch',
+                    onChanged: (key, value) {
+                      controller.customerBranch.text = value['name'];
+                      controller.customerBranchId.value = key;
+                      controller.isJobModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.customerBranch.clear();
+                      controller.customerBranchId.value = "";
+                      controller.isJobModified.value = true;
+                    },
+                    onOpen: () {
+                      return controller.getBranches();
+                    },
+                  ),
+                  newValueButton(
+                    constraints,
+                    'Add New Branch',
+                    'Branches',
+                    const Branches(),
+                  ),
+                ],
               ),
               Row(
-                spacing: 10,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   CustomDropdown(
                     focusNode: controller.focusNodeForCustomerDetails7,
@@ -250,6 +229,14 @@ Widget customerDetailsSection() {
                       return controller.getCurrencies();
                     },
                   ),
+                  newValueButton(
+                    constraints,
+                    'Add New Currency',
+                    'Currencies',
+                    const Currency(),
+                  ),
+                  const SizedBox(width: 10),
+
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCustomerDetails8,
                     width: 100,
@@ -261,6 +248,7 @@ Widget customerDetailsSection() {
                       controller.isJobModified.value = true;
                     },
                   ),
+                  const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -290,13 +278,15 @@ Widget customerDetailsSection() {
                               CupertinoRadio<String>(
                                 value: 'Cash',
                                 fillColor: mainColor,
-                                activeColor: Colors.white,
+                                activeColor: Colors.grey.shade300,
+                                inactiveColor: Colors.grey.shade300,
                               ),
                               Text('Cash', style: textFieldFontStyle),
                               CupertinoRadio<String>(
                                 value: 'Credit',
                                 fillColor: mainColor,
-                                activeColor: Colors.white,
+                                activeColor: Colors.grey.shade300,
+                                inactiveColor: Colors.grey.shade300,
                               ),
                               Text('Credit', style: textFieldFontStyle),
                             ],

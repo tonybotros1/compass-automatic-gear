@@ -28,7 +28,6 @@ class QuotationCard extends StatelessWidget {
                   GetX<QuotationCardController>(
                     init: QuotationCardController(),
                     builder: (controller) {
-                      bool isModelLoading = controller.allModels.isEmpty;
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         spacing: 10,
@@ -74,7 +73,6 @@ class QuotationCard extends StatelessWidget {
                               textcontroller:
                                   controller.carModelIdFilterName.value.text,
                               hintText: 'Car Model',
-                              items: isModelLoading ? {} : controller.allModels,
                               onChanged: (key, value) async {
                                 controller.carModelIdFilter.value = key;
                                 controller.carModelIdFilterName.value.text =
@@ -83,6 +81,11 @@ class QuotationCard extends StatelessWidget {
                               onDelete: () {
                                 controller.carModelIdFilter.value = '';
                                 controller.carModelIdFilterName.value.clear();
+                              },
+                              onOpen: () {
+                                return controller.getModelsByCarBrand(
+                                  controller.carBrandIdFilter.value,
+                                );
                               },
                             ),
                           ),

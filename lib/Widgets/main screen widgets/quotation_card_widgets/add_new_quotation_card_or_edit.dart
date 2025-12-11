@@ -26,7 +26,7 @@ Widget addNewQuotationCardOrEdit({
             child: Column(
               children: [
                 labelContainer(lable: Text('Car Details', style: fontStyle1)),
-                carDetailsSection(),
+                carDetailsSection(constraints),
               ],
             ),
           ),
@@ -36,7 +36,7 @@ Widget addNewQuotationCardOrEdit({
                 labelContainer(
                   lable: Text('Customer Details', style: fontStyle1),
                 ),
-                customerDetailsSection(),
+                customerDetailsSection(constraints),
                 const SizedBox(height: 10),
               ],
             ),

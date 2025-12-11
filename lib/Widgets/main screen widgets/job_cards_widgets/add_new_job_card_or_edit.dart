@@ -30,7 +30,7 @@ Widget addNewJobCardOrEdit({
                   labelContainer(
                     lable: Text('Car Details', style: fontStyle1),
                   ),
-                  carDetailsSection(),
+                  carDetailsSection(constraints),
                 ],
               ),
             ),
@@ -40,7 +40,7 @@ Widget addNewJobCardOrEdit({
                   labelContainer(
                     lable: Text('Customer Details', style: fontStyle1),
                   ),
-                  customerDetailsSection(),
+                  customerDetailsSection(constraints),
                   const SizedBox(height: 10),
                 ],
               ),

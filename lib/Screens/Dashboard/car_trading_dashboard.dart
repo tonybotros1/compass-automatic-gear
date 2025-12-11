@@ -262,26 +262,6 @@ class CarTradingDashboard extends StatelessWidget {
                                   },
                                   isSelected: controller.isTodaySelected.value,
                                 ),
-                                // ElevatedButton(
-                                //   style: todayButtonStyle,
-                                //   onPressed: controller.isTodaySelected.isFalse
-                                //       ? () async {
-                                //           controller.isTodaySelected.value =
-                                //               true;
-                                //           controller.isThisMonthSelected.value =
-                                //               false;
-                                //           controller.isThisYearSelected.value =
-                                //               false;
-                                //           controller.searching.value = true;
-
-                                //           await controller.searchEngine({
-                                //             "today": true,
-                                //           });
-                                //           controller.searching.value = false;
-                                //         }
-                                //       : null,
-                                //   child: const Text('Today'),
-                                // ),
                                 filterButton(
                                   title: 'This Month',
                                   onPressed: () async {
@@ -298,27 +278,6 @@ class CarTradingDashboard extends StatelessWidget {
                                   isSelected:
                                       controller.isThisMonthSelected.value,
                                 ),
-                                // ElevatedButton(
-                                //   style: thisMonthButtonStyle,
-                                //   onPressed:
-                                //       controller.isThisMonthSelected.isFalse
-                                //       ? () async {
-                                //           controller.isTodaySelected.value =
-                                //               false;
-                                //           controller.isThisMonthSelected.value =
-                                //               true;
-                                //           controller.isThisYearSelected.value =
-                                //               false;
-                                //           controller.searching.value = true;
-
-                                //           await controller.searchEngine({
-                                //             "this_month": true,
-                                //           });
-                                //           controller.searching.value = false;
-                                //         }
-                                //       : null,
-                                //   child: const Text('This Month'),
-                                // ),
                                 filterButton(
                                   title: 'This Year',
                                   onPressed: () async {
@@ -336,27 +295,6 @@ class CarTradingDashboard extends StatelessWidget {
                                   isSelected:
                                       controller.isThisYearSelected.value,
                                 ),
-                                // ElevatedButton(
-                                //   style: thisYearButtonStyle,
-                                //   onPressed:
-                                //       controller.isThisYearSelected.isFalse
-                                //       ? () async {
-                                //           controller.isTodaySelected.value =
-                                //               false;
-                                //           controller.isThisMonthSelected.value =
-                                //               false;
-                                //           controller.isThisYearSelected.value =
-                                //               true;
-                                //           controller.searching.value = true;
-
-                                //           await controller.searchEngine({
-                                //             "this_year": true,
-                                //           });
-                                //           controller.searching.value = false;
-                                //         }
-                                //       : null,
-                                //   child: const Text('This Year'),
-                                // ),
                                 filterButton(
                                   isStatus: true,
                                   title: 'New',
@@ -381,30 +319,6 @@ class CarTradingDashboard extends StatelessWidget {
                                   isSelected:
                                       controller.isNewStatusSelected.value,
                                 ),
-                                // ElevatedButton(
-                                //   style: controller.isNewStatusSelected.isFalse
-                                //       ? isNotPressedButtonStyle
-                                //       : newButtonStyle,
-                                //   onPressed: () async {
-                                //     if (controller
-                                //         .isNewStatusSelected
-                                //         .isFalse) {
-                                //       controller.isNewStatusSelected.value =
-                                //           true;
-                                //       controller.isSoldStatusSelected.value =
-                                //           false;
-                                //     } else {
-                                //       controller.isNewStatusSelected.value =
-                                //           false;
-                                //     }
-                                //     controller.searching.value = true;
-                                //     await controller.searchEngine({
-                                //       "status": 'New',
-                                //     });
-                                //     controller.searching.value = false;
-                                //   },
-                                //   child: const Text('New'),
-                                // ),
                                 filterButton(
                                   isStatus: true,
                                   title: 'Sold',
@@ -429,30 +343,6 @@ class CarTradingDashboard extends StatelessWidget {
                                   isSelected:
                                       controller.isSoldStatusSelected.value,
                                 ),
-                                // ElevatedButton(
-                                //   style: controller.isSoldStatusSelected.isFalse
-                                //       ? isNotPressedButtonStyle
-                                //       : soldButtonStyle,
-                                //   onPressed: () async {
-                                //     if (controller
-                                //         .isSoldStatusSelected
-                                //         .isFalse) {
-                                //       controller.isSoldStatusSelected.value =
-                                //           true;
-                                //       controller.isNewStatusSelected.value =
-                                //           false;
-                                //     } else {
-                                //       controller.isSoldStatusSelected.value =
-                                //           false;
-                                //     }
-                                //     controller.searching.value = true;
-                                //     await controller.searchEngine({
-                                //       "status": 'Sold',
-                                //     });
-                                //     controller.searching.value = false;
-                                //   },
-                                //   child: const Text('Sold'),
-                                // ),
                                 const SizedBox(width: 10),
                                 ElevatedButton(
                                   style: saveButtonStyle,

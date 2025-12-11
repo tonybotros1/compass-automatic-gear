@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
 import '../../../consts.dart';
+import '../add_new_values_button.dart';
 
-Widget carDetailsSection() {
+Widget carDetailsSection(BoxConstraints constraints) {
   return FocusTraversalGroup(
     policy: WidgetOrderTraversalPolicy(),
     child: Container(
@@ -25,7 +26,7 @@ Widget carDetailsSection() {
                   CustomDropdown(
                     focusNode: controller.focusNodeForCardDetails1,
                     nextFocusNode: controller.focusNodeForCardDetails2,
-                    width: 240,
+                    width: 325,
                     showedSelectedName: 'name',
                     textcontroller: controller.carBrand.text,
                     hintText: 'Brand',
@@ -42,7 +43,6 @@ Widget carDetailsSection() {
                       controller.carBrandLogo.value = "";
                       controller.carBrand.clear();
                       controller.carModel.clear();
-                      controller.allModels.clear();
                       controller.carBrandId.value = "";
                       controller.carModelId.value = "";
                       controller.isJobModified.value = true;
@@ -58,18 +58,15 @@ Widget carDetailsSection() {
                 ],
               ),
               Row(
-                spacing: 10,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   CustomDropdown(
                     focusNode: controller.focusNodeForCardDetails2,
                     nextFocusNode: controller.focusNodeForCardDetails3,
-                    width: 240,
+                    width: 325,
                     showedSelectedName: 'name',
                     textcontroller: controller.carModel.text,
                     hintText: 'Model',
-                    items: controller.allModels.isEmpty
-                        ? {}
-                        : controller.allModels,
                     onChanged: (key, value) {
                       controller.carModel.text = value['name'];
                       controller.carModelId.value = key;
@@ -80,37 +77,65 @@ Widget carDetailsSection() {
                       controller.carModelId.value = "";
                       controller.isJobModified.value = true;
                     },
-                  ),
-                  CustomDropdown(
-                    focusNode: controller.focusNodeForCardDetails3,
-                    nextFocusNode: controller.focusNodeForCardDetails4,
-                    width: 120,
-                    showedSelectedName: 'name',
-                    textcontroller: controller.color.text,
-                    hintText: 'Color',
-                    onChanged: (key, value) {
-                      controller.color.text = value['name'];
-                      controller.colorId.value = key;
-                      controller.isJobModified.value = true;
-                    },
-                    onDelete: () {
-                      controller.color.clear();
-                      controller.colorId.value = "";
-                      controller.isJobModified.value = true;
-                    },
-                    onOpen: () async {
-                      return controller.getColors();
+                    onOpen: () {
+                      return controller.getModelsByCarBrand(
+                        controller.carBrandId.value,
+                      );
                     },
                   ),
+                  valSectionInTheTableForBrands(
+                    controller.carBrandsController,
+                    controller.carBrandId.value,
+                    constraints,
+                    'New Model',
+                  ),
+                ],
+              ),
+              Row(
+                spacing: 10,
+                children: [
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCardDetails4,
-                    width: 119,
+                    width: 115,
                     controller: controller.year,
                     labelText: 'Year',
                     hintText: 'Enter Year',
                     onChanged: (_) {
                       controller.isJobModified.value = true;
                     },
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      CustomDropdown(
+                        focusNode: controller.focusNodeForCardDetails3,
+                        nextFocusNode: controller.focusNodeForCardDetails4,
+                        width: 200,
+                        showedSelectedName: 'name',
+                        textcontroller: controller.color.text,
+                        hintText: 'Color',
+                        onChanged: (key, value) {
+                          controller.color.text = value['name'];
+                          controller.colorId.value = key;
+                          controller.isJobModified.value = true;
+                        },
+                        onDelete: () {
+                          controller.color.clear();
+                          controller.colorId.value = "";
+                          controller.isJobModified.value = true;
+                        },
+                        onOpen: () async {
+                          return controller.getColors();
+                        },
+                      ),
+                      valSectionInTheTable(
+                        controller.listOfValuesController,
+                        constraints,
+                        'COLORS',
+                        'New Color',
+                        'Colors',
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -141,52 +166,73 @@ Widget carDetailsSection() {
                   ),
                 ],
               ),
-              CustomDropdown(
-                focusNode: controller.focusNodeForCardDetails7,
-                nextFocusNode: controller.focusNodeForCardDetails8,
-                width: 240,
-                showedSelectedName: 'name',
-                textcontroller: controller.country.text,
-                hintText: 'Country',
-                onChanged: (key, value) {
-                  controller.country.text = value['name'] ?? "";
-                  controller.city.clear();
-                  controller.getCitiesByCountryID(key);
-                  controller.countryId.value = key;
-                  controller.isJobModified.value = true;
-                },
-                onDelete: () {
-                  controller.country.clear();
-                  controller.city.clear();
-                  controller.allCities.clear();
-                  controller.countryId.value = "";
-                  controller.isJobModified.value = true;
-                },
-                onOpen: () {
-                  return controller.getCountries();
-                },
-              ),
-              CustomDropdown(
-                focusNode: controller.focusNodeForCardDetails8,
-                nextFocusNode: controller.focusNodeForCardDetails9,
-                width: 240,
-                showedSelectedName: 'name',
-                textcontroller: controller.city.text,
-                hintText: 'City',
-                items: controller.allCities.isEmpty ? {} : controller.allCities,
-                onChanged: (key, value) {
-                  controller.city.text = value['name'] ?? "";
-                  controller.cityId.value = key;
-                  controller.isJobModified.value = true;
-                },
-                onDelete: () {
-                  controller.city.clear();
-                  controller.cityId.value = "";
-                  controller.isJobModified.value = true;
-                },
-              ),
               Row(
                 spacing: 10,
+                children: [
+                  CustomDropdown(
+                    focusNode: controller.focusNodeForCardDetails7,
+                    nextFocusNode: controller.focusNodeForCardDetails8,
+                    width: 240,
+                    showedSelectedName: 'name',
+                    textcontroller: controller.country.text,
+                    hintText: 'Country',
+                    onChanged: (key, value) {
+                      controller.country.text = value['name'] ?? "";
+                      controller.city.clear();
+                      controller.getCitiesByCountryID(key);
+                      controller.countryId.value = key;
+                      controller.isJobModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.country.clear();
+                      controller.city.clear();
+                      controller.countryId.value = "";
+                      controller.isJobModified.value = true;
+                    },
+                    onOpen: () {
+                      return controller.getCountries();
+                    },
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      CustomDropdown(
+                        focusNode: controller.focusNodeForCardDetails8,
+                        nextFocusNode: controller.focusNodeForCardDetails9,
+                        width: 200,
+                        showedSelectedName: 'name',
+                        textcontroller: controller.city.text,
+                        hintText: 'City',
+
+                        onChanged: (key, value) {
+                          controller.city.text = value['name'] ?? "";
+                          controller.cityId.value = key;
+                          controller.isJobModified.value = true;
+                        },
+                        onDelete: () {
+                          controller.city.clear();
+                          controller.cityId.value = "";
+                          controller.isJobModified.value = true;
+                        },
+                        onOpen: () {
+                          return controller.getCitiesByCountryID(
+                            controller.countryId.value,
+                          );
+                        },
+                      ),
+                      valSectionInTheTableForCountries(
+                        controller.countriesController,
+                        controller.countryId.value,
+                        constraints,
+                        'New City',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCardDetails9,
@@ -199,6 +245,7 @@ Widget carDetailsSection() {
                       controller.isJobModified.value = true;
                     },
                   ),
+                  const SizedBox(width: 10),
                   CustomDropdown(
                     focusNode: controller.focusNodeForCardDetails10,
                     nextFocusNode: controller.focusNodeForCardDetails11,
@@ -220,11 +267,18 @@ Widget carDetailsSection() {
                       return controller.getEngineTypes();
                     },
                   ),
+                  valSectionInTheTable(
+                    controller.listOfValuesController,
+                    constraints,
+                    'ENGINE_TYPES',
+                    'New Engine Type',
+                    'Engine Type',
+                  ),
                 ],
               ),
               myTextFormFieldWithBorder(
                 focusNode: controller.focusNodeForCardDetails11,
-                width: 240,
+                width: 450,
                 controller: controller.vin,
                 labelText: 'VIN',
                 isCapitaLetters: true,
@@ -238,7 +292,7 @@ Widget carDetailsSection() {
                 children: [
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCardDetails12,
-                    width: 115,
+                    width: 105,
                     isnumber: true,
                     controller: controller.mileageIn.value,
                     labelText: 'Mileage In',
@@ -255,7 +309,7 @@ Widget carDetailsSection() {
                   ),
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCardDetails13,
-                    width: 115,
+                    width: 105,
                     isnumber: true,
                     controller: controller.mileageOut.value,
                     labelText: 'Mileage Out',
@@ -271,14 +325,14 @@ Widget carDetailsSection() {
                     },
                   ),
                   myTextFormFieldWithBorder(
-                    width: 115,
+                    width: 105,
                     isEnabled: false,
                     controller: controller.inOutDiff.value,
                     labelText: 'Difference',
                   ),
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCardDetails14,
-                    width: 115,
+                    width: 105,
                     isnumber: true,
                     controller: controller.minTestKms.value,
                     labelText: 'Testing KMs',

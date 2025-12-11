@@ -1,12 +1,14 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../../Screens/Main screens/System Administrator/Setup/invoice_items.dart';
-import '../../../consts.dart';
 import '../../my_text_field.dart';
+import '../add_new_values_button.dart';
 
-Widget addNewinvoiceItemsOrEdit({required JobCardController controller}) {
+Widget addNewinvoiceItemsOrEdit({
+  required JobCardController controller,
+  required BoxConstraints constraints,
+}) {
   return SingleChildScrollView(
     child: FocusTraversalGroup(
       policy: WidgetOrderTraversalPolicy(),
@@ -72,58 +74,11 @@ Widget addNewinvoiceItemsOrEdit({required JobCardController controller}) {
                             },
                           ),
                         ),
-                        IconButton(
-                          onPressed: () {
-                            Get.dialog(
-                              barrierDismissible: false,
-                              Dialog(
-                                backgroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                insetPadding: const EdgeInsets.all(8),
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    return Column(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                const BorderRadius.only(
-                                                  topLeft: Radius.circular(5),
-                                                  topRight: Radius.circular(5),
-                                                ),
-                                            color: mainColor,
-                                          ),
-                                          padding: const EdgeInsets.all(16),
-                                          width: constraints.maxWidth,
-                                          child: Row(
-                                            spacing: 10,
-                                            children: [
-                                              Text(
-                                                'Invoice Items',
-                                                style:
-                                                    fontStyleForScreenNameUsedInButtons,
-                                              ),
-                                              const Spacer(),
-                                              closeIcon(),
-                                            ],
-                                          ),
-                                        ),
-                                        const Expanded(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(8),
-                                            child: InvoiceItems(),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.add),
+                        newValueButton(
+                          constraints,
+                          'New Item',
+                          'Invoice Items',
+                          const InvoiceItems(),
                         ),
                       ],
                     ),

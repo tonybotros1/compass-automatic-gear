@@ -1,3 +1,4 @@
+import 'package:datahubai/consts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -13,19 +14,19 @@ CupertinoButton filterButton({
     color: isSelected == true
         ? isStatus == true
               ? Colors.blueGrey
-              : Colors.blue
+              : mainColor
         : isStatus == true
         ? Colors.blueGrey.shade50
-        : Colors.blue.shade50,
+        : Colors.grey.shade300,
     onPressed: onPressed,
     child: Text(
-      title,
+      isSelected == false ? title : "✓  $title",
       style: TextStyle(
         color: isSelected == true
             ? Colors.white
             : isStatus == true
             ? Colors.blueGrey
-            : Colors.blue,
+            : mainColor,
         fontWeight: FontWeight.w500,
       ),
     ),

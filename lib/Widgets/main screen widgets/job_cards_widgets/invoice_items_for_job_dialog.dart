@@ -53,7 +53,10 @@ Future<dynamic> invoiceItemsForJobDialog({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: addNewinvoiceItemsOrEdit(controller: controller),
+                child: addNewinvoiceItemsOrEdit(
+                  controller: controller,
+                  constraints: constraints,
+                ),
               ),
             ),
           ],

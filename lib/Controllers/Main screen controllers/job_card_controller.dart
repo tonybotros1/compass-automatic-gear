@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:datahubai/Controllers/Main%20screen%20controllers/countries_controller.dart';
 import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/formatters/currency_input_formatter.dart';
@@ -18,7 +19,9 @@ import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dar
 import '../../Widgets/Mobile widgets/inspection report widgets/inspection_reports_hekpers.dart';
 import '../../helpers.dart';
 import '../Mobile section controllers/cards_screen_controller.dart';
+import 'car_brands_controller.dart';
 import 'cash_management_receipts_controller.dart';
+import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
 import 'quotation_card_controller.dart';
 
@@ -96,12 +99,12 @@ class JobCardController extends GetxController {
   RxBool creatingNewQuotation = RxBool(false);
   RxBool creatingNewReceipt = RxBool(false);
   RxMap companyDetails = RxMap({});
-  RxMap allCities = RxMap({});
+  // RxMap allCities = RxMap({});
   RxBool loadingCopyJob = RxBool(false);
   var selectedRowIndex = Rxn<int>();
   var buttonLoadingStates = <String, bool>{}.obs;
 
-  RxMap allModels = RxMap({});
+  // RxMap allModels = RxMap({});
   RxBool isCashSelected = RxBool(true);
   RxBool isCreditSelected = RxBool(false);
   RxString payType = RxString('Cash');
@@ -176,7 +179,11 @@ class JobCardController extends GetxController {
   RxBool isJobInternalNotesLoading = RxBool(false);
   final formatter = CurrencyInputFormatter();
   RxBool loadingIspectionReport = RxBool(false);
-
+  ListOfValuesController listOfValuesController = Get.put(
+    ListOfValuesController(),
+  );
+  CarBrandsController carBrandsController = Get.put(CarBrandsController());
+  CountriesController countriesController = Get.put(CountriesController());
   // // for the payment header
   final FocusNode focusNodeForCardDetails1 = FocusNode();
   final FocusNode focusNodeForCardDetails2 = FocusNode();
@@ -236,16 +243,16 @@ class JobCardController extends GetxController {
     return await helper.getCarBrands();
   }
 
-  Future<void> getModelsByCarBrand(String brandID) async {
-    allModels.assignAll(await helper.getModelsValues(brandID));
+  Future<Map<String, dynamic>> getModelsByCarBrand(String brandID) async {
+    return await helper.getModelsValues(brandID);
   }
 
   Future<Map<String, dynamic>> getCountries() async {
     return await helper.getCountries();
   }
 
-  Future<void> getCitiesByCountryID(String countryID) async {
-    allCities.assignAll(await helper.getCitiesValues(countryID));
+  Future<Map<String, dynamic>> getCitiesByCountryID(String countryID) async {
+    return await helper.getCitiesValues(countryID);
   }
 
   Future<Map<String, dynamic>> getSalesMan() async {
@@ -1292,7 +1299,6 @@ class JobCardController extends GetxController {
     jobStatus1.value = '';
     jobStatus2.value = '';
     carBrandLogo.value = '';
-    allModels.clear();
     jobCardCounter.value.clear();
     invoiceCounter.value.clear();
     curreentJobCardId.value = '';
@@ -1827,12 +1833,6 @@ class JobCardController extends GetxController {
 
   void clearAllFilters() {
     statusFilter.value.clear();
-    // allJobCards.clear();
-    // numberOfJobs.value = 0;
-    // allJobsTotals.value = 0;
-    // allJobsVATS.value = 0;
-    // allJobsNET.value = 0;
-    allModels.clear();
     isAllSelected.value = false;
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;

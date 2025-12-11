@@ -13,7 +13,10 @@ import '../../Models/quotation cards/quotation_cards_model.dart';
 import '../../Screens/Main screens/System Administrator/Setup/job_card.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
+import 'car_brands_controller.dart';
+import 'countries_controller.dart';
 import 'job_card_controller.dart';
+import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
 
 class QuotationCardController extends GetxController {
@@ -82,7 +85,6 @@ class QuotationCardController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxMap allBrands = RxMap({});
   RxMap allTechnicians = RxMap({});
-  RxMap allModels = {}.obs;
   RxMap allCustomers = RxMap({});
   RxMap salesManMap = RxMap({});
   RxBool addingNewValue = RxBool(false);
@@ -90,7 +92,6 @@ class QuotationCardController extends GetxController {
   RxString companyId = RxString('');
   RxMap companyDetails = RxMap({});
   RxMap allCountries = RxMap({});
-  RxMap allCities = RxMap({});
   RxMap allColors = RxMap({});
   RxMap allEngineType = RxMap({});
   RxMap allBranches = RxMap({});
@@ -102,9 +103,6 @@ class QuotationCardController extends GetxController {
   var selectedRowIndex = Rxn<int>();
   final ScrollController scrollController = ScrollController();
   RxString quotationStatus = RxString('');
-  // RxBool isCashSelected = RxBool(true);
-  // RxBool isCreditSelected = RxBool(false);
-  // RxString payType = RxString('Cash');
   DateFormat format = DateFormat("dd-MM-yyyy");
   RxString curreentQuotationCardId = RxString('');
   TextEditingController invoiceItemName = TextEditingController();
@@ -165,6 +163,11 @@ class QuotationCardController extends GetxController {
   RxBool isQuotationInternalNotesLoading = RxBool(false);
   final RxList<InternalNotesModel> allInternalNotes =
       RxList<InternalNotesModel>([]);
+  CarBrandsController carBrandsController = Get.put(CarBrandsController());
+  CountriesController countriesController = Get.put(CountriesController());
+ListOfValuesController listOfValuesController = Get.put(
+    ListOfValuesController(),
+  );
 
   @override
   void onInit() async {
@@ -190,16 +193,16 @@ class QuotationCardController extends GetxController {
     return await helper.getCarBrands();
   }
 
-  Future<void> getModelsByCarBrand(String brandID) async {
-    allModels.assignAll(await helper.getModelsValues(brandID));
+  Future<Map<String, dynamic>> getModelsByCarBrand(String brandID) async {
+    return await helper.getModelsValues(brandID);
   }
 
   Future<Map<String, dynamic>> getCountries() async {
     return await helper.getCountries();
   }
 
-  Future<void> getCitiesByCountryID(String countryID) async {
-    allCities.assignAll(await helper.getCitiesValues(countryID));
+  Future<Map<String, dynamic>> getCitiesByCountryID(String countryID) async {
+    return await helper.getCitiesValues(countryID);
   }
 
   Future<Map<String, dynamic>> getSalesMan() async {
@@ -992,9 +995,9 @@ class QuotationCardController extends GetxController {
     countryId.value = companyDetails.containsKey('country_id')
         ? companyDetails['country_id'] ?? ""
         : "";
-    if (countryId.value.isNotEmpty) {
-      getCitiesByCountryID(countryId.value);
-    }
+    // if (countryId.value.isNotEmpty) {
+    //   getCitiesByCountryID(countryId.value);
+    // }
     mileageIn.value.text = '0';
     customerCreditNumber.text = '0';
     customerOutstanding.text = '0';
@@ -1012,7 +1015,6 @@ class QuotationCardController extends GetxController {
     canAddInternalNotesAndInvoiceItems.value = false;
     quotationStatus.value = '';
     carBrandLogo.value = '';
-    allModels.clear();
     quotationCounter.value.clear();
     curreentQuotationCardId.value = '';
     quotationCardAdded.value = false;
@@ -1079,12 +1081,12 @@ class QuotationCardController extends GetxController {
     country.text = data.country ?? '';
 
     // If you need these lists populated before setting city name:
-    if (countryId.value.isNotEmpty) {
-      getCitiesByCountryID(countryId.value);
-    }
-    if (carBrandId.value.isNotEmpty) {
-      getModelsByCarBrand(carBrandId.value);
-    }
+    // if (countryId.value.isNotEmpty) {
+    //   getCitiesByCountryID(countryId.value);
+    // }
+    // if (carBrandId.value.isNotEmpty) {
+    //   getModelsByCarBrand(carBrandId.value);
+    // }
 
     cityId.value = data.cityId ?? '';
     city.text = data.city ?? '';
@@ -1266,7 +1268,6 @@ class QuotationCardController extends GetxController {
     allQuotationsTotals.value = 0;
     allQuotationsVATS.value = 0;
     allQuotationsNET.value = 0;
-    allModels.clear();
     isAllSelected.value = false;
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;

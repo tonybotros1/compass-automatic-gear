@@ -101,7 +101,7 @@ class Helpers {
   }
 
   // this function is to ger all cities of selected country for drop down menu
-  Future getCitiesValues(String countryId) async {
+  Future<Map<String, dynamic>> getCitiesValues(String countryId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -114,12 +114,14 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> jsonData = decoded["cities"];
-        var map = {for (var city in jsonData) city['_id']: city};
+        Map<String, dynamic> map = {
+          for (var city in jsonData) city['_id']: city,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCitiesValues(countryId);
+          return await getCitiesValues(countryId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -128,6 +130,7 @@ class Helpers {
       } else {
         return {};
       }
+      return {};
     } catch (e) {
       return {};
     }
@@ -322,7 +325,7 @@ class Helpers {
     }
   }
 
-  Future getModelsValues(String brandId) async {
+  Future<Map<String, dynamic>> getModelsValues(String brandId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -337,7 +340,9 @@ class Helpers {
       if (response.statusCode == 200) {
         final decode = jsonDecode(response.body);
         List<dynamic> jsonData = decode['models'];
-        Map map = {for (var model in jsonData) model['_id']: model};
+        Map<String, dynamic> map = {
+          for (var model in jsonData) model['_id']: model,
+        };
         return map;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -351,6 +356,7 @@ class Helpers {
       } else {
         return {};
       }
+      return {};
     } catch (e) {
       return {};
     }

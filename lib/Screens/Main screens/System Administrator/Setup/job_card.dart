@@ -29,7 +29,6 @@ class JobCard extends StatelessWidget {
                   GetX<JobCardController>(
                     init: JobCardController(),
                     builder: (controller) {
-                      bool isModelLoading = controller.allModels.isEmpty;
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
@@ -76,7 +75,6 @@ class JobCard extends StatelessWidget {
                               textcontroller:
                                   controller.carModelIdFilterName.value.text,
                               hintText: 'Car Model',
-                              items: isModelLoading ? {} : controller.allModels,
                               onChanged: (key, value) async {
                                 controller.carModelIdFilter.value = key;
                                 controller.carModelIdFilterName.value.text =
@@ -85,6 +83,11 @@ class JobCard extends StatelessWidget {
                               onDelete: () {
                                 controller.carModelIdFilter.value = "";
                                 controller.carModelIdFilterName.value.clear();
+                              },
+                              onOpen: () {
+                                return controller.getModelsByCarBrand(
+                                  controller.carBrandIdFilter.value,
+                                );
                               },
                             ),
                             myTextFormFieldWithBorder(

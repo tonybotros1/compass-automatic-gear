@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../consts.dart';
-import 'car_information_section.dart';
+import '../../main screen widgets/add_new_values_button.dart';
 
 Widget addNewItemOrEdit({
   required BoxConstraints constraints,
@@ -72,7 +72,6 @@ Widget addNewItemOrEdit({
                       ),
                       valSectionInTheTable(
                         controller.listOfValuesController,
-                        context,
                         constraints,
                         'ITEMS',
                         'New Item',
@@ -105,7 +104,6 @@ Widget addNewItemOrEdit({
                       ),
                       valSectionInTheTable(
                         controller.listOfValuesController,
-                        context,
                         constraints,
                         'NAMES_OF_PEOPLE',
                         'New Name',

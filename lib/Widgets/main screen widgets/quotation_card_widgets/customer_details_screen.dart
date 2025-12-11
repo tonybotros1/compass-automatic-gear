@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/quotation_card_controller.dart';
+import '../../../Screens/Main screens/System Administrator/Setup/branches.dart';
+import '../../../Screens/Main screens/System Administrator/Setup/currency.dart';
 import '../../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
+import '../../../Screens/Main screens/System Administrator/Setup/sales_man.dart';
 import '../../../consts.dart';
 import '../../drop_down_menu3.dart';
 import '../../my_text_field.dart';
+import '../add_new_values_button.dart';
 
-Widget customerDetailsSection() {
+Widget customerDetailsSection(BoxConstraints constraints) {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     child: GetX<QuotationCardController>(
       builder: (controller) {
-        // var isCustomersLoading = controller.allCustomers.isEmpty;
-        // final isBranchesLoading = controller.allBranches.isEmpty;
-        // final isSalesManLoading = controller.salesManMap.isEmpty;
         return FocusTraversalGroup(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,243 +56,200 @@ Widget customerDetailsSection() {
                       ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      Get.dialog(
-                        barrierDismissible: false,
-                        Dialog(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          insetPadding: const EdgeInsets.all(8),
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              return Column(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(5),
-                                        topRight: Radius.circular(5),
-                                      ),
-                                      color: mainColor,
-                                    ),
-                                    padding: const EdgeInsets.all(16),
-                                    width: constraints.maxWidth,
-                                    child: Row(
-                                      spacing: 10,
-                                      children: [
-                                        Text(
-                                          'Entity Information',
-                                          style:
-                                              fontStyleForScreenNameUsedInButtons,
-                                        ),
-                                        const Spacer(),
-                                        closeIcon(),
-                                      ],
-                                    ),
-                                  ),
-                                  const Expanded(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: EntityInformations(),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      );
+                  newValueButton(
+                    constraints,
+                    'Add New Customer',
+                    'Entity Information',
+                    const EntityInformations(),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(2),
+                    child: myTextFormFieldWithBorder(
+                      width: 250,
+                      controller: controller.customerEntityName,
+                      labelText: 'Contact Name',
+                      hintText: 'Enter Contact Name',
+                      onChanged: (_) {
+                        controller.isQuotationModified.value = true;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(3),
+                    child: myTextFormFieldWithBorder(
+                      width: 250,
+                      controller: controller.customerEntityPhoneNumber,
+                      labelText: 'Contact Number',
+                      hintText: 'Enter Contact Number',
+                      onChanged: (_) {
+                        controller.isQuotationModified.value = true;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  myTextFormFieldWithBorder(
+                    width: 250,
+                    controller: controller.customerEntityEmail,
+                    labelText: 'Contact Email',
+                    hintText: 'Enter Contact Email',
+                    onChanged: (_) {
+                      controller.isQuotationModified.value = true;
                     },
-                    icon: const Icon(Icons.add),
                   ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(2),
-                      child: myTextFormFieldWithBorder(
-                        controller: controller.customerEntityName,
-                        labelText: 'Contact Name',
-                        hintText: 'Enter Contact Name',
-                        onChanged: (_) {
-                          controller.isQuotationModified.value = true;
-                        },
-                      ),
-                    ),
-                  ),
-                  const Expanded(child: SizedBox()),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(3),
-                      child: myTextFormFieldWithBorder(
-                        controller: controller.customerEntityPhoneNumber,
-                        labelText: 'Contact Number',
-                        hintText: 'Enter Contact Number',
-                        onChanged: (_) {
-                          controller.isQuotationModified.value = true;
-                        },
-                      ),
-                    ),
-                  ),
-                  const Expanded(child: SizedBox()),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: myTextFormFieldWithBorder(
-                      controller: controller.customerEntityEmail,
-                      labelText: 'Contact Email',
-                      hintText: 'Enter Contact Email',
-                      onChanged: (_) {
-                        controller.isQuotationModified.value = true;
-                      },
-                    ),
-                  ),
-                  const Expanded(child: SizedBox()),
                 ],
               ),
               Row(
                 spacing: 10,
                 children: [
-                  Expanded(
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(4),
-                      child: myTextFormFieldWithBorder(
-                        isEnabled: false,
-                        isnumber: true,
-                        controller: controller.customerCreditNumber,
-                        labelText: 'Credit Limit',
-                        hintText: 'Enter Credit Limit',
-                        onChanged: (_) {
-                          controller.isQuotationModified.value = true;
-                        },
-                      ),
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(4),
+                    child: myTextFormFieldWithBorder(
+                      width: 120,
+                      isEnabled: false,
+                      isnumber: true,
+                      controller: controller.customerCreditNumber,
+                      labelText: 'Credit Limit',
+                      hintText: 'Enter Credit Limit',
+                      onChanged: (_) {
+                        controller.isQuotationModified.value = true;
+                      },
                     ),
                   ),
-                  Expanded(
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(5),
-                      child: myTextFormFieldWithBorder(
-                        isEnabled: false,
-                        isnumber: true,
-                        controller: controller.customerOutstanding,
-                        labelText: 'Outstanding',
-                        hintText: 'Enter Outstanding',
-                        onChanged: (_) {
-                          controller.isQuotationModified.value = true;
-                        },
-                      ),
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(5),
+                    child: myTextFormFieldWithBorder(
+                      width: 120,
+                      isEnabled: false,
+                      isnumber: true,
+                      controller: controller.customerOutstanding,
+                      labelText: 'Outstanding',
+                      hintText: 'Enter Outstanding',
+                      onChanged: (_) {
+                        controller.isQuotationModified.value = true;
+                      },
                     ),
                   ),
-                  const Expanded(flex: 2, child: SizedBox()),
                 ],
               ),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(6),
-                      child: Focus(
-                        child: CustomDropdown(
-                          showedSelectedName: 'name',
-                          textcontroller: controller.customerSaleMan.value,
-                          hintText: 'Salesman',
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(6),
+                    child: Focus(
+                      child: CustomDropdown(
+                        width: 250,
+                        showedSelectedName: 'name',
+                        textcontroller: controller.customerSaleMan.value,
+                        hintText: 'Salesman',
 
-                          onChanged: (key, value) {
-                            controller.customerSaleMan.value = value['name'];
-                            controller.customerSaleManId.value = key;
-                            controller.isQuotationModified.value = true;
-                          },
-                          onDelete: () {
-                            controller.customerSaleMan.value = '';
-                            controller.customerSaleManId.value = '';
-                            controller.isQuotationModified.value = true;
-                          },
-                          onOpen: () {
-                            return controller.getSalesMan();
-                          },
-                        ),
+                        onChanged: (key, value) {
+                          controller.customerSaleMan.value = value['name'];
+                          controller.customerSaleManId.value = key;
+                          controller.isQuotationModified.value = true;
+                        },
+                        onDelete: () {
+                          controller.customerSaleMan.value = '';
+                          controller.customerSaleManId.value = '';
+                          controller.isQuotationModified.value = true;
+                        },
+                        onOpen: () {
+                          return controller.getSalesMan();
+                        },
                       ),
                     ),
                   ),
-                  const Expanded(child: SizedBox()),
+                  newValueButton(
+                    constraints,
+                    'Add New Salesman',
+                    'Salesman',
+                    const SalesMan(),
+                  ),
                 ],
               ),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Expanded(
-                    child: CustomDropdown(
-                      showedSelectedName: 'name',
-                      textcontroller: controller.customerBranch.text,
-                      hintText: 'Branch',
-                      onChanged: (key, value) {
-                        controller.customerBranch.text = value['name'];
-                        controller.customerBranchId.value = key;
-                        controller.isQuotationModified.value = true;
-                      },
-                      onDelete: () {
-                        controller.customerBranch.clear();
-                        controller.customerBranchId.value = '';
-                        controller.isQuotationModified.value = true;
-                      },
-                      onOpen: () {
-                        return controller.getBranches();
-                      },
-                    ),
+                  CustomDropdown(
+                    width: 170,
+                    showedSelectedName: 'name',
+                    textcontroller: controller.customerBranch.text,
+                    hintText: 'Branch',
+                    onChanged: (key, value) {
+                      controller.customerBranch.text = value['name'];
+                      controller.customerBranchId.value = key;
+                      controller.isQuotationModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.customerBranch.clear();
+                      controller.customerBranchId.value = '';
+                      controller.isQuotationModified.value = true;
+                    },
+                    onOpen: () {
+                      return controller.getBranches();
+                    },
                   ),
-                  const Expanded(flex: 2, child: SizedBox()),
+                  newValueButton(
+                    constraints,
+                    'Add New Branch',
+                    'Branches',
+                    const Branches(),
+                  ),
                 ],
               ),
               Row(
-                spacing: 10,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Expanded(
-                    child: CustomDropdown(
-                      textcontroller: controller.customerCurrency.value.text,
-                      hintText: 'Currency',
-                      showedSelectedName: 'currency_code',
-                      onChanged: (key, value) {
-                        controller.customerCurrency.text =
-                            value['currency_code'];
-                        controller.customerCurrencyId.value = key;
-                        controller.customerCurrencyRate.text =
-                            (value['rate'] ?? '1').toString();
-                        controller.isQuotationModified.value = true;
-                      },
-                      onDelete: () {
-                        controller.customerCurrency.clear();
-                        controller.customerCurrencyId.value = '';
-                        controller.customerCurrencyRate.clear();
-                        controller.isQuotationModified.value = true;
-                      },
-                      onOpen: () {
-                        return controller.getCurrencies();
-                      },
-                    ),
+                  CustomDropdown(
+                    width: 170,
+                    textcontroller: controller.customerCurrency.value.text,
+                    hintText: 'Currency',
+                    showedSelectedName: 'currency_code',
+                    onChanged: (key, value) {
+                      controller.customerCurrency.text = value['currency_code'];
+                      controller.customerCurrencyId.value = key;
+                      controller.customerCurrencyRate.text =
+                          (value['rate'] ?? '1').toString();
+                      controller.isQuotationModified.value = true;
+                    },
+                    onDelete: () {
+                      controller.customerCurrency.clear();
+                      controller.customerCurrencyId.value = '';
+                      controller.customerCurrencyRate.clear();
+                      controller.isQuotationModified.value = true;
+                    },
+                    onOpen: () {
+                      return controller.getCurrencies();
+                    },
                   ),
-                  Expanded(
-                    child: myTextFormFieldWithBorder(
-                      isDouble: true,
-                      controller: controller.customerCurrencyRate,
-                      labelText: 'Rate',
-                      hintText: 'Enter Rate',
-                      onChanged: (_) {
-                        controller.isQuotationModified.value = true;
-                      },
-                    ),
+                  newValueButton(
+                    constraints,
+                    'Add New Currency',
+                    'Currencies',
+                    const Currency(),
                   ),
-                  const Expanded(flex: 2, child: SizedBox()),
+                  const SizedBox(width: 10),
+                  myTextFormFieldWithBorder(
+                    width: 100,
+                    isDouble: true,
+                    controller: controller.customerCurrencyRate,
+                    labelText: 'Rate',
+                    hintText: 'Enter Rate',
+                    onChanged: (_) {
+                      controller.isQuotationModified.value = true;
+                    },
+                  ),
                 ],
               ),
             ],
