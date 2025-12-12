@@ -169,6 +169,11 @@ class QuotationCardController extends GetxController {
     ListOfValuesController(),
   );
 
+  ScrollController scrollerForCarDetails = ScrollController();
+  ScrollController scrollerForCustomer = ScrollController();
+  ScrollController scrollerForQuotationSection = ScrollController();
+
+
   @override
   void onInit() async {
     super.onInit();

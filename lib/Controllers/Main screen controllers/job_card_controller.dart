@@ -217,6 +217,9 @@ class JobCardController extends GetxController {
   final FocusNode focusNodeForItemsDetails3 = FocusNode();
 
   RxBool isReturned = RxBool(false);
+  ScrollController scrollerForCarDetails = ScrollController();
+  ScrollController scrollerForCustomer = ScrollController();
+  ScrollController scrollerForjobSection = ScrollController();
 
   RxMap allStatus = RxMap({
     '1': {'name': 'New'},

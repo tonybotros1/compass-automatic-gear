@@ -253,12 +253,7 @@ class CarTradingDashboard extends StatelessWidget {
                                     controller.isThisMonthSelected.value =
                                         false;
                                     controller.isThisYearSelected.value = false;
-                                    controller.searching.value = true;
-
-                                    await controller.searchEngine({
-                                      "today": true,
-                                    });
-                                    controller.searching.value = false;
+                                    controller.filterSearch();
                                   },
                                   isSelected: controller.isTodaySelected.value,
                                 ),
@@ -268,12 +263,7 @@ class CarTradingDashboard extends StatelessWidget {
                                     controller.isTodaySelected.value = false;
                                     controller.isThisMonthSelected.value = true;
                                     controller.isThisYearSelected.value = false;
-                                    controller.searching.value = true;
-
-                                    await controller.searchEngine({
-                                      "this_month": true,
-                                    });
-                                    controller.searching.value = false;
+                                    controller.filterSearch();
                                   },
                                   isSelected:
                                       controller.isThisMonthSelected.value,
@@ -285,12 +275,7 @@ class CarTradingDashboard extends StatelessWidget {
                                     controller.isThisMonthSelected.value =
                                         false;
                                     controller.isThisYearSelected.value = true;
-                                    controller.searching.value = true;
-
-                                    await controller.searchEngine({
-                                      "this_year": true,
-                                    });
-                                    controller.searching.value = false;
+                                    controller.filterSearch();
                                   },
                                   isSelected:
                                       controller.isThisYearSelected.value,
@@ -310,11 +295,7 @@ class CarTradingDashboard extends StatelessWidget {
                                       controller.isNewStatusSelected.value =
                                           false;
                                     }
-                                    controller.searching.value = true;
-                                    await controller.searchEngine({
-                                      "status": 'New',
-                                    });
-                                    controller.searching.value = false;
+                                    controller.filterSearch();
                                   },
                                   isSelected:
                                       controller.isNewStatusSelected.value,
@@ -334,11 +315,7 @@ class CarTradingDashboard extends StatelessWidget {
                                       controller.isSoldStatusSelected.value =
                                           false;
                                     }
-                                    controller.searching.value = true;
-                                    await controller.searchEngine({
-                                      "status": 'Sold',
-                                    });
-                                    controller.searching.value = false;
+                                    controller.filterSearch();
                                   },
                                   isSelected:
                                       controller.isSoldStatusSelected.value,

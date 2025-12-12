@@ -152,6 +152,7 @@ class JobCard extends StatelessWidget {
                             minWidth: constraints.maxWidth - 28,
                           ),
                           child: Row(
+                            spacing: 10,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
 

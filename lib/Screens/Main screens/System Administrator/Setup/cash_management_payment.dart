@@ -1,4 +1,5 @@
 import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/ap_payments_model.dart';
+import 'package:datahubai/Widgets/filter_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/cash_management_payments_controller.dart';
@@ -28,17 +29,18 @@ class CashManagementPayment extends StatelessWidget {
                   GetX<CashManagementPaymentsController>(
                     init: CashManagementPaymentsController(),
                     builder: (controller) {
-                      return Row(
-                        spacing: 10,
-                        children: [
-                          Expanded(
-                            child: myTextFormFieldWithBorder(
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          spacing: 10,
+                          children: [
+                            myTextFormFieldWithBorder(
+                              width: 150,
                               labelText: 'Payment NO.',
                               controller: controller.paymentCounterFilter.value,
                             ),
-                          ),
-                          Expanded(
-                            child: CustomDropdown(
+                            CustomDropdown(
+                              width: 200,
                               showedSelectedName: 'name',
                               textcontroller:
                                   controller.paymentTypeFilter.value.text,
@@ -56,10 +58,8 @@ class CashManagementPayment extends StatelessWidget {
                                 return controller.getReceiptsAndPaymentsTypes();
                               },
                             ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: CustomDropdown(
+                            CustomDropdown(
+                              width: 300,
                               showedSelectedName: 'entity_name',
                               textcontroller:
                                   controller.vendorNameFilter.value.text,
@@ -77,9 +77,8 @@ class CashManagementPayment extends StatelessWidget {
                                 return controller.getAllVendors();
                               },
                             ),
-                          ),
-                          Expanded(
-                            child: CustomDropdown(
+                            CustomDropdown(
+                              width: 250,
                               showedSelectedName: 'account_number',
                               textcontroller:
                                   controller.accountFilter.value.text,
@@ -97,15 +96,13 @@ class CashManagementPayment extends StatelessWidget {
                                 return controller.getAllAccounts();
                               },
                             ),
-                          ),
-                          Expanded(
-                            child: myTextFormFieldWithBorder(
+                            myTextFormFieldWithBorder(
+                              width: 150,
                               labelText: 'Cheque NO.',
                               controller: controller.chequeNumberFilter.value,
                             ),
-                          ),
-                          Expanded(
-                            child: CustomDropdown(
+                            CustomDropdown(
+                              width: 150,
                               textcontroller:
                                   controller.statusFilter.value.text,
                               showedSelectedName: 'name',
@@ -119,24 +116,30 @@ class CashManagementPayment extends StatelessWidget {
                                 controller.statusFilter.value.clear();
                               },
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       );
                     },
                   ),
                   GetX<CashManagementPaymentsController>(
                     builder: (controller) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Row(
-                              spacing: 10,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: myTextFormFieldWithBorder(
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 28,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            spacing: 10,
+                            children: [
+                              Row(
+                                spacing: 10,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
                                     controller: controller.fromDate.value,
                                     labelText: 'From Date',
                                     onFieldSubmitted: (_) async {
@@ -146,9 +149,8 @@ class CashManagementPayment extends StatelessWidget {
                                       );
                                     },
                                   ),
-                                ),
-                                Expanded(
-                                  child: myTextFormFieldWithBorder(
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
                                     controller: controller.toDate.value,
                                     labelText: 'To Date',
                                     onFieldSubmitted: (_) async {
@@ -158,118 +160,103 @@ class CashManagementPayment extends StatelessWidget {
                                       );
                                     },
                                   ),
-                                ),
-
-                                ElevatedButton(
-                                  style: todayButtonStyle,
-                                  onPressed: controller.isTodaySelected.isFalse
-                                      ? () {
-                                          controller.isAllSelected.value =
-                                              false;
-                                          controller.isTodaySelected.value =
-                                              true;
-                                          controller.isThisMonthSelected.value =
-                                              false;
-                                          controller.isThisYearSelected.value =
-                                              false;
-                                          controller.isYearSelected.value =
-                                              false;
-                                          controller.isMonthSelected.value =
-                                              false;
-                                          controller.isDaySelected.value = true;
-                                          controller.searchEngineForPayments({
-                                            "today": true,
-                                          });
-                                        }
-                                      : null,
-                                  child: const Text('Today'),
-                                ),
-                                ElevatedButton(
-                                  style: thisMonthButtonStyle,
-                                  onPressed:
-                                      controller.isThisMonthSelected.isFalse
-                                      ? () {
-                                          controller.isAllSelected.value =
-                                              false;
-                                          controller.isTodaySelected.value =
-                                              false;
-                                          controller.isThisMonthSelected.value =
-                                              true;
-                                          controller.isThisYearSelected.value =
-                                              false;
-                                          controller.isYearSelected.value =
-                                              false;
-                                          controller.isMonthSelected.value =
-                                              true;
-                                          controller.isDaySelected.value =
-                                              false;
-                                          controller.searchEngineForPayments({
-                                            "this_month": true,
-                                          });
-                                        }
-                                      : null,
-                                  child: const Text('This Month'),
-                                ),
-                                ElevatedButton(
-                                  style: thisYearButtonStyle,
-                                  onPressed:
-                                      controller.isThisYearSelected.isFalse
-                                      ? () {
-                                          controller.isTodaySelected.value =
-                                              false;
-                                          controller.isThisMonthSelected.value =
-                                              false;
-                                          controller.isThisYearSelected.value =
-                                              true;
-                                          controller.isYearSelected.value =
-                                              true;
-                                          controller.isMonthSelected.value =
-                                              false;
-                                          controller.isDaySelected.value =
-                                              false;
-                                          controller.searchEngineForPayments({
-                                            "this_year": true,
-                                          });
-                                        }
-                                      : null,
-                                  child: const Text('This Year'),
-                                ),
-                                ElevatedButton(
-                                  style: saveButtonStyle,
-                                  onPressed:
-                                      controller
-                                          .isScreenLodingForPayments
-                                          .isFalse
-                                      ? () async {
-                                          controller.filterSearch();
-                                        }
-                                      : null,
-                                  child:
-                                      controller
-                                          .isScreenLodingForPayments
-                                          .isFalse
-                                      ? Text(
-                                          'Find',
-                                          style: fontStyleForElevatedButtons,
-                                        )
-                                      : loadingProcess,
-                                ),
-                                ElevatedButton(
-                                  style: clearVariablesButtonStyle,
-                                  onPressed: () {
-                                    controller.clearAllFilters();
-                                  },
-                                  child: Text(
-                                    'Clear Filters',
-                                    style: fontStyleForElevatedButtons,
+                                  filterButton(
+                                    title: 'Today',
+                                    onPressed: () {
+                                      controller.isAllSelected.value = false;
+                                      controller.isTodaySelected.value = true;
+                                      controller.isThisMonthSelected.value =
+                                          false;
+                                      controller.isThisYearSelected.value =
+                                          false;
+                                      controller.isYearSelected.value = false;
+                                      controller.isMonthSelected.value = false;
+                                      controller.isDaySelected.value = true;
+                                      controller.searchEngineForPayments({
+                                        "today": true,
+                                      });
+                                    },
+                                    isSelected:
+                                        controller.isTodaySelected.value,
                                   ),
-                                ),
-                              ],
-                            ),
+                                  filterButton(
+                                    title: 'This Month',
+                                    onPressed: () {
+                                      controller.isAllSelected.value = false;
+                                      controller.isTodaySelected.value = false;
+                                      controller.isThisMonthSelected.value =
+                                          true;
+                                      controller.isThisYearSelected.value =
+                                          false;
+                                      controller.isYearSelected.value = false;
+                                      controller.isMonthSelected.value = true;
+                                      controller.isDaySelected.value = false;
+                                      controller.searchEngineForPayments({
+                                        "this_month": true,
+                                      });
+                                    },
+                                    isSelected:
+                                        controller.isThisMonthSelected.value,
+                                  ),
+                                  filterButton(
+                                    title: 'This Year',
+                                    onPressed: () {
+                                      controller.isTodaySelected.value = false;
+                                      controller.isThisMonthSelected.value =
+                                          false;
+                                      controller.isThisYearSelected.value =
+                                          true;
+                                      controller.isYearSelected.value = true;
+                                      controller.isMonthSelected.value = false;
+                                      controller.isDaySelected.value = false;
+                                      controller.searchEngineForPayments({
+                                        "this_year": true,
+                                      });
+                                    },
+                                    isSelected:
+                                        controller.isThisYearSelected.value,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  ElevatedButton(
+                                    style: saveButtonStyle,
+                                    onPressed:
+                                        controller
+                                            .isScreenLodingForPayments
+                                            .isFalse
+                                        ? () async {
+                                            controller.filterSearch();
+                                          }
+                                        : null,
+                                    child:
+                                        controller
+                                            .isScreenLodingForPayments
+                                            .isFalse
+                                        ? Text(
+                                            'Find',
+                                            style: fontStyleForElevatedButtons,
+                                          )
+                                        : loadingProcess,
+                                  ),
+                                  ElevatedButton(
+                                    style: clearVariablesButtonStyle,
+                                    onPressed: () {
+                                      controller.clearAllFilters();
+                                    },
+                                    child: Text(
+                                      'Clear Filters',
+                                      style: fontStyleForElevatedButtons,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              newPaymentButton(
+                                context,
+                                constraints,
+                                controller,
+                              ),
+                            ],
                           ),
-                          const Expanded(flex: 2, child: SizedBox()),
-                          newPaymentButton(context, constraints, controller),
-                        ],
+                        ),
                       );
                     },
                   ),

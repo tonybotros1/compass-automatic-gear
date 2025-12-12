@@ -27,10 +27,8 @@ Widget addNewJobCardOrEdit({
             Expanded(
               child: Column(
                 children: [
-                  labelContainer(
-                    lable: Text('Car Details', style: fontStyle1),
-                  ),
-                  carDetailsSection(constraints),
+                  labelContainer(lable: Text('Car Details', style: fontStyle1)),
+                  carDetailsSection(controller, constraints),
                 ],
               ),
             ),
@@ -40,7 +38,7 @@ Widget addNewJobCardOrEdit({
                   labelContainer(
                     lable: Text('Customer Details', style: fontStyle1),
                   ),
-                  customerDetailsSection(constraints),
+                  customerDetailsSection(controller, constraints),
                   const SizedBox(height: 10),
                 ],
               ),
@@ -55,10 +53,7 @@ Widget addNewJobCardOrEdit({
                         Text('Job Details', style: fontStyle1),
                         GetX<JobCardController>(
                           builder: (controller) {
-                            return controller
-                                    .quotationCounter
-                                    .value
-                                    .isNotEmpty
+                            return controller.quotationCounter.value.isNotEmpty
                                 ? ClickableHoverText(
                                     color2:
                                         controller
@@ -79,9 +74,7 @@ Widget addNewJobCardOrEdit({
                                         ? () async {
                                             controller
                                                 .openQuotationCardScreenByNumber(
-                                                  controller
-                                                      .quotationId
-                                                      .value,
+                                                  controller.quotationId.value,
                                                 );
                                           }
                                         : null,
@@ -98,7 +91,7 @@ Widget addNewJobCardOrEdit({
             ),
           ],
         ),
-    
+
         labelContainer(lable: Text('Notes', style: fontStyle1)),
         Container(
           padding: const EdgeInsets.all(20),
