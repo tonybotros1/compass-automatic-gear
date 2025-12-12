@@ -1302,7 +1302,7 @@ class QuotationCardController extends GetxController {
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;
     quotaionNumberFilter.value.clear();
-    carBrandIdFilterName.value.clear();
+    carBrandIdFilterName.value = TextEditingController();
     carBrandIdFilter = RxString('');
     carModelIdFilter = RxString('');
     customerNameIdFilter = RxString('');

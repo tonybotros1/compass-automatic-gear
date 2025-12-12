@@ -74,6 +74,8 @@ class JobCardModel {
   String? technician;
   String? technicianName;
   DateTime? date;
+  double? paid;
+  double? finlOutstanding;
 
   JobCardModel({
     this.id,
@@ -148,6 +150,8 @@ class JobCardModel {
     this.technician,
     this.technicianName,
     this.date,
+    this.finlOutstanding,
+    this.paid,
   });
 
   JobCardModel.fromJson(Map<String, dynamic> json) {
@@ -250,6 +254,8 @@ class JobCardModel {
     totals = (tryGet<num>('total_amount') ?? 0).toDouble();
     vat = (tryGet<num>('total_vat') ?? 0).toDouble();
     net = (tryGet<num>('total_net') ?? 0).toDouble();
+    paid = (tryGet<num>('paid') ?? 0).toDouble();
+    finlOutstanding = (tryGet<num>('final_outstanding') ?? 0).toDouble();
 
     technician = tryGet<String>('technician');
     technicianName = tryGet<String>('technician_name');

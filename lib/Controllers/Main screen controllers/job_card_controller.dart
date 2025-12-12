@@ -149,6 +149,8 @@ class JobCardController extends GetxController {
   RxDouble allJobsVATS = RxDouble(0.0);
   RxDouble allJobsTotals = RxDouble(0.0);
   RxDouble allJobsNET = RxDouble(0.0);
+  RxDouble allJobsPaid = RxDouble(0.0);
+  RxDouble allJobsOutstanding = RxDouble(0.0);
   // DocumentSnapshot? lastDocument;
   bool hasMore = true;
   RxBool isYearSelected = RxBool(false);
@@ -670,6 +672,8 @@ class JobCardController extends GetxController {
         allJobsTotals.value = grandTotals['grand_total'];
         allJobsVATS.value = grandTotals['grand_vat'];
         allJobsNET.value = grandTotals['grand_net'];
+        allJobsPaid.value = grandTotals['grand_paid'];
+        allJobsOutstanding.value = grandTotals['grand_outstanding'];
         // print(jobs[0]);
         allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
         numberOfJobs.value = allJobCards.length;
@@ -1850,7 +1854,7 @@ class JobCardController extends GetxController {
     isThisYearSelected.value = false;
     jobNumberFilter.value.clear();
     invoiceNumberFilter.value.clear();
-    carBrandIdFilterName.value.clear();
+    carBrandIdFilterName.value = TextEditingController();
     carBrandIdFilter = RxString('');
     carModelIdFilter = RxString('');
     customerNameIdFilter = RxString('');

@@ -320,6 +320,24 @@ class JobCard extends StatelessWidget {
                                 text: '${controller.allJobsNET.value}',
                               ),
                             ),
+                            customBox(
+                              title: 'PAID',
+                              value: textForDataRowInTable(
+                                fontSize: 16,
+                                color: Colors.orange,
+                                isBold: true,
+                                text: '${controller.allJobsPaid.value}',
+                              ),
+                            ),
+                            customBox(
+                              title: 'OUTSTANDING',
+                              value: textForDataRowInTable(
+                                fontSize: 16,
+                                color: Colors.blue,
+                                isBold: true,
+                                text: '${controller.allJobsOutstanding.value}',
+                              ),
+                            ),
                           ],
                         );
                       },
@@ -424,7 +442,7 @@ Widget tableOfScreens({
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
         headingRowHeight: 70,
-        columnSpacing: 15,
+        columnSpacing: 5,
         horizontalMargin: 5,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
@@ -501,6 +519,16 @@ Widget tableOfScreens({
           DataColumn(
             numeric: true,
             label: columnForTable(constraints, '', 'NET'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            numeric: true,
+            label: columnForTable(constraints, '', 'Paid'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            numeric: true,
+            label: columnForTable(constraints, '', 'Outstanding'),
             // onSort: controller.onSort,
           ),
         ],
@@ -594,7 +622,12 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(maxWidth: null, text: jobData.customerName ?? ''),
       ),
       DataCell(
-        SelectableText(jobData.vehicleIdentificationNumber ?? '', maxLines: 1),
+        textForDataRowInTable(
+          text: jobData.vehicleIdentificationNumber ?? '',
+          maxWidth: null,
+          isBold: true,
+          color: Colors.deepPurple,
+        ),
       ),
       DataCell(
         textForDataRowInTable(
@@ -604,23 +637,31 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: textForDataRowInTable(
-            color: Colors.red,
-            isBold: true,
-            text: (jobData.vat.toString()),
-          ),
+        textForDataRowInTable(
+          color: Colors.red,
+          isBold: true,
+          text: (jobData.vat.toString()),
         ),
       ),
       DataCell(
-        Align(
-          alignment: Alignment.centerRight,
-          child: textForDataRowInTable(
-            color: Colors.blueGrey,
-            isBold: true,
-            text: (jobData.net.toString()),
-          ),
+        textForDataRowInTable(
+          color: Colors.blueGrey,
+          isBold: true,
+          text: (jobData.net.toString()),
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          color: Colors.orange,
+          isBold: true,
+          text: (jobData.paid.toString()),
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          color: Colors.blue,
+          isBold: true,
+          text: (jobData.finlOutstanding.toString()),
         ),
       ),
     ],
