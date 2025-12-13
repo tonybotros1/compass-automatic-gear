@@ -395,6 +395,7 @@ Widget tableOfScreens({
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
+        showFirstLastButtons: true,
         headingRowHeight: 70,
         columnSpacing: 15,
         sortColumnIndex: controller.sortColumnIndex.value,

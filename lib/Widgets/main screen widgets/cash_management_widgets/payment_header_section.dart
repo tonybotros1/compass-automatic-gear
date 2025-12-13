@@ -5,28 +5,30 @@ import '../../../consts.dart';
 import '../../drop_down_menu3.dart';
 import '../../my_text_field.dart';
 
-Widget paymentHeader(BuildContext context) {
+Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
+    width: double.infinity,
     child: GetX<CashManagementPaymentsController>(
       builder: (controller) {
-        return Column(
-          spacing: 10,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  child: myTextFormFieldWithBorder(
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Column(
+            spacing: 10,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                spacing: 10,
+                children: [
+                  myTextFormFieldWithBorder(
+                    width: 150,
                     labelText: 'Payment Number',
                     controller: controller.paymentCounter.value,
                     isEnabled: false,
                   ),
-                ),
-                Expanded(
-                  child: myTextFormFieldWithBorder(
+                  myTextFormFieldWithBorder(
+                    width: 150,
                     controller: controller.paymentDate.value,
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -48,16 +50,13 @@ Widget paymentHeader(BuildContext context) {
                       );
                     },
                   ),
-                ),
-                const Expanded(flex: 2, child: SizedBox()),
-              ],
-            ),
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: CustomDropdown(
+                ],
+              ),
+              Row(
+                spacing: 10,
+                children: [
+                  CustomDropdown(
+                    width: constraints.maxWidth / 2.75,
                     textcontroller: controller.vendorName.text,
                     hintText: 'Vendor Name',
                     showedSelectedName: 'entity_name',
@@ -90,33 +89,24 @@ Widget paymentHeader(BuildContext context) {
                       return controller.getAllVendors();
                     },
                   ),
-                ),
-                Expanded(
-                  child: myTextFormFieldWithBorder(
+                  myTextFormFieldWithBorder(
+                    width: 150,
                     controller: controller.outstanding,
                     labelText: 'Outstanding',
                     isEnabled: false,
                   ),
-                ),
-              ],
-            ),
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: myTextFormFieldWithBorder(
-                    labelText: 'Note',
-                    maxLines: 4,
-                    onChanged: (_) {
-                      controller.isPaymentModified.value = true;
-                    },
-                  ),
-                ),
-                const Expanded(child: SizedBox()),
-              ],
-            ),
-          ],
+                ],
+              ),
+              myTextFormFieldWithBorder(
+                width: constraints.maxWidth / 2.75,
+                labelText: 'Note',
+                maxLines: 4,
+                onChanged: (_) {
+                  controller.isPaymentModified.value = true;
+                },
+              ),
+            ],
+          ),
         );
       },
     ),

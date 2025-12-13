@@ -260,16 +260,10 @@ class CashManagementPaymentsController extends CashManagementBaseController {
                 element.isModified = null;
               }
               if (vendorNameId.value != '') {
-                outstanding.clear();
-                outstanding.value = formatter.formatEditUpdate(
-                  outstanding.value,
-                  TextEditingValue(
-                    text: await calculateVendorOutstanding(vendorNameId.value)
-                        .then((value) {
-                          return value.toString();
-                        }),
-                  ),
+                final result = await calculateVendorOutstanding(
+                  vendorNameId.value,
                 );
+                outstanding.text = formatNumber(result.toString());
               }
               // List updatedItems = decoded['updated_items'];
               // List deletedItems = decoded['deleted_items'];
@@ -519,16 +513,8 @@ class CashManagementPaymentsController extends CashManagementBaseController {
 
     calculateAmountForSelectedPayments();
     if (data.vendor != '' && data.vendor != null) {
-      outstanding.value = formatter.formatEditUpdate(
-        outstanding.value,
-        TextEditingValue(
-          text: await calculateVendorOutstanding(data.vendor ?? '').then((
-            value,
-          ) {
-            return value.toString();
-          }),
-        ),
-      );
+      final result = await calculateVendorOutstanding(data.vendor ?? '');
+      outstanding.text = formatNumber(result.toString());
     } else {
       outstanding.text = "0.0";
     }

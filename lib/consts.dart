@@ -43,6 +43,12 @@ var fontStyleForCheckBoxes = TextStyle(
   fontWeight: FontWeight.bold,
 );
 
+
+String formatNumber(String value) {
+  final number = num.parse(value);
+  return NumberFormat('#,###').format(number);
+}
+
 final createButton = Container(
   padding: const EdgeInsets.symmetric(horizontal: 12),
   decoration: BoxDecoration(
@@ -68,7 +74,7 @@ var fontStyleForScreenNameUsedInButtons = const TextStyle(
 var fontStyleForTableHeader = TextStyle(
   color: Colors.grey[700],
   fontWeight: FontWeight.bold,
-  fontSize: 12,
+  fontSize: 10,
 );
 var iconStyleForTableHeaderDown = Icon(
   Icons.keyboard_arrow_down,
@@ -81,6 +87,7 @@ var iconStyleForTableHeaderUp = Icon(
 var regTextStyle = TextStyle(
   color: Colors.grey.shade700,
   fontWeight: FontWeight.w500,
+  fontSize: 13,
 );
 var userNameStyle = const TextStyle(
   color: Colors.blue,

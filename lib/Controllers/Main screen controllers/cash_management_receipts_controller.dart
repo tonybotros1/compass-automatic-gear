@@ -262,18 +262,10 @@ class CashManagementReceiptsController extends CashManagementBaseController {
                 element.isModified = null;
               }
               if (customerNameId.value != '') {
-                outstanding.clear();
-                outstanding.value = formatter.formatEditUpdate(
-                  outstanding.value,
-                  TextEditingValue(
-                    text:
-                        await calculateCustomerOutstanding(
-                          customerNameId.value,
-                        ).then((value) {
-                          return value.toString();
-                        }),
-                  ),
+                final result = await calculateCustomerOutstanding(
+                  customerNameId.value,
                 );
+                outstanding.text = formatNumber(result.toString());
               }
               // List updatedItems = decoded['updated_items'];
               // List deletedItems = decoded['deleted_items'];
@@ -525,14 +517,8 @@ class CashManagementReceiptsController extends CashManagementBaseController {
     String customerId = data.customer ?? '';
     outstanding.clear();
     if (customerId != '') {
-      outstanding.value = formatter.formatEditUpdate(
-        outstanding.value,
-        TextEditingValue(
-          text: await calculateCustomerOutstanding(customerId).then((value) {
-            return value.toString();
-          }),
-        ),
-      );
+      final result = await calculateCustomerOutstanding(customerId);
+      outstanding.text = formatNumber(result.toString());
     }
     note.text = data.note ?? '';
     receiptType.text = data.receiptTypeName ?? '';

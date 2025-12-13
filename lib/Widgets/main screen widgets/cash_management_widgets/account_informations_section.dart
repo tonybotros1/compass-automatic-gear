@@ -4,83 +4,81 @@ import 'package:get/get.dart';
 import '../../../consts.dart';
 import '../../drop_down_menu3.dart';
 import '../../my_text_field.dart';
+import '../add_new_values_button.dart';
 
 Widget accountInformations<T extends CashManagementBaseController>(
   BuildContext context,
   bool isPayment,
   T controller,
+  BoxConstraints constraints,
 ) {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
+    width: double.infinity,
     child: GetX<T>(
       builder: (controller) {
-        return Column(
-          spacing: 10,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Row(
-              spacing: 20,
-              children: [
-                Expanded(
-                  child: CustomDropdown(
-                    textcontroller: isPayment
-                        ? controller.paymentType.text
-                        : controller.receiptType.text,
-                    showedSelectedName: 'name',
-                    hintText: isPayment ? 'Payment Type' : 'Receipt Type',
-                    onChanged: (key, value) {
-                      if (isPayment) {
-                        controller.isPaymentModified.value = true;
-                        controller.paymentType.text = value['name'];
-                        controller.paymentTypeId.value = key;
-                      } else {
-                        controller.receiptTypeId.value = key;
-                        controller.receiptType.text = value['name'];
-                        controller.isReceiptModified.value = true;
-                      }
-                      if (value['name'] == 'Cheque') {
-                        controller.isChequeSelected.value = true;
-                        controller.chequeDate.text = textToDate(
-                          DateTime.now().toString(),
-                        );
-                      } else {
-                        controller.isChequeSelected.value = false;
-                        controller.chequeDate.clear();
-                        controller.chequeNumber.clear();
-                        controller.bankName.clear();
-                      }
-                    },
-                    onDelete: () {
-                      controller.isReceiptModified.value = true;
-                      if (isPayment) {
-                        controller.isPaymentModified.value = true;
-                        controller.paymentType.clear();
-                        controller.paymentTypeId.value = '';
-                      } else {
-                        controller.receiptTypeId.value = '';
-                        controller.receiptType.clear();
-                        controller.isReceiptModified.value = true;
-                      }
-                      controller.isChequeSelected.value = false;
-                      controller.chequeDate.clear();
-                      controller.chequeNumber.clear();
-                      controller.bankName.clear();
-                    },
-                    onOpen: () {
-                      return controller.getReceiptsAndPaymentsTypes();
-                    },
-                  ),
-                ),
-                const Expanded(flex: 3, child: SizedBox()),
-              ],
-            ),
-            // const SizedBox(height: 10),
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  child: myTextFormFieldWithBorder(
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Column(
+            spacing: 10,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomDropdown(
+                width: 200,
+                textcontroller: isPayment
+                    ? controller.paymentType.text
+                    : controller.receiptType.text,
+                showedSelectedName: 'name',
+                hintText: isPayment ? 'Payment Type' : 'Receipt Type',
+                onChanged: (key, value) {
+                  if (isPayment) {
+                    controller.isPaymentModified.value = true;
+                    controller.paymentType.text = value['name'];
+                    controller.paymentTypeId.value = key;
+                  } else {
+                    controller.receiptTypeId.value = key;
+                    controller.receiptType.text = value['name'];
+                    controller.isReceiptModified.value = true;
+                  }
+                  if (value['name'] == 'Cheque') {
+                    controller.isChequeSelected.value = true;
+                    controller.chequeDate.text = textToDate(
+                      DateTime.now().toString(),
+                    );
+                  } else {
+                    controller.isChequeSelected.value = false;
+                    controller.chequeDate.clear();
+                    controller.chequeNumber.clear();
+                    controller.bankName.clear();
+                  }
+                },
+                onDelete: () {
+                  controller.isReceiptModified.value = true;
+                  if (isPayment) {
+                    controller.isPaymentModified.value = true;
+                    controller.paymentType.clear();
+                    controller.paymentTypeId.value = '';
+                  } else {
+                    controller.receiptTypeId.value = '';
+                    controller.receiptType.clear();
+                    controller.isReceiptModified.value = true;
+                  }
+                  controller.isChequeSelected.value = false;
+                  controller.chequeDate.clear();
+                  controller.chequeNumber.clear();
+                  controller.bankName.clear();
+                },
+                onOpen: () {
+                  return controller.getReceiptsAndPaymentsTypes();
+                },
+              ),
+              // const SizedBox(height: 10),
+              Row(
+                spacing: 10,
+                children: [
+                  myTextFormFieldWithBorder(
+                    width: 200,
                     controller: controller.chequeNumber,
                     isEnabled: controller.isChequeSelected.isTrue,
                     labelText: 'Cheque Number',
@@ -88,33 +86,43 @@ Widget accountInformations<T extends CashManagementBaseController>(
                       controller.isReceiptModified.value = true;
                     },
                   ),
-                ),
-                isPayment
-                    ? const SizedBox()
-                    : Expanded(
-                        flex: 2,
-                        child: CustomDropdown(
-                          hintText: 'Bank Name',
-                          enabled: controller.isChequeSelected.isTrue,
-                          textcontroller: controller.bankName.text,
-                          showedSelectedName: 'name',
-                          onChanged: (key, value) {
-                            controller.isReceiptModified.value = true;
-                            controller.bankId.value = key;
-                            controller.bankName.text = value['name'];
-                          },
-                          onDelete: () {
-                            controller.isReceiptModified.value = true;
-                            controller.bankId.value = '';
-                            controller.bankName.clear();
-                          },
-                          onOpen: () {
-                            return controller.getBanks();
-                          },
+                  isPayment
+                      ? const SizedBox()
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            CustomDropdown(
+                              width: 300,
+                              hintText: 'Bank Name',
+                              enabled: controller.isChequeSelected.isTrue,
+                              textcontroller: controller.bankName.text,
+                              showedSelectedName: 'name',
+                              onChanged: (key, value) {
+                                controller.isReceiptModified.value = true;
+                                controller.bankId.value = key;
+                                controller.bankName.text = value['name'];
+                              },
+                              onDelete: () {
+                                controller.isReceiptModified.value = true;
+                                controller.bankId.value = '';
+                                controller.bankName.clear();
+                              },
+                              onOpen: () {
+                                return controller.getBanks();
+                              },
+                            ),
+                            valSectionInTheTable(
+                              isEnabled: controller.isChequeSelected.isTrue,
+                              controller.listOfValuesController,
+                              constraints,
+                              'BANKS',
+                              'New Bank',
+                              'Banks',
+                            ),
+                          ],
                         ),
-                      ),
-                Expanded(
-                  child: myTextFormFieldWithBorder(
+                  myTextFormFieldWithBorder(
+                    width: 200,
                     suffixIcon: IconButton(
                       onPressed: () {
                         if (isPayment) {
@@ -152,85 +160,67 @@ Widget accountInformations<T extends CashManagementBaseController>(
                       }
                     },
                   ),
-                ),
-                isPayment
-                    ? const Expanded(flex: 2, child: SizedBox())
-                    : const SizedBox(),
-              ],
-            ),
-            // const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: CustomDropdown(
-                    textcontroller: controller.account.text,
-                    hintText: 'Account',
-                    showedSelectedName: 'account_number',
-                    onChanged: (key, value) async {
+                ],
+              ),
+              CustomDropdown(
+                width: 260,
+                textcontroller: controller.account.text,
+                hintText: 'Account',
+                showedSelectedName: 'account_number',
+                onChanged: (key, value) async {
+                  if (isPayment) {
+                    controller.isPaymentModified.value = true;
+                  } else {
+                    controller.isReceiptModified.value = true;
+                  }
+                  controller.account.text = value['account_number'];
+                  controller.accountId.value = key;
+                  controller.currency.text = value['currency'];
+                  controller.rate.text = '${value['rate']}';
+                },
+                onDelete: () {
+                  if (isPayment) {
+                    controller.isPaymentModified.value = true;
+                  } else {
+                    controller.isReceiptModified.value = true;
+                  }
+                  controller.account.clear();
+                  controller.accountId.value = '';
+                  controller.currency.clear();
+                  controller.rate.clear();
+                },
+                onOpen: () {
+                  return controller.getAllAccounts();
+                },
+              ),
+              Row(
+                spacing: 10,
+                children: [
+                  myTextFormFieldWithBorder(
+                    width: 125,
+                    isEnabled: false,
+                    controller: controller.currency,
+                    labelText: 'Currency',
+                  ),
+                  myTextFormFieldWithBorder(
+                    width: 125,
+
+                    moneyFormat: true,
+                    // isDouble: true,
+                    controller: controller.rate,
+                    labelText: 'Rate',
+                    onChanged: (_) {
                       if (isPayment) {
                         controller.isPaymentModified.value = true;
                       } else {
                         controller.isReceiptModified.value = true;
                       }
-                      controller.account.text = value['account_number'];
-                      controller.accountId.value = key;
-                      controller.currency.text = value['currency'];
-                      controller.rate.text = '${value['rate']}';
-                    },
-                    onDelete: () {
-                      if (isPayment) {
-                        controller.isPaymentModified.value = true;
-                      } else {
-                        controller.isReceiptModified.value = true;
-                      }
-                      controller.account.clear();
-                      controller.accountId.value = '';
-                      controller.currency.clear();
-                      controller.rate.clear();
-                    },
-                    onOpen: () {
-                      return controller.getAllAccounts();
                     },
                   ),
-                ),
-                const Expanded(flex: 2, child: SizedBox()),
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    spacing: 10,
-                    children: [
-                      Expanded(
-                        child: myTextFormFieldWithBorder(
-                          isEnabled: false,
-                          controller: controller.currency,
-                          labelText: 'Currency',
-                        ),
-                      ),
-                      Expanded(
-                        child: myTextFormFieldWithBorder(
-                          moneyFormat: true,
-                          // isDouble: true,
-                          controller: controller.rate,
-                          labelText: 'Rate',
-                          onChanged: (_) {
-                            if (isPayment) {
-                              controller.isPaymentModified.value = true;
-                            } else {
-                              controller.isReceiptModified.value = true;
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Expanded(flex: 2, child: SizedBox()),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         );
       },
     ),

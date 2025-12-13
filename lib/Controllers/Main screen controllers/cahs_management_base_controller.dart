@@ -3,6 +3,7 @@ import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Models/ar receipts and ap payments/vendor_payments_model.dart';
+import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
 
 class CashManagementBaseController extends GetxController {
@@ -67,6 +68,9 @@ class CashManagementBaseController extends GetxController {
   RxBool isPaymentInvoicesModified = RxBool(false);
   RxBool isPaymentModified = RxBool(false);
   RxDouble calculatedAmountForAllSelectedPayments = RxDouble(0.0);
+   ListOfValuesController listOfValuesController = Get.put(
+    ListOfValuesController(),
+  );
 
   Future<Map<String, dynamic>> getReceiptsAndPaymentsTypes() async {
     return await helper.getAllListValues('RECEIPT_TYPES');

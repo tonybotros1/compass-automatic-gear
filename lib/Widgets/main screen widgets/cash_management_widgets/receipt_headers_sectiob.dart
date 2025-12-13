@@ -5,29 +5,29 @@ import '../../../consts.dart';
 import '../../drop_down_menu3.dart';
 import '../../my_text_field.dart';
 
-Widget receiptHeader(BuildContext context) {
+Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     child: GetX<CashManagementReceiptsController>(
       builder: (controller) {
-        return Column(
-          spacing: 10,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  child: myTextFormFieldWithBorder(
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Column(
+            spacing: 10,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                spacing: 10,
+                children: [
+                  myTextFormFieldWithBorder(
+                    width: 150,
                     isEnabled: false,
                     controller: controller.receiptCounter.value,
                     labelText: 'Receipt Number',
                   ),
-                ),
-                Expanded(
-                  // flex: 2,
-                  child: myTextFormFieldWithBorder(
+                  myTextFormFieldWithBorder(
+                    width: 150,
                     controller: controller.receiptDate.value,
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -52,16 +52,13 @@ Widget receiptHeader(BuildContext context) {
                       controller.isReceiptModified.value = true;
                     },
                   ),
-                ),
-                const Expanded(flex: 2, child: SizedBox()),
-              ],
-            ),
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: CustomDropdown(
+                ],
+              ),
+              Row(
+                spacing: 10,
+                children: [
+                  CustomDropdown(
+                    width: constraints.maxWidth / 2.75,
                     textcontroller: controller.customerName.text,
                     showedSelectedName: 'entity_name',
                     hintText: 'Customer Name',
@@ -71,17 +68,16 @@ Widget receiptHeader(BuildContext context) {
                       controller.customerNameId.value = key;
                       controller.availableReceipts.clear();
                       controller.selectedAvailableReceipts.clear();
-                      controller.outstanding.value = formatter
-                          .formatEditUpdate(
-                            controller.outstanding.value,
-                            TextEditingValue(
-                              text: await controller
-                                  .calculateCustomerOutstanding(key)
-                                  .then((value) {
-                                    return value.toString();
-                                  }),
-                            ),
-                          );
+                      controller.outstanding.value = formatter.formatEditUpdate(
+                        controller.outstanding.value,
+                        TextEditingValue(
+                          text: await controller
+                              .calculateCustomerOutstanding(key)
+                              .then((value) {
+                                return value.toString();
+                              }),
+                        ),
+                      );
                     },
                     onDelete: () {
                       controller.customerName.clear();
@@ -95,35 +91,26 @@ Widget receiptHeader(BuildContext context) {
                       return controller.getAllCustomers();
                     },
                   ),
-                ),
-                Expanded(
-                  child: myTextFormFieldWithBorder(
+                  myTextFormFieldWithBorder(
+                    width: 150,
                     moneyFormat: true,
                     labelText: 'Outstanding',
                     controller: controller.outstanding,
                     isEnabled: false,
                   ),
-                ),
-              ],
-            ),
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: myTextFormFieldWithBorder(
-                    controller: controller.note,
-                    labelText: 'Notes',
-                    maxLines: 4,
-                    onChanged: (_) {
-                      controller.isReceiptModified.value = true;
-                    },
-                  ),
-                ),
-                const Expanded(child: SizedBox()),
-              ],
-            ),
-          ],
+                ],
+              ),
+              myTextFormFieldWithBorder(
+                width: constraints.maxWidth / 2.75,
+                controller: controller.note,
+                labelText: 'Notes',
+                maxLines: 4,
+                onChanged: (_) {
+                  controller.isReceiptModified.value = true;
+                },
+              ),
+            ],
+          ),
         );
       },
     ),

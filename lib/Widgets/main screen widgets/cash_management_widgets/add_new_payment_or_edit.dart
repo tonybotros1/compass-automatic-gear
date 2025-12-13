@@ -43,7 +43,7 @@ Widget addNewPaymentOrEdit({
                                       style: fontStyle1,
                                     ),
                                   ),
-                                  paymentHeader(context),
+                                  paymentHeader(context,constraints),
                                 ],
                               ),
                             ),
@@ -60,6 +60,7 @@ Widget addNewPaymentOrEdit({
                                     context,
                                     true,
                                     controller,
+                                    constraints
                                   ),
                                 ],
                               ),

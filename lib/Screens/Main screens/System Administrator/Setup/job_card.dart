@@ -444,6 +444,7 @@ Widget tableOfScreens({
         dataRowMinHeight: 30,
         headingRowHeight: 70,
         columnSpacing: 5,
+        showFirstLastButtons: true,
         horizontalMargin: 5,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
@@ -582,7 +583,7 @@ DataRow dataRowForTheTable(
         jobData.label == 'Draft'
             ? statusBox('D')
             : jobData.label == 'Returned'
-            ? statusBox('Returned', hieght: 35)
+            ? statusBox('R', hieght: 35, width: 35)
             : const SizedBox(),
       ),
 

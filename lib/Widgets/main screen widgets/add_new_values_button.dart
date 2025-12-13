@@ -14,55 +14,59 @@ Widget valSectionInTheTable(
   BoxConstraints constraints,
   String code,
   String tooltip,
-  String screenName,
-  // Widget screen,
-) {
+  String screenName, {
+  bool isEnabled = true,
+}) {
   return IconButton(
     tooltip: tooltip,
-    onPressed: () async {
-      Map jsonData = await helper.getListDetails(code);
-      String listId = jsonData['_id'];
-      String masteredBy = jsonData['mastered_by'];
-      controller.searchForValues.value.clear();
-      controller.valueMap.clear();
-      controller.listIDToWorkWithNewValue.value = listId;
-      controller.getListValues(listId, masteredBy);
-      Get.dialog(
-        barrierDismissible: false,
-        Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          child: SizedBox(
-            height: constraints.maxHeight,
-            width: constraints.maxWidth / 2,
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(5),
-                      topRight: Radius.circular(5),
-                    ),
-                    color: mainColor,
-                  ),
-                  child: Row(
+    onPressed: isEnabled == false
+        ? null
+        : () async {
+            Map jsonData = await helper.getListDetails(code);
+            String listId = jsonData['_id'];
+            String masteredBy = jsonData['mastered_by'];
+            controller.searchForValues.value.clear();
+            controller.valueMap.clear();
+            controller.listIDToWorkWithNewValue.value = listId;
+            controller.getListValues(listId, masteredBy);
+            Get.dialog(
+              barrierDismissible: false,
+              Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: SizedBox(
+                  height: constraints.maxHeight,
+                  width: constraints.maxWidth / 2,
+                  child: Column(
                     children: [
-                      Text(
-                        screenName,
-                        style: fontStyleForScreenNameUsedInButtons,
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5),
+                          ),
+                          color: mainColor,
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              screenName,
+                              style: fontStyleForScreenNameUsedInButtons,
+                            ),
+                            const Spacer(),
+                            closeIcon(),
+                          ],
+                        ),
                       ),
-                      const Spacer(),
-                      closeIcon(),
+                      Expanded(child: valuesSection(context: Get.context!)),
                     ],
                   ),
                 ),
-                Expanded(child: valuesSection(context: Get.context!)),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
+              ),
+            );
+          },
     icon: const Icon(Icons.add_card),
   );
 }
