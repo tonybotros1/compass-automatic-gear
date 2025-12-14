@@ -223,7 +223,12 @@ GetBuilder<JobCardController> copyJobButton(
                 JobCardModel newData = await controller.copyJob(jobId);
                 await controller.loadValues(newData);
                 controller.loadingCopyJob.value = false;
-                editJobCardDialog(controller, newData, newData.id ?? '');
+                editJobCardDialog(
+                  controller,
+                  newData,
+                  newData.id ?? '',
+                  newData.isSales == true ? false : true,
+                ); // need to be changed
                 showSnackBar('Done', 'Job Copied Successfully');
               }
             : null,

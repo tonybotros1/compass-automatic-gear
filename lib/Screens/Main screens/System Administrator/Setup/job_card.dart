@@ -37,12 +37,12 @@ class JobCard extends StatelessWidget {
                           children: [
                             myTextFormFieldWithBorder(
                               width: 150,
-                              labelText: 'Job NO.',
+                              labelText: 'Job No.',
                               controller: controller.jobNumberFilter.value,
                             ),
                             myTextFormFieldWithBorder(
                               width: 150,
-                              labelText: 'Invoice NO.',
+                              labelText: 'Invoice No.',
                               controller: controller.invoiceNumberFilter.value,
                             ),
                             CustomDropdown(
@@ -99,6 +99,11 @@ class JobCard extends StatelessWidget {
                               width: 200,
                               labelText: 'VIN',
                               controller: controller.vinFilter.value,
+                            ),
+                            myTextFormFieldWithBorder(
+                              width: 200,
+                              labelText: 'LPO No.',
+                              controller: controller.lpoFilter.value,
                             ),
                             CustomDropdown(
                               width: 300,
@@ -183,6 +188,11 @@ class JobCard extends StatelessWidget {
                                       );
                                     },
                                   ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
                                   filterButton(
                                     title: 'Today',
                                     onPressed: () {
@@ -237,9 +247,26 @@ class JobCard extends StatelessWidget {
                                     isSelected:
                                         controller.isThisYearSelected.value,
                                   ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  newJobCardButton(
+                                    context,
+                                    constraints,
+                                    controller,
+                                    false,
+                                  ),
+                                  newJobCardButton(
+                                    context,
+                                    constraints,
+                                    controller,
+                                    true,
+                                  ),
                                   const SizedBox(width: 10),
                                   ElevatedButton(
-                                    style: saveButtonStyle,
+                                    style: findButtonStyle,
                                     onPressed: controller.isScreenLoding.isFalse
                                         ? () async {
                                             controller.filterSearch();
@@ -259,16 +286,11 @@ class JobCard extends StatelessWidget {
                                       // controller.update();
                                     },
                                     child: Text(
-                                      'Clear Filters',
+                                      'Clear',
                                       style: fontStyleForElevatedButtons,
                                     ),
                                   ),
                                 ],
-                              ),
-                              newJobCardButton(
-                                context,
-                                constraints,
-                                controller,
                               ),
                             ],
                           ),
@@ -459,7 +481,11 @@ Widget tableOfScreens({
             // onSort: controller.onSort,
           ),
           DataColumn(
-            label: columnForTable(constraints, 'Job', 'Number'),
+            label: columnForTable(constraints, '', 'Type'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: columnForTable(constraints, '', 'Number'),
             // onSort: controller.onSort,
           ),
           DataColumn(
@@ -578,7 +604,9 @@ DataRow dataRowForTheTable(
       return isEvenRow ? Colors.grey.shade200 : Colors.white;
     }),
     cells: [
-      DataCell(editSection(context, jobData, constraints, jobId)),
+      DataCell(
+        editSection(context, jobData, constraints, jobId, jobData.isSales == true ? false : true),
+      ), // need to be changed
       DataCell(
         jobData.label == 'Draft'
             ? statusBox('D')
@@ -586,8 +614,17 @@ DataRow dataRowForTheTable(
             ? statusBox('R', hieght: 35, width: 35)
             : const SizedBox(),
       ),
-
-      DataCell(textForDataRowInTable(text: jobData.jobNumber ?? "")),
+      DataCell(
+        jobData.isSales == true
+            ? statusBox('SI', width: 35)
+            : statusBox('JC', width: 35),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.jobNumber ?? "",
+          formatDouble: false,
+        ),
+      ),
       DataCell(
         textForDataRowInTable(
           text: jobData.jobNumber != ''
@@ -629,6 +666,7 @@ DataRow dataRowForTheTable(
           maxWidth: null,
           isBold: true,
           color: Colors.deepPurple,
+          formatDouble: false,
         ),
       ),
       DataCell(
@@ -675,6 +713,7 @@ Widget editSection(
   JobCardModel jobData,
   BoxConstraints constraints,
   String jobId,
+  bool isJob,
 ) {
   return GetX<JobCardController>(
     builder: (controller) {
@@ -699,7 +738,7 @@ Widget editSection(
                   //     ? controller.companyDetails['country_vat'].toString()
                   //     : "";
                   await controller.loadValues(jobData);
-                  editJobCardDialog(controller, jobData, jobId);
+                  editJobCardDialog(controller, jobData, jobId, isJob);
                 } finally {
                   controller.setButtonLoading(jobId, false);
                 }
@@ -738,7 +777,8 @@ ElevatedButton historySection(
 Future<dynamic> editJobCardDialog(
   JobCardController controller,
   JobCardModel jobData,
-  String jobId, {
+  String jobId,
+  bool isJob, {
   String screenName = '',
   headerColor = '',
 }) {
@@ -774,9 +814,11 @@ Future<dynamic> editJobCardDialog(
                           spacing: 10,
                           children: [
                             Text(
-                              screenName == ''
-                                  ? controller.getScreenName()
-                                  : screenName,
+                              isJob == true
+                                  ? screenName == ''
+                                        ? controller.getScreenName()
+                                        : screenName
+                                  : "Sales Invoices",
                               style: fontStyleForScreenNameUsedInButtons,
                             ),
                             GetX<JobCardController>(
@@ -849,6 +891,7 @@ Future<dynamic> editJobCardDialog(
                     controller: controller,
                     constraints: constraints,
                     context: context,
+                    isJob: isJob,
                   ),
                 ),
               ),
@@ -864,10 +907,12 @@ ElevatedButton newJobCardButton(
   BuildContext context,
   BoxConstraints constraints,
   JobCardController controller,
+  bool isJob,
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.clearValues();
+      controller.clearValues(isJob);
+
       Get.dialog(
         barrierDismissible: false,
         Dialog(
@@ -903,7 +948,9 @@ ElevatedButton newJobCardButton(
                                   spacing: 10,
                                   children: [
                                     Text(
-                                      controller.getScreenName(),
+                                      isJob == true
+                                          ? controller.getScreenName()
+                                          : "🏷️ Sales Invoices",
                                       style:
                                           fontStyleForScreenNameUsedInButtons,
                                     ),
@@ -993,6 +1040,7 @@ ElevatedButton newJobCardButton(
                         controller: controller,
                         constraints: constraints,
                         context: context,
+                        isJob: isJob,
                       ),
                     ),
                   ),
@@ -1003,8 +1051,8 @@ ElevatedButton newJobCardButton(
         ),
       );
     },
-    style: newButtonStyle,
-    child: const Text('New Card'),
+    style: isJob == true ? newButtonStyle : newSalesInvoicesButtonStyle,
+    child: Text(isJob == true ? 'New Job' : 'New Sale'),
   );
 }
 

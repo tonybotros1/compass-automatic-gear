@@ -5,7 +5,11 @@ import 'package:get/get.dart';
 import '../../../consts.dart';
 import '../../my_text_field.dart';
 
-Widget jobCardSection(BuildContext context, JobCardController controller) {
+Widget jobCardSection(
+  BuildContext context,
+  JobCardController controller,
+  bool isJob,
+) {
   return Scrollbar(
     thumbVisibility: true,
     controller: controller.scrollerForjobSection,
@@ -20,44 +24,47 @@ Widget jobCardSection(BuildContext context, JobCardController controller) {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
           children: [
+            const SizedBox(height: 8),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
               spacing: 10,
               children: [
-                myTextFormFieldWithBorder(
+                Container(
+                  height: 35,
                   width: 150,
-                  isEnabled: false,
-                  controller: controller.jobCardCounter.value,
-                  labelText: 'Job No.',
-                  onChanged: (_) {
-                    controller.isJobModified.value = true;
-                  },
-                ),
-                myTextFormFieldWithBorder(
-                  width: 150,
-                  suffixIcon: IconButton(
-                    focusNode: FocusNode(skipTraversal: true),
-                    onPressed: () async {
-                      selectDateContext(context, controller.jobCardDate.value);
-                      controller.isJobModified.value = true;
-                    },
-                    icon: const Icon(Icons.date_range),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.grey),
+                    color: Colors.white,
                   ),
-                  onFieldSubmitted: (_) async {
-                    normalizeDate(
-                      controller.jobCardDate.value.text,
-                      controller.jobCardDate.value,
-                    );
-                  },
-                  controller: controller.jobCardDate.value,
-                  labelText: 'Job Date',
-                  onChanged: (_) {
-                    controller.isJobModified.value = true;
-                  },
+                  child: Row(
+                    children: [
+                      GetX<JobCardController>(
+                        builder: (controller) {
+                          return CupertinoCheckbox(
+                            value: controller.isSales.value,
+                            onChanged: (value) {
+                              controller.isSales.value = value!;
+                              controller.isJobModified.value = true;
+                            },
+                            fillColor: WidgetStateProperty.resolveWith<Color?>((
+                              Set<WidgetState> states,
+                            ) {
+                              if (!states.contains(WidgetState.selected)) {
+                                return Colors.grey.shade300;
+                              }
+                              return Colors.cyan;
+                            }),
+                          );
+                        },
+                      ),
+
+                      Text('Sales ?', style: textFieldFontStyle),
+                    ],
+                  ),
                 ),
                 Container(
                   height: 35,
-                  width: 130,
+                  width: 150,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(color: Colors.grey),
@@ -79,15 +86,52 @@ Widget jobCardSection(BuildContext context, JobCardController controller) {
                               if (!states.contains(WidgetState.selected)) {
                                 return Colors.grey.shade300;
                               }
-                              return mainColor;
+                              return Colors.red;
                             }),
                           );
                         },
                       ),
 
-                      Text('Returned', style: textFieldFontStyle),
+                      Text('Returned ?', style: textFieldFontStyle),
                     ],
                   ),
+                ),
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              spacing: 10,
+              children: [
+                myTextFormFieldWithBorder(
+                  width: 150,
+                  isEnabled: false,
+                  controller: controller.jobCardCounter.value,
+                  labelText: isJob == true ? 'Job No.' : 'Sales No.',
+                  onChanged: (_) {
+                    controller.isJobModified.value = true;
+                  },
+                ),
+                myTextFormFieldWithBorder(
+                  width: 150,
+                  suffixIcon: IconButton(
+                    focusNode: FocusNode(skipTraversal: true),
+                    onPressed: () async {
+                      selectDateContext(context, controller.jobCardDate.value);
+                      controller.isJobModified.value = true;
+                    },
+                    icon: const Icon(Icons.date_range),
+                  ),
+                  onFieldSubmitted: (_) async {
+                    normalizeDate(
+                      controller.jobCardDate.value.text,
+                      controller.jobCardDate.value,
+                    );
+                  },
+                  controller: controller.jobCardDate.value,
+                  labelText: isJob == true ? 'Job Date' : 'Sale Date',
+                  onChanged: (_) {
+                    controller.isJobModified.value = true;
+                  },
                 ),
               ],
             ),
@@ -135,32 +179,33 @@ Widget jobCardSection(BuildContext context, JobCardController controller) {
                 controller.isJobModified.value = true;
               },
             ),
-            myTextFormFieldWithBorder(
-              width: 150,
-              suffixIcon: IconButton(
-                focusNode: FocusNode(skipTraversal: true),
-                onPressed: () async {
-                  selectDateContext(context, controller.approvalDate.value);
-                  controller.isJobModified.value = true;
-                },
-                icon: const Icon(Icons.date_range),
-              ),
-              onFieldSubmitted: (_) async {
-                normalizeDate(
-                  controller.approvalDate.value.text,
-                  controller.approvalDate.value,
-                );
-              },
-              controller: controller.approvalDate.value,
-              labelText: 'Approval Date',
-              onChanged: (_) {
-                controller.isJobModified.value = true;
-              },
-            ),
 
             Row(
               spacing: 10,
               children: [
+                myTextFormFieldWithBorder(
+                  width: 150,
+                  suffixIcon: IconButton(
+                    focusNode: FocusNode(skipTraversal: true),
+                    onPressed: () async {
+                      selectDateContext(context, controller.approvalDate.value);
+                      controller.isJobModified.value = true;
+                    },
+                    icon: const Icon(Icons.date_range),
+                  ),
+                  onFieldSubmitted: (_) async {
+                    normalizeDate(
+                      controller.approvalDate.value.text,
+                      controller.approvalDate.value,
+                    );
+                  },
+                  controller: controller.approvalDate.value,
+                  labelText: 'Approval Date',
+                  onChanged: (_) {
+                    controller.isJobModified.value = true;
+                  },
+                ),
+
                 myTextFormFieldWithBorder(
                   width: 150,
                   suffixIcon: IconButton(

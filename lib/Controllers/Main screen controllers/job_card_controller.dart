@@ -172,6 +172,7 @@ class JobCardController extends GetxController {
       TextEditingController().obs;
   Rx<TextEditingController> plateNumberFilter = TextEditingController().obs;
   Rx<TextEditingController> vinFilter = TextEditingController().obs;
+  Rx<TextEditingController> lpoFilter = TextEditingController().obs;
   Rx<TextEditingController> fromDate = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
   Rx<TextEditingController> statusFilter = TextEditingController().obs;
@@ -217,6 +218,7 @@ class JobCardController extends GetxController {
   final FocusNode focusNodeForItemsDetails3 = FocusNode();
 
   RxBool isReturned = RxBool(false);
+  RxBool isSales = RxBool(false);
   ScrollController scrollerForCarDetails = ScrollController();
   ScrollController scrollerForCustomer = ScrollController();
   ScrollController scrollerForjobSection = ScrollController();
@@ -225,7 +227,9 @@ class JobCardController extends GetxController {
     '1': {'name': 'New'},
     '2': {'name': 'Posted'},
     '3': {'name': 'Cancelled'},
-    '4': {'name': 'Draft'},
+    '4': {'name': 'Ready'},
+    '5': {'name': 'Approved'},
+    '6': {'name': 'Draft'},
   });
 
   @override
@@ -311,7 +315,7 @@ class JobCardController extends GetxController {
       if (curreentJobCardId.isNotEmpty) {
         Map jobStatus = await getCurrentJobCardStatus(curreentJobCardId.value);
         String status1 = jobStatus['job_status_1'];
-        if ((status1 != 'New' && status1 != '')&& status1 != 'Draft') {
+        if ((status1 != 'New' && status1 != '') && status1 != 'Draft') {
           alertMessage(
             context: Get.context!,
             content: 'Only new jobs can be edited',
@@ -322,6 +326,7 @@ class JobCardController extends GetxController {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'label': isReturned.isTrue ? 'Returned' : '',
+        'is_sales': isSales.isTrue ? true : false,
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'car_brand_logo': carBrandLogo.value,
@@ -623,6 +628,9 @@ class JobCardController extends GetxController {
     }
     if (vinFilter.value.text.isNotEmpty) {
       body["vin"] = vinFilter.value.text;
+    }
+    if (lpoFilter.value.text.isNotEmpty) {
+      body["lpo"] = lpoFilter.value.text;
     }
     if (statusFilter.value.text.isNotEmpty) {
       body["status"] = statusFilter.value.text;
@@ -1272,7 +1280,13 @@ class JobCardController extends GetxController {
     net.text = '0';
   }
 
-  void clearValues() {
+  void clearValues(bool isJob) {
+    if (isJob) {
+      isSales.value = false;
+    } else {
+      isSales.value = true;
+    }
+    isReturned.value = false;
     quotationId.value = '';
     currentCountryVAT.value =
         (companyDetails['vat_percentage'] != null
@@ -1280,9 +1294,6 @@ class JobCardController extends GetxController {
             : null) ??
         companyDetails['country_vat'] ??
         0;
-    // currentCountryVAT.value = companyDetails.containsKey('country_vat')
-    //     ? companyDetails['country_vat'].toString()
-    //     : "";
     country.text = companyDetails.containsKey('country')
         ? companyDetails['country'] ?? ""
         : "";
@@ -1557,6 +1568,7 @@ class JobCardController extends GetxController {
   }
 
   Future<void> loadValues(JobCardModel data) async {
+    data.isSales == true? isSales.value = true : isSales.value = false;
     quotationId.value = data.quotationId ?? '';
     jobCardAdded.value = true;
     isReturned.value = data.label == 'Returned' ? true : false;
@@ -1670,7 +1682,8 @@ class JobCardController extends GetxController {
     Map jobStatus = await getCurrentJobCardStatus(jobId);
     String status1 = jobStatus['job_status_1'];
     String status2 = jobStatus['job_status_2'];
-    if ((status1 == 'New' && status2 != 'New') || (status1 == 'Draft' && status2 == 'Draft')) {
+    if ((status1 == 'New' && status2 != 'New') ||
+        (status1 == 'Draft' && status2 == 'Draft')) {
       finishDate.value.text = '';
       approvalDate.value.text = '';
       jobStatus2.value = status;
@@ -1850,6 +1863,7 @@ class JobCardController extends GetxController {
   }
 
   void clearAllFilters() {
+    lpoFilter.value.clear();
     statusFilter.value.clear();
     isAllSelected.value = false;
     isTodaySelected.value = false;

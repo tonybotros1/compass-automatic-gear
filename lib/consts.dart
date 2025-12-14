@@ -43,7 +43,6 @@ var fontStyleForCheckBoxes = TextStyle(
   fontWeight: FontWeight.bold,
 );
 
-
 String formatNumber(String value) {
   final number = num.parse(value);
   return NumberFormat('#,###').format(number);
@@ -115,6 +114,13 @@ Color colorForNameInCards = const Color(0xFF00695C);
 
 var newButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+  minimumSize: const Size(100, 40),
+);
+
+var newSalesInvoicesButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.blue.shade300,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
@@ -404,6 +410,13 @@ var thisYearButtonStyle = ElevatedButton.styleFrom(
 
 var homeButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xffFA812F),
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+  minimumSize: const Size(100, 40),
+);
+
+var findButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.blueGrey,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
@@ -907,6 +920,10 @@ Container statusBox(
           ? Colors.redAccent
           : status == 'Draft'
           ? Colors.blueGrey
+          : status == 'JC'
+          ? Colors.pink.shade800
+          : status == 'SI'
+          ? Colors.blue.shade300
           : Colors.brown,
     ),
     height: hieght,

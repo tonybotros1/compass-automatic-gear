@@ -2,6 +2,7 @@ import 'job_card_invoice_items_model.dart';
 
 class JobCardModel {
   String? id;
+  bool? isSales;
   String? quotationId;
   String? quotationNumber;
   String? label;
@@ -152,6 +153,7 @@ class JobCardModel {
     this.date,
     this.finlOutstanding,
     this.paid,
+    this.isSales,
   });
 
   JobCardModel.fromJson(Map<String, dynamic> json) {
@@ -174,6 +176,7 @@ class JobCardModel {
     quotationId = tryGet<String>('quotation_id');
     quotationNumber = tryGet<String>('quotation_number');
     label = tryGet<String>('label');
+    isSales = tryGet<bool>('is_sales');
     jobStatus1 = tryGet<String>('job_status_1');
     jobStatus2 = tryGet<String>('job_status_2');
     carBrandLogo = tryGet<String>('car_brand_logo');

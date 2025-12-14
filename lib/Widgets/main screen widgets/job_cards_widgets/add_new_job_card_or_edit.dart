@@ -15,6 +15,7 @@ Widget addNewJobCardOrEdit({
   required JobCardController controller,
   bool? canEdit,
   required jobId,
+  required isJob,
 }) {
   return SingleChildScrollView(
     controller: controller.scrollController,
@@ -24,14 +25,18 @@ Widget addNewJobCardOrEdit({
           spacing: 10,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                children: [
-                  labelContainer(lable: Text('Car Details', style: fontStyle1)),
-                  carDetailsSection(controller, constraints),
-                ],
-              ),
-            ),
+            isJob == true
+                ? Expanded(
+                    child: Column(
+                      children: [
+                        labelContainer(
+                          lable: Text('Car Details', style: fontStyle1),
+                        ),
+                        carDetailsSection(controller, constraints),
+                      ],
+                    ),
+                  )
+                : const SizedBox(),
             Expanded(
               child: Column(
                 children: [
@@ -50,7 +55,10 @@ Widget addNewJobCardOrEdit({
                     lable: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Job Details', style: fontStyle1),
+                        Text(
+                          isJob == true ? 'Job Details' : 'Sales Details',
+                          style: fontStyle1,
+                        ),
                         GetX<JobCardController>(
                           builder: (controller) {
                             return controller.quotationCounter.value.isNotEmpty
@@ -85,7 +93,7 @@ Widget addNewJobCardOrEdit({
                       ],
                     ),
                   ),
-                  jobCardSection(context, controller),
+                  jobCardSection(context, controller,isJob),
                 ],
               ),
             ),

@@ -961,6 +961,7 @@ class QuotationCardController extends GetxController {
           jobCardController,
           requiredJob,
           id,
+          true,
           screenName: '💳 Job Card',
           headerColor: Colors.deepPurple,
         );
