@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/car_brands_controller.dart';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values_controller.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -158,6 +159,14 @@ class CarTradingDashboardController extends GetxController {
   final FocusNode focusNodeForBuySell2 = FocusNode();
   final FocusNode focusNodeForBuySell3 = FocusNode();
   final FocusNode focusNodeForBuySell4 = FocusNode();
+
+  RxList<Map<String, dynamic>> summaryData = RxList<Map<String, dynamic>>([
+    {"category": "🚘  Cars"},
+    {"category": "🏷️  Capital Docs"},
+    {"category": "⚠️  Outstanding"},
+    {"category": "📜  Expenses"},
+  ]);
+
 
   @override
   void onInit() async {
@@ -387,11 +396,35 @@ class CarTradingDashboardController extends GetxController {
           totalReceivesForAllCapitals.value = totals['total_receive'];
           totalNETsForAllCapitals.value = totals['total_net'];
           numberOfCapitalsDocs.value = totals['count'];
+
+          int i = summaryData.indexWhere(
+            (data) => data['category'].contains('Capital Docs'),
+          );
+          summaryData[i] = {
+            ...summaryData[i],
+            'count': numberOfCapitalsDocs.value,
+            'paid': totalPaysForAllCapitals.value,
+            'received': totalReceivesForAllCapitals.value,
+            'net': totalNETsForAllCapitals.value,
+          };
         } else if (type == 'outstanding') {
           totalPaysForAllOutstanding.value = totals['total_pay'];
           totalReceivesForAllOutstanding.value = totals['total_receive'];
           totalNETsForAllOutstanding.value = totals['total_net'];
           numberOfOutstandingDocs.value = totals['count'];
+          int i = summaryData.indexWhere(
+            (data) => data['category'].contains('Outstanding'),
+          );
+
+          if (i != -1) {
+            summaryData[i] = {
+              ...summaryData[i],
+              'count': numberOfOutstandingDocs.value,
+              'paid': totalPaysForAllOutstanding.value,
+              'received': totalReceivesForAllOutstanding.value,
+              'net': totalNETsForAllOutstanding.value,
+            };
+          }
         }
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -652,6 +685,17 @@ class CarTradingDashboardController extends GetxController {
         totalReceivesForAllGeneralExpenses.value = totals['total_receive'];
         totalNETsForAllGeneralExpenses.value = totals['total_net'];
         numberOfGeneralExpensesDocs.value = totals['count'];
+
+        int i = summaryData.indexWhere(
+          (data) => data['category'].contains('Expenses'),
+        );
+        summaryData[i] = {
+          ...summaryData[i],
+          'count': numberOfGeneralExpensesDocs.value,
+          'paid': totalPaysForAllGeneralExpenses.value,
+          'received': totalNETsForAllGeneralExpenses.value,
+          'net': totalNETsForAllCapitals.value,
+        };
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -1121,6 +1165,16 @@ class CarTradingDashboardController extends GetxController {
           trades.map((item) => CarTradeModel.fromJson(item)),
         );
         numberOfCars.value = trades.length;
+        int i = summaryData.indexWhere(
+          (data) => data['category'].contains('Cars'),
+        );
+        summaryData[i] = {
+          ...summaryData[i],
+          'count': numberOfCars.value,
+          'paid': totalPaysForAllTrades.value,
+          'received': totalReceivesForAllTrades.value,
+          'net': totalNETsForAllTrades.value,
+        };
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

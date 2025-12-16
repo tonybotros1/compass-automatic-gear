@@ -177,8 +177,8 @@ class QuotationCardsModel {
     quotationNumber = tryGet<String>('quotation_number', '');
     quotationStatus = tryGet<String>('quotation_status', '');
 
-    quotationWarrentyDays = tryGet<int>('quotation_warrenty_days', 0);
-    quotationWarrentyKm = tryGet<double>('quotation_warrenty_km', 0.0);
+    quotationWarrentyDays = tryGet<int>('quotation_warranty_days', 0);
+    quotationWarrentyKm = tryGet<double>('quotation_warranty_km', 0.0);
     rate = tryGet<double>('rate', 0.0);
 
     referenceNumber = tryGet<String>('reference_number', '');

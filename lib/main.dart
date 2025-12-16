@@ -40,6 +40,11 @@ class MyApp extends StatelessWidget {
       title: 'DataHub AI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        // This changes the background for all Cards, including PaginatedDataTable
+        cardTheme: const CardThemeData(
+          color: Colors.white, // New overall background color
+          elevation: 4,
+        ),
         // 👇 This sets the default background color for all Scaffold pages
         dialogTheme: const DialogThemeData(
           backgroundColor: Color(0xffF6F9FC),

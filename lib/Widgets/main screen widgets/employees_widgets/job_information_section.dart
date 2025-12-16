@@ -99,7 +99,7 @@ Container jobInformation(BuildContext context, EmployeesController controller) {
                   return controller.getEmployeeStatus();
                 },
               ),
-              Text('Department', style: textFieldLabelStyle),
+              Text('Category', style: textFieldLabelStyle),
               Row(
                 children: [
                   SizedBox(

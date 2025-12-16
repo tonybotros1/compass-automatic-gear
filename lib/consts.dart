@@ -520,7 +520,8 @@ String formatPhrase(String phrase) {
   return phrase.replaceAll(' ', '_');
 }
 
-Text separator() => const Text('|', style: TextStyle(color: Colors.white));
+Text separator({Color? color}) =>
+    Text('|', style: TextStyle(color: color ?? Colors.white));
 
 Text point() {
   return Text(
@@ -856,7 +857,7 @@ Widget textForDataRowInTable({
   bool isBold = false,
   double? fontSize,
   bool isSelectable = true,
-  bool formatDouble = true, // New parameter with default true
+  bool formatDouble = true,
 }) {
   String formattedText = text;
 

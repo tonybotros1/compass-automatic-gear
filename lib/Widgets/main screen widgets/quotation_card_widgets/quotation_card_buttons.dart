@@ -62,10 +62,10 @@ GetBuilder<QuotationCardController> changeStatusToPostedButton(
   );
 }
 
-GetBuilder<QuotationCardController> saveQuotationButton(
+GetX<QuotationCardController> saveQuotationButton(
   void Function() onSave,
 ) {
-  return GetBuilder<QuotationCardController>(
+  return GetX<QuotationCardController>(
     builder: (controller) {
       return ClickableHoverText(
         onTap: controller.addingNewValue.value
@@ -73,7 +73,7 @@ GetBuilder<QuotationCardController> saveQuotationButton(
             : () async {
                 onSave();
               },
-        text: 'Save',
+        text: controller.addingNewValue.isFalse ? 'Save' : '•••',
       );
     },
   );

@@ -173,7 +173,6 @@ class QuotationCardController extends GetxController {
   ScrollController scrollerForCustomer = ScrollController();
   ScrollController scrollerForQuotationSection = ScrollController();
 
-
   @override
   void onInit() async {
     super.onInit();
@@ -362,6 +361,16 @@ class QuotationCardController extends GetxController {
             body: jsonEncode(newDataToUpdate),
           );
           if (response.statusCode == 200) {
+            final decoded = jsonDecode(response.body);
+            QuotationCardsModel updated = QuotationCardsModel.fromJson(
+              decoded['quotation_card'],
+            );
+            int ind = allQuotationCards.indexWhere(
+              (job) => job.id == updated.id,
+            );
+            if (ind != -1) {
+              allQuotationCards[ind] = updated;
+            }
             isQuotationModified.value = false;
           } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
             final refreshed = await helper.refreshAccessToken(refreshToken);

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../Models/car trading/car_trade_model.dart';
 import '../../../consts.dart';
-import '../../main screen widgets/auto_size_box.dart';
 import 'car_trade_dialog.dart';
 
 Widget tableOfCarTrades({
@@ -15,13 +14,28 @@ Widget tableOfCarTrades({
       bool istradingLoading = controller.filteredTrades.isEmpty;
       return DataTableTheme(
         data: DataTableThemeData(
-          headingTextStyle: fontStyleForTableHeader,
-          dataTextStyle: regTextStyle,
+          dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.grey.shade400;
+            }
+            return Colors.white;
+          }),
+          headingTextStyle: TextStyle(
+            color: Colors.grey[700],
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+          dataTextStyle: TextStyle(
+            color: Colors.grey.shade800,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
         ),
         child: PaginatedDataTable(
           controller: controller.scrollControllerForTable,
           headingRowHeight: 45,
-          showEmptyRows: false,
+          showEmptyRows: true,
+          dividerThickness: .3,
           showFirstLastButtons: true,
           rowsPerPage: controller.pagesPerPage.value,
           showCheckboxColumn: false,
@@ -29,69 +43,25 @@ Widget tableOfCarTrades({
           dataRowMaxHeight: 40,
           dataRowMinHeight: 30,
           columnSpacing: 5,
-          headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-          columns: [
-            const DataColumn(label: Text('')),
-            DataColumn(
-              label: AutoSizedText(text: 'Brand', constraints: constraints),
-            ),
-            DataColumn(
-              label: AutoSizedText(text: 'Model', constraints: constraints),
-            ),
-            DataColumn(
-              label: AutoSizedText(text: 'Year', constraints: constraints),
-            ),
-            DataColumn(
-              label: AutoSizedText(text: 'Status', constraints: constraints),
-            ),
-            DataColumn(
-              label: AutoSizedText(text: 'Color in', constraints: constraints),
-            ),
-            DataColumn(
-              label: AutoSizedText(text: 'Color out', constraints: constraints),
-            ),
-            DataColumn(
-              label: AutoSizedText(
-                text: 'Specification',
-                constraints: constraints,
-              ),
-            ),
-            DataColumn(
-              label: AutoSizedText(
-                text: 'Engine Size',
-                constraints: constraints,
-              ),
-            ),
-            DataColumn(
-              label: AutoSizedText(text: 'Mileage', constraints: constraints),
-            ),
-            DataColumn(
-              label: AutoSizedText(
-                text: 'Bought From',
-                constraints: constraints,
-              ),
-            ),
-            DataColumn(
-              label: AutoSizedText(text: 'Sold To', constraints: constraints),
-            ),
-            DataColumn(
-              label: AutoSizedText(constraints: constraints, text: 'Buy Date'),
-            ),
-            DataColumn(
-              label: AutoSizedText(constraints: constraints, text: 'Sell Date'),
-            ),
-            DataColumn(
-              numeric: true,
-              label: AutoSizedText(constraints: constraints, text: 'Paid'),
-            ),
-            DataColumn(
-              numeric: true,
-              label: AutoSizedText(constraints: constraints, text: 'Received'),
-            ),
-            DataColumn(
-              numeric: true,
-              label: AutoSizedText(constraints: constraints, text: 'Net'),
-            ),
+          headingRowColor: const WidgetStatePropertyAll(Color(0xffF4F5F8)),
+          columns: const [
+            DataColumn(label: Text('')),
+            DataColumn(label: Text('Brand')),
+            DataColumn(label: Text('Model')),
+            DataColumn(label: Text('Year')),
+            DataColumn(label: Text('Status')),
+            DataColumn(label: Text('Color in')),
+            DataColumn(label: Text('Color out')),
+            DataColumn(label: Text('Specification')),
+            DataColumn(label: Text('Engine Size')),
+            DataColumn(label: Text('Mileage')),
+            DataColumn(label: Text('Bought From')),
+            DataColumn(label: Text('Sold To')),
+            DataColumn(label: Text('Buy Date')),
+            DataColumn(label: Text('Sell Date')),
+            DataColumn(numeric: true, label: Text('Paid')),
+            DataColumn(numeric: true, label: Text('Received')),
+            DataColumn(numeric: true, label: Text('Net')),
           ],
           source: TradeDataSource(
             trades: istradingLoading ? [] : controller.filteredTrades,
@@ -113,13 +83,13 @@ DataRow dataRowForTheTable(
   CarTradingDashboardController controller,
   index,
 ) {
-  final isEvenRow = index % 2 == 0;
+  // final isEvenRow = index % 2 == 0;
   return DataRow(
     color: WidgetStateProperty.resolveWith<Color?>((states) {
       if (states.contains(WidgetState.selected)) {
         return Colors.grey.shade400;
       }
-      return isEvenRow ? Colors.grey.shade200 : Colors.white;
+      return Colors.white;
     }),
     cells: [
       DataCell(editSection(tradeData: tradeData, id: tradeId)),
