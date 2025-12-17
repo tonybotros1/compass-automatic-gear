@@ -30,125 +30,136 @@ Widget carDetailsSection(
                 spacing: 10,
                 children: [
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    spacing: 10,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      CustomDropdown(
-                        focusNode: controller.focusNodeForCardDetails1,
-                        nextFocusNode: controller.focusNodeForCardDetails2,
-                        width: 325,
-                        showedSelectedName: 'name',
-                        textcontroller: controller.carBrand.text,
-                        hintText: 'Brand',
-                        items: const {},
-                        onChanged: (key, value) {
-                          controller.carBrandLogo.value = value['logo'] ?? "";
-                          controller.carBrand.text = value['name'] ?? "";
-                          controller.carModel.clear();
-                          controller.getModelsByCarBrand(key);
-                          controller.carBrandId.value = key;
-                          controller.isJobModified.value = true;
-                        },
-                        onDelete: () {
-                          controller.carBrandLogo.value = "";
-                          controller.carBrand.clear();
-                          controller.carModel.clear();
-                          controller.carBrandId.value = "";
-                          controller.carModelId.value = "";
-                          controller.isJobModified.value = true;
-                        },
-                        onOpen: () async {
-                          return await controller.getCarBrands();
-                        },
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomDropdown(
+                            focusNode: controller.focusNodeForCardDetails1,
+                            nextFocusNode: controller.focusNodeForCardDetails2,
+                            width: 325,
+                            showedSelectedName: 'name',
+                            textcontroller: controller.carBrand.text,
+                            hintText: 'Brand',
+                            items: const {},
+                            onChanged: (key, value) {
+                              controller.carBrandLogo.value =
+                                  value['logo'] ?? "";
+                              controller.carBrand.text = value['name'] ?? "";
+                              controller.carModel.clear();
+                              controller.getModelsByCarBrand(key);
+                              controller.carBrandId.value = key;
+                              controller.isJobModified.value = true;
+                            },
+                            onDelete: () {
+                              controller.carBrandLogo.value = "";
+                              controller.carBrand.clear();
+                              controller.carModel.clear();
+                              controller.carBrandId.value = "";
+                              controller.carModelId.value = "";
+                              controller.isJobModified.value = true;
+                            },
+                            onOpen: () async {
+                              return await controller.getCarBrands();
+                            },
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              CustomDropdown(
+                                focusNode: controller.focusNodeForCardDetails2,
+                                nextFocusNode:
+                                    controller.focusNodeForCardDetails3,
+                                width: 325,
+                                showedSelectedName: 'name',
+                                textcontroller: controller.carModel.text,
+                                hintText: 'Model',
+                                onChanged: (key, value) {
+                                  controller.carModel.text = value['name'];
+                                  controller.carModelId.value = key;
+                                  controller.isJobModified.value = true;
+                                },
+                                onDelete: () {
+                                  controller.carModel.clear();
+                                  controller.carModelId.value = "";
+                                  controller.isJobModified.value = true;
+                                },
+                                onOpen: () {
+                                  return controller.getModelsByCarBrand(
+                                    controller.carBrandId.value,
+                                  );
+                                },
+                              ),
+                              valSectionInTheTableForBrands(
+                                controller.carBrandsController,
+                                controller.carBrandId.value,
+                                constraints,
+                                'New Model',
+                              ),
+                            ],
+                          ),
+                          Row(
+                            spacing: 10,
+                            children: [
+                              myTextFormFieldWithBorder(
+                                focusNode: controller.focusNodeForCardDetails4,
+                                width: 115,
+                                controller: controller.year,
+                                labelText: 'Year',
+                                hintText: 'Enter Year',
+                                onChanged: (_) {
+                                  controller.isJobModified.value = true;
+                                },
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  CustomDropdown(
+                                    focusNode:
+                                        controller.focusNodeForCardDetails3,
+                                    nextFocusNode:
+                                        controller.focusNodeForCardDetails4,
+                                    width: 200,
+                                    showedSelectedName: 'name',
+                                    textcontroller: controller.color.text,
+                                    hintText: 'Color',
+                                    onChanged: (key, value) {
+                                      controller.color.text = value['name'];
+                                      controller.colorId.value = key;
+                                      controller.isJobModified.value = true;
+                                    },
+                                    onDelete: () {
+                                      controller.color.clear();
+                                      controller.colorId.value = "";
+                                      controller.isJobModified.value = true;
+                                    },
+                                    onOpen: () async {
+                                      return controller.getColors();
+                                    },
+                                  ),
+                                  valSectionInTheTable(
+                                    controller.listOfValuesController,
+                                    constraints,
+                                    'COLORS',
+                                    'New Color',
+                                    'Colors',
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
+                      const SizedBox(width: 20),
                       Container(
                         alignment: Alignment.centerLeft,
                         child: carLogo(controller.carBrandLogo.value),
                       ),
                     ],
                   ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      CustomDropdown(
-                        focusNode: controller.focusNodeForCardDetails2,
-                        nextFocusNode: controller.focusNodeForCardDetails3,
-                        width: 325,
-                        showedSelectedName: 'name',
-                        textcontroller: controller.carModel.text,
-                        hintText: 'Model',
-                        onChanged: (key, value) {
-                          controller.carModel.text = value['name'];
-                          controller.carModelId.value = key;
-                          controller.isJobModified.value = true;
-                        },
-                        onDelete: () {
-                          controller.carModel.clear();
-                          controller.carModelId.value = "";
-                          controller.isJobModified.value = true;
-                        },
-                        onOpen: () {
-                          return controller.getModelsByCarBrand(
-                            controller.carBrandId.value,
-                          );
-                        },
-                      ),
-                      valSectionInTheTableForBrands(
-                        controller.carBrandsController,
-                        controller.carBrandId.value,
-                        constraints,
-                        'New Model',
-                      ),
-                    ],
-                  ),
-                  Row(
-                    spacing: 10,
-                    children: [
-                      myTextFormFieldWithBorder(
-                        focusNode: controller.focusNodeForCardDetails4,
-                        width: 115,
-                        controller: controller.year,
-                        labelText: 'Year',
-                        hintText: 'Enter Year',
-                        onChanged: (_) {
-                          controller.isJobModified.value = true;
-                        },
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          CustomDropdown(
-                            focusNode: controller.focusNodeForCardDetails3,
-                            nextFocusNode: controller.focusNodeForCardDetails4,
-                            width: 200,
-                            showedSelectedName: 'name',
-                            textcontroller: controller.color.text,
-                            hintText: 'Color',
-                            onChanged: (key, value) {
-                              controller.color.text = value['name'];
-                              controller.colorId.value = key;
-                              controller.isJobModified.value = true;
-                            },
-                            onDelete: () {
-                              controller.color.clear();
-                              controller.colorId.value = "";
-                              controller.isJobModified.value = true;
-                            },
-                            onOpen: () async {
-                              return controller.getColors();
-                            },
-                          ),
-                          valSectionInTheTable(
-                            controller.listOfValuesController,
-                            constraints,
-                            'COLORS',
-                            'New Color',
-                            'Colors',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+
                   Row(
                     spacing: 10,
                     children: [

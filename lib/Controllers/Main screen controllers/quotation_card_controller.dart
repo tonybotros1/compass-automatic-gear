@@ -335,6 +335,7 @@ class QuotationCardController extends GetxController {
           allInvoiceItems.value = newQuotation.invoiceItemsDetails ?? [];
           isQuotationInvoicesModified.value = false;
           isQuotationModified.value = false;
+          allQuotationCards.add(newQuotation);
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {

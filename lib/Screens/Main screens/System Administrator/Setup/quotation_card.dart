@@ -31,119 +31,6 @@ class QuotationCard extends StatelessWidget {
                     builder: (controller) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          spacing: 10,
-                          children: [
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Quotation NO.',
-                              controller: controller.quotaionNumberFilter.value,
-                            ),
-                            CustomDropdown(
-                              width: 200,
-                              showedSelectedName: 'name',
-                              textcontroller:
-                                  controller.carBrandIdFilterName.value.text,
-                              hintText: 'Car Brand',
-                              onChanged: (key, value) async {
-                                controller.carModel.clear();
-                                controller.getModelsByCarBrand(key);
-                                controller.carBrandIdFilter.value = key;
-                                controller.carBrandIdFilterName.value.text =
-                                    value['name'];
-                                controller.carModelIdFilter.value = '';
-                                controller.carModelIdFilterName.value.text = '';
-                              },
-                              onDelete: () {
-                                controller.carModel.clear();
-                                controller.carBrandIdFilter.value = '';
-                                controller.carBrandIdFilterName.value.clear();
-                                controller.carModelIdFilter.value = '';
-                                controller.carModelIdFilterName.value.text = '';
-                              },
-                              onOpen: () {
-                                return controller.getCarBrands();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 200,
-                              showedSelectedName: 'name',
-                              textcontroller:
-                                  controller.carModelIdFilterName.value.text,
-                              hintText: 'Car Model',
-                              onChanged: (key, value) async {
-                                controller.carModelIdFilter.value = key;
-                                controller.carModelIdFilterName.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.carModelIdFilter.value = '';
-                                controller.carModelIdFilterName.value.clear();
-                              },
-                              onOpen: () {
-                                return controller.getModelsByCarBrand(
-                                  controller.carBrandIdFilter.value,
-                                );
-                              },
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Plate NO.',
-                              controller: controller.plateNumberFilter.value,
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 200,
-                              labelText: 'VIN',
-                              controller: controller.vinFilter.value,
-                            ),
-                            CustomDropdown(
-                              width: 300,
-                              textcontroller: controller
-                                  .customerNameIdFilterName
-                                  .value
-                                  .text,
-                              showedSelectedName: 'entity_name',
-                              hintText: 'Customer Name',
-                              onChanged: (key, value) async {
-                                controller.customerNameIdFilterName.value.text =
-                                    value['entity_name'];
-                                controller.customerNameIdFilter.value = key;
-                              },
-                              onDelete: () {
-                                controller.customerNameIdFilterName.value
-                                    .clear();
-                                controller.customerNameIdFilter.value = '';
-                              },
-                              onOpen: () {
-                                return controller.getAllCustomers();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 150,
-                              textcontroller:
-                                  controller.statusFilter.value.text,
-                              showedSelectedName: 'name',
-                              hintText: 'Status',
-                              items: allStatus,
-                              onChanged: (key, value) async {
-                                controller.statusFilter.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.statusFilter.value.clear();
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  GetX<QuotationCardController>(
-                    builder: (controller) {
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
                             minWidth: constraints.maxWidth - 28,
@@ -151,9 +38,119 @@ class QuotationCard extends StatelessWidget {
                           child: Row(
                             spacing: 10,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-
                             children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                spacing: 10,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Quotation NO.',
+                                    controller:
+                                        controller.quotaionNumberFilter.value,
+                                  ),
+                                  // CustomDropdown(
+                                  //   width: 200,
+                                  //   showedSelectedName: 'name',
+                                  //   textcontroller:
+                                  //       controller.carBrandIdFilterName.value.text,
+                                  //   hintText: 'Car Brand',
+                                  //   onChanged: (key, value) async {
+                                  //     controller.carModel.clear();
+                                  //     controller.getModelsByCarBrand(key);
+                                  //     controller.carBrandIdFilter.value = key;
+                                  //     controller.carBrandIdFilterName.value.text =
+                                  //         value['name'];
+                                  //     controller.carModelIdFilter.value = '';
+                                  //     controller.carModelIdFilterName.value.text = '';
+                                  //   },
+                                  //   onDelete: () {
+                                  //     controller.carModel.clear();
+                                  //     controller.carBrandIdFilter.value = '';
+                                  //     controller.carBrandIdFilterName.value.clear();
+                                  //     controller.carModelIdFilter.value = '';
+                                  //     controller.carModelIdFilterName.value.text = '';
+                                  //   },
+                                  //   onOpen: () {
+                                  //     return controller.getCarBrands();
+                                  //   },
+                                  // ),
+                                  // CustomDropdown(
+                                  //   width: 200,
+                                  //   showedSelectedName: 'name',
+                                  //   textcontroller:
+                                  //       controller.carModelIdFilterName.value.text,
+                                  //   hintText: 'Car Model',
+                                  //   onChanged: (key, value) async {
+                                  //     controller.carModelIdFilter.value = key;
+                                  //     controller.carModelIdFilterName.value.text =
+                                  //         value['name'];
+                                  //   },
+                                  //   onDelete: () {
+                                  //     controller.carModelIdFilter.value = '';
+                                  //     controller.carModelIdFilterName.value.clear();
+                                  //   },
+                                  //   onOpen: () {
+                                  //     return controller.getModelsByCarBrand(
+                                  //       controller.carBrandIdFilter.value,
+                                  //     );
+                                  //   },
+                                  // ),
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Plate NO.',
+                                    controller:
+                                        controller.plateNumberFilter.value,
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 200,
+                                    labelText: 'VIN',
+                                    controller: controller.vinFilter.value,
+                                  ),
+                                  CustomDropdown(
+                                    width: 300,
+                                    textcontroller: controller
+                                        .customerNameIdFilterName
+                                        .value
+                                        .text,
+                                    showedSelectedName: 'entity_name',
+                                    hintText: 'Customer Name',
+                                    onChanged: (key, value) async {
+                                      controller
+                                              .customerNameIdFilterName
+                                              .value
+                                              .text =
+                                          value['entity_name'];
+                                      controller.customerNameIdFilter.value =
+                                          key;
+                                    },
+                                    onDelete: () {
+                                      controller.customerNameIdFilterName.value
+                                          .clear();
+                                      controller.customerNameIdFilter.value =
+                                          '';
+                                    },
+                                    onOpen: () {
+                                      return controller.getAllCustomers();
+                                    },
+                                  ),
+                                  CustomDropdown(
+                                    width: 150,
+                                    textcontroller:
+                                        controller.statusFilter.value.text,
+                                    showedSelectedName: 'name',
+                                    hintText: 'Status',
+                                    items: allStatus,
+                                    onChanged: (key, value) async {
+                                      controller.statusFilter.value.text =
+                                          value['name'];
+                                    },
+                                    onDelete: () {
+                                      controller.statusFilter.value.clear();
+                                    },
+                                  ),
+                                ],
+                              ),
                               Row(
                                 spacing: 10,
                                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -180,6 +177,38 @@ class QuotationCard extends StatelessWidget {
                                       );
                                     },
                                   ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  GetX<QuotationCardController>(
+                    builder: (controller) {
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 28,
+                          ),
+                          child: Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+
+                            children: [
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  newQuotationCardButton(
+                                    context,
+                                    constraints,
+                                    controller,
+                                  ),
+                                  const SizedBox(width: 10),
                                   filterButton(
                                     title: 'Today',
                                     onPressed: () {
@@ -234,9 +263,15 @@ class QuotationCard extends StatelessWidget {
                                     isSelected:
                                         controller.isThisYearSelected.value,
                                   ),
+                                ],
+                              ),
+
+                              Row(
+                                spacing: 10,
+                                children: [
                                   const SizedBox(width: 10),
                                   ElevatedButton(
-                                    style: saveButtonStyle,
+                                    style: findButtonStyle,
                                     onPressed: controller.isScreenLoding.isFalse
                                         ? () async {
                                             controller.filterSearch();
@@ -261,11 +296,6 @@ class QuotationCard extends StatelessWidget {
                                     ),
                                   ),
                                 ],
-                              ),
-                              newQuotationCardButton(
-                                context,
-                                constraints,
-                                controller,
                               ),
                             ],
                           ),
@@ -373,8 +403,8 @@ Widget tableOfScreens({
 
   return DataTableTheme(
     data: DataTableThemeData(
-      headingTextStyle: fontStyleForTableHeader,
-      dataTextStyle: regTextStyle,
+      // headingTextStyle: fontStyleForTableHeader,
+      // dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
           return Colors.grey.shade300;
@@ -400,7 +430,7 @@ Widget tableOfScreens({
         columnSpacing: 15,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+        // headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           const DataColumn(label: SizedBox()),
           DataColumn(
@@ -572,7 +602,7 @@ DataRow dataRowForTheTable(
   return DataRow(
     color: WidgetStateProperty.resolveWith<Color?>((states) {
       if (states.contains(WidgetState.selected)) {
-        return Colors.grey.shade400;
+        return coolColor;
       }
       return isEvenRow ? Colors.grey.shade200 : Colors.white;
     }),
@@ -752,6 +782,11 @@ Future<dynamic> editQuotationCardDialog(
                           spacing: 10,
                           children: [
                             separator(),
+                            saveQuotationButton(
+                              () => controller.addNewQuotationCard(),
+                            ),
+                            // point(),
+                            separator(),
                             creatJobButton(quotationId),
                             point(),
                             internalNotesButton(
@@ -760,10 +795,7 @@ Future<dynamic> editQuotationCardDialog(
                               quotationId,
                             ),
                             separator(),
-                            saveQuotationButton(
-                              () => controller.addNewQuotationCard(),
-                            ),
-                            point(),
+
                             copyQuotationButton(quotationId),
                             point(),
                             deleteButton(controller, context, quotationId),
@@ -856,6 +888,10 @@ ElevatedButton newQuotationCardButton(
                                   spacing: 10,
                                   children: [
                                     separator(),
+                                    saveQuotationButton(
+                                      () => controller.addNewQuotationCard(),
+                                    ),
+                                    separator(),
                                     creatJobButton(
                                       controller.curreentQuotationCardId.value,
                                     ),
@@ -865,10 +901,7 @@ ElevatedButton newQuotationCardButton(
                                       constraints,
                                       controller.curreentQuotationCardId.value,
                                     ),
-                                    separator(),
-                                    saveQuotationButton(
-                                      () => controller.addNewQuotationCard(),
-                                    ),
+
                                     separator(),
                                     changeStatusToPostedButton(
                                       controller.curreentQuotationCardId.value,

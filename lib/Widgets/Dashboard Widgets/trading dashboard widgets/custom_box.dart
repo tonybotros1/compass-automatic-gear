@@ -1,3 +1,4 @@
+import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 
 Widget customBox({
@@ -14,7 +15,7 @@ Widget customBox({
     padding: const EdgeInsets.all(8),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(5),
-      color: Colors.grey.shade300,
+      color: coolColor.withValues(alpha: 2),
     ),
     child: LayoutBuilder(
       builder: (context, constraints) {

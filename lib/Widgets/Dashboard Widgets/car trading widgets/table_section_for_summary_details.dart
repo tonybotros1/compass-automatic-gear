@@ -33,7 +33,7 @@ Widget tableOfSummaryDetails({required BuildContext context}) {
             dataRowMinHeight: 30,
             columnSpacing: 5,
             dividerThickness: .3,
-            headingRowColor: const WidgetStatePropertyAll(Color(0xffF4F5F8)),
+            headingRowColor: WidgetStatePropertyAll(coolColor),
             columns: const [
               DataColumn(
                 label: Text('CATEGORY'),
@@ -66,9 +66,6 @@ Widget tableOfSummaryDetails({required BuildContext context}) {
               ),
             ],
             rows: controller.summaryData.map((data) {
-              // int i = controller.summaryData.indexWhere(
-              //   (element) => element['category'] == data['category'],
-              // );
               return dataRowForTheTable(data, controller);
             }).toList(),
           ),
@@ -80,17 +77,9 @@ Widget tableOfSummaryDetails({required BuildContext context}) {
 
 DataRow dataRowForTheTable(
   Map<String, dynamic> data,
-  // int index,
   CarTradingDashboardController controller,
 ) {
-  // final isEvenRow = index % 2 == 0;
   return DataRow(
-    // color: WidgetStateProperty.resolveWith<Color?>((states) {
-    //   if (states.contains(WidgetState.selected)) {
-    //     return Colors.grey.shade400;
-    //   }
-    //   return !isEvenRow ? Colors.grey.shade200 : Colors.white;
-    // }),
     cells: [
       DataCell(
         textForDataRowInTable(text: data['category'], formatDouble: false),

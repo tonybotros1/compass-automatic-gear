@@ -143,11 +143,11 @@ Widget myTextFormField1({
   required String labelText,
   required String hintText,
   required TextEditingController controller,
-  required validate,
-  required obscureText,
+  required bool validate,
+  required bool obscureText,
   IconButton? icon,
-  required constraints,
-  keyboardType,
+  required BoxConstraints constraints,
+  TextInputType? keyboardType,
 }) {
   return Container(
     constraints: BoxConstraints(
@@ -166,6 +166,7 @@ Widget myTextFormField1({
         suffixIcon: icon,
         hintStyle: const TextStyle(color: Colors.grey),
         labelText: labelText,
+        floatingLabelStyle:const TextStyle(fontSize: 20),
         hintText: hintText,
         labelStyle: regTextStyle,
         focusedBorder: const UnderlineInputBorder(

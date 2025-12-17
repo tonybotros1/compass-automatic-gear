@@ -37,4 +37,5 @@ class OutstandingModel {
       updatedAt: DateTime.parse(json['updatedAt']),
     );
   }
+  double get net => receive - pay;
 }

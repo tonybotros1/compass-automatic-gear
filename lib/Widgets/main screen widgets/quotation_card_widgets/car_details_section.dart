@@ -27,114 +27,127 @@ Widget carDetailsSection(
               spacing: 10,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  spacing: 10,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomDropdown(
-                      width: 325,
-                      showedSelectedName: 'name',
-                      textcontroller: controller.carBrand.text,
-                      hintText: 'Brand',
-                      onChanged: (key, value) {
-                        controller.carBrandLogo.value = value['logo'] ?? '';
-                        controller.carBrand.text = value['name'];
-                        controller.getModelsByCarBrand(key);
-                        controller.carBrandId.value = key;
-                        controller.isQuotationModified.value = true;
-                      },
-                      onDelete: () {
-                        controller.carBrandLogo.value = '';
-                        controller.carBrand.clear();
-                        controller.carModel.clear();
-                        controller.carBrandId.value = '';
-                        controller.isQuotationModified.value = true;
-                        controller.isQuotationModified.value = true;
-                      },
-                      onOpen: () {
-                        return controller.getCarBrands();
-                      },
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          spacing: 10,
+                          children: [
+                            CustomDropdown(
+                              width: 325,
+                              showedSelectedName: 'name',
+                              textcontroller: controller.carBrand.text,
+                              hintText: 'Brand',
+                              onChanged: (key, value) {
+                                controller.carBrandLogo.value =
+                                    value['logo'] ?? '';
+                                controller.carBrand.text = value['name'];
+                                controller.getModelsByCarBrand(key);
+                                controller.carBrandId.value = key;
+                                controller.isQuotationModified.value = true;
+                              },
+                              onDelete: () {
+                                controller.carBrandLogo.value = '';
+                                controller.carBrand.clear();
+                                controller.carModel.clear();
+                                controller.carBrandId.value = '';
+                                controller.isQuotationModified.value = true;
+                                controller.isQuotationModified.value = true;
+                              },
+                              onOpen: () {
+                                return controller.getCarBrands();
+                              },
+                            ),
+                          ],
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            CustomDropdown(
+                              width: 325,
+                              showedSelectedName: 'name',
+                              textcontroller: controller.carModel.text,
+                              hintText: 'Model',
+
+                              onChanged: (key, value) {
+                                controller.carModel.text = value['name'];
+                                controller.carModelId.value = key;
+                                controller.isQuotationModified.value = true;
+                              },
+                              onDelete: () {
+                                controller.carModel.clear();
+                                controller.carModelId.value = '';
+                                controller.isQuotationModified.value = true;
+                                controller.isQuotationModified.value = true;
+                              },
+                              onOpen: () {
+                                return controller.getModelsByCarBrand(
+                                  controller.carBrandId.value,
+                                );
+                              },
+                            ),
+                            valSectionInTheTableForBrands(
+                              controller.carBrandsController,
+                              controller.carBrandId.value,
+                              constraints,
+                              'New Model',
+                            ),
+                          ],
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            myTextFormFieldWithBorder(
+                              width: 115,
+                              controller: controller.year,
+                              labelText: 'Year',
+                              hintText: 'Enter Year',
+                              onChanged: (_) {
+                                controller.isQuotationModified.value = true;
+                              },
+                            ),
+                            const SizedBox(width: 10),
+                            CustomDropdown(
+                              width: 200,
+                              showedSelectedName: 'name',
+                              textcontroller: controller.color.text,
+                              hintText: 'Color',
+                              onChanged: (key, value) {
+                                controller.color.text = value['name'];
+                                controller.colorId.value = key;
+                                controller.isQuotationModified.value = true;
+                              },
+                              onDelete: () {
+                                controller.color.clear();
+                                controller.colorId.value = '';
+                                controller.isQuotationModified.value = true;
+                              },
+                              onOpen: () {
+                                return controller.getColors();
+                              },
+                            ),
+                            valSectionInTheTable(
+                              controller.listOfValuesController,
+                              constraints,
+                              'COLORS',
+                              'New Color',
+                              'Colors',
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
+                    const SizedBox(width: 20),
                     Container(
                       alignment: Alignment.centerLeft,
                       child: carLogo(controller.carBrandLogo.value),
                     ),
                   ],
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    CustomDropdown(
-                      width: 325,
-                      showedSelectedName: 'name',
-                      textcontroller: controller.carModel.text,
-                      hintText: 'Model',
 
-                      onChanged: (key, value) {
-                        controller.carModel.text = value['name'];
-                        controller.carModelId.value = key;
-                        controller.isQuotationModified.value = true;
-                      },
-                      onDelete: () {
-                        controller.carModel.clear();
-                        controller.carModelId.value = '';
-                        controller.isQuotationModified.value = true;
-                        controller.isQuotationModified.value = true;
-                      },
-                      onOpen: () {
-                        return controller.getModelsByCarBrand(
-                          controller.carBrandId.value,
-                        );
-                      },
-                    ),
-                    valSectionInTheTableForBrands(
-                      controller.carBrandsController,
-                      controller.carBrandId.value,
-                      constraints,
-                      'New Model',
-                    ),
-                  ],
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    myTextFormFieldWithBorder(
-                      width: 115,
-                      controller: controller.year,
-                      labelText: 'Year',
-                      hintText: 'Enter Year',
-                      onChanged: (_) {
-                        controller.isQuotationModified.value = true;
-                      },
-                    ),
-                    const SizedBox(width: 10),
-                    CustomDropdown(
-                      width: 200,
-                      showedSelectedName: 'name',
-                      textcontroller: controller.color.text,
-                      hintText: 'Color',
-                      onChanged: (key, value) {
-                        controller.color.text = value['name'];
-                        controller.colorId.value = key;
-                        controller.isQuotationModified.value = true;
-                      },
-                      onDelete: () {
-                        controller.color.clear();
-                        controller.colorId.value = '';
-                        controller.isQuotationModified.value = true;
-                      },
-                      onOpen: () {
-                        return controller.getColors();
-                      },
-                    ),
-                    valSectionInTheTable(
-                      controller.listOfValuesController,
-                      constraints,
-                      'COLORS',
-                      'New Color',
-                      'Colors',
-                    ),
-                  ],
-                ),
                 Row(
                   spacing: 10,
                   children: [

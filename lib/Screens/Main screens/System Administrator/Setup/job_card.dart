@@ -31,137 +31,136 @@ class JobCard extends StatelessWidget {
                     builder: (controller) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          spacing: 10,
-                          children: [
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Job No.',
-                              controller: controller.jobNumberFilter.value,
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Invoice No.',
-                              controller: controller.invoiceNumberFilter.value,
-                            ),
-                            CustomDropdown(
-                              width: 200,
-                              showedSelectedName: 'name',
-                              textcontroller:
-                                  controller.carBrandIdFilterName.value.text,
-                              hintText: 'Car Brand',
-                              onChanged: (key, value) async {
-                                controller.getModelsByCarBrand(key);
-                                controller.carBrandIdFilter.value = key;
-                                controller.carBrandIdFilterName.value.text =
-                                    value['name'];
-                                controller.carModelIdFilter.value = '';
-                                controller.carModelIdFilterName.value.text = '';
-                              },
-                              onDelete: () {
-                                controller.carBrandIdFilter.value = "";
-                                controller.carBrandIdFilterName.value.clear();
-                                controller.carModelIdFilter.value = '';
-                                controller.carModelIdFilterName.value.text = '';
-                              },
-                              onOpen: () {
-                                return controller.getCarBrands();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 200,
-                              showedSelectedName: 'name',
-                              textcontroller:
-                                  controller.carModelIdFilterName.value.text,
-                              hintText: 'Car Model',
-                              onChanged: (key, value) async {
-                                controller.carModelIdFilter.value = key;
-                                controller.carModelIdFilterName.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.carModelIdFilter.value = "";
-                                controller.carModelIdFilterName.value.clear();
-                              },
-                              onOpen: () {
-                                return controller.getModelsByCarBrand(
-                                  controller.carBrandIdFilter.value,
-                                );
-                              },
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Plate NO.',
-                              controller: controller.plateNumberFilter.value,
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 200,
-                              labelText: 'VIN',
-                              controller: controller.vinFilter.value,
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 200,
-                              labelText: 'LPO No.',
-                              controller: controller.lpoFilter.value,
-                            ),
-                            CustomDropdown(
-                              width: 300,
-                              textcontroller: controller
-                                  .customerNameIdFilterName
-                                  .value
-                                  .text,
-                              showedSelectedName: 'entity_name',
-                              hintText: 'Customer Name',
-                              onChanged: (key, value) async {
-                                controller.customerNameIdFilterName.value.text =
-                                    value['entity_name'];
-                                controller.customerNameIdFilter.value = key;
-                              },
-                              onDelete: () {
-                                controller.customerNameIdFilterName.value
-                                    .clear();
-                                controller.customerNameIdFilter.value = "";
-                              },
-                              onOpen: () {
-                                return controller.getAllCustomers();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 150,
-                              textcontroller:
-                                  controller.statusFilter.value.text,
-                              showedSelectedName: 'name',
-                              hintText: 'Status',
-                              items: controller.allStatus,
-                              onChanged: (key, value) async {
-                                controller.statusFilter.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.statusFilter.value.clear();
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  GetX<JobCardController>(
-                    builder: (controller) {
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
                             minWidth: constraints.maxWidth - 28,
                           ),
                           child: Row(
-                            spacing: 10,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
-
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            spacing: 10,
                             children: [
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Job No.',
+                                    controller:
+                                        controller.jobNumberFilter.value,
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Invoice No.',
+                                    controller:
+                                        controller.invoiceNumberFilter.value,
+                                  ),
+                                  // CustomDropdown(
+                                  //   width: 200,
+                                  //   showedSelectedName: 'name',
+                                  //   textcontroller:
+                                  //       controller.carBrandIdFilterName.value.text,
+                                  //   hintText: 'Car Brand',
+                                  //   onChanged: (key, value) async {
+                                  //     controller.getModelsByCarBrand(key);
+                                  //     controller.carBrandIdFilter.value = key;
+                                  //     controller.carBrandIdFilterName.value.text =
+                                  //         value['name'];
+                                  //     controller.carModelIdFilter.value = '';
+                                  //     controller.carModelIdFilterName.value.text = '';
+                                  //   },
+                                  //   onDelete: () {
+                                  //     controller.carBrandIdFilter.value = "";
+                                  //     controller.carBrandIdFilterName.value.clear();
+                                  //     controller.carModelIdFilter.value = '';
+                                  //     controller.carModelIdFilterName.value.text = '';
+                                  //   },
+                                  //   onOpen: () {
+                                  //     return controller.getCarBrands();
+                                  //   },
+                                  // ),
+                                  // CustomDropdown(
+                                  //   width: 200,
+                                  //   showedSelectedName: 'name',
+                                  //   textcontroller:
+                                  //       controller.carModelIdFilterName.value.text,
+                                  //   hintText: 'Car Model',
+                                  //   onChanged: (key, value) async {
+                                  //     controller.carModelIdFilter.value = key;
+                                  //     controller.carModelIdFilterName.value.text =
+                                  //         value['name'];
+                                  //   },
+                                  //   onDelete: () {
+                                  //     controller.carModelIdFilter.value = "";
+                                  //     controller.carModelIdFilterName.value.clear();
+                                  //   },
+                                  //   onOpen: () {
+                                  //     return controller.getModelsByCarBrand(
+                                  //       controller.carBrandIdFilter.value,
+                                  //     );
+                                  //   },
+                                  // ),
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Plate NO.',
+                                    controller:
+                                        controller.plateNumberFilter.value,
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 200,
+                                    labelText: 'VIN',
+                                    controller: controller.vinFilter.value,
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 200,
+                                    labelText: 'LPO No.',
+                                    controller: controller.lpoFilter.value,
+                                  ),
+                                  CustomDropdown(
+                                    width: 300,
+                                    textcontroller: controller
+                                        .customerNameIdFilterName
+                                        .value
+                                        .text,
+                                    showedSelectedName: 'entity_name',
+                                    hintText: 'Customer Name',
+                                    onChanged: (key, value) async {
+                                      controller
+                                              .customerNameIdFilterName
+                                              .value
+                                              .text =
+                                          value['entity_name'];
+                                      controller.customerNameIdFilter.value =
+                                          key;
+                                    },
+                                    onDelete: () {
+                                      controller.customerNameIdFilterName.value
+                                          .clear();
+                                      controller.customerNameIdFilter.value =
+                                          "";
+                                    },
+                                    onOpen: () {
+                                      return controller.getAllCustomers();
+                                    },
+                                  ),
+                                  CustomDropdown(
+                                    width: 150,
+                                    textcontroller:
+                                        controller.statusFilter.value.text,
+                                    showedSelectedName: 'name',
+                                    hintText: 'Status',
+                                    items: controller.allStatus,
+                                    onChanged: (key, value) async {
+                                      controller.statusFilter.value.text =
+                                          value['name'];
+                                    },
+                                    onDelete: () {
+                                      controller.statusFilter.value.clear();
+                                    },
+                                  ),
+                                ],
+                              ),
+
                               Row(
                                 spacing: 10,
                                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -190,9 +189,44 @@ class JobCard extends StatelessWidget {
                                   ),
                                 ],
                               ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  GetX<JobCardController>(
+                    builder: (controller) {
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 28,
+                          ),
+                          child: Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+
+                            children: [
                               Row(
                                 spacing: 10,
                                 children: [
+                                  newJobCardButton(
+                                    context,
+                                    constraints,
+                                    controller,
+                                    false,
+                                  ),
+                                  newJobCardButton(
+                                    context,
+                                    constraints,
+                                    controller,
+                                    true,
+                                  ),
+                                  const SizedBox(width: 10),
+
                                   filterButton(
                                     title: 'Today',
                                     onPressed: () {
@@ -252,19 +286,6 @@ class JobCard extends StatelessWidget {
                               Row(
                                 spacing: 10,
                                 children: [
-                                  newJobCardButton(
-                                    context,
-                                    constraints,
-                                    controller,
-                                    false,
-                                  ),
-                                  newJobCardButton(
-                                    context,
-                                    constraints,
-                                    controller,
-                                    true,
-                                  ),
-                                  const SizedBox(width: 10),
                                   ElevatedButton(
                                     style: findButtonStyle,
                                     onPressed: controller.isScreenLoding.isFalse
@@ -369,6 +390,7 @@ class JobCard extends StatelessWidget {
                   GetX<JobCardController>(
                     builder: (controller) {
                       return Container(
+                        padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: const BorderRadius.only(
@@ -446,8 +468,8 @@ Widget tableOfScreens({
 
   return DataTableTheme(
     data: DataTableThemeData(
-      headingTextStyle: fontStyleForTableHeader,
-      dataTextStyle: regTextStyle,
+      // headingTextStyle: fontStyleForTableHeader,
+      // dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
           return Colors.grey.shade300;
@@ -470,7 +492,7 @@ Widget tableOfScreens({
         horizontalMargin: 5,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+        // headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           const DataColumn(
             label: SizedBox(),
@@ -601,11 +623,17 @@ DataRow dataRowForTheTable(
       if (states.contains(WidgetState.selected)) {
         return Colors.grey.shade400;
       }
-      return isEvenRow ? Colors.grey.shade200 : Colors.white;
+      return !isEvenRow ? coolColor : Colors.white;
     }),
     cells: [
       DataCell(
-        editSection(context, jobData, constraints, jobId, jobData.isSales == true ? false : true),
+        editSection(
+          context,
+          jobData,
+          constraints,
+          jobId,
+          jobData.isSales == true ? false : true,
+        ),
       ), // need to be changed
       DataCell(
         jobData.label == 'Draft'
@@ -851,6 +879,10 @@ Future<dynamic> editJobCardDialog(
                           spacing: 10,
                           children: [
                             separator(),
+
+                            saveJobButton(() => controller.addNewJobCard()),
+                            // point(),
+                            separator(),
                             creatQuotationButton(controller, jobId),
                             point(),
                             creatReceiptButton(controller, jobId),
@@ -859,8 +891,7 @@ Future<dynamic> editJobCardDialog(
                             point(),
                             internalNotesButton(controller, constraints, jobId),
                             separator(),
-                            saveJobButton(() => controller.addNewJobCard()),
-                            point(),
+
                             copyJobButton(jobId, context),
                             point(),
                             deleteJobButton(controller, context, jobId),
@@ -979,6 +1010,10 @@ ElevatedButton newJobCardButton(
                                   spacing: 10,
                                   children: [
                                     separator(),
+                                    saveJobButton(
+                                      () => controller.addNewJobCard(),
+                                    ),
+                                    separator(),
                                     creatQuotationButton(
                                       controller,
                                       controller.curreentJobCardId.value,
@@ -996,10 +1031,7 @@ ElevatedButton newJobCardButton(
                                       constraints,
                                       controller.curreentJobCardId.value,
                                     ),
-                                    separator(),
-                                    saveJobButton(
-                                      () => controller.addNewJobCard(),
-                                    ),
+
                                     separator(),
                                     changeStatusToPostedButton(
                                       controller,

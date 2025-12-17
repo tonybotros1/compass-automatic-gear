@@ -14,6 +14,7 @@ import 'Screens/Auth Screens/register_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
 import 'Screens/mobile Screens/main_screen_fro_mobile.dart';
 import 'Widgets/main screen widgets/job_cards_widgets/image_gallery_viewer.dart';
+import 'consts.dart';
 import 'security.dart';
 // import 'package:web/web.dart' as web;
 
@@ -40,12 +41,22 @@ class MyApp extends StatelessWidget {
       title: 'DataHub AI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This changes the background for all Cards, including PaginatedDataTable
-        cardTheme: const CardThemeData(
-          color: Colors.white, // New overall background color
-          elevation: 4,
+        dataTableTheme: DataTableThemeData(
+          headingRowColor: WidgetStatePropertyAll(coolColor),
+          dividerThickness: 0.3,
+          headingTextStyle: TextStyle(
+            color: Colors.grey[700],
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+          // 5. **Default Text Style for Data**
+          dataTextStyle: TextStyle(
+            color: Colors.grey.shade800,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
         ),
-        // 👇 This sets the default background color for all Scaffold pages
+        cardTheme: const CardThemeData(color: Colors.white),
         dialogTheme: const DialogThemeData(
           backgroundColor: Color(0xffF6F9FC),
           shape: RoundedRectangleBorder(
@@ -53,19 +64,13 @@ class MyApp extends StatelessWidget {
           ),
           elevation: 10,
         ),
-        // colorScheme: ColorScheme.fromSeed(
-        //   seedColor: Colors.red, // <-- global focus color
-        // ),
+
         inputDecorationTheme: const InputDecorationTheme(
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.blue, // <-- Global focus color
-              width: 2,
-            ),
+            borderSide: BorderSide(color: Colors.blue, width: 2),
           ),
         ),
       ),
-      // home: PdfPreviewScreen(),
       initialRoute: '/',
       getPages: [
         GetPage(name: '/cardImagesScreen', page: () => CardImagesScreen()),

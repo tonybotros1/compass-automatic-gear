@@ -13,8 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://192.168.1.105:8000';
-String webSocketURL = "ws://192.168.1.105:8000/ws";
+String backendTestURI = 'http://192.168.1.104:8000';
+String webSocketURL = "ws://192.168.1.104:8000/ws";
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -582,11 +582,8 @@ var textStyleForInspectionHints = TextStyle(
 );
 
 var mainColor = const Color(0xff005f95);
-// var mainColor = const Color(0xff27374D);
-// var secColor = const Color(0xff7E99A3);
 var secColor = const Color(0xff9ab0bf);
-// var secColor =  const Color(0xff688f98);
-// var secColor = const Color(0xff526D82);
+var coolColor = const Color(0xffF4F5F8);
 var containerColor = const Color(0xffF5F5F5);
 var textStyleForCardBottomBar = const TextStyle(color: Colors.blueGrey);
 var iconColorForCardBottomBar = Colors.blueGrey;
@@ -1216,10 +1213,11 @@ var loadingProcess = SizedBox(
   width: 20,
   child: CircularProgressIndicator(strokeWidth: 2, color: mainColor),
 );
+
 Container carLogo(String? logo) {
   return Container(
-    height: 40,
-    width: 40,
+    height: 100,
+    width: 100,
     decoration: BoxDecoration(
       shape: BoxShape.circle,
       border: Border.all(color: Colors.grey, width: 2),
