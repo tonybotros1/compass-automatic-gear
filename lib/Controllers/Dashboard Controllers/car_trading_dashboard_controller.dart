@@ -171,6 +171,8 @@ class CarTradingDashboardController extends GetxController {
     {"category": "📜  Expenses"},
   ]);
 
+  final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
+
   @override
   void onInit() async {
     connectWebSocket();
@@ -179,17 +181,6 @@ class CarTradingDashboardController extends GetxController {
     getCapitalsOROutstandingSummary('outstanding');
     filterGeneralExpensesSearch();
     filterSearch();
-    // everAll(
-    //   [
-    //     totalNETsForAllTrades,
-    //     totalNETsForAllCapitals,
-    //     totalNETsForAllGeneralExpenses,
-    //     totalNETsForAllOutstanding,
-    //   ],
-    //   (values) {
-    //     calculateTotalsForAllAndNetProfit();
-    //   },
-    // );
     focusNodeForitems1.addListener(() {
       if (!focusNodeForitems1.hasFocus) {
         normalizeDate(itemDate.value.text, itemDate.value);
@@ -202,6 +193,35 @@ class CarTradingDashboardController extends GetxController {
   void dispose() {
     focusNodeForitems1.dispose();
     super.dispose();
+  }
+
+  void setTodayRange() {
+    final now = DateTime.now();
+
+    final today = DateTime(now.year, now.month, now.day);
+
+    fromDate.value.text = dateFormat.format(today);
+    toDate.value.text = dateFormat.format(today);
+  }
+
+  void setThisMonthRange() {
+    final now = DateTime.now();
+
+    final firstDayOfMonth = DateTime(now.year, now.month, 1);
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+
+    fromDate.value.text = dateFormat.format(firstDayOfMonth);
+    toDate.value.text = dateFormat.format(lastDayOfMonth);
+  }
+
+  void setThisYearRange() {
+    final now = DateTime.now();
+
+    final firstDayOfYear = DateTime(now.year, 1, 1);
+    final lastDayOfYear = DateTime(now.year, 12, 31);
+
+    fromDate.value.text = dateFormat.format(firstDayOfYear);
+    toDate.value.text = dateFormat.format(lastDayOfYear);
   }
 
   // function to manage loading button
@@ -504,7 +524,7 @@ class CarTradingDashboardController extends GetxController {
   Future<void> addNewCapitalOrOutstanding(String type) async {
     try {
       if (itemDate.value.text.isEmpty) {
-        showSnackBar('Alert', 'Please add valid Date');
+        alertMessage(context: Get.context!, content: 'Please add valid Date');
         return;
       }
       final parsedDate = inputFormat.parse(itemDate.value.text);
@@ -546,7 +566,10 @@ class CarTradingDashboardController extends GetxController {
       Get.back();
     } catch (e) {
       Get.back();
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -587,7 +610,7 @@ class CarTradingDashboardController extends GetxController {
   Future<void> updateCapitalOrOutstanding(String id, String type) async {
     try {
       if (itemDate.value.text.isEmpty) {
-        showSnackBar('Alert', 'Please add valid Date');
+        alertMessage(context: Get.context!, content: 'Please add valid Date');
         return;
       }
       final parsedDate = inputFormat.parse(itemDate.value.text);
@@ -626,7 +649,10 @@ class CarTradingDashboardController extends GetxController {
       Get.back();
     } catch (e) {
       Get.back();
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -763,7 +789,7 @@ class CarTradingDashboardController extends GetxController {
   Future<void> addNewGeneralExpenses() async {
     try {
       if (itemDate.value.text.isEmpty) {
-        showSnackBar('Alert', 'Please add valid Date');
+        alertMessage(context: Get.context!, content: 'Please add valid Date');
         return;
       }
       final parsedDate = inputFormat.parse(itemDate.value.text);
@@ -803,7 +829,10 @@ class CarTradingDashboardController extends GetxController {
       Get.back();
     } catch (e) {
       Get.back();
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -844,7 +873,7 @@ class CarTradingDashboardController extends GetxController {
   Future<void> updateGeneralEpenses(String id) async {
     try {
       if (itemDate.value.text.isEmpty) {
-        showSnackBar('Alert', 'Please add valid Date');
+        alertMessage(context: Get.context!, content: 'Please add valid Date');
         return;
       }
       final parsedDate = inputFormat.parse(itemDate.value.text);
@@ -883,7 +912,10 @@ class CarTradingDashboardController extends GetxController {
       Get.back();
     } catch (e) {
       Get.back();
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -946,7 +978,6 @@ class CarTradingDashboardController extends GetxController {
       }
 
       addingNewValue.value = true;
-      bool finishUpdatind = false;
 
       final parsedDate = inputFormat.parse(date.value.text);
       final isoDate = parsedDate.toIso8601String();
@@ -1043,7 +1074,6 @@ class CarTradingDashboardController extends GetxController {
           status.value = 'New';
           itemsModified.value = false;
           carModified.value = false;
-          // showSnackBar('Done', decoded["message"]);
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -1089,7 +1119,6 @@ class CarTradingDashboardController extends GetxController {
           );
           final decoded = jsonDecode(itemsResponse.body);
           if (itemsResponse.statusCode == 200) {
-            finishUpdatind = true;
             final uuids = decoded["items_map"];
             updateIdsFromBackend(uuids);
             itemsModified.value = false;
@@ -1122,7 +1151,6 @@ class CarTradingDashboardController extends GetxController {
           );
           final decoded = jsonDecode(carResponse.body);
           if (carResponse.statusCode == 200) {
-            finishUpdatind = true;
             carModified.value = false;
           } else if (carResponse.statusCode == 401 && refreshToken.isNotEmpty) {
             final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -1142,9 +1170,6 @@ class CarTradingDashboardController extends GetxController {
           }
         }
       }
-      // if (finishUpdatind == true) {
-      //   showSnackBar('Done', 'Trade updated successfully');
-      // }
       addingNewValue.value = false;
     } catch (e) {
       addingNewValue.value = false;
@@ -1302,10 +1327,16 @@ class CarTradingDashboardController extends GetxController {
         logout();
       } else {
         Get.back();
-        showSnackBar('Alert', 'Something went wrong please try again');
+        alertMessage(
+          context: Get.context!,
+          content: 'Something went wrong please try again',
+        );
       }
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 

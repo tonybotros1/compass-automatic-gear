@@ -338,6 +338,32 @@ class CarTradingDashboard extends StatelessWidget {
                                                 controller.fromDate.value,
                                             labelText: 'From Date',
                                             onFieldSubmitted: (_) async {
+                                              controller.isTodaySelected.value =
+                                                  false;
+                                              controller
+                                                      .isThisMonthSelected
+                                                      .value =
+                                                  false;
+                                              controller
+                                                      .isThisYearSelected
+                                                      .value =
+                                                  false;
+                                              normalizeDate(
+                                                controller.fromDate.value.text,
+                                                controller.fromDate.value,
+                                              );
+                                            },
+                                            onTapOutside: (_) {
+                                              controller.isTodaySelected.value =
+                                                  false;
+                                              controller
+                                                      .isThisMonthSelected
+                                                      .value =
+                                                  false;
+                                              controller
+                                                      .isThisYearSelected
+                                                      .value =
+                                                  false;
                                               normalizeDate(
                                                 controller.fromDate.value.text,
                                                 controller.fromDate.value,
@@ -349,6 +375,32 @@ class CarTradingDashboard extends StatelessWidget {
                                             controller: controller.toDate.value,
                                             labelText: 'To Date',
                                             onFieldSubmitted: (_) async {
+                                              controller.isTodaySelected.value =
+                                                  false;
+                                              controller
+                                                      .isThisMonthSelected
+                                                      .value =
+                                                  false;
+                                              controller
+                                                      .isThisYearSelected
+                                                      .value =
+                                                  false;
+                                              normalizeDate(
+                                                controller.toDate.value.text,
+                                                controller.toDate.value,
+                                              );
+                                            },
+                                            onTapOutside: (_) {
+                                              controller.isTodaySelected.value =
+                                                  false;
+                                              controller
+                                                      .isThisMonthSelected
+                                                      .value =
+                                                  false;
+                                              controller
+                                                      .isThisYearSelected
+                                                      .value =
+                                                  false;
                                               normalizeDate(
                                                 controller.toDate.value.text,
                                                 controller.toDate.value,
@@ -384,6 +436,7 @@ class CarTradingDashboard extends StatelessWidget {
                                           filterButton(
                                             title: 'Today',
                                             onPressed: () async {
+                                              controller.setTodayRange();
                                               controller.isTodaySelected.value =
                                                   true;
                                               controller
@@ -394,9 +447,9 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .isThisYearSelected
                                                       .value =
                                                   false;
-                                              controller.filterSearch();
-                                              controller
-                                                  .filterGeneralExpensesSearch();
+                                              // controller.filterSearch();
+                                              // controller
+                                              //     .filterGeneralExpensesSearch();
                                             },
                                             isSelected: controller
                                                 .isTodaySelected
@@ -405,6 +458,7 @@ class CarTradingDashboard extends StatelessWidget {
                                           filterButton(
                                             title: 'This Month',
                                             onPressed: () async {
+                                              controller.setThisMonthRange();
                                               controller.isTodaySelected.value =
                                                   false;
                                               controller
@@ -415,9 +469,9 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .isThisYearSelected
                                                       .value =
                                                   false;
-                                              controller.filterSearch();
-                                              controller
-                                                  .filterGeneralExpensesSearch();
+                                              // controller.filterSearch();
+                                              // controller
+                                              //     .filterGeneralExpensesSearch();
                                             },
                                             isSelected: controller
                                                 .isThisMonthSelected
@@ -426,6 +480,7 @@ class CarTradingDashboard extends StatelessWidget {
                                           filterButton(
                                             title: 'This Year',
                                             onPressed: () async {
+                                              controller.setThisYearRange();
                                               controller.isTodaySelected.value =
                                                   false;
                                               controller
@@ -436,9 +491,9 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .isThisYearSelected
                                                       .value =
                                                   true;
-                                              controller.filterSearch();
-                                              controller
-                                                  .filterGeneralExpensesSearch();
+                                              // controller.filterSearch();
+                                              // controller
+                                              //     .filterGeneralExpensesSearch();
                                             },
                                             isSelected: controller
                                                 .isThisYearSelected
@@ -468,7 +523,7 @@ class CarTradingDashboard extends StatelessWidget {
                                                         .value =
                                                     false;
                                               }
-                                              controller.filterSearch();
+                                              // controller.filterSearch();
                                             },
                                             isSelected: controller
                                                 .isNewStatusSelected
@@ -495,7 +550,7 @@ class CarTradingDashboard extends StatelessWidget {
                                                         .value =
                                                     false;
                                               }
-                                              controller.filterSearch();
+                                              // controller.filterSearch();
                                             },
                                             isSelected: controller
                                                 .isSoldStatusSelected
@@ -514,6 +569,15 @@ class CarTradingDashboard extends StatelessWidget {
                                                     controller.filterSearch();
                                                     controller
                                                         .filterGeneralExpensesSearch();
+                                                    controller.getCashOnHand();
+                                                    controller
+                                                        .getCapitalsOROutstandingSummary(
+                                                          'capitals',
+                                                        );
+                                                    controller
+                                                        .getCapitalsOROutstandingSummary(
+                                                          'outstanding',
+                                                        );
                                                   }
                                                 : null,
                                             child: controller.searching.isFalse
@@ -575,20 +639,7 @@ class CarTradingDashboard extends StatelessWidget {
                                           0xFFFFE8D9,
                                         ).withValues(alpha: 0.8),
                                         textColor: Colors.grey[700],
-                                        showRefreshIcon: true,
-                                        onPressedForRefreshIcon: () {
-                                          controller.getCashOnHand();
-                                          controller
-                                              .getCapitalsOROutstandingSummary(
-                                                'capitals',
-                                              );
-                                          controller
-                                              .getCapitalsOROutstandingSummary(
-                                                'outstanding',
-                                              );
-                                          controller
-                                              .filterGeneralExpensesSearch();
-                                        },
+                                        showRefreshIcon: false,
                                       ),
                                     ),
                                     Expanded(
