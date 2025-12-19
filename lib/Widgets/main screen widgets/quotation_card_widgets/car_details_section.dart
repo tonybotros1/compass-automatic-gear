@@ -30,6 +30,7 @@ Widget carDetailsSection(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Column(
+                      spacing: 10,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(

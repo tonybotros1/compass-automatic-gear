@@ -84,6 +84,7 @@ class Users extends StatelessWidget {
   ) {
     return ElevatedButton(
       onPressed: () {
+        controller.selectedMenu.value = 1;
         controller.name.clear();
         controller.pass.clear();
         controller.email.clear();
@@ -255,22 +256,18 @@ class Users extends StatelessWidget {
     return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
+        controller.selectedMenu.value = 1;
         controller.pass.clear();
         controller.email.text = userData.email;
         controller.name.text = userData.userName;
-        for (var roleId in userData.roles) {
-          controller.selectedRoles.forEach((key, value) {
-            if (value[0] == roleId) {
-              controller.selectedRoles.update(key, (value) => [value[0], true]);
-            }
-          });
-        }
-        // Reset roles not in userData['roles'] to false
-        controller.selectedRoles.forEach((key, value) {
-          if (!userData.roles.contains(value[0])) {
-            controller.selectedRoles.update(key, (value) => [value[0], false]);
-          }
-        });
+        // Sync roles & branches
+        controller.syncSelection(controller.selectedRoles, userData.roles);
+
+        controller.syncSelection(
+          controller.selectedBranches,
+          userData.branches,
+        );
+
         usersDialog(
           userExpiryDate: userData.expiryDate,
           canEdit: false,

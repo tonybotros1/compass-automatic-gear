@@ -1,6 +1,7 @@
 import 'package:datahubai/Models/job%20cards/job_card_model.dart';
 import 'package:datahubai/Widgets/filter_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
@@ -815,120 +816,149 @@ Future<dynamic> editJobCardDialog(
     Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       insetPadding: const EdgeInsets.all(8),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(5),
-                    topRight: Radius.circular(5),
-                  ),
-                  color: headerColor == '' ? mainColor : headerColor,
-                ),
-                padding: const EdgeInsets.all(16),
-                width: constraints.maxWidth,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth - 40,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          spacing: 10,
-                          children: [
-                            Text(
-                              isJob == true
-                                  ? screenName == ''
-                                        ? controller.getScreenName()
-                                        : screenName
-                                  : "Sales Invoices",
-                              style: fontStyleForScreenNameUsedInButtons,
-                            ),
-                            GetX<JobCardController>(
-                              builder: (ctl) {
-                                if (ctl.jobStatus2.value.isNotEmpty &&
-                                    ctl.jobStatus1.value.isNotEmpty) {
-                                  return statusBox(
-                                    ctl.jobStatus1.value == 'Posted'
-                                        ? (isBeforeToday(
-                                                ctl
-                                                    .jobWarrentyEndDate
-                                                    .value
-                                                    .text,
-                                              )
-                                              ? 'Closed'
-                                              : 'Warranty')
-                                        : ctl.jobStatus2.value,
-                                    hieght: 35,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 5,
-                                    ),
-                                  );
-                                }
-                                return const SizedBox();
-                              },
-                            ),
-                          ],
-                        ),
-                        Row(
-                          spacing: 10,
-                          children: [
-                            separator(),
-
-                            saveJobButton(() => controller.addNewJobCard()),
-                            // point(),
-                            separator(),
-                            creatQuotationButton(controller, jobId),
-                            point(),
-                            creatReceiptButton(controller, jobId),
-                            point(),
-                            inspectionFormButton(controller, jobId, context),
-                            point(),
-                            internalNotesButton(controller, constraints, jobId),
-                            separator(),
-
-                            copyJobButton(jobId, context),
-                            point(),
-                            deleteJobButton(controller, context, jobId),
-                            separator(),
-                            changeStatusToPostedButton(controller, jobId),
-                            point(),
-                            changeStatusToCancelledButton(jobId),
-                            point(),
-                            changeStatusToNewButton(jobId),
-                            point(),
-                            changeStatusToApproveButton(jobId),
-                            point(),
-                            changeStatusToReadyButton(jobId),
-                            separator(),
-                            closeIcon(),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: addNewJobCardOrEdit(
-                    jobId: jobId,
-                    controller: controller,
-                    constraints: constraints,
-                    context: context,
-                    isJob: isJob,
-                  ),
-                ),
-              ),
-            ],
-          );
+      child: Shortcuts(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.keyS, control: true): SaveIntent(),
+          SingleActivator(LogicalKeyboardKey.keyS, meta: true): SaveIntent(),
         },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            SaveIntent: CallbackAction(
+              onInvoke: (intent) {
+                controller.addNewJobCard();
+                return null;
+              },
+            ),
+          },
+          child: Focus(
+            autofocus: true,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(5),
+                          topRight: Radius.circular(5),
+                        ),
+                        color: headerColor == '' ? mainColor : headerColor,
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      width: constraints.maxWidth,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 40,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  Text(
+                                    isJob == true
+                                        ? screenName == ''
+                                              ? controller.getScreenName()
+                                              : screenName
+                                        : "Sales Invoices",
+                                    style: fontStyleForScreenNameUsedInButtons,
+                                  ),
+                                  GetX<JobCardController>(
+                                    builder: (ctl) {
+                                      if (ctl.jobStatus2.value.isNotEmpty &&
+                                          ctl.jobStatus1.value.isNotEmpty) {
+                                        return statusBox(
+                                          ctl.jobStatus1.value == 'Posted'
+                                              ? (isBeforeToday(
+                                                      ctl
+                                                          .jobWarrentyEndDate
+                                                          .value
+                                                          .text,
+                                                    )
+                                                    ? 'Closed'
+                                                    : 'Warranty')
+                                              : ctl.jobStatus2.value,
+                                          hieght: 35,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 5,
+                                          ),
+                                        );
+                                      }
+                                      return const SizedBox();
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  separator(),
+
+                                  saveJobButton(
+                                    () => controller.addNewJobCard(),
+                                  ),
+                                  // point(),
+                                  separator(),
+                                  creatQuotationButton(controller, jobId),
+                                  point(),
+                                  creatReceiptButton(controller, jobId),
+                                  point(),
+                                  inspectionFormButton(
+                                    controller,
+                                    jobId,
+                                    context,
+                                  ),
+                                  point(),
+                                  internalNotesButton(
+                                    controller,
+                                    constraints,
+                                    jobId,
+                                  ),
+                                  separator(),
+
+                                  copyJobButton(jobId, context),
+                                  point(),
+                                  deleteJobButton(controller, context, jobId),
+                                  separator(),
+                                  changeStatusToPostedButton(controller, jobId),
+                                  point(),
+                                  changeStatusToCancelledButton(jobId),
+                                  point(),
+                                  changeStatusToNewButton(jobId),
+                                  point(),
+                                  changeStatusToApproveButton(jobId),
+                                  point(),
+                                  changeStatusToReadyButton(jobId),
+                                  separator(),
+                                  closeIcon(),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: addNewJobCardOrEdit(
+                          jobId: jobId,
+                          controller: controller,
+                          constraints: constraints,
+                          context: context,
+                          isJob: isJob,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
       ),
     ),
   );
@@ -950,135 +980,163 @@ ElevatedButton newJobCardButton(
           backgroundColor: const Color(0xffF6F9FC),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           insetPadding: const EdgeInsets.all(8),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                children: [
-                  GetX<JobCardController>(
-                    builder: (controller) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(5),
-                            topRight: Radius.circular(5),
-                          ),
-                          color: mainColor,
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        width: constraints.maxWidth,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minWidth: constraints.maxWidth - 40,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  spacing: 10,
-                                  children: [
-                                    Text(
-                                      isJob == true
-                                          ? controller.getScreenName()
-                                          : "🏷️ Sales Invoices",
-                                      style:
-                                          fontStyleForScreenNameUsedInButtons,
-                                    ),
-                                    controller.jobStatus2.value.isNotEmpty
-                                        ? statusBox(
-                                            controller.jobStatus1.value ==
-                                                    'Posted'
-                                                ? ((isBeforeToday(
-                                                        controller
-                                                            .jobWarrentyEndDate
-                                                            .value
-                                                            .text,
-                                                      ))
-                                                      ? 'Closed'
-                                                      : 'Warranty')
-                                                : (controller.jobStatus2.value),
-                                            hieght: 35,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 5,
-                                            ),
-                                          )
-                                        : const SizedBox(),
-                                  ],
-                                ),
-                                Row(
-                                  spacing: 10,
-                                  children: [
-                                    separator(),
-                                    saveJobButton(
-                                      () => controller.addNewJobCard(),
-                                    ),
-                                    separator(),
-                                    creatQuotationButton(
-                                      controller,
-                                      controller.curreentJobCardId.value,
-                                    ),
-                                    point(),
+          child: Shortcuts(
+            shortcuts: const <ShortcutActivator, Intent>{
+              // Ctrl + S on Windows/Linux
+              SingleActivator(LogicalKeyboardKey.keyS, control: true):
+                  SaveIntent(),
 
-                                    creatReceiptButton(
-                                      controller,
-                                      controller.curreentJobCardId.value,
-                                    ),
-
-                                    point(),
-                                    internalNotesButton(
-                                      controller,
-                                      constraints,
-                                      controller.curreentJobCardId.value,
-                                    ),
-
-                                    separator(),
-                                    changeStatusToPostedButton(
-                                      controller,
-                                      controller.curreentJobCardId.value,
-                                    ),
-                                    point(),
-                                    changeStatusToCancelledButton(
-                                      controller.curreentJobCardId.value,
-                                    ),
-                                    point(),
-                                    changeStatusToNewButton(
-                                      controller.curreentJobCardId.value,
-                                    ),
-                                    point(),
-                                    changeStatusToApproveButton(
-                                      controller.curreentJobCardId.value,
-                                    ),
-                                    point(),
-                                    changeStatusToReadyButton(
-                                      controller.curreentJobCardId.value,
-                                    ),
-                                    separator(),
-                                    closeIcon(),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: addNewJobCardOrEdit(
-                        jobId: controller.curreentJobCardId.value,
-                        controller: controller,
-                        constraints: constraints,
-                        context: context,
-                        isJob: isJob,
-                      ),
-                    ),
-                  ),
-                ],
-              );
+              // Command + S on macOS
+              SingleActivator(LogicalKeyboardKey.keyS, meta: true):
+                  SaveIntent(),
             },
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                SaveIntent: CallbackAction(
+                  onInvoke: (intent) {
+                    controller.addNewJobCard();
+                    return null;
+                  },
+                ),
+              },
+              child: Focus(
+                autofocus: true,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Column(
+                      children: [
+                        GetX<JobCardController>(
+                          builder: (controller) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(5),
+                                  topRight: Radius.circular(5),
+                                ),
+                                color: mainColor,
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              width: constraints.maxWidth,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minWidth: constraints.maxWidth - 40,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        spacing: 10,
+                                        children: [
+                                          Text(
+                                            isJob == true
+                                                ? controller.getScreenName()
+                                                : "🏷️ Sales Invoices",
+                                            style:
+                                                fontStyleForScreenNameUsedInButtons,
+                                          ),
+                                          controller.jobStatus2.value.isNotEmpty
+                                              ? statusBox(
+                                                  controller.jobStatus1.value ==
+                                                          'Posted'
+                                                      ? ((isBeforeToday(
+                                                              controller
+                                                                  .jobWarrentyEndDate
+                                                                  .value
+                                                                  .text,
+                                                            ))
+                                                            ? 'Closed'
+                                                            : 'Warranty')
+                                                      : (controller
+                                                            .jobStatus2
+                                                            .value),
+                                                  hieght: 35,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 5,
+                                                      ),
+                                                )
+                                              : const SizedBox(),
+                                        ],
+                                      ),
+                                      Row(
+                                        spacing: 10,
+                                        children: [
+                                          separator(),
+                                          saveJobButton(
+                                            () => controller.addNewJobCard(),
+                                          ),
+                                          separator(),
+                                          creatQuotationButton(
+                                            controller,
+                                            controller.curreentJobCardId.value,
+                                          ),
+                                          point(),
+
+                                          creatReceiptButton(
+                                            controller,
+                                            controller.curreentJobCardId.value,
+                                          ),
+
+                                          point(),
+                                          internalNotesButton(
+                                            controller,
+                                            constraints,
+                                            controller.curreentJobCardId.value,
+                                          ),
+
+                                          separator(),
+                                          changeStatusToPostedButton(
+                                            controller,
+                                            controller.curreentJobCardId.value,
+                                          ),
+                                          point(),
+                                          changeStatusToCancelledButton(
+                                            controller.curreentJobCardId.value,
+                                          ),
+                                          point(),
+                                          changeStatusToNewButton(
+                                            controller.curreentJobCardId.value,
+                                          ),
+                                          point(),
+                                          changeStatusToApproveButton(
+                                            controller.curreentJobCardId.value,
+                                          ),
+                                          point(),
+                                          changeStatusToReadyButton(
+                                            controller.curreentJobCardId.value,
+                                          ),
+                                          separator(),
+                                          closeIcon(),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: addNewJobCardOrEdit(
+                              jobId: controller.curreentJobCardId.value,
+                              controller: controller,
+                              constraints: constraints,
+                              context: context,
+                              isJob: isJob,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
         ),
       );

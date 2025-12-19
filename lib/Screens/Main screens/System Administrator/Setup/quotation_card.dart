@@ -2,6 +2,7 @@ import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
 import 'package:datahubai/Widgets/filter_button.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/quotation_card_controller.dart';
 import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
@@ -224,7 +225,7 @@ class QuotationCard extends StatelessWidget {
                                       controller.searchEngine({"today": true});
                                     },
                                     isSelected:
-                                        controller.isTodaySelected.canUpdate,
+                                        controller.isTodaySelected.value,
                                   ),
                                   filterButton(
                                     title: 'This Month',
@@ -795,10 +796,14 @@ Future<dynamic> editQuotationCardDialog(
                               quotationId,
                             ),
                             separator(),
-
+          
                             copyQuotationButton(quotationId),
                             point(),
-                            deleteButton(controller, context, quotationId),
+                            deleteButton(
+                              controller,
+                              context,
+                              quotationId,
+                            ),
                             separator(),
                             changeStatusToPostedButton(quotationId),
                             point(),
@@ -844,97 +849,134 @@ ElevatedButton newQuotationCardButton(
         Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           insetPadding: const EdgeInsets.all(8),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                children: [
-                  GetX<QuotationCardController>(
-                    builder: (controller) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(5),
-                            topRight: Radius.circular(5),
-                          ),
-                          color: mainColor,
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        width: constraints.maxWidth,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minWidth: constraints.maxWidth - 40,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  spacing: 10,
-                                  children: [
-                                    Text(
-                                      controller.getScreenName(),
-                                      style:
-                                          fontStyleForScreenNameUsedInButtons,
-                                    ),
-                                    controller.quotationStatus.value.isNotEmpty
-                                        ? statusBox(
-                                            controller.quotationStatus.value,
-                                          )
-                                        : const SizedBox(),
-                                  ],
-                                ),
-                                Row(
-                                  spacing: 10,
-                                  children: [
-                                    separator(),
-                                    saveQuotationButton(
-                                      () => controller.addNewQuotationCard(),
-                                    ),
-                                    separator(),
-                                    creatJobButton(
-                                      controller.curreentQuotationCardId.value,
-                                    ),
-                                    point(),
-                                    internalNotesButton(
-                                      controller,
-                                      constraints,
-                                      controller.curreentQuotationCardId.value,
-                                    ),
-
-                                    separator(),
-                                    changeStatusToPostedButton(
-                                      controller.curreentQuotationCardId.value,
-                                    ),
-                                    point(),
-                                    changeStatusToCanceledButton(
-                                      controller.curreentQuotationCardId.value,
-                                    ),
-                                    separator(),
-                                    closeIcon(),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: addNewQuotationCardOrEdit(
-                        quotaionId: controller.curreentQuotationCardId.value,
-                        controller: controller,
-                        constraints: constraints,
-                        context: context,
-                      ),
-                    ),
-                  ),
-                ],
-              );
+          child: Shortcuts(
+            shortcuts: const <ShortcutActivator, Intent>{
+              SingleActivator(LogicalKeyboardKey.keyS, control: true):
+                  SaveIntent(),
+              SingleActivator(LogicalKeyboardKey.keyS, meta: true):
+                  SaveIntent(),
             },
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                SaveIntent: CallbackAction(
+                  onInvoke: (intent) {
+                    controller.addNewQuotationCard();
+                    return null;
+                  },
+                ),
+              },
+              child: Focus(
+                autofocus: true,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Column(
+                      children: [
+                        GetX<QuotationCardController>(
+                          builder: (controller) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(5),
+                                  topRight: Radius.circular(5),
+                                ),
+                                color: mainColor,
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              width: constraints.maxWidth,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minWidth: constraints.maxWidth - 40,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        spacing: 10,
+                                        children: [
+                                          Text(
+                                            controller.getScreenName(),
+                                            style:
+                                                fontStyleForScreenNameUsedInButtons,
+                                          ),
+                                          controller
+                                                  .quotationStatus
+                                                  .value
+                                                  .isNotEmpty
+                                              ? statusBox(
+                                                  controller
+                                                      .quotationStatus
+                                                      .value,
+                                                )
+                                              : const SizedBox(),
+                                        ],
+                                      ),
+                                      Row(
+                                        spacing: 10,
+                                        children: [
+                                          separator(),
+                                          saveQuotationButton(
+                                            () => controller
+                                                .addNewQuotationCard(),
+                                          ),
+                                          separator(),
+                                          creatJobButton(
+                                            controller
+                                                .curreentQuotationCardId
+                                                .value,
+                                          ),
+                                          point(),
+                                          internalNotesButton(
+                                            controller,
+                                            constraints,
+                                            controller
+                                                .curreentQuotationCardId
+                                                .value,
+                                          ),
+
+                                          separator(),
+                                          changeStatusToPostedButton(
+                                            controller
+                                                .curreentQuotationCardId
+                                                .value,
+                                          ),
+                                          point(),
+                                          changeStatusToCanceledButton(
+                                            controller
+                                                .curreentQuotationCardId
+                                                .value,
+                                          ),
+                                          separator(),
+                                          closeIcon(),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: addNewQuotationCardOrEdit(
+                              quotaionId:
+                                  controller.curreentQuotationCardId.value,
+                              controller: controller,
+                              constraints: constraints,
+                              context: context,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
         ),
       );

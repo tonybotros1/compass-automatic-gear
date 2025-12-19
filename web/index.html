@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -27,7 +28,7 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>DataHub AI</title>
   <link rel="manifest" href="manifest.json">
@@ -38,9 +39,17 @@
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer=""></script>
-  
+  <script>
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+      }
+    });
+  </script>
+
 
 </head>
+
 <body>
   <script src="flutter_bootstrap.js" async></script>
 
@@ -54,12 +63,12 @@
     import { getFunctions } from 'firebase/functions';
     import { getMessaging, getToken } from "firebase/messaging";
 
-    
 
-  
+
+
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
-  
+
     // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBkdkjdZyEn4_d436x4Jq_G_39jVynXX1k",
@@ -70,7 +79,7 @@
       appId: "1:660504023083:web:becd167feb642c230b9a6e",
       // measurementId: "G-LDQZ5NLESB"
     };
-  
+
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
@@ -81,10 +90,10 @@
 
     // subsequent calls to getToken will return from cache.
     const messaging = getMessaging();
-    
-    
 
-  
+
+
+
 
   </script>
 
@@ -92,4 +101,5 @@
 
 
 </body>
+
 </html>

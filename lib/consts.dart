@@ -13,8 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://192.168.43.58:8000'; //home : 192.168.1.104
-String webSocketURL = "ws://192.168.43.58:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://192.168.1.104:8000'; //home : 192.168.1.104
+String webSocketURL = "ws://192.168.1.104:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -1460,4 +1460,8 @@ Future<void> logout() async {
   } catch (e) {
     showSnackBar('Alert', 'Can\'t logout');
   }
+}
+
+class SaveIntent extends Intent {
+  const SaveIntent();
 }

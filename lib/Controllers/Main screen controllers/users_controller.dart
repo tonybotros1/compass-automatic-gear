@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/users/users_model.dart';
+import '../../Widgets/Auth screens widgets/register widgets/add_new_user_and_view.dart';
 import '../../consts.dart';
 import 'main_screen_contro.dart';
 import 'package:http/http.dart' as http;
@@ -21,6 +22,7 @@ class UsersController extends GetxController {
   RxString theDate = RxString('');
   List<String> areaName = [];
   RxMap selectedRoles = RxMap({});
+  RxMap selectedBranches = RxMap({});
   RxBool isScreenLoding = RxBool(false);
   final RxList<UsersModel> allUsers = RxList<UsersModel>([]);
   final RxList<UsersModel> filteredUsers = RxList<UsersModel>([]);
@@ -31,9 +33,11 @@ class UsersController extends GetxController {
   WebSocketService ws = Get.find<WebSocketService>();
   String backendUrl = backendTestURI;
   RxBool isLoading = RxBool(false);
+  RxInt selectedMenu = RxInt(1);
 
   @override
   void onInit() {
+    getBranches();
     connectWebSocket();
     getRoles();
     getAllUsers();
@@ -44,6 +48,22 @@ class UsersController extends GetxController {
   void onClose() {
     Get.delete<UsersController>();
     super.onClose();
+  }
+
+  Widget buildContent(int index) {
+    switch (index) {
+      case 1:
+        return rolesSection(key: const ValueKey('roles'));
+      case 2:
+        return branchesSection(key: const ValueKey('branches'));
+
+      default:
+        return const Text('4');
+    }
+  }
+
+  void selectFromTab(int i) {
+    selectedMenu.value = i;
   }
 
   void connectWebSocket() {
@@ -119,7 +139,8 @@ class UsersController extends GetxController {
       if (name.text.isEmpty ||
           email.text.isEmpty ||
           pass.text.isEmpty ||
-          selectedRoles.isEmpty) {
+          selectedRoles.isEmpty ||
+          selectedBranches.isEmpty) {
         showSnackBar('Note', 'Please fill all fields');
         return;
       }
@@ -139,6 +160,10 @@ class UsersController extends GetxController {
           "email": email.text.toLowerCase(),
           "password": pass.text,
           "roles": selectedRoles.entries
+              .where((entry) => entry.value[1] == true)
+              .map((entry) => entry.value[0])
+              .toList(),
+          "branches": selectedBranches.entries
               .where((entry) => entry.value[1] == true)
               .map((entry) => entry.value[0])
               .toList(),
@@ -215,6 +240,10 @@ class UsersController extends GetxController {
       Map updatedData = {
         "user_name": name.text,
         "roles": selectedRoles.entries
+            .where((entry) => entry.value[1] == true)
+            .map((entry) => entry.value[0])
+            .toList(),
+        "branches": selectedBranches.entries
             .where((entry) => entry.value[1] == true)
             .map((entry) => entry.value[0])
             .toList(),
@@ -404,5 +433,34 @@ class UsersController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> getBranches() async {
+    try {
+      isLoading.value = true;
+      RxMap branchesMap = RxMap(await helper.getBrunches());
+      Map<String, List<dynamic>> tempSelectedBrunches = {};
+      for (var branch in branchesMap.values) {
+        tempSelectedBrunches[branch['name']] = [branch["_id"], false];
+      }
+      selectedBranches.assignAll(tempSelectedBrunches);
+    } catch (e) {
+      isLoading.value = false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void syncSelection(
+    Map targetMap,
+    List<dynamic> selectedIds,
+  ) {
+    final selectedSet = selectedIds.toSet();
+
+    targetMap.updateAll((key, value) {
+      final id = value[0];
+      final isSelected = selectedSet.contains(id);
+      return [id, isSelected];
+    });
   }
 }

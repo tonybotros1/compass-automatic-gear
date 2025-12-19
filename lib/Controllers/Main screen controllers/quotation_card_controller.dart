@@ -173,6 +173,7 @@ class QuotationCardController extends GetxController {
   ScrollController scrollerForCustomer = ScrollController();
   ScrollController scrollerForQuotationSection = ScrollController();
 
+
   @override
   void onInit() async {
     super.onInit();
