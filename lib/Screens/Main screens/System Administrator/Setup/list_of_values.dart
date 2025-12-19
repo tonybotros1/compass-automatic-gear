@@ -212,8 +212,9 @@ IconButton valSectionInTheTable(
 ) {
   return IconButton(
     onPressed: () {
-      controller.searchForValues.value.clear();
       controller.valueMap.clear();
+      controller.searchForValues.value.clear();
+      controller.filterValues();
       controller.listIDToWorkWithNewValue.value = listId;
       controller.getListValues(listId, listData['mastered_by_id']);
       Get.dialog(

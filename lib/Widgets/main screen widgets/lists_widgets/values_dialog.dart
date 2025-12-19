@@ -16,8 +16,8 @@ Future<dynamic> valuesDialog({
     Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
-        height: 300,
-        width: constraints.maxWidth / 2.5,
+        height: 250,
+        width: constraints.maxWidth / 2,
         child: Column(
           children: [
             Container(

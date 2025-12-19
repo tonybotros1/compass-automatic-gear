@@ -196,6 +196,8 @@ IconButton valSectionInTheTable(
 ) {
   return IconButton(
     onPressed: () {
+      controller.searchForModels.value.clear();
+      controller.filterModels();
       controller.getModelsValues(brandId);
       controller.brandIdToWorkWith.value = brandId;
       Get.dialog(
@@ -324,6 +326,7 @@ ElevatedButton newbrandButton(
       controller.logoUrl.value = '';
       controller.logoSelectedError.value = false;
       controller.brandName.clear();
+      controller.search.value.clear();
       carBrandsDialog(
         constraints: constraints,
         controller: controller,

@@ -1,3 +1,4 @@
+import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
@@ -30,6 +31,7 @@ Widget buySellSection({
             GetBuilder<CarTradingDashboardController>(
               builder: (controller) {
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 10,
                   children: [
                     Row(
@@ -94,6 +96,30 @@ Widget buySellSection({
                         ),
                       ],
                     ),
+                    myTextFormFieldWithBorder(
+                      width: 200,
+                      labelText: 'Warranty End Date',
+                      isDate: true,
+                      suffixIcon: IconButton(
+                        focusNode: FocusNode(skipTraversal: true),
+                        onPressed: () async {
+                          selectDateContext(
+                            context,
+                            controller.warrantyEndDate.value,
+                          );
+                          controller.carModified.value = true;
+                        },
+
+                        icon: const Icon(Icons.date_range),
+                      ),
+                      controller: controller.warrantyEndDate.value,
+                      onFieldSubmitted: (_) async {
+                        normalizeDate(
+                          controller.warrantyEndDate.value.text,
+                          controller.warrantyEndDate.value,
+                        );
+                      },
+                    ),
                   ],
                 );
               },
@@ -101,6 +127,7 @@ Widget buySellSection({
             GetBuilder<CarTradingDashboardController>(
               builder: (controller) {
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 10,
                   children: [
                     Row(
@@ -164,6 +191,30 @@ Widget buySellSection({
                           'Buyers and Sellers',
                         ),
                       ],
+                    ),
+                    myTextFormFieldWithBorder(
+                      width: 200,
+                      labelText: 'Service Contract End Date',
+                      isDate: true,
+                      suffixIcon: IconButton(
+                        focusNode: FocusNode(skipTraversal: true),
+                        onPressed: () async {
+                          selectDateContext(
+                            context,
+                            controller.serviceContractEndDate.value,
+                          );
+                          controller.carModified.value = true;
+                        },
+
+                        icon: const Icon(Icons.date_range),
+                      ),
+                      controller: controller.serviceContractEndDate.value,
+                      onFieldSubmitted: (_) async {
+                        normalizeDate(
+                          controller.serviceContractEndDate.value.text,
+                          controller.serviceContractEndDate.value,
+                        );
+                      },
                     ),
                   ],
                 );

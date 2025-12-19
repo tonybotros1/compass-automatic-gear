@@ -49,6 +49,10 @@ Widget customerDetailsSection(
                             controller.onSelectForCustomers(key, value);
                             controller.customerId.value = key;
                             controller.isJobModified.value = true;
+                            controller.jobWarrentyDays.value.text =
+                                value.containsKey('warranty_days')
+                                ? value['warranty_days'].toString()
+                                : '0';
                           },
                           onDelete: () {
                             controller.customerName.clear();

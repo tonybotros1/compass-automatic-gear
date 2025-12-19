@@ -17,6 +17,7 @@ class EntityInformationsController extends GetxController {
   TextEditingController entityName = TextEditingController();
   TextEditingController groupName = TextEditingController();
   TextEditingController creditLimit = TextEditingController();
+  TextEditingController warrantyDays = TextEditingController();
   TextEditingController trn = TextEditingController();
   Rx<TextEditingController> industry = TextEditingController().obs;
   Rx<TextEditingController> salesMAn = TextEditingController().obs;
@@ -217,6 +218,9 @@ class EntityInformationsController extends GetxController {
         "credit_limit": creditLimit.text.isEmpty
             ? '0'
             : creditLimit.text.trim(),
+        "warranty_days": warrantyDays.text.isEmpty
+            ? '0'
+            : warrantyDays.text.trim(),
         "salesman_id": salesManId.value,
         "entity_status": entityStatus.value,
         "group_name": groupName.text.trim(),
@@ -284,6 +288,9 @@ class EntityInformationsController extends GetxController {
         "credit_limit": creditLimit.text.isEmpty
             ? '0'
             : creditLimit.text.trim(),
+        "warranty_days": warrantyDays.text.isEmpty
+            ? '0'
+            : warrantyDays.text.trim(),
         "salesman_id": salesManId.value,
         "entity_status": entityStatus.value,
         "group_name": groupName.text.trim(),
@@ -409,6 +416,7 @@ class EntityInformationsController extends GetxController {
     creditLimit.text = (entityData.creditLimit ?? '').toString();
     groupName.text = entityData.groupName ?? '';
     trn.text = entityData.trn ?? '';
+    warrantyDays.text = entityData.warrantyDays.toString();
 
     isCustomerSelected.value =
         entityData.entityCode?.contains('Customer') ?? false;
@@ -438,6 +446,7 @@ class EntityInformationsController extends GetxController {
 
   void clearAllVariables() {
     entityName.clear();
+    warrantyDays.text = '0';
     entityCode.assign('Customer');
     isVendorSelected.value = false;
     creditLimit.clear();

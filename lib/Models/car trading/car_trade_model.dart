@@ -34,6 +34,8 @@ class CarTradeModel {
   String? note;
   DateTime? date;
   double? net;
+  DateTime? warrantyEndDate;
+  DateTime? serviceContractEndDate;
 
   CarTradeModel({
     this.id,
@@ -69,6 +71,8 @@ class CarTradeModel {
     this.boughtById,
     this.soldBy,
     this.soldById,
+    this.warrantyEndDate,
+    this.serviceContractEndDate,
   });
 
   DateTime? parseDate(String? dateStr) {
@@ -87,6 +91,12 @@ class CarTradeModel {
     soldTo = json['sold_to'] ?? '';
     soldToId = json['sold_to_id'] ?? '';
     date = parseDate(json['date']);
+    warrantyEndDate = json.containsKey('warranty_end_date')
+        ? parseDate(json['warranty_end_date'])
+        : null;
+    serviceContractEndDate = json.containsKey('service_contract_end_date')
+        ? parseDate(json['service_contract_end_date'])
+        : null;
     buyDate = parseDate(json['buy_date']);
     sellDate = parseDate(json['sell_date']);
     carBrand = json['car_brand'] ?? '';
@@ -109,7 +119,9 @@ class CarTradeModel {
     soldBy = json.containsKey('sold_by') ? json['sold_by'] ?? '' : '';
     soldById = json.containsKey('sold_by_id') ? json['sold_by_id'] ?? '' : '';
     boughtBy = json.containsKey('bought_by') ? json['bought_by'] ?? '' : '';
-    boughtById = json.containsKey('bought_by_id') ? json['bought_by_id'] ?? '' : '';
+    boughtById = json.containsKey('bought_by_id')
+        ? json['bought_by_id'] ?? ''
+        : '';
     totalPay = (json['total_pay'] is num)
         ? (json['total_pay'] as num).toDouble()
         : 0;

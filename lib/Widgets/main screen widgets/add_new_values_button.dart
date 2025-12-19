@@ -25,8 +25,9 @@ Widget valSectionInTheTable(
             Map jsonData = await helper.getListDetails(code);
             String listId = jsonData['_id'];
             String masteredBy = jsonData['mastered_by'];
-            controller.searchForValues.value.clear();
             controller.valueMap.clear();
+            controller.searchForValues.value.clear();
+            controller.filterValues();
             controller.listIDToWorkWithNewValue.value = listId;
             controller.getListValues(listId, masteredBy);
             Get.dialog(

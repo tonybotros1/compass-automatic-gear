@@ -378,36 +378,6 @@ class CarTradingDashboard extends StatelessWidget {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      // Row(
-                                      //   crossAxisAlignment:
-                                      //       CrossAxisAlignment.end,
-                                      //   spacing: 10,
-                                      //   children: [
-                                      //     myTextFormFieldWithBorder(
-                                      //       width: 170,
-                                      //       controller:
-                                      //           controller.fromDate.value,
-                                      //       labelText: 'From Date',
-                                      //       onFieldSubmitted: (_) async {
-                                      //         normalizeDate(
-                                      //           controller.fromDate.value.text,
-                                      //           controller.fromDate.value,
-                                      //         );
-                                      //       },
-                                      //     ),
-                                      //     myTextFormFieldWithBorder(
-                                      //       width: 170,
-                                      //       controller: controller.toDate.value,
-                                      //       labelText: 'To Date',
-                                      //       onFieldSubmitted: (_) async {
-                                      //         normalizeDate(
-                                      //           controller.toDate.value.text,
-                                      //           controller.toDate.value,
-                                      //         );
-                                      //       },
-                                      //     ),
-                                      //   ],
-                                      // ),
                                       Row(
                                         spacing: 10,
                                         children: [
@@ -425,6 +395,8 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .value =
                                                   false;
                                               controller.filterSearch();
+                                              controller
+                                                  .filterGeneralExpensesSearch();
                                             },
                                             isSelected: controller
                                                 .isTodaySelected
@@ -444,6 +416,8 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .value =
                                                   false;
                                               controller.filterSearch();
+                                              controller
+                                                  .filterGeneralExpensesSearch();
                                             },
                                             isSelected: controller
                                                 .isThisMonthSelected
@@ -463,6 +437,8 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .value =
                                                   true;
                                               controller.filterSearch();
+                                              controller
+                                                  .filterGeneralExpensesSearch();
                                             },
                                             isSelected: controller
                                                 .isThisYearSelected
@@ -536,6 +512,8 @@ class CarTradingDashboard extends StatelessWidget {
                                                 controller.searching.isFalse
                                                 ? () {
                                                     controller.filterSearch();
+                                                    controller
+                                                        .filterGeneralExpensesSearch();
                                                   }
                                                 : null,
                                             child: controller.searching.isFalse
@@ -589,7 +567,7 @@ class CarTradingDashboard extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: SummaryBox(
-                                        title: 'CASH IN HAND',
+                                        title: 'CASH ON HAND',
                                         value:
                                             '${controller.totalNETsForAll.value}',
                                         icon: Icons.wallet,
@@ -599,6 +577,7 @@ class CarTradingDashboard extends StatelessWidget {
                                         textColor: Colors.grey[700],
                                         showRefreshIcon: true,
                                         onPressedForRefreshIcon: () {
+                                          controller.getCashOnHand();
                                           controller
                                               .getCapitalsOROutstandingSummary(
                                                 'capitals',
@@ -608,7 +587,7 @@ class CarTradingDashboard extends StatelessWidget {
                                                 'outstanding',
                                               );
                                           controller
-                                              .getGeneralExpensesSummary();
+                                              .filterGeneralExpensesSearch();
                                         },
                                       ),
                                     ),
@@ -721,11 +700,14 @@ class SummaryBox extends StatelessWidget {
                           : const SizedBox(),
                     ],
                   ),
-                  textForDataRowInTable(
-                    fontSize: 25,
-                    isBold: true,
-                    color: textColor,
-                    text: value,
+                  FittedBox(
+                    child: textForDataRowInTable(
+                      fontSize: 25,
+                      isBold: true,
+                      color: textColor,
+                      text: value,
+                      maxWidth: null,
+                    ),
                   ),
                 ],
               ),

@@ -947,10 +947,10 @@ class JobCardController extends GetxController {
       creatingNewQuotation.value = true;
       Map quotationStatus = await getCurrentJobCardStatus(id);
       final status1 = quotationStatus['job_status_1'];
-      if (status1 != 'Posted') {
+      if (status1 == 'Cancelled') {
         alertMessage(
           context: Get.context!,
-          content: 'Only Posted Jobs Allowed',
+          content: 'Can\'t create quotation for cancelled jobs',
         );
         creatingNewQuotation.value = false;
         return;
@@ -1568,7 +1568,7 @@ class JobCardController extends GetxController {
   }
 
   Future<void> loadValues(JobCardModel data) async {
-    data.isSales == true? isSales.value = true : isSales.value = false;
+    data.isSales == true ? isSales.value = true : isSales.value = false;
     quotationId.value = data.quotationId ?? '';
     jobCardAdded.value = true;
     isReturned.value = data.label == 'Returned' ? true : false;

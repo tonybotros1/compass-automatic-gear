@@ -48,6 +48,10 @@ Widget customerDetailsSection(
                               controller.onSelectForCustomers(value);
                               controller.customerId.value = key;
                               controller.isQuotationModified.value = true;
+                              controller.quotationWarrentyDays.value.text =
+                                value.containsKey('warranty_days')
+                                ? value['warranty_days'].toString()
+                                : '0';
                             },
                             onDelete: () {
                               controller.customerName.clear();

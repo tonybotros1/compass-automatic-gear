@@ -604,7 +604,7 @@ DataRow dataRowForTheTable(
       if (states.contains(WidgetState.selected)) {
         return coolColor;
       }
-      return isEvenRow ? Colors.grey.shade200 : Colors.white;
+      return !isEvenRow ? coolColor : Colors.white;
     }),
     cells: [
       DataCell(

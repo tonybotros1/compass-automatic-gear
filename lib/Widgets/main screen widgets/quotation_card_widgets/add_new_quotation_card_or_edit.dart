@@ -55,7 +55,7 @@ Widget addNewQuotationCardOrEdit({
                               ? ClickableHoverText(
                                   color2:
                                       controller.openingJobCardScreen.isFalse
-                                      ? null
+                                      ? Colors.black
                                       : Colors.yellow,
                                   text: controller.openingJobCardScreen.isFalse
                                       ? controller.jobCardCounter.value

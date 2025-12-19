@@ -13,8 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://192.168.1.104:8000';
-String webSocketURL = "ws://192.168.1.104:8000/ws";
+String backendTestURI = 'http://192.168.1.104:8000'; //home : 192.168.1.104
+String webSocketURL = "ws://192.168.1.104:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -47,6 +47,18 @@ String formatNumber(String value) {
   final number = num.parse(value);
   return NumberFormat('#,###').format(number);
 }
+
+TextStyle headerTableTextStyle = TextStyle(
+  color: Colors.grey[700],
+  fontWeight: FontWeight.bold,
+  fontSize: 13,
+);
+
+TextStyle cellsTableTextStyle = TextStyle(
+  color: Colors.grey.shade800,
+  fontWeight: FontWeight.bold,
+  fontSize: 12,
+);
 
 final createButton = Container(
   padding: const EdgeInsets.symmetric(horizontal: 12),

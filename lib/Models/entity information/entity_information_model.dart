@@ -1,6 +1,7 @@
 class EntityInformationModel {
   String? id;
   double? creditLimit;
+  int? warrantyDays;
   List<EntityAddress>? entityAddress;
   List<String>? entityCode;
   String? entityName;
@@ -41,6 +42,7 @@ class EntityInformationModel {
     this.entityTypeId,
     this.createdAt,
     this.updatedAt,
+    this.warrantyDays,
   });
   EntityInformationModel.fromJson(Map<String, dynamic> json) {
     id = json.containsKey('_id') ? json['_id'] ?? '' : '';
@@ -48,6 +50,12 @@ class EntityInformationModel {
     creditLimit = json.containsKey('credit_limit')
         ? (json['credit_limit'] != null
               ? double.tryParse(json['credit_limit'].toString()) ?? 0
+              : 0)
+        : 0;
+
+    warrantyDays = json.containsKey('warranty_days')
+        ? (json['warranty_days'] != null
+              ? int.tryParse(json['warranty_days'].toString()) ?? 0
               : 0)
         : 0;
 

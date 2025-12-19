@@ -4,6 +4,7 @@ import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_control
 import '../../../consts.dart';
 import 'capital_dialog.dart';
 import 'car_trade_dialog.dart';
+import 'outstanding_capitals_dialog2.dart';
 
 Widget tableOfSummaryDetails({required BuildContext context}) {
   return GetX<CarTradingDashboardController>(
@@ -60,9 +61,9 @@ Widget tableOfSummaryDetails({required BuildContext context}) {
                 columnWidth: IntrinsicColumnWidth(flex: .5),
               ),
               DataColumn(
-                label: Text('ACT'),
+                label: Text('ACTION'),
                 numeric: true,
-                columnWidth: IntrinsicColumnWidth(flex: .2),
+                columnWidth: IntrinsicColumnWidth(flex: .4),
               ),
             ],
             rows: controller.summaryData.map((data) {
@@ -172,8 +173,7 @@ DataRow dataRowForTheTable(
                   .clear();
               controller.allOutstanding.clear();
               controller.getAllCapitalsOROutstanding('outstanding');
-              capitalOrOutstandingOrGeneralExpensesDialog(
-                isGeneralExpenses: false,
+              capitalOrOutstanding(
                 search:
                     controller.searchForCapitalsOrOutstandingOrGeneralExpenses,
                 collection: 'outstanding',
@@ -201,7 +201,11 @@ DataRow dataRowForTheTable(
               );
             }
           },
-          child: const Icon(Icons.add, size: 20, color: Colors.grey),
+          child: Icon(
+            !data['category'].contains('Cars') ? Icons.more_horiz : Icons.add,
+            size: 25,
+            color: Colors.grey,
+          ),
         ),
       ),
     ],

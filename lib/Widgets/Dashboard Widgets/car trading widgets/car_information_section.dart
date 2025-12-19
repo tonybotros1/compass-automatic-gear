@@ -40,7 +40,7 @@ Widget carInformation({
                         // nextFocusNode: controller.focusNodeForCarInformation2,
                         width: 130,
                         controller: controller.date.value,
-                        labelText: 'Date',
+                        labelText: 'Transaction Date',
                         onFieldSubmitted: (_) async {
                           normalizeDate(
                             controller.date.value.text,
@@ -50,6 +50,7 @@ Widget carInformation({
                         onChanged: (_) {
                           controller.carModified.value = true;
                         },
+                        isEnabled: false,
                       ),
                       myTextFormFieldWithBorder(
                         // focusNode: controller.focusNodeForCarInformation4,
@@ -104,7 +105,7 @@ Widget carInformation({
                             hintText: 'Car Brand',
                             onChanged: (key, value) {
                               controller.carModel.value.clear();
-                              controller.getModelsByCarBrand(key);
+                              // controller.getModelsByCarBrand(key);
                               controller.carBrand.value.text = value['name'];
                               controller.carBrandId.value = key;
                               controller.carModified.value = true;
@@ -198,8 +199,6 @@ Widget carInformation({
               ),
               GetX<CarTradingDashboardController>(
                 builder: (controller) {
-                  bool isModelLoading = controller.allModels.isEmpty;
-
                   return Column(
                     spacing: 10,
                     children: [
@@ -214,7 +213,7 @@ Widget carInformation({
                             showedSelectedName: 'name',
                             textcontroller: controller.carModel.value.text,
                             hintText: 'Car Model',
-                            items: isModelLoading ? {} : controller.allModels,
+                            // items: isModelLoading ? {} : controller.allModels,
                             onChanged: (key, value) {
                               controller.carModel.value.text = value['name'];
                               controller.carModelId.value = key;
@@ -224,6 +223,11 @@ Widget carInformation({
                               controller.carModel.value.clear();
                               controller.carModelId.value = '';
                               controller.carModified.value = true;
+                            },
+                            onOpen: () {
+                              return controller.getModelsByCarBrand(
+                                controller.carBrandId.value,
+                              );
                             },
                           ),
                           valSectionInTheTableForBrands(
@@ -312,4 +316,3 @@ Widget carInformation({
     ),
   );
 }
-

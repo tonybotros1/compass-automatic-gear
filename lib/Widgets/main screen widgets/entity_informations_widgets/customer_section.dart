@@ -53,7 +53,7 @@ Container customerSection() {
                     builder: (controller) {
                       return CustomDropdown(
                         width: 200,
-                        hintText: 'Sales Man',
+                        hintText: 'Salesman',
                         textcontroller: controller.salesMAn.value.text,
                         showedSelectedName: 'name',
                         items: controller.isCustomerSelected.isTrue
@@ -69,6 +69,16 @@ Container customerSection() {
                           controller.salesMAn.value.clear();
                           controller.salesManId.value = '';
                         },
+                      );
+                    },
+                  ),
+                  GetBuilder<EntityInformationsController>(
+                    builder: (controller) {
+                      return myTextFormFieldWithBorder(
+                        width: 150,
+                        controller: controller.warrantyDays,
+                        isnumber: true,
+                        labelText: 'Warranty Days',
                       );
                     },
                   ),

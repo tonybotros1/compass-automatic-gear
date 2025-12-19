@@ -387,8 +387,8 @@ ElevatedButton newItemButton(
     onPressed: () {
       controller.item.clear();
       controller.itemId.value = '';
-      controller.pay.text = '0';
-      controller.receive.text = '0';
+      controller.pay.text = '';
+      controller.receive.text = '';
       controller.comments.value.text = '';
       controller.itemDate.value.text = textToDate(DateTime.now());
       itemDialog(

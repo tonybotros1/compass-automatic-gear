@@ -587,8 +587,16 @@ class QuotationCardController extends GetxController {
     } else if (qstatus == 'Cancelled') {
       alertMessage(context: Get.context!, content: 'Quotation is Cancelled');
     } else {
-      quotationStatus.value = 'Posted';
-      isQuotationModified.value = true;
+      alertDialog(
+        context: Get.context!,
+        content: 'Do you want to post this quotation?',
+        onPressed: () {
+          quotationStatus.value = 'Posted';
+          isQuotationModified.value = true;
+          Get.back();
+          addNewQuotationCard();
+        },
+      );
     }
   }
 
@@ -611,8 +619,16 @@ class QuotationCardController extends GetxController {
     } else if (status1 == 'Posted') {
       alertMessage(context: Get.context!, content: 'Quotation is Posted');
     } else {
-      quotationStatus.value = 'Cancelled';
-      isQuotationModified.value = true;
+      alertDialog(
+        context: Get.context!,
+        content: 'Do you want to cancel this quotation?',
+        onPressed: () {
+          quotationStatus.value = 'Cancelled';
+          isQuotationModified.value = true;
+          Get.back();
+          addNewQuotationCard();
+        },
+      );
     }
   }
 

@@ -16,8 +16,8 @@ Future<dynamic> carModelsDialog({
     Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
-        height: 150,
-        width: constraints.maxWidth / 2.5,
+        height: 175,
+        width: constraints.maxWidth / 1.5,
         child: Column(
           children: [
             Container(

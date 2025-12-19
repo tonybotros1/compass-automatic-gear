@@ -40,6 +40,14 @@ Widget addNewItemOrEdit({
                   validate: true,
                   controller: controller.itemDate.value,
                   labelText: 'Date',
+                  suffixIcon: IconButton(
+                    focusNode: FocusNode(skipTraversal: true),
+                    onPressed: () async {
+                      selectDateContext(context, controller.itemDate.value);
+                    },
+
+                    icon: const Icon(Icons.date_range),
+                  ),
                 ),
                 const Expanded(flex: 3, child: SizedBox()),
               ],

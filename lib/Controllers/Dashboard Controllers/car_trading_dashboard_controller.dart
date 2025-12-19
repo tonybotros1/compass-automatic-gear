@@ -8,11 +8,10 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-import '../../Models/car trading/capitals_model.dart';
+import '../../Models/car trading/capitals_outstanding_model.dart';
 import '../../Models/car trading/car_trade_model.dart';
 import '../../Models/car trading/car_trading_items_model.dart';
 import '../../Models/car trading/general_expenses_model.dart';
-import '../../Models/car trading/outstanding_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import '../Main screen controllers/websocket_controller.dart';
@@ -37,15 +36,17 @@ class CarTradingDashboardController extends GetxController {
   RxString carSoldByFilterId = RxString('');
   RxString carBoughtByFilterId = RxString('');
   RxString carSpecificationFilterId = RxString('');
-  final RxList<CapitalsModel> allCapitals = RxList<CapitalsModel>([]);
-  final RxList<OutstandingModel> allOutstanding = RxList<OutstandingModel>([]);
+  final RxList<CapitalsAndOutstandingModel> allCapitals =
+      RxList<CapitalsAndOutstandingModel>([]);
+  final RxList<CapitalsAndOutstandingModel> allOutstanding =
+      RxList<CapitalsAndOutstandingModel>([]);
   final RxList<GeneralExpensesModel> allGeneralExpenses =
       RxList<GeneralExpensesModel>([]);
   final RxList<CarTradeModel> filteredTrades = RxList<CarTradeModel>([]);
-  final RxList<CapitalsModel> filteredCapitals = RxList<CapitalsModel>([]);
-  final RxList<OutstandingModel> filteredOutstanding = RxList<OutstandingModel>(
-    [],
-  );
+  final RxList<CapitalsAndOutstandingModel> filteredCapitals =
+      RxList<CapitalsAndOutstandingModel>([]);
+  final RxList<CapitalsAndOutstandingModel> filteredOutstanding =
+      RxList<CapitalsAndOutstandingModel>([]);
   final RxList<GeneralExpensesModel> filteredGeneralExpenses =
       RxList<GeneralExpensesModel>([]);
   RxInt numberOfCars = RxInt(0);
@@ -66,7 +67,7 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalNETsForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAll = RxDouble(0.0);
   RxDouble totalNetProfit = RxDouble(0.0);
-  RxInt pagesPerPage = RxInt(7);
+  RxInt pagesPerPage = RxInt(100);
   DateFormat inputFormat = DateFormat("dd-MM-yyyy");
   RxBool isNewStatusSelected = RxBool(false);
   RxBool isSoldStatusSelected = RxBool(false);
@@ -92,6 +93,9 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> year = TextEditingController().obs;
   Rx<TextEditingController> soldTo = TextEditingController().obs;
   Rx<TextEditingController> soldBy = TextEditingController().obs;
+  Rx<TextEditingController> serviceContractEndDate =
+      TextEditingController().obs;
+  Rx<TextEditingController> warrantyEndDate = TextEditingController().obs;
   TextEditingController pay = TextEditingController();
   TextEditingController receive = TextEditingController();
   Rx<TextEditingController> comments = TextEditingController().obs;
@@ -167,24 +171,25 @@ class CarTradingDashboardController extends GetxController {
     {"category": "📜  Expenses"},
   ]);
 
-
   @override
   void onInit() async {
     connectWebSocket();
+    getCashOnHand();
     getCapitalsOROutstandingSummary('capitals');
     getCapitalsOROutstandingSummary('outstanding');
-    getGeneralExpensesSummary();
-    everAll(
-      [
-        totalNETsForAllTrades,
-        totalNETsForAllCapitals,
-        totalNETsForAllGeneralExpenses,
-        totalNETsForAllOutstanding,
-      ],
-      (values) {
-        calculateTotalsForAllAndNetProfit();
-      },
-    );
+    filterGeneralExpensesSearch();
+    filterSearch();
+    // everAll(
+    //   [
+    //     totalNETsForAllTrades,
+    //     totalNETsForAllCapitals,
+    //     totalNETsForAllGeneralExpenses,
+    //     totalNETsForAllOutstanding,
+    //   ],
+    //   (values) {
+    //     calculateTotalsForAllAndNetProfit();
+    //   },
+    // );
     focusNodeForitems1.addListener(() {
       if (!focusNodeForitems1.hasFocus) {
         normalizeDate(itemDate.value.text, itemDate.value);
@@ -209,12 +214,14 @@ class CarTradingDashboardController extends GetxController {
     ws.events.listen((message) {
       switch (message["type"]) {
         case "capital_created":
-          final newCapital = CapitalsModel.fromJson(message["data"]);
+          final newCapital = CapitalsAndOutstandingModel.fromJson(
+            message["data"],
+          );
           allCapitals.add(newCapital);
           break;
 
         case "capital_updated":
-          final updated = CapitalsModel.fromJson(message["data"]);
+          final updated = CapitalsAndOutstandingModel.fromJson(message["data"]);
           final totals = message['totals'];
           final index = allCapitals.indexWhere((b) => b.id == updated.id);
           if (index != -1) {
@@ -231,12 +238,14 @@ class CarTradingDashboardController extends GetxController {
           break;
 
         case "outstanding_created":
-          final newModel = OutstandingModel.fromJson(message["data"]);
+          final newModel = CapitalsAndOutstandingModel.fromJson(
+            message["data"],
+          );
           allOutstanding.add(newModel);
           break;
 
         case "outstanding_updated":
-          final updated = OutstandingModel.fromJson(message["data"]);
+          final updated = CapitalsAndOutstandingModel.fromJson(message["data"]);
           final totals = message['totals'];
           final index = allOutstanding.indexWhere((m) => m.id == updated.id);
           if (index != -1) {
@@ -319,8 +328,8 @@ class CarTradingDashboardController extends GetxController {
     return await helper.getCarBrands();
   }
 
-  Future<void> getModelsByCarBrand(String brandId) async {
-    allModels.assignAll(await helper.getModelsValues(brandId));
+  Future<Map<String, dynamic>> getModelsByCarBrand(String brandId) async {
+    return await helper.getModelsValues(brandId);
   }
 
   void addNewCapitalOrOutstandingOrGeneralExpenses(String type) async {
@@ -465,10 +474,12 @@ class CarTradingDashboardController extends GetxController {
         totalReceives.value = totals['total_receive'];
         totalNETs.value = totals['total_net'];
         if (type == "capitals") {
-          allCapitals.assignAll(data.map((c) => CapitalsModel.fromJson(c)));
+          allCapitals.assignAll(
+            data.map((c) => CapitalsAndOutstandingModel.fromJson(c)),
+          );
         } else if (type == "outstanding") {
           allOutstanding.assignAll(
-            data.map((c) => OutstandingModel.fromJson(c)),
+            data.map((c) => CapitalsAndOutstandingModel.fromJson(c)),
           );
         }
         isCapitalLoading.value = false;
@@ -666,7 +677,40 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> getGeneralExpensesSummary() async {
+  void filterGeneralExpensesSearch() async {
+    searching.value = true;
+
+    Map<String, dynamic> body = {};
+    if (isTodaySelected.isTrue) {
+      body["today"] = true;
+    }
+    if (isThisMonthSelected.isTrue) {
+      body["this_month"] = true;
+    }
+    if (isThisYearSelected.isTrue) {
+      body["this_year"] = true;
+    }
+    if (fromDate.value.text.isNotEmpty) {
+      final parsedDate = inputFormat
+          .parse(fromDate.value.text)
+          .toIso8601String();
+
+      body["from_date"] = parsedDate;
+    }
+    if (toDate.value.text.isNotEmpty) {
+      final parsedDate = inputFormat.parse(toDate.value.text).toIso8601String();
+
+      body["to_date"] = parsedDate;
+    }
+    if (body.isNotEmpty) {
+      await getGeneralExpensesSummary(body);
+    } else {
+      await getGeneralExpensesSummary({"all": true});
+    }
+    searching.value = false;
+  }
+
+  Future<void> getGeneralExpensesSummary(Map body) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -674,9 +718,13 @@ class CarTradingDashboardController extends GetxController {
       Uri url = Uri.parse(
         '$backendUrl/car_trading/get_general_expenses_summary',
       );
-      final response = await http.get(
+      final response = await http.post(
         url,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -685,6 +733,7 @@ class CarTradingDashboardController extends GetxController {
         totalReceivesForAllGeneralExpenses.value = totals['total_receive'];
         totalNETsForAllGeneralExpenses.value = totals['total_net'];
         numberOfGeneralExpensesDocs.value = totals['count'];
+        totalNetProfit.value = totals['net_profit'];
 
         int i = summaryData.indexWhere(
           (data) => data['category'].contains('Expenses'),
@@ -693,13 +742,13 @@ class CarTradingDashboardController extends GetxController {
           ...summaryData[i],
           'count': numberOfGeneralExpensesDocs.value,
           'paid': totalPaysForAllGeneralExpenses.value,
-          'received': totalNETsForAllGeneralExpenses.value,
-          'net': totalNETsForAllCapitals.value,
+          'received': totalReceivesForAllGeneralExpenses.value,
+          'net': totalNETsForAllGeneralExpenses.value,
         };
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getGeneralExpensesSummary();
+          await getGeneralExpensesSummary(body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -892,7 +941,7 @@ class CarTradingDashboardController extends GetxController {
   Future<void> addNewTrade() async {
     try {
       if (date.value.text.isEmpty) {
-        showSnackBar('Alert', 'Please add valid Date');
+        alertMessage(context: Get.context!, content: 'Please add valid Date');
         return;
       }
 
@@ -949,6 +998,34 @@ class CarTradingDashboardController extends GetxController {
         }).toList(),
       };
 
+      final rawDate = warrantyEndDate.value.text.trim();
+      if (rawDate.isNotEmpty) {
+        try {
+          body['warranty_end_date'] = convertDateToIson(rawDate);
+        } catch (e) {
+          alertMessage(
+            context: Get.context!,
+            content: 'Please enter valid Warranty End Date',
+          );
+        }
+      } else {
+        body['warranty_end_date'] = null;
+      }
+
+      final rawDate2 = serviceContractEndDate.value.text.trim();
+      if (rawDate2.isNotEmpty) {
+        try {
+          body['service_contract_end_date'] = convertDateToIson(rawDate2);
+        } catch (e) {
+          alertMessage(
+            context: Get.context!,
+            content: 'Please enter valid Service Contract End Date',
+          );
+        }
+      } else {
+        body['service_contract_end_date'] = null;
+      }
+
       if (currentTradId.value == '') {
         // ---------- ADD ----------
         final response = await http.post(
@@ -966,7 +1043,7 @@ class CarTradingDashboardController extends GetxController {
           status.value = 'New';
           itemsModified.value = false;
           carModified.value = false;
-          showSnackBar('Done', decoded["message"]);
+          // showSnackBar('Done', decoded["message"]);
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -977,7 +1054,11 @@ class CarTradingDashboardController extends GetxController {
         } else if (response.statusCode == 401) {
           logout();
         } else {
-          showSnackBar('Error', decoded["detail"] ?? "Failed to add trade");
+          alertMessage(
+            title: 'Error',
+            content: decoded["detail"] ?? "Failed to add trade",
+            context: Get.context!,
+          );
         }
       } else {
         // ---------- UPDATE ----------
@@ -1023,9 +1104,10 @@ class CarTradingDashboardController extends GetxController {
           } else if (itemsResponse.statusCode == 401) {
             logout();
           } else {
-            showSnackBar(
-              'Error',
-              decoded["detail"] ?? "Failed to update items",
+            alertMessage(
+              title: 'Error',
+              content: decoded["detail"] ?? "Failed to update trade",
+              context: Get.context!,
             );
           }
         }
@@ -1052,20 +1134,24 @@ class CarTradingDashboardController extends GetxController {
           } else if (carResponse.statusCode == 401) {
             logout();
           } else {
-            showSnackBar(
-              'Error',
-              decoded["detail"] ?? "Failed to update trade",
+            alertMessage(
+              title: 'Error',
+              content: decoded["detail"] ?? "Failed to update trade",
+              context: Get.context!,
             );
           }
         }
       }
-      if (finishUpdatind == true) {
-        showSnackBar('Done', 'Trade updated successfully');
-      }
+      // if (finishUpdatind == true) {
+      //   showSnackBar('Done', 'Trade updated successfully');
+      // }
       addingNewValue.value = false;
     } catch (e) {
       addingNewValue.value = false;
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -1223,18 +1309,38 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  // =======================================================================================================
+  Future<void> getCashOnHand() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
 
-  void calculateTotalsForAllAndNetProfit() {
-    totalNETsForAll.value =
-        totalNETsForAllCapitals.value +
-        totalNETsForAllGeneralExpenses.value +
-        totalNETsForAllOutstanding.value +
-        totalNETsForAllTrades.value;
-
-    totalNetProfit.value =
-        totalNETsForAllTrades.value + totalNETsForAllGeneralExpenses.value;
+      final url = Uri.parse('$backendUrl/car_trading/get_cash_on_hand');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        totalNETsForAll.value = decoded['totals']['final_net'];
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getCashOnHand();
+        } else {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        Get.back();
+      }
+    } catch (e) {
+      //
+    }
   }
+
+  // =======================================================================================================
 
   void calculateTotalsForCapitals(RxList allMap) {
     totalPays.value = 0;
@@ -1336,9 +1442,13 @@ class CarTradingDashboardController extends GetxController {
     currentTradId.value = data.id ?? '';
     carModified.value = false;
     itemsModified.value = false;
+    warrantyEndDate.value.text = textToDate(data.warrantyEndDate);
+    serviceContractEndDate.value.text = textToDate(data.serviceContractEndDate);
   }
 
   void clearValues() {
+    warrantyEndDate.value.clear();
+    serviceContractEndDate.value.clear();
     boughtFrom.value.clear();
     boughtBy.value.clear();
     soldBy.value.clear();
@@ -1355,7 +1465,7 @@ class CarTradingDashboardController extends GetxController {
     searchForItems.value.clear();
     allModels.clear();
     date.value.text = textToDate(DateTime.now());
-    mileage.value.text = '0';
+    mileage.value.text = '';
     colorIn.value.clear();
     colorInId.value = '';
     colorOut.value.clear();

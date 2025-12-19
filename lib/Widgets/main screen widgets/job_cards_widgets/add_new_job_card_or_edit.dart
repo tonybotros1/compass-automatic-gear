@@ -67,7 +67,7 @@ Widget addNewJobCardOrEdit({
                                         controller
                                             .openingQuotationCardScreen
                                             .isFalse
-                                        ? null
+                                        ? Colors.black
                                         : Colors.yellow,
                                     text:
                                         controller
@@ -93,7 +93,7 @@ Widget addNewJobCardOrEdit({
                       ],
                     ),
                   ),
-                  jobCardSection(context, controller,isJob),
+                  jobCardSection(context, controller, isJob),
                 ],
               ),
             ),
