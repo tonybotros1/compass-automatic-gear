@@ -210,7 +210,6 @@ class QuotationCard extends StatelessWidget {
                                     constraints,
                                     controller,
                                   ),
-                                  const SizedBox(width: 10),
                                   CustomSlidingSegmentedControl<int>(
                                     height: 30,
                                     initialValue: 1,

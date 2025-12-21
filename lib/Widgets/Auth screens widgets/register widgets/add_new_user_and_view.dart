@@ -232,6 +232,10 @@ Widget branchesSection({Key? key}) {
                               controller.selectedBranches[key]![0],
                               selected!,
                             ];
+                            if (!selected &&
+                                controller.primaryBranchIndex.value == i) {
+                              controller.primaryBranchIndex.value = -1;
+                            }
                           },
                         ),
                       ),

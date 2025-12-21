@@ -85,6 +85,7 @@ class Users extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         controller.selectedMenu.value = 1;
+        controller.showPrimaryText.value = false;
         controller.name.clear();
         controller.pass.clear();
         controller.email.clear();
@@ -253,13 +254,14 @@ class Users extends StatelessWidget {
   ElevatedButton editSection(
     BuildContext context,
     UsersModel userData,
-    constraints,
-    uid,
+    BoxConstraints constraints,
+    String uid,
     UsersController controller,
   ) {
     return ElevatedButton(
       style: editButtonStyle,
       onPressed: () {
+        controller.showPrimaryText.value = false;
         controller.selectedMenu.value = 1;
         controller.pass.clear();
         controller.email.text = userData.email;
