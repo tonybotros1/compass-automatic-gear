@@ -88,7 +88,11 @@ class Users extends StatelessWidget {
         controller.name.clear();
         controller.pass.clear();
         controller.email.clear();
+        controller.primaryBranchIndex.value = -1;
         controller.selectedRoles.updateAll((key, value) => [value[0], false]);
+        controller.selectedBranches.updateAll(
+          (key, value) => [value[0], false],
+        );
         usersDialog(
           userExpiryDate: '',
           canEdit: true,
@@ -266,6 +270,10 @@ class Users extends StatelessWidget {
         controller.syncSelection(
           controller.selectedBranches,
           userData.branches,
+        );
+        controller.primaryBranchIndex.value = controller.getPrimaryBranchIndex(
+          controller.selectedBranches,
+          userData.primaryBranch,
         );
 
         usersDialog(

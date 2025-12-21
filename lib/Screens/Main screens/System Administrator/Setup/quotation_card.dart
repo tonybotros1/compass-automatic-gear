@@ -1,6 +1,7 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
-import 'package:datahubai/Widgets/filter_button.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -210,59 +211,37 @@ class QuotationCard extends StatelessWidget {
                                     controller,
                                   ),
                                   const SizedBox(width: 10),
-                                  filterButton(
-                                    title: 'Today',
-                                    onPressed: () {
-                                      controller.isAllSelected.value = false;
-                                      controller.isTodaySelected.value = true;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      controller.isYearSelected.value = false;
-                                      controller.isMonthSelected.value = false;
-                                      controller.isDaySelected.value = true;
-                                      controller.searchEngine({"today": true});
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue: 1,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('TODAY'),
+                                      3: Text('THIS MONTH'),
+                                      4: Text('THIS YEAR'),
                                     },
-                                    isSelected:
-                                        controller.isTodaySelected.value,
-                                  ),
-                                  filterButton(
-                                    title: 'This Month',
-                                    onPressed: () {
-                                      controller.isAllSelected.value = false;
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          true;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      controller.isYearSelected.value = false;
-                                      controller.isMonthSelected.value = true;
-                                      controller.isDaySelected.value = false;
-                                      controller.searchEngine({
-                                        "this_month": true,
-                                      });
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForDatePicker(v);
                                     },
-                                    isSelected:
-                                        controller.isThisMonthSelected.value,
-                                  ),
-                                  filterButton(
-                                    title: 'This Year',
-                                    onPressed: () {
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          true;
-                                      controller.isYearSelected.value = true;
-                                      controller.isMonthSelected.value = false;
-                                      controller.isDaySelected.value = false;
-                                      controller.searchEngine({
-                                        "this_year": true,
-                                      });
-                                    },
-                                    isSelected:
-                                        controller.isThisYearSelected.value,
                                   ),
                                 ],
                               ),
@@ -420,9 +399,14 @@ Widget tableOfScreens({
         controller: scrollController,
         // rowsPerPage: controller.numberOfQuotations.value +1,
         // availableRowsPerPage: const [1, 10, 17, 25],
-        onRowsPerPageChanged: (rows) {
-          controller.pagesPerPage.value = rows!;
-        },
+        // onRowsPerPageChanged: (rows) {
+        //   controller.pagesPerPage.value = rows!;
+        // },
+        rowsPerPage: controller.numberOfQuotations.value <= 12
+            ? 12
+            : controller.numberOfQuotations.value >= 30
+            ? 30
+            : controller.numberOfQuotations.value,
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
@@ -796,14 +780,10 @@ Future<dynamic> editQuotationCardDialog(
                               quotationId,
                             ),
                             separator(),
-          
+
                             copyQuotationButton(quotationId),
                             point(),
-                            deleteButton(
-                              controller,
-                              context,
-                              quotationId,
-                            ),
+                            deleteButton(controller, context, quotationId),
                             separator(),
                             changeStatusToPostedButton(quotationId),
                             point(),

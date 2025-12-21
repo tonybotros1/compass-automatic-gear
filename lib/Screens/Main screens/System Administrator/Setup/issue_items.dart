@@ -1,4 +1,6 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/auto_size_box.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/issue_items_controller.dart';
@@ -29,80 +31,120 @@ class IssueItems extends StatelessWidget {
                     builder: (controller) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          spacing: 10,
-                          children: [
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Number',
-                              controller: controller.issueNumberFilter.value,
-                            ),
-                            // myTextFormFieldWithBorder(
-                            //   width: 300,
-                            //   labelText: 'Job Card',
-                            //   controller: controller.issueNumberFilter.value,
-                            // ),
-                            // myTextFormFieldWithBorder(
-                            //   width: 300,
-                            //   labelText: 'Converter',
-                            //   controller: controller.issueNumberFilter.value,
-                            // ),
-                            // CustomDropdown(
-                            //   width: 300,
-                            //   textcontroller:
-                            //       controller.jobConverterFilter.value.text,
-                            //   showedSelectedName: 'name',
-                            //   hintText: 'Job / Converter',
-                            //   onChanged: (key, value) async {
-                            //     controller.jobConverterFilter.value.text =
-                            //         value['name'];
-                            //     controller.jobConverterIdFilter.value = key;
-                            //   },
-                            //   items: isJobConverterLoading
-                            //       ? {}
-                            //       : controller.alljobConverters,
-                            // ),
-                            CustomDropdown(
-                              width: 300,
-                              textcontroller:
-                                  controller.receivedByFilter.value.text,
-                              showedSelectedName: 'name',
-                              hintText: 'Received By',
-                              onChanged: (key, value) async {
-                                controller.receivedByFilter.value.text =
-                                    value['name'];
-                                controller.receivedByIdFilter.value = key;
-                              },
-                              onDelete: () {
-                                controller.receivedByFilter.value.clear();
-                                controller.receivedByIdFilter.value = '';
-                              },
-                              onOpen: () {
-                                return controller.getEmployeesByDepartment();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 120,
-                              textcontroller:
-                                  controller.statusFilter.value.text,
-                              showedSelectedName: 'name',
-                              hintText: 'Status',
-                              items: allStatus,
-                              onChanged: (key, value) async {
-                                controller.statusFilter.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.statusFilter.value.clear();
-                              },
-                            ),
-                          ],
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 28,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            spacing: 10,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                spacing: 10,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Number',
+                                    controller:
+                                        controller.issueNumberFilter.value,
+                                  ),
+                                  // myTextFormFieldWithBorder(
+                                  //   width: 300,
+                                  //   labelText: 'Job Card',
+                                  //   controller: controller.issueNumberFilter.value,
+                                  // ),
+                                  // myTextFormFieldWithBorder(
+                                  //   width: 300,
+                                  //   labelText: 'Converter',
+                                  //   controller: controller.issueNumberFilter.value,
+                                  // ),
+                                  // CustomDropdown(
+                                  //   width: 300,
+                                  //   textcontroller:
+                                  //       controller.jobConverterFilter.value.text,
+                                  //   showedSelectedName: 'name',
+                                  //   hintText: 'Job / Converter',
+                                  //   onChanged: (key, value) async {
+                                  //     controller.jobConverterFilter.value.text =
+                                  //         value['name'];
+                                  //     controller.jobConverterIdFilter.value = key;
+                                  //   },
+                                  //   items: isJobConverterLoading
+                                  //       ? {}
+                                  //       : controller.alljobConverters,
+                                  // ),
+                                  CustomDropdown(
+                                    width: 300,
+                                    textcontroller:
+                                        controller.receivedByFilter.value.text,
+                                    showedSelectedName: 'name',
+                                    hintText: 'Received By',
+                                    onChanged: (key, value) async {
+                                      controller.receivedByFilter.value.text =
+                                          value['name'];
+                                      controller.receivedByIdFilter.value = key;
+                                    },
+                                    onDelete: () {
+                                      controller.receivedByFilter.value.clear();
+                                      controller.receivedByIdFilter.value = '';
+                                    },
+                                    onOpen: () {
+                                      return controller
+                                          .getEmployeesByDepartment();
+                                    },
+                                  ),
+                                  CustomDropdown(
+                                    width: 120,
+                                    textcontroller:
+                                        controller.statusFilter.value.text,
+                                    showedSelectedName: 'name',
+                                    hintText: 'Status',
+                                    items: allStatus,
+                                    onChanged: (key, value) async {
+                                      controller.statusFilter.value.text =
+                                          value['name'];
+                                    },
+                                    onDelete: () {
+                                      controller.statusFilter.value.clear();
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 120,
+                                    controller: controller.fromDate.value,
+                                    labelText: 'From Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.fromDate.value.text,
+                                        controller.fromDate.value,
+                                      );
+                                    },
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 120,
+                                    controller: controller.toDate.value,
+                                    labelText: 'To Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.toDate.value.text,
+                                        controller.toDate.value,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   GetX<IssueItemsController>(
                     builder: (controller) {
                       return SingleChildScrollView(
@@ -119,123 +161,50 @@ class IssueItems extends StatelessWidget {
                                 spacing: 10,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  SizedBox(
-                                    width: 120,
-                                    child: myTextFormFieldWithBorder(
-                                      controller: controller.fromDate.value,
-                                      labelText: 'From Date',
-                                      onFieldSubmitted: (_) async {
-                                        normalizeDate(
-                                          controller.fromDate.value.text,
-                                          controller.fromDate.value,
-                                        );
-                                      },
+                                  newIssueButton(
+                                    context,
+                                    constraints,
+                                    controller,
+                                  ),
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue: 1,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('TODAY'),
+                                      3: Text('THIS MONTH'),
+                                      4: Text('THIS YEAR'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width: 120,
-
-                                    child: myTextFormFieldWithBorder(
-                                      controller: controller.toDate.value,
-                                      labelText: 'To Date',
-                                      onFieldSubmitted: (_) async {
-                                        normalizeDate(
-                                          controller.toDate.value.text,
-                                          controller.toDate.value,
-                                        );
-                                      },
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
                                     ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForDatePicker(v);
+                                    },
                                   ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
                                   ElevatedButton(
-                                    style: todayButtonStyle,
-                                    onPressed:
-                                        controller.isTodaySelected.isFalse
-                                        ? () {
-                                            controller.isAllSelected.value =
-                                                false;
-                                            controller.isTodaySelected.value =
-                                                true;
-                                            controller
-                                                    .isThisMonthSelected
-                                                    .value =
-                                                false;
-                                            controller
-                                                    .isThisYearSelected
-                                                    .value =
-                                                false;
-                                            controller.isYearSelected.value =
-                                                false;
-                                            controller.isMonthSelected.value =
-                                                false;
-                                            controller.isDaySelected.value =
-                                                true;
-                                            controller.searchEngine({
-                                              "today": true,
-                                            });
-                                          }
-                                        : null,
-                                    child: const Text('Today'),
-                                  ),
-                                  ElevatedButton(
-                                    style: thisMonthButtonStyle,
-                                    onPressed:
-                                        controller.isThisMonthSelected.isFalse
-                                        ? () {
-                                            controller.isAllSelected.value =
-                                                false;
-                                            controller.isTodaySelected.value =
-                                                false;
-                                            controller
-                                                    .isThisMonthSelected
-                                                    .value =
-                                                true;
-                                            controller
-                                                    .isThisYearSelected
-                                                    .value =
-                                                false;
-                                            controller.isYearSelected.value =
-                                                false;
-                                            controller.isMonthSelected.value =
-                                                true;
-                                            controller.isDaySelected.value =
-                                                false;
-                                            controller.searchEngine({
-                                              "this_month": true,
-                                            });
-                                          }
-                                        : null,
-                                    child: const Text('This Month'),
-                                  ),
-                                  ElevatedButton(
-                                    style: thisYearButtonStyle,
-                                    onPressed:
-                                        controller.isThisYearSelected.isFalse
-                                        ? () {
-                                            controller.isTodaySelected.value =
-                                                false;
-                                            controller
-                                                    .isThisMonthSelected
-                                                    .value =
-                                                false;
-                                            controller
-                                                    .isThisYearSelected
-                                                    .value =
-                                                true;
-                                            controller.isYearSelected.value =
-                                                true;
-                                            controller.isMonthSelected.value =
-                                                false;
-                                            controller.isDaySelected.value =
-                                                false;
-                                            controller.searchEngine({
-                                              "this_year": true,
-                                            });
-                                          }
-                                        : null,
-                                    child: const Text('This Year'),
-                                  ),
-                                  ElevatedButton(
-                                    style: saveButtonStyle,
+                                    style: findButtonStyle,
                                     onPressed: controller.isScreenLoding.isFalse
                                         ? () async {
                                             controller.filterSearch();
@@ -261,7 +230,6 @@ class IssueItems extends StatelessWidget {
                                 ],
                               ),
                               // Expanded(flex: 2, child: SizedBox()),
-                              newIssueButton(context, constraints, controller),
                             ],
                           ),
                         ),
@@ -351,8 +319,6 @@ Widget tableOfScreens({
 
   return DataTableTheme(
     data: DataTableThemeData(
-      headingTextStyle: fontStyleForTableHeader,
-      dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
           return Colors.grey.shade300;
@@ -369,11 +335,9 @@ Widget tableOfScreens({
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
-        headingRowHeight: 70,
         columnSpacing: 15,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           const DataColumn(
             label: SizedBox(),
@@ -447,7 +411,7 @@ DataRow dataRowForTheTable(
       if (states.contains(WidgetState.selected)) {
         return Colors.grey.shade400;
       }
-      return isEvenRow ? Colors.grey.shade200 : Colors.white;
+      return !isEvenRow ? coolColor : Colors.white;
     }),
     cells: [
       DataCell(
@@ -580,7 +544,7 @@ ElevatedButton newIssueButton(
       );
     },
     style: newButtonStyle,
-    child: const Text('New Issue Doc.'),
+    child: const Text('New Doc.'),
   );
 }
 

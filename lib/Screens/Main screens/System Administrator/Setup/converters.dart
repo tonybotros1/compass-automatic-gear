@@ -1,3 +1,5 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/converters_controller.dart';
@@ -29,63 +31,57 @@ class Converters extends StatelessWidget {
                     builder: (controller) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          spacing: 10,
-                          children: [
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Converter NO.',
-                              controller: controller.converterNumberFilter,
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Name',
-                              controller: controller.converterNameFilter,
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 300,
-                              labelText: 'Description',
-                              controller: controller.converterDescriptionFilter,
-                            ),
-                            CustomDropdown(
-                              width: 150,
-                              textcontroller:
-                                  controller.statusFilter.value.text,
-                              showedSelectedName: 'name',
-                              hintText: 'Status',
-                              items: allStatus,
-                              onChanged: (key, value) async {
-                                controller.statusFilter.text = value['name'];
-                              },
-                              onDelete: () {
-                                controller.statusFilter.clear();
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  GetX<ConvertersController>(
-                    builder: (controller) {
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
                             minWidth: constraints.maxWidth - 28,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            spacing: 10,
                             children: [
                               Row(
-                                spacing: 10,
                                 crossAxisAlignment: CrossAxisAlignment.end,
+                                spacing: 10,
                                 children: [
                                   myTextFormFieldWithBorder(
                                     width: 150,
+                                    labelText: 'Converter NO.',
+                                    controller:
+                                        controller.converterNumberFilter,
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Name',
+                                    controller: controller.converterNameFilter,
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 300,
+                                    labelText: 'Description',
+                                    controller:
+                                        controller.converterDescriptionFilter,
+                                  ),
+                                  CustomDropdown(
+                                    width: 150,
+                                    textcontroller:
+                                        controller.statusFilter.value.text,
+                                    showedSelectedName: 'name',
+                                    hintText: 'Status',
+                                    items: allStatus,
+                                    onChanged: (key, value) async {
+                                      controller.statusFilter.text =
+                                          value['name'];
+                                    },
+                                    onDelete: () {
+                                      controller.statusFilter.clear();
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 120,
                                     controller: controller.fromDate,
                                     labelText: 'From Date',
                                     onFieldSubmitted: (_) async {
@@ -96,7 +92,7 @@ class Converters extends StatelessWidget {
                                     },
                                   ),
                                   myTextFormFieldWithBorder(
-                                    width: 150,
+                                    width: 120,
                                     controller: controller.toDate,
                                     labelText: 'To Date',
                                     onFieldSubmitted: (_) async {
@@ -106,96 +102,76 @@ class Converters extends StatelessWidget {
                                       );
                                     },
                                   ),
-                                  ElevatedButton(
-                                    style: todayButtonStyle,
-                                    onPressed:
-                                        controller.isTodaySelected.isFalse
-                                        ? () {
-                                            controller.isAllSelected.value =
-                                                false;
-                                            controller.isTodaySelected.value =
-                                                true;
-                                            controller
-                                                    .isThisMonthSelected
-                                                    .value =
-                                                false;
-                                            controller
-                                                    .isThisYearSelected
-                                                    .value =
-                                                false;
-                                            controller.isYearSelected.value =
-                                                false;
-                                            controller.isMonthSelected.value =
-                                                false;
-                                            controller.isDaySelected.value =
-                                                true;
-                                            controller.searchEngine({
-                                              "today": true,
-                                            });
-                                          }
-                                        : null,
-                                    child: const Text('Today'),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  GetX<ConvertersController>(
+                    builder: (controller) {
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 28,
+                          ),
+                          child: Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Row(
+                                spacing: 10,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  newConverterButton(
+                                    context,
+                                    constraints,
+                                    controller,
                                   ),
-                                  ElevatedButton(
-                                    style: thisMonthButtonStyle,
-                                    onPressed:
-                                        controller.isThisMonthSelected.isFalse
-                                        ? () {
-                                            controller.isAllSelected.value =
-                                                false;
-                                            controller.isTodaySelected.value =
-                                                false;
-                                            controller
-                                                    .isThisMonthSelected
-                                                    .value =
-                                                true;
-                                            controller
-                                                    .isThisYearSelected
-                                                    .value =
-                                                false;
-                                            controller.isYearSelected.value =
-                                                false;
-                                            controller.isMonthSelected.value =
-                                                true;
-                                            controller.isDaySelected.value =
-                                                false;
-                                            controller.searchEngine({
-                                              "this_month": true,
-                                            });
-                                          }
-                                        : null,
-                                    child: const Text('This Month'),
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue: 1,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('TODAY'),
+                                      3: Text('THIS MONTH'),
+                                      4: Text('THIS YEAR'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForDatePicker(v);
+                                    },
                                   ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
                                   ElevatedButton(
-                                    style: thisYearButtonStyle,
-                                    onPressed:
-                                        controller.isThisYearSelected.isFalse
-                                        ? () {
-                                            controller.isTodaySelected.value =
-                                                false;
-                                            controller
-                                                    .isThisMonthSelected
-                                                    .value =
-                                                false;
-                                            controller
-                                                    .isThisYearSelected
-                                                    .value =
-                                                true;
-                                            controller.isYearSelected.value =
-                                                true;
-                                            controller.isMonthSelected.value =
-                                                false;
-                                            controller.isDaySelected.value =
-                                                false;
-                                            controller.searchEngine({
-                                              "this_year": true,
-                                            });
-                                          }
-                                        : null,
-                                    child: const Text('This Year'),
-                                  ),
-                                  ElevatedButton(
-                                    style: saveButtonStyle,
+                                    style: findButtonStyle,
                                     onPressed: controller.isScreenLoding.isFalse
                                         ? () async {
                                             controller.filterSearch();
@@ -214,17 +190,11 @@ class Converters extends StatelessWidget {
                                       controller.clearAllFilters();
                                     },
                                     child: Text(
-                                      'Clear Filters',
+                                      'Clear',
                                       style: fontStyleForElevatedButtons,
                                     ),
                                   ),
-                                  // const Spacer(),
                                 ],
-                              ),
-                              newConverterButton(
-                                context,
-                                constraints,
-                                controller,
                               ),
                             ],
                           ),
@@ -278,17 +248,14 @@ class Converters extends StatelessWidget {
                             topRight: Radius.circular(2),
                           ),
                         ),
-                        child: SizedBox(
-                          width: constraints.maxWidth,
-                          child: tableOfScreens(
-                            showHistoryButton: true,
-                            scrollController:
-                                controller.scrollControllerFotTable1,
-                            constraints: constraints,
-                            context: context,
-                            controller: controller,
-                            data: controller.allConverters,
-                          ),
+                        child: tableOfScreens(
+                          showHistoryButton: true,
+                          scrollController:
+                              controller.scrollControllerFotTable1,
+                          constraints: constraints,
+                          context: context,
+                          controller: controller,
+                          data: controller.allConverters,
                         ),
                       );
                     },
@@ -315,8 +282,6 @@ Widget tableOfScreens({
 
   return DataTableTheme(
     data: DataTableThemeData(
-      headingTextStyle: fontStyleForTableHeader,
-      dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
           return Colors.grey.shade300;
@@ -333,44 +298,35 @@ Widget tableOfScreens({
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
-        headingRowHeight: 70,
         columnSpacing: 15,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           const DataColumn(
-            columnWidth: IntrinsicColumnWidth(flex: 0.2),
             label: SizedBox(),
             // onSort: controller.onSort,
           ),
           DataColumn(
-            columnWidth: const IntrinsicColumnWidth(flex: 1),
             label: AutoSizedText(text: 'Number', constraints: constraints),
             // onSort: controller.onSort,
           ),
           DataColumn(
-            columnWidth: const IntrinsicColumnWidth(flex: 1),
             label: AutoSizedText(text: 'Date', constraints: constraints),
             // onSort: controller.onSort,
           ),
           DataColumn(
-            columnWidth: const IntrinsicColumnWidth(flex: 1),
             label: AutoSizedText(text: 'Status', constraints: constraints),
             // onSort: controller.onSort,
           ),
           DataColumn(
-            columnWidth: const IntrinsicColumnWidth(flex: 1),
             label: AutoSizedText(text: 'Name', constraints: constraints),
             // onSort: controller.onSort,
           ),
           DataColumn(
-            columnWidth: const IntrinsicColumnWidth(flex: 2),
             label: AutoSizedText(text: 'Description', constraints: constraints),
             // onSort: controller.onSort,
           ),
           DataColumn(
-            columnWidth: const IntrinsicColumnWidth(flex: 1),
             numeric: true,
             label: AutoSizedText(text: 'Total', constraints: constraints),
             // onSort: controller.onSort,
@@ -401,7 +357,7 @@ DataRow dataRowForTheTable(
       if (states.contains(WidgetState.selected)) {
         return Colors.grey.shade400;
       }
-      return isEvenRow ? Colors.grey.shade200 : Colors.white;
+      return !isEvenRow ? coolColor : Colors.white;
     }),
     cells: [
       DataCell(editConverterButton(context, constraints, controller, docData)),

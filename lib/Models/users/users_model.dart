@@ -2,6 +2,7 @@ class UsersModel {
   final String id;
   final String userName;
   final String email;
+  final String primaryBranch;
   bool status;
   final List<String> roles;
   final List<String> branches;
@@ -15,10 +16,11 @@ class UsersModel {
     required this.expiryDate,
     required this.id,
     required this.roles,
+    required this.primaryBranch,
     required this.status,
     required this.updatedAt,
     required this.userName,
-    required this.branches
+    required this.branches,
   });
 
   factory UsersModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +29,9 @@ class UsersModel {
       userName: json['user_name'],
       email: json['email'],
       roles: json['roles'].cast<String>(),
+      primaryBranch: json.containsKey('primary_branch')
+          ? json['primary_branch'] ?? ''
+          : '',
       branches: json['branches'].cast<String>(),
       status: json['status'],
       expiryDate: DateTime.parse(json['expiry_date']),

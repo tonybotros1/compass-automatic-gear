@@ -1,5 +1,6 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/ar_receipts_model.dart';
-import 'package:datahubai/Widgets/filter_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/cash_management_receipts_controller.dart';
@@ -24,127 +25,175 @@ class CashManagementReceipt extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 10,
                 children: [
                   GetX<CashManagementReceiptsController>(
                     init: CashManagementReceiptsController(),
                     builder: (controller) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          spacing: 10,
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 28,
+                          ),
+                          child: Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                spacing: 10,
+                                crossAxisAlignment: CrossAxisAlignment.end,
 
-                          children: [
-                            myTextFormFieldWithBorder(
-                              width: 170,
-                              labelText: 'Receipt NO.',
-                              controller: controller.receiptCounterFilter.value,
-                            ),
-                            CustomDropdown(
-                              width: 170,
-                              showedSelectedName: 'name',
-                              textcontroller:
-                                  controller.receiptTypeFilter.value.text,
-                              hintText: 'Receipt Type',
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 170,
+                                    labelText: 'Receipt NO.',
+                                    controller:
+                                        controller.receiptCounterFilter.value,
+                                  ),
+                                  CustomDropdown(
+                                    width: 170,
+                                    showedSelectedName: 'name',
+                                    textcontroller:
+                                        controller.receiptTypeFilter.value.text,
+                                    hintText: 'Receipt Type',
 
-                              onChanged: (key, value) async {
-                                controller.receiptTypeFilterId.value = key;
-                                controller.receiptTypeFilter.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.receiptTypeFilterId.value = '';
-                                controller.receiptTypeFilter.value.clear();
-                              },
-                              onOpen: () {
-                                return controller.getReceiptsAndPaymentsTypes();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 300,
-                              showedSelectedName: 'entity_name',
-                              textcontroller:
-                                  controller.customerNameFilter.value.text,
-                              hintText: 'Customer Name',
-                              onChanged: (key, value) async {
-                                controller.customerNameFilterId.value = key;
-                                controller.customerNameFilter.value.text =
-                                    value['entity_name'];
-                              },
-                              onDelete: () {
-                                controller.customerNameFilterId.value = '';
-                                controller.customerNameFilter.value.clear();
-                              },
-                              onOpen: () {
-                                return controller.getAllCustomers();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 250,
-                              showedSelectedName: 'account_number',
-                              textcontroller:
-                                  controller.accountFilter.value.text,
-                              hintText: 'Account',
+                                    onChanged: (key, value) async {
+                                      controller.receiptTypeFilterId.value =
+                                          key;
+                                      controller.receiptTypeFilter.value.text =
+                                          value['name'];
+                                    },
+                                    onDelete: () {
+                                      controller.receiptTypeFilterId.value = '';
+                                      controller.receiptTypeFilter.value
+                                          .clear();
+                                    },
+                                    onOpen: () {
+                                      return controller
+                                          .getReceiptsAndPaymentsTypes();
+                                    },
+                                  ),
+                                  CustomDropdown(
+                                    width: 300,
+                                    showedSelectedName: 'entity_name',
+                                    textcontroller: controller
+                                        .customerNameFilter
+                                        .value
+                                        .text,
+                                    hintText: 'Customer Name',
+                                    onChanged: (key, value) async {
+                                      controller.customerNameFilterId.value =
+                                          key;
+                                      controller.customerNameFilter.value.text =
+                                          value['entity_name'];
+                                    },
+                                    onDelete: () {
+                                      controller.customerNameFilterId.value =
+                                          '';
+                                      controller.customerNameFilter.value
+                                          .clear();
+                                    },
+                                    onOpen: () {
+                                      return controller.getAllCustomers();
+                                    },
+                                  ),
+                                  CustomDropdown(
+                                    width: 250,
+                                    showedSelectedName: 'account_number',
+                                    textcontroller:
+                                        controller.accountFilter.value.text,
+                                    hintText: 'Account',
 
-                              onChanged: (key, value) async {
-                                controller.accountFilterId.value = key;
-                                controller.accountFilter.value.text =
-                                    value['account_number'];
-                              },
-                              onDelete: () {
-                                controller.accountFilterId.value = '';
-                                controller.accountFilter.value.clear();
-                              },
-                              onOpen: () {
-                                return controller.getAllAccounts();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 250,
-                              showedSelectedName: 'name',
-                              textcontroller:
-                                  controller.bankNameFilter.value.text,
-                              hintText: 'Bank Name',
+                                    onChanged: (key, value) async {
+                                      controller.accountFilterId.value = key;
+                                      controller.accountFilter.value.text =
+                                          value['account_number'];
+                                    },
+                                    onDelete: () {
+                                      controller.accountFilterId.value = '';
+                                      controller.accountFilter.value.clear();
+                                    },
+                                    onOpen: () {
+                                      return controller.getAllAccounts();
+                                    },
+                                  ),
+                                  CustomDropdown(
+                                    width: 250,
+                                    showedSelectedName: 'name',
+                                    textcontroller:
+                                        controller.bankNameFilter.value.text,
+                                    hintText: 'Bank Name',
 
-                              onChanged: (key, value) async {
-                                controller.bankNameFilterId.value = key;
-                                controller.bankNameFilter.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.bankNameFilterId.value = '';
-                                controller.bankNameFilter.value.clear();
-                              },
-                              onOpen: () {
-                                return controller.getBanks();
-                              },
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 200,
-                              labelText: 'Cheque NO.',
-                              controller: controller.chequeNumberFilter.value,
-                            ),
-                            CustomDropdown(
-                              width: 150,
-                              textcontroller:
-                                  controller.statusFilter.value.text,
-                              showedSelectedName: 'name',
-                              hintText: 'Status',
-                              items: allStatus,
-                              onChanged: (key, value) async {
-                                controller.statusFilter.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.statusFilter.value.clear();
-                              },
-                            ),
-                          ],
+                                    onChanged: (key, value) async {
+                                      controller.bankNameFilterId.value = key;
+                                      controller.bankNameFilter.value.text =
+                                          value['name'];
+                                    },
+                                    onDelete: () {
+                                      controller.bankNameFilterId.value = '';
+                                      controller.bankNameFilter.value.clear();
+                                    },
+                                    onOpen: () {
+                                      return controller.getBanks();
+                                    },
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 200,
+                                    labelText: 'Cheque NO.',
+                                    controller:
+                                        controller.chequeNumberFilter.value,
+                                  ),
+                                  CustomDropdown(
+                                    width: 150,
+                                    textcontroller:
+                                        controller.statusFilter.value.text,
+                                    showedSelectedName: 'name',
+                                    hintText: 'Status',
+                                    items: allStatus,
+                                    onChanged: (key, value) async {
+                                      controller.statusFilter.value.text =
+                                          value['name'];
+                                    },
+                                    onDelete: () {
+                                      controller.statusFilter.value.clear();
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 120,
+                                    controller: controller.fromDate.value,
+                                    labelText: 'From Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.fromDate.value.text,
+                                        controller.fromDate.value,
+                                      );
+                                    },
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 120,
+                                    controller: controller.toDate.value,
+                                    labelText: 'To Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.toDate.value.text,
+                                        controller.toDate.value,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
                   ),
+                  const SizedBox(height: 20),
                   GetX<CashManagementReceiptsController>(
                     builder: (controller) {
                       return SingleChildScrollView(
@@ -163,81 +212,50 @@ class CashManagementReceipt extends StatelessWidget {
                                 spacing: 10,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  myTextFormFieldWithBorder(
-                                    width: 170,
-                                    controller: controller.fromDate.value,
-                                    labelText: 'From Date',
-                                    onFieldSubmitted: (_) async {
-                                      normalizeDate(
-                                        controller.fromDate.value.text,
-                                        controller.fromDate.value,
-                                      );
+                                  newReceiptButton(
+                                    context,
+                                    constraints,
+                                    controller,
+                                  ),
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue: 1,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('TODAY'),
+                                      3: Text('THIS MONTH'),
+                                      4: Text('THIS YEAR'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForDatePicker(v);
                                     },
                                   ),
-                                  myTextFormFieldWithBorder(
-                                    width: 170,
-                                    controller: controller.toDate.value,
-                                    labelText: 'To Date',
-                                    onFieldSubmitted: (_) async {
-                                      normalizeDate(
-                                        controller.toDate.value.text,
-                                        controller.toDate.value,
-                                      );
-                                    },
-                                  ),
-                                  filterButton(
-                                    title: 'Today',
-                                    onPressed: () {
-                                      controller.isAllSelected.value = false;
-                                      controller.isTodaySelected.value = true;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      controller.isYearSelected.value = false;
-                                      controller.isMonthSelected.value = false;
-                                      controller.isDaySelected.value = true;
-                                      controller.filterSearch();
-                                    },
-                                    isSelected:
-                                        controller.isTodaySelected.value,
-                                  ),
-                                  filterButton(
-                                    title: 'This Month',
-                                    onPressed: () {
-                                      controller.isAllSelected.value = false;
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          true;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      controller.isYearSelected.value = false;
-                                      controller.isMonthSelected.value = true;
-                                      controller.isDaySelected.value = false;
-                                      controller.filterSearch();
-                                    },
-                                    isSelected:
-                                        controller.isThisMonthSelected.value,
-                                  ),
-                                  filterButton(
-                                    title: 'This Year',
-                                    onPressed: () {
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          true;
-                                      controller.isYearSelected.value = true;
-                                      controller.isMonthSelected.value = false;
-                                      controller.isDaySelected.value = false;
-                                      controller.filterSearch();
-                                    },
-                                    isSelected:
-                                        controller.isThisYearSelected.value,
-                                  ),
-                                  const SizedBox(width: 10),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
                                   ElevatedButton(
-                                    style: saveButtonStyle,
+                                    style: findButtonStyle,
                                     onPressed:
                                         controller
                                             .isScreenLodingForReceipts
@@ -262,16 +280,11 @@ class CashManagementReceipt extends StatelessWidget {
                                       controller.clearAllFilters();
                                     },
                                     child: Text(
-                                      'Clear Filters',
+                                      'Clear',
                                       style: fontStyleForElevatedButtons,
                                     ),
                                   ),
                                 ],
-                              ),
-                              newReceiptButton(
-                                context,
-                                constraints,
-                                controller,
                               ),
                             ],
                           ),
@@ -279,42 +292,45 @@ class CashManagementReceipt extends StatelessWidget {
                       );
                     },
                   ),
-                  GetX<CashManagementReceiptsController>(
-                    builder: (controller) {
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: Row(
-                              spacing: 10,
-                              children: [
-                                customBox(
-                                  title: 'NUMBER OF RECEIPTS',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: mainColor,
-                                    isBold: true,
-                                    text:
-                                        '${controller.numberOfReceipts.value}',
-                                    formatDouble: false,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: GetX<CashManagementReceiptsController>(
+                      builder: (controller) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                spacing: 10,
+                                children: [
+                                  customBox(
+                                    title: 'NUMBER OF RECEIPTS',
+                                    value: textForDataRowInTable(
+                                      fontSize: 16,
+                                      color: mainColor,
+                                      isBold: true,
+                                      text:
+                                          '${controller.numberOfReceipts.value}',
+                                      formatDouble: false,
+                                    ),
                                   ),
-                                ),
-                                customBox(
-                                  title: 'RECEIVED',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.green,
-                                    isBold: true,
-                                    text:
-                                        '${controller.totalReceiptsReceived.value}',
+                                  customBox(
+                                    title: 'RECEIVED',
+                                    value: textForDataRowInTable(
+                                      fontSize: 16,
+                                      color: Colors.green,
+                                      isBold: true,
+                                      text:
+                                          '${controller.totalReceiptsReceived.value}',
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const Expanded(child: SizedBox()),
-                        ],
-                      );
-                    },
+                            const Expanded(child: SizedBox()),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                   Container(
                     width: constraints.maxWidth,
@@ -363,8 +379,6 @@ Widget tableOfScreensForCashManagement({
 
   return DataTableTheme(
     data: DataTableThemeData(
-      headingTextStyle: fontStyleForTableHeader,
-      dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
           return Colors.grey.shade300;
@@ -385,7 +399,6 @@ Widget tableOfScreensForCashManagement({
         horizontalMargin: horizontalMarginForTable,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           const DataColumn(
             label: SizedBox(),

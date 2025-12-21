@@ -1,3 +1,5 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/ap_invoices_controller.dart';
@@ -27,15 +29,22 @@ class ApInvoices extends StatelessWidget {
                   GetX<ApInvoicesController>(
                     init: ApInvoicesController(),
                     builder: (controller) {
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: Row(
-                              spacing: 10,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: CustomDropdown(
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 28,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            spacing: 10,
+                            children: [
+                              Row(
+                                spacing: 10,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  CustomDropdown(
+                                    width: 150,
                                     textcontroller:
                                         controller.invoiceTypeFilter.text,
                                     showedSelectedName: 'name',
@@ -54,17 +63,14 @@ class ApInvoices extends StatelessWidget {
                                       return controller.getInvoiceTypes();
                                     },
                                   ),
-                                ),
-                                Expanded(
-                                  child: myTextFormFieldWithBorder(
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
                                     labelText: 'Reference NO.',
                                     controller:
                                         controller.referenceNumberFilter,
                                   ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: CustomDropdown(
+                                  CustomDropdown(
+                                    width: 300,
                                     textcontroller:
                                         controller.vendorFilter.value.text,
                                     showedSelectedName: 'entity_name',
@@ -82,9 +88,8 @@ class ApInvoices extends StatelessWidget {
                                       return controller.getAllVendors();
                                     },
                                   ),
-                                ),
-                                Expanded(
-                                  child: CustomDropdown(
+                                  CustomDropdown(
+                                    width: 200,
                                     textcontroller:
                                         controller.statusFilter.value.text,
                                     showedSelectedName: 'name',
@@ -98,29 +103,13 @@ class ApInvoices extends StatelessWidget {
                                       controller.statusFilter.value.clear();
                                     },
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Expanded(child: SizedBox()),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  GetX<ApInvoicesController>(
-                    builder: (controller) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Row(
-                              spacing: 10,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: myTextFormFieldWithBorder(
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 120,
                                     controller: controller.fromDate.value,
                                     labelText: 'From Date',
                                     onFieldSubmitted: (_) async {
@@ -130,9 +119,8 @@ class ApInvoices extends StatelessWidget {
                                       );
                                     },
                                   ),
-                                ),
-                                Expanded(
-                                  child: myTextFormFieldWithBorder(
+                                  myTextFormFieldWithBorder(
+                                    width: 120,
                                     controller: controller.toDate.value,
                                     labelText: 'To Date',
                                     onFieldSubmitted: (_) async {
@@ -142,111 +130,104 @@ class ApInvoices extends StatelessWidget {
                                       );
                                     },
                                   ),
-                                ),
-                                ElevatedButton(
-                                  style: todayButtonStyle,
-                                  onPressed: controller.isTodaySelected.isFalse
-                                      ? () {
-                                          controller.isAllSelected.value =
-                                              false;
-                                          controller.isTodaySelected.value =
-                                              true;
-                                          controller.isThisMonthSelected.value =
-                                              false;
-                                          controller.isThisYearSelected.value =
-                                              false;
-                                          controller.isYearSelected.value =
-                                              false;
-                                          controller.isMonthSelected.value =
-                                              false;
-                                          controller.isDaySelected.value = true;
-                                          controller.searchEngine({
-                                            "today": true,
-                                          });
-                                        }
-                                      : null,
-                                  child: const Text('Today'),
-                                ),
-                                ElevatedButton(
-                                  style: thisMonthButtonStyle,
-                                  onPressed:
-                                      controller.isThisMonthSelected.isFalse
-                                      ? () {
-                                          controller.isAllSelected.value =
-                                              false;
-                                          controller.isTodaySelected.value =
-                                              false;
-                                          controller.isThisMonthSelected.value =
-                                              true;
-                                          controller.isThisYearSelected.value =
-                                              false;
-                                          controller.isYearSelected.value =
-                                              false;
-                                          controller.isMonthSelected.value =
-                                              true;
-                                          controller.isDaySelected.value =
-                                              false;
-                                          controller.searchEngine({
-                                            "this_month": true,
-                                          });
-                                        }
-                                      : null,
-                                  child: const Text('This Month'),
-                                ),
-                                ElevatedButton(
-                                  style: thisYearButtonStyle,
-                                  onPressed:
-                                      controller.isThisYearSelected.isFalse
-                                      ? () {
-                                          controller.isTodaySelected.value =
-                                              false;
-                                          controller.isThisMonthSelected.value =
-                                              false;
-                                          controller.isThisYearSelected.value =
-                                              true;
-                                          controller.isYearSelected.value =
-                                              true;
-                                          controller.isMonthSelected.value =
-                                              false;
-                                          controller.isDaySelected.value =
-                                              false;
-                                          controller.searchEngine({
-                                            "this_year": true,
-                                          });
-                                        }
-                                      : null,
-                                  child: const Text('This Year'),
-                                ),
-                                ElevatedButton(
-                                  style: saveButtonStyle,
-                                  onPressed: controller.isScreenLoding.isFalse
-                                      ? () {
-                                          controller.filterSearch();
-                                        }
-                                      : null,
-                                  child: controller.isScreenLoding.isFalse
-                                      ? Text(
-                                          'Find',
-                                          style: fontStyleForElevatedButtons,
-                                        )
-                                      : loadingProcess,
-                                ),
-                                ElevatedButton(
-                                  style: clearVariablesButtonStyle,
-                                  onPressed: () {
-                                    controller.clearAllFilters();
-                                  },
-                                  child: Text(
-                                    'Clear Filters',
-                                    style: fontStyleForElevatedButtons,
-                                  ),
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
+                            ],
                           ),
-                          const Expanded(flex: 2, child: SizedBox()),
-                          newInvoiceButton(context, constraints, controller),
-                        ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  GetX<ApInvoicesController>(
+                    builder: (controller) {
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 28,
+                          ),
+                          child: Row(
+                            spacing: 10,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                spacing: 10,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  newInvoiceButton(
+                                    context,
+                                    constraints,
+                                    controller,
+                                  ),
+
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue: 1,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('TODAY'),
+                                      3: Text('THIS MONTH'),
+                                      4: Text('THIS YEAR'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForDatePicker(v);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  ElevatedButton(
+                                    style: findButtonStyle,
+                                    onPressed: controller.isScreenLoding.isFalse
+                                        ? () {
+                                            controller.filterSearch();
+                                          }
+                                        : null,
+                                    child: controller.isScreenLoding.isFalse
+                                        ? Text(
+                                            'Find',
+                                            style: fontStyleForElevatedButtons,
+                                          )
+                                        : loadingProcess,
+                                  ),
+                                  ElevatedButton(
+                                    style: clearVariablesButtonStyle,
+                                    onPressed: () {
+                                      controller.clearAllFilters();
+                                    },
+                                    child: Text(
+                                      'Clear',
+                                      style: fontStyleForElevatedButtons,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -352,8 +333,8 @@ Widget tableOfScreens({
 
   return DataTableTheme(
     data: DataTableThemeData(
-      headingTextStyle: fontStyleForTableHeader,
-      dataTextStyle: regTextStyle,
+      // headingTextStyle: fontStyleForTableHeader,
+      // dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
           return Colors.grey.shade300;
@@ -373,7 +354,7 @@ Widget tableOfScreens({
         columnSpacing: 15,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+        // headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           const DataColumn(label: SizedBox()),
           DataColumn(

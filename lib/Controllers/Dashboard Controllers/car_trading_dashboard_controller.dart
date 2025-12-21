@@ -67,7 +67,6 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalNETsForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAll = RxDouble(0.0);
   RxDouble totalNetProfit = RxDouble(0.0);
-  RxInt pagesPerPage = RxInt(100);
   DateFormat inputFormat = DateFormat("dd-MM-yyyy");
   RxBool isNewStatusSelected = RxBool(false);
   RxBool isSoldStatusSelected = RxBool(false);
@@ -193,6 +192,64 @@ class CarTradingDashboardController extends GetxController {
   void dispose() {
     focusNodeForitems1.dispose();
     super.dispose();
+  }
+
+  void onChooseForDatePicker(int i) {
+    switch (i) {
+      case 1:
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = false;
+        fromDate.value.clear();
+        toDate.value.clear();
+        break;
+      case 2:
+        setTodayRange();
+        isTodaySelected.value = true;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = false;
+        break;
+      case 3:
+        setThisMonthRange();
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = true;
+        isThisYearSelected.value = false;
+        break;
+      case 4:
+        setThisYearRange();
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = true;
+        break;
+      default:
+    }
+  }
+
+  void onChooseForStatusPicker(int i) {
+    switch (i) {
+      case 1:
+        isNewStatusSelected.value = false;
+        isSoldStatusSelected.value = false;
+        break;
+      case 2:
+        if (isNewStatusSelected.isFalse) {
+          isNewStatusSelected.value = true;
+          isSoldStatusSelected.value = false;
+        } else {
+          isNewStatusSelected.value = false;
+        }
+        break;
+      case 3:
+        if (isSoldStatusSelected.isFalse) {
+          isSoldStatusSelected.value = true;
+          isNewStatusSelected.value = false;
+        } else {
+          isSoldStatusSelected.value = false;
+        }
+        break;
+
+      default:
+    }
   }
 
   void setTodayRange() {

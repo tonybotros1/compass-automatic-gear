@@ -173,7 +173,6 @@ class QuotationCardController extends GetxController {
   ScrollController scrollerForCustomer = ScrollController();
   ScrollController scrollerForQuotationSection = ScrollController();
 
-
   @override
   void onInit() async {
     super.onInit();
@@ -236,6 +235,51 @@ class QuotationCardController extends GetxController {
 
   Future getCurrentQuotationCardStatus(String id) async {
     return await helper.getQuotationCardStatus(id);
+  }
+
+  void onChooseForDatePicker(int i) {
+    switch (i) {
+      case 1:
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = false;
+        fromDate.value.clear();
+        toDate.value.clear();
+        break;
+      case 2:
+        setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
+        isAllSelected.value = false;
+        isTodaySelected.value = true;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = false;
+        isYearSelected.value = false;
+        isMonthSelected.value = false;
+        isDaySelected.value = true;
+        searchEngine({"today": true});
+        break;
+      case 3:
+        setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
+        isAllSelected.value = false;
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = true;
+        isThisYearSelected.value = false;
+        isYearSelected.value = false;
+        isMonthSelected.value = true;
+        isDaySelected.value = false;
+        searchEngine({"this_month": true});
+        break;
+      case 4:
+        setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = true;
+        isYearSelected.value = true;
+        isMonthSelected.value = false;
+        isDaySelected.value = false;
+        searchEngine({"this_year": true});
+        break;
+      default:
+    }
   }
 
   Future<void> addNewQuotationCard() async {
@@ -1045,6 +1089,9 @@ class QuotationCardController extends GetxController {
   // }
 
   void clearValues() {
+    customerBranch.text = companyDetails['current_user_branch_name'] ?? '';
+    customerBranchId.value = companyDetails['current_user_branch_id'] ?? '';
+
     jobCardId.value = '';
     quotationDate.value.text = textToDate(DateTime.now());
     currentCountryVAT.value =
@@ -1053,9 +1100,6 @@ class QuotationCardController extends GetxController {
             : null) ??
         companyDetails['country_vat'] ??
         0;
-    // currentCountryVAT.value = companyDetails.containsKey('country_vat')
-    //     ? companyDetails['country_vat'].toString()
-    //     : "";
     country.text = companyDetails.containsKey('country')
         ? companyDetails['country'] ?? ""
         : "";
@@ -1063,9 +1107,6 @@ class QuotationCardController extends GetxController {
     countryId.value = companyDetails.containsKey('country_id')
         ? companyDetails['country_id'] ?? ""
         : "";
-    // if (countryId.value.isNotEmpty) {
-    //   getCitiesByCountryID(countryId.value);
-    // }
     mileageIn.value.text = '0';
     customerCreditNumber.text = '0';
     customerOutstanding.text = '0';
@@ -1107,8 +1148,6 @@ class QuotationCardController extends GetxController {
     customerEntityEmail.clear();
     customerSaleManId.value = '';
     customerSaleMan.value = '';
-    customerBranchId.value = '';
-    customerBranch.clear();
     quotationDays.value.clear();
     validityEndDate.value.clear();
     referenceNumber.value.clear();

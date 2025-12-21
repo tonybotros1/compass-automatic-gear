@@ -129,6 +129,51 @@ class ReceivingController extends GetxController {
     return await helper.getReceivingStatus(id);
   }
 
+  void onChooseForDatePicker(int i) {
+    switch (i) {
+      case 1:
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = false;
+        fromDate.value.clear();
+        toDate.value.clear();
+        break;
+      case 2:
+        setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
+        isAllSelected.value = false;
+        isTodaySelected.value = true;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = false;
+        isYearSelected.value = false;
+        isMonthSelected.value = false;
+        isDaySelected.value = true;
+        searchEngine({"today": true});
+        break;
+      case 3:
+        setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
+        isAllSelected.value = false;
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = true;
+        isThisYearSelected.value = false;
+        isYearSelected.value = false;
+        isMonthSelected.value = true;
+        isDaySelected.value = false;
+        searchEngine({"this_month": true});
+        break;
+      case 4:
+        setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = true;
+        isYearSelected.value = true;
+        isMonthSelected.value = false;
+        isDaySelected.value = false;
+        searchEngine({"this_year": true});
+        break;
+      default:
+    }
+  }
+
   Future<void> getAllInventeryItems() async {
     try {
       loadingInventeryItems.value = true;

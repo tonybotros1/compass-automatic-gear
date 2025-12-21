@@ -21,8 +21,8 @@ String webSocketURL = "ws://192.168.1.104:8000/ws"; // mobile : 192.168.43.58
 // String webSocketURL = "ws://10.0.2.2:8000/ws";
 
 // ======== production urls ========
-// String backcketURL = "endTestURI = 'https://datahubai-backend.onrender.com';
-// String webSowss://datahubai-backend.onrender.com/ws";
+// String backendTestURI = 'https://datahubai-backend.onrender.com';
+// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
 
 final formatter = CurrencyInputFormatter();
 
@@ -515,9 +515,9 @@ var valuesIcon = const Icon(
   color: Colors.purple,
 );
 
-var activeIcon = const Icon(Icons.check, color: Color(0xff9ACBD0));
+var activeIcon = const Icon(Icons.person, color: Color(0xff9ACBD0));
 var inActiveIcon = const Icon(
-  Icons.horizontal_rule_rounded,
+  Icons.person_off_rounded,
   color: Color(0xff09122C),
 );
 
@@ -1460,6 +1460,43 @@ Future<void> logout() async {
   } catch (e) {
     showSnackBar('Alert', 'Can\'t logout');
   }
+}
+
+void setTodayRange({
+  required TextEditingController fromDate,
+  required TextEditingController toDate,
+}) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+
+  fromDate.text = format.format(today);
+  toDate.text = format.format(today);
+}
+
+void setThisMonthRange({
+  required TextEditingController fromDate,
+  required TextEditingController toDate,
+}) {
+  final now = DateTime.now();
+
+  final firstDayOfMonth = DateTime(now.year, now.month, 1);
+  final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+
+  fromDate.text = format.format(firstDayOfMonth);
+  toDate.text = format.format(lastDayOfMonth);
+}
+
+void setThisYearRange({
+  required TextEditingController fromDate,
+  required TextEditingController toDate,
+}) {
+  final now = DateTime.now();
+
+  final firstDayOfYear = DateTime(now.year, 1, 1);
+  final lastDayOfYear = DateTime(now.year, 12, 31);
+
+  fromDate.text = format.format(firstDayOfYear);
+  toDate.text = format.format(lastDayOfYear);
 }
 
 class SaveIntent extends Intent {

@@ -50,6 +50,51 @@ class ConvertersController extends GetxController {
     super.onInit();
   }
 
+  void onChooseForDatePicker(int i) {
+    switch (i) {
+      case 1:
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = false;
+        fromDate.clear();
+        toDate.clear();
+        break;
+      case 2:
+        setTodayRange(fromDate: fromDate, toDate: toDate);
+        isAllSelected.value = false;
+        isTodaySelected.value = true;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = false;
+        isYearSelected.value = false;
+        isMonthSelected.value = false;
+        isDaySelected.value = true;
+        searchEngine({"today": true});
+        break;
+      case 3:
+        setThisMonthRange(fromDate: fromDate, toDate: toDate);
+        isAllSelected.value = false;
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = true;
+        isThisYearSelected.value = false;
+        isYearSelected.value = false;
+        isMonthSelected.value = true;
+        isDaySelected.value = false;
+        searchEngine({"this_month": true});
+        break;
+      case 4:
+        setThisYearRange(fromDate: fromDate, toDate: toDate);
+        isTodaySelected.value = false;
+        isThisMonthSelected.value = false;
+        isThisYearSelected.value = true;
+        isYearSelected.value = true;
+        isMonthSelected.value = false;
+        isDaySelected.value = false;
+        searchEngine({"this_year": true});
+        break;
+      default:
+    }
+  }
+
   String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();

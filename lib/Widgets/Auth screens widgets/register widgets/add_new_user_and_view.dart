@@ -65,31 +65,58 @@ Widget addNewUserAndView({
         date: userExpiryDate.toString(),
       ),
 
-      CustomSlidingSegmentedControl<int>(
-        initialValue: 1,
-        children: const {1: Text('ROLES'), 2: Text('BRANCHES')},
-        decoration: BoxDecoration(
-          color: CupertinoColors.lightBackgroundGray,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        thumbDecoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(6),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(1),
-              blurRadius: 4.0,
-              spreadRadius: 1.0,
-              offset: const Offset(0.0, 2.0),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CustomSlidingSegmentedControl<int>(
+            initialValue: 1,
+            children: const {1: Text('ROLES'), 2: Text('BRANCHES')},
+            decoration: BoxDecoration(
+              color: CupertinoColors.lightBackgroundGray,
+              borderRadius: BorderRadius.circular(8),
             ),
-          ],
-        ),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInToLinear,
-        onValueChanged: (v) {
-          controller.selectedMenu.value = v;
-          controller.selectFromTab(v);
-        },
+            thumbDecoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(1),
+                  blurRadius: 4.0,
+                  spreadRadius: 1.0,
+                  offset: const Offset(0.0, 2.0),
+                ),
+              ],
+            ),
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInToLinear,
+            onValueChanged: (v) {
+              // controller.selectedMenu.value = v;
+              controller.selectFromTab(v);
+            },
+          ),
+          Obx(
+            () => controller.showPrimaryText.isTrue
+                ? Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade600),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text(
+                      'Primary ?',
+                      style: TextStyle(
+                        color: Colors.grey.shade800,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  )
+                : const SizedBox(),
+          ),
+        ],
       ),
 
       Expanded(
@@ -178,6 +205,20 @@ Widget branchesSection({Key? key}) {
                   itemCount: controller.selectedBranches.length,
                   itemBuilder: (context, i) {
                     return ListTile(
+                      trailing: Obx(
+                        () => RadioGroup(
+                          groupValue: controller.primaryBranchIndex.value,
+                          onChanged: (value) {
+                            if (value != null) {
+                              controller.selectPrimaryBranch(value);
+                            }
+                          },
+                          child: Radio<int>(
+                            value: i, // unique value for this tile
+                            activeColor: mainColor,
+                          ),
+                        ),
+                      ),
                       leading: Obx(
                         () => Checkbox(
                           activeColor: Colors.blue,
@@ -195,7 +236,7 @@ Widget branchesSection({Key? key}) {
                         ),
                       ),
                       title: Text(
-                        '${controller.selectedBranches.keys.elementAt(i)}',
+                        controller.selectedBranches.keys.elementAt(i),
                       ),
                     );
                   },

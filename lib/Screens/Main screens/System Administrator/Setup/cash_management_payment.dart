@@ -1,5 +1,6 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/ap_payments_model.dart';
-import 'package:datahubai/Widgets/filter_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/cash_management_payments_controller.dart';
@@ -23,7 +24,6 @@ class CashManagementPayment extends StatelessWidget {
             padding: screenPadding,
             child: SingleChildScrollView(
               child: Column(
-                spacing: 20,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GetX<CashManagementPaymentsController>(
@@ -31,96 +31,139 @@ class CashManagementPayment extends StatelessWidget {
                     builder: (controller) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          spacing: 10,
-                          children: [
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Payment NO.',
-                              controller: controller.paymentCounterFilter.value,
-                            ),
-                            CustomDropdown(
-                              width: 200,
-                              showedSelectedName: 'name',
-                              textcontroller:
-                                  controller.paymentTypeFilter.value.text,
-                              hintText: 'Payment Type',
-                              onChanged: (key, value) async {
-                                controller.paymentTypeFilterId.value = key;
-                                controller.paymentTypeFilter.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.paymentTypeFilterId.value = '';
-                                controller.paymentTypeFilter.value.clear();
-                              },
-                              onOpen: () {
-                                return controller.getReceiptsAndPaymentsTypes();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 300,
-                              showedSelectedName: 'entity_name',
-                              textcontroller:
-                                  controller.vendorNameFilter.value.text,
-                              hintText: 'Vendor Name',
-                              onChanged: (key, value) async {
-                                controller.vendorNameFilterId.value = key;
-                                controller.vendorNameFilter.value.text =
-                                    value['entity_name'];
-                              },
-                              onDelete: () {
-                                controller.vendorNameFilterId.value = '';
-                                controller.vendorNameFilter.value.clear();
-                              },
-                              onOpen: () {
-                                return controller.getAllVendors();
-                              },
-                            ),
-                            CustomDropdown(
-                              width: 250,
-                              showedSelectedName: 'account_number',
-                              textcontroller:
-                                  controller.accountFilter.value.text,
-                              hintText: 'Account',
-                              onChanged: (key, value) async {
-                                controller.accountFilterId.value = key;
-                                controller.accountFilter.value.text =
-                                    value['account_number'];
-                              },
-                              onDelete: () {
-                                controller.accountFilterId.value = '';
-                                controller.accountFilter.value.clear();
-                              },
-                              onOpen: () {
-                                return controller.getAllAccounts();
-                              },
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 150,
-                              labelText: 'Cheque NO.',
-                              controller: controller.chequeNumberFilter.value,
-                            ),
-                            CustomDropdown(
-                              width: 150,
-                              textcontroller:
-                                  controller.statusFilter.value.text,
-                              showedSelectedName: 'name',
-                              hintText: 'Status',
-                              items: allStatus,
-                              onChanged: (key, value) async {
-                                controller.statusFilter.value.text =
-                                    value['name'];
-                              },
-                              onDelete: () {
-                                controller.statusFilter.value.clear();
-                              },
-                            ),
-                          ],
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: constraints.maxWidth - 28,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Payment NO.',
+                                    controller:
+                                        controller.paymentCounterFilter.value,
+                                  ),
+                                  CustomDropdown(
+                                    width: 200,
+                                    showedSelectedName: 'name',
+                                    textcontroller:
+                                        controller.paymentTypeFilter.value.text,
+                                    hintText: 'Payment Type',
+                                    onChanged: (key, value) async {
+                                      controller.paymentTypeFilterId.value =
+                                          key;
+                                      controller.paymentTypeFilter.value.text =
+                                          value['name'];
+                                    },
+                                    onDelete: () {
+                                      controller.paymentTypeFilterId.value = '';
+                                      controller.paymentTypeFilter.value
+                                          .clear();
+                                    },
+                                    onOpen: () {
+                                      return controller
+                                          .getReceiptsAndPaymentsTypes();
+                                    },
+                                  ),
+                                  CustomDropdown(
+                                    width: 300,
+                                    showedSelectedName: 'entity_name',
+                                    textcontroller:
+                                        controller.vendorNameFilter.value.text,
+                                    hintText: 'Vendor Name',
+                                    onChanged: (key, value) async {
+                                      controller.vendorNameFilterId.value = key;
+                                      controller.vendorNameFilter.value.text =
+                                          value['entity_name'];
+                                    },
+                                    onDelete: () {
+                                      controller.vendorNameFilterId.value = '';
+                                      controller.vendorNameFilter.value.clear();
+                                    },
+                                    onOpen: () {
+                                      return controller.getAllVendors();
+                                    },
+                                  ),
+                                  CustomDropdown(
+                                    width: 250,
+                                    showedSelectedName: 'account_number',
+                                    textcontroller:
+                                        controller.accountFilter.value.text,
+                                    hintText: 'Account',
+                                    onChanged: (key, value) async {
+                                      controller.accountFilterId.value = key;
+                                      controller.accountFilter.value.text =
+                                          value['account_number'];
+                                    },
+                                    onDelete: () {
+                                      controller.accountFilterId.value = '';
+                                      controller.accountFilter.value.clear();
+                                    },
+                                    onOpen: () {
+                                      return controller.getAllAccounts();
+                                    },
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Cheque NO.',
+                                    controller:
+                                        controller.chequeNumberFilter.value,
+                                  ),
+                                  CustomDropdown(
+                                    width: 150,
+                                    textcontroller:
+                                        controller.statusFilter.value.text,
+                                    showedSelectedName: 'name',
+                                    hintText: 'Status',
+                                    items: allStatus,
+                                    onChanged: (key, value) async {
+                                      controller.statusFilter.value.text =
+                                          value['name'];
+                                    },
+                                    onDelete: () {
+                                      controller.statusFilter.value.clear();
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  myTextFormFieldWithBorder(
+                                    width: 120,
+                                    controller: controller.fromDate.value,
+                                    labelText: 'From Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.fromDate.value.text,
+                                        controller.fromDate.value,
+                                      );
+                                    },
+                                  ),
+                                  myTextFormFieldWithBorder(
+                                    width: 120,
+                                    controller: controller.toDate.value,
+                                    labelText: 'To Date',
+                                    onFieldSubmitted: (_) async {
+                                      normalizeDate(
+                                        controller.toDate.value.text,
+                                        controller.toDate.value,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
                   ),
+                  const SizedBox(height: 20),
                   GetX<CashManagementPaymentsController>(
                     builder: (controller) {
                       return SingleChildScrollView(
@@ -138,87 +181,50 @@ class CashManagementPayment extends StatelessWidget {
                                 spacing: 10,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  myTextFormFieldWithBorder(
-                                    width: 150,
-                                    controller: controller.fromDate.value,
-                                    labelText: 'From Date',
-                                    onFieldSubmitted: (_) async {
-                                      normalizeDate(
-                                        controller.fromDate.value.text,
-                                        controller.fromDate.value,
-                                      );
+                                  newPaymentButton(
+                                    context,
+                                    constraints,
+                                    controller,
+                                  ),
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue: 1,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('TODAY'),
+                                      3: Text('THIS MONTH'),
+                                      4: Text('THIS YEAR'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForDatePicker(v);
                                     },
                                   ),
-                                  myTextFormFieldWithBorder(
-                                    width: 150,
-                                    controller: controller.toDate.value,
-                                    labelText: 'To Date',
-                                    onFieldSubmitted: (_) async {
-                                      normalizeDate(
-                                        controller.toDate.value.text,
-                                        controller.toDate.value,
-                                      );
-                                    },
-                                  ),
-                                  filterButton(
-                                    title: 'Today',
-                                    onPressed: () {
-                                      controller.isAllSelected.value = false;
-                                      controller.isTodaySelected.value = true;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      controller.isYearSelected.value = false;
-                                      controller.isMonthSelected.value = false;
-                                      controller.isDaySelected.value = true;
-                                      controller.searchEngineForPayments({
-                                        "today": true,
-                                      });
-                                    },
-                                    isSelected:
-                                        controller.isTodaySelected.value,
-                                  ),
-                                  filterButton(
-                                    title: 'This Month',
-                                    onPressed: () {
-                                      controller.isAllSelected.value = false;
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          true;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      controller.isYearSelected.value = false;
-                                      controller.isMonthSelected.value = true;
-                                      controller.isDaySelected.value = false;
-                                      controller.searchEngineForPayments({
-                                        "this_month": true,
-                                      });
-                                    },
-                                    isSelected:
-                                        controller.isThisMonthSelected.value,
-                                  ),
-                                  filterButton(
-                                    title: 'This Year',
-                                    onPressed: () {
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          true;
-                                      controller.isYearSelected.value = true;
-                                      controller.isMonthSelected.value = false;
-                                      controller.isDaySelected.value = false;
-                                      controller.searchEngineForPayments({
-                                        "this_year": true,
-                                      });
-                                    },
-                                    isSelected:
-                                        controller.isThisYearSelected.value,
-                                  ),
-                                  const SizedBox(width: 10),
+                                ],
+                              ),
+                              Row(
+                                spacing: 10,
+                                children: [
                                   ElevatedButton(
-                                    style: saveButtonStyle,
+                                    style: findButtonStyle,
                                     onPressed:
                                         controller
                                             .isScreenLodingForPayments
@@ -243,16 +249,11 @@ class CashManagementPayment extends StatelessWidget {
                                       controller.clearAllFilters();
                                     },
                                     child: Text(
-                                      'Clear Filters',
+                                      'Clear',
                                       style: fontStyleForElevatedButtons,
                                     ),
                                   ),
                                 ],
-                              ),
-                              newPaymentButton(
-                                context,
-                                constraints,
-                                controller,
                               ),
                             ],
                           ),
@@ -260,42 +261,45 @@ class CashManagementPayment extends StatelessWidget {
                       );
                     },
                   ),
-                  GetX<CashManagementPaymentsController>(
-                    builder: (controller) {
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: Row(
-                              spacing: 10,
-                              children: [
-                                customBox(
-                                  title: 'NUMBER OF PAYMENTS',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: mainColor,
-                                    isBold: true,
-                                    text:
-                                        '${controller.numberOfPayments.value}',
-                                    formatDouble: false,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: GetX<CashManagementPaymentsController>(
+                      builder: (controller) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                spacing: 10,
+                                children: [
+                                  customBox(
+                                    title: 'NUMBER OF PAYMENTS',
+                                    value: textForDataRowInTable(
+                                      fontSize: 16,
+                                      color: mainColor,
+                                      isBold: true,
+                                      text:
+                                          '${controller.numberOfPayments.value}',
+                                      formatDouble: false,
+                                    ),
                                   ),
-                                ),
-                                customBox(
-                                  title: 'PAID',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.red,
-                                    isBold: true,
-                                    text:
-                                        '${controller.totalPaymentPaid.value}',
+                                  customBox(
+                                    title: 'PAID',
+                                    value: textForDataRowInTable(
+                                      fontSize: 16,
+                                      color: Colors.red,
+                                      isBold: true,
+                                      text:
+                                          '${controller.totalPaymentPaid.value}',
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const Expanded(child: SizedBox()),
-                        ],
-                      );
-                    },
+                            const Expanded(child: SizedBox()),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                   Container(
                     width: constraints.maxWidth,
@@ -481,8 +485,6 @@ Widget tableOfScreensForCashManagement({
 
   return DataTableTheme(
     data: DataTableThemeData(
-      headingTextStyle: fontStyleForTableHeader,
-      dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
           return Colors.grey.shade300;
@@ -503,7 +505,6 @@ Widget tableOfScreensForCashManagement({
         horizontalMargin: horizontalMarginForTable,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           const DataColumn(
             label: SizedBox(),

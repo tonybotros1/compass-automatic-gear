@@ -1,10 +1,11 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_summary_details.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_car_trading.dart';
-import '../../Widgets/filter_button.dart';
 import '../../Widgets/my_text_field.dart';
 import '../../consts.dart';
 
@@ -333,7 +334,7 @@ class CarTradingDashboard extends StatelessWidget {
                                         spacing: 10,
                                         children: [
                                           myTextFormFieldWithBorder(
-                                            width: 170,
+                                            width: 120,
                                             controller:
                                                 controller.fromDate.value,
                                             labelText: 'From Date',
@@ -371,7 +372,7 @@ class CarTradingDashboard extends StatelessWidget {
                                             },
                                           ),
                                           myTextFormFieldWithBorder(
-                                            width: 170,
+                                            width: 120,
                                             controller: controller.toDate.value,
                                             labelText: 'To Date',
                                             onFieldSubmitted: (_) async {
@@ -433,128 +434,93 @@ class CarTradingDashboard extends StatelessWidget {
                                       Row(
                                         spacing: 10,
                                         children: [
-                                          filterButton(
-                                            title: 'Today',
-                                            onPressed: () async {
-                                              controller.setTodayRange();
-                                              controller.isTodaySelected.value =
-                                                  true;
-                                              controller
-                                                      .isThisMonthSelected
-                                                      .value =
-                                                  false;
-                                              controller
-                                                      .isThisYearSelected
-                                                      .value =
-                                                  false;
-                                              // controller.filterSearch();
-                                              // controller
-                                              //     .filterGeneralExpensesSearch();
+                                          CustomSlidingSegmentedControl<int>(
+                                            height: 30,
+                                            initialValue: 1,
+                                            children: const {
+                                              1: Text('ALL'),
+                                              2: Text('TODAY'),
+                                              3: Text('THIS MONTH'),
+                                              4: Text('THIS YEAR'),
                                             },
-                                            isSelected: controller
-                                                .isTodaySelected
-                                                .value,
-                                          ),
-                                          filterButton(
-                                            title: 'This Month',
-                                            onPressed: () async {
-                                              controller.setThisMonthRange();
-                                              controller.isTodaySelected.value =
-                                                  false;
-                                              controller
-                                                      .isThisMonthSelected
-                                                      .value =
-                                                  true;
-                                              controller
-                                                      .isThisYearSelected
-                                                      .value =
-                                                  false;
-                                              // controller.filterSearch();
-                                              // controller
-                                              //     .filterGeneralExpensesSearch();
+                                            decoration: BoxDecoration(
+                                              color: CupertinoColors
+                                                  .lightBackgroundGray,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            thumbDecoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withAlpha(
+                                                    1,
+                                                  ),
+                                                  blurRadius: 4.0,
+                                                  spreadRadius: 1.0,
+                                                  offset: const Offset(
+                                                    0.0,
+                                                    2.0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            duration: const Duration(
+                                              milliseconds: 300,
+                                            ),
+                                            curve: Curves.easeInToLinear,
+                                            onValueChanged: (v) {
+                                              controller.onChooseForDatePicker(
+                                                v,
+                                              );
                                             },
-                                            isSelected: controller
-                                                .isThisMonthSelected
-                                                .value,
-                                          ),
-                                          filterButton(
-                                            title: 'This Year',
-                                            onPressed: () async {
-                                              controller.setThisYearRange();
-                                              controller.isTodaySelected.value =
-                                                  false;
-                                              controller
-                                                      .isThisMonthSelected
-                                                      .value =
-                                                  false;
-                                              controller
-                                                      .isThisYearSelected
-                                                      .value =
-                                                  true;
-                                              // controller.filterSearch();
-                                              // controller
-                                              //     .filterGeneralExpensesSearch();
-                                            },
-                                            isSelected: controller
-                                                .isThisYearSelected
-                                                .value,
                                           ),
                                           separator(
                                             color: Colors.grey.shade700,
                                           ),
-                                          filterButton(
-                                            isStatus: true,
-                                            title: 'New',
-                                            onPressed: () async {
-                                              if (controller
-                                                  .isNewStatusSelected
-                                                  .isFalse) {
-                                                controller
-                                                        .isNewStatusSelected
-                                                        .value =
-                                                    true;
-                                                controller
-                                                        .isSoldStatusSelected
-                                                        .value =
-                                                    false;
-                                              } else {
-                                                controller
-                                                        .isNewStatusSelected
-                                                        .value =
-                                                    false;
-                                              }
-                                              // controller.filterSearch();
+                                          CustomSlidingSegmentedControl<int>(
+                                            height: 30,
+
+                                            initialValue: 1,
+                                            children: const {
+                                              1: Text('ALL'),
+                                              2: Text('NEW'),
+                                              3: Text('SOLD'),
                                             },
-                                            isSelected: controller
-                                                .isNewStatusSelected
-                                                .value,
-                                          ),
-                                          filterButton(
-                                            isStatus: true,
-                                            title: 'Sold',
-                                            onPressed: () async {
-                                              if (controller
-                                                  .isSoldStatusSelected
-                                                  .isFalse) {
-                                                controller
-                                                        .isSoldStatusSelected
-                                                        .value =
-                                                    true;
-                                                controller
-                                                        .isNewStatusSelected
-                                                        .value =
-                                                    false;
-                                              } else {
-                                                controller
-                                                        .isSoldStatusSelected
-                                                        .value =
-                                                    false;
-                                              }
-                                              // controller.filterSearch();
+                                            decoration: BoxDecoration(
+                                              color: CupertinoColors
+                                                  .lightBackgroundGray,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            thumbDecoration: BoxDecoration(
+                                              color: CupertinoColors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withAlpha(
+                                                    1,
+                                                  ),
+                                                  blurRadius: 4.0,
+                                                  spreadRadius: 1.0,
+                                                  offset: const Offset(
+                                                    0.0,
+                                                    2.0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            duration: const Duration(
+                                              milliseconds: 300,
+                                            ),
+                                            curve: Curves.easeInToLinear,
+                                            onValueChanged: (v) {
+                                              controller
+                                                  .onChooseForStatusPicker(v);
                                             },
-                                            isSelected: controller
-                                                .isSoldStatusSelected
-                                                .value,
                                           ),
                                         ],
                                       ),

@@ -37,7 +37,11 @@ Widget tableOfCarTrades({
           showEmptyRows: true,
           dividerThickness: .3,
           showFirstLastButtons: true,
-          rowsPerPage: controller.pagesPerPage.value,
+          rowsPerPage: controller.numberOfCars.value <= 8
+              ? 8
+              : controller.numberOfCars.value >= 30
+              ? 30
+              : controller.numberOfCars.value,
           showCheckboxColumn: false,
           horizontalMargin: horizontalMarginForTable,
           dataRowMaxHeight: 40,

@@ -1,5 +1,6 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:datahubai/Models/job%20cards/job_card_model.dart';
-import 'package:datahubai/Widgets/filter_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -25,429 +26,415 @@ class JobCard extends StatelessWidget {
             padding: screenPadding,
             child: SizedBox(
               width: constraints.maxWidth,
-              child: ListView(
-                children: [
-                  GetX<JobCardController>(
-                    init: JobCardController(),
-                    builder: (controller) {
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minWidth: constraints.maxWidth - 28,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            spacing: 10,
-                            children: [
-                              Row(
-                                spacing: 10,
-                                children: [
-                                  myTextFormFieldWithBorder(
-                                    width: 150,
-                                    labelText: 'Job No.',
-                                    controller:
-                                        controller.jobNumberFilter.value,
-                                  ),
-                                  myTextFormFieldWithBorder(
-                                    width: 150,
-                                    labelText: 'Invoice No.',
-                                    controller:
-                                        controller.invoiceNumberFilter.value,
-                                  ),
-                                  // CustomDropdown(
-                                  //   width: 200,
-                                  //   showedSelectedName: 'name',
-                                  //   textcontroller:
-                                  //       controller.carBrandIdFilterName.value.text,
-                                  //   hintText: 'Car Brand',
-                                  //   onChanged: (key, value) async {
-                                  //     controller.getModelsByCarBrand(key);
-                                  //     controller.carBrandIdFilter.value = key;
-                                  //     controller.carBrandIdFilterName.value.text =
-                                  //         value['name'];
-                                  //     controller.carModelIdFilter.value = '';
-                                  //     controller.carModelIdFilterName.value.text = '';
-                                  //   },
-                                  //   onDelete: () {
-                                  //     controller.carBrandIdFilter.value = "";
-                                  //     controller.carBrandIdFilterName.value.clear();
-                                  //     controller.carModelIdFilter.value = '';
-                                  //     controller.carModelIdFilterName.value.text = '';
-                                  //   },
-                                  //   onOpen: () {
-                                  //     return controller.getCarBrands();
-                                  //   },
-                                  // ),
-                                  // CustomDropdown(
-                                  //   width: 200,
-                                  //   showedSelectedName: 'name',
-                                  //   textcontroller:
-                                  //       controller.carModelIdFilterName.value.text,
-                                  //   hintText: 'Car Model',
-                                  //   onChanged: (key, value) async {
-                                  //     controller.carModelIdFilter.value = key;
-                                  //     controller.carModelIdFilterName.value.text =
-                                  //         value['name'];
-                                  //   },
-                                  //   onDelete: () {
-                                  //     controller.carModelIdFilter.value = "";
-                                  //     controller.carModelIdFilterName.value.clear();
-                                  //   },
-                                  //   onOpen: () {
-                                  //     return controller.getModelsByCarBrand(
-                                  //       controller.carBrandIdFilter.value,
-                                  //     );
-                                  //   },
-                                  // ),
-                                  myTextFormFieldWithBorder(
-                                    width: 150,
-                                    labelText: 'Plate NO.',
-                                    controller:
-                                        controller.plateNumberFilter.value,
-                                  ),
-                                  myTextFormFieldWithBorder(
-                                    width: 200,
-                                    labelText: 'VIN',
-                                    controller: controller.vinFilter.value,
-                                  ),
-                                  myTextFormFieldWithBorder(
-                                    width: 200,
-                                    labelText: 'LPO No.',
-                                    controller: controller.lpoFilter.value,
-                                  ),
-                                  CustomDropdown(
-                                    width: 300,
-                                    textcontroller: controller
-                                        .customerNameIdFilterName
-                                        .value
-                                        .text,
-                                    showedSelectedName: 'entity_name',
-                                    hintText: 'Customer Name',
-                                    onChanged: (key, value) async {
-                                      controller
-                                              .customerNameIdFilterName
-                                              .value
-                                              .text =
-                                          value['entity_name'];
-                                      controller.customerNameIdFilter.value =
-                                          key;
-                                    },
-                                    onDelete: () {
-                                      controller.customerNameIdFilterName.value
-                                          .clear();
-                                      controller.customerNameIdFilter.value =
-                                          "";
-                                    },
-                                    onOpen: () {
-                                      return controller.getAllCustomers();
-                                    },
-                                  ),
-                                  CustomDropdown(
-                                    width: 150,
-                                    textcontroller:
-                                        controller.statusFilter.value.text,
-                                    showedSelectedName: 'name',
-                                    hintText: 'Status',
-                                    items: controller.allStatus,
-                                    onChanged: (key, value) async {
-                                      controller.statusFilter.value.text =
-                                          value['name'];
-                                    },
-                                    onDelete: () {
-                                      controller.statusFilter.value.clear();
-                                    },
-                                  ),
-                                ],
-                              ),
-
-                              Row(
-                                spacing: 10,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  myTextFormFieldWithBorder(
-                                    width: 150,
-                                    controller: controller.fromDate.value,
-                                    labelText: 'From Date',
-                                    onFieldSubmitted: (_) async {
-                                      normalizeDate(
-                                        controller.fromDate.value.text,
-                                        controller.fromDate.value,
-                                      );
-                                    },
-                                  ),
-                                  myTextFormFieldWithBorder(
-                                    width: 150,
-                                    controller: controller.toDate.value,
-                                    labelText: 'To Date',
-                                    onFieldSubmitted: (_) async {
-                                      normalizeDate(
-                                        controller.toDate.value.text,
-                                        controller.toDate.value,
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  GetX<JobCardController>(
-                    builder: (controller) {
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minWidth: constraints.maxWidth - 28,
-                          ),
-                          child: Row(
-                            spacing: 10,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-
-                            children: [
-                              Row(
-                                spacing: 10,
-                                children: [
-                                  newJobCardButton(
-                                    context,
-                                    constraints,
-                                    controller,
-                                    false,
-                                  ),
-                                  newJobCardButton(
-                                    context,
-                                    constraints,
-                                    controller,
-                                    true,
-                                  ),
-                                  const SizedBox(width: 10),
-
-                                  filterButton(
-                                    title: 'Today',
-                                    onPressed: () {
-                                      controller.isAllSelected.value = false;
-                                      controller.isTodaySelected.value = true;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      controller.isYearSelected.value = false;
-                                      controller.isMonthSelected.value = false;
-                                      controller.isDaySelected.value = true;
-                                      controller.searchEngine({"today": true});
-                                    },
-                                    isSelected:
-                                        controller.isTodaySelected.value,
-                                  ),
-                                  filterButton(
-                                    title: 'This Month',
-                                    onPressed: () {
-                                      controller.isAllSelected.value = false;
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          true;
-                                      controller.isThisYearSelected.value =
-                                          false;
-                                      controller.isYearSelected.value = false;
-                                      controller.isMonthSelected.value = true;
-                                      controller.isDaySelected.value = false;
-                                      controller.searchEngine({
-                                        "this_month": true,
-                                      });
-                                    },
-                                    isSelected:
-                                        controller.isThisMonthSelected.value,
-                                  ),
-                                  filterButton(
-                                    title: 'This Year',
-                                    onPressed: () {
-                                      controller.isTodaySelected.value = false;
-                                      controller.isThisMonthSelected.value =
-                                          false;
-                                      controller.isThisYearSelected.value =
-                                          true;
-                                      controller.isYearSelected.value = true;
-                                      controller.isMonthSelected.value = false;
-                                      controller.isDaySelected.value = false;
-                                      controller.searchEngine({
-                                        "this_year": true,
-                                      });
-                                    },
-                                    isSelected:
-                                        controller.isThisYearSelected.value,
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                spacing: 10,
-                                children: [
-                                  ElevatedButton(
-                                    style: findButtonStyle,
-                                    onPressed: controller.isScreenLoding.isFalse
-                                        ? () async {
-                                            controller.filterSearch();
-                                          }
-                                        : null,
-                                    child: controller.isScreenLoding.isFalse
-                                        ? Text(
-                                            'Find',
-                                            style: fontStyleForElevatedButtons,
-                                          )
-                                        : loadingProcess,
-                                  ),
-                                  ElevatedButton(
-                                    style: clearVariablesButtonStyle,
-                                    onPressed: () {
-                                      controller.clearAllFilters();
-                                      // controller.update();
-                                    },
-                                    child: Text(
-                                      'Clear',
-                                      style: fontStyleForElevatedButtons,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: GetX<JobCardController>(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    GetX<JobCardController>(
+                      init: JobCardController(),
                       builder: (controller) {
-                        return Row(
-                          spacing: 10,
-                          children: [
-                            customBox(
-                              title: 'NUMBER OF JOBS',
-                              value: Text(
-                                '${controller.numberOfJobs.value}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: mainColor,
-                                  fontSize: 16,
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: constraints.maxWidth - 28,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              spacing: 10,
+                              children: [
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    myTextFormFieldWithBorder(
+                                      width: 150,
+                                      labelText: 'Job No.',
+                                      controller:
+                                          controller.jobNumberFilter.value,
+                                    ),
+                                    myTextFormFieldWithBorder(
+                                      width: 150,
+                                      labelText: 'Invoice No.',
+                                      controller:
+                                          controller.invoiceNumberFilter.value,
+                                    ),
+                                    // CustomDropdown(
+                                    //   width: 200,
+                                    //   showedSelectedName: 'name',
+                                    //   textcontroller:
+                                    //       controller.carBrandIdFilterName.value.text,
+                                    //   hintText: 'Car Brand',
+                                    //   onChanged: (key, value) async {
+                                    //     controller.getModelsByCarBrand(key);
+                                    //     controller.carBrandIdFilter.value = key;
+                                    //     controller.carBrandIdFilterName.value.text =
+                                    //         value['name'];
+                                    //     controller.carModelIdFilter.value = '';
+                                    //     controller.carModelIdFilterName.value.text = '';
+                                    //   },
+                                    //   onDelete: () {
+                                    //     controller.carBrandIdFilter.value = "";
+                                    //     controller.carBrandIdFilterName.value.clear();
+                                    //     controller.carModelIdFilter.value = '';
+                                    //     controller.carModelIdFilterName.value.text = '';
+                                    //   },
+                                    //   onOpen: () {
+                                    //     return controller.getCarBrands();
+                                    //   },
+                                    // ),
+                                    // CustomDropdown(
+                                    //   width: 200,
+                                    //   showedSelectedName: 'name',
+                                    //   textcontroller:
+                                    //       controller.carModelIdFilterName.value.text,
+                                    //   hintText: 'Car Model',
+                                    //   onChanged: (key, value) async {
+                                    //     controller.carModelIdFilter.value = key;
+                                    //     controller.carModelIdFilterName.value.text =
+                                    //         value['name'];
+                                    //   },
+                                    //   onDelete: () {
+                                    //     controller.carModelIdFilter.value = "";
+                                    //     controller.carModelIdFilterName.value.clear();
+                                    //   },
+                                    //   onOpen: () {
+                                    //     return controller.getModelsByCarBrand(
+                                    //       controller.carBrandIdFilter.value,
+                                    //     );
+                                    //   },
+                                    // ),
+                                    myTextFormFieldWithBorder(
+                                      width: 150,
+                                      labelText: 'Plate NO.',
+                                      controller:
+                                          controller.plateNumberFilter.value,
+                                    ),
+                                    myTextFormFieldWithBorder(
+                                      width: 200,
+                                      labelText: 'VIN',
+                                      controller: controller.vinFilter.value,
+                                    ),
+                                    myTextFormFieldWithBorder(
+                                      width: 200,
+                                      labelText: 'LPO No.',
+                                      controller: controller.lpoFilter.value,
+                                    ),
+                                    CustomDropdown(
+                                      width: 300,
+                                      textcontroller: controller
+                                          .customerNameIdFilterName
+                                          .value
+                                          .text,
+                                      showedSelectedName: 'entity_name',
+                                      hintText: 'Customer Name',
+                                      onChanged: (key, value) async {
+                                        controller
+                                                .customerNameIdFilterName
+                                                .value
+                                                .text =
+                                            value['entity_name'];
+                                        controller.customerNameIdFilter.value =
+                                            key;
+                                      },
+                                      onDelete: () {
+                                        controller
+                                            .customerNameIdFilterName
+                                            .value
+                                            .clear();
+                                        controller.customerNameIdFilter.value =
+                                            "";
+                                      },
+                                      onOpen: () {
+                                        return controller.getAllCustomers();
+                                      },
+                                    ),
+                                    CustomDropdown(
+                                      width: 150,
+                                      textcontroller:
+                                          controller.statusFilter.value.text,
+                                      showedSelectedName: 'name',
+                                      hintText: 'Status',
+                                      items: controller.allStatus,
+                                      onChanged: (key, value) async {
+                                        controller.statusFilter.value.text =
+                                            value['name'];
+                                      },
+                                      onDelete: () {
+                                        controller.statusFilter.value.clear();
+                                      },
+                                    ),
+                                  ],
                                 ),
-                              ),
+
+                                Row(
+                                  spacing: 10,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    myTextFormFieldWithBorder(
+                                      width: 150,
+                                      controller: controller.fromDate.value,
+                                      labelText: 'From Date',
+                                      onFieldSubmitted: (_) async {
+                                        normalizeDate(
+                                          controller.fromDate.value.text,
+                                          controller.fromDate.value,
+                                        );
+                                      },
+                                    ),
+                                    myTextFormFieldWithBorder(
+                                      width: 150,
+                                      controller: controller.toDate.value,
+                                      labelText: 'To Date',
+                                      onFieldSubmitted: (_) async {
+                                        normalizeDate(
+                                          controller.toDate.value.text,
+                                          controller.toDate.value,
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            customBox(
-                              title: 'TOTALS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.green,
-                                isBold: true,
-                                text: '${controller.allJobsTotals.value}',
-                              ),
-                            ),
-                            customBox(
-                              title: 'VATS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.red,
-                                isBold: true,
-                                text: '${controller.allJobsVATS.value}',
-                              ),
-                            ),
-                            customBox(
-                              title: 'NETS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.blueGrey,
-                                isBold: true,
-                                text: '${controller.allJobsNET.value}',
-                              ),
-                            ),
-                            customBox(
-                              title: 'PAID',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.orange,
-                                isBold: true,
-                                text: '${controller.allJobsPaid.value}',
-                              ),
-                            ),
-                            customBox(
-                              title: 'OUTSTANDING',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.blue,
-                                isBold: true,
-                                text: '${controller.allJobsOutstanding.value}',
-                              ),
-                            ),
-                          ],
+                          ),
                         );
                       },
                     ),
-                  ),
-                  GetX<JobCardController>(
-                    builder: (controller) {
-                      return Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(15),
-                            bottomRight: Radius.circular(15),
-                            topLeft: Radius.circular(2),
-                            topRight: Radius.circular(2),
+                    const SizedBox(height: 20),
+                    GetX<JobCardController>(
+                      builder: (controller) {
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: constraints.maxWidth - 28,
+                            ),
+                            child: Row(
+                              spacing: 10,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+
+                              children: [
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    newJobCardButton(
+                                      context,
+                                      constraints,
+                                      controller,
+                                      false,
+                                    ),
+                                    newJobCardButton(
+                                      context,
+                                      constraints,
+                                      controller,
+                                      true,
+                                    ),
+                                    
+                                    CustomSlidingSegmentedControl<int>(
+                                      height: 30,
+                                      initialValue: 1,
+                                      children: const {
+                                        1: Text('ALL'),
+                                        2: Text('TODAY'),
+                                        3: Text('THIS MONTH'),
+                                        4: Text('THIS YEAR'),
+                                      },
+                                      decoration: BoxDecoration(
+                                        color:
+                                            CupertinoColors.lightBackgroundGray,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      thumbDecoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withAlpha(1),
+                                            blurRadius: 4.0,
+                                            spreadRadius: 1.0,
+                                            offset: const Offset(0.0, 2.0),
+                                          ),
+                                        ],
+                                      ),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeInToLinear,
+                                      onValueChanged: (v) {
+                                        controller.onChooseForDatePicker(v);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    ElevatedButton(
+                                      style: findButtonStyle,
+                                      onPressed:
+                                          controller.isScreenLoding.isFalse
+                                          ? () async {
+                                              controller.filterSearch();
+                                            }
+                                          : null,
+                                      child: controller.isScreenLoding.isFalse
+                                          ? Text(
+                                              'Find',
+                                              style:
+                                                  fontStyleForElevatedButtons,
+                                            )
+                                          : loadingProcess,
+                                    ),
+                                    ElevatedButton(
+                                      style: clearVariablesButtonStyle,
+                                      onPressed: () {
+                                        controller.clearAllFilters();
+                                        // controller.update();
+                                      },
+                                      child: Text(
+                                        'Clear',
+                                        style: fontStyleForElevatedButtons,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        child: SizedBox(
-                          width: constraints.maxWidth,
-                          child: tableOfScreens(
-                            showHistoryButton: true,
-                            scrollController:
-                                controller.scrollControllerFotTable1,
-                            constraints: constraints,
-                            context: context,
-                            controller: controller,
-                            data: controller.allJobCards,
+                        );
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: GetX<JobCardController>(
+                        builder: (controller) {
+                          return Row(
+                            spacing: 10,
+                            children: [
+                              customBox(
+                                title: 'NUMBER OF JOBS',
+                                value: Text(
+                                  '${controller.numberOfJobs.value}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: mainColor,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              customBox(
+                                title: 'TOTALS',
+                                value: textForDataRowInTable(
+                                  fontSize: 16,
+                                  color: Colors.green,
+                                  isBold: true,
+                                  text: '${controller.allJobsTotals.value}',
+                                ),
+                              ),
+                              customBox(
+                                title: 'VATS',
+                                value: textForDataRowInTable(
+                                  fontSize: 16,
+                                  color: Colors.red,
+                                  isBold: true,
+                                  text: '${controller.allJobsVATS.value}',
+                                ),
+                              ),
+                              customBox(
+                                title: 'NETS',
+                                value: textForDataRowInTable(
+                                  fontSize: 16,
+                                  color: Colors.blueGrey,
+                                  isBold: true,
+                                  text: '${controller.allJobsNET.value}',
+                                ),
+                              ),
+                              customBox(
+                                title: 'PAID',
+                                value: textForDataRowInTable(
+                                  fontSize: 16,
+                                  color: Colors.orange,
+                                  isBold: true,
+                                  text: '${controller.allJobsPaid.value}',
+                                ),
+                              ),
+                              customBox(
+                                title: 'OUTSTANDING',
+                                value: textForDataRowInTable(
+                                  fontSize: 16,
+                                  color: Colors.blue,
+                                  isBold: true,
+                                  text:
+                                      '${controller.allJobsOutstanding.value}',
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    GetX<JobCardController>(
+                      builder: (controller) {
+                        return Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(15),
+                              bottomRight: Radius.circular(15),
+                              topLeft: Radius.circular(2),
+                              topRight: Radius.circular(2),
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                  // const SizedBox(
-                  //   height: 10,
-                  // ),
-                  // Text('💳 History', style: fontStyleForAppBar),
-                  // Expanded(
-                  //     child: Container(
-                  //   width: constraints.maxWidth,
-                  //   decoration: BoxDecoration(
-                  //     border: Border.all(color: Colors.grey),
-                  //     borderRadius: BorderRadius.circular(10),
-                  //   ),
-                  //   child: GetX<JobCardController>(builder: (controller) {
-                  //     return controller.historyJobCards.isNotEmpty
-                  //         ? SingleChildScrollView(
-                  //             scrollDirection: Axis.vertical,
-                  //             child: tableOfScreens(
-                  //                 showHistoryButton: false,
-                  //                 scrollController:
-                  //                     controller.scrollControllerFotTable2,
-                  //                 constraints: constraints,
-                  //                 context: context,
-                  //                 controller: controller,
-                  //                 data: controller.historyJobCards))
-                  //         : const Center(
-                  //             child: Text(
-                  //               'History',
-                  //               style: TextStyle(color: Colors.grey),
-                  //             ),
-                  //           );
-                  //   }),
-                  // ))
-                ],
+                          child: SizedBox(
+                            width: constraints.maxWidth,
+                            child: tableOfScreens(
+                              showHistoryButton: true,
+                              scrollController:
+                                  controller.scrollControllerFotTable1,
+                              constraints: constraints,
+                              context: context,
+                              controller: controller,
+                              data: controller.allJobCards,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    // const SizedBox(
+                    //   height: 10,
+                    // ),
+                    // Text('💳 History', style: fontStyleForAppBar),
+                    // Expanded(
+                    //     child: Container(
+                    //   width: constraints.maxWidth,
+                    //   decoration: BoxDecoration(
+                    //     border: Border.all(color: Colors.grey),
+                    //     borderRadius: BorderRadius.circular(10),
+                    //   ),
+                    //   child: GetX<JobCardController>(builder: (controller) {
+                    //     return controller.historyJobCards.isNotEmpty
+                    //         ? SingleChildScrollView(
+                    //             scrollDirection: Axis.vertical,
+                    //             child: tableOfScreens(
+                    //                 showHistoryButton: false,
+                    //                 scrollController:
+                    //                     controller.scrollControllerFotTable2,
+                    //                 constraints: constraints,
+                    //                 context: context,
+                    //                 controller: controller,
+                    //                 data: controller.historyJobCards))
+                    //         : const Center(
+                    //             child: Text(
+                    //               'History',
+                    //               style: TextStyle(color: Colors.grey),
+                    //             ),
+                    //           );
+                    //   }),
+                    // ))
+                  ],
+                ),
               ),
             ),
           );
@@ -483,7 +470,11 @@ Widget tableOfScreens({
       controller: scrollController,
       child: PaginatedDataTable(
         controller: scrollController,
-        rowsPerPage: 10,
+        rowsPerPage: controller.numberOfJobs.value <= 12
+            ? 12
+            : controller.numberOfJobs.value >= 30
+            ? 30
+            : controller.numberOfJobs.value,
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,

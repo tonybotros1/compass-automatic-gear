@@ -22,7 +22,9 @@ class UsersController extends GetxController {
   RxString theDate = RxString('');
   List<String> areaName = [];
   RxMap selectedRoles = RxMap({});
-  RxMap selectedBranches = RxMap({});
+  RxMap<String, List<dynamic>> selectedBranches = RxMap<String, List<dynamic>>(
+    {},
+  );
   RxBool isScreenLoding = RxBool(false);
   final RxList<UsersModel> allUsers = RxList<UsersModel>([]);
   final RxList<UsersModel> filteredUsers = RxList<UsersModel>([]);
@@ -34,6 +36,8 @@ class UsersController extends GetxController {
   String backendUrl = backendTestURI;
   RxBool isLoading = RxBool(false);
   RxInt selectedMenu = RxInt(1);
+  RxInt primaryBranchIndex = (-1).obs;
+  RxBool showPrimaryText = RxBool(false);
 
   @override
   void onInit() {
@@ -62,8 +66,26 @@ class UsersController extends GetxController {
     }
   }
 
+  void selectPrimaryBranch(int index) {
+    if (selectedBranches.values.toList()[index][1]) {
+      primaryBranchIndex.value = index;
+    } else {
+      return;
+    }
+  }
+
+  int getPrimaryBranchIndex(
+    Map<String, List<dynamic>> branches,
+    String primaryBranchId,
+  ) {
+    return branches.values.toList().indexWhere(
+      (value) => value[0] == primaryBranchId,
+    );
+  }
+
   void selectFromTab(int i) {
     selectedMenu.value = i;
+    showPrimaryText.value = i == 2;
   }
 
   void connectWebSocket() {
@@ -167,6 +189,9 @@ class UsersController extends GetxController {
               .where((entry) => entry.value[1] == true)
               .map((entry) => entry.value[0])
               .toList(),
+          "primary_branch": primaryBranchIndex.value != -1
+              ? selectedBranches.values.elementAt(primaryBranchIndex.value)[0]
+              : null,
           "expiry_date": selectedDate.value.toIso8601String(),
         }),
       );
@@ -247,6 +272,9 @@ class UsersController extends GetxController {
             .where((entry) => entry.value[1] == true)
             .map((entry) => entry.value[0])
             .toList(),
+        "primary_branch": primaryBranchIndex.value != -1
+            ? selectedBranches.values.elementAt(primaryBranchIndex.value)[0]
+            : null,
         "expiry_date": selectedDate.value.toIso8601String(),
       };
       if (pass.text.isNotEmpty) {
@@ -451,10 +479,7 @@ class UsersController extends GetxController {
     }
   }
 
-  void syncSelection(
-    Map targetMap,
-    List<dynamic> selectedIds,
-  ) {
+  void syncSelection(Map targetMap, List<dynamic> selectedIds) {
     final selectedSet = selectedIds.toSet();
 
     targetMap.updateAll((key, value) {
