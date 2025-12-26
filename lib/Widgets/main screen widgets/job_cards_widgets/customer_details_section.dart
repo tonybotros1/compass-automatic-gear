@@ -185,7 +185,7 @@ Widget customerDetailsSection(
                     children: [
                       CustomDropdown(
                         focusNode: controller.focusNodeForCustomerDetails6,
-                        nextFocusNode: controller.focusNodeForCustomerDetails7,
+                        // nextFocusNode: controller.focusNodeForCustomerDetails7,
                         width: 170,
                         showedSelectedName: 'name',
                         textcontroller: controller.customerBranch.text,
@@ -217,8 +217,8 @@ Widget customerDetailsSection(
                     children: [
                       CustomDropdown(
                         focusNode: controller.focusNodeForCustomerDetails7,
-                        nextFocusNode: controller.focusNodeForCustomerDetails8,
 
+                        // nextFocusNode: controller.focusNodeForCustomerDetails8,
                         width: 170,
                         textcontroller: controller.customerCurrency.value.text,
                         hintText: 'Currency',

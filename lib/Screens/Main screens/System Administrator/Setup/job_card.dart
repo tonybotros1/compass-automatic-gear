@@ -58,51 +58,71 @@ class JobCard extends StatelessWidget {
                                       controller:
                                           controller.invoiceNumberFilter.value,
                                     ),
-                                    // CustomDropdown(
-                                    //   width: 200,
-                                    //   showedSelectedName: 'name',
-                                    //   textcontroller:
-                                    //       controller.carBrandIdFilterName.value.text,
-                                    //   hintText: 'Car Brand',
-                                    //   onChanged: (key, value) async {
-                                    //     controller.getModelsByCarBrand(key);
-                                    //     controller.carBrandIdFilter.value = key;
-                                    //     controller.carBrandIdFilterName.value.text =
-                                    //         value['name'];
-                                    //     controller.carModelIdFilter.value = '';
-                                    //     controller.carModelIdFilterName.value.text = '';
-                                    //   },
-                                    //   onDelete: () {
-                                    //     controller.carBrandIdFilter.value = "";
-                                    //     controller.carBrandIdFilterName.value.clear();
-                                    //     controller.carModelIdFilter.value = '';
-                                    //     controller.carModelIdFilterName.value.text = '';
-                                    //   },
-                                    //   onOpen: () {
-                                    //     return controller.getCarBrands();
-                                    //   },
-                                    // ),
-                                    // CustomDropdown(
-                                    //   width: 200,
-                                    //   showedSelectedName: 'name',
-                                    //   textcontroller:
-                                    //       controller.carModelIdFilterName.value.text,
-                                    //   hintText: 'Car Model',
-                                    //   onChanged: (key, value) async {
-                                    //     controller.carModelIdFilter.value = key;
-                                    //     controller.carModelIdFilterName.value.text =
-                                    //         value['name'];
-                                    //   },
-                                    //   onDelete: () {
-                                    //     controller.carModelIdFilter.value = "";
-                                    //     controller.carModelIdFilterName.value.clear();
-                                    //   },
-                                    //   onOpen: () {
-                                    //     return controller.getModelsByCarBrand(
-                                    //       controller.carBrandIdFilter.value,
-                                    //     );
-                                    //   },
-                                    // ),
+                                    CustomDropdown(
+                                      width: 200,
+                                      showedSelectedName: 'name',
+                                      textcontroller: controller
+                                          .carBrandIdFilterName
+                                          .value
+                                          .text,
+                                      hintText: 'Car Brand',
+                                      onChanged: (key, value) async {
+                                        controller.getModelsByCarBrand(key);
+                                        controller.carBrandIdFilter.value = key;
+                                        controller
+                                                .carBrandIdFilterName
+                                                .value
+                                                .text =
+                                            value['name'];
+                                        controller.carModelIdFilter.value = '';
+                                        controller
+                                                .carModelIdFilterName
+                                                .value
+                                                .text =
+                                            '';
+                                      },
+                                      onDelete: () {
+                                        controller.carBrandIdFilter.value = "";
+                                        controller.carBrandIdFilterName.value
+                                            .clear();
+                                        controller.carModelIdFilter.value = '';
+                                        controller
+                                                .carModelIdFilterName
+                                                .value
+                                                .text =
+                                            '';
+                                      },
+                                      onOpen: () {
+                                        return controller.getCarBrands();
+                                      },
+                                    ),
+                                    CustomDropdown(
+                                      width: 200,
+                                      showedSelectedName: 'name',
+                                      textcontroller: controller
+                                          .carModelIdFilterName
+                                          .value
+                                          .text,
+                                      hintText: 'Car Model',
+                                      onChanged: (key, value) async {
+                                        controller.carModelIdFilter.value = key;
+                                        controller
+                                                .carModelIdFilterName
+                                                .value
+                                                .text =
+                                            value['name'];
+                                      },
+                                      onDelete: () {
+                                        controller.carModelIdFilter.value = "";
+                                        controller.carModelIdFilterName.value
+                                            .clear();
+                                      },
+                                      onOpen: () {
+                                        return controller.getModelsByCarBrand(
+                                          controller.carBrandIdFilter.value,
+                                        );
+                                      },
+                                    ),
                                     myTextFormFieldWithBorder(
                                       width: 150,
                                       labelText: 'Plate NO.',
@@ -148,21 +168,21 @@ class JobCard extends StatelessWidget {
                                         return controller.getAllCustomers();
                                       },
                                     ),
-                                    CustomDropdown(
-                                      width: 150,
-                                      textcontroller:
-                                          controller.statusFilter.value.text,
-                                      showedSelectedName: 'name',
-                                      hintText: 'Status',
-                                      items: controller.allStatus,
-                                      onChanged: (key, value) async {
-                                        controller.statusFilter.value.text =
-                                            value['name'];
-                                      },
-                                      onDelete: () {
-                                        controller.statusFilter.value.clear();
-                                      },
-                                    ),
+                                    // CustomDropdown(
+                                    //   width: 150,
+                                    //   textcontroller:
+                                    //       controller.statusFilter.value.text,
+                                    //   showedSelectedName: 'name',
+                                    //   hintText: 'Status',
+                                    //   items: controller.allStatus,
+                                    //   onChanged: (key, value) async {
+                                    //     controller.statusFilter.value.text =
+                                    //         value['name'];
+                                    //   },
+                                    //   onDelete: () {
+                                    //     controller.statusFilter.value.clear();
+                                    //   },
+                                    // ),
                                   ],
                                 ),
 
@@ -171,7 +191,7 @@ class JobCard extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     myTextFormFieldWithBorder(
-                                      width: 150,
+                                      width: 120,
                                       controller: controller.fromDate.value,
                                       labelText: 'From Date',
                                       onFieldSubmitted: (_) async {
@@ -182,7 +202,7 @@ class JobCard extends StatelessWidget {
                                       },
                                     ),
                                     myTextFormFieldWithBorder(
-                                      width: 150,
+                                      width: 120,
                                       controller: controller.toDate.value,
                                       labelText: 'To Date',
                                       onFieldSubmitted: (_) async {
@@ -230,7 +250,7 @@ class JobCard extends StatelessWidget {
                                       controller,
                                       true,
                                     ),
-                                    
+
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
                                       initialValue: 1,
@@ -263,6 +283,78 @@ class JobCard extends StatelessWidget {
                                       curve: Curves.easeInToLinear,
                                       onValueChanged: (v) {
                                         controller.onChooseForDatePicker(v);
+                                      },
+                                    ),
+                                    separator(color: Colors.black),
+                                    CustomSlidingSegmentedControl<int>(
+                                      height: 30,
+                                      initialValue: 1,
+                                      children: const {
+                                        1: Text('ALL'),
+                                        2: Text('NEW'),
+                                        3: Text('POSTED'),
+                                        4: Text('CANCELLED'),
+                                        5: Text('APPROVED'),
+                                        6: Text('READY'),
+                                        7: Text('DRAFT'),
+                                      },
+                                      decoration: BoxDecoration(
+                                        color:
+                                            CupertinoColors.lightBackgroundGray,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      thumbDecoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withAlpha(1),
+                                            blurRadius: 4.0,
+                                            spreadRadius: 1.0,
+                                            offset: const Offset(0.0, 2.0),
+                                          ),
+                                        ],
+                                      ),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeInToLinear,
+                                      onValueChanged: (v) {
+                                        controller.onChooseForStatusPicker(v);
+                                      },
+                                    ),
+                                    separator(color: Colors.black),
+                                    CustomSlidingSegmentedControl<int>(
+                                      height: 30,
+                                      initialValue: 1,
+                                      children: const {
+                                        1: Text('ALL'),
+                                        2: Text('JOBS'),
+                                        3: Text('SALES'),
+                                      },
+                                      decoration: BoxDecoration(
+                                        color:
+                                            CupertinoColors.lightBackgroundGray,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      thumbDecoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withAlpha(1),
+                                            blurRadius: 4.0,
+                                            spreadRadius: 1.0,
+                                            offset: const Offset(0.0, 2.0),
+                                          ),
+                                        ],
+                                      ),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeInToLinear,
+                                      onValueChanged: (v) {
+                                        controller.onChooseForTypePicker(v);
                                       },
                                     ),
                                   ],
@@ -460,7 +552,7 @@ Widget tableOfScreens({
       // dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
-          return Colors.grey.shade300;
+          return Colors.yellow;
         }
         return null;
       }),
@@ -611,9 +703,11 @@ DataRow dataRowForTheTable(
 ) {
   final isEvenRow = index % 2 == 0;
   return DataRow(
+    // onSelectChanged: (_) {},
+    // selected: true,
     color: WidgetStateProperty.resolveWith<Color?>((states) {
       if (states.contains(WidgetState.selected)) {
-        return Colors.grey.shade400;
+        return Colors.yellow;
       }
       return !isEvenRow ? coolColor : Colors.white;
     }),
@@ -624,7 +718,7 @@ DataRow dataRowForTheTable(
           jobData,
           constraints,
           jobId,
-          jobData.isSales == true ? false : true,
+          jobData.type == 'SALE' ? false : true,
         ),
       ), // need to be changed
       DataCell(
@@ -635,7 +729,7 @@ DataRow dataRowForTheTable(
             : const SizedBox(),
       ),
       DataCell(
-        jobData.isSales == true
+        jobData.type == 'SALE'
             ? statusBox('SI', width: 35)
             : statusBox('JC', width: 35),
       ),
@@ -665,7 +759,12 @@ DataRow dataRowForTheTable(
         ),
       ),
 
-      DataCell(textForDataRowInTable(text: jobData.invoiceNumber ?? '')),
+      DataCell(
+        textForDataRowInTable(
+          text: jobData.invoiceNumber ?? '',
+          formatDouble: false,
+        ),
+      ),
       DataCell(
         textForDataRowInTable(
           text: jobData.invoiceNumber != ''

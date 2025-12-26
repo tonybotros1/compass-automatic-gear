@@ -38,6 +38,7 @@ import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dar
 import '../../Screens/Main screens/System Administrator/Setup/receiving.dart';
 import '../../Screens/Main screens/System Administrator/Setup/system_variables.dart';
 import '../../Screens/Main screens/System Administrator/Setup/time_sheets.dart';
+import '../../Screens/Main screens/System Administrator/User Management/data_migration.dart';
 import '../../Screens/Main screens/System Administrator/User Management/menus.dart';
 import '../../Screens/Main screens/System Administrator/User Management/responsibilities.dart';
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
@@ -223,6 +224,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Employees());
       case '/converters':
         return const SizedBox(child: Converters());
+      case '/dataMigration':
+        return const SizedBox(child: DataMigration());
 
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));

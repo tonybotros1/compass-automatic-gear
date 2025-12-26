@@ -31,17 +31,26 @@ class FilePickerService {
   static Future<void> pickFile(
     Rx<Uint8List?> fileBytes,
     RxString fileType,
-    RxString fileName,
-  ) async {
+    RxString fileName, {
+    bool isExcel = false,
+  }) async {
     // if (kIsWeb) return; // Ensure it does not run on web
 
     try {
-      final result = await FilePicker.platform.pickFiles();
+      final result = await FilePicker.platform.pickFiles(
+        type: isExcel ? FileType.custom : FileType.any,
+        allowedExtensions: isExcel ? ['xls', 'xlsx'] : null,
+        withData: true,
+      );
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
         fileName.value = file.name;
         fileBytes.value = file.bytes;
+        if (isExcel) {
+          fileType.value = 'excel';
+          return;
+        }
 
         // Check MIME type first
         final mimeType = lookupMimeType(file.name, headerBytes: file.bytes);

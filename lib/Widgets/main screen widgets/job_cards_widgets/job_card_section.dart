@@ -28,40 +28,39 @@ Widget jobCardSection(
             Row(
               spacing: 10,
               children: [
-                Container(
-                  height: 35,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.grey),
-                    color: Colors.white,
-                  ),
-                  child: Row(
-                    children: [
-                      GetX<JobCardController>(
-                        builder: (controller) {
-                          return CupertinoCheckbox(
-                            value: controller.isSales.value,
-                            onChanged: (value) {
-                              controller.isSales.value = value!;
-                              controller.isJobModified.value = true;
-                            },
-                            fillColor: WidgetStateProperty.resolveWith<Color?>((
-                              Set<WidgetState> states,
-                            ) {
-                              if (!states.contains(WidgetState.selected)) {
-                                return Colors.grey.shade300;
-                              }
-                              return Colors.cyan;
-                            }),
-                          );
-                        },
-                      ),
-
-                      Text('Sales ?', style: textFieldFontStyle),
-                    ],
-                  ),
-                ),
+                // Container(
+                //   height: 35,
+                //   width: 150,
+                //   decoration: BoxDecoration(
+                //     borderRadius: BorderRadius.circular(4),
+                //     border: Border.all(color: Colors.grey),
+                //     color: Colors.white,
+                //   ),
+                //   child: Row(
+                //     children: [
+                //       GetX<JobCardController>(
+                //         builder: (controller) {
+                //           return CupertinoCheckbox(
+                //             value: controller.isSales.value,
+                //             onChanged: (value) {
+                //               controller.isSales.value = value!;
+                //               controller.isJobModified.value = true;
+                //             },
+                //             fillColor: WidgetStateProperty.resolveWith<Color?>((
+                //               Set<WidgetState> states,
+                //             ) {
+                //               if (!states.contains(WidgetState.selected)) {
+                //                 return Colors.grey.shade300;
+                //               }
+                //               return Colors.cyan;
+                //             }),
+                //           );
+                //         },
+                //       ),
+                //       Text('Sales ?', style: textFieldFontStyle),
+                //     ],
+                //   ),
+                // ),
                 Container(
                   height: 35,
                   width: 150,

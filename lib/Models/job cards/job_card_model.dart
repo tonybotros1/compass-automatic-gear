@@ -2,7 +2,7 @@ import 'job_card_invoice_items_model.dart';
 
 class JobCardModel {
   String? id;
-  bool? isSales;
+  String? type;
   String? quotationId;
   String? quotationNumber;
   String? label;
@@ -153,7 +153,7 @@ class JobCardModel {
     this.date,
     this.finlOutstanding,
     this.paid,
-    this.isSales,
+    this.type,
   });
 
   JobCardModel.fromJson(Map<String, dynamic> json) {
@@ -176,7 +176,7 @@ class JobCardModel {
     quotationId = tryGet<String>('quotation_id');
     quotationNumber = tryGet<String>('quotation_number');
     label = tryGet<String>('label');
-    isSales = tryGet<bool>('is_sales');
+    type = tryGet<String>('type');
     jobStatus1 = tryGet<String>('job_status_1');
     jobStatus2 = tryGet<String>('job_status_2');
     carBrandLogo = tryGet<String>('car_brand_logo');
@@ -242,6 +242,46 @@ class JobCardModel {
     } else {
       invoiceItemsDetails = [];
     }
+    // ✅ invoice items
+    // invoiceItemsDetails = [];
+
+    // try {
+    //   final items = json['invoice_items_details'];
+
+    //   if (items is List) {
+    //     for (int i = 0; i < items.length; i++) {
+    //       try {
+    //         invoiceItemsDetails!.add(
+    //           JobCardInvoiceItemsModel.fromJson(items[i]),
+    //         );
+    //       } catch (e, stack) {
+    //         // 🔴 Error in a specific item
+    //         debugPrint(
+    //           '❌ Failed to parse invoice item at index $i\n'
+    //           'Item data: ${items[i]}\n'
+    //           'Error: $e',
+    //         );
+
+    //         // Optional: send to crash reporting
+    //         // FirebaseCrashlytics.instance.recordError(e, stack);
+    //       }
+    //     }
+    //   } else {
+    //     debugPrint(
+    //       '❌ invoice_items_details is not a List. '
+    //       'Actual type: ${items.runtimeType}',
+    //     );
+    //   }
+    // } catch (e, stack) {
+    //   // 🔴 Critical error (JSON shape problem)
+    //   debugPrint(
+    //     '🔥 Failed to parse invoice_items_details\n'
+    //     'Error: $e',
+    //   );
+
+    //   // Optional crash reporting
+    //   // FirebaseCrashlytics.instance.recordError(e, stack);
+    // }
 
     carBrandName = tryGet<String>('car_brand_name');
     carModelName = tryGet<String>('car_model_name');

@@ -176,6 +176,7 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> fromDate = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
   Rx<TextEditingController> statusFilter = TextEditingController().obs;
+  Rx<TextEditingController> typeFilter = TextEditingController().obs;
   final Uuid _uuid = const Uuid();
   String backendUrl = backendTestURI;
   RxBool isJobModified = RxBool(false);
@@ -287,7 +288,7 @@ class JobCardController extends GetxController {
   }
 
   Future<Map<String, dynamic>> getBranches() async {
-    return await helper.getBrunches();
+    return await helper.getUserBrunches();
   }
 
   Future<Map<String, dynamic>> getAllCustomers() async {
@@ -318,6 +319,7 @@ class JobCardController extends GetxController {
         isThisYearSelected.value = false;
         fromDate.value.clear();
         toDate.value.clear();
+        filterSearch();
         break;
       case 2:
         setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -328,7 +330,7 @@ class JobCardController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = false;
         isDaySelected.value = true;
-        searchEngine({"today": true});
+        filterSearch();
         break;
       case 3:
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -339,7 +341,7 @@ class JobCardController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = true;
         isDaySelected.value = false;
-        searchEngine({"this_month": true});
+        filterSearch();
         break;
       case 4:
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -349,8 +351,61 @@ class JobCardController extends GetxController {
         isYearSelected.value = true;
         isMonthSelected.value = false;
         isDaySelected.value = false;
-        searchEngine({"this_year": true});
+        filterSearch();
         break;
+      default:
+    }
+  }
+
+  void onChooseForStatusPicker(int i) {
+    switch (i) {
+      case 1:
+        statusFilter.value.clear();
+        filterSearch();
+        break;
+      case 2:
+        statusFilter.value.text = 'New';
+        filterSearch();
+        break;
+      case 3:
+        statusFilter.value.text = 'Posted';
+        filterSearch();
+        break;
+      case 4:
+        statusFilter.value.text = 'Cancelled';
+        filterSearch();
+        break;
+      case 5:
+        statusFilter.value.text = 'Approved';
+        filterSearch();
+        break;
+      case 6:
+        statusFilter.value.text = 'Ready';
+        filterSearch();
+        break;
+      case 7:
+        statusFilter.value.text = 'Draft';
+        filterSearch();
+        break;
+      default:
+    }
+  }
+
+  void onChooseForTypePicker(int i) {
+    switch (i) {
+      case 1:
+        typeFilter.value.clear();
+        filterSearch();
+        break;
+      case 2:
+        typeFilter.value.text = 'JOB';
+        filterSearch();
+        break;
+      case 3:
+        typeFilter.value.text = 'SALE';
+        filterSearch();
+        break;
+
       default:
     }
   }
@@ -371,7 +426,7 @@ class JobCardController extends GetxController {
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'label': isReturned.isTrue ? 'Returned' : '',
-        'is_sales': isSales.isTrue ? true : false,
+        'type': isSales.isTrue ? 'SALE' : 'JOB',
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
         'car_brand_logo': carBrandLogo.value,
@@ -664,6 +719,9 @@ class JobCardController extends GetxController {
     }
     if (jobNumberFilter.value.text.isNotEmpty) {
       body["job_number"] = jobNumberFilter.value.text;
+    }
+    if (typeFilter.value.text.isNotEmpty) {
+      body["type"] = typeFilter.value.text;
     }
     if (invoiceNumberFilter.value.text.isNotEmpty) {
       body["invoice_number"] = invoiceNumberFilter.value.text;
@@ -1612,7 +1670,7 @@ class JobCardController extends GetxController {
   }
 
   Future<void> loadValues(JobCardModel data) async {
-    data.isSales == true ? isSales.value = true : isSales.value = false;
+    data.type == 'SALE' ? isSales.value = true : isSales.value = false;
     quotationId.value = data.quotationId ?? '';
     jobCardAdded.value = true;
     isReturned.value = data.label == 'Returned' ? true : false;
@@ -1801,6 +1859,7 @@ class JobCardController extends GetxController {
             jobStatus2.value = 'Warranty';
           }
           jobStatus1.value = 'Posted';
+          invoiceDate.value.text = textToDate(DateTime.now());
           isJobModified.value = true;
           Get.back();
           await addNewJobCard();

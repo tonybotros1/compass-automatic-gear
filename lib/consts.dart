@@ -60,6 +60,12 @@ TextStyle cellsTableTextStyle = TextStyle(
   fontSize: 12,
 );
 
+TextStyle coolTextStyle = TextStyle(
+  color: Colors.grey.shade800,
+  fontWeight: FontWeight.bold,
+  fontSize: 12,
+);
+
 final createButton = Container(
   padding: const EdgeInsets.symmetric(horizontal: 12),
   decoration: BoxDecoration(
@@ -707,8 +713,11 @@ Future<dynamic> alertMessage({
     context: context,
     builder: (BuildContext context) {
       return CupertinoAlertDialog(
-        title: Text(title ?? "Alert"),
-        content: Text(content),
+        title: Text(
+          title ?? "Alert",
+          style: const TextStyle(color: Colors.red),
+        ),
+        content: Text(content, style: coolTextStyle),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
@@ -1220,11 +1229,19 @@ bool isBeforeToday(String dateStr) {
   return inputDay.isBefore(today);
 }
 
-var loadingProcess = SizedBox(
+SizedBox loadingProcess = SizedBox(
   height: 20,
   width: 20,
   child: CircularProgressIndicator(strokeWidth: 2, color: mainColor),
 );
+
+SizedBox loadingIndecator({Color? color}) {
+  return SizedBox(
+    height: 20,
+    width: 20,
+    child: CircularProgressIndicator(strokeWidth: 2, color: color ?? mainColor),
+  );
+}
 
 Container carLogo(String? logo) {
   return Container(

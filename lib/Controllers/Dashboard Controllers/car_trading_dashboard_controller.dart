@@ -202,24 +202,30 @@ class CarTradingDashboardController extends GetxController {
         isThisYearSelected.value = false;
         fromDate.value.clear();
         toDate.value.clear();
+        filterSearch();
         break;
       case 2:
         setTodayRange();
         isTodaySelected.value = true;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
+        filterSearch();
         break;
       case 3:
         setThisMonthRange();
         isTodaySelected.value = false;
         isThisMonthSelected.value = true;
         isThisYearSelected.value = false;
+        filterSearch();
+
         break;
       case 4:
         setThisYearRange();
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = true;
+        filterSearch();
+
         break;
       default:
     }
@@ -230,11 +236,13 @@ class CarTradingDashboardController extends GetxController {
       case 1:
         isNewStatusSelected.value = false;
         isSoldStatusSelected.value = false;
+        filterSearch();
         break;
       case 2:
         if (isNewStatusSelected.isFalse) {
           isNewStatusSelected.value = true;
           isSoldStatusSelected.value = false;
+          filterSearch();
         } else {
           isNewStatusSelected.value = false;
         }
@@ -243,6 +251,7 @@ class CarTradingDashboardController extends GetxController {
         if (isSoldStatusSelected.isFalse) {
           isSoldStatusSelected.value = true;
           isNewStatusSelected.value = false;
+          filterSearch();
         } else {
           isSoldStatusSelected.value = false;
         }

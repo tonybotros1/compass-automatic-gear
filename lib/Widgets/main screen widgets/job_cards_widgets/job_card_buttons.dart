@@ -227,7 +227,7 @@ GetBuilder<JobCardController> copyJobButton(
                   controller,
                   newData,
                   newData.id ?? '',
-                  newData.isSales == true ? false : true,
+                  newData.type == 'JOB' ? false : true,
                 ); // need to be changed
                 showSnackBar('Done', 'Job Copied Successfully');
               }
