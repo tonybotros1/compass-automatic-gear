@@ -60,6 +60,7 @@ Widget myTextFormFieldWithBorder({
               if (nextFocusNode != null) {
                 nextFocusNode.requestFocus();
               }
+              onFieldSubmitted?.call(controller?.text ?? '');
             }
           },
 

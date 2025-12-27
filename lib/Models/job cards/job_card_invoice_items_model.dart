@@ -5,7 +5,7 @@ class JobCardInvoiceItemsModel {
   String? name;
   String? nameId;
   String? description;
-  int? quantity;
+  double? quantity;
   double? price;
   double? amount;
   double? discount;

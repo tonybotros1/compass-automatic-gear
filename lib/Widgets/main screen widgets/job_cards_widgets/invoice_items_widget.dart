@@ -68,6 +68,9 @@ Widget tableOfScreens({
             label: AutoSizedText(constraints: constraints, text: 'Name'),
           ),
           DataColumn(
+            label: AutoSizedText(constraints: constraints, text: 'Description'),
+          ),
+          DataColumn(
             headingRowAlignment: MainAxisAlignment.end,
             label: AutoSizedText(constraints: constraints, text: 'Quantity'),
           ),
@@ -97,20 +100,24 @@ Widget tableOfScreens({
           ),
         ],
         rows: [
-          ...controller.allInvoiceItems.where((item)=> item.deleted != true).map<DataRow>((invoiceItems) {
-            final invoiceItemsId = invoiceItems.id ?? invoiceItems.uid ?? '';
-            return dataRowForTheTable(
-              invoiceItems,
-              context,
-              constraints,
-              invoiceItemsId,
-              controller,
-              jobId,
-            );
-          }),
+          ...controller.allInvoiceItems
+              .where((item) => item.deleted != true)
+              .map<DataRow>((invoiceItems) {
+                final invoiceItemsId =
+                    invoiceItems.id ?? invoiceItems.uid ?? '';
+                return dataRowForTheTable(
+                  invoiceItems,
+                  context,
+                  constraints,
+                  invoiceItemsId,
+                  controller,
+                  jobId,
+                );
+              }),
           DataRow(
             selected: true,
             cells: [
+              const DataCell(Text('')),
               const DataCell(Text('')),
               const DataCell(Text('')),
               const DataCell(Text('')),
@@ -186,6 +193,7 @@ DataRow dataRowForTheTable(
           maxWidth: null,
         ),
       ),
+      DataCell(Text(invoiceItemsData.description ?? '')),
       DataCell(
         Align(
           alignment: Alignment.centerRight,

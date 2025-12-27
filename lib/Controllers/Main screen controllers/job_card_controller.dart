@@ -167,9 +167,11 @@ class JobCardController extends GetxController {
   RxString carBrandIdFilter = RxString('');
   RxString carModelIdFilter = RxString('');
   RxString customerNameIdFilter = RxString('');
+  RxString branchNameIdFilter = RxString('');
   Rx<TextEditingController> carModelIdFilterName = TextEditingController().obs;
   Rx<TextEditingController> customerNameIdFilterName =
       TextEditingController().obs;
+  Rx<TextEditingController> branchFilterName = TextEditingController().obs;
   Rx<TextEditingController> plateNumberFilter = TextEditingController().obs;
   Rx<TextEditingController> vinFilter = TextEditingController().obs;
   Rx<TextEditingController> lpoFilter = TextEditingController().obs;
@@ -233,10 +235,27 @@ class JobCardController extends GetxController {
     '6': {'name': 'Draft'},
   });
 
+  List<Map<String, dynamic>> customers = [
+    {"id": "1", "name": "Acme Corp"},
+    {"id": "2", "name": "Globex Corporation"},
+    {"id": "3", "name": "Soylent Corp"},
+    // ... imagine 1000+ more items here
+  ];
+
+  String? selectedCustomerId;
+
   @override
   void onInit() async {
     super.onInit();
-    searchEngine({"today": true});
+    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
+    isAllSelected.value = false;
+    isTodaySelected.value = true;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+    isYearSelected.value = false;
+    isMonthSelected.value = false;
+    isDaySelected.value = true;
+    filterSearch();
     await getCompanyDetails();
     jobWarrentyEndDate.value.addListener(() {
       jobWarrentyEndDate.refresh();
@@ -789,8 +808,8 @@ class JobCardController extends GetxController {
         allJobsPaid.value = grandTotals['grand_paid'];
         allJobsOutstanding.value = grandTotals['grand_outstanding'];
         // print(jobs[0]);
+        numberOfJobs.value = jobs.length;
         allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
-        numberOfJobs.value = allJobCards.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -808,6 +827,54 @@ class JobCardController extends GetxController {
     }
   }
 
+  // Future<void> searchEngine(
+  //   Map<String, dynamic> body, {
+  //   bool isNextPage = false,
+  // }) async {
+  //   try {
+  //     isScreenLoding.value = true;
+
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     var accessToken = '${prefs.getString('accessToken')}';
+  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+  //     Uri url = Uri.parse('$backendUrl/job_cards/search_engine_2');
+  //     final response = await http.post(
+  //       url,
+  //       headers: {
+  //         'Authorization': 'Bearer $accessToken',
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: jsonEncode(body),
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final decoded = jsonDecode(response.body);
+  //       List jobs = decoded['job_cards'];
+  //       Map grandTotals = decoded['grand_totals'];
+  //       allJobsTotals.value = grandTotals['grand_total'];
+  //       allJobsVATS.value = grandTotals['grand_vat'];
+  //       allJobsNET.value = grandTotals['grand_net'];
+  //       allJobsPaid.value = grandTotals['grand_paid'];
+  //       allJobsOutstanding.value = grandTotals['grand_outstanding'];
+  //       // print(jobs[0]);
+  //       numberOfJobs.value = jobs.length;
+  //       allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
+  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+  //       final refreshed = await helper.refreshAccessToken(refreshToken);
+  //       if (refreshed == RefreshResult.success) {
+  //         await searchEngine(body);
+  //       } else if (refreshed == RefreshResult.invalidToken) {
+  //         logout();
+  //       }
+  //     } else if (response.statusCode == 401) {
+  //       logout();
+  //     }
+
+  //     isScreenLoding.value = false;
+  //   } catch (e) {
+  //     isScreenLoding.value = false;
+  //   }
+  // }
+
   void addNewInvoiceItem() {
     final String uniqueId = _uuid.v4();
 
@@ -819,7 +886,7 @@ class JobCardController extends GetxController {
         name: invoiceItemName.text,
         lineNumber: int.tryParse(lineNumber.text) ?? 0,
         description: description.text,
-        quantity: int.tryParse(quantity.text) ?? 0,
+        quantity: double.tryParse(quantity.text) ?? 0,
         price: double.tryParse(price.text) ?? 0.0,
         amount: double.tryParse(amount.text) ?? 0.0,
         discount: double.tryParse(discount.text) ?? 0.0,
@@ -857,7 +924,7 @@ class JobCardController extends GetxController {
         name: invoiceItemName.text,
         lineNumber: int.tryParse(lineNumber.text) ?? 0,
         description: description.text,
-        quantity: int.tryParse(quantity.text) ?? 0,
+        quantity: double.tryParse(quantity.text) ?? 0,
         price: double.tryParse(price.text) ?? 0.0,
         amount: double.tryParse(amount.text) ?? 0.0,
         discount: double.tryParse(discount.text) ?? 0.0,
@@ -1670,7 +1737,7 @@ class JobCardController extends GetxController {
   }
 
   Future<void> loadValues(JobCardModel data) async {
-    data.type == 'SALE' ? isSales.value = true : isSales.value = false;
+    data.type == 'SALES' ? isSales.value = true : isSales.value = false;
     quotationId.value = data.quotationId ?? '';
     jobCardAdded.value = true;
     isReturned.value = data.label == 'Returned' ? true : false;

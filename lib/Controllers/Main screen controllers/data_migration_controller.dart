@@ -20,6 +20,8 @@ class DataMigrationController extends GetxController {
   RxMap screens = RxMap({
     '1': {'name': 'Job Cards'},
     '2': {'name': 'Job Cards Invoice Items'},
+    '3': {'name': 'AR Receipts'},
+    '4': {'name': 'AR Receipts Items'},
   });
 
   Future<void> uploadFile() async {

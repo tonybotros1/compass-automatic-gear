@@ -105,6 +105,45 @@ class ARReceiptsModel {
       invoicesDetails = [];
     }
 
+    //  try {
+    //   final items = json['invoices_details'];
+
+    //   if (items is List) {
+    //     for (int i = 0; i < items.length; i++) {
+    //       try {
+    //         invoicesDetails!.add(
+    //           CustomerInvoicesModel.fromJson(items[i]),
+    //         );
+    //       } catch (e, stack) {
+    //         // 🔴 Error in a specific item
+    //         debugPrint(
+    //           '❌ Failed to parse invoice item at index $i\n'
+    //           'Item data: ${items[i]}\n'
+    //           'Error: $e',
+    //         );
+    //         return;
+
+    //         // Optional: send to crash reporting
+    //         // FirebaseCrashlytics.instance.recordError(e, stack);
+    //       }
+    //     }
+    //   } else {
+    //     debugPrint(
+    //       '❌ invoice_items_details is not a List. '
+    //       'Actual type: ${items.runtimeType}',
+    //     );
+    //   }
+    // } catch (e, stack) {
+    //   // 🔴 Critical error (JSON shape problem)
+    //   debugPrint(
+    //     '🔥 Failed to parse invoice_items_details\n'
+    //     'Error: $e',
+    //   );
+
+    //   // Optional crash reporting
+    //   // FirebaseCrashlytics.instance.recordError(e, stack);
+    // }
+
     customerName = json.containsKey('customer_name')
         ? json['customer_name']?.toString()
         : null;

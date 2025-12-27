@@ -47,19 +47,19 @@ class JobCard extends StatelessWidget {
                                   spacing: 10,
                                   children: [
                                     myTextFormFieldWithBorder(
-                                      width: 150,
+                                      width: 90,
                                       labelText: 'Job No.',
                                       controller:
                                           controller.jobNumberFilter.value,
                                     ),
                                     myTextFormFieldWithBorder(
-                                      width: 150,
+                                      width: 90,
                                       labelText: 'Invoice No.',
                                       controller:
                                           controller.invoiceNumberFilter.value,
                                     ),
                                     CustomDropdown(
-                                      width: 200,
+                                      width: 170,
                                       showedSelectedName: 'name',
                                       textcontroller: controller
                                           .carBrandIdFilterName
@@ -97,7 +97,7 @@ class JobCard extends StatelessWidget {
                                       },
                                     ),
                                     CustomDropdown(
-                                      width: 200,
+                                      width: 170,
                                       showedSelectedName: 'name',
                                       textcontroller: controller
                                           .carModelIdFilterName
@@ -124,18 +124,18 @@ class JobCard extends StatelessWidget {
                                       },
                                     ),
                                     myTextFormFieldWithBorder(
-                                      width: 150,
+                                      width: 90,
                                       labelText: 'Plate NO.',
                                       controller:
                                           controller.plateNumberFilter.value,
                                     ),
                                     myTextFormFieldWithBorder(
-                                      width: 200,
+                                      width: 170,
                                       labelText: 'VIN',
                                       controller: controller.vinFilter.value,
                                     ),
                                     myTextFormFieldWithBorder(
-                                      width: 200,
+                                      width: 170,
                                       labelText: 'LPO No.',
                                       controller: controller.lpoFilter.value,
                                     ),
@@ -168,21 +168,30 @@ class JobCard extends StatelessWidget {
                                         return controller.getAllCustomers();
                                       },
                                     ),
-                                    // CustomDropdown(
-                                    //   width: 150,
-                                    //   textcontroller:
-                                    //       controller.statusFilter.value.text,
-                                    //   showedSelectedName: 'name',
-                                    //   hintText: 'Status',
-                                    //   items: controller.allStatus,
-                                    //   onChanged: (key, value) async {
-                                    //     controller.statusFilter.value.text =
-                                    //         value['name'];
-                                    //   },
-                                    //   onDelete: () {
-                                    //     controller.statusFilter.value.clear();
-                                    //   },
-                                    // ),
+                                    CustomDropdown(
+                                      width: 250,
+                                      textcontroller: controller
+                                          .branchFilterName
+                                          .value
+                                          .text,
+                                      showedSelectedName: 'name',
+                                      hintText: 'Branch',
+                                      onChanged: (key, value) async {
+                                        controller.branchFilterName.value.text =
+                                            value['name'];
+                                        controller.branchNameIdFilter.value =
+                                            key;
+                                      },
+                                      onDelete: () {
+                                        controller.branchFilterName.value
+                                            .clear();
+                                        controller.branchNameIdFilter.value =
+                                            "";
+                                      },
+                                      onOpen: () {
+                                        return controller.getBranches();
+                                      },
+                                    ),
                                   ],
                                 ),
 
@@ -191,7 +200,7 @@ class JobCard extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     myTextFormFieldWithBorder(
-                                      width: 120,
+                                      width: 110,
                                       controller: controller.fromDate.value,
                                       labelText: 'From Date',
                                       onFieldSubmitted: (_) async {
@@ -200,12 +209,24 @@ class JobCard extends StatelessWidget {
                                           controller.fromDate.value,
                                         );
                                       },
+                                      onTapOutside: (_) {
+                                        normalizeDate(
+                                          controller.fromDate.value.text,
+                                          controller.fromDate.value,
+                                        );
+                                      },
                                     ),
                                     myTextFormFieldWithBorder(
-                                      width: 120,
+                                      width: 110,
                                       controller: controller.toDate.value,
                                       labelText: 'To Date',
                                       onFieldSubmitted: (_) async {
+                                        normalizeDate(
+                                          controller.toDate.value.text,
+                                          controller.toDate.value,
+                                        );
+                                      },
+                                      onTapOutside: (_) {
                                         normalizeDate(
                                           controller.toDate.value.text,
                                           controller.toDate.value,
@@ -253,7 +274,7 @@ class JobCard extends StatelessWidget {
 
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
-                                      initialValue: 1,
+                                      initialValue: 2,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('TODAY'),
@@ -567,6 +588,7 @@ Widget tableOfScreens({
             : controller.numberOfJobs.value >= 30
             ? 30
             : controller.numberOfJobs.value,
+
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
@@ -634,6 +656,10 @@ Widget tableOfScreens({
           //     ),
           DataColumn(
             label: columnForTable(constraints, '', 'Customer Name'),
+            // onSort: controller.onSort,
+          ),
+          DataColumn(
+            label: columnForTable(constraints, '', 'Branch'),
             // onSort: controller.onSort,
           ),
           DataColumn(
@@ -718,7 +744,7 @@ DataRow dataRowForTheTable(
           jobData,
           constraints,
           jobId,
-          jobData.type == 'SALE' ? false : true,
+          jobData.type == 'SALES' ? false : true,
         ),
       ), // need to be changed
       DataCell(
@@ -729,7 +755,7 @@ DataRow dataRowForTheTable(
             : const SizedBox(),
       ),
       DataCell(
-        jobData.type == 'SALE'
+        jobData.type == 'SALES'
             ? statusBox('SI', width: 35)
             : statusBox('JC', width: 35),
       ),
@@ -778,6 +804,9 @@ DataRow dataRowForTheTable(
       DataCell(SelectableText(jobData.plateNumber ?? '', maxLines: 1)),
       DataCell(
         textForDataRowInTable(maxWidth: null, text: jobData.customerName ?? ''),
+      ),
+      DataCell(
+        textForDataRowInTable(maxWidth: null, text: jobData.branchName ?? ''),
       ),
       DataCell(
         textForDataRowInTable(

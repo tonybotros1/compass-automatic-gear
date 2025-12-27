@@ -25,23 +25,53 @@ class CustomerInvoicesModel extends BaseModelForReceiptsAndPayments {
     super.notes,
   });
 
-  /// Safe fromJson with null checks and defaults
+  // /// Safe fromJson with null checks and defaults
+  // factory CustomerInvoicesModel.fromJson(Map<String, dynamic> json) {
+  //   return CustomerInvoicesModel(
+  //     id: json['_id'] ?? '',
+  //     invoiceNumber: json['invoice_number']?.toString() ?? '',
+  //     isSelected: json['is_selected'] == true,
+  //     jobId: json['job_id']?.toString() ?? '',
+  //     invoiceDate: json['invoice_date']?.toString() ?? '',
+  //     receiptId:json.containsKey('receipt_id') ? json['receipt_id'] ?? '' : "",
+  //     invoiceAmount:
+  //         double.tryParse(json['invoice_amount']?.toString() ?? '') ?? 0,
+  //     receiptAmount:
+  //         double.tryParse(json['receipt_amount']?.toString() ?? '') ?? 0,
+  //     outstandingAmount:
+  //         double.tryParse(json['outstanding_amount']?.toString() ?? '') ?? 0,
+  //     notes: json['notes']?.toString() ?? '',
+  //   );
+  // }
+
+  /// Safe fromJson with detailed error reporting
   factory CustomerInvoicesModel.fromJson(Map<String, dynamic> json) {
-    return CustomerInvoicesModel(
-      id: json['_id'] ?? '',
-      invoiceNumber: json['invoice_number']?.toString() ?? '',
-      isSelected: json['is_selected'] == true,
-      jobId: json['job_id']?.toString() ?? '',
-      invoiceDate: json['invoice_date']?.toString() ?? '',
-      receiptId:json.containsKey('receipt_id') ? json['receipt_id'] ?? '' : "",
-      invoiceAmount:
-          double.tryParse(json['invoice_amount']?.toString() ?? '') ?? 0,
-      receiptAmount:
-          double.tryParse(json['receipt_amount']?.toString() ?? '') ?? 0,
-      outstandingAmount:
-          double.tryParse(json['outstanding_amount']?.toString() ?? '') ?? 0,
-      notes: json['notes']?.toString() ?? '',
-    );
+    try {
+      return CustomerInvoicesModel(
+        id: json['_id'] ?? '',
+        invoiceNumber: json['invoice_number']?.toString() ?? '',
+        isSelected: json['is_selected'] == true,
+        jobId: json['job_id']?.toString() ?? '',
+        invoiceDate: json['invoice_date']?.toString() ?? '',
+        receiptId: json.containsKey('receipt_id')
+            ? json['receipt_id']?.toString() ?? ''
+            : '',
+        invoiceAmount:
+            double.tryParse(json['invoice_amount']?.toString() ?? '') ?? 0,
+        receiptAmount:
+            double.tryParse(json['receipt_amount']?.toString() ?? '') ?? 0,
+        outstandingAmount:
+            double.tryParse(json['outstanding_amount']?.toString() ?? '') ?? 0,
+        notes: json['notes']?.toString() ?? '',
+      );
+    } catch (e, stackTrace) {
+      throw FormatException(
+        'CustomerInvoicesModel.fromJson failed.\n'
+        'Error: $e\n'
+        'JSON: $json\n'
+        'StackTrace: $stackTrace',
+      );
+    }
   }
 
   CustomerInvoicesModel clone() {
@@ -69,7 +99,7 @@ class CustomerInvoicesModel extends BaseModelForReceiptsAndPayments {
       'is_modified': isModified,
       'is_deleted': isDeleted,
       'id': id,
-      'receipt_id' : receiptId
+      'receipt_id': receiptId,
     };
   }
 }

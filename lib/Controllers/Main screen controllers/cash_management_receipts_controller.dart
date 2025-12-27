@@ -163,7 +163,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         'rate': double.tryParse(rate.text) ?? 1,
       };
       final rawDate = receiptDate.value.text.trim();
-      final rawDate2 = chequeDate.value.text.trim();
+      final rawDate2 = chequeDate.text.trim();
 
       if (rawDate.isNotEmpty) {
         try {
@@ -193,10 +193,6 @@ class CashManagementReceiptsController extends CashManagementBaseController {
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
 
       if (currentReceiptID.isEmpty) {
-        alertMessage(
-          context: Get.context!,
-          content: 'Please Enter Valid Cheque Date',
-        );
         newData['status'] = 'New';
 
         Uri url = Uri.parse('$backendUrl/ar_receipts/add_new_receipt');

@@ -32,6 +32,50 @@ Widget customerDetailsSection(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
                 children: [
+                  // SizedBox(
+                  //   width: 300,
+                  //   child: SearchChoices.single(
+                  //     items: controller.customers.map((customer) {
+                  //       return DropdownMenuItem(
+                  //         value: customer['id'],
+                  //         child: Text(customer['name']),
+                  //       );
+                  //     }).toList(),
+                  //     value: controller.selectedCustomerId,
+                  //     hint: "Select a Customer",
+                  //     searchHint: "Search by name",
+                  //     isExpanded: true,
+                  //     onChanged: (value) {
+                  //       controller.selectedCustomerId = value;
+                  //     },
+                  //     onTap: () {
+                  //       print('skjnvlkv');
+                  //     },
+
+                  //     searchFn: (String keyword, items) {
+                  //       List<int> ret = [];
+                  //       if (keyword.isNotEmpty) {
+                  //         keyword.toLowerCase();
+                  //         for (int i = 0; i < items.length; i++) {
+                  //           if (items[i].child.data.toLowerCase().contains(
+                  //             keyword,
+                  //           )) {
+                  //             ret.add(i);
+                  //           }
+                  //         }
+                  //       } else {
+                  //         ret = List<int>.generate(items.length, (i) => i);
+                  //       }
+                  //       return ret;
+                  //     },
+
+                  //     // Styling the dialog for better UX
+                  //     closeButton: "Close",
+                  //     doneButton: "Done",
+                  //     displayClearIcon: true,
+                  //     icon: const Icon(Icons.arrow_drop_down),
+                  //   ),
+                  // ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -152,7 +196,7 @@ Widget customerDetailsSection(
                             nextFocusNode:
                                 controller.focusNodeForCustomerDetails6,
 
-                            width: 250,
+                            width: 320,
                             showedSelectedName: 'name',
                             textcontroller: controller.customerSaleMan.value,
                             hintText: 'Salesman',
@@ -186,7 +230,7 @@ Widget customerDetailsSection(
                       CustomDropdown(
                         focusNode: controller.focusNodeForCustomerDetails6,
                         // nextFocusNode: controller.focusNodeForCustomerDetails7,
-                        width: 170,
+                        width: 320,
                         showedSelectedName: 'name',
                         textcontroller: controller.customerBranch.text,
                         hintText: 'Branch',

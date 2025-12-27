@@ -544,41 +544,93 @@ class Helpers {
     }
   }
 
+  // Future<Map<String, dynamic>> getCustomers() async {
+  //   try {
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     var accessToken = '${prefs.getString('accessToken')}';
+  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+  //     var url = Uri.parse(
+  //       '$backendTestURI/entity_information/get_all_customers',
+  //     );
+  //     final response = await http.get(
+  //       url,
+  //       headers: {'Authorization': 'Bearer $accessToken'},
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final decode = jsonDecode(response.body);
+  //       List<dynamic> jsonData = decode['customers'];
+  //       Map<String, dynamic> map = {
+  //         for (var model in jsonData) model['_id']: model,
+  //       };
+  //       return map;
+  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+  //       final refreshed = await helper.refreshAccessToken(refreshToken);
+  //       if (refreshed == RefreshResult.success) {
+  //         await getCustomers();
+  //       } else if (refreshed == RefreshResult.invalidToken) {
+  //         logout();
+  //       }
+  //       return {};
+  //     } else if (response.statusCode == 401) {
+  //       logout();
+  //       return {};
+  //     } else {
+  //       return {};
+  //     }
+  //   } catch (e) {
+  //     return {};
+  //   }
+  // }
   Future<Map<String, dynamic>> getCustomers() async {
+    final client = http.Client();
+
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse(
-        '$backendTestURI/entity_information/get_all_customers',
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+
+      final request = http.Request(
+        'GET',
+        Uri.parse('$backendTestURI/entity_information/get_all_customers'),
       );
-      final response = await http.get(
-        url,
-        headers: {'Authorization': 'Bearer $accessToken'},
-      );
-      if (response.statusCode == 200) {
-        final decode = jsonDecode(response.body);
-        List<dynamic> jsonData = decode['customers'];
-        Map<String, dynamic> map = {
-          for (var model in jsonData) model['_id']: model,
-        };
-        return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-        final refreshed = await helper.refreshAccessToken(refreshToken);
-        if (refreshed == RefreshResult.success) {
-          await getCustomers();
-        } else if (refreshed == RefreshResult.invalidToken) {
-          logout();
+
+      request.headers['Authorization'] = 'Bearer $accessToken';
+
+      final streamedResponse = await client.send(request);
+
+      // 🔴 Handle auth
+      if (streamedResponse.statusCode == 401) {
+        if (refreshToken.isNotEmpty) {
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) {
+            return await getCustomers();
+          }
         }
-        return {};
-      } else if (response.statusCode == 401) {
         logout();
         return {};
-      } else {
+      }
+
+      if (streamedResponse.statusCode != 200) {
         return {};
       }
+
+      // ✅ Read stream safely
+      final buffer = StringBuffer();
+
+      await for (final chunk in streamedResponse.stream.transform(
+        utf8.decoder,
+      )) {
+        buffer.write(chunk);
+      }
+
+      final decoded = jsonDecode(buffer.toString());
+      final List<dynamic> customers = decoded['customers'];
+
+      return {for (final customer in customers) customer['_id']: customer};
     } catch (e) {
       return {};
+    } finally {
+      client.close();
     }
   }
 
