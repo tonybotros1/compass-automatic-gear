@@ -179,6 +179,7 @@ class JobCardController extends GetxController {
   Rx<TextEditingController> toDate = TextEditingController().obs;
   Rx<TextEditingController> statusFilter = TextEditingController().obs;
   Rx<TextEditingController> typeFilter = TextEditingController().obs;
+  Rx<TextEditingController> lableFilter = TextEditingController().obs;
   final Uuid _uuid = const Uuid();
   String backendUrl = backendTestURI;
   RxBool isJobModified = RxBool(false);
@@ -422,6 +423,25 @@ class JobCardController extends GetxController {
         break;
       case 3:
         typeFilter.value.text = 'SALE';
+        filterSearch();
+        break;
+
+      default:
+    }
+  }
+
+  void onChooseForLabelPicker(int i) {
+    switch (i) {
+      case 1:
+        lableFilter.value.clear();
+        filterSearch();
+        break;
+      case 2:
+        lableFilter.value.text = 'Returned';
+        filterSearch();
+        break;
+      case 3:
+        lableFilter.value.text = 'Not Returned';
         filterSearch();
         break;
 
@@ -748,6 +768,9 @@ class JobCardController extends GetxController {
     if (plateNumberFilter.value.text.isNotEmpty) {
       body["plate_number"] = plateNumberFilter.value.text;
     }
+    if (branchNameIdFilter.value.isNotEmpty) {
+      body["branch"] = branchNameIdFilter.value;
+    }
     if (vinFilter.value.text.isNotEmpty) {
       body["vin"] = vinFilter.value.text;
     }
@@ -769,6 +792,9 @@ class JobCardController extends GetxController {
     if (isThisYearSelected.isTrue) {
       body["this_year"] = true;
     }
+    if (lableFilter.value.text.isNotEmpty) {
+      body["label"] = lableFilter.value.text;
+    }
     if (fromDate.value.text.isNotEmpty) {
       body["from_date"] = convertDateToIson(fromDate.value.text);
     }
@@ -784,6 +810,7 @@ class JobCardController extends GetxController {
 
   Future<void> searchEngine(Map<String, dynamic> body) async {
     try {
+      print(body);
       isScreenLoding.value = true;
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -2025,6 +2052,7 @@ class JobCardController extends GetxController {
   }
 
   void clearAllFilters() {
+    lableFilter.value.clear();
     lpoFilter.value.clear();
     statusFilter.value.clear();
     isAllSelected.value = false;

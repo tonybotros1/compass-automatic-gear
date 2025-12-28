@@ -378,6 +378,40 @@ class JobCard extends StatelessWidget {
                                         controller.onChooseForTypePicker(v);
                                       },
                                     ),
+                                    separator(color: Colors.black),
+                                    CustomSlidingSegmentedControl<int>(
+                                      height: 30,
+                                      initialValue: 1,
+                                      children: const {
+                                        1: Text('ALL'),
+                                        2: Text('RETURNED'),
+                                        3: Text('NOT RETUNRED'),
+                                      },
+                                      decoration: BoxDecoration(
+                                        color:
+                                            CupertinoColors.lightBackgroundGray,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      thumbDecoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withAlpha(1),
+                                            blurRadius: 4.0,
+                                            spreadRadius: 1.0,
+                                            offset: const Offset(0.0, 2.0),
+                                          ),
+                                        ],
+                                      ),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeInToLinear,
+                                      onValueChanged: (v) {
+                                        controller.onChooseForLabelPicker(v);
+                                      },
+                                    ),
                                   ],
                                 ),
                                 Row(
