@@ -1,11 +1,11 @@
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
+import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
-import '../../../Models/dynamic_field_models.dart';
 import '../../../Models/entity information/entity_information_model.dart';
 import '../../../consts.dart';
-import '../dynamic_field.dart';
 
 Widget contactsCardSection(EntityInformationsController controller) {
   return Column(
@@ -15,6 +15,7 @@ Widget contactsCardSection(EntityInformationsController controller) {
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         decoration: containerDecor,
         child: Column(
+          spacing: 10,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Primary', style: fontStyle2),
@@ -64,161 +65,134 @@ Widget buildSmartField(
   int index, {
   bool isRemoving = false,
 }) {
-  return SizeTransition(
-    sizeFactor: animation,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: GetBuilder<EntityInformationsController>(
-                builder: (controller) {
-                  return RadioGroup<bool>(
-                    groupValue: controller.phonePrimary[index].isPrimary,
-                    onChanged: (bool? newValue) {
-                      if (newValue != null) {
-                        controller.selectPrimaryPhonesField(index, newValue);
-                      }
-                    },
-                    child: CupertinoRadio<bool>(
-                      value: true,
-                      fillColor: mainColor,
-                      activeColor: Colors.white,
-                    ),
-                  );
-                },
-              ),
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: SizeTransition(
+      sizeFactor: animation,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: GetBuilder<EntityInformationsController>(
+              builder: (controller) {
+                return RadioGroup<bool>(
+                  groupValue: controller.phonePrimary[index].isPrimary,
+                  onChanged: (bool? newValue) {
+                    if (newValue != null) {
+                      controller.selectPrimaryPhonesField(index, newValue);
+                    }
+                  },
+                  child: CupertinoRadio<bool>(
+                    value: true,
+                    fillColor: mainColor,
+                    activeColor: Colors.white,
+                  ),
+                );
+              },
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: GetX<EntityInformationsController>(
-                  builder: (controller) {
-                    final isphoneTypesLoading =
-                        controller.phoneTypesMap.isEmpty;
-
-                    return dynamicFields(
-                      dynamicConfigs: [
-                        DynamicConfig(
-                          isDropdown: true,
-                          flex: 1,
-                          dropdownConfig: DropdownConfig(
-                            showedSelectedName: 'name',
-                            textController: controller
-                                .phoneTypesControllers[index]
-                                .controller!
-                                .text,
-
-                            hintText: 'Type',
-                            menuValues: isphoneTypesLoading
-                                ? {}
-                                : controller.phoneTypesMap,
-                            onSelected: (key, value) {
-                              controller
-                                      .phoneTypesControllers[index]
-                                      .controller!
-                                      .text =
-                                  value['name'];
-                              controller.contactPhone[index].type =
-                                  value['name'];
-                              controller.contactPhone[index].typeId = key;
-                            },
-                            onDelete: () {
-                              controller
+          ),
+          Expanded(
+            child: GetX<EntityInformationsController>(
+              builder: (controller) {
+                return Row(
+                  spacing: 10,
+                  children: [
+                    Expanded(
+                      child: CustomDropdown(
+                        showedSelectedName: 'name',
+                        textcontroller: controller
+                            .phoneTypesControllers[index]
+                            .controller!
+                            .text,
+                        hintText: 'Type',
+                        onChanged: (key, value) {
+                          controller
                                   .phoneTypesControllers[index]
                                   .controller!
-                                  .clear();
-                              controller.contactPhone[index].type = '';
-                              controller.contactPhone[index].typeId = '';
-                            },
-                          ),
-                        ),
-                        DynamicConfig(
-                          isDropdown: false,
-                          flex: 1,
-                          fieldConfig: FieldConfig(
-                            textController: controller
-                                .phoneNumbersControllers[index]
-                                .controller,
-                            labelText: 'Phone',
-                            hintText: 'Enter Phone',
-                            validate: false,
-                            onChanged: (value) {
-                              controller.contactPhone[index].number = value.trim();
-                            },
-                          ),
-                        ),
-                        DynamicConfig(
-                          isDropdown: false,
-                          flex: 2,
-                          fieldConfig: FieldConfig(
-                            textController:
-                                controller.emailsControllers[index].controller,
-                            labelText: 'Email',
-                            hintText: 'Enter Email',
-                            validate: false,
-                            onChanged: (value) {
-                              controller.contactPhone[index].email = value.trim();
-                            },
-                          ),
-                        ),
-                        DynamicConfig(
-                          isDropdown: false,
-                          flex: 1,
-                          fieldConfig: FieldConfig(
-                            textController:
-                                controller.namesControllers[index].controller,
-                            labelText: 'Name',
-                            hintText: 'Enter Name',
-                            validate: false,
-                            onChanged: (value) {
-                              controller.contactPhone[index].name = value.trim();
-                            },
-                          ),
-                        ),
-                        DynamicConfig(
-                          isDropdown: false,
-                          flex: 1,
-                          fieldConfig: FieldConfig(
-                            textController: controller
-                                .jobTitlesControllers[index]
-                                .controller,
-                            labelText: 'Job Title',
-                            hintText: 'Enter Job Title',
-                            validate: false,
-                            onChanged: (value) {
-                              controller.contactPhone[index].jobTitle = value.trim();
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              switchInCurve: Curves.easeIn,
-              switchOutCurve: Curves.easeOut,
-              child: controller.contactPhone.length > 1
-                  ? IconButton(
-                      key: ValueKey('remove_$index'),
-                      onPressed: () {
-                        removePhoneFieldWithAnimation(index, controller);
-                      },
-                      icon: const Icon(
-                        Icons.remove_circle_outline,
-                        color: Colors.red,
+                                  .text =
+                              value['name'];
+                          controller.contactPhone[index].type = value['name'];
+                          controller.contactPhone[index].typeId = key;
+                        },
+                        onDelete: () {
+                          controller.phoneTypesControllers[index].controller!
+                              .clear();
+                          controller.contactPhone[index].type = '';
+                          controller.contactPhone[index].typeId = '';
+                        },
+                        onOpen: () {
+                          return controller.getPhoneTypes();
+                        },
                       ),
-                    )
-                  : const SizedBox(),
+                    ),
+                    Expanded(
+                      child: myTextFormFieldWithBorder(
+                        controller: controller
+                            .phoneNumbersControllers[index]
+                            .controller,
+                        labelText: 'Phone',
+                        onChanged: (value) {
+                          controller.contactPhone[index].number = value.trim();
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: myTextFormFieldWithBorder(
+                        controller:
+                            controller.emailsControllers[index].controller,
+                        labelText: 'Email',
+                        onChanged: (value) {
+                          controller.contactPhone[index].email = value.trim();
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: myTextFormFieldWithBorder(
+                        controller:
+                            controller.namesControllers[index].controller,
+                        labelText: 'Name',
+                        onChanged: (value) {
+                          controller.contactPhone[index].name = value.trim();
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: myTextFormFieldWithBorder(
+                        controller:
+                            controller.jobTitlesControllers[index].controller,
+                        labelText: 'Job Title',
+                        onChanged: (value) {
+                          controller.contactPhone[index].jobTitle = value
+                              .trim();
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
-          ],
-        ),
-      ],
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            switchInCurve: Curves.easeIn,
+            switchOutCurve: Curves.easeOut,
+            child: controller.contactPhone.length > 1
+                ? IconButton(
+                    key: ValueKey('remove_$index'),
+                    onPressed: () {
+                      removePhoneFieldWithAnimation(index, controller);
+                    },
+                    icon: const Icon(
+                      Icons.remove_circle_outline,
+                      color: Colors.red,
+                    ),
+                  )
+                : const SizedBox(),
+          ),
+        ],
+      ),
     ),
   );
 }

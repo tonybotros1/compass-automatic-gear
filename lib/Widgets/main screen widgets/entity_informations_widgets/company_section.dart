@@ -1,9 +1,9 @@
-import 'package:datahubai/Models/dynamic_field_models.dart';
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
+import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../consts.dart';
-import '../dynamic_field.dart';
 
 Container companySection() {
   return Container(
@@ -13,41 +13,26 @@ Container companySection() {
       children: [
         GetX<EntityInformationsController>(
           builder: (controller) {
-            return dynamicFields(
-              dynamicConfigs: [
-                DynamicConfig(
-                  isDropdown: false,
-                  flex: 1,
-                  fieldConfig: FieldConfig(
-                    isEnabled: controller.isCompanySelected.isTrue,
-                    textController: controller.groupName,
-                    labelText: 'Group Name',
-                    hintText: 'Enter Group Name',
-                    validate: false,
-                  ),
-                ),
-              ],
+            return myTextFormFieldWithBorder(
+              isEnabled: controller.isCompanySelected.isTrue,
+              controller: controller.groupName,
+              labelText: 'Group Name',
             );
           },
         ),
         const SizedBox(height: 15),
         GetX<EntityInformationsController>(
           builder: (controller) {
-            return dynamicFields(
-              dynamicConfigs: [
-                DynamicConfig(
-                  isDropdown: true,
-                  flex: 1,
-                  dropdownConfig: DropdownConfig(
+            return Row(
+              spacing: 10,
+              children: [
+                Expanded(
+                  child: CustomDropdown(
+                    enabled: controller.isCompanySelected.isTrue ? true : false,
                     showedSelectedName: 'name',
-                    textController: controller.industry.value.text,
+                    textcontroller: controller.industry.value.text,
                     hintText: 'Industries',
-                    menuValues: controller.isCompanySelected.isTrue
-                        ? controller.industryMap.isNotEmpty
-                              ? controller.industryMap
-                              : {}
-                        : {},
-                    onSelected: (key, value) {
+                    onChanged: (key, value) {
                       controller.industry.value.text = '${value['name']}';
                       controller.industryId.value = key;
                     },
@@ -55,38 +40,34 @@ Container companySection() {
                       controller.industry.value.clear();
                       controller.industryId.value = '';
                     },
+                    onOpen: () {
+                      return controller.getIndustries();
+                    },
                   ),
                 ),
-                DynamicConfig(
-                  isDropdown: false,
-                  flex: 1,
-                  fieldConfig: FieldConfig(
+                Expanded(
+                  child: myTextFormFieldWithBorder(
                     isEnabled: controller.isCompanySelected.isTrue,
-                    textController: controller.trn,
                     labelText: 'Tax Registration Number',
-                    hintText: 'Enter TRN',
-                    validate: false,
+                    controller: controller.trn,
                   ),
                 ),
-                DynamicConfig(
-                  isDropdown: true,
-                  flex: 1,
-                  dropdownConfig: DropdownConfig(
+                Expanded(
+                  child: CustomDropdown(
+                    enabled: controller.isCompanySelected.isTrue,
                     showedSelectedName: 'name',
-                    textController: controller.entityType.value.text,
+                    textcontroller: controller.entityType.value.text,
                     hintText: 'Entity Type',
-                    menuValues: controller.isCompanySelected.isTrue
-                        ? controller.entityTypeMap.isNotEmpty
-                              ? controller.entityTypeMap
-                              : {}
-                        : {},
-                    onSelected: (key, value) {
+                    onChanged: (key, value) {
                       controller.entityType.value.text = '${value['name']}';
                       controller.entityTypeId.value = key;
                     },
                     onDelete: () {
                       controller.entityType.value.clear();
                       controller.entityTypeId.value = '';
+                    },
+                    onOpen: () {
+                      return controller.getEntityType();
                     },
                   ),
                 ),

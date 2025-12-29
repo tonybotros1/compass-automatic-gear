@@ -52,15 +52,7 @@ class EntityInformationsController extends GetxController {
   RxBool isCompanySelected = RxBool(true);
   RxBool isIndividualSelected = RxBool(false);
   RxString logoUrl = RxString('');
-  RxMap industryMap = RxMap({});
-  RxMap salesManMap = RxMap({});
-  RxMap entityTypeMap = RxMap({});
-  RxMap typeOfSocialsMap = RxMap({});
-  RxMap phoneTypesMap = RxMap({});
   Uint8List? imageBytes;
-  List<RxMap> allCities = [];
-  RxMap allCountries = RxMap({});
-  // RxMap filterdCitiesByCountry = RxMap({});
   RxList entityCode = RxList([]);
   RxString entityStatus = RxString('');
   final GlobalKey<AnimatedListState> listKeyForPhoneLine =
@@ -80,12 +72,6 @@ class EntityInformationsController extends GetxController {
   @override
   void onInit() {
     connectWebSocket();
-    getCountries();
-    getSalesMan();
-    getPhoneTypes();
-    getTypeOfSocial();
-    getIndustries();
-    getEntityType();
     getEntities();
     generateControllerForAdressCountriesAndCities();
     generateControllerForPhoneTypes();
@@ -139,36 +125,38 @@ class EntityInformationsController extends GetxController {
     });
   }
 
-  Future<void> getCountries() async {
-    allCountries.assignAll(await helper.getCountries());
+  Future<Map<String, dynamic>> getCountries() async {
+    return await helper.getCountries();
   }
 
-  Future<void> getCitiesByCountryID(String? countryID, int index) async {
+  Future<Map<String, dynamic>> getCitiesByCountryID(String? countryID) async {
     if (countryID == null || countryID.trim().isEmpty) {
-      return; // do nothing if id is null or empty
+      return {};
     }
-    allCities[index].value = await helper.getCitiesValues(countryID);
+    return await helper.getCitiesValues(countryID);
   }
 
-  Future<void> getSalesMan() async {
-    salesManMap.assignAll(await helper.getSalesMan());
+  Future<Map<String, dynamic>> getSalesMan() async {
+    return await helper.getSalesMan();
   }
 
-  Future<void> getPhoneTypes() async {
-    phoneTypesMap.assignAll(await helper.getAllListValues('CONTACT_TYPES'));
+  Future<Map<String, dynamic>> getPhoneTypes() async {
+    return await helper.getAllListValues('CONTACT_TYPES');
   }
 
-  Future<void> getTypeOfSocial() async {
-    typeOfSocialsMap.assignAll(await helper.getAllListValues('SOCIAL_MEDIA'));
+  Future<Map<String, dynamic>> getTypeOfSocial() async {
+    return await helper.getAllListValues('SOCIAL_MEDIA');
   }
 
-  Future<void> getIndustries() async {
-    industryMap.assignAll(await helper.getAllListValues('INDUSTRIES'));
+  Future<Map<String, dynamic>> getIndustries() async {
+    return await helper.getAllListValues('INDUSTRIES');
   }
 
-  Future<void> getEntityType() async {
-    entityTypeMap.assignAll(await helper.getAllListValues('ENTITY_TYPES'));
+  Future<Map<String, dynamic>> getEntityType() async {
+    return await helper.getAllListValues('ENTITY_TYPES');
   }
+
+  // =========================================================================
 
   Future<void> getEntities() async {
     try {
@@ -524,7 +512,7 @@ class EntityInformationsController extends GetxController {
       addressPrimary[i].isPrimary = address.isPrimary ?? false;
       citiesControllers[i].controller?.text = address.city ?? '';
       linesControllers[i].controller?.text = address.line ?? '';
-      await getCitiesByCountryID(address.countryId.toString(), i);
+      // await getCitiesByCountryID(address.countryId.toString(), i);
     }
   }
 
@@ -674,7 +662,7 @@ class EntityInformationsController extends GetxController {
       ),
     );
 
-    allCities.assignAll(List.generate(length, (index) => RxMap()));
+    // allCities.assignAll(List.generate(length, (index) => RxMap()));
     citiesControllers.value = List.generate(
       length,
       (index) => TypeModel(controller: TextEditingController()),
@@ -747,7 +735,7 @@ class EntityInformationsController extends GetxController {
   // this function is to generate a new address field
   void addAdressLine() {
     final index = contactAddress.length;
-    allCities.add(RxMap());
+    // allCities.add(RxMap());
     contactAddress.add(EntityAddress());
     listKeyForAddressLine.currentState?.insertItem(
       index,

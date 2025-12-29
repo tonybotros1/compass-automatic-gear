@@ -88,17 +88,13 @@ Widget tableOfScreens({
   required BuildContext context,
   required EntityInformationsController controller,
 }) {
-  return DataTable(
+  return PaginatedDataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
-    showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       const DataColumn(label: Text('')),
       DataColumn(
@@ -117,37 +113,47 @@ Widget tableOfScreens({
         label: AutoSizedText(text: 'Phone', constraints: constraints),
       ),
     ],
-    rows:
-        controller.filteredEntities.isEmpty &&
-            controller.search.value.text.isEmpty
-        ? controller.allEntities.map<DataRow>((entity) {
-            final entityId = entity.id;
-            return dataRowForTheTable(
-              entity,
-              context,
-              constraints,
-              entityId,
-              controller,
-            );
-          }).toList()
-        : controller.filteredEntities.map<DataRow>((entity) {
-            final entityId = entity.id;
-            return dataRowForTheTable(
-              entity,
-              context,
-              constraints,
-              entityId,
-              controller,
-            );
-          }).toList(),
+    source: CardDataSource(
+      cards:
+          controller.filteredEntities.isEmpty &&
+              controller.search.value.text.isEmpty
+          ? controller.allEntities
+          : controller.filteredEntities,
+      context: context,
+      constraints: constraints,
+      controller: controller,
+    ),
+    // rows:
+    //     controller.filteredEntities.isEmpty &&
+    //         controller.search.value.text.isEmpty
+    //     ? controller.allEntities.map<DataRow>((entity) {
+    //         final entityId = entity.id;
+    //         return dataRowForTheTable(
+    //           entity,
+    //           context,
+    //           constraints,
+    //           entityId,
+    //           controller,
+    //         );
+    //       }).toList()
+    //     : controller.filteredEntities.map<DataRow>((entity) {
+    //         final entityId = entity.id;
+    //         return dataRowForTheTable(
+    //           entity,
+    //           context,
+    //           constraints,
+    //           entityId,
+    //           controller,
+    //         );
+    //       }).toList(),
   );
 }
 
 DataRow dataRowForTheTable(
   EntityInformationModel entityData,
-  context,
-  constraints,
-  entityId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String entityId,
   EntityInformationsController controller,
 ) {
   final addresses = entityData.entityAddress;
@@ -179,7 +185,7 @@ DataRow dataRowForTheTable(
           text: (addresses != null && addresses.isNotEmpty)
               ? addresses
                     .where((address) => address.isPrimary == true)
-                    .map((address) => address.country)
+                    .map((address) => address.country ?? '')
                     .first
                     .toString()
               : "",
@@ -192,7 +198,7 @@ DataRow dataRowForTheTable(
           text: (addresses != null && addresses.isNotEmpty)
               ? addresses
                     .where((address) => address.isPrimary == true)
-                    .map((address) => address.city)
+                    .map((address) => address.city ?? '')
                     .first
                     .toString()
               : "",
@@ -203,7 +209,7 @@ DataRow dataRowForTheTable(
           maxWidth: 300,
           formatDouble: false,
           text: entityData.entityPhone!
-              .map((phoneData) => phoneData.number)
+              .map((phoneData) => phoneData.number ?? '')
               .take(2)
               .join('/'),
         ),
@@ -403,4 +409,43 @@ ElevatedButton newContactButton(
     style: newButtonStyle,
     child: const Text('New Entity'),
   );
+}
+
+class CardDataSource extends DataTableSource {
+  final List<EntityInformationModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final EntityInformationsController controller;
+
+  CardDataSource({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final entityDate = cards[index];
+    final cardId = entityDate.id ?? '';
+
+    return dataRowForTheTable(
+      entityDate,
+      context,
+      constraints,
+      cardId,
+      controller,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

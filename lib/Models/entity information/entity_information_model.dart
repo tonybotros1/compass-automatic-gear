@@ -46,20 +46,12 @@ class EntityInformationModel {
   });
   EntityInformationModel.fromJson(Map<String, dynamic> json) {
     id = json.containsKey('_id') ? json['_id'] ?? '' : '';
-
-    creditLimit = json.containsKey('credit_limit')
-        ? (json['credit_limit'] != null
-              ? double.tryParse(json['credit_limit'].toString()) ?? 0
-              : 0)
-        : 0;
-
+    creditLimit = (json['credit_limit'] as num?)?.toDouble() ?? 0;
     warrantyDays = json.containsKey('warranty_days')
         ? (json['warranty_days'] != null
               ? int.tryParse(json['warranty_days'].toString()) ?? 0
               : 0)
         : 0;
-
-    // entity_address
     if (json.containsKey('entity_address') &&
         json['entity_address'] is List &&
         (json['entity_address'] as List).isNotEmpty) {
@@ -71,7 +63,6 @@ class EntityInformationModel {
       entityAddress = <EntityAddress>[];
     }
 
-    // entity_code
     entityCode = json.containsKey('entity_code') && json['entity_code'] is List
         ? List<String>.from(json['entity_code'])
         : <String>[];
@@ -79,8 +70,6 @@ class EntityInformationModel {
     entityName = json.containsKey('entity_name')
         ? json['entity_name'] ?? ''
         : '';
-
-    // entity_phone
     if (json.containsKey('entity_phone') &&
         json['entity_phone'] is List &&
         (json['entity_phone'] as List).isNotEmpty) {
@@ -91,12 +80,9 @@ class EntityInformationModel {
     } else {
       entityPhone = <EntityPhone>[];
     }
-
     entityPicture = json.containsKey('entity_picture')
         ? json['entity_picture'] ?? ''
         : '';
-
-    // entity_social
     if (json.containsKey('entity_social') &&
         json['entity_social'] is List &&
         (json['entity_social'] as List).isNotEmpty) {
@@ -107,39 +93,27 @@ class EntityInformationModel {
     } else {
       entitySocial = <EntitySocial>[];
     }
-
     entityStatus = json.containsKey('entity_status')
         ? json['entity_status'] ?? ''
         : '';
-
     entityType = json.containsKey('entity_type')
         ? json['entity_type'] ?? ''
         : '';
-
     groupName = json.containsKey('group_name') ? json['group_name'] ?? '' : '';
-
     industry = json.containsKey('industry') ? json['industry'] ?? '' : '';
-
     status = json.containsKey('status') ? json['status'] ?? '' : '';
-
-    trn = json.containsKey('trn') ? json['trn'] ?? '' : '';
-
+    trn = json.containsKey('trn') ? json['trn']?.toString() ?? '' : '';
     createdAt =
         DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now();
-
     updatedAt =
         DateTime.tryParse(json['updatedAt'].toString()) ?? DateTime.now();
-
     salesmanId = json.containsKey('salesman_id')
         ? json['salesman_id'] ?? ''
         : '';
-
     salesman = json.containsKey('salesman') ? json['salesman'] ?? '' : '';
-
     industryId = json.containsKey('industry_id')
         ? json['industry_id'] ?? ''
         : '';
-
     entityTypeId = json.containsKey('entity_type_id')
         ? json['entity_type_id'] ?? ''
         : '';
@@ -195,14 +169,20 @@ class EntityAddress {
   });
 
   EntityAddress.fromJson(Map<String, dynamic> json) {
-    line = json.containsKey('line') ? json['line'] ?? '' : '';
+    line = json.containsKey('line') ? json['line']?.toString() ?? '' : '';
     isPrimary = json.containsKey('isPrimary')
         ? json['isPrimary'] ?? false
         : false;
-    countryId = json.containsKey('country_id') ? json['country_id'] ?? '' : '';
-    country = json.containsKey('country') ? json['country'] ?? '' : '';
-    cityId = json.containsKey('city_id') ? json['city_id'] ?? '' : '';
-    city = json.containsKey('city') ? json['city'] ?? '' : '';
+    countryId = json.containsKey('country_id')
+        ? json['country_id']?.toString() ?? ''
+        : '';
+    country = json.containsKey('country')
+        ? json['country']?.toString() ?? ''
+        : '';
+    cityId = json.containsKey('city_id')
+        ? json['city_id']?.toString() ?? ''
+        : '';
+    city = json.containsKey('city') ? json['city']?.toString() ?? '' : '';
   }
 
   Map<String, dynamic> toJson() {

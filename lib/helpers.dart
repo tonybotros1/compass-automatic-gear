@@ -198,7 +198,7 @@ class Helpers {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllListValues(code);
+          return await getAllListValues(code);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }

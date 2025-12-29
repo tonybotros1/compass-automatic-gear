@@ -23,7 +23,7 @@ Container customerSection() {
               GetBuilder<EntityInformationsController>(
                 builder: (controller) {
                   return myTextFormFieldWithBorder(
-                    width: 360,
+                    width: 520,
                     obscureText: false,
                     controller: controller.entityName,
                     labelText: 'Name',
@@ -52,15 +52,11 @@ Container customerSection() {
                   GetX<EntityInformationsController>(
                     builder: (controller) {
                       return CustomDropdown(
+                        enabled: controller.isCustomerSelected.isTrue,
                         width: 200,
                         hintText: 'Salesman',
                         textcontroller: controller.salesMAn.value.text,
                         showedSelectedName: 'name',
-                        items: controller.isCustomerSelected.isTrue
-                            ? controller.salesManMap.isNotEmpty
-                                  ? controller.salesManMap
-                                  : {}
-                            : {},
                         onChanged: (key, value) {
                           controller.salesMAn.value.text = '${value['name']}';
                           controller.salesManId.value = key;
@@ -68,6 +64,9 @@ Container customerSection() {
                         onDelete: () {
                           controller.salesMAn.value.clear();
                           controller.salesManId.value = '';
+                        },
+                        onOpen: () {
+                          return controller.getSalesMan();
                         },
                       );
                     },
