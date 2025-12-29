@@ -810,7 +810,6 @@ class JobCardController extends GetxController {
 
   Future<void> searchEngine(Map<String, dynamic> body) async {
     try {
-      print(body);
       isScreenLoding.value = true;
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();

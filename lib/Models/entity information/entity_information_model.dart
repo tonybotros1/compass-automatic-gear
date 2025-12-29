@@ -20,6 +20,7 @@ class EntityInformationModel {
   String? entityTypeId;
   DateTime? createdAt;
   DateTime? updatedAt;
+  String? lpoReq;
 
   EntityInformationModel({
     this.id,
@@ -43,6 +44,7 @@ class EntityInformationModel {
     this.createdAt,
     this.updatedAt,
     this.warrantyDays,
+    this.lpoReq,
   });
   EntityInformationModel.fromJson(Map<String, dynamic> json) {
     id = json.containsKey('_id') ? json['_id'] ?? '' : '';
@@ -62,6 +64,9 @@ class EntityInformationModel {
     } else {
       entityAddress = <EntityAddress>[];
     }
+    lpoReq = json.containsKey('lpo_required')
+        ? json['lpo_required']?.toString() ?? ''
+        : '';
 
     entityCode = json.containsKey('entity_code') && json['entity_code'] is List
         ? List<String>.from(json['entity_code'])

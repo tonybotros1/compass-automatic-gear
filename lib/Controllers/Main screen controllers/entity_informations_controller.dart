@@ -68,6 +68,7 @@ class EntityInformationsController extends GetxController {
   String backendUrl = backendTestURI;
   var buttonLoadingStates = <String, bool>{}.obs;
   WebSocketService ws = Get.find<WebSocketService>();
+  RxBool lpoReq = RxBool(false);
 
   @override
   void onInit() {
@@ -201,6 +202,7 @@ class EntityInformationsController extends GetxController {
       final request = http.MultipartRequest('POST', url);
       request.headers['Authorization'] = 'Bearer $accessToken';
       request.fields.addAll({
+        "lpo_required": lpoReq.value.toString(),
         "entity_name": entityName.text.trim(),
         "entity_code": entityCode.join(","),
         "credit_limit": creditLimit.text.isEmpty
@@ -397,6 +399,7 @@ class EntityInformationsController extends GetxController {
 
   Future<void> loadEntityData(EntityInformationModel entityData) async {
     imageBytes = null;
+    lpoReq.value = entityData.lpoReq == 'Y' ? true : false;
 
     // Update entity text controllers
     entityName.text = entityData.entityName ?? '';
@@ -434,6 +437,7 @@ class EntityInformationsController extends GetxController {
 
   void clearAllVariables() {
     entityName.clear();
+    lpoReq.value = false;
     warrantyDays.text = '0';
     entityCode.assign('Customer');
     isVendorSelected.value = false;

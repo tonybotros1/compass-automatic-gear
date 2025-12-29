@@ -1,4 +1,5 @@
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
@@ -20,15 +21,41 @@ Container customerSection() {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              GetBuilder<EntityInformationsController>(
+              GetX<EntityInformationsController>(
                 builder: (controller) {
-                  return myTextFormFieldWithBorder(
-                    width: 520,
-                    obscureText: false,
-                    controller: controller.entityName,
-                    labelText: 'Name',
-                    hintText: 'Enter Entity Name',
-                    validate: true,
+                  return Row(
+                    spacing: 10,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      myTextFormFieldWithBorder(
+                        width: 360,
+                        obscureText: false,
+                        controller: controller.entityName,
+                        labelText: 'Name',
+                        hintText: 'Enter Entity Name',
+                        validate: true,
+                      ),
+                      Container(
+                        height: 35,
+                        width: 150,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.grey),
+                          color: Colors.white,
+                        ),
+                        child: Row(
+                          children: [
+                            CupertinoCheckbox(
+                              value: controller.lpoReq.value,
+                              onChanged: (value) {
+                                controller.lpoReq.value = value!;
+                              },
+                            ),
+                            Text('LPO Required', style: textFieldFontStyle),
+                          ],
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),

@@ -299,7 +299,7 @@ Widget carInformation({
                           valSectionInTheTable(
                             controller.listOfValuesController,
                             constraints,
-                            'CAR_SPECIFICATIONS',
+                            'YEARS',
                             'New Year',
                             'Years',
                           ),
