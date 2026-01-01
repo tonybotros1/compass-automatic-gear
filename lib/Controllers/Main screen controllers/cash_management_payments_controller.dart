@@ -31,7 +31,9 @@ class CashManagementPaymentsController extends CashManagementBaseController {
 
   @override
   void onInit() async {
-    searchEngineForPayments({"today": true});
+    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
+    filterSearch();
+
     super.onInit();
   }
 
@@ -65,7 +67,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         isYearSelected.value = false;
         isMonthSelected.value = false;
         isDaySelected.value = true;
-        searchEngineForPayments({"today": true});
+        filterSearch();
         break;
       case 3:
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -76,7 +78,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         isYearSelected.value = false;
         isMonthSelected.value = true;
         isDaySelected.value = false;
-        searchEngineForPayments({"this_month": true});
+        filterSearch();
         break;
       case 4:
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -86,7 +88,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         isYearSelected.value = true;
         isMonthSelected.value = false;
         isDaySelected.value = false;
-        searchEngineForPayments({"this_year": true});
+        filterSearch();
         break;
       default:
     }

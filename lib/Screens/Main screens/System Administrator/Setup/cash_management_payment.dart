@@ -188,7 +188,7 @@ class CashManagementPayment extends StatelessWidget {
                                   ),
                                   CustomSlidingSegmentedControl<int>(
                                     height: 30,
-                                    initialValue: 1,
+                                    initialValue: 2,
                                     children: const {
                                       1: Text('ALL'),
                                       2: Text('TODAY'),

@@ -470,6 +470,7 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: typeData.invoiceNumber ?? '',
           maxWidth: null,
+          formatDouble: false,
         ),
       ),
       DataCell(textForDataRowInTable(text: textToDate(typeData.invoiceDate))),

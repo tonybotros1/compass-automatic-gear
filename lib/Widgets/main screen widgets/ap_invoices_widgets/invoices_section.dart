@@ -139,10 +139,7 @@ DataRow dataRowForTheTable(
       ),
 
       DataCell(
-        textForDataRowInTable(
-          text: invoiceItemsData.note ?? '',
-          maxWidth: null,
-        ),
+        textForDataRowInTable(text: invoiceItemsData.note, maxWidth: null),
       ),
       DataCell(
         textForDataRowInTable(
@@ -152,7 +149,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: invoiceItemsData.jobNumber ?? '',
+          text: invoiceItemsData.jobNumber,
           formatDouble: false,
         ),
       ),
@@ -211,12 +208,11 @@ Widget editSection(
       if (controller.status.value == 'New' || controller.status.isEmpty) {
         controller.transactionType.text =
             invoiceItemsData.transactionTypeName ?? '';
-        controller.transactionTypeId.value =
-            invoiceItemsData.transactionType ?? '';
-        controller.invoiceNote.text = invoiceItemsData.note ?? '';
+        controller.transactionTypeId.value = invoiceItemsData.transactionType;
+        controller.invoiceNote.text = invoiceItemsData.note;
         controller.vat.text = invoiceItemsData.vat.toString();
         controller.amount.text = invoiceItemsData.amount.toString();
-        controller.jobNumber.text = invoiceItemsData.jobNumber ?? '';
+        controller.jobNumber.text = invoiceItemsData.jobNumber;
         invoiceItemsForapInvoicesDialog(
           controller: controller,
           constraints: constraints,

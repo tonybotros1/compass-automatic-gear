@@ -50,10 +50,10 @@ Future<dynamic> apInvoiceDialog({
                     ),
                     const Spacer(),
                     separator(),
-                    GetBuilder<ApInvoicesController>(
+                    GetX<ApInvoicesController>(
                       builder: (controller) => ClickableHoverText(
                         onTap: onPressedForSave,
-                        text: 'Save',
+                        text:controller.addingNewValue.isFalse? 'Save' : "•••",
                       ),
                     ),
                     point(),

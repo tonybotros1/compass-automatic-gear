@@ -193,8 +193,8 @@ class ApInvoicesController extends GetxController {
     calculatedAmountForInvoiceItems.value = 0.0;
     calculatedVatForInvoiceItems.value = 0.0;
     for (var element in allInvoices.where((inv) => inv.isDeleted != true)) {
-      calculatedAmountForInvoiceItems.value += element.amount ?? 0;
-      calculatedVatForInvoiceItems.value += element.vat ?? 0;
+      calculatedAmountForInvoiceItems.value += element.amount;
+      calculatedVatForInvoiceItems.value += element.vat;
     }
   }
 
@@ -279,9 +279,10 @@ class ApInvoicesController extends GetxController {
           referenceNumber.text = newInvoice.referenceNumber ?? '';
           addingNewValue.value = false;
           currentApInvoiceId.value = newInvoice.id ?? '';
-          allInvoices.value = newInvoice.items ?? [];
+          allInvoices.value = newInvoice.items;
           isInvoiceModified.value = false;
           isInvoiceItemsModified.value = false;
+          allApInvoices.insert(0, newInvoice);
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -310,6 +311,16 @@ class ApInvoicesController extends GetxController {
             body: jsonEncode(newDataToUpdate),
           );
           if (responseForEditingAPInvoice.statusCode == 200) {
+            final decoded = jsonDecode(responseForEditingAPInvoice.body);
+            ApInvoicesModel updatedApInvoice = ApInvoicesModel.fromJson(
+              decoded['updated_ap_invoice'],
+            );
+            int index = allApInvoices.indexWhere(
+              (item) => item.id == updatedApInvoice.id,
+            );
+            if (index != -1) {
+              allApInvoices[index] = updatedApInvoice;
+            }
             isInvoiceModified.value = false;
           } else if (responseForEditingAPInvoice.statusCode == 401 &&
               refreshToken.isNotEmpty) {
@@ -347,29 +358,22 @@ class ApInvoicesController extends GetxController {
           );
           if (responseForEditingAPInvoiceItems.statusCode == 200) {
             final decoded = jsonDecode(responseForEditingAPInvoiceItems.body);
-            List updatedItems = decoded['updated_items'];
-            List deletedItems = decoded['deleted_items'];
-            if (deletedItems.isNotEmpty) {
-              for (var id in deletedItems) {
-                allInvoices.removeWhere((item) => item.id == id);
-              }
-            }
-            if (updatedItems.isNotEmpty) {
-              for (var item in updatedItems) {
-                var uuid = item['uuid'];
-                var id = item['_id'];
-                final localIndex = allInvoices.indexWhere(
-                  (item) => item.uuid == uuid,
-                );
 
-                if (localIndex != -1) {
-                  allInvoices[localIndex].id = id;
-                  allInvoices[localIndex].isAdded = false;
-                  allInvoices[localIndex].isModified = false;
-                  allInvoices[localIndex].isDeleted = false;
-                }
-              }
+            final updated = ApInvoicesModel.fromJson(
+              decoded['updated_ap_invoice'],
+            );
+
+            int index = allApInvoices.indexWhere((e) => e.id == updated.id);
+
+            if (index != -1) {
+              allApInvoices[index] = allApInvoices[index].copyWith(
+                items: updated.items.isNotEmpty
+                    ? updated.items
+                    : allApInvoices[index].items,
+              );
+              allApInvoices.refresh();
             }
+
             isInvoiceItemsModified.value = false;
           } else if (responseForEditingAPInvoiceItems.statusCode == 401 &&
               refreshToken.isNotEmpty) {
@@ -598,7 +602,7 @@ class ApInvoicesController extends GetxController {
     invoiceNumber.text = typeData.invoiceNumber ?? '';
     invoiceDate.text = textToDate(typeData.invoiceDate ?? '');
     invoiceType.text = typeData.invoiceTypeName ?? '';
-    allInvoices.assignAll(typeData.items ?? []);
+    allInvoices.assignAll(typeData.items);
     invoiceTypeId.value = typeData.invoiceType ?? '';
     referenceNumber.text = typeData.referenceNumber ?? '';
     transactionDate.text = textToDate(typeData.transactionDate);
@@ -640,6 +644,7 @@ class ApInvoicesController extends GetxController {
     if (status1 != 'Posted' && status1 != 'Cancelled' && status1.isNotEmpty) {
       status.value = 'Posted';
       isInvoiceModified.value = true;
+      addNewApInvoice();
     } else if (status1 == 'Posted') {
       alertMessage(
         context: Get.context!,
@@ -664,6 +669,7 @@ class ApInvoicesController extends GetxController {
     if (status1 != 'Cancelled' && status1 != 'Posted' && status1.isNotEmpty) {
       status.value = 'Cancelled';
       isInvoiceModified.value = true;
+      addNewApInvoice();
     } else if (status1 == 'Cancelled') {
       alertMessage(
         context: Get.context!,
