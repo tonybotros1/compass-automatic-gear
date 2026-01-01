@@ -22,6 +22,7 @@ Widget addNewinvoiceForApInvoicesOrEdit({
             GetBuilder<ApInvoicesController>(
               builder: (controller) {
                 return CustomDropdown(
+                  width: double.infinity,
                   focusNode: controller.focusNode1,
                   nextFocusNode: controller.focusNode2,
                   showedSelectedName: 'type',
@@ -44,124 +45,57 @@ Widget addNewinvoiceForApInvoicesOrEdit({
             Row(
               spacing: 10,
               children: [
-                Expanded(
-                  child: myTextFormFieldWithBorder(
-                    isDouble: true,
-                    focusNode: controller.focusNode2,
-                    onEditingComplete: () {
-                      FocusScope.of(
-                        context,
-                      ).requestFocus(controller.focusNode3);
-                    },
-                    textInputAction: TextInputAction.next,
-                    labelText: 'Amount',
-                    controller: controller.amount,
-                  ),
+                myTextFormFieldWithBorder(
+                  width: 150,
+                  isDouble: true,
+                  focusNode: controller.focusNode2,
+                  onEditingComplete: () {
+                    FocusScope.of(context).requestFocus(controller.focusNode3);
+                  },
+                  textInputAction: TextInputAction.next,
+                  labelText: 'Amount',
+                  controller: controller.amount,
                 ),
-                Expanded(
-                  child: myTextFormFieldWithBorder(
-                    focusNode: controller.focusNode3,
-                    isDouble: true,
-                    onEditingComplete: () {
-                      FocusScope.of(
-                        context,
-                      ).requestFocus(controller.focusNode4);
-                    },
-                    textInputAction: TextInputAction.next,
-                    labelText: 'VAT',
-                    controller: controller.vat,
-                  ),
+                myTextFormFieldWithBorder(
+                  width: 150,
+                  focusNode: controller.focusNode3,
+                  isDouble: true,
+                  onEditingComplete: () {
+                    FocusScope.of(context).requestFocus(controller.focusNode4);
+                  },
+                  textInputAction: TextInputAction.next,
+                  labelText: 'VAT',
+                  controller: controller.vat,
                 ),
-                const Expanded(child: SizedBox()),
               ],
             ),
-            // Row(
-            //   spacing: 10,
-            //   children: [
-            //     Expanded(
-            //       child: myTextFormFieldWithBorder(
-            //           focusNode: controller.focusNode4,
-            //           onEditingComplete: () {
-            //             FocusScope.of(context)
-            //                 .requestFocus(controller.focusNode5);
-            //           },
-            //           textInputAction: TextInputAction.next,
-            //           labelText: 'Invoice Number',
-            //           controller: controller.invoiceNumber),
-            //     ),
-            //     Expanded(
-            //         child: myTextFormFieldWithBorder(
-            //             focusNode: controller.focusNode5,
-            //             onEditingComplete: () {
-            //               FocusScope.of(context)
-            //                   .requestFocus(controller.focusNode6);
-            //             },
-            //             isDate: true,
-            //             suffixIcon: IconButton(
-            //                 focusNode: FocusNode(skipTraversal: true),
-            //                 onPressed: () {
-            //                   selectDateContext(
-            //                       context, controller.invoiceDate);
-            //                 },
-            //                 icon: const Icon(Icons.date_range)),
-            //             controller: controller.invoiceDate,
-            //             onFieldSubmitted: (_) {
-            //               normalizeDate(controller.invoiceDate.value.text,
-            //                   controller.invoiceDate);
-            //             },
-            //             labelText: 'Invoice Date')),
-            //     Expanded(child: SizedBox())
-            //   ],
-            // ),
-            // Row(
-            //   crossAxisAlignment: CrossAxisAlignment.end,
-            //   children: [
-            //     Expanded(
-            //       child: GetX<ApInvoicesController>(builder: (controller) {
-            //         bool isVendorLoading = controller.allVendors.isEmpty;
-            //         return CustomDropdown(
-            //           focusNode: controller.focusNode6,
-            //           nextFocusNode: controller.focusNode7,
-            //           textcontroller: controller.vendorForInvoice.text,
-            //           hintText: 'Vendor',
-            //           showedSelectedName: 'entity_name',
-            //           items: isVendorLoading ? {} : controller.allVendors,
-            //           onChanged: (key, value) {
-            //             controller.vendorForInvoice.text = value['entity_name'];
-            //             controller.vendorForInvoiceId.value = key;
-            //           },
-            //         );
-            //       }),
-            //     ),
-            //     addNewEntityButton()
-            //   ],
-            // ),
+            myTextFormFieldWithBorder(
+              width: 150,
+              labelText: 'Received Number',
+              controller: controller.receivedNumber,
+            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Expanded(
-                  child: myTextFormFieldWithBorder(
-                    focusNode: controller.focusNode7,
-                    onEditingComplete: () {
-                      FocusScope.of(
-                        context,
-                      ).requestFocus(controller.focusNode8);
-                    },
-                    labelText: 'Job Number',
-                    controller: controller.jobNumber,
-                  ),
+                myTextFormFieldWithBorder(
+                  width: 150,
+                  focusNode: controller.focusNode7,
+                  onEditingComplete: () {
+                    FocusScope.of(context).requestFocus(controller.focusNode8);
+                  },
+                  labelText: 'Job Number',
+                  controller: controller.jobNumber,
+                  isEnabled: false
                 ),
                 IconButton(
                   focusNode: FocusNode(skipTraversal: true),
                   onPressed: () {
                     controller.searchForJobCards.clear();
-                    controller.getAllJobCards();
+                    // controller.getAllJobCards();
                     jobDialog(constraints, context);
                   },
                   icon: Icon(Icons.more_vert_rounded, color: mainColor),
                 ),
-                const Expanded(flex: 1, child: SizedBox()),
-                const Expanded(flex: 1, child: SizedBox()),
               ],
             ),
             myTextFormFieldWithBorder(
@@ -181,10 +115,11 @@ Future<dynamic> jobDialog(BoxConstraints constraints, BuildContext context) {
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
-        width: constraints.maxWidth / 1.5,
-        height: 500,
+        width: constraints.maxWidth,
+        height: 700,
         child: Column(
           children: [
             // Header
@@ -209,181 +144,193 @@ Future<dynamic> jobDialog(BoxConstraints constraints, BuildContext context) {
               ),
             ),
             // Content
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 10,
-                ),
-                child: GetX<ApInvoicesController>(
-                  builder: (controller) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 400,
-                          height: 50,
-                          child: SearchBar(
-                            trailing: [
-                              IconButton(
-                                onPressed: () {
-                                  controller.searchForJobCards.clear();
-                                  controller.searchEngineForJobCards();
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+              child: GetX<ApInvoicesController>(
+                builder: (controller) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            spacing: 10,
+                            children: [
+                              myTextFormFieldWithBorder(
+                                width: 120,
+                                labelText: 'Job No.',
+                                controller: controller.jobNumberFilter,
+                              ),
+                              CustomDropdown(
+                                width: 170,
+                                showedSelectedName: 'name',
+                                textcontroller:
+                                    controller.carBrandIdFilterName.text,
+                                hintText: 'Car Brand',
+                                onChanged: (key, value) async {
+                                  controller.carBrandIdFilter.value = key;
+                                  controller.carBrandIdFilterName.text =
+                                      value['name'];
+                                  controller.carModelIdFilter.value = '';
+                                  controller.carModelIdFilterName.text = '';
                                 },
-                                icon: const Icon(
-                                  Icons.close,
-                                  color: Colors.grey,
-                                ),
+                                onDelete: () {
+                                  controller.carBrandIdFilter.value = "";
+                                  controller.carBrandIdFilterName.clear();
+                                  controller.carModelIdFilter.value = '';
+                                  controller.carModelIdFilterName.text = '';
+                                },
+                                onOpen: () {
+                                  return controller.getCarBrands();
+                                },
+                              ),
+                              CustomDropdown(
+                                width: 170,
+                                showedSelectedName: 'name',
+                                textcontroller:
+                                    controller.carModelIdFilterName.value.text,
+                                hintText: 'Car Model',
+                                onChanged: (key, value) async {
+                                  controller.carModelIdFilter.value = key;
+                                  controller.carModelIdFilterName.text =
+                                      value['name'];
+                                },
+                                onDelete: () {
+                                  controller.carModelIdFilter.value = "";
+                                  controller.carModelIdFilterName.clear();
+                                },
+                                onOpen: () {
+                                  return controller.getModelsByCarBrand(
+                                    controller.carBrandIdFilter.value,
+                                  );
+                                },
+                              ),
+                              myTextFormFieldWithBorder(
+                                width: 90,
+                                labelText: 'Plate NO.',
+                                controller: controller.plateNumberFilter,
+                              ),
+                              myTextFormFieldWithBorder(
+                                width: 170,
+                                labelText: 'VIN',
+                                controller: controller.vinFilter,
+                              ),
+                              CustomDropdown(
+                                width: 300,
+                                textcontroller: controller
+                                    .customerNameIdFilterName
+                                    .value
+                                    .text,
+                                showedSelectedName: 'entity_name',
+                                hintText: 'Customer Name',
+                                onChanged: (key, value) async {
+                                  controller.customerNameIdFilterName.text =
+                                      value['entity_name'];
+                                  controller.customerNameIdFilter.value = key;
+                                },
+                                onDelete: () {
+                                  controller.customerNameIdFilterName.clear();
+                                  controller.customerNameIdFilter.value = "";
+                                },
+                                onOpen: () {
+                                  return controller.getAllCustomers();
+                                },
                               ),
                             ],
-                            leading: const Icon(
-                              Icons.search,
-                              color: Colors.grey,
-                            ),
-                            shape: WidgetStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            hintText: 'Search for jobs',
-                            hintStyle: WidgetStateProperty.all(
-                              const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            controller: controller.searchForJobCards,
-                            onChanged: (_) {
-                              controller.searchEngineForJobCards();
-                            },
+                          ),
+                          ElevatedButton(
+                            style: findButtonStyle,
+                            onPressed: controller.loadingJobCards.isFalse
+                                ? () async {
+                                    controller.filterSearchForJobCards();
+                                  }
+                                : null,
+                            child: controller.loadingJobCards.isFalse
+                                ? Text(
+                                    'Find',
+                                    style: fontStyleForElevatedButtons,
+                                  )
+                                : loadingProcess,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(15),
+                            bottomRight: Radius.circular(15),
+                            topLeft: Radius.circular(2),
+                            topRight: Radius.circular(2),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        // Full-width Scrollable Table
-                        Expanded(
-                          child: controller.loadingJobCards.value
-                              ? Center(child: loadingProcess)
-                              : controller.loadingJobCards.isFalse &&
-                                    controller.allJobCards.isEmpty
-                              ? const Center(child: Text('No Data'))
-                              : SingleChildScrollView(
-                                  scrollDirection: Axis.vertical,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        minWidth:
-                                            constraints.maxWidth / 1.5 - 20,
-                                      ),
-                                      child: DataTable(
-                                        showCheckboxColumn: false,
-                                        horizontalMargin:
-                                            horizontalMarginForTable,
-                                        dataRowMaxHeight: 40,
-                                        dataRowMinHeight: 30,
-                                        columnSpacing: 5,
-                                        showBottomBorder: true,
-                                        dataTextStyle: regTextStyle,
-                                        headingTextStyle:
-                                            fontStyleForTableHeader,
-                                        headingRowColor: WidgetStatePropertyAll(
-                                          Colors.grey[300],
-                                        ),
-                                        columns: [
-                                          DataColumn(
-                                            label: AutoSizedText(
-                                              constraints: constraints,
-                                              text: 'Job Number',
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: AutoSizedText(
-                                              constraints: constraints,
-                                              text: 'Car Brand',
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: AutoSizedText(
-                                              constraints: constraints,
-                                              text: 'Car Model',
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: AutoSizedText(
-                                              constraints: constraints,
-                                              text: 'Plate Number',
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: AutoSizedText(
-                                              constraints: constraints,
-                                              text: 'VIN',
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: AutoSizedText(
-                                              constraints: constraints,
-                                              text: 'Customer',
-                                            ),
-                                          ),
-                                        ],
-                                        rows:
-                                            (controller
-                                                    .filteredJobCards
-                                                    .isEmpty &&
-                                                controller
-                                                    .searchForJobCards
-                                                    .value
-                                                    .text
-                                                    .isEmpty)
-                                            ? List<DataRow>.generate(
-                                                controller.allJobCards.length,
-                                                (index) {
-                                                  final job = controller
-                                                      .allJobCards[index];
-
-                                                  final jobId = job.id;
-
-                                                  return dataRowForTheTable(
-                                                    job,
-                                                    context,
-                                                    constraints,
-                                                    jobId,
-                                                    controller,
-                                                    index,
-                                                  );
-                                                },
-                                              )
-                                            : List<DataRow>.generate(
-                                                controller
-                                                    .filteredJobCards
-                                                    .length,
-                                                (index) {
-                                                  final job = controller
-                                                      .filteredJobCards[index];
-
-                                                  final jobId = job.id;
-
-                                                  return dataRowForTheTable(
-                                                    job,
-                                                    context,
-                                                    constraints,
-                                                    jobId,
-                                                    controller,
-                                                    index,
-                                                  );
-                                                },
-                                              ),
-                                      ),
-                                    ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: constraints.maxWidth,
+                            ),
+                            child: PaginatedDataTable(
+                              showCheckboxColumn: false,
+                              horizontalMargin: horizontalMarginForTable,
+                              dataRowMaxHeight: 40,
+                              dataRowMinHeight: 30,
+                              columnSpacing: 5,
+                              columns: [
+                                DataColumn(
+                                  label: AutoSizedText(
+                                    constraints: constraints,
+                                    text: 'Job Number',
                                   ),
                                 ),
+                                DataColumn(
+                                  label: AutoSizedText(
+                                    constraints: constraints,
+                                    text: 'Car Brand',
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: AutoSizedText(
+                                    constraints: constraints,
+                                    text: 'Car Model',
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: AutoSizedText(
+                                    constraints: constraints,
+                                    text: 'Plate Number',
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: AutoSizedText(
+                                    constraints: constraints,
+                                    text: 'VIN',
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: AutoSizedText(
+                                    constraints: constraints,
+                                    text: 'Customer',
+                                  ),
+                                ),
+                              ],
+                              source: CardDataSource(
+                                cards: controller.allJobCards.isEmpty
+                                    ? []
+                                    : controller.allJobCards,
+                                context: context,
+                                constraints: constraints,
+                                controller: controller,
+                              ),
+                            ),
+                          ),
                         ),
-                      ],
-                    );
-                  },
-                ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -405,6 +352,7 @@ DataRow dataRowForTheTable(
     onSelectChanged: (_) {
       Get.back();
       controller.jobNumber.text = jobData.jobNumber ?? '';
+      controller.jobNumberId.text = jobData.id ?? '';
     },
     color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
       return index % 2 == 0 ? Colors.grey[200] : Colors.white;
@@ -459,4 +407,44 @@ DataRow dataRowForTheTable(
       ),
     ],
   );
+}
+
+class CardDataSource extends DataTableSource {
+  final List<JobCardModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final ApInvoicesController controller;
+
+  CardDataSource({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final jobCard = cards[index];
+    final cardId = jobCard.id ?? '';
+
+    return dataRowForTheTable(
+      jobCard,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

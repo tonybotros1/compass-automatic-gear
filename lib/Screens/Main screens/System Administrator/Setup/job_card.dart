@@ -67,7 +67,7 @@ class JobCard extends StatelessWidget {
                                           .text,
                                       hintText: 'Car Brand',
                                       onChanged: (key, value) async {
-                                        controller.getModelsByCarBrand(key);
+                                        // controller.getModelsByCarBrand(key);
                                         controller.carBrandIdFilter.value = key;
                                         controller
                                                 .carBrandIdFilterName

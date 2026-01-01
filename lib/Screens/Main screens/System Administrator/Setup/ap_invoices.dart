@@ -164,7 +164,7 @@ class ApInvoices extends StatelessWidget {
 
                                   CustomSlidingSegmentedControl<int>(
                                     height: 30,
-                                    initialValue: 1,
+                                    initialValue: 2,
                                     children: const {
                                       1: Text('ALL'),
                                       2: Text('TODAY'),
@@ -347,7 +347,11 @@ Widget tableOfScreens({
       controller: scrollController,
       child: PaginatedDataTable(
         controller: scrollController,
-        rowsPerPage: 10,
+        rowsPerPage: controller.numberOfAPInvoices.value <= 12
+            ? 12
+            : controller.numberOfAPInvoices.value >= 30
+            ? 30
+            : controller.numberOfAPInvoices.value,
         horizontalMargin: horizontalMarginForTable,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
@@ -379,6 +383,20 @@ Widget tableOfScreens({
             label: AutoSizedText(
               constraints: constraints,
               text: 'Transaction Date',
+            ),
+            // onSort: controller.onS ort,
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Invoice Number',
+            ),
+            // onSort: controller.onS ort,
+          ),
+          DataColumn(
+            label: AutoSizedText(
+              constraints: constraints,
+              text: 'Invoice Date',
             ),
             // onSort: controller.onS ort,
           ),
@@ -439,11 +457,25 @@ DataRow dataRowForTheTable(
           padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),
-      DataCell(textForDataRowInTable(text: typeData.referenceNumber ?? '')),
+      DataCell(
+        textForDataRowInTable(
+          text: typeData.referenceNumber ?? '',
+          formatDouble: false,
+        ),
+      ),
       DataCell(
         textForDataRowInTable(text: textToDate(typeData.transactionDate)),
       ),
-      DataCell(textForDataRowInTable(text: typeData.vendorName ?? '')),
+      DataCell(
+        textForDataRowInTable(
+          text: typeData.invoiceNumber ?? '',
+          maxWidth: null,
+        ),
+      ),
+      DataCell(textForDataRowInTable(text: textToDate(typeData.invoiceDate))),
+      DataCell(
+        textForDataRowInTable(text: typeData.vendorName ?? '', maxWidth: null),
+      ),
       DataCell(
         textForDataRowInTable(
           formatDouble: false,

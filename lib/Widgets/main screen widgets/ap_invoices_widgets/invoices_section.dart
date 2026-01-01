@@ -52,11 +52,8 @@ Widget tableOfScreens({
         columnSpacing: 5,
         horizontalMargin: horizontalMarginForTable,
         showBottomBorder: true,
-        dataTextStyle: regTextStyle,
-        headingTextStyle: fontStyleForTableHeader,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           DataColumn(
             label: AutoSizedText(constraints: constraints, text: ''),
@@ -67,24 +64,6 @@ Widget tableOfScreens({
               text: 'Transaction Type',
             ),
           ),
-          // DataColumn(
-          //   label: AutoSizedText(
-          //     constraints: constraints,
-          //     text: 'Invoice No.',
-          //   ),
-          // ),
-          // DataColumn(
-          //   label: AutoSizedText(
-          //     constraints: constraints,
-          //     text: 'Invoice Date',
-          //   ),
-          // ),
-          // DataColumn(
-          //   label: AutoSizedText(
-          //     constraints: constraints,
-          //     text: 'Vendor',
-          //   ),
-          // ),
           DataColumn(
             label: AutoSizedText(constraints: constraints, text: 'Note'),
           ),
@@ -107,17 +86,20 @@ Widget tableOfScreens({
           ),
         ],
         rows: [
-          ...controller.allInvoices.where((item)=> item.isDeleted != true).map<DataRow>((invoiceItems) {
-            String invoiceItemsId = invoiceItems.id ?? invoiceItems.uuid ?? '';
-            return dataRowForTheTable(
-              invoiceItems,
-              context,
-              constraints,
-              invoiceItemsId,
-              controller,
-              id,
-            );
-          }),
+          ...controller.allInvoices
+              .where((item) => item.isDeleted != true)
+              .map<DataRow>((invoiceItems) {
+                String invoiceItemsId =
+                    invoiceItems.id ?? invoiceItems.uuid ?? '';
+                return dataRowForTheTable(
+                  invoiceItems,
+                  context,
+                  constraints,
+                  invoiceItemsId,
+                  controller,
+                  id,
+                );
+              }),
         ],
       ),
     ),
@@ -150,16 +132,30 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: invoiceItemsData.transactionTypeName ?? ''),
-      ),
-
-      DataCell(textForDataRowInTable(text: invoiceItemsData.note ?? '')),
-      DataCell(
         textForDataRowInTable(
-          text: '', // '${invoiceItemsData['report_reference'] ?? ''}',
+          text: invoiceItemsData.transactionTypeName ?? '',
+          maxWidth: null,
         ),
       ),
-      DataCell(textForDataRowInTable(text: invoiceItemsData.jobNumber ?? '')),
+
+      DataCell(
+        textForDataRowInTable(
+          text: invoiceItemsData.note ?? '',
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: invoiceItemsData.receivedNumber ?? '',
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: invoiceItemsData.jobNumber ?? '',
+          formatDouble: false,
+        ),
+      ),
       DataCell(
         textForDataRowInTable(
           text: invoiceItemsData.amount.toString(),
@@ -251,6 +247,7 @@ ElevatedButton newinvoiceItemsButton(
         controller.invoiceNote.clear();
         controller.vat.text = '';
         controller.amount.text = '';
+        controller.receivedNumber.clear();
         controller.jobNumber.clear();
 
         invoiceItemsForapInvoicesDialog(

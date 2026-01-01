@@ -24,10 +24,12 @@ class ApInvoicesController extends GetxController {
   TextEditingController description = TextEditingController();
   TextEditingController searchForJobCards = TextEditingController();
   TextEditingController jobNumber = TextEditingController();
+  TextEditingController jobNumberId = TextEditingController();
   TextEditingController vendorForInvoice = TextEditingController();
   TextEditingController invoiceDate = TextEditingController();
   TextEditingController invoiceNumber = TextEditingController();
   TextEditingController vat = TextEditingController();
+  TextEditingController receivedNumber = TextEditingController();
   TextEditingController amount = TextEditingController();
   TextEditingController transactionType = TextEditingController();
   TextEditingController invoiceNote = TextEditingController();
@@ -48,7 +50,6 @@ class ApInvoicesController extends GetxController {
   final RxList<ApInvoicesModel> allApInvoices = RxList<ApInvoicesModel>([]);
   final RxList<ApInvoicesItem> allInvoices = RxList<ApInvoicesItem>([]);
   final RxList<JobCardModel> allJobCards = RxList<JobCardModel>([]);
-  final RxList<JobCardModel> filteredJobCards = RxList<JobCardModel>([]);
   // RxBool addingNewinvoiceItemsValue = RxBool(false);
   RxString invoiceTypeId = RxString('');
   RxString vendorId = RxString('');
@@ -97,9 +98,21 @@ class ApInvoicesController extends GetxController {
   RxDouble calculatedAmountForInvoiceItems = RxDouble(0.0);
   RxDouble calculatedVatForInvoiceItems = RxDouble(0.0);
 
+  // job filters
+  TextEditingController jobNumberFilter = TextEditingController();
+  TextEditingController carBrandIdFilterName = TextEditingController();
+  RxString carBrandIdFilter = RxString('');
+  RxString carModelIdFilter = RxString('');
+  TextEditingController carModelIdFilterName = TextEditingController();
+  TextEditingController plateNumberFilter = TextEditingController();
+  TextEditingController vinFilter = TextEditingController();
+  TextEditingController customerNameIdFilterName = TextEditingController();
+  RxString customerNameIdFilter = RxString('');
+
   @override
   void onInit() async {
-    searchEngine({"today": true});
+    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
+    filterSearch();
     super.onInit();
   }
 
@@ -117,6 +130,18 @@ class ApInvoicesController extends GetxController {
 
   Future getCurrentAPInvoicedStatus(String id) async {
     return await helper.getAPInvoiceStatus(id);
+  }
+
+  Future<Map<String, dynamic>> getCarBrands() async {
+    return await helper.getCarBrands();
+  }
+
+  Future<Map<String, dynamic>> getModelsByCarBrand(String brandID) async {
+    return await helper.getModelsValues(brandID);
+  }
+
+  Future<Map<String, dynamic>> getAllCustomers() async {
+    return await helper.getCustomers();
   }
 
   void onChooseForDatePicker(int i) {
@@ -137,7 +162,7 @@ class ApInvoicesController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = false;
         isDaySelected.value = true;
-        searchEngine({"today": true});
+        filterSearch();
         break;
       case 3:
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -148,7 +173,7 @@ class ApInvoicesController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = true;
         isDaySelected.value = false;
-        searchEngine({"this_month": true});
+        filterSearch();
         break;
       case 4:
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -158,7 +183,7 @@ class ApInvoicesController extends GetxController {
         isYearSelected.value = true;
         isMonthSelected.value = false;
         isDaySelected.value = false;
-        searchEngine({"this_year": true});
+        filterSearch();
         break;
       default:
     }
@@ -173,38 +198,6 @@ class ApInvoicesController extends GetxController {
     }
   }
 
-  Future<void> getAllJobCards() async {
-    try {
-      loadingJobCards.value = true;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/job_cards/get_all_job_cards');
-      final response = await http.get(
-        url,
-        headers: {'Authorization': 'Bearer $accessToken'},
-      );
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        List jobs = decoded['all_jobs'];
-        allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-        final refreshed = await helper.refreshAccessToken(refreshToken);
-        if (refreshed == RefreshResult.success) {
-          await getAllJobCards();
-        } else if (refreshed == RefreshResult.invalidToken) {
-          logout();
-        }
-      } else if (response.statusCode == 401) {
-        logout();
-      }
-    } catch (e) {
-      loadingJobCards.value = false;
-    } finally {
-      loadingJobCards.value = false;
-    }
-  }
-
   Future<void> addNewApInvoice() async {
     try {
       if (currentApInvoiceId.isNotEmpty) {
@@ -213,7 +206,10 @@ class ApInvoicesController extends GetxController {
         );
         String status1 = jobStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new jobs can be edited');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new jobs can be edited',
+          );
           return;
         }
       }
@@ -235,7 +231,10 @@ class ApInvoicesController extends GetxController {
         try {
           newData['transaction_date'] = convertDateToIson(rawDate);
         } catch (e) {
-          showSnackBar('Alert', 'Please enter valid job date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please enter valid job date',
+          );
         }
       } else {
         newData['transaction_date'] = null;
@@ -246,7 +245,10 @@ class ApInvoicesController extends GetxController {
         try {
           newData['invoice_date'] = convertDateToIson(rawDate2);
         } catch (e) {
-          showSnackBar('Alert', 'Please enter valid invoice date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please enter valid invoice date',
+          );
         }
       } else {
         newData['invoice_date'] = null;
@@ -259,7 +261,6 @@ class ApInvoicesController extends GetxController {
       );
 
       if (currentApInvoiceId.isEmpty) {
-        showSnackBar('Adding', 'Please Wait');
         newData['status'] = 'New';
         final response = await http.post(
           addingJobUrl,
@@ -281,7 +282,6 @@ class ApInvoicesController extends GetxController {
           allInvoices.value = newInvoice.items ?? [];
           isInvoiceModified.value = false;
           isInvoiceItemsModified.value = false;
-          showSnackBar('Done', 'Invoice Added Successfully');
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -293,9 +293,6 @@ class ApInvoicesController extends GetxController {
           logout();
         }
       } else {
-        if (isInvoiceModified.isTrue || isInvoiceItemsModified.isTrue) {
-          showSnackBar('Updating', 'Please Wait');
-        }
         http.Response? responseForEditingAPInvoice;
         http.Response? responseForEditingAPInvoiceItems;
         if (isInvoiceModified.isTrue) {
@@ -387,13 +384,14 @@ class ApInvoicesController extends GetxController {
           }
         }
         if ((responseForEditingAPInvoiceItems?.statusCode == 200) ||
-            (responseForEditingAPInvoice?.statusCode == 200)) {
-          showSnackBar('Done', 'Updated Successfully');
-        }
+            (responseForEditingAPInvoice?.statusCode == 200)) {}
       }
       addingNewValue.value = false;
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
       addingNewValue.value = false;
     }
   }
@@ -414,15 +412,14 @@ class ApInvoicesController extends GetxController {
         allApInvoices.removeWhere((inv) => inv.id == deletedId);
         numberOfAPInvoices.value -= 1;
         Get.close(2);
-        showSnackBar('Success', 'AP Invoice deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
         final decoded = jsonDecode(response.body) ?? 'Failed to delete invoice';
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'] ?? 'Only New AP Invoice Allowed';
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -434,12 +431,15 @@ class ApInvoicesController extends GetxController {
         final decoded = jsonDecode(response.body);
         final error =
             decoded['detail'] ?? 'Server error while deleting AP Invoice';
-        showSnackBar('Server Error', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401) {
         logout();
       }
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -452,21 +452,21 @@ class ApInvoicesController extends GetxController {
       body["reference_number"] = referenceNumberFilter.text;
     }
     if (vendorFilterId.value.isNotEmpty) {
-      body["vandor"] = vendorFilterId.value;
+      body["vendor"] = vendorFilterId.value;
     }
 
     if (statusFilter.value.text.isNotEmpty) {
       body["status"] = statusFilter.value.text;
     }
-    if (isTodaySelected.isTrue) {
-      body["today"] = true;
-    }
-    if (isThisMonthSelected.isTrue) {
-      body["this_month"] = true;
-    }
-    if (isThisYearSelected.isTrue) {
-      body["this_year"] = true;
-    }
+    // if (isTodaySelected.isTrue) {
+    //   body["today"] = true;
+    // }
+    // if (isThisMonthSelected.isTrue) {
+    //   body["this_month"] = true;
+    // }
+    // if (isThisYearSelected.isTrue) {
+    //   body["this_year"] = true;
+    // }
     if (fromDate.value.text.isNotEmpty) {
       body["from_date"] = convertDateToIson(fromDate.value.text);
     }
@@ -522,6 +522,73 @@ class ApInvoicesController extends GetxController {
     }
   }
 
+  void filterSearchForJobCards() async {
+    Map<String, dynamic> body = {};
+    if (carBrandIdFilter.value.isNotEmpty) {
+      body["car_brand"] = carBrandIdFilter.value;
+    }
+    if (carModelIdFilter.value.isNotEmpty) {
+      body["car_model"] = carModelIdFilter.value;
+    }
+    if (jobNumberFilter.text.isNotEmpty) {
+      body["job_number"] = jobNumberFilter.text;
+    }
+
+    if (plateNumberFilter.text.isNotEmpty) {
+      body["plate_number"] = plateNumberFilter.text;
+    }
+    if (vinFilter.text.isNotEmpty) {
+      body["vin"] = vinFilter.text;
+    }
+    if (customerNameIdFilter.value.isNotEmpty) {
+      body["customer_name"] = customerNameIdFilter.value;
+    }
+    if (body.isNotEmpty) {
+      await searchEngineForJobCard(body);
+    } else {
+      await searchEngineForJobCard({"all": true});
+    }
+  }
+
+  Future<void> searchEngineForJobCard(Map<String, dynamic> body) async {
+    try {
+      loadingJobCards.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards/search_engine_for_job_card_in_ap_invoices_screen',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List invs = decoded['job_cards'];
+        allJobCards.assignAll(invs.map((job) => JobCardModel.fromJson(job)));
+        numberOfAPInvoices.value = allApInvoices.length;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngineForJobCard(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      loadingJobCards.value = false;
+    } catch (e) {
+      loadingJobCards.value = false;
+    }
+  }
+
   // =======================================================================================================================
 
   Future<void> loadValues(ApInvoicesModel typeData) async {
@@ -561,7 +628,10 @@ class ApInvoicesController extends GetxController {
 
   Future<void> editPostForApInvoices(String id) async {
     if (status.value.isEmpty) {
-      showSnackBar('Alert', 'Please Save The Invoice First');
+      alertMessage(
+        context: Get.context!,
+        content: 'Please Save The Invoice First',
+      );
       return;
     }
     Map invoiceStatus = await getCurrentAPInvoicedStatus(id);
@@ -571,15 +641,21 @@ class ApInvoicesController extends GetxController {
       status.value = 'Posted';
       isInvoiceModified.value = true;
     } else if (status1 == 'Posted') {
-      showSnackBar('Alert', 'AP Invoice is Already Posted');
+      alertMessage(
+        context: Get.context!,
+        content: 'AP Invoice is Already Posted',
+      );
     } else if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'AP Invoice is Cancelled');
+      alertMessage(context: Get.context!, content: 'AP Invoice is Cancelled');
     }
   }
 
   Future<void> editCancelForApInvoices(String id) async {
     if (status.value.isEmpty) {
-      showSnackBar('Alert', 'Please Save The Invoice First');
+      alertMessage(
+        context: Get.context!,
+        content: 'Please Save The Invoice First',
+      );
       return;
     }
     Map invoiceStatus = await getCurrentAPInvoicedStatus(id);
@@ -589,9 +665,12 @@ class ApInvoicesController extends GetxController {
       status.value = 'Cancelled';
       isInvoiceModified.value = true;
     } else if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'AP Invoice Already Cancelled');
+      alertMessage(
+        context: Get.context!,
+        content: 'AP Invoice Already Cancelled',
+      );
     } else if (status1 == 'Posted') {
-      showSnackBar('Alert', 'AP Invoice is Posted');
+      alertMessage(context: Get.context!, content: 'AP Invoice is Posted');
     }
   }
 
@@ -603,8 +682,10 @@ class ApInvoicesController extends GetxController {
         uuid: uniqueId,
         amount: double.tryParse(amount.text) ?? 0,
         jobNumber: jobNumber.text,
+        jobNumberId: jobNumberId.text,
         note: invoiceNote.text,
         transactionType: transactionTypeId.value,
+        receivedNumber: receivedNumber.text,
         vat: double.tryParse(vat.text) ?? 0,
         apInvoiceId: currentApInvoiceId.value,
         transactionTypeName: transactionType.text,
@@ -627,8 +708,10 @@ class ApInvoicesController extends GetxController {
         uuid: oldItem.uuid,
         amount: double.tryParse(amount.text) ?? 0,
         jobNumber: jobNumber.text,
+        jobNumberId: jobNumberId.text,
         note: invoiceNote.text,
         transactionType: transactionTypeId.value,
+        receivedNumber: receivedNumber.text,
         vat: double.tryParse(vat.text) ?? 0,
         apInvoiceId: currentApInvoiceId.value,
         transactionTypeName: transactionType.text,
@@ -652,26 +735,6 @@ class ApInvoicesController extends GetxController {
     calculateAmountForSelectedReceipts();
 
     Get.back();
-  }
-
-  void searchEngineForJobCards() {
-    query.value = searchForJobCards.value.text.toLowerCase();
-    if (query.value.isEmpty) {
-      filteredJobCards.clear();
-    } else {
-      filteredJobCards.assignAll(
-        allJobCards.where((job) {
-          return job.jobNumber.toString().toLowerCase().contains(query) ||
-              job.carBrandName.toString().toLowerCase().contains(query) ||
-              job.carModelName.toString().toLowerCase().contains(query) ||
-              job.plateNumber.toString().toLowerCase().contains(query) ||
-              job.vehicleIdentificationNumber.toString().toLowerCase().contains(
-                query,
-              ) ||
-              job.customerName.toString().toLowerCase().contains(query);
-        }).toList(),
-      );
-    }
   }
 
   void removeFilters() {

@@ -43,7 +43,7 @@ Widget addNewPaymentOrEdit({
                                       style: fontStyle1,
                                     ),
                                   ),
-                                  paymentHeader(context,constraints),
+                                  paymentHeader(context, constraints),
                                 ],
                               ),
                             ),
@@ -60,7 +60,7 @@ Widget addNewPaymentOrEdit({
                                     context,
                                     true,
                                     controller,
-                                    constraints
+                                    constraints,
                                   ),
                                 ],
                               ),
@@ -210,7 +210,7 @@ Widget addNewPaymentOrEdit({
                                 .value,
                           ),
                           style: const TextStyle(
-                            color: Colors.red,
+                            color: Colors.green,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

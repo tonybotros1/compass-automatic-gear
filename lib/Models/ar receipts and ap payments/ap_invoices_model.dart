@@ -90,6 +90,7 @@ class ApInvoicesItem {
     this.updatedAt,
     required this.amount,
     required this.jobNumber,
+    required this.jobNumberId,
     required this.note,
     required this.transactionType,
     required this.vat,
@@ -98,6 +99,7 @@ class ApInvoicesItem {
     this.isAdded,
     this.isDeleted,
     this.isModified,
+    this.receivedNumber,
   });
 
   String? id;
@@ -106,6 +108,7 @@ class ApInvoicesItem {
   DateTime? updatedAt;
   double? amount;
   String? jobNumber;
+  String? jobNumberId;
   String? note;
   String? transactionType;
   double? vat;
@@ -114,6 +117,7 @@ class ApInvoicesItem {
   bool? isAdded;
   bool? isDeleted;
   bool? isModified;
+  String? receivedNumber;
 
   factory ApInvoicesItem.fromJson(Map<String, dynamic> json) {
     return ApInvoicesItem(
@@ -122,11 +126,15 @@ class ApInvoicesItem {
       updatedAt: DateTime.tryParse(json["updatedAt"] ?? ""),
       amount: json["amount"] ?? 0,
       jobNumber: json["job_number"] ?? '',
+      jobNumberId: json["job_number_id"] ?? '',
       note: json["note"] ?? '',
       transactionType: json["transaction_type"] ?? '',
       vat: json["vat"] ?? 0,
       apInvoiceId: json["ap_invoice_id"] ?? '',
       transactionTypeName: json["transaction_type_name"] ?? '',
+      receivedNumber: json.containsKey('received_number')
+          ? json['received_number']?.toString() ?? ''
+          : '',
     );
   }
 
@@ -135,7 +143,9 @@ class ApInvoicesItem {
     "uuid": uuid,
     "amount": amount,
     "job_number": jobNumber,
+    "job_number_id" : jobNumberId,
     "note": note,
+    "received_number" : receivedNumber,
     "transaction_type": transactionType,
     "vat": vat,
     "ap_invoice_id": apInvoiceId,

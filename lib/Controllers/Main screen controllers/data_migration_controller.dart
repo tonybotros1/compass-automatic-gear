@@ -22,6 +22,7 @@ class DataMigrationController extends GetxController {
     '2': {'name': 'Job Cards Invoice Items'},
     '3': {'name': 'AR Receipts'},
     '4': {'name': 'AR Receipts Items'},
+    '5': {'name': 'AP Invoices'},
   });
 
   Future<void> uploadFile() async {

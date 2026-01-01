@@ -17,7 +17,7 @@ Future<dynamic> invoiceItemsForapInvoicesDialog({
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
         width: Get.width / 3,
-        height: 450,
+        height: 550,
         child: Column(
           children: [
             Container(

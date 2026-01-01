@@ -13,16 +13,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-// String backendTestURI = 'http://192.168.1.104:8000'; //home : 192.168.1.104
-// String webSocketURL = "ws://192.168.1.104:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://192.168.1.103:8000'; //home : 192.168.1.103
+String webSocketURL = "ws://192.168.1.103:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
 // String webSocketURL = "ws://10.0.2.2:8000/ws";
 
 // ======== production urls ========
-String backendTestURI = 'https://datahubai-backend.onrender.com';
-String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
+// String backendTestURI = 'https://datahubai-backend.onrender.com';
+// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
 
 final formatter = CurrencyInputFormatter();
 
@@ -856,7 +856,7 @@ Container labelContainer({required Widget lable}) {
 }
 
 Decoration containerDecor = BoxDecoration(
-  color: Colors.grey.shade100,
+  color: Colors.white,
   border: Border(
     left: BorderSide(color: secColor),
     right: BorderSide(color: secColor),
@@ -891,7 +891,7 @@ Widget textForDataRowInTable({
     child: isSelectable
         ? SelectableText(
             formattedText,
-            maxLines: 1,
+            // maxLines: 1,
             style: TextStyle(
               fontSize: fontSize,
               overflow: TextOverflow.ellipsis,
@@ -901,7 +901,7 @@ Widget textForDataRowInTable({
           )
         : Text(
             formattedText,
-            maxLines: 1,
+            // maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: fontSize,

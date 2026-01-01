@@ -268,6 +268,7 @@ class JobCardController extends GetxController {
   @override
   void onClose() {
     textFieldFocusNode.dispose();
+    allJobCards.clear();
     super.onClose();
   }
 
@@ -833,7 +834,6 @@ class JobCardController extends GetxController {
         allJobsNET.value = grandTotals['grand_net'];
         allJobsPaid.value = grandTotals['grand_paid'];
         allJobsOutstanding.value = grandTotals['grand_outstanding'];
-        // print(jobs[0]);
         numberOfJobs.value = jobs.length;
         allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
