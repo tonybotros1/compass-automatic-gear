@@ -1,31 +1,33 @@
+//
 import 'vendor_payments_model.dart';
 
 class APPaymentModel {
-  String? id;
-  String? account;
-  String? chequeNumber;
-  DateTime? chequeDate;
-  String? companyId;
-  String? currency;
-  String? note;
-  DateTime? paymentDate;
-  String? paymentNumber;
-  String? paymentType;
-  int? rate;
-  String? status;
-  String? vendor;
-  DateTime? createdAt;
-  DateTime? updatedAt;
-  List<VendorPaymentsModel>? invoicesDetails;
-  String? vendorName;
-  String? paymentTypeName;
-  String? accountNumber;
-  double? totalGiven;
+  final String? id;
+  final String? account;
+  final String? chequeNumber;
+  final DateTime? chequeDate;
+  final String? companyId;
+  final String? currency;
+  final String? note;
+  final DateTime? paymentDate;
+  final String? paymentNumber;
+  final String? paymentType;
+  final int? rate;
+  final String? status;
+  final String? vendor;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final List<VendorPaymentsModel> invoicesDetails; // 🔥 non-nullable
+  final String? vendorName;
+  final String? paymentTypeName;
+  final String? accountNumber;
+  final double totalGiven;
 
   APPaymentModel({
     this.id,
     this.account,
     this.chequeNumber,
+    this.chequeDate,
     this.companyId,
     this.currency,
     this.note,
@@ -37,97 +39,99 @@ class APPaymentModel {
     this.vendor,
     this.createdAt,
     this.updatedAt,
-    this.invoicesDetails,
+    required this.invoicesDetails,
     this.vendorName,
     this.paymentTypeName,
     this.accountNumber,
-    this.totalGiven,
-    this.chequeDate,
+    required this.totalGiven,
   });
 
-  APPaymentModel.fromJson(Map<String, dynamic> json) {
-    id = json.containsKey('_id') ? json['_id'] : null;
-    account = json.containsKey('account') ? json['account'] : null;
-    chequeNumber = json.containsKey('cheque_number')
-        ? json['cheque_number']
-        : null;
-    companyId = json.containsKey('company_id') ? json['company_id'] : null;
-    currency = json.containsKey('currency') ? json['currency'] : null;
-    note = json.containsKey('note') ? json['note'] : null;
-
-    // ✅ Safe date conversion
-    if (json.containsKey('payment_date') && json['payment_date'] != null) {
-      paymentDate = DateTime.tryParse(json['payment_date'].toString());
-    }
-
-    if (json.containsKey('createdAt') && json['createdAt'] != null) {
-      createdAt = DateTime.tryParse(json['createdAt'].toString());
-    }
-
-    if (json.containsKey('updatedAt') && json['updatedAt'] != null) {
-      updatedAt = DateTime.tryParse(json['updatedAt'].toString());
-    }
-
-    if (json.containsKey('cheque_date') && json['cheque_date'] != null) {
-      chequeDate = DateTime.tryParse(json['cheque_date'].toString());
-    }
-
-    paymentNumber = json.containsKey('payment_number')
-        ? json['payment_number']
-        : null;
-    paymentType = json.containsKey('payment_type')
-        ? json['payment_type']
-        : null;
-    rate = json.containsKey('rate') ? json['rate'] : null;
-    status = json.containsKey('status') ? json['status'] : null;
-    vendor = json.containsKey('vendor') ? json['vendor'] : null;
-
-    if (json.containsKey('invoices_details') &&
-        json['invoices_details'] != null) {
-      invoicesDetails = <VendorPaymentsModel>[];
-      json['invoices_details'].forEach((v) {
-        invoicesDetails!.add(VendorPaymentsModel.fromJson(v));
-      });
-    }
-
-    vendorName = json.containsKey('vendor_name') ? json['vendor_name'] : null;
-    paymentTypeName = json.containsKey('payment_type_name')
-        ? json['payment_type_name']
-        : null;
-    accountNumber = json.containsKey('account_number')
-        ? json['account_number']
-        : null;
-    totalGiven = json.containsKey("total_given") ? json["total_given"] : null;
+  factory APPaymentModel.fromJson(Map<String, dynamic> json) {
+    return APPaymentModel(
+      id: json['_id'],
+      account: json['account'],
+      chequeNumber: json['cheque_number'],
+      chequeDate: json['cheque_date'] != null
+          ? DateTime.tryParse(json['cheque_date'].toString())
+          : null,
+      companyId: json['company_id'],
+      currency: json['currency'],
+      note: json['note'],
+      paymentDate: json['payment_date'] != null
+          ? DateTime.tryParse(json['payment_date'].toString())
+          : null,
+      paymentNumber: json['payment_number'],
+      paymentType: json['payment_type'],
+      rate: json['rate'],
+      status: json['status'],
+      vendor: json['vendor'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null,
+      invoicesDetails:
+          (json['invoices_details'] as List?)
+              ?.map((e) => VendorPaymentsModel.fromJson(e))
+              .toList() ??
+          const [], // 🔥 always initialized
+      vendorName: json['vendor_name'],
+      paymentTypeName: json['payment_type_name'],
+      accountNumber: json['account_number'],
+      totalGiven: (json['total_given'] ?? 0).toDouble(),
+    );
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {};
-
-    data['_id'] = id;
-    data['account'] = account;
-    data['cheque_number'] = chequeNumber;
-    data['company_id'] = companyId;
-    data['currency'] = currency;
-    data['note'] = note;
-    data['payment_date'] = paymentDate?.toIso8601String();
-    data['payment_number'] = paymentNumber;
-    data['payment_type'] = paymentType;
-    data['rate'] = rate;
-    data['status'] = status;
-    data['vendor'] = vendor;
-    data['createdAt'] = createdAt?.toIso8601String();
-    data['updatedAt'] = updatedAt?.toIso8601String();
-
-    if (invoicesDetails != null) {
-      data['invoices_details'] = invoicesDetails!
-          .map((v) => v.toJson())
-          .toList();
-    }
-
-    data['vendor_name'] = vendorName;
-    data['payment_type_name'] = paymentTypeName;
-    data['account_number'] = accountNumber;
-
-    return data;
+  APPaymentModel copyWith({
+    List<VendorPaymentsModel>? invoicesDetails,
+    final double? totalGiven,
+  }) {
+    return APPaymentModel(
+      id: id,
+      account: account,
+      chequeNumber: chequeNumber,
+      chequeDate: chequeDate,
+      companyId: companyId,
+      currency: currency,
+      note: note,
+      paymentDate: paymentDate,
+      paymentNumber: paymentNumber,
+      paymentType: paymentType,
+      rate: rate,
+      status: status,
+      vendor: vendor,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      invoicesDetails:
+          invoicesDetails ?? List.from(this.invoicesDetails), // 🔥 preserve
+      vendorName: vendorName,
+      paymentTypeName: paymentTypeName,
+      accountNumber: accountNumber,
+      totalGiven: totalGiven ?? this.totalGiven,
+    );
   }
+
+  Map<String, dynamic> toJson() => {
+    "_id": id,
+    "account": account,
+    "cheque_number": chequeNumber,
+    "cheque_date": chequeDate?.toIso8601String(),
+    "company_id": companyId,
+    "currency": currency,
+    "note": note,
+    "payment_date": paymentDate?.toIso8601String(),
+    "payment_number": paymentNumber,
+    "payment_type": paymentType,
+    "rate": rate,
+    "status": status,
+    "vendor": vendor,
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
+    "invoices_details": invoicesDetails.map((e) => e.toJson()).toList(),
+    "vendor_name": vendorName,
+    "payment_type_name": paymentTypeName,
+    "account_number": accountNumber,
+    "total_given": totalGiven,
+  };
 }

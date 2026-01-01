@@ -49,10 +49,10 @@ Future<dynamic> paymentDialog({
                     ),
                     const Spacer(),
                     separator(),
-                    GetBuilder<CashManagementPaymentsController>(
+                    GetX<CashManagementPaymentsController>(
                       builder: (controller) => ClickableHoverText(
                         onTap: onPressedForSave,
-                        text: controller.isScreenLodingForPayments.isFalse
+                        text: controller.addingNewValue.isFalse
                             ? 'Save'
                             : "•••",
                       ),

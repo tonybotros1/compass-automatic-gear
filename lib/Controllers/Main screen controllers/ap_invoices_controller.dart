@@ -370,6 +370,12 @@ class ApInvoicesController extends GetxController {
                 items: updated.items.isNotEmpty
                     ? updated.items
                     : allApInvoices[index].items,
+                totalAmount: updated.totalAmount.isNaN
+                    ? allApInvoices[index].totalAmount
+                    : updated.totalAmount,
+                totalVat: updated.totalVat.isNaN
+                    ? allApInvoices[index].totalVat
+                    : updated.totalVat,
               );
               allApInvoices.refresh();
             }

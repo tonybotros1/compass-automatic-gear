@@ -630,7 +630,7 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
-          text: textToDate(cashManagementData.chequeDate), //
+          text: textToDate(cashManagementData.chequeDate),
         ),
       ),
       DataCell(

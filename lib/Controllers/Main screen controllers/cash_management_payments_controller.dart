@@ -216,7 +216,9 @@ class CashManagementPaymentsController extends CashManagementBaseController {
           paymentCounter.value.text = newPayment.paymentNumber ?? '';
           currentPaymentID.value = newPayment.id ?? '';
           paymentStatus.value = newPayment.status ?? '';
-          selectedAvailablePayments.assignAll(newPayment.invoicesDetails ?? []);
+          selectedAvailablePayments.assignAll(newPayment.invoicesDetails);
+          allPayements.insert(0, newPayment);
+          numberOfPayments.value += 1;
           isPaymentModified.value = false;
           for (var element in selectedAvailablePayments) {
             element.isAdded = null;
@@ -256,6 +258,16 @@ class CashManagementPaymentsController extends CashManagementBaseController {
               body: jsonEncode(newDataToUpdate),
             );
             if (responseForEditingPayment.statusCode == 200) {
+              final decoded = jsonDecode(responseForEditingPayment.body);
+              APPaymentModel updatedPayment = APPaymentModel.fromJson(
+                decoded['updated_payment'],
+              );
+              int index = allPayements.indexWhere(
+                (x) => x.id == updatedPayment.id,
+              );
+              if (index != -1) {
+                allPayements[index] = updatedPayment;
+              }
               isPaymentModified.value = false;
             } else if (responseForEditingPayment.statusCode == 401 &&
                 refreshToken.isNotEmpty) {
@@ -298,20 +310,36 @@ class CashManagementPaymentsController extends CashManagementBaseController {
               APPaymentModel updatedPayment = APPaymentModel.fromJson(
                 decoded['payment'],
               );
-              selectedAvailablePayments.assignAll(
-                updatedPayment.invoicesDetails ?? [],
+              int index = allPayements.indexWhere(
+                (e) => e.id == updatedPayment.id,
               );
-              for (var element in selectedAvailablePayments) {
-                element.isAdded = null;
-                element.isDeleted = null;
-                element.isModified = null;
-              }
-              if (vendorNameId.value != '') {
-                final result = await calculateVendorOutstanding(
-                  vendorNameId.value,
+
+              if (index != -1) {
+                allPayements[index] = allPayements[index].copyWith(
+                  invoicesDetails: updatedPayment.invoicesDetails.isNotEmpty
+                      ? updatedPayment.invoicesDetails
+                      : allPayements[index].invoicesDetails,
+                  totalGiven: updatedPayment.totalGiven.isNaN
+                      ? allPayements[index].totalGiven
+                      : updatedPayment.totalGiven,
                 );
-                outstanding.text = formatNumber(result.toString());
+                allPayements.refresh();
               }
+              // selectedAvailablePayments.assignAll(
+              //   updatedPayment.invoicesDetails ?? [],
+              // );
+              // for (var element in selectedAvailablePayments) {
+              //   element.isAdded = null;
+              //   element.isDeleted = null;
+              //   element.isModified = null;
+              // }
+              // if (vendorNameId.value != '') {
+              //   final result = await calculateVendorOutstanding(
+              //     vendorNameId.value,
+              //   );
+              //   outstanding.text = formatNumber(result.toString());
+              // }
+
               // List updatedItems = decoded['updated_items'];
               // List deletedItems = decoded['deleted_items'];
               // if (deletedItems.isNotEmpty) {
@@ -542,7 +570,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
     }
     calculateAmountForSelectedPayments();
 
-    isPaymentModified.value = true;
+    isPaymentInvoicesModified.value = true;
     selectedAvailablePayments.refresh();
     availablePayments.refresh();
     Get.back();
@@ -556,7 +584,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
     selectedAvailablePayments.clear();
     isPaymentModified.value = false;
     isPaymentInvoicesModified.value = false;
-    selectedAvailablePayments.assignAll(data.invoicesDetails ?? []);
+    selectedAvailablePayments.assignAll(data.invoicesDetails );
     currentPaymentID.value = data.id ?? '';
 
     calculateAmountForSelectedPayments();
@@ -588,6 +616,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
   }
 
   void clearValues() {
+    addingNewValue.value = false;
     currency.clear();
     rate.clear();
     account.clear();
