@@ -540,6 +540,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         ); // keep the set up to date
       }
     }
+    calculateAmountForSelectedPayments();
 
     isPaymentModified.value = true;
     selectedAvailablePayments.refresh();

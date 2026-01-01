@@ -536,7 +536,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         existingJobIds.add(receipt.jobId); // keep the set up to date
       }
     }
-
+    calculateAmountForSelectedReceipts();
     isReceiptInvoicesModified.value = true;
     selectedAvailableReceipts.refresh();
     availableReceipts.refresh();
