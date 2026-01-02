@@ -465,7 +465,7 @@ class JobCardController extends GetxController {
       }
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
-        'label': isReturned.isTrue ? 'Returned' : '',
+        'label': isReturned.isTrue ? 'Returned' : 'Not Returned',
         'type': isSales.isTrue ? 'SALE' : 'JOB',
         'job_status_1': jobStatus1.value,
         'job_status_2': jobStatus2.value,
@@ -816,7 +816,7 @@ class JobCardController extends GetxController {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/job_cards/search_engine_for_job_cards');
+      Uri url = Uri.parse('$backendUrl/job_cards/search_engine_for_job_cards_3');
       final response = await http.post(
         url,
         headers: {
@@ -829,12 +829,13 @@ class JobCardController extends GetxController {
         final decoded = jsonDecode(response.body);
         List jobs = decoded['job_cards'];
         Map grandTotals = decoded['grand_totals'];
+        print(grandTotals);
         allJobsTotals.value = grandTotals['grand_total'];
         allJobsVATS.value = grandTotals['grand_vat'];
         allJobsNET.value = grandTotals['grand_net'];
         allJobsPaid.value = grandTotals['grand_paid'];
         allJobsOutstanding.value = grandTotals['grand_outstanding'];
-        numberOfJobs.value = jobs.length;
+        numberOfJobs.value = grandTotals['grand_count'];
         allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);

@@ -15,6 +15,12 @@ import 'websocket_controller.dart';
 
 class EntityInformationsController extends GetxController {
   TextEditingController entityName = TextEditingController();
+  TextEditingController entityNameFilter = TextEditingController();
+  TextEditingController phoneNumberFilter = TextEditingController();
+  TextEditingController countryFilter = TextEditingController();
+  RxString countryFilterId = RxString('');
+  TextEditingController cityFilter = TextEditingController();
+  RxString cityFilterId = RxString('');
   TextEditingController groupName = TextEditingController();
   TextEditingController creditLimit = TextEditingController();
   TextEditingController warrantyDays = TextEditingController();
@@ -37,13 +43,12 @@ class EntityInformationsController extends GetxController {
   RxList<TypeModel> emailsControllers = RxList<TypeModel>([]);
   RxList<TypeModel> namesControllers = RxList<TypeModel>([]);
   RxList<TypeModel> jobTitlesControllers = RxList<TypeModel>([]);
-  RxString query = RxString('');
-  Rx<TextEditingController> search = TextEditingController().obs;
+  // RxString query = RxString('');
+  // Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(false);
   final RxList<EntityInformationModel> allEntities =
       RxList<EntityInformationModel>([]);
-  final RxList<EntityInformationModel> filteredEntities =
-      RxList<EntityInformationModel>([]);
+  
   RxBool addingNewEntity = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
@@ -73,7 +78,7 @@ class EntityInformationsController extends GetxController {
   @override
   void onInit() {
     connectWebSocket();
-    getEntities();
+    // getEntities();
     generateControllerForAdressCountriesAndCities();
     generateControllerForPhoneTypes();
     generateControllerForSocialTypes();
@@ -159,38 +164,101 @@ class EntityInformationsController extends GetxController {
 
   // =========================================================================
 
-  Future<void> getEntities() async {
+  void filterSearch() async {
+    Map<String, dynamic> body = {};
+    if (countryFilterId.value.isNotEmpty) {
+      body["country"] = countryFilterId.value;
+    }
+    if (cityFilterId.value.isNotEmpty) {
+      body["city"] = cityFilterId.value;
+    }
+    if (entityNameFilter.text.isNotEmpty) {
+      body["name"] = entityNameFilter.text;
+    }
+    if (phoneNumberFilter.text.isNotEmpty) {
+      body["number"] = phoneNumberFilter.text;
+    }
+    if (body.isNotEmpty) {
+      await searchEngine(body);
+    } else {
+      await searchEngine({"all": true});
+    }
+  }
+
+  Future<void> searchEngine(Map<String, dynamic> body) async {
     try {
       isScreenLoding.value = true;
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/entity_information/get_all_entities');
-      final response = await http.get(
+      Uri url = Uri.parse(
+        '$backendUrl/entity_information/search_engine_for_entity_information',
+      );
+      final response = await http.post(
         url,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List entities = decoded['entities'];
+
         allEntities.assignAll(
           entities.map((ent) => EntityInformationModel.fromJson(ent)),
         );
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getEntities();
+          await searchEngine(body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
       }
+
       isScreenLoding.value = false;
     } catch (e) {
       isScreenLoding.value = false;
     }
   }
+
+  // Future<void> getEntities() async {
+  //   try {
+  //     isScreenLoding.value = true;
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     var accessToken = '${prefs.getString('accessToken')}';
+  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+  //     Uri url = Uri.parse('$backendUrl/entity_information/get_all_entities');
+  //     final response = await http.get(
+  //       url,
+  //       headers: {'Authorization': 'Bearer $accessToken'},
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final decoded = jsonDecode(response.body);
+  //       List entities = decoded['entities'];
+  //       allEntities.assignAll(
+  //         entities.map((ent) => EntityInformationModel.fromJson(ent)),
+  //       );
+  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+  //       final refreshed = await helper.refreshAccessToken(refreshToken);
+  //       if (refreshed == RefreshResult.success) {
+  //         await getEntities();
+  //       } else if (refreshed == RefreshResult.invalidToken) {
+  //         logout();
+  //       }
+  //     } else if (response.statusCode == 401) {
+  //       logout();
+  //     }
+  //     isScreenLoding.value = false;
+  //   } catch (e) {
+  //     isScreenLoding.value = false;
+  //   }
+  // }
 
   Future<void> addNewEntity() async {
     try {
@@ -809,27 +877,5 @@ class EntityInformationsController extends GetxController {
     return ascending ? comparison : -comparison; // Reverse if descending
   }
 
-  void filterEntities() {
-    query.value = search.value.text.toLowerCase();
-    if (query.value.isEmpty) {
-      filteredEntities.clear();
-    } else {
-      filteredEntities.assignAll(
-        allEntities.where((entity) {
-          bool nameMatches = entity.entityName
-              .toString()
-              .toLowerCase()
-              .contains(query);
-
-          final phones = entity.entityPhone ?? [];
-
-          bool phoneMatches = phones.any(
-            (phoneData) => phoneData.number.toString().contains(query),
-          );
-
-          return nameMatches || phoneMatches;
-        }).toList(),
-      );
-    }
-  }
+ 
 }

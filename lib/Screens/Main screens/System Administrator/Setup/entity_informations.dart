@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
-import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
+import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/my_text_field.dart';
 import '../../../../Widgets/text_button.dart';
 import '../../../../consts.dart';
 
@@ -19,48 +20,156 @@ class EntityInformations extends StatelessWidget {
         builder: (context, constraints) {
           return Padding(
             padding: screenPadding,
-            child: Container(
+            child: SizedBox(
               width: constraints.maxWidth,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  GetX<EntityInformationsController>(
-                    init: EntityInformationsController(),
-                    builder: (controller) {
-                      return searchBar(
-                        onChanged: (_) {
-                          controller.filterEntities();
-                        },
-                        onPressedForClearSearch: () {
-                          controller.search.value.clear();
-                          controller.filterEntities();
-                        },
-                        search: controller.search,
-                        constraints: constraints,
-                        context: context,
-                        title: 'Search for entities',
-                        button: newContactButton(
-                          context,
-                          constraints,
-                          controller,
-                        ),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: GetX<EntityInformationsController>(
+
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    GetX<EntityInformationsController>(
+                      init: EntityInformationsController(),
                       builder: (controller) {
-                        if (controller.isScreenLoding.value) {
-                          return Center(child: loadingProcess);
-                        }
-                        if (controller.allEntities.isEmpty) {
-                          return const Center(child: Text('No Element'));
-                        }
                         return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: constraints.maxWidth - 28,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    myTextFormFieldWithBorder(
+                                      width: 300,
+                                      labelText: 'Name',
+                                      controller: controller.entityNameFilter,
+                                    ),
+                                    CustomDropdown(
+                                      width: 200,
+                                      showedSelectedName: 'name',
+                                      textcontroller:
+                                          controller.countryFilter.text,
+                                      hintText: 'Country',
+                                      onChanged: (key, value) async {
+                                        // controller.getModelsByCarBrand(key);
+                                        controller.countryFilterId.value = key;
+                                        controller.countryFilter.text =
+                                            value['name'];
+                                        controller.cityFilterId.value = '';
+                                        controller.cityFilter.text = '';
+                                      },
+                                      onDelete: () {
+                                        controller.countryFilterId.value = '';
+                                        controller.countryFilter.clear();
+                                        controller.cityFilterId.value = '';
+                                        controller.cityFilter.text = '';
+                                      },
+                                      onOpen: () {
+                                        return controller.getCountries();
+                                      },
+                                    ),
+                                    CustomDropdown(
+                                      width: 200,
+                                      showedSelectedName: 'name',
+                                      textcontroller:
+                                          controller.cityFilter.text,
+                                      hintText: 'City',
+                                      onChanged: (key, value) async {
+                                        // controller.getModelsByCarBrand(key);
+                                        controller.cityFilterId.value = key;
+                                        controller.cityFilter.text =
+                                            value['name'];
+                                      },
+                                      onDelete: () {
+                                        controller.cityFilterId.value = '';
+                                        controller.cityFilter.text = '';
+                                      },
+                                      onOpen: () {
+                                        return controller.getCitiesByCountryID(
+                                          controller.countryFilterId.value,
+                                        );
+                                      },
+                                    ),
+                                    myTextFormFieldWithBorder(
+                                      width: 200,
+                                      labelText: 'Phone Number',
+                                      controller: controller.phoneNumberFilter,
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    ElevatedButton(
+                                      style: findButtonStyle,
+                                      onPressed:
+                                          controller.isScreenLoding.isFalse
+                                          ? () async {
+                                              controller.filterSearch();
+                                            }
+                                          : null,
+                                      child: controller.isScreenLoding.isFalse
+                                          ? Text(
+                                              'Find',
+                                              style:
+                                                  fontStyleForElevatedButtons,
+                                            )
+                                          : loadingProcess,
+                                    ),
+                                    newContactButton(
+                                      context,
+                                      constraints,
+                                      controller,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // GetX<EntityInformationsController>(
+                    //   init: EntityInformationsController(),
+                    //   builder: (controller) {
+                    //     return searchBar(
+                    //       onChanged: (_) {
+                    //         controller.filterEntities();
+                    //       },
+                    //       onPressedForClearSearch: () {
+                    //         controller.search.value.clear();
+                    //         controller.filterEntities();
+                    //       },
+                    //       search: controller.search,
+                    //       constraints: constraints,
+                    //       context: context,
+                    //       title: 'Search for entities',
+                    //       button: newContactButton(
+                    //         context,
+                    //         constraints,
+                    //         controller,
+                    //       ),
+                    //     );
+                    //   },
+                    // ),
+                    GetX<EntityInformationsController>(
+                      builder: (controller) {
+                        return Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(15),
+                              bottomRight: Radius.circular(15),
+                              topLeft: Radius.circular(2),
+                              topRight: Radius.circular(2),
+                            ),
+                          ),
                           child: SizedBox(
                             width: constraints.maxWidth,
                             child: tableOfScreens(
@@ -72,8 +181,8 @@ class EntityInformations extends StatelessWidget {
                         );
                       },
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -93,6 +202,7 @@ Widget tableOfScreens({
     dataRowMinHeight: 30,
     horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
+    rowsPerPage: 14,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
     columns: [
@@ -114,38 +224,11 @@ Widget tableOfScreens({
       ),
     ],
     source: CardDataSource(
-      cards:
-          controller.filteredEntities.isEmpty &&
-              controller.search.value.text.isEmpty
-          ? controller.allEntities
-          : controller.filteredEntities,
+      cards: controller.allEntities.isEmpty ? [] : controller.allEntities,
       context: context,
       constraints: constraints,
       controller: controller,
     ),
-    // rows:
-    //     controller.filteredEntities.isEmpty &&
-    //         controller.search.value.text.isEmpty
-    //     ? controller.allEntities.map<DataRow>((entity) {
-    //         final entityId = entity.id;
-    //         return dataRowForTheTable(
-    //           entity,
-    //           context,
-    //           constraints,
-    //           entityId,
-    //           controller,
-    //         );
-    //       }).toList()
-    //     : controller.filteredEntities.map<DataRow>((entity) {
-    //         final entityId = entity.id;
-    //         return dataRowForTheTable(
-    //           entity,
-    //           context,
-    //           constraints,
-    //           entityId,
-    //           controller,
-    //         );
-    //       }).toList(),
   );
 }
 
