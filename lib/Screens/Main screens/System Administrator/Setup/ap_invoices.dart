@@ -523,7 +523,10 @@ Widget editSection(
             ? null
             : () {
                 if (controller.status.value != 'New') {
-                  showSnackBar('Alert', 'Only New AP Invoices Can be Deleted');
+                  alertMessage(
+                    context: Get.context!,
+                    content: 'Only New AP Invoices Can be Deleted',
+                  );
                 } else {
                   alertDialog(
                     context: context,
@@ -540,9 +543,15 @@ Widget editSection(
                     controller.status.value.isNotEmpty) {
                   controller.editCancelForApInvoices(typeId);
                 } else if (controller.status.value == 'Cancelled') {
-                  showSnackBar('Alert', 'AP Invoice Already Cancelled');
+                  alertMessage(
+                    context: Get.context!,
+                    content: 'AP Invoice Already Cancelled',
+                  );
                 } else if (controller.status.value.isEmpty) {
-                  showSnackBar('Alert', 'Please Save The AP Invoice First');
+                  alertMessage(
+                    context: Get.context!,
+                    content: 'Please Save The AP Invoice First',
+                  );
                 }
               }
             : null,

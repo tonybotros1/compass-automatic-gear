@@ -352,15 +352,22 @@ ElevatedButton newPaymentButton(
           );
           String status1 = currentPaymentStatus['status'];
           if (status1 == 'Cancelled') {
-            showSnackBar('Alert', 'Can\'t post cancelled payments');
+            alertMessage(
+              context: Get.context!,
+              content: 'Can\'t post cancelled payments',
+            );
             return;
           }
           if (status1 == 'Posted') {
-            showSnackBar('Alert', 'Status already posted');
+            alertMessage(
+              context: Get.context!,
+              content: 'Status already posted',
+            );
             return;
           }
           controller.paymentStatus.value = 'Posted';
           controller.isPaymentModified.value = true;
+          controller.addNewPayment();
         },
         onPressedForSave: controller.addingNewValue.value
             ? null
@@ -404,15 +411,22 @@ Widget editSectionForPayments(
                         );
                     String status1 = currentPaymentStatus['status'];
                     if (status1 == 'Posted') {
-                      showSnackBar('Alert', 'Can\'t cancel posted payments');
+                      alertMessage(
+                        context: Get.context!,
+                        content: 'Can\'t cancel posted payments',
+                      );
                       return;
                     }
                     if (status1 == 'Cancelled') {
-                      showSnackBar('Alert', 'Status already cancelled');
+                      alertMessage(
+                        context: Get.context!,
+                        content: 'Status already cancelled',
+                      );
                       return;
                     }
                     controller.paymentStatus.value = 'Cancelled';
                     controller.isPaymentModified.value = true;
+                    controller.addNewPayment();
                   },
                   canEdit: true,
                   constraints: constraints,
@@ -424,23 +438,30 @@ Widget editSectionForPayments(
                         );
                     String status1 = currentPaymentStatus['status'];
                     if (status1 == 'Cancelled') {
-                      showSnackBar('Alert', 'Can\'t post cancelled payments');
+                      alertMessage(
+                        context: Get.context!,
+                        content: 'Can\'t post cancelled payments',
+                      );
                       return;
                     }
                     if (status1 == 'Posted') {
-                      showSnackBar('Alert', 'Status already posted');
+                      alertMessage(
+                        context: Get.context!,
+                        content: 'Status already posted',
+                      );
                       return;
                     }
                     controller.paymentStatus.value = 'Posted';
                     controller.isPaymentModified.value = true;
+                    controller.addNewPayment();
                   },
                   onPressedForSave: controller.addingNewValue.value
                       ? null
                       : () {
                           if (controller.status.value == 'Posted') {
-                            showSnackBar(
-                              'Alert',
-                              'Only cew payments can be edited',
+                            alertMessage(
+                              context: Get.context!,
+                              content: 'Only cew payments can be edited',
                             );
                             return;
                           }
@@ -453,7 +474,10 @@ Widget editSectionForPayments(
                         );
                     String status1 = currentPaymentStatus['status'];
                     if (status1 != 'New') {
-                      showSnackBar('Alert', 'Only new payments can be deleted');
+                      alertMessage(
+                        context: Get.context!,
+                        content: 'Only new payments can be deleted',
+                      );
                       return;
                     }
 
