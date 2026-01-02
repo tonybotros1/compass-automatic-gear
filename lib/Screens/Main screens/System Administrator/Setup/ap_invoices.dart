@@ -515,6 +515,7 @@ Widget editSection(
     onPressed: () async {
       await controller.loadValues(typeData);
       apInvoiceDialog(
+        onPressedForNewPage: null,
         id: typeId,
         constraints: constraints,
         controller: controller,
@@ -578,6 +579,9 @@ ElevatedButton newInvoiceButton(
     onPressed: () {
       controller.clearValues();
       apInvoiceDialog(
+        onPressedForNewPage: (){
+          controller.clearValues();
+        },
         onPressedForCancel: null,
         id: controller.currentApInvoiceId.value,
         constraints: constraints,

@@ -584,7 +584,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
     selectedAvailablePayments.clear();
     isPaymentModified.value = false;
     isPaymentInvoicesModified.value = false;
-    selectedAvailablePayments.assignAll(data.invoicesDetails );
+    selectedAvailablePayments.assignAll(data.invoicesDetails);
     currentPaymentID.value = data.id ?? '';
 
     calculateAmountForSelectedPayments();
@@ -619,14 +619,14 @@ class CashManagementPaymentsController extends CashManagementBaseController {
     addingNewValue.value = false;
     currency.clear();
     rate.clear();
-    account.clear();
+    account = TextEditingController();
     accountId.value = '';
     outstanding.clear();
     isPaymentAdded.value = false;
     paymentDate.value.text = textToDate(DateTime.now().toString());
     paymentCounter.value.clear();
-    paymentType.clear();
-    vendorName.clear();
+    paymentType = TextEditingController();
+    vendorName = TextEditingController();
     note.clear();
     chequeNumber.clear();
     chequeDate.clear();
@@ -639,6 +639,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
     calculatedAmountForAllSelectedPayments.value = 0.0;
     currentPaymentID.value = '';
     paymentStatus.value = '';
+    update();
   }
 
   void clearAllFilters() {

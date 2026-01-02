@@ -341,6 +341,9 @@ ElevatedButton newPaymentButton(
     onPressed: () {
       controller.clearValues();
       paymentDialog(
+        onPressedForNewPage: () {
+          controller.clearValues();
+        },
         onPressedForDelete: null,
         canEdit: true,
         constraints: constraints,
@@ -404,6 +407,7 @@ Widget editSectionForPayments(
                 controller.setButtonLoading(cashManagementId, false);
 
                 paymentDialog(
+                  onPressedForNewPage: null,
                   onPressedForCancel: () async {
                     Map currentPaymentStatus = await controller
                         .getCurrentAPPaymentStatus(

@@ -9,6 +9,7 @@ Future<dynamic> paymentDialog({
   required BoxConstraints constraints,
   required CashManagementPaymentsController controller,
   required void Function()? onPressedForSave,
+  required void Function()? onPressedForNewPage,
   required void Function()? onPressedForPost,
   required void Function()? onPressedForDelete,
   required void Function()? onPressedForCancel,
@@ -49,6 +50,20 @@ Future<dynamic> paymentDialog({
                     ),
                     const Spacer(),
                     separator(),
+
+                    if (onPressedForNewPage != null)
+                      GetBuilder<CashManagementPaymentsController>(
+                        builder: (controller) => Row(
+                          spacing: 10,
+                          children: [
+                            ClickableHoverText(
+                              onTap: onPressedForNewPage,
+                              text: 'New Page',
+                            ),
+                            separator(),
+                          ],
+                        ),
+                      ),
                     GetX<CashManagementPaymentsController>(
                       builder: (controller) => ClickableHoverText(
                         onTap: onPressedForSave,

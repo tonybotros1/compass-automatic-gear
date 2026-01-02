@@ -24,54 +24,58 @@ Widget accountInformations<T extends CashManagementBaseController>(
             spacing: 10,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomDropdown(
-                width: 200,
-                textcontroller: isPayment
-                    ? controller.paymentType.text
-                    : controller.receiptType.text,
-                showedSelectedName: 'name',
-                hintText: isPayment ? 'Payment Type' : 'Receipt Type',
-                onChanged: (key, value) {
-                  if (isPayment) {
-                    controller.isPaymentModified.value = true;
-                    controller.paymentType.text = value['name'];
-                    controller.paymentTypeId.value = key;
-                  } else {
-                    controller.receiptTypeId.value = key;
-                    controller.receiptType.text = value['name'];
-                    controller.isReceiptModified.value = true;
-                  }
-                  if (value['name'] == 'Cheque') {
-                    controller.isChequeSelected.value = true;
-                    controller.chequeDate.text = textToDate(
-                      DateTime.now().toString(),
-                    );
-                  } else {
-                    controller.isChequeSelected.value = false;
-                    controller.chequeDate.clear();
-                    controller.chequeNumber.clear();
-                    controller.bankName.clear();
-                  }
-                },
-                onDelete: () {
-                  controller.isReceiptModified.value = true;
-                  if (isPayment) {
-                    controller.isPaymentModified.value = true;
-                    controller.paymentType.clear();
-                    controller.paymentTypeId.value = '';
-                  } else {
-                    controller.receiptTypeId.value = '';
-                    controller.receiptType.clear();
-                    controller.isReceiptModified.value = true;
-                  }
-                  controller.isChequeSelected.value = false;
-                  controller.chequeDate.clear();
-                  controller.chequeNumber.clear();
-                  controller.bankName.clear();
-                },
-                onOpen: () {
-                  return controller.getReceiptsAndPaymentsTypes();
-                },
+              GetBuilder<T>(
+                builder: (controller) {
+                  return CustomDropdown(
+                    width: 200,
+                    textcontroller: isPayment
+                        ? controller.paymentType.text
+                        : controller.receiptType.text,
+                    showedSelectedName: 'name',
+                    hintText: isPayment ? 'Payment Type' : 'Receipt Type',
+                    onChanged: (key, value) {
+                      if (isPayment) {
+                        controller.isPaymentModified.value = true;
+                        controller.paymentType.text = value['name'];
+                        controller.paymentTypeId.value = key;
+                      } else {
+                        controller.receiptTypeId.value = key;
+                        controller.receiptType.text = value['name'];
+                        controller.isReceiptModified.value = true;
+                      }
+                      if (value['name'] == 'Cheque') {
+                        controller.isChequeSelected.value = true;
+                        controller.chequeDate.text = textToDate(
+                          DateTime.now().toString(),
+                        );
+                      } else {
+                        controller.isChequeSelected.value = false;
+                        controller.chequeDate.clear();
+                        controller.chequeNumber.clear();
+                        controller.bankName.clear();
+                      }
+                    },
+                    onDelete: () {
+                      controller.isReceiptModified.value = true;
+                      if (isPayment) {
+                        controller.isPaymentModified.value = true;
+                        controller.paymentType.clear();
+                        controller.paymentTypeId.value = '';
+                      } else {
+                        controller.receiptTypeId.value = '';
+                        controller.receiptType.clear();
+                        controller.isReceiptModified.value = true;
+                      }
+                      controller.isChequeSelected.value = false;
+                      controller.chequeDate.clear();
+                      controller.chequeNumber.clear();
+                      controller.bankName.clear();
+                    },
+                    onOpen: () {
+                      return controller.getReceiptsAndPaymentsTypes();
+                    },
+                  );
+                }
               ),
               // const SizedBox(height: 10),
               Row(
@@ -162,36 +166,40 @@ Widget accountInformations<T extends CashManagementBaseController>(
                   ),
                 ],
               ),
-              CustomDropdown(
-                width: 260,
-                textcontroller: controller.account.text,
-                hintText: 'Account',
-                showedSelectedName: 'account_number',
-                onChanged: (key, value) async {
-                  if (isPayment) {
-                    controller.isPaymentModified.value = true;
-                  } else {
-                    controller.isReceiptModified.value = true;
-                  }
-                  controller.account.text = value['account_number'];
-                  controller.accountId.value = key;
-                  controller.currency.text = value['currency'];
-                  controller.rate.text = '${value['rate']}';
-                },
-                onDelete: () {
-                  if (isPayment) {
-                    controller.isPaymentModified.value = true;
-                  } else {
-                    controller.isReceiptModified.value = true;
-                  }
-                  controller.account.clear();
-                  controller.accountId.value = '';
-                  controller.currency.clear();
-                  controller.rate.clear();
-                },
-                onOpen: () {
-                  return controller.getAllAccounts();
-                },
+              GetBuilder<T>(
+                builder: (controller) {
+                  return CustomDropdown(
+                    width: 260,
+                    textcontroller: controller.account.text,
+                    hintText: 'Account',
+                    showedSelectedName: 'account_number',
+                    onChanged: (key, value) async {
+                      if (isPayment) {
+                        controller.isPaymentModified.value = true;
+                      } else {
+                        controller.isReceiptModified.value = true;
+                      }
+                      controller.account.text = value['account_number'];
+                      controller.accountId.value = key;
+                      controller.currency.text = value['currency'];
+                      controller.rate.text = '${value['rate']}';
+                    },
+                    onDelete: () {
+                      if (isPayment) {
+                        controller.isPaymentModified.value = true;
+                      } else {
+                        controller.isReceiptModified.value = true;
+                      }
+                      controller.account.clear();
+                      controller.accountId.value = '';
+                      controller.currency.clear();
+                      controller.rate.clear();
+                    },
+                    onOpen: () {
+                      return controller.getAllAccounts();
+                    },
+                  );
+                }
               ),
               Row(
                 spacing: 10,

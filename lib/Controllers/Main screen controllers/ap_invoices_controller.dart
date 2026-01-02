@@ -623,17 +623,18 @@ class ApInvoicesController extends GetxController {
     currentApInvoiceId.value = '';
     invoiceNumber.clear();
     invoiceDate.clear();
-    invoiceType.clear();
+    invoiceType = TextEditingController();
     invoiceTypeId.value = '';
     referenceNumber.clear();
     transactionDate.clear();
-    vendor.clear();
+    vendor = TextEditingController();
     vendorId.value = '';
     description.clear();
     allInvoices.clear();
     status.value = '';
     calculatedAmountForInvoiceItems.value = 0;
     calculatedVatForInvoiceItems.value = 0;
+    update();
   }
 
   Future<void> editPostForApInvoices(String id) async {

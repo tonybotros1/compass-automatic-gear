@@ -10,6 +10,7 @@ Future<dynamic> apInvoiceDialog({
   required String id,
   required ApInvoicesController controller,
   required void Function()? onPressedForSave,
+  required void Function()? onPressedForNewPage,
   required void Function()? onPressedForPost,
   required void Function()? onPressedForDelete,
   required void Function()? onPressedForCancel,
@@ -50,17 +51,25 @@ Future<dynamic> apInvoiceDialog({
                     ),
                     const Spacer(),
                     separator(),
-                    GetBuilder<ApInvoicesController>(
-                      builder: (controller) => ClickableHoverText(
-                        onTap: onPressedForSave,
-                        text:controller.addingNewValue.isFalse? 'Save' : "•••",
+                    if (onPressedForNewPage != null)
+                      GetBuilder<ApInvoicesController>(
+                        builder: (controller) => Row(
+                          spacing: 10,
+                          children: [
+                            ClickableHoverText(
+                              onTap: onPressedForNewPage,
+                              text: 'New Page',
+                            ),
+                            separator(),
+                          ],
+                        ),
                       ),
-                    ),
-                    separator(),
                     GetX<ApInvoicesController>(
                       builder: (controller) => ClickableHoverText(
                         onTap: onPressedForSave,
-                        text:controller.addingNewValue.isFalse? 'Save' : "•••",
+                        text: controller.addingNewValue.isFalse
+                            ? 'Save'
+                            : "•••",
                       ),
                     ),
                     point(),
