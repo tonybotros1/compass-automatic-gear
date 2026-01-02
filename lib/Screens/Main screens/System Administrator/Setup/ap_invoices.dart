@@ -69,6 +69,11 @@ class ApInvoices extends StatelessWidget {
                                     controller:
                                         controller.referenceNumberFilter,
                                   ),
+                                  myTextFormFieldWithBorder(
+                                    width: 150,
+                                    labelText: 'Invoice NO.',
+                                    controller: controller.invoiceNumberFilter,
+                                  ),
                                   CustomDropdown(
                                     width: 300,
                                     textcontroller:
@@ -579,7 +584,7 @@ ElevatedButton newInvoiceButton(
     onPressed: () {
       controller.clearValues();
       apInvoiceDialog(
-        onPressedForNewPage: (){
+        onPressedForNewPage: () {
           controller.clearValues();
         },
         onPressedForCancel: null,

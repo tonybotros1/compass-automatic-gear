@@ -17,6 +17,7 @@ class ApInvoicesController extends GetxController {
   RxString status = RxString('');
   TextEditingController referenceNumber = TextEditingController();
   TextEditingController referenceNumberFilter = TextEditingController();
+  TextEditingController invoiceNumberFilter = TextEditingController();
   TextEditingController transactionDate = TextEditingController();
   TextEditingController vendor = TextEditingController();
   Rx<TextEditingController> vendorFilter = TextEditingController().obs;
@@ -467,6 +468,9 @@ class ApInvoicesController extends GetxController {
 
     if (statusFilter.value.text.isNotEmpty) {
       body["status"] = statusFilter.value.text;
+    }
+    if (invoiceNumberFilter.text.isNotEmpty) {
+      body['invoice_number'] = invoiceNumberFilter.text;
     }
     // if (isTodaySelected.isTrue) {
     //   body["today"] = true;
