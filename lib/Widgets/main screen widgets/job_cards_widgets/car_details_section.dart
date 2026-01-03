@@ -34,6 +34,7 @@ Widget carDetailsSection(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
+                        spacing: 10,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CustomDropdown(

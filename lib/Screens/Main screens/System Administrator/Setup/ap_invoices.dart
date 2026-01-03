@@ -24,300 +24,308 @@ class ApInvoices extends StatelessWidget {
             padding: screenPadding,
             child: SizedBox(
               width: constraints.maxWidth,
-              child: ListView(
-                children: [
-                  GetX<ApInvoicesController>(
-                    init: ApInvoicesController(),
-                    builder: (controller) {
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minWidth: constraints.maxWidth - 28,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            spacing: 10,
-                            children: [
-                              Row(
-                                spacing: 10,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  CustomDropdown(
-                                    width: 150,
-                                    textcontroller:
-                                        controller.invoiceTypeFilter.text,
-                                    showedSelectedName: 'name',
-                                    hintText: 'Invoice Type',
-                                    onChanged: (key, value) {
-                                      controller.invoiceTypeFilter.text =
-                                          value['name'];
-                                      controller.invoiceTypeFilterId.value =
-                                          key;
-                                    },
-                                    onDelete: () {
-                                      controller.invoiceTypeFilter.clear();
-                                      controller.invoiceTypeFilterId.value = '';
-                                    },
-                                    onOpen: () {
-                                      return controller.getInvoiceTypes();
-                                    },
-                                  ),
-                                  myTextFormFieldWithBorder(
-                                    width: 150,
-                                    labelText: 'Reference NO.',
-                                    controller:
-                                        controller.referenceNumberFilter,
-                                  ),
-                                  myTextFormFieldWithBorder(
-                                    width: 150,
-                                    labelText: 'Invoice NO.',
-                                    controller: controller.invoiceNumberFilter,
-                                  ),
-                                  CustomDropdown(
-                                    width: 300,
-                                    textcontroller:
-                                        controller.vendorFilter.value.text,
-                                    showedSelectedName: 'entity_name',
-                                    hintText: 'Vendor',
-                                    onChanged: (key, value) async {
-                                      controller.vendorFilter.value.text =
-                                          value['entity_name'];
-                                      controller.vendorFilterId.value = key;
-                                    },
-                                    onDelete: () {
-                                      controller.vendorFilter.value.clear();
-                                      controller.vendorFilterId.value = '';
-                                    },
-                                    onOpen: () {
-                                      return controller.getAllVendors();
-                                    },
-                                  ),
-                                  CustomDropdown(
-                                    width: 200,
-                                    textcontroller:
-                                        controller.statusFilter.value.text,
-                                    showedSelectedName: 'name',
-                                    hintText: 'Status',
-                                    items: allStatus,
-                                    onChanged: (key, value) async {
-                                      controller.statusFilter.value.text =
-                                          value['name'];
-                                    },
-                                    onDelete: () {
-                                      controller.statusFilter.value.clear();
-                                    },
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                spacing: 10,
-                                children: [
-                                  myTextFormFieldWithBorder(
-                                    width: 120,
-                                    controller: controller.fromDate.value,
-                                    labelText: 'From Date',
-                                    onFieldSubmitted: (_) async {
-                                      normalizeDate(
-                                        controller.fromDate.value.text,
-                                        controller.fromDate.value,
-                                      );
-                                    },
-                                  ),
-                                  myTextFormFieldWithBorder(
-                                    width: 120,
-                                    controller: controller.toDate.value,
-                                    labelText: 'To Date',
-                                    onFieldSubmitted: (_) async {
-                                      normalizeDate(
-                                        controller.toDate.value.text,
-                                        controller.toDate.value,
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  GetX<ApInvoicesController>(
-                    builder: (controller) {
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minWidth: constraints.maxWidth - 28,
-                          ),
-                          child: Row(
-                            spacing: 10,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                spacing: 10,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  newInvoiceButton(
-                                    context,
-                                    constraints,
-                                    controller,
-                                  ),
-
-                                  CustomSlidingSegmentedControl<int>(
-                                    height: 30,
-                                    initialValue: 2,
-                                    children: const {
-                                      1: Text('ALL'),
-                                      2: Text('TODAY'),
-                                      3: Text('THIS MONTH'),
-                                      4: Text('THIS YEAR'),
-                                    },
-                                    decoration: BoxDecoration(
-                                      color:
-                                          CupertinoColors.lightBackgroundGray,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    thumbDecoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(6),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withAlpha(1),
-                                          blurRadius: 4.0,
-                                          spreadRadius: 1.0,
-                                          offset: const Offset(0.0, 2.0),
-                                        ),
-                                      ],
-                                    ),
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInToLinear,
-                                    onValueChanged: (v) {
-                                      controller.onChooseForDatePicker(v);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                spacing: 10,
-                                children: [
-                                  ElevatedButton(
-                                    style: findButtonStyle,
-                                    onPressed: controller.isScreenLoding.isFalse
-                                        ? () {
-                                            controller.filterSearch();
-                                          }
-                                        : null,
-                                    child: controller.isScreenLoding.isFalse
-                                        ? Text(
-                                            'Find',
-                                            style: fontStyleForElevatedButtons,
-                                          )
-                                        : loadingProcess,
-                                  ),
-                                  ElevatedButton(
-                                    style: clearVariablesButtonStyle,
-                                    onPressed: () {
-                                      controller.clearAllFilters();
-                                    },
-                                    child: Text(
-                                      'Clear',
-                                      style: fontStyleForElevatedButtons,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  GetX<ApInvoicesController>(
-                    builder: (controller) {
-                      return Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    GetX<ApInvoicesController>(
+                      init: ApInvoicesController(),
+                      builder: (controller) {
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: constraints.maxWidth - 28,
+                            ),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               spacing: 10,
                               children: [
-                                customBox(
-                                  title: 'NUMBER OF RECEIPTS',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: mainColor,
-                                    isBold: true,
-                                    text:
-                                        '${controller.numberOfAPInvoices.value}',
-                                    formatDouble: false,
-                                  ),
+                                Row(
+                                  spacing: 10,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    CustomDropdown(
+                                      width: 150,
+                                      textcontroller:
+                                          controller.invoiceTypeFilter.text,
+                                      showedSelectedName: 'name',
+                                      hintText: 'Invoice Type',
+                                      onChanged: (key, value) {
+                                        controller.invoiceTypeFilter.text =
+                                            value['name'];
+                                        controller.invoiceTypeFilterId.value =
+                                            key;
+                                      },
+                                      onDelete: () {
+                                        controller.invoiceTypeFilter.clear();
+                                        controller.invoiceTypeFilterId.value =
+                                            '';
+                                      },
+                                      onOpen: () {
+                                        return controller.getInvoiceTypes();
+                                      },
+                                    ),
+                                    myTextFormFieldWithBorder(
+                                      width: 150,
+                                      labelText: 'Reference NO.',
+                                      controller:
+                                          controller.referenceNumberFilter,
+                                    ),
+                                    myTextFormFieldWithBorder(
+                                      width: 150,
+                                      labelText: 'Invoice NO.',
+                                      controller:
+                                          controller.invoiceNumberFilter,
+                                    ),
+                                    CustomDropdown(
+                                      width: 300,
+                                      textcontroller:
+                                          controller.vendorFilter.value.text,
+                                      showedSelectedName: 'entity_name',
+                                      hintText: 'Vendor',
+                                      onChanged: (key, value) async {
+                                        controller.vendorFilter.value.text =
+                                            value['entity_name'];
+                                        controller.vendorFilterId.value = key;
+                                      },
+                                      onDelete: () {
+                                        controller.vendorFilter.value.clear();
+                                        controller.vendorFilterId.value = '';
+                                      },
+                                      onOpen: () {
+                                        return controller.getAllVendors();
+                                      },
+                                    ),
+                                    CustomDropdown(
+                                      width: 200,
+                                      textcontroller:
+                                          controller.statusFilter.value.text,
+                                      showedSelectedName: 'name',
+                                      hintText: 'Status',
+                                      items: allStatus,
+                                      onChanged: (key, value) async {
+                                        controller.statusFilter.value.text =
+                                            value['name'];
+                                      },
+                                      onDelete: () {
+                                        controller.statusFilter.value.clear();
+                                      },
+                                    ),
+                                  ],
                                 ),
-                                customBox(
-                                  title: 'AMOUNT',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.green,
-                                    isBold: true,
-                                    text:
-                                        '${controller.totalAmountForAPInvoices.value}',
-                                  ),
-                                ),
-                                customBox(
-                                  title: 'VAT',
-                                  value: textForDataRowInTable(
-                                    fontSize: 16,
-                                    color: Colors.red,
-                                    isBold: true,
-                                    text:
-                                        '${controller.totalVATForAPInvoices.value}',
-                                  ),
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    myTextFormFieldWithBorder(
+                                      width: 120,
+                                      controller: controller.fromDate.value,
+                                      labelText: 'From Date',
+                                      onFieldSubmitted: (_) async {
+                                        normalizeDate(
+                                          controller.fromDate.value.text,
+                                          controller.fromDate.value,
+                                        );
+                                      },
+                                    ),
+                                    myTextFormFieldWithBorder(
+                                      width: 120,
+                                      controller: controller.toDate.value,
+                                      labelText: 'To Date',
+                                      onFieldSubmitted: (_) async {
+                                        normalizeDate(
+                                          controller.toDate.value.text,
+                                          controller.toDate.value,
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
-                          const Expanded(child: SizedBox()),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  GetX<ApInvoicesController>(
-                    builder: (controller) {
-                      return Container(
-                        width: constraints.maxWidth,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          children: [
-                            SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: SizedBox(
-                                width: constraints.maxWidth,
-                                child: tableOfScreens(
-                                  scrollController:
-                                      controller.scrollControllerFotTable1,
-                                  constraints: constraints,
-                                  context: context,
-                                  controller: controller,
-                                  data: controller.allApInvoices.isEmpty
-                                      ? RxList()
-                                      : controller.allApInvoices,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    GetX<ApInvoicesController>(
+                      builder: (controller) {
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: constraints.maxWidth - 28,
+                            ),
+                            child: Row(
+                              spacing: 10,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  spacing: 10,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    newInvoiceButton(
+                                      context,
+                                      constraints,
+                                      controller,
+                                    ),
+
+                                    CustomSlidingSegmentedControl<int>(
+                                      height: 30,
+                                      initialValue: 2,
+                                      children: const {
+                                        1: Text('ALL'),
+                                        2: Text('TODAY'),
+                                        3: Text('THIS MONTH'),
+                                        4: Text('THIS YEAR'),
+                                      },
+                                      decoration: BoxDecoration(
+                                        color:
+                                            CupertinoColors.lightBackgroundGray,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      thumbDecoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withAlpha(1),
+                                            blurRadius: 4.0,
+                                            spreadRadius: 1.0,
+                                            offset: const Offset(0.0, 2.0),
+                                          ),
+                                        ],
+                                      ),
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeInToLinear,
+                                      onValueChanged: (v) {
+                                        controller.onChooseForDatePicker(v);
+                                      },
+                                    ),
+                                  ],
                                 ),
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    ElevatedButton(
+                                      style: findButtonStyle,
+                                      onPressed:
+                                          controller.isScreenLoding.isFalse
+                                          ? () {
+                                              controller.filterSearch();
+                                            }
+                                          : null,
+                                      child: controller.isScreenLoding.isFalse
+                                          ? Text(
+                                              'Find',
+                                              style:
+                                                  fontStyleForElevatedButtons,
+                                            )
+                                          : loadingProcess,
+                                    ),
+                                    ElevatedButton(
+                                      style: clearVariablesButtonStyle,
+                                      onPressed: () {
+                                        controller.clearAllFilters();
+                                      },
+                                      child: Text(
+                                        'Clear',
+                                        style: fontStyleForElevatedButtons,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    GetX<ApInvoicesController>(
+                      builder: (controller) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Row(
+                                spacing: 10,
+                                children: [
+                                  customBox(
+                                    title: 'NUMBER OF RECEIPTS',
+                                    value: textForDataRowInTable(
+                                      fontSize: 16,
+                                      color: mainColor,
+                                      isBold: true,
+                                      text:
+                                          '${controller.numberOfAPInvoices.value}',
+                                      formatDouble: false,
+                                    ),
+                                  ),
+                                  customBox(
+                                    title: 'AMOUNT',
+                                    value: textForDataRowInTable(
+                                      fontSize: 16,
+                                      color: Colors.green,
+                                      isBold: true,
+                                      text:
+                                          '${controller.totalAmountForAPInvoices.value}',
+                                    ),
+                                  ),
+                                  customBox(
+                                    title: 'VAT',
+                                    value: textForDataRowInTable(
+                                      fontSize: 16,
+                                      color: Colors.red,
+                                      isBold: true,
+                                      text:
+                                          '${controller.totalVATForAPInvoices.value}',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
+                            const Expanded(child: SizedBox()),
                           ],
-                        ),
-                      );
-                    },
-                  ),
-                ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    GetX<ApInvoicesController>(
+                      builder: (controller) {
+                        return Container(
+                          width: constraints.maxWidth,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: SizedBox(
+                                  width: constraints.maxWidth,
+                                  child: tableOfScreens(
+                                    scrollController:
+                                        controller.scrollControllerFotTable1,
+                                    constraints: constraints,
+                                    context: context,
+                                    controller: controller,
+                                    data: controller.allApInvoices.isEmpty
+                                        ? RxList()
+                                        : controller.allApInvoices,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           );

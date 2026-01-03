@@ -829,7 +829,6 @@ class JobCardController extends GetxController {
         final decoded = jsonDecode(response.body);
         List jobs = decoded['job_cards'];
         Map grandTotals = decoded['grand_totals'];
-        print(grandTotals);
         allJobsTotals.value = grandTotals['grand_total'];
         allJobsVATS.value = grandTotals['grand_vat'];
         allJobsNET.value = grandTotals['grand_net'];

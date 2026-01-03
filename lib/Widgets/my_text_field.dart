@@ -1,6 +1,5 @@
 import 'package:datahubai/Widgets/capital_letters_field.dart';
 import 'package:datahubai/Widgets/decimal_text_field.dart';
-import 'package:datahubai/Widgets/first_letter_from_each_word_capital.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -94,7 +93,7 @@ Widget myTextFormFieldWithBorder({
                 ? [CapitalLettersOnlyFormatter()]
                 : moneyFormat == true
                 ? [CurrencyInputFormatter()]
-                : [WordCapitalizationInputFormatter()],
+                : null,
             enabled: isEnabled,
             obscureText: obscureText,
             keyboardType: keyboardType,

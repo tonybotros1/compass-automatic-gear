@@ -202,7 +202,11 @@ Widget tableOfScreens({
     dataRowMinHeight: 30,
     horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
-    rowsPerPage: 14,
+    rowsPerPage: controller.allEntities.length <= 12
+        ? 12
+        : controller.allEntities.length >= 30
+        ? 30
+        : controller.allEntities.length,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
     columns: [

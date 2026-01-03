@@ -47,7 +47,7 @@ Widget tableOfScreens({
     child: SizedBox(
       width: constraints.maxWidth - 17,
       child: DataTable(
-        dataRowMaxHeight: 40,
+        // dataRowMaxHeight: null,
         dataRowMinHeight: 30,
         columnSpacing: 5,
         horizontalMargin: horizontalMarginForTable,
@@ -139,7 +139,17 @@ DataRow dataRowForTheTable(
       ),
 
       DataCell(
-        textForDataRowInTable(text: invoiceItemsData.note, maxWidth: null),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 400,
+            maxHeight: 900,
+          ), // control column width
+          child: Text(
+            invoiceItemsData.note,
+            softWrap: true,
+            overflow: TextOverflow.visible,
+          ),
+        ),
       ),
       DataCell(
         textForDataRowInTable(

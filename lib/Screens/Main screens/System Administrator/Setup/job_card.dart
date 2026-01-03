@@ -271,7 +271,11 @@ class JobCard extends StatelessWidget {
                                       controller,
                                       true,
                                     ),
-
+                                  ],
+                                ),
+                                Row(
+                                  spacing: 10,
+                                  children: [
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
                                       initialValue: 2,

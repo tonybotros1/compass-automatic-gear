@@ -529,7 +529,11 @@ Widget tableOfScreensForCashManagement({
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
         columnSpacing: 5,
-        rowsPerPage: 10,
+        rowsPerPage: controller.numberOfPayments.value <= 12
+            ? 12
+            : controller.numberOfPayments.value >= 30
+            ? 30
+            : controller.numberOfPayments.value,
         horizontalMargin: horizontalMarginForTable,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
