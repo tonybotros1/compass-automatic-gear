@@ -35,6 +35,7 @@ Widget myTextFormFieldWithBorder({
   void Function(String)? onFieldSubmitted,
   bool? isEnabled = true,
   void Function(PointerDownEvent)? onTapOutside,
+  bool? readOnly
 }) {
   return SizedBox(
     width: width,
@@ -64,6 +65,7 @@ Widget myTextFormFieldWithBorder({
           },
 
           child: TextFormField(
+            readOnly: readOnly ?? false,
             onTapOutside: onTapOutside,
             onEditingComplete: onEditingComplete,
             textInputAction: textInputAction,

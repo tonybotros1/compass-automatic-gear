@@ -200,94 +200,6 @@ class Receiving extends StatelessWidget {
                                       controller.onChooseForDatePicker(v);
                                     },
                                   ),
-                                  // ElevatedButton(
-                                  //   style: todayButtonStyle,
-                                  //   onPressed:
-                                  //       controller.isTodaySelected.isFalse
-                                  //       ? () {
-                                  //           controller.isAllSelected.value =
-                                  //               false;
-                                  //           controller.isTodaySelected.value =
-                                  //               true;
-                                  //           controller
-                                  //                   .isThisMonthSelected
-                                  //                   .value =
-                                  //               false;
-                                  //           controller
-                                  //                   .isThisYearSelected
-                                  //                   .value =
-                                  //               false;
-                                  //           controller.isYearSelected.value =
-                                  //               false;
-                                  //           controller.isMonthSelected.value =
-                                  //               false;
-                                  //           controller.isDaySelected.value =
-                                  //               true;
-                                  //           controller.searchEngine({
-                                  //             "today": true,
-                                  //           });
-                                  //         }
-                                  //       : null,
-                                  //   child: const Text('Today'),
-                                  // ),
-                                  // ElevatedButton(
-                                  //   style: thisMonthButtonStyle,
-                                  //   onPressed:
-                                  //       controller.isThisMonthSelected.isFalse
-                                  //       ? () {
-                                  //           controller.isAllSelected.value =
-                                  //               false;
-                                  //           controller.isTodaySelected.value =
-                                  //               false;
-                                  //           controller
-                                  //                   .isThisMonthSelected
-                                  //                   .value =
-                                  //               true;
-                                  //           controller
-                                  //                   .isThisYearSelected
-                                  //                   .value =
-                                  //               false;
-                                  //           controller.isYearSelected.value =
-                                  //               false;
-                                  //           controller.isMonthSelected.value =
-                                  //               true;
-                                  //           controller.isDaySelected.value =
-                                  //               false;
-                                  //           controller.searchEngine({
-                                  //             "this_month": true,
-                                  //           });
-                                  //         }
-                                  //       : null,
-                                  //   child: const Text('This Month'),
-                                  // ),
-                                  // ElevatedButton(
-                                  //   style: thisYearButtonStyle,
-                                  //   onPressed:
-                                  //       controller.isThisYearSelected.isFalse
-                                  //       ? () {
-                                  //           controller.isTodaySelected.value =
-                                  //               false;
-                                  //           controller
-                                  //                   .isThisMonthSelected
-                                  //                   .value =
-                                  //               false;
-                                  //           controller
-                                  //                   .isThisYearSelected
-                                  //                   .value =
-                                  //               true;
-                                  //           controller.isYearSelected.value =
-                                  //               true;
-                                  //           controller.isMonthSelected.value =
-                                  //               false;
-                                  //           controller.isDaySelected.value =
-                                  //               false;
-                                  //           controller.searchEngine({
-                                  //             "this_year": true,
-                                  //           });
-                                  //         }
-                                  //       : null,
-                                  //   child: const Text('This Year'),
-                                  // ),
                                 ],
                               ),
                               Row(
@@ -436,7 +348,12 @@ Widget tableOfScreens({
       controller: scrollController,
       child: PaginatedDataTable(
         controller: scrollController,
-        rowsPerPage: 10,
+        rowsPerPage: controller.numberOfReceivingDocs.value <= 12
+            ? 12
+            : controller.numberOfReceivingDocs.value >= 30
+            ? 30
+            : controller.numberOfReceivingDocs.value,
+
         showCheckboxColumn: false,
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,

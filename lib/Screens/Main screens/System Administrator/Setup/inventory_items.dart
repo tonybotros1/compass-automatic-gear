@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/inventery_items_controller.dart';
-import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/inventery_items_widgets/items_dialog.dart';
+import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
 class InventeryItems extends StatelessWidget {
@@ -19,62 +19,96 @@ class InventeryItems extends StatelessWidget {
         builder: (context, constraints) {
           return Padding(
             padding: screenPadding,
-            child: Container(
-              width: constraints.maxWidth,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  GetX<InventoryItemsController>(
-                    init: InventoryItemsController(),
-                    builder: (controller) {
-                      return searchBar(
-                        onChanged: (_) {
-                          controller.filterItems();
-                        },
-                        onPressedForClearSearch: () {
-                          controller.search.value.clear();
-                          controller.filterItems();
-                        },
-                        search: controller.search,
-                        constraints: constraints,
-                        context: context,
-                        title: 'Search for items',
-                        button: newCurrencyButton(
-                          context,
-                          constraints,
-                          controller,
-                        ),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: GetX<InventoryItemsController>(
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GetBuilder<InventoryItemsController>(
+                      init: InventoryItemsController(),
                       builder: (controller) {
-                        if (controller.isScreenLoding.value) {
-                          return Center(child: loadingProcess);
-                        }
-                        if (controller.allItems.isEmpty) {
-                          return const Center(child: Text('No Element'));
-                        }
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
+                        return Row(
+                          spacing: 10,
+                          children: [
+                            myTextFormFieldWithBorder(
+                              width: 300,
+                              labelText: 'Code',
+                              controller: controller.inventoryCodeFilter.value,
                             ),
-                          ),
+                            myTextFormFieldWithBorder(
+                              width: 300,
+                              labelText: 'Name',
+                              controller: controller.inventoryNameFilter.value,
+                            ),
+                            myTextFormFieldWithBorder(
+                              width: 170,
+                              labelText: 'Min. Quantity',
+                              controller:
+                                  controller.inventoryMinQuantityFilter.value,
+                            ),
+                          ],
                         );
                       },
                     ),
-                  ),
-                ],
-              ),
+                    Row(
+                      spacing: 10,
+                      children: [
+                        GetX<InventoryItemsController>(
+                          builder: (controller) {
+                            return ElevatedButton(
+                              style: findButtonStyle,
+                              onPressed: controller.isScreenLoding.isFalse
+                                  ? () async {
+                                      controller
+                                          .filterSearchFirInventoryItems();
+                                    }
+                                  : null,
+                              child: controller.isScreenLoding.isFalse
+                                  ? Text(
+                                      'Find',
+                                      style: fontStyleForElevatedButtons,
+                                    )
+                                  : loadingProcess,
+                            );
+                          },
+                        ),
+                        GetBuilder<InventoryItemsController>(
+                          builder: (controller) {
+                            return newCurrencyButton(
+                              context,
+                              constraints,
+                              controller,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                GetX<InventoryItemsController>(
+                  builder: (controller) {
+                    return Container(
+                      width: constraints.maxWidth,
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(15),
+                          bottomRight: Radius.circular(15),
+                          topLeft: Radius.circular(2),
+                          topRight: Radius.circular(2),
+                        ),
+                      ),
+                      child: tableOfScreens(
+                        constraints: constraints,
+                        context: context,
+                        controller: controller,
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           );
         },
@@ -88,17 +122,18 @@ Widget tableOfScreens({
   required BuildContext context,
   required InventoryItemsController controller,
 }) {
-  return DataTable(
+  return PaginatedDataTable(
     dataRowMaxHeight: 40,
     dataRowMinHeight: 30,
     columnSpacing: 5,
-    horizontalMargin: horizontalMarginForTable,
-    showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    rowsPerPage: controller.allItems.length <= 12
+        ? 12
+        : controller.allItems.length >= 30
+        ? 30
+        : controller.allItems.length,
+
     columns: [
       const DataColumn(
         columnWidth: IntrinsicColumnWidth(flex: .5),
@@ -121,39 +156,30 @@ Widget tableOfScreens({
         // onSort: controller.onSort,
       ),
     ],
-    rows:
-        controller.filteredItems.isEmpty && controller.search.value.text.isEmpty
-        ? controller.allItems.map<DataRow>((item) {
-            final itemId = item.id;
-            return dataRowForTheTable(
-              item,
-              context,
-              constraints,
-              itemId,
-              controller,
-            );
-          }).toList()
-        : controller.filteredItems.map<DataRow>((item) {
-            final itemId = item.id;
-            return dataRowForTheTable(
-              item,
-              context,
-              constraints,
-              itemId,
-              controller,
-            );
-          }).toList(),
+    source: CardDataSource(
+      cards: controller.allItems.isEmpty ? [] : controller.allItems,
+      context: Get.context!,
+      constraints: constraints,
+      controller: controller,
+    ),
   );
 }
 
 DataRow dataRowForTheTable(
   InventoryItemsModel itemData,
-  context,
-  constraints,
-  itemId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String itemId,
   InventoryItemsController controller,
+  int index,
 ) {
   return DataRow(
+    color: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.yellow;
+      }
+      return index % 2 != 0 ? coolColor : Colors.white;
+    }),
     cells: [
       DataCell(
         Row(
@@ -164,9 +190,26 @@ DataRow dataRowForTheTable(
           ],
         ),
       ),
-      DataCell(textForDataRowInTable(text: itemData.code, maxWidth: null)),
-      DataCell(textForDataRowInTable(text: itemData.name, maxWidth: null)),
-      DataCell(textForDataRowInTable(text: itemData.minQuantity.toString(),formatDouble: false)),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.code,
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.name,
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.minQuantity.toString(),
+          formatDouble: false,
+        ),
+      ),
     ],
   );
 }
@@ -190,8 +233,8 @@ IconButton editSection(
   BuildContext context,
   InventoryItemsController controller,
   InventoryItemsModel itemData,
-  constraints,
-  itemId,
+  BoxConstraints constraints,
+  String itemId,
 ) {
   return IconButton(
     onPressed: () {
@@ -237,4 +280,44 @@ ElevatedButton newCurrencyButton(
     style: newButtonStyle,
     child: const Text('New Currency'),
   );
+}
+
+class CardDataSource extends DataTableSource {
+  final List<InventoryItemsModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final InventoryItemsController controller;
+
+  CardDataSource({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final item = cards[index];
+    final itemId = item.id;
+
+    return dataRowForTheTable(
+      item,
+      context,
+      constraints,
+      itemId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

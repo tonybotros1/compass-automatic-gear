@@ -16,53 +16,45 @@ Widget addNewitemsOrEdit({
         spacing: 10,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              spacing: 10,
-              children: [
-                SizedBox(
-                  width: 150,
-                  child: myTextFormFieldWithBorder(
-                    labelText: 'Item Code',
-                    controller: controller.itemCode.value,
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.more_horiz_outlined),
-                      onPressed: () {
-                        controller.searchForInventeryItems.clear();
-                        controller.getAllInventeryItems();
-                        showingAvailableItemsDialog(
-                          screenName: '📜 Inventory Items',
-                          constraints: constraints,
-                        );
-                      },
-                    ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: myTextFormFieldWithBorder(
+                  readOnly: true,
+                  labelText: 'Item Code',
+                  controller: controller.itemCode.value,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.more_horiz_outlined),
+                    onPressed: () {
+                      controller.allInventeryItems.clear();
+                      showingAvailableItemsDialog(
+                        screenName: '📜 Inventory Items',
+                        constraints: constraints,
+                      );
+                    },
                   ),
                 ),
-                SizedBox(
-                  width: 300,
-                  child: myTextFormFieldWithBorder(
-                    labelText: 'Item Name',
-                    isEnabled: false,
-                    controller: controller.itemName.value,
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Add New Value',
+              ),
+              IconButton(
+                tooltip: 'Add New Value',
 
-                  onPressed: () {
-                    addNewValueToScreenButtonDialog(
-                      screenName: '📜 Inventery Items',
-                      widget: const InventeryItems(),
-                    );
-                  },
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
+                onPressed: () {
+                  addNewValueToScreenButtonDialog(
+                    screenName: '📜 Inventery Items',
+                    widget: const InventeryItems(),
+                  );
+                },
+                icon: const Icon(Icons.add),
+              ),
+            ],
           ),
+          myTextFormFieldWithBorder(
+            labelText: 'Item Name',
+            isEnabled: false,
+            controller: controller.itemName.value,
+          ),
+
           SizedBox(
             width: 150,
             child: myTextFormFieldWithBorder(

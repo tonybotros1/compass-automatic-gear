@@ -187,8 +187,10 @@ DataRow dataRowForTheTable(
           ],
         ),
       ),
-      DataCell(textForDataRowInTable(text: data.itemCode ?? '')),
-      DataCell(textForDataRowInTable(text: data.itemName ?? '')),
+      DataCell(textForDataRowInTable(text: data.itemCode ?? '',maxWidth: null,formatDouble: false)),
+      DataCell(
+        textForDataRowInTable(text: data.itemName ?? '', maxWidth: null,formatDouble: false),
+      ),
 
       DataCell(
         textForDataRowInTable(

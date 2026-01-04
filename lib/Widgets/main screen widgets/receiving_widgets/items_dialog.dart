@@ -9,6 +9,7 @@ Future<dynamic> itemsDialog({
   required ReceivingController controller,
   required BoxConstraints constraints,
   required void Function()? onPressed,
+  
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -16,7 +17,7 @@ Future<dynamic> itemsDialog({
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
         width: 600,
-        height: 400,
+        height: 500,
         child: Column(
           children: [
             Container(

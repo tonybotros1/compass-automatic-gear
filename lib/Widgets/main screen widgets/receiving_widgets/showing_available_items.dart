@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Models/inventory items/inventory_items_model.dart';
 import '../../../consts.dart';
+import '../../my_text_field.dart';
 import '../auto_size_box.dart';
 
 Future<dynamic> showingAvailableItemsDialog({
@@ -12,10 +13,11 @@ Future<dynamic> showingAvailableItemsDialog({
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
         width: constraints.maxWidth / 1.5,
-        height: 500,
+        height: 810,
         child: Column(
           children: [
             // Header
@@ -48,147 +50,97 @@ Future<dynamic> showingAvailableItemsDialog({
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          width: 400,
-                          height: 50,
-                          child: SearchBar(
-                            trailing: [
-                              IconButton(
-                                onPressed: () {
-                                  controller.searchForInventeryItems.clear();
-                                  controller.filterInventeryItems();
-                                },
-                                icon: const Icon(
-                                  Icons.close,
-                                  color: Colors.grey,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              spacing: 10,
+                              children: [
+                                myTextFormFieldWithBorder(
+                                  width: 300,
+                                  labelText: 'Code',
+                                  controller:
+                                      controller.inventoryCodeFilter.value,
                                 ),
-                              ),
-                            ],
-                            leading: const Icon(
-                              Icons.search,
-                              color: Colors.grey,
+                                myTextFormFieldWithBorder(
+                                  width: 300,
+                                  labelText: 'Name',
+                                  controller:
+                                      controller.inventoryNameFilter.value,
+                                ),
+                                myTextFormFieldWithBorder(
+                                  width: 170,
+                                  labelText: 'Min. Quantity',
+                                  controller: controller
+                                      .inventoryMinQuantityFilter
+                                      .value,
+                                ),
+                              ],
                             ),
-                            shape: WidgetStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                            ElevatedButton(
+                              style: findButtonStyle,
+                              onPressed:
+                                  controller.loadingInventeryItems.isFalse
+                                  ? () async {
+                                      controller
+                                          .filterSearchFirInventoryItems();
+                                    }
+                                  : null,
+                              child: controller.loadingInventeryItems.isFalse
+                                  ? Text(
+                                      'Find',
+                                      style: fontStyleForElevatedButtons,
+                                    )
+                                  : loadingProcess,
                             ),
-                            hintText: 'Search for items',
-                            hintStyle: WidgetStateProperty.all(
-                              const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            controller: controller.searchForInventeryItems,
-                            onChanged: (_) {
-                              controller.filterInventeryItems();
-                            },
-                          ),
+                          ],
                         ),
+
                         const SizedBox(height: 16),
                         Expanded(
-                          child: controller.loadingInventeryItems.isTrue
-                              ? Center(child: loadingProcess)
-                              : controller.loadingInventeryItems.isFalse &&
-                                    controller.allInventeryItems.isEmpty
-                              ? const Center(child: Text('No Data'))
-                              : SingleChildScrollView(
-                                  scrollDirection: Axis.vertical,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        minWidth:
-                                            constraints.maxWidth / 1.5 - 20,
-                                      ),
-                                      child: DataTable(
-                                        showCheckboxColumn: false,
-                                        horizontalMargin:
-                                            horizontalMarginForTable,
-                                        dataRowMaxHeight: 40,
-                                        dataRowMinHeight: 30,
-                                        columnSpacing: 5,
-                                        showBottomBorder: true,
-                                        dataTextStyle: regTextStyle,
-                                        headingTextStyle:
-                                            fontStyleForTableHeader,
-                                        headingRowColor: WidgetStatePropertyAll(
-                                          Colors.grey[300],
-                                        ),
-                                        columns: [
-                                          DataColumn(
-                                            label: AutoSizedText(
-                                              constraints: constraints,
-                                              text: 'Code',
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: AutoSizedText(
-                                              constraints: constraints,
-                                              text: 'Name',
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            numeric: true,
-                                            label: AutoSizedText(
-                                              constraints: constraints,
-                                              text: 'Min.',
-                                            ),
-                                          ),
-                                        ],
-                                        rows:
-                                            (controller
-                                                    .filteredInventeryItems
-                                                    .isEmpty &&
-                                                controller
-                                                    .searchForInventeryItems
-                                                    .value
-                                                    .text
-                                                    .isEmpty)
-                                            ? List<DataRow>.generate(
-                                                controller
-                                                    .allInventeryItems
-                                                    .length,
-                                                (index) {
-                                                  final item = controller
-                                                      .allInventeryItems[index];
-
-                                                  final itemId = item.id;
-
-                                                  return dataRowForTheTable(
-                                                    item,
-                                                    constraints,
-                                                    itemId,
-                                                    controller,
-                                                    index,
-                                                  );
-                                                },
-                                              )
-                                            : List<DataRow>.generate(
-                                                controller
-                                                    .filteredInventeryItems
-                                                    .length,
-                                                (index) {
-                                                  final item = controller
-                                                      .filteredInventeryItems[index];
-
-                                                  final itemId = item.id;
-
-                                                  return dataRowForTheTable(
-                                                    item,
-                                                    constraints,
-                                                    itemId,
-                                                    controller,
-                                                    index,
-                                                  );
-                                                },
-                                              ),
-                                      ),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: SizedBox(
+                              width: constraints.maxWidth,
+                              child: PaginatedDataTable(
+                                showCheckboxColumn: false,
+                                horizontalMargin: horizontalMarginForTable,
+                                dataRowMaxHeight: 40,
+                                dataRowMinHeight: 30,
+                                columnSpacing: 5,
+                                rowsPerPage: 13,
+                                columns: [
+                                  DataColumn(
+                                    label: AutoSizedText(
+                                      constraints: constraints,
+                                      text: 'Code',
                                     ),
                                   ),
+                                  DataColumn(
+                                    label: AutoSizedText(
+                                      constraints: constraints,
+                                      text: 'Name',
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    numeric: true,
+                                    label: AutoSizedText(
+                                      constraints: constraints,
+                                      text: 'Min.',
+                                    ),
+                                  ),
+                                ],
+                                source: CardDataSource(
+                                  cards: controller.allInventeryItems.isEmpty
+                                      ? []
+                                      : controller.allInventeryItems,
+                                  context: Get.context!,
+                                  constraints: constraints,
+                                  controller: controller,
                                 ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     );
@@ -205,8 +157,8 @@ Future<dynamic> showingAvailableItemsDialog({
 
 DataRow dataRowForTheTable(
   InventoryItemsModel itemDate,
-  constraints,
-  id,
+  BoxConstraints constraints,
+  String id,
   ReceivingController controller,
   int index,
 ) {
@@ -218,7 +170,7 @@ DataRow dataRowForTheTable(
       controller.itemName.value.text = itemDate.name;
     },
     color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-      return index % 2 == 0 ? Colors.grey[200] : Colors.white;
+      return index % 2 != 0 ? coolColor : Colors.white;
     }),
     cells: [
       DataCell(Text(itemDate.code)),
@@ -226,4 +178,37 @@ DataRow dataRowForTheTable(
       DataCell(Text(itemDate.minQuantity.toString())),
     ],
   );
+}
+
+class CardDataSource extends DataTableSource {
+  final List<InventoryItemsModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final ReceivingController controller;
+
+  CardDataSource({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final item = cards[index];
+    final itemId = item.id;
+
+    return dataRowForTheTable(item, constraints, itemId, controller, index);
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

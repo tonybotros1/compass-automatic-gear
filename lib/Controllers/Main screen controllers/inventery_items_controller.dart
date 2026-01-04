@@ -13,22 +13,19 @@ class InventoryItemsController extends GetxController {
   TextEditingController code = TextEditingController();
   TextEditingController name = TextEditingController();
   TextEditingController minQuantity = TextEditingController();
-  RxString query = RxString('');
-  Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(false);
   final RxList<InventoryItemsModel> allItems = RxList<InventoryItemsModel>([]);
-  final RxList<InventoryItemsModel> filteredItems = RxList<InventoryItemsModel>(
-    [],
-  );
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
-
+  Rx<TextEditingController> inventoryCodeFilter = TextEditingController().obs;
+  Rx<TextEditingController> inventoryNameFilter = TextEditingController().obs;
+  Rx<TextEditingController> inventoryMinQuantityFilter =
+      TextEditingController().obs;
   @override
   void onInit() async {
-    getAllItems();
     connectWebSocket();
     super.onInit();
   }
@@ -63,43 +60,102 @@ class InventoryItemsController extends GetxController {
     });
   }
 
-  Future<void> getAllItems() async {
+  void filterSearchFirInventoryItems() async {
+    Map<String, dynamic> body = {};
+    if (inventoryCodeFilter.value.text.isNotEmpty) {
+      body["code"] = inventoryCodeFilter.value.text;
+    }
+    if (inventoryNameFilter.value.text.isNotEmpty) {
+      body["name"] = inventoryNameFilter.value.text;
+    }
+    if (inventoryMinQuantityFilter.value.text.isNotEmpty) {
+      body["min_quantity"] = inventoryMinQuantityFilter.value.text;
+    }
+
+    if (body.isNotEmpty) {
+      await searchEngineForInventoryItems(body);
+    } else {
+      await searchEngineForInventoryItems({});
+    }
+  }
+
+  Future<void> searchEngineForInventoryItems(Map<String, dynamic> body) async {
     try {
       isScreenLoding.value = true;
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse(
-        '$backendUrl/inventory_items/get_all_inventory_items',
+        '$backendUrl/inventory_items/search_engine_for_inventory_items',
       );
-      final response = await http.get(
+      final response = await http.post(
         url,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List items = decoded['inventory_items'];
         allItems.assignAll(
-          items.map((item) => InventoryItemsModel.fromJson(item)),
+          items.map((job) => InventoryItemsModel.fromJson(job)),
         );
-        isScreenLoding.value = false;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllItems();
+          await searchEngineForInventoryItems(body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
-        isScreenLoding.value = false;
         logout();
-      } else {
-        isScreenLoding.value = false;
       }
+
+      isScreenLoding.value = false;
     } catch (e) {
       isScreenLoding.value = false;
     }
   }
+  // Future<void> getAllItems() async {
+  //   try {
+  //     isScreenLoding.value = true;
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     var accessToken = '${prefs.getString('accessToken')}';
+  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+  //     Uri url = Uri.parse(
+  //       '$backendUrl/inventory_items/get_all_inventory_items',
+  //     );
+  //     final response = await http.get(
+  //       url,
+  //       headers: {'Authorization': 'Bearer $accessToken'},
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final decoded = jsonDecode(response.body);
+  //       List items = decoded['inventory_items'];
+  //       allItems.assignAll(
+  //         items.map((item) => InventoryItemsModel.fromJson(item)),
+  //       );
+  //       isScreenLoding.value = false;
+  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+  //       final refreshed = await helper.refreshAccessToken(refreshToken);
+  //       if (refreshed == RefreshResult.success) {
+  //         await getAllItems();
+  //       } else if (refreshed == RefreshResult.invalidToken) {
+  //         logout();
+  //       }
+  //     } else if (response.statusCode == 401) {
+  //       isScreenLoding.value = false;
+  //       logout();
+  //     } else {
+  //       isScreenLoding.value = false;
+  //     }
+  //   } catch (e) {
+  //     isScreenLoding.value = false;
+  //   }
+  // }
 
   Future<void> addNewItem() async {
     try {
@@ -202,24 +258,6 @@ class InventoryItemsController extends GetxController {
       Get.back();
     } catch (e) {
       //
-    }
-  }
-
-  // ==============================================================================================================
-
-  // this function is to filter the search results for web
-  void filterItems() {
-    query.value = search.value.text.toLowerCase();
-    if (query.value.isEmpty) {
-      filteredItems.clear();
-    } else {
-      filteredItems.assignAll(
-        allItems.where((currency) {
-          return currency.code.toString().toLowerCase().contains(query) ||
-              currency.name.toString().toLowerCase().contains(query) ||
-              currency.minQuantity.toString().toLowerCase().contains(query);
-        }).toList(),
-      );
     }
   }
 }

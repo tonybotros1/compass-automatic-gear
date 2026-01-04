@@ -39,6 +39,10 @@ class ReceivingController extends GetxController {
   Rx<TextEditingController> vat = TextEditingController().obs;
   Rx<TextEditingController> total = TextEditingController().obs;
   Rx<TextEditingController> net = TextEditingController().obs;
+  Rx<TextEditingController> inventoryCodeFilter = TextEditingController().obs;
+  Rx<TextEditingController> inventoryNameFilter = TextEditingController().obs;
+  Rx<TextEditingController> inventoryMinQuantityFilter =
+      TextEditingController().obs;
   RxString branchId = RxString('');
   RxString vendorId = RxString('');
   RxString currencyId = RxString('');
@@ -80,12 +84,10 @@ class ReceivingController extends GetxController {
   // RxBool addingNewItemsValue = RxBool(false);
   RxBool addingNewValue = RxBool(false);
   RxBool receivingDocAdded = RxBool(false);
-  TextEditingController searchForInventeryItems = TextEditingController();
   RxBool loadingInventeryItems = RxBool(false);
   final RxList<InventoryItemsModel> allInventeryItems =
       RxList<InventoryItemsModel>([]);
-  final RxList<InventoryItemsModel> filteredInventeryItems =
-      RxList<InventoryItemsModel>([]);
+
   RxString selectedInventeryItemID = RxString('');
   RxString query = RxString('');
   RxDouble itemsTotal = RxDouble(0.0);
@@ -101,6 +103,13 @@ class ReceivingController extends GetxController {
   void onInit() async {
     searchEngine({"today": true});
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    allInventeryItems.clear();
+    allReceivingDocs.clear();
+    super.onClose();
   }
 
   String getScreenName() {
@@ -174,43 +183,102 @@ class ReceivingController extends GetxController {
     }
   }
 
-  Future<void> getAllInventeryItems() async {
+  void filterSearchFirInventoryItems() async {
+    Map<String, dynamic> body = {};
+    if (inventoryCodeFilter.value.text.isNotEmpty) {
+      body["code"] = inventoryCodeFilter.value.text;
+    }
+    if (inventoryNameFilter.value.text.isNotEmpty) {
+      body["name"] = inventoryNameFilter.value.text;
+    }
+    if (inventoryMinQuantityFilter.value.text.isNotEmpty) {
+      body["min_quantity"] = inventoryMinQuantityFilter.value.text;
+    }
+
+    if (body.isNotEmpty) {
+      await searchEngineForInventoryItems(body);
+    } else {
+      await searchEngineForInventoryItems({});
+    }
+  }
+
+  Future<void> searchEngineForInventoryItems(Map<String, dynamic> body) async {
     try {
       loadingInventeryItems.value = true;
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse(
-        '$backendUrl/inventory_items/get_all_inventory_items',
+        '$backendUrl/inventory_items/search_engine_for_inventory_items',
       );
-      final response = await http.get(
+      final response = await http.post(
         url,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List items = decoded['inventory_items'];
         allInventeryItems.assignAll(
-          items.map((item) => InventoryItemsModel.fromJson(item)),
+          items.map((job) => InventoryItemsModel.fromJson(job)),
         );
-        loadingInventeryItems.value = false;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllInventeryItems();
+          await searchEngineForInventoryItems(body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
-        loadingInventeryItems.value = false;
         logout();
-      } else {
-        loadingInventeryItems.value = false;
       }
+
+      loadingInventeryItems.value = false;
     } catch (e) {
       loadingInventeryItems.value = false;
     }
   }
+  // Future<void> getAllInventeryItems() async {
+  //   try {
+  //     loadingInventeryItems.value = true;
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     var accessToken = '${prefs.getString('accessToken')}';
+  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+  //     Uri url = Uri.parse(
+  //       '$backendUrl/inventory_items/get_all_inventory_items',
+  //     );
+  //     final response = await http.get(
+  //       url,
+  //       headers: {'Authorization': 'Bearer $accessToken'},
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final decoded = jsonDecode(response.body);
+  //       List items = decoded['inventory_items'];
+  //       allInventeryItems.assignAll(
+  //         items.map((item) => InventoryItemsModel.fromJson(item)),
+  //       );
+  //       loadingInventeryItems.value = false;
+  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+  //       final refreshed = await helper.refreshAccessToken(refreshToken);
+  //       if (refreshed == RefreshResult.success) {
+  //         await getAllInventeryItems();
+  //       } else if (refreshed == RefreshResult.invalidToken) {
+  //         logout();
+  //       }
+  //     } else if (response.statusCode == 401) {
+  //       loadingInventeryItems.value = false;
+  //       logout();
+  //     } else {
+  //       loadingInventeryItems.value = false;
+  //     }
+  //   } catch (e) {
+  //     loadingInventeryItems.value = false;
+  //   }
+  // }
 
   Future<void> addNewReceivingDoc() async {
     try {
@@ -664,22 +732,11 @@ class ReceivingController extends GetxController {
   }
 
   // this function is to filter the search results for inventery items
-  void filterInventeryItems() {
-    query.value = searchForInventeryItems.value.text.toLowerCase();
-    if (query.value.isEmpty) {
-      filteredInventeryItems.clear();
-    } else {
-      filteredInventeryItems.assignAll(
-        allInventeryItems.where((item) {
-          return item.code.toString().toLowerCase().contains(query) ||
-              item.name.toString().toLowerCase().contains(query) ||
-              item.minQuantity.toString().toLowerCase().contains(query);
-        }).toList(),
-      );
-    }
-  }
 
   void calculateTotalsForSelectedReceive() {
+    finalItemsTotal.value = 0;
+    finalItemsVAT.value = 0;
+    finalItemsNet.value = 0;
     for (var item in allReceivingItems.where(
       (item) => item.isDeleted != true,
     )) {
@@ -695,11 +752,11 @@ class ReceivingController extends GetxController {
     selectedInventeryItemID.value = '';
     quantity.value.text = '1';
     addCost.value.text = '0';
-    orginalPrice.value.text = '0';
+    orginalPrice.value.text = '';
     addDisc.value.text = '0';
-    discount.value.text = '0';
+    discount.value.text = '';
     localPrice.value.text = '0';
-    vat.value.text = '0';
+    vat.value.text = '';
     total.value.text = '0';
     net.value.text = '0';
   }
