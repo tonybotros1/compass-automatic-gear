@@ -94,8 +94,8 @@ Widget addNewIssueOrEdit({
                                     GetBuilder<IssueItemsController>(
                                       builder: (controller) {
                                         return CustomDropdown(
-                                          focusNode: controller.focusNode3,
-                                          nextFocusNode: controller.focusNode4,
+                                          // focusNode: controller.focusNode3,
+                                          // nextFocusNode: controller.focusNode4,
                                           hintText: 'Issue Types',
                                           showedSelectedName: 'name',
                                           textcontroller:
@@ -378,9 +378,9 @@ Widget addNewIssueOrEdit({
                                       child: GetBuilder<IssueItemsController>(
                                         builder: (controller) {
                                           return CustomDropdown(
-                                            focusNode: controller.focusNode2,
-                                            nextFocusNode:
-                                                controller.focusNode3,
+                                            // focusNode: controller.focusNode2,
+                                            // nextFocusNode:
+                                            //     controller.focusNode3,
                                             textcontroller:
                                                 controller.branch.value.text,
                                             showedSelectedName: 'name',

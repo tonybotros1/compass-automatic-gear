@@ -68,7 +68,6 @@ class IssueItemsController extends GetxController {
   final FocusNode focusNode3 = FocusNode();
   final FocusNode focusNode4 = FocusNode();
   final FocusNode focusNode5 = FocusNode();
-  // RxString companyId = RxString('slowXdVvhLdsVQItgO3n');
   RxBool loadingJobCards = RxBool(false);
   RxBool loadingConverters = RxBool(false);
   final RxList<BaseModelForIssuingItems> allInventeryItems =
@@ -80,9 +79,6 @@ class IssueItemsController extends GetxController {
   final RxList<BaseModelForIssuingItems> allConvertersDetails =
       RxList<BaseModelForIssuingItems>([]);
   RxList<JobCardModel> allJobCards = RxList<JobCardModel>([]);
-  // final RxList<JobCardModel> filteredJobCards = RxList<JobCardModel>([]);
-  // TextEditingController searchForJobCards = TextEditingController();
-  // TextEditingController searchForConverters = TextEditingController();
   RxString jobQuery = RxString('');
   RxString converterQuery = RxString('');
   RxString converterDetailsQuery = RxString('');
@@ -382,7 +378,10 @@ class IssueItemsController extends GetxController {
         Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
         String status1 = jobStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new issuing can be edited');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new issuing can be edited',
+          );
           return;
         }
       }
@@ -429,7 +428,10 @@ class IssueItemsController extends GetxController {
         Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
         String status1 = jobStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new issuing can be edited');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new issuing can be edited',
+          );
           return;
         }
       }
@@ -479,7 +481,10 @@ class IssueItemsController extends GetxController {
 
         String status1 = jobStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new issuing docs can be edited');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new issuing docs can be edited',
+          );
           return;
         }
       }
@@ -510,7 +515,10 @@ class IssueItemsController extends GetxController {
         try {
           newData['date'] = convertDateToIson(rawDate);
         } catch (e) {
-          showSnackBar('Alert', 'Please enter a valid date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please enter a valid date',
+          );
           addingNewValue.value = false;
           return;
         }
@@ -523,7 +531,6 @@ class IssueItemsController extends GetxController {
       if (currentIssuingId.isEmpty) {
         Uri addingRecUrl = Uri.parse('$backendUrl/issue_items/add_new_issuing');
 
-        showSnackBar('Adding', 'Please Wait');
         newData['status'] = 'New';
         final response = await http.post(
           addingRecUrl,
@@ -544,7 +551,6 @@ class IssueItemsController extends GetxController {
           isIssuingModified.value = false;
           isIssuingConvertersDetailsModified.value = false;
           isIssuingItemsDetailsModified.value = false;
-          showSnackBar('Done', 'Issuing Added Successfully');
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -562,8 +568,6 @@ class IssueItemsController extends GetxController {
           http.Response? responseForEditingIssuing;
           http.Response? responseForEditingIssuingItemsDetails;
           http.Response? responseForEditingIssuingConvertersDetails;
-
-          showSnackBar('Updating', 'Please Wait');
 
           if (isIssuingModified.isTrue) {
             Uri updatingJobUrl = Uri.parse(
@@ -705,17 +709,16 @@ class IssueItemsController extends GetxController {
               logout();
             }
           }
-          if ((responseForEditingIssuing?.statusCode == 200) ||
-              (responseForEditingIssuingItemsDetails?.statusCode == 200 ||
-                  responseForEditingIssuingConvertersDetails?.statusCode ==
-                      200)) {
-            showSnackBar('Done', 'Updated Successfully');
-          }
+          // if ((responseForEditingIssuing?.statusCode == 200) ||
+          //     (responseForEditingIssuingItemsDetails?.statusCode == 200 ||
+          //         responseForEditingIssuingConvertersDetails?.statusCode ==
+          //             200)) {
+          // }
         }
       }
       addingNewValue.value = false; // Ensure loading flag is reset
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong');
+      alertMessage(context: Get.context!, content: 'Something went wrong');
       addingNewValue.value = false; // Ensure loading flag is reset
     }
   }
@@ -736,16 +739,15 @@ class IssueItemsController extends GetxController {
         allIssuesDocs.removeWhere((rec) => rec.id == deletedIssuingId);
         numberOfIssuesgDocs.value -= 1;
         Get.close(2);
-        showSnackBar('Success', 'Issuing deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
         final decoded =
             jsonDecode(response.body) ?? 'Failed to delete receiving';
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'] ?? 'Only New Issuing Allowed';
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -757,12 +759,15 @@ class IssueItemsController extends GetxController {
         final decoded = jsonDecode(response.body);
         final error =
             decoded['detail'] ?? 'Server error while deleting issuing';
-        showSnackBar('Server Error', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401) {
         logout();
       }
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -981,7 +986,7 @@ class IssueItemsController extends GetxController {
 
   void removeSelectedInventoryItems(String id) {
     if (status.value != 'New' && status.value != '') {
-      showSnackBar('Alert', 'Only new issuing allowed');
+      alertMessage(context: Get.context!, content: 'Only new issuing allowed');
       return;
     }
 
@@ -1004,7 +1009,7 @@ class IssueItemsController extends GetxController {
 
   void removeSelectedConvertersDetails(String id) {
     if (status.value != 'New' && status.value != '') {
-      showSnackBar('Alert', 'Only new issuing allowed');
+      alertMessage(context: Get.context!, content: 'Only new issuing allowed');
       return;
     }
 
@@ -1082,17 +1087,24 @@ class IssueItemsController extends GetxController {
 
       String status1 = jobStatus['status'];
       if (status1 == 'Posted') {
-        showSnackBar('Alert', 'Status is already posted');
+        alertMessage(
+          context: Get.context!,
+          content: 'Status is already posted',
+        );
         return;
       } else if (status1 == 'Cancelled') {
-        showSnackBar('Alert', 'Status is cancelled');
+        alertMessage(context: Get.context!, content: 'Status is cancelled');
         return;
       } else {
         status.value = 'Posted';
         isIssuingModified.value = true;
+        addNewIssuingDoc();
       }
     } else {
-      showSnackBar('Alert', 'Please save the issue doc first');
+      alertMessage(
+        context: Get.context!,
+        content: 'Please save the issue doc first',
+      );
     }
   }
 
@@ -1102,17 +1114,24 @@ class IssueItemsController extends GetxController {
 
       String status1 = jobStatus['status'];
       if (status1 == 'Cancelled') {
-        showSnackBar('Alert', 'Status is already cancelled');
+        alertMessage(
+          context: Get.context!,
+          content: 'Status is already cancelled',
+        );
         return;
       } else if (status1 == 'Posted') {
-        showSnackBar('Alert', 'Status is cancelled');
+        alertMessage(context: Get.context!, content: 'Status is cancelled');
         return;
       } else {
         status.value = 'Cancelled';
         isIssuingModified.value = true;
+        addNewIssuingDoc();
       }
     } else {
-      showSnackBar('Alert', 'Please save the issue doc first');
+      alertMessage(
+        context: Get.context!,
+        content: 'Please save the issue doc first',
+      );
     }
   }
 

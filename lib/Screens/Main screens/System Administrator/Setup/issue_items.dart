@@ -581,7 +581,10 @@ IconButton editReceivingButton({
               },
             );
           } else {
-            showSnackBar('Alert', 'Only New Issuing Allowed');
+            alertMessage(
+              context: Get.context!,
+              content: 'Only New Issuing Allowed',
+            );
           }
         },
         onTapForCancel: () {

@@ -278,7 +278,7 @@ ElevatedButton newCurrencyButton(
       );
     },
     style: newButtonStyle,
-    child: const Text('New Currency'),
+    child: const Text('New Item'),
   );
 }
 
