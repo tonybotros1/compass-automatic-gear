@@ -28,6 +28,9 @@ Widget addNewitemsOrEdit({
                     icon: const Icon(Icons.more_horiz_outlined),
                     onPressed: () {
                       controller.allInventeryItems.clear();
+                      controller.inventoryCodeFilter.value.clear();
+                      controller.inventoryMinQuantityFilter.value.clear();
+                      controller.inventoryNameFilter.value.clear();
                       showingAvailableItemsDialog(
                         screenName: '📜 Inventory Items',
                         constraints: constraints,

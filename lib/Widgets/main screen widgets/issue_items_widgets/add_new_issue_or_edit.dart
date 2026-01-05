@@ -131,12 +131,12 @@ Widget addNewIssueOrEdit({
                                       builder: (controller) {
                                         var selectedType = controller.issueType;
                                         return myTextFormFieldWithBorder(
+                                          readOnly: true,
                                           controller: controller.jobDetails,
                                           labelText: selectedType.value == ''
                                               ? 'Not Selected'
                                               : selectedType.value,
                                           width: 400,
-                                          focusNode: controller.focusNode4,
                                           onEditingComplete: () {
                                             FocusScope.of(context).requestFocus(
                                               controller.focusNode5,
@@ -156,9 +156,9 @@ Widget addNewIssueOrEdit({
                                               bool isJobSelected =
                                                   selectedType.value ==
                                                   'Job Card';
-                                              controller.selectedJobOrConverter(
-                                                selectedType.value,
-                                              );
+                                              controller
+                                                  .clearSearchFiltersForJobCardsAndConverters();
+
                                               dialog(
                                                 constraints: constraints,
                                                 context: context,
@@ -166,37 +166,186 @@ Widget addNewIssueOrEdit({
                                                     isJobSelected == true
                                                     ? '💳 Job Cards'
                                                     : "🚘 Converters",
-                                                onPressedForClearSearch: () {
-                                                  if (isJobSelected) {
-                                                    controller.searchForJobCards
-                                                        .clear();
-                                                    controller
-                                                        .searchEngineForJobCards();
-                                                  } else {
-                                                    controller
-                                                        .searchForConverters
-                                                        .clear();
-                                                    controller
-                                                        .searchEngineForConverters();
-                                                  }
-                                                },
-                                                hintText: isJobSelected == true
-                                                    ? 'Search for jobs'
-                                                    : 'Search for converters',
-                                                controllerForSearchField:
-                                                    isJobSelected == true
-                                                    ? controller
-                                                          .searchForJobCards
+                                                searchBar: isJobSelected == true
+                                                    ? Row(
+                                                        spacing: 10,
+                                                        children: [
+                                                          myTextFormFieldWithBorder(
+                                                            width: 120,
+                                                            labelText:
+                                                                'Job No.',
+                                                            controller: controller
+                                                                .jobNumberFilter,
+                                                          ),
+                                                          CustomDropdown(
+                                                            width: 170,
+                                                            showedSelectedName:
+                                                                'name',
+                                                            textcontroller:
+                                                                controller
+                                                                    .carBrandIdFilterName
+                                                                    .text,
+                                                            hintText:
+                                                                'Car Brand',
+                                                            onChanged: (key, value) async {
+                                                              controller
+                                                                      .carBrandIdFilter
+                                                                      .value =
+                                                                  key;
+                                                              controller
+                                                                      .carBrandIdFilterName
+                                                                      .text =
+                                                                  value['name'];
+                                                              controller
+                                                                      .carModelIdFilter
+                                                                      .value =
+                                                                  '';
+                                                              controller
+                                                                      .carModelIdFilterName
+                                                                      .text =
+                                                                  '';
+                                                            },
+                                                            onDelete: () {
+                                                              controller
+                                                                      .carBrandIdFilter
+                                                                      .value =
+                                                                  "";
+                                                              controller
+                                                                  .carBrandIdFilterName
+                                                                  .clear();
+                                                              controller
+                                                                      .carModelIdFilter
+                                                                      .value =
+                                                                  '';
+                                                              controller
+                                                                      .carModelIdFilterName
+                                                                      .text =
+                                                                  '';
+                                                            },
+                                                            onOpen: () {
+                                                              return controller
+                                                                  .getCarBrands();
+                                                            },
+                                                          ),
+                                                          CustomDropdown(
+                                                            width: 170,
+                                                            showedSelectedName:
+                                                                'name',
+                                                            textcontroller:
+                                                                controller
+                                                                    .carModelIdFilterName
+                                                                    .value
+                                                                    .text,
+                                                            hintText:
+                                                                'Car Model',
+                                                            onChanged: (key, value) async {
+                                                              controller
+                                                                      .carModelIdFilter
+                                                                      .value =
+                                                                  key;
+                                                              controller
+                                                                      .carModelIdFilterName
+                                                                      .text =
+                                                                  value['name'];
+                                                            },
+                                                            onDelete: () {
+                                                              controller
+                                                                      .carModelIdFilter
+                                                                      .value =
+                                                                  "";
+                                                              controller
+                                                                  .carModelIdFilterName
+                                                                  .clear();
+                                                            },
+                                                            onOpen: () {
+                                                              return controller
+                                                                  .getModelsByCarBrand(
+                                                                    controller
+                                                                        .carBrandIdFilter
+                                                                        .value,
+                                                                  );
+                                                            },
+                                                          ),
+                                                          myTextFormFieldWithBorder(
+                                                            width: 90,
+                                                            labelText:
+                                                                'Plate NO.',
+                                                            controller: controller
+                                                                .plateNumberFilter,
+                                                          ),
+                                                          myTextFormFieldWithBorder(
+                                                            width: 170,
+                                                            labelText: 'VIN',
+                                                            controller:
+                                                                controller
+                                                                    .vinFilter,
+                                                          ),
+                                                          CustomDropdown(
+                                                            width: 300,
+                                                            textcontroller:
+                                                                controller
+                                                                    .customerNameIdFilterName
+                                                                    .value
+                                                                    .text,
+                                                            showedSelectedName:
+                                                                'entity_name',
+                                                            hintText:
+                                                                'Customer Name',
+                                                            onChanged: (key, value) async {
+                                                              controller
+                                                                      .customerNameIdFilterName
+                                                                      .text =
+                                                                  value['entity_name'];
+                                                              controller
+                                                                      .customerNameIdFilter
+                                                                      .value =
+                                                                  key;
+                                                            },
+                                                            onDelete: () {
+                                                              controller
+                                                                  .customerNameIdFilterName
+                                                                  .clear();
+                                                              controller
+                                                                      .customerNameIdFilter
+                                                                      .value =
+                                                                  "";
+                                                            },
+                                                            onOpen: () {
+                                                              return controller
+                                                                  .getAllCustomers();
+                                                            },
+                                                          ),
+                                                        ],
+                                                      )
+                                                    : Row(
+                                                        spacing: 10,
+                                                        children: [
+                                                          myTextFormFieldWithBorder(
+                                                            width: 200,
+                                                            labelText:
+                                                                'Converter Number',
+                                                            controller: controller
+                                                                .converterNumberFilter,
+                                                          ),
+                                                          myTextFormFieldWithBorder(
+                                                            width: 300,
+                                                            labelText:
+                                                                'Converter Name',
+                                                            controller: controller
+                                                                .converterNameFilter,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                loading: isJobSelected == true
+                                                    ? controller.loadingJobCards
                                                     : controller
-                                                          .searchForConverters,
-                                                onChangedForSearchField: (_) {
-                                                  if (isJobSelected) {
-                                                    controller
-                                                        .searchEngineForJobCards();
-                                                  } else {
-                                                    controller
-                                                        .searchEngineForConverters();
-                                                  }
+                                                          .loadingConverters,
+                                                search: () {
+                                                  isJobSelected == true
+                                                      ? controller
+                                                            .filterSearchForJobCards()
+                                                      : controller
+                                                            .filterSearchForConverters();
                                                 },
 
                                                 table: isJobSelected == true
@@ -388,19 +537,19 @@ Future<dynamic> dialog({
   required BoxConstraints constraints,
   required BuildContext context,
   required String dialogName,
-  required void Function()? onPressedForClearSearch,
-  required String hintText,
-  required TextEditingController? controllerForSearchField,
-  required void Function(String)? onChangedForSearchField,
+  required RxBool loading,
+  required void Function()? search,
+  required Widget searchBar,
   Widget? table,
 }) {
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
         width: constraints.maxWidth / 1.5,
-        // height: 600,
+        height: 810,
         child: Column(
           children: [
             // Header
@@ -423,44 +572,43 @@ Future<dynamic> dialog({
             ),
             // Content
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 10,
-                ),
+              child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 400,
-                      height: 50,
-                      child: SearchBar(
-                        backgroundColor: WidgetStateProperty.all(Colors.white),
-                        trailing: [
-                          IconButton(
-                            onPressed: onPressedForClearSearch,
-                            icon: const Icon(Icons.close, color: Colors.grey),
-                          ),
-                        ],
-                        leading: const Icon(Icons.search, color: Colors.grey),
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: constraints.maxWidth / 1.5 - 8,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              searchBar,
+                              GetX<IssueItemsController>(
+                                builder: (controller) {
+                                  return ElevatedButton(
+                                    style: findButtonStyle,
+                                    onPressed: loading.isFalse ? search : null,
+                                    child: loading.isFalse
+                                        ? Text(
+                                            'Find',
+                                            style: fontStyleForElevatedButtons,
+                                          )
+                                        : loadingProcess,
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ),
-                        hintText: hintText,
-                        hintStyle: WidgetStateProperty.all(
-                          const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        controller: controllerForSearchField,
-                        onChanged: onChangedForSearchField,
                       ),
                     ),
-                    const SizedBox(height: 16),
                     table ?? const SizedBox(),
                   ],
                 ),
@@ -473,125 +621,57 @@ Future<dynamic> dialog({
   );
 }
 
-Expanded jobCardTable(
+Widget jobCardTable(
   BoxConstraints constraints,
   IssueItemsController controller,
   BuildContext context,
 ) {
-  return Expanded(
-    child: GetX<IssueItemsController>(
-      builder: (controller) {
-        return controller.loadingJobCards.value
-            ? Center(child: loadingProcess)
-            : controller.loadingJobCards.isFalse &&
-                  controller.allJobCards.isEmpty
-            ? const Center(child: Text('No Data'))
-            : SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth / 1.5 - 20,
-                    ),
-                    child: DataTable(
-                      showCheckboxColumn: false,
-                      horizontalMargin: horizontalMarginForTable,
-                      dataRowMaxHeight: 40,
-                      dataRowMinHeight: 30,
-                      columnSpacing: 5,
-
-                      border: TableBorder.symmetric(
-                        outside: const BorderSide(),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      showBottomBorder: true,
-                      dataTextStyle: regTextStyle,
-                      headingTextStyle: fontStyleForTableHeader,
-                      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-                      columns: [
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Job Number',
-                          ),
-                        ),
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Car Brand',
-                          ),
-                        ),
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Car Model',
-                          ),
-                        ),
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Plate Number',
-                          ),
-                        ),
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'VIN',
-                          ),
-                        ),
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Customer',
-                          ),
-                        ),
-                      ],
-                      rows:
-                          (controller.filteredJobCards.isEmpty &&
-                              controller.searchForJobCards.value.text.isEmpty)
-                          ? List<DataRow>.generate(
-                              controller.allJobCards.length,
-                              (index) {
-                                JobCardModel job =
-                                    controller.allJobCards[index];
-
-                                String jobId = job.id ?? '';
-
-                                return dataRowForTheTable(
-                                  job,
-                                  context,
-                                  constraints,
-                                  jobId,
-                                  controller,
-                                  index,
-                                );
-                              },
-                            )
-                          : List<DataRow>.generate(
-                              controller.filteredJobCards.length,
-                              (index) {
-                                JobCardModel job =
-                                    controller.filteredJobCards[index];
-
-                                String jobId = job.id ?? '';
-
-                                return dataRowForTheTable(
-                                  job,
-                                  context,
-                                  constraints,
-                                  jobId,
-                                  controller,
-                                  index,
-                                );
-                              },
-                            ),
-                    ),
-                  ),
-                ),
-              );
-      },
-    ),
+  return GetX<IssueItemsController>(
+    builder: (controller) {
+      return SizedBox(
+        width: constraints.maxWidth,
+        child: PaginatedDataTable(
+          showCheckboxColumn: false,
+          horizontalMargin: horizontalMarginForTable,
+          dataRowMaxHeight: 40,
+          dataRowMinHeight: 30,
+          columnSpacing: 5,
+          rowsPerPage: 13,
+          columns: [
+            DataColumn(
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Job Number',
+              ),
+            ),
+            DataColumn(
+              label: AutoSizedText(constraints: constraints, text: 'Car Brand'),
+            ),
+            DataColumn(
+              label: AutoSizedText(constraints: constraints, text: 'Car Model'),
+            ),
+            DataColumn(
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Plate Number',
+              ),
+            ),
+            DataColumn(
+              label: AutoSizedText(constraints: constraints, text: 'VIN'),
+            ),
+            DataColumn(
+              label: AutoSizedText(constraints: constraints, text: 'Customer'),
+            ),
+          ],
+          source: CardDataSourceForJobCards(
+            cards: controller.allJobCards.isEmpty ? [] : controller.allJobCards,
+            context: context,
+            constraints: constraints,
+            controller: controller,
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -671,107 +751,53 @@ DataRow dataRowForTheTable(
   );
 }
 
-Expanded converterTable(
+Widget converterTable(
   BoxConstraints constraints,
   IssueItemsController controller,
   BuildContext context,
 ) {
-  return Expanded(
-    child: GetX<IssueItemsController>(
-      builder: (controller) {
-        return controller.loadingConverters.value
-            ? Center(child: loadingProcess)
-            : controller.loadingConverters.isFalse &&
-                  controller.allConverters.isEmpty
-            ? const Center(child: Text('No Data'))
-            : SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth / 1.5 - 20,
-                    ),
-                    child: DataTable(
-                      showCheckboxColumn: false,
-                      horizontalMargin: horizontalMarginForTable,
-                      dataRowMaxHeight: 40,
-                      dataRowMinHeight: 30,
-                      columnSpacing: 5,
-
-                      border: TableBorder.symmetric(
-                        outside: const BorderSide(),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      showBottomBorder: true,
-                      dataTextStyle: regTextStyle,
-                      headingTextStyle: fontStyleForTableHeader,
-                      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-                      columns: [
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Converter Number',
-                          ),
-                        ),
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Converter Name',
-                          ),
-                        ),
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Description',
-                          ),
-                        ),
-                      ],
-                      rows:
-                          (controller.filteredConverters.isEmpty &&
-                              controller.searchForConverters.value.text.isEmpty)
-                          ? List<DataRow>.generate(
-                              controller.allConverters.length,
-                              (index) {
-                                ConverterModel converter =
-                                    controller.allConverters[index];
-
-                                String converterId = converter.id ?? '';
-
-                                return dataRowForTheConverterTable(
-                                  converter,
-                                  context,
-                                  constraints,
-                                  converterId,
-                                  controller,
-                                  index,
-                                );
-                              },
-                            )
-                          : List<DataRow>.generate(
-                              controller.filteredConverters.length,
-                              (index) {
-                                ConverterModel converter =
-                                    controller.filteredConverters[index];
-
-                                String converterId = converter.id ?? '';
-
-                                return dataRowForTheConverterTable(
-                                  converter,
-                                  context,
-                                  constraints,
-                                  converterId,
-                                  controller,
-                                  index,
-                                );
-                              },
-                            ),
-                    ),
-                  ),
-                ),
-              );
-      },
-    ),
+  return GetX<IssueItemsController>(
+    builder: (controller) {
+      return SizedBox(
+        width: constraints.maxWidth,
+        child: PaginatedDataTable(
+          showCheckboxColumn: false,
+          horizontalMargin: horizontalMarginForTable,
+          dataRowMaxHeight: 40,
+          dataRowMinHeight: 30,
+          rowsPerPage: 13,
+          columnSpacing: 5,
+          columns: [
+            DataColumn(
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Converter Number',
+              ),
+            ),
+            DataColumn(
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Converter Name',
+              ),
+            ),
+            DataColumn(
+              label: AutoSizedText(
+                constraints: constraints,
+                text: 'Description',
+              ),
+            ),
+          ],
+          source: CardDataSourceForConverters(
+            cards: controller.allConverters.isEmpty
+                ? []
+                : controller.allConverters,
+            context: context,
+            constraints: constraints,
+            controller: controller,
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -824,4 +850,84 @@ DataRow dataRowForTheConverterTable(
       ),
     ],
   );
+}
+
+class CardDataSourceForConverters extends DataTableSource {
+  final List<ConverterModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final IssueItemsController controller;
+
+  CardDataSourceForConverters({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final trade = cards[index];
+    final cardId = trade.id ?? '';
+
+    return dataRowForTheConverterTable(
+      trade,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
+}
+
+class CardDataSourceForJobCards extends DataTableSource {
+  final List<JobCardModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final IssueItemsController controller;
+
+  CardDataSourceForJobCards({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final jobCard = cards[index];
+    final cardId = jobCard.id ?? '';
+
+    return dataRowForTheTable(
+      jobCard,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

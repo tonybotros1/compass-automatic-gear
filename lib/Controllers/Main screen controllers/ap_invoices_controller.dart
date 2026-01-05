@@ -585,7 +585,6 @@ class ApInvoicesController extends GetxController {
         final decoded = jsonDecode(response.body);
         List invs = decoded['job_cards'];
         allJobCards.assignAll(invs.map((job) => JobCardModel.fromJson(job)));
-        numberOfAPInvoices.value = allApInvoices.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

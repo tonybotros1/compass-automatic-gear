@@ -73,32 +73,25 @@ class IssueItemsController extends GetxController {
   RxBool loadingConverters = RxBool(false);
   final RxList<BaseModelForIssuingItems> allInventeryItems =
       RxList<BaseModelForIssuingItems>([]);
-  final RxList<BaseModelForIssuingItems> filteredInventeryItems =
-      RxList<BaseModelForIssuingItems>([]);
   final RxList<BaseModelForIssuingItems> selectedInventeryItems =
       RxList<BaseModelForIssuingItems>([]);
   final RxList<BaseModelForIssuingItems> selectedConvertersDetails =
       RxList<BaseModelForIssuingItems>([]);
   final RxList<BaseModelForIssuingItems> allConvertersDetails =
       RxList<BaseModelForIssuingItems>([]);
-  final RxList<BaseModelForIssuingItems> filteredConvertersDetails =
-      RxList<BaseModelForIssuingItems>([]);
   RxList<JobCardModel> allJobCards = RxList<JobCardModel>([]);
-  final RxList<JobCardModel> filteredJobCards = RxList<JobCardModel>([]);
-  TextEditingController searchForJobCards = TextEditingController();
-  TextEditingController searchForConverters = TextEditingController();
+  // final RxList<JobCardModel> filteredJobCards = RxList<JobCardModel>([]);
+  // TextEditingController searchForJobCards = TextEditingController();
+  // TextEditingController searchForConverters = TextEditingController();
   RxString jobQuery = RxString('');
   RxString converterQuery = RxString('');
   RxString converterDetailsQuery = RxString('');
   RxString inventoryQuery = RxString('');
   TextEditingController jobDetails = TextEditingController();
   final RxList<ConverterModel> allConverters = RxList<ConverterModel>([]);
-  final RxList<ConverterModel> filteredConverters = RxList<ConverterModel>([]);
   final RxList<QueryDocumentSnapshot<Map<String, dynamic>>> allConvertersTable =
       RxList([]);
   RxBool loadingItemsTable = RxBool(false);
-  TextEditingController searchForInventoryItems = TextEditingController();
-  TextEditingController searchForConvertersDetails = TextEditingController();
   String backendUrl = backendTestURI;
   RxString currentIssuingId = RxString('');
   var editingIndexForInventoryDetails = (-1).obs;
@@ -111,6 +104,26 @@ class IssueItemsController extends GetxController {
   RxDouble totalsForSelectedInventoryItemsDetails = RxDouble(0.0);
   RxDouble totalsForSelectedConvertersDetails = RxDouble(0.0);
   final Uuid _uuid = const Uuid();
+
+  // converter filters
+  TextEditingController converterNumberFilter = TextEditingController();
+  TextEditingController converterNameFilter = TextEditingController();
+
+  // job filtes
+  TextEditingController jobNumberFilter = TextEditingController();
+  TextEditingController carBrandIdFilterName = TextEditingController();
+  RxString carBrandIdFilter = RxString('');
+  RxString carModelIdFilter = RxString('');
+  TextEditingController carModelIdFilterName = TextEditingController();
+  TextEditingController plateNumberFilter = TextEditingController();
+  TextEditingController vinFilter = TextEditingController();
+  TextEditingController customerNameIdFilterName = TextEditingController();
+  RxString customerNameIdFilter = RxString('');
+
+  // filters for inventory items and converters details
+  TextEditingController codeFilter = TextEditingController();
+  TextEditingController numberFilter = TextEditingController();
+  TextEditingController nameFilter = TextEditingController();
 
   @override
   void onInit() async {
@@ -138,6 +151,34 @@ class IssueItemsController extends GetxController {
 
   Future getCurrentIssuingStatus(String id) async {
     return await helper.getIssuingStatus(id);
+  }
+
+  Future<Map<String, dynamic>> getCarBrands() async {
+    return await helper.getCarBrands();
+  }
+
+  Future<Map<String, dynamic>> getModelsByCarBrand(String brandID) async {
+    return await helper.getModelsValues(brandID);
+  }
+
+  Future<Map<String, dynamic>> getAllCustomers() async {
+    return await helper.getCustomers();
+  }
+
+  void clearSearchFiltersForJobCardsAndConverters() {
+    jobNumberFilter.clear();
+    carBrandIdFilterName.clear();
+    carBrandIdFilter.value = '';
+    carModelIdFilter.value = '';
+    carModelIdFilterName.clear();
+    plateNumberFilter.clear();
+    vinFilter.clear();
+    customerNameIdFilterName.clear();
+    customerNameIdFilter.value = '';
+    converterNumberFilter.clear();
+    converterNameFilter.clear();
+    allJobCards.clear();
+    allConverters.clear();
   }
 
   void onChooseForDatePicker(int i) {
@@ -185,52 +226,163 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  Future<void> getAllJobCards() async {
-    loadingJobCards.value = true;
-    allJobCards.assignAll(await helper.getAllJobCards());
-    loadingJobCards.value = false;
+  void filterSearchForJobCards() async {
+    Map<String, dynamic> body = {};
+    if (carBrandIdFilter.value.isNotEmpty) {
+      body["car_brand"] = carBrandIdFilter.value;
+    }
+    if (carModelIdFilter.value.isNotEmpty) {
+      body["car_model"] = carModelIdFilter.value;
+    }
+    if (jobNumberFilter.text.isNotEmpty) {
+      body["job_number"] = jobNumberFilter.text;
+    }
+
+    if (plateNumberFilter.text.isNotEmpty) {
+      body["plate_number"] = plateNumberFilter.text;
+    }
+    if (vinFilter.text.isNotEmpty) {
+      body["vin"] = vinFilter.text;
+    }
+    if (customerNameIdFilter.value.isNotEmpty) {
+      body["customer_name"] = customerNameIdFilter.value;
+    }
+    if (body.isNotEmpty) {
+      await searchEngineForJobCard(body);
+    } else {
+      await searchEngineForJobCard({"all": true});
+    }
   }
 
-  Future<void> getAllConverters() async {
+  Future<void> searchEngineForJobCard(Map<String, dynamic> body) async {
     try {
-      loadingConverters.value = true;
+      loadingJobCards.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/converters/get_all_converter');
-      final response = await http.get(
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards/search_engine_for_job_card_in_ap_invoices_screen',
+      );
+      final response = await http.post(
         url,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        List converters = decoded['converters'];
-        allConverters.assignAll(
-          converters.map((conv) => ConverterModel.fromJson(conv)),
-        );
+        List invs = decoded['job_cards'];
+        allJobCards.assignAll(invs.map((job) => JobCardModel.fromJson(job)));
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllConverters();
+          await searchEngineForJobCard(body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
       }
+
+      loadingJobCards.value = false;
+    } catch (e) {
+      loadingJobCards.value = false;
+    }
+  }
+
+  void filterSearchForConverters() async {
+    Map<String, dynamic> body = {};
+    if (converterNumberFilter.text.isNotEmpty) {
+      body["converter_number"] = converterNumberFilter.text;
+    }
+    if (converterNameFilter.text.isNotEmpty) {
+      body["converter_name"] = converterNameFilter.text;
+    }
+
+    if (body.isNotEmpty) {
+      await searchEngineForConverters(body);
+    } else {
+      await searchEngineForConverters({});
+    }
+  }
+
+  Future<void> searchEngineForConverters(Map<String, dynamic> body) async {
+    try {
+      loadingConverters.value = true;
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/converters/search_engine_for_converters',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List converters = decoded['converters'];
+        allConverters.assignAll(
+          converters.map((job) => ConverterModel.fromJson(job)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngineForConverters(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
       loadingConverters.value = false;
     } catch (e) {
       loadingConverters.value = false;
     }
   }
 
-  Future<void> getAllInventeryItems() async {
+  void filterSearchForInventoryItemsAndConvertesrDetails(String type) async {
+    Map<String, dynamic> body = {};
+    if (codeFilter.text.isNotEmpty) {
+      body['code'] = codeFilter.text;
+    }
+    if (nameFilter.text.isNotEmpty && type == 'items') {
+      body['name'] = nameFilter.text;
+    }
+    if (numberFilter.text.isNotEmpty && type == 'converters') {
+      body['number'] = numberFilter.text;
+    }
+
+    if (body.isNotEmpty) {
+      if (type == 'items') {
+        await getAllInventeryItems(body);
+      } else {
+        await getAllConvertersDetails(body);
+      }
+    } else {
+      if (type == 'items') {
+        await getAllInventeryItems({});
+      } else {
+        await getAllConvertersDetails({});
+      }
+    }
+  }
+
+  Future<void> getAllInventeryItems(Map body) async {
     try {
       if (currentIssuingId.isNotEmpty) {
         Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
         String status1 = jobStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new converters can be edited');
+          showSnackBar('Alert', 'Only new issuing can be edited');
           return;
         }
       }
@@ -239,9 +391,13 @@ class IssueItemsController extends GetxController {
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse('$backendUrl/issue_items/get_items_details_section');
-      final response = await http.get(
+      final response = await http.post(
         url,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -254,7 +410,7 @@ class IssueItemsController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllInventeryItems();
+          await getAllInventeryItems(body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -267,13 +423,13 @@ class IssueItemsController extends GetxController {
     }
   }
 
-  Future<void> getAllConvertersDetails() async {
+  Future<void> getAllConvertersDetails(Map body) async {
     try {
       if (currentIssuingId.isNotEmpty) {
         Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
         String status1 = jobStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new converters can be edited');
+          showSnackBar('Alert', 'Only new issuing can be edited');
           return;
         }
       }
@@ -284,9 +440,13 @@ class IssueItemsController extends GetxController {
       Uri url = Uri.parse(
         '$backendUrl/issue_items/get_converters_details_section',
       );
-      final response = await http.get(
+      final response = await http.post(
         url,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -299,7 +459,7 @@ class IssueItemsController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllInventeryItems();
+          await getAllConvertersDetails(body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -713,52 +873,110 @@ class IssueItemsController extends GetxController {
     Get.back();
   }
 
+  // void addSelectedConvertersDetails() {
+  //   final existingConvertersIds = selectedConvertersDetails
+  //       .map((r) => r.id)
+  //       .toSet();
+
+  //   for (final item in allConvertersDetails.where(
+  //     (r) => r.isSelected == true,
+  //   )) {
+  //     if (existingConvertersIds.contains(item.id)) {
+  //       print('contains');
+  //       final idx = selectedConvertersDetails.indexWhere(
+  //         (i) => i.id == item.id,
+  //       );
+
+  //       if (idx != -1) {
+  //         print('found');
+  //         final existing = selectedConvertersDetails[idx];
+  //         existing
+  //           ..issueId = currentIssuingId.value
+  //           ..isDeleted = false
+  //           ..isAdded = true
+  //           ..isSelected = true
+  //           ..finalQuantity = 1;
+  //       }
+
+  //       item
+  //         ..issueId = currentIssuingId.value
+  //         ..isDeleted = false
+  //         ..isAdded = true
+  //         ..isSelected = true
+  //         ..finalQuantity = 1;
+  //     } else {
+  //       print('no contains');
+  //       item
+  //         ..issueId = currentIssuingId.value
+  //         ..isAdded = true
+  //         ..isSelected = true
+  //         ..isDeleted = false
+  //         ..finalQuantity = 1;
+
+  //       selectedConvertersDetails.add(item);
+  //       existingConvertersIds.add(item.id);
+  //     }
+  //   }
+  //   calculateTotalsForSelectedConvertersDetails();
+  //   selectedConvertersDetails.refresh();
+  //   isIssuingConvertersDetailsModified.value = true;
+  //   allConvertersDetails.refresh();
+  //   print(selectedConvertersDetails.length);
+  //   Get.back();
+  // }
+
   void addSelectedConvertersDetails() {
-    final existingConvertersIds = selectedConvertersDetails
-        .map((r) => r.id)
-        .toSet();
+    final issueId = currentIssuingId.value;
+
+    // Map existing selected converters by id for O(1) access
+    final Map<dynamic, BaseModelForIssuingItems> selectedMap = {
+      for (final c in selectedConvertersDetails) c.id: c,
+    };
 
     for (final item in allConvertersDetails.where(
-      (r) => r.isSelected == true,
+      (c) => c.isSelected == true,
     )) {
-      if (existingConvertersIds.contains(item.id)) {
-        final idx = selectedConvertersDetails.indexWhere(
-          (i) => i.id == item.id,
-        );
+      // Apply common updates
+      _applySelectionState(item, issueId, item.id ?? '');
 
-        if (idx != -1) {
-          final existing = selectedConvertersDetails[idx];
-          existing
-            ..issueId = currentIssuingId.value
-            ..isDeleted = false
-            ..isAdded = true
-            ..isSelected = true
-            ..finalQuantity = 1;
-        }
+      final existing = selectedMap[item.id];
 
-        item
-          ..issueId = currentIssuingId.value
-          ..isDeleted = false
-          ..isAdded = true
-          ..isSelected = true
-          ..finalQuantity = 1;
+      if (existing != null) {
+        // Update existing selected item
+        _applySelectionState(existing, issueId, item.id ?? '');
       } else {
-        item
-          ..issueId = currentIssuingId.value
-          ..isAdded = true
-          ..isSelected = true
-          ..isDeleted = false
-          ..finalQuantity = 1;
-
+        // Add new selected item
         selectedConvertersDetails.add(item);
-        existingConvertersIds.add(item.id);
+        selectedMap[item.id] = item;
       }
     }
+
     calculateTotalsForSelectedConvertersDetails();
+
     selectedConvertersDetails.refresh();
-    isIssuingConvertersDetailsModified.value = true;
     allConvertersDetails.refresh();
+    isIssuingConvertersDetailsModified.value = true;
+    print(
+      allConvertersDetails.where((i) => i.isSelected == true).map((i) {
+        print(i.id);
+      }),
+    );
+
     Get.back();
+  }
+
+  void _applySelectionState(
+    BaseModelForIssuingItems item,
+    String issueId,
+    String itemId,
+  ) {
+    item
+      ..id = itemId
+      ..issueId = issueId
+      ..isDeleted = false
+      ..isAdded = true
+      ..isSelected = true
+      ..finalQuantity = 1;
   }
 
   void removeSelectedInventoryItems(String id) {
@@ -858,16 +1076,6 @@ class IssueItemsController extends GetxController {
 
   // ======================================================================================================================
 
-  void selectedJobOrConverter(String selected) {
-    if (selected != '') {
-      if (selected == 'Job Card') {
-        getAllJobCards();
-      } else {
-        getAllConverters();
-      }
-    }
-  }
-
   void updateToPostedStatus() async {
     if (currentIssuingId.isNotEmpty) {
       Map jobStatus = await getCurrentIssuingStatus(currentIssuingId.value);
@@ -905,76 +1113,6 @@ class IssueItemsController extends GetxController {
       }
     } else {
       showSnackBar('Alert', 'Please save the issue doc first');
-    }
-  }
-
-  void searchEngineForJobCards() {
-    jobQuery.value = searchForJobCards.value.text.toLowerCase();
-    if (jobQuery.value.isEmpty) {
-      filteredJobCards.clear();
-    } else {
-      filteredJobCards.assignAll(
-        allJobCards.where((job) {
-          return job.jobNumber.toString().toLowerCase().contains(jobQuery) ||
-              job.carBrandName.toString().toLowerCase().contains(jobQuery) ||
-              job.carModelName.toString().toLowerCase().contains(jobQuery) ||
-              job.customerName.toString().toLowerCase().contains(jobQuery) ||
-              job.plateNumber.toString().toLowerCase().contains(jobQuery) ||
-              job.vehicleIdentificationNumber.toString().toLowerCase().contains(
-                jobQuery,
-              );
-        }).toList(),
-      );
-    }
-  }
-
-  void searchEngineForConverters() {
-    converterQuery.value = searchForConverters.value.text.toLowerCase();
-    if (converterQuery.value.isEmpty) {
-      filteredConverters.clear();
-    } else {
-      filteredConverters.assignAll(
-        allConverters.where((converter) {
-          return converter.converterNumber.toString().toLowerCase().contains(
-                converterQuery,
-              ) ||
-              converter.name.toString().toLowerCase().contains(
-                converterQuery,
-              ) ||
-              converter.description.toString().toLowerCase().contains(
-                converterQuery,
-              );
-        }).toList(),
-      );
-    }
-  }
-
-  void searchEngineForInverntoryItems() {
-    inventoryQuery.value = searchForInventoryItems.value.text.toLowerCase();
-    if (inventoryQuery.value.isEmpty) {
-      filteredInventeryItems.clear();
-    } else {
-      filteredInventeryItems.assignAll(
-        allInventeryItems.where((item) {
-          return item.name.toString().toLowerCase().contains(inventoryQuery) ||
-              item.code.toString().toLowerCase().contains(inventoryQuery);
-        }).toList(),
-      );
-    }
-  }
-
-  void searchEngineForConvertersDetails() {
-    converterDetailsQuery.value = searchForConvertersDetails.value.text
-        .toLowerCase();
-    if (converterDetailsQuery.value.isEmpty) {
-      filteredConvertersDetails.clear();
-    } else {
-      filteredConvertersDetails.assignAll(
-        allConvertersDetails.where((item) {
-          return item.name.toString().toLowerCase().contains(inventoryQuery) ||
-              item.number.toString().toLowerCase().contains(inventoryQuery);
-        }).toList(),
-      );
     }
   }
 

@@ -331,8 +331,13 @@ Widget tableOfScreens({
       controller: scrollController,
       child: PaginatedDataTable(
         controller: scrollController,
-        rowsPerPage: 10,
+        rowsPerPage: controller.numberOfIssuesgDocs.value <= 12
+            ? 12
+            : controller.numberOfIssuesgDocs.value >= 30
+            ? 30
+            : controller.numberOfIssuesgDocs.value,
         showCheckboxColumn: false,
+
         dataRowMaxHeight: 40,
         dataRowMinHeight: 30,
         columnSpacing: 15,

@@ -1,3 +1,4 @@
+import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/issue_items_controller.dart';
@@ -292,36 +293,39 @@ ElevatedButton newItemsButton(
   return ElevatedButton(
     onPressed: () {
       if (isConverter == false) {
-        controller.searchForInventoryItems.clear();
-        controller.getAllInventeryItems();
+        controller.allInventeryItems.clear();
       } else {
-        controller.searchForConvertersDetails.clear();
-        controller.getAllConvertersDetails();
+        controller.allConvertersDetails.clear();
       }
       dialog(
         constraints: constraints,
         context: context,
         dialogName: isConverter == false ? 'Inventery Items' : 'Converters',
-        hintText: isConverter == false
-            ? 'Search of items'
-            : "Search for converters",
-        controllerForSearchField: isConverter == false
-            ? controller.searchForInventoryItems
-            : controller.searchForConvertersDetails,
-        onChangedForSearchField: (_) {
+        loading: controller.loadingItemsTable,
+        search: () {
           isConverter == false
-              ? controller.searchEngineForInverntoryItems()
-              : controller.searchEngineForConvertersDetails();
+              ? controller.filterSearchForInventoryItemsAndConvertesrDetails(
+                  'items',
+                )
+              : controller.filterSearchForInventoryItemsAndConvertesrDetails(
+                  'converters',
+                );
         },
-        onPressedForClearSearch: () {
-          if (isConverter == false) {
-            controller.searchForInventoryItems.clear();
-            controller.searchEngineForInverntoryItems();
-          } else {
-            controller.searchForConvertersDetails.clear();
-            controller.searchEngineForConvertersDetails();
-          }
-        },
+        searchBar: Row(
+          spacing: 10,
+          children: [
+            myTextFormFieldWithBorder(
+              width: 200,
+              labelText: 'Code',
+              controller: controller.codeFilter,
+            ),
+            myTextFormFieldWithBorder(
+              width: 200,
+              labelText: 'Name',
+              controller: controller.nameFilter,
+            ),
+          ],
+        ),
         table: itemsTable(constraints, controller, context, isConverter),
       );
     },
@@ -333,147 +337,123 @@ ElevatedButton newItemsButton(
   );
 }
 
-Expanded itemsTable(
+Widget itemsTable(
   BoxConstraints constraints,
   IssueItemsController controller,
   BuildContext context,
   bool isConverter,
 ) {
-  return Expanded(
-    child: GetX<IssueItemsController>(
-      builder: (controller) {
-        return controller.loadingItemsTable.value
-            ? Center(child: loadingProcess)
-            : controller.loadingItemsTable.isFalse &&
-                  (isConverter == false
-                      ? controller.allInventeryItems.isEmpty
-                      : controller.allConvertersDetails.isEmpty)
-            ? const Center(child: Text('No Data'))
-            : SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth / 1.5 - 20,
-                    ),
-                    child: DataTable(
-                      showCheckboxColumn: false,
-                      horizontalMargin: horizontalMarginForTable,
-                      dataRowMaxHeight: 40,
-                      dataRowMinHeight: 30,
-                      columnSpacing: 5,
-                      border: TableBorder.symmetric(
-                        outside: const BorderSide(),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      showBottomBorder: true,
-                      dataTextStyle: regTextStyle,
-                      headingTextStyle: fontStyleForTableHeader,
-                      headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-                      columns: [
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: isConverter == false ? 'Code' : 'Number',
-                          ),
-                        ),
-                        DataColumn(
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Name',
-                          ),
-                        ),
-                        DataColumn(
-                          numeric: true,
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Quantity',
-                          ),
-                        ),
-                        DataColumn(
-                          numeric: true,
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Price',
-                          ),
-                        ),
-                        DataColumn(
-                          numeric: true,
-                          label: AutoSizedText(
-                            constraints: constraints,
-                            text: 'Total',
-                          ),
-                        ),
-                      ],
-                      rows: isConverter == false
-                          // ---------------- INVENTORY MODE ----------------
-                          ? (controller
-                                        .searchForInventoryItems
-                                        .value
-                                        .text
-                                        .isEmpty
-                                    ? controller.allInventeryItems
-                                    : controller.filteredInventeryItems)
-                                // .where(
-                                //   (r) => !controller.selectedInventeryItems.any(
-                                //     (sel) =>
-                                //         (sel.inventoryItemId == r.id) &&
-                                //         (sel.isDeleted != true),
-                                //   ),
-                                // )
-                                .map((item) {
-                                  final itemId = item.id ?? '';
-                                  final index = controller.allInventeryItems
-                                      .indexWhere((r) => r.id == itemId);
-                                  return dataRowForTheItemTable(
-                                    item,
-                                    context,
-                                    constraints,
-                                    itemId,
-                                    controller,
-                                    index,
-                                    isConverter,
-                                  );
-                                })
-                                .toList()
-                          // ---------------- CONVERTER MODE ----------------
-                          : (controller
-                                        .searchForInventoryItems
-                                        .value
-                                        .text
-                                        .isEmpty
-                                    ? controller.allConvertersDetails
-                                    : controller.filteredConvertersDetails)
-                                .where(
-                                  (r) =>
-                                      !controller.selectedConvertersDetails.any(
-                                        (sel) =>
-                                            (sel.id == r.id) &&
-                                            (sel.isDeleted != true),
-                                      ),
-                                )
-                                .map((item) {
-                                  final itemId = item.id ?? '';
-                                  final index = controller.allConvertersDetails
-                                      .indexWhere((r) => r.id == itemId);
-                                  return dataRowForTheItemTable(
-                                    item,
-                                    context,
-                                    constraints,
-                                    itemId,
-                                    controller,
-                                    index,
-                                    isConverter,
-                                  );
-                                })
-                                .toList(),
-                    ),
-                  ),
-                ),
-              );
-      },
-    ),
+  return GetX<IssueItemsController>(
+    builder: (controller) {
+      return SizedBox(
+        width: constraints.maxWidth,
+        child: PaginatedDataTable(
+          showCheckboxColumn: false,
+          horizontalMargin: horizontalMarginForTable,
+          dataRowMaxHeight: 40,
+          dataRowMinHeight: 30,
+          rowsPerPage: 13,
+          columnSpacing: 5,
+          columns: [
+            DataColumn(
+              label: AutoSizedText(
+                constraints: constraints,
+                text: isConverter == false ? 'Code' : 'Number',
+              ),
+            ),
+            DataColumn(
+              label: AutoSizedText(constraints: constraints, text: 'Name'),
+            ),
+            DataColumn(
+              numeric: true,
+              label: AutoSizedText(constraints: constraints, text: 'Quantity'),
+            ),
+            DataColumn(
+              numeric: true,
+              label: AutoSizedText(constraints: constraints, text: 'Price'),
+            ),
+            DataColumn(
+              numeric: true,
+              label: AutoSizedText(constraints: constraints, text: 'Total'),
+            ),
+          ],
+          source: CardDataSourceForItemsAndConvertersDetails(
+            cards: isConverter == false
+                ? (controller.allInventeryItems.isEmpty
+                      ? []
+                      : controller.allInventeryItems)
+                : (controller.allConvertersDetails.isEmpty
+                      ? []
+                      : controller.allConvertersDetails
+                            .where(
+                              (r) => !controller.selectedConvertersDetails.any(
+                                (sel) =>
+                                    (sel.id == r.id) && (sel.isDeleted != true),
+                              ),
+                            )
+                            .toList()),
+            context: context,
+            constraints: constraints,
+            controller: controller,
+            isConverter: isConverter,
+          ),
+          // rows:
+          // isConverter == false
+          //     // ---------------- INVENTORY MODE ----------------
+          //     ? (controller.searchForInventoryItems.value.text.isEmpty
+          //               ? controller.allInventeryItems
+          //               : controller.filteredInventeryItems)
+          //           // .where(
+          //           //   (r) => !controller.selectedInventeryItems.any(
+          //           //     (sel) =>
+          //           //         (sel.inventoryItemId == r.id) &&
+          //           //         (sel.isDeleted != true),
+          //           //   ),
+          //           // )
+          //           .map((item) {
+          //             final itemId = item.id ?? '';
+          //             final index = controller.allInventeryItems.indexWhere(
+          //               (r) => r.id == itemId,
+          //             );
+          //             return dataRowForTheItemTable(
+          //               item,
+          //               context,
+          //               constraints,
+          //               itemId,
+          //               controller,
+          //               index,
+          //               isConverter,
+          //             );
+          //           })
+          //           .toList()
+          //     // ---------------- CONVERTER MODE ----------------
+          //     : (controller.searchForInventoryItems.value.text.isEmpty
+          //               ? controller.allConvertersDetails
+          //               : controller.filteredConvertersDetails)
+          //           .where(
+          //             (r) => !controller.selectedConvertersDetails.any(
+          //               (sel) => (sel.id == r.id) && (sel.isDeleted != true),
+          //             ),
+          //           )
+          //           .map((item) {
+          //             final itemId = item.id ?? '';
+          //             final index = controller.allConvertersDetails.indexWhere(
+          //               (r) => r.id == itemId,
+          //             );
+          //             return dataRowForTheItemTable(
+          //               item,
+          //               context,
+          //               constraints,
+          //               itemId,
+          //               controller,
+          //               index,
+          //               isConverter,
+          //             );
+          //           })
+          //           .toList(),
+        ),
+      );
+    },
   );
 }
 
@@ -492,7 +472,11 @@ DataRow dataRowForTheItemTable(
         controller.allInventeryItems[index].isSelected = true;
         controller.addSelectedInventoryItems();
       } else {
-        controller.allConvertersDetails[index].isSelected = true;
+        final item = controller.allConvertersDetails.firstWhere(
+          (i) => i.id == itemId,
+        );
+
+        item.isSelected = true;
         controller.addSelectedConvertersDetails();
       }
     },
@@ -506,10 +490,15 @@ DataRow dataRowForTheItemTable(
               ? itemData.code ?? ''
               : itemData.number ?? '',
           formatDouble: false,
+          maxWidth: null,
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: itemData.name ?? '', formatDouble: false),
+        textForDataRowInTable(
+          text: itemData.name ?? '',
+          formatDouble: false,
+          maxWidth: null,
+        ),
       ),
       DataCell(
         textForDataRowInTable(
@@ -534,4 +523,47 @@ DataRow dataRowForTheItemTable(
       ),
     ],
   );
+}
+
+class CardDataSourceForItemsAndConvertersDetails extends DataTableSource {
+  final List<BaseModelForIssuingItems> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final IssueItemsController controller;
+  final bool isConverter;
+
+  CardDataSourceForItemsAndConvertersDetails({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+    required this.isConverter,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final item = cards[index];
+    final cardId = item.id ?? '';
+
+    return dataRowForTheItemTable(
+      item,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+      isConverter,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }
