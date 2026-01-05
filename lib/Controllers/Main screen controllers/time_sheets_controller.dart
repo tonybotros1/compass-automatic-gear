@@ -64,6 +64,7 @@ class TimeSheetsController extends GetxController {
             List<ActivePeriods> period =
                 allTimeSheets[index].activePeriods ?? [];
             period.last.to = DateTime.now();
+            allTimeSheets.refresh();
           }
           break;
 
@@ -74,11 +75,13 @@ class TimeSheetsController extends GetxController {
             List<ActivePeriods> period =
                 allTimeSheets[index].activePeriods ?? [];
             period.add(ActivePeriods(from: DateTime.now(), to: null));
+            allTimeSheets.refresh();
           }
           break;
         case "time_sheets_finish_function":
           String updatedId = message["data"]["_id"];
           allTimeSheets.removeWhere((m) => m.id == updatedId);
+          allTimeSheets.refresh();
 
           break;
       }
@@ -106,6 +109,7 @@ class TimeSheetsController extends GetxController {
 
         sheetDurations[sheet.id ?? ''] = total;
       }
+      allTimeSheets.refresh();
     });
   }
 
@@ -144,7 +148,9 @@ class TimeSheetsController extends GetxController {
 
   Future getAllTechnicians() async {
     isScreenLodingForTechnicians.value = true;
-    allTechnician.assignAll(await helper.getAllEmployeesByDepartment('Time Sheets'));
+    allTechnician.assignAll(
+      await helper.getAllEmployeesByDepartment('Time Sheets'),
+    );
     isScreenLodingForTechnicians.value = false;
   }
 
@@ -383,7 +389,10 @@ class TimeSheetsController extends GetxController {
 
     if (hasActiveJob) {
       // Show warning (you can use your custom snackbar/dialog here)
-      showSnackBar('Alert', 'This employee is already working on another job!');
+      alertMessage(
+        context: Get.context!,
+        content: 'This employee is already working on another job!',
+      );
       return true;
     }
     return false;

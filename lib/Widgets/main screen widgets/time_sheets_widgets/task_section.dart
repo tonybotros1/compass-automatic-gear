@@ -76,7 +76,7 @@ Future<dynamic> taskDialog({
                                     return HoverCard(
                                       emoji: taskENName,
                                       name: taskARName,
-                                      description: '',
+                                      description: task.category ?? '',
                                       color: cardColor,
                                       onTap: () {
                                         controller.selectedTask.value =

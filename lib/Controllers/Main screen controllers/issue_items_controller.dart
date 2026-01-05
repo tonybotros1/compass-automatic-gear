@@ -961,11 +961,6 @@ class IssueItemsController extends GetxController {
     selectedConvertersDetails.refresh();
     allConvertersDetails.refresh();
     isIssuingConvertersDetailsModified.value = true;
-    print(
-      allConvertersDetails.where((i) => i.isSelected == true).map((i) {
-        print(i.id);
-      }),
-    );
 
     Get.back();
   }

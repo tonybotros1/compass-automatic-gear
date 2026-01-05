@@ -38,6 +38,18 @@ IconButton dateRange({
   );
 }
 
+TextStyle fontStyleForTimeSheetsMainInfo = const TextStyle(
+  color: Colors.black,
+  fontSize: 14,
+  fontWeight: FontWeight.bold,
+);
+
+TextStyle fontStyleForTimeSheetsHeader = const TextStyle(
+  color: Colors.grey,
+  fontSize: 12,
+  fontWeight: FontWeight.bold,
+);
+
 var fontStyleForCheckBoxes = TextStyle(
   color: Colors.grey.shade800,
   fontWeight: FontWeight.bold,

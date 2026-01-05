@@ -64,7 +64,7 @@ Widget tableOfScreens({
             label: AutoSizedText(
               constraints: constraints,
               text: isConverter == false
-                  ? 'Inventory Code'
+                  ? 'Inventory Item Code'
                   : 'Converter Number',
             ),
           ),
@@ -72,7 +72,9 @@ Widget tableOfScreens({
             columnWidth: const IntrinsicColumnWidth(flex: 2.0),
             label: AutoSizedText(
               constraints: constraints,
-              text: isConverter == false ? 'Inventory Name' : 'Converter Name',
+              text: isConverter == false
+                  ? 'Inventory Item Name'
+                  : 'Converter Name',
             ),
           ),
           DataColumn(
@@ -174,12 +176,14 @@ DataRow dataRowForTheTable(
               ? invoiceItemsData.code ?? ''
               : invoiceItemsData.number ?? '',
           maxWidth: null,
+          formatDouble: false
         ),
       ),
       DataCell(
         textForDataRowInTable(
           text: invoiceItemsData.name ?? '',
           maxWidth: null,
+          formatDouble: false
         ),
       ),
       DataCell(
