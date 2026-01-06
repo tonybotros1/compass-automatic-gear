@@ -1,4 +1,6 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:datahubai/Models/job%20tasks/job_tasks_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/time_sheets_controller.dart';
@@ -42,6 +44,47 @@ Future<dynamic> taskDialog({
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: GetX<TimeSheetsController>(
+                builder: (controller) {
+                  return CustomSlidingSegmentedControl<int>(
+                    height: 60,
+                    fixedWidth: 100,
+                    initialValue: 1,
+                    children: controller.buildSegmentedButtons(
+                      controller.allTasks.isEmpty
+                          ? []
+                          : controller.allTasks
+                                .map((task) => task.category)
+                                .toSet()
+                                .toList(),
+                    ),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.lightBackgroundGray,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    thumbDecoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(1),
+                          blurRadius: 4.0,
+                          spreadRadius: 1.0,
+                          offset: const Offset(0.0, 2.0),
+                        ),
+                      ],
+                    ),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInToLinear,
+                    onValueChanged: (v) {
+                      controller.onChooseForLabelPicker(v);
+                    },
+                  );
+                },
+              ),
+            ),
             Expanded(
               child: GetX<TimeSheetsController>(
                 builder: (controller) {
@@ -63,10 +106,14 @@ Future<dynamic> taskDialog({
                                 crossAxisSpacing: 40,
                                 mainAxisSpacing: 40,
                                 children: List.generate(
-                                  controller.allTasks.length,
+                                  controller.filteredTasks.isEmpty
+                                      ? controller.allTasks.length
+                                      : controller.filteredTasks.length,
                                   (index) {
                                     JobTasksModel task =
-                                        controller.allTasks[index];
+                                        controller.filteredTasks.isEmpty
+                                        ? controller.allTasks[index]
+                                        : controller.filteredTasks[index];
                                     String taskENName = task.nameEN ?? '';
                                     String taskARName = task.nameAR ?? '';
 

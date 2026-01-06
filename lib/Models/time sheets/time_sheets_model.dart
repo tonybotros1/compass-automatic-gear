@@ -13,8 +13,10 @@ class TimeSheetsModel {
   String? brandName;
   String? modelName;
   String? plateNumber;
+  String? plateCode;
   String? color;
   String? logo;
+  String? employeeJobTitle;
 
   TimeSheetsModel({
     this.id,
@@ -33,6 +35,8 @@ class TimeSheetsModel {
     this.plateNumber,
     this.logo,
     this.color,
+    this.plateCode,
+    this.employeeJobTitle,
   });
   TimeSheetsModel.fromJson(Map<String, dynamic> json) {
     id = json.containsKey('_id') ? json['_id']?.toString() : null;
@@ -81,6 +85,12 @@ class TimeSheetsModel {
     plateNumber = json.containsKey('plate_number')
         ? json['plate_number']?.toString()
         : null;
+    plateCode = json.containsKey('plate_code')
+        ? json['plate_code']?.toString() ?? ''
+        : '';
+    employeeJobTitle = json.containsKey('employee_job_title')
+        ? json['employee_job_title']?.toString() ?? ''
+        : '';
     color = json.containsKey('color') ? json['color']?.toString() : null;
     logo = json.containsKey('logo') ? json['logo']?.toString() : null;
   }
@@ -113,15 +123,14 @@ class ActivePeriods {
   DateTime? to;
   ActivePeriods({this.from, this.to});
   ActivePeriods.fromJson(Map<String, dynamic> json) {
-  from = (json.containsKey('from') && json['from'] != null)
-      ? DateTime.tryParse(json['from'].toString())
-      : null;
+    from = (json.containsKey('from') && json['from'] != null)
+        ? DateTime.tryParse(json['from'].toString())
+        : null;
 
-  to = (json.containsKey('to') && json['to'] != null)
-      ? DateTime.tryParse(json['to'].toString())
-      : null;
-}
-
+    to = (json.containsKey('to') && json['to'] != null)
+        ? DateTime.tryParse(json['to'].toString())
+        : null;
+  }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};

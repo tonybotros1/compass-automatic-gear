@@ -6,6 +6,7 @@ class ApprovedJobsModel {
   String? logo;
   String? platNumber;
   String? jobNumber;
+  String? plateCode;
 
   ApprovedJobsModel({
     this.id,
@@ -33,5 +34,8 @@ class ApprovedJobsModel {
     platNumber = json.containsKey('plate_number')
         ? json['plate_number'] ?? ""
         : "";
+    plateCode = json.containsKey('plate_code')
+        ? json['plate_code']?.toString() ?? ''
+        : '';
   }
 }

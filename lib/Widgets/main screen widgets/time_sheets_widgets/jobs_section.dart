@@ -72,8 +72,8 @@ Future<dynamic> jobsDialog({
                                     return HoverCard(
                                       emoji: '${data.brand} ${data.model}',
                                       name:
-                                          '${data.platNumber}  |  ${data.color}',
-                                      description: data.jobNumber ?? '',
+                                          '${data.platNumber ?? ''} - ${data.plateCode ?? ''}',
+                                      description: data.color ?? '',
                                       color: cardColor,
                                       onTap: () {
                                         controller.selectedJob.value =

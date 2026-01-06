@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:datahubai/consts.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,6 +29,7 @@ class TimeSheetsController extends GetxController {
   RxBool startSheet = RxBool(false);
   final RxMap<String, dynamic> allTechnician = RxMap<String, dynamic>({});
   final RxList<JobTasksModel> allTasks = RxList<JobTasksModel>([]);
+  final RxList<JobTasksModel> filteredTasks = RxList<JobTasksModel>([]);
   final RxList<TimeSheetsModel> allTimeSheets = RxList<TimeSheetsModel>([]);
   final RxList<ApprovedJobsModel> allJobCards = <ApprovedJobsModel>[].obs;
   final Map<String, Map<String, String>> modelCache = {};
@@ -35,6 +37,7 @@ class TimeSheetsController extends GetxController {
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
   RxBool pausingAllOpenTimeSheets = RxBool(false);
+
   @override
   void onInit() async {
     connectWebSocket();
@@ -86,6 +89,36 @@ class TimeSheetsController extends GetxController {
           break;
       }
     });
+  }
+
+  void filterJobTasks(String? category) {
+    if (category == null) {
+      filteredTasks.clear();
+    }
+    filteredTasks.assignAll(
+      allTasks.where(
+        (task) => task.category?.toString().trim() == category?.trim(),
+      ),
+    );
+    filteredTasks.refresh();
+    allTasks.refresh();
+  }
+
+  void onChooseForLabelPicker(int index) {
+    if (index == 1) {
+      filterJobTasks(null);
+    } else {
+      filterJobTasks((index - 1).toString());
+    }
+  }
+
+  Map<int, Widget> buildSegmentedButtons(List list) {
+    final Map<int, Widget> map = {1: const Text('ALL')};
+
+    for (int i = 1; i <= list.length; i++) {
+      map[i + 1] = Text('$i ');
+    }
+    return map;
   }
 
   void startRealTimeTimer() {

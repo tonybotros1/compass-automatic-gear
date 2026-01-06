@@ -193,7 +193,7 @@ class TimeSheets extends StatelessWidget {
                                                       fontStyleForTimeSheetsMainInfo,
                                                 ),
                                                 Text(
-                                                  'Technician',
+                                                  sheet.employeeJobTitle ?? '',
                                                   style:
                                                       fontStyleForTimeSheetsHeader,
                                                 ),
@@ -213,7 +213,7 @@ class TimeSheets extends StatelessWidget {
                                                       fontStyleForTimeSheetsMainInfo,
                                                 ),
                                                 Text(
-                                                  'Vehicle',
+                                                  '${sheet.plateNumber} - ${sheet.plateCode}',
                                                   style:
                                                       fontStyleForTimeSheetsHeader,
                                                 ),
@@ -228,12 +228,12 @@ class TimeSheets extends StatelessWidget {
                                               spacing: 5,
                                               children: [
                                                 Text(
-                                                  '${sheet.taskEnName ?? ''} - ${sheet.taskArName ?? ''}',
+                                                  sheet.taskEnName ?? '',
                                                   style:
                                                       fontStyleForTimeSheetsMainInfo,
                                                 ),
                                                 Text(
-                                                  'Task',
+                                                  sheet.taskArName ?? '',
                                                   style:
                                                       fontStyleForTimeSheetsHeader,
                                                 ),
@@ -284,7 +284,17 @@ class TimeSheets extends StatelessWidget {
                                               ],
                                             ),
                                           ),
-                                          Expanded(
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                              color: Colors.grey.shade200,
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 8,
+                                              horizontal: 16,
+                                            ),
+
                                             child: Text(
                                               isPaused ? 'Paused' : 'Running',
                                               style: TextStyle(
@@ -302,38 +312,55 @@ class TimeSheets extends StatelessWidget {
                                               mainAxisAlignment:
                                                   MainAxisAlignment.end,
                                               children: [
-                                                IconButton(
-                                                  icon: Icon(
-                                                    !isPaused
-                                                        ? Icons.pause_rounded
-                                                        : Icons
-                                                              .play_arrow_rounded,
+                                                Container(
+                                                  padding: const EdgeInsets.all(
+                                                    8,
                                                   ),
-                                                  color: CupertinoColors
-                                                      .systemGrey,
-                                                  onPressed: () {
-                                                    if (isPaused) {
-                                                      controller
-                                                          .continueFunction(
-                                                            sheet.id,
-                                                          );
-                                                    } else {
-                                                      controller.pauseFunction(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade200,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: IconButton(
+                                                    icon: Icon(
+                                                      !isPaused
+                                                          ? Icons.pause_rounded
+                                                          : Icons
+                                                                .play_arrow_rounded,
+                                                    ),
+                                                    color: CupertinoColors
+                                                        .systemGrey,
+                                                    onPressed: () {
+                                                      if (isPaused) {
+                                                        controller
+                                                            .continueFunction(
+                                                              sheet.id,
+                                                            );
+                                                      } else {
+                                                        controller
+                                                            .pauseFunction(
+                                                              sheet.id,
+                                                            );
+                                                      }
+                                                    },
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: const EdgeInsets.all(
+                                                    8,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade200,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: IconButton(
+                                                    onPressed: () {
+                                                      controller.finishFunction(
                                                         sheet.id,
                                                       );
-                                                    }
-                                                  },
-                                                ),
-                                                IconButton(
-                                                  color: CupertinoColors
-                                                      .systemGrey,
-                                                  onPressed: () {
-                                                    controller.finishFunction(
-                                                      sheet.id,
-                                                    );
-                                                  },
-                                                  icon: const Icon(
-                                                    Icons.task_alt_rounded,
+                                                    },
+                                                    icon: const Icon(
+                                                      Icons.task_alt_rounded,
+                                                    ),
                                                   ),
                                                 ),
                                               ],
