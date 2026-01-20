@@ -326,6 +326,9 @@ class TimeSheets extends StatelessWidget {
                                                           ? Icons.pause_rounded
                                                           : Icons
                                                                 .play_arrow_rounded,
+                                                      color: !isPaused
+                                                          ? Colors.orange
+                                                          : Colors.green,
                                                     ),
                                                     color: CupertinoColors
                                                         .systemGrey,
@@ -360,6 +363,7 @@ class TimeSheets extends StatelessWidget {
                                                     },
                                                     icon: const Icon(
                                                       Icons.task_alt_rounded,
+                                                      color: Colors.red,
                                                     ),
                                                   ),
                                                 ),

@@ -19,96 +19,98 @@ class InventeryItems extends StatelessWidget {
         builder: (context, constraints) {
           return Padding(
             padding: screenPadding,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GetBuilder<InventoryItemsController>(
-                      init: InventoryItemsController(),
-                      builder: (controller) {
-                        return Row(
-                          spacing: 10,
-                          children: [
-                            myTextFormFieldWithBorder(
-                              width: 300,
-                              labelText: 'Code',
-                              controller: controller.inventoryCodeFilter.value,
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 300,
-                              labelText: 'Name',
-                              controller: controller.inventoryNameFilter.value,
-                            ),
-                            myTextFormFieldWithBorder(
-                              width: 170,
-                              labelText: 'Min. Quantity',
-                              controller:
-                                  controller.inventoryMinQuantityFilter.value,
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    Row(
-                      spacing: 10,
-                      children: [
-                        GetX<InventoryItemsController>(
-                          builder: (controller) {
-                            return ElevatedButton(
-                              style: findButtonStyle,
-                              onPressed: controller.isScreenLoding.isFalse
-                                  ? () async {
-                                      controller
-                                          .filterSearchFirInventoryItems();
-                                    }
-                                  : null,
-                              child: controller.isScreenLoding.isFalse
-                                  ? Text(
-                                      'Find',
-                                      style: fontStyleForElevatedButtons,
-                                    )
-                                  : loadingProcess,
-                            );
-                          },
-                        ),
-                        GetBuilder<InventoryItemsController>(
-                          builder: (controller) {
-                            return newCurrencyButton(
-                              context,
-                              constraints,
-                              controller,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                GetX<InventoryItemsController>(
-                  builder: (controller) {
-                    return Container(
-                      width: constraints.maxWidth,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(15),
-                          bottomRight: Radius.circular(15),
-                          topLeft: Radius.circular(2),
-                          topRight: Radius.circular(2),
-                        ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GetBuilder<InventoryItemsController>(
+                        init: InventoryItemsController(),
+                        builder: (controller) {
+                          return Row(
+                            spacing: 10,
+                            children: [
+                              myTextFormFieldWithBorder(
+                                width: 300,
+                                labelText: 'Code',
+                                controller: controller.inventoryCodeFilter.value,
+                              ),
+                              myTextFormFieldWithBorder(
+                                width: 300,
+                                labelText: 'Name',
+                                controller: controller.inventoryNameFilter.value,
+                              ),
+                              myTextFormFieldWithBorder(
+                                width: 170,
+                                labelText: 'Min. Quantity',
+                                controller:
+                                    controller.inventoryMinQuantityFilter.value,
+                              ),
+                            ],
+                          );
+                        },
                       ),
-                      child: tableOfScreens(
-                        constraints: constraints,
-                        context: context,
-                        controller: controller,
+                      Row(
+                        spacing: 10,
+                        children: [
+                          GetX<InventoryItemsController>(
+                            builder: (controller) {
+                              return ElevatedButton(
+                                style: findButtonStyle,
+                                onPressed: controller.isScreenLoding.isFalse
+                                    ? () async {
+                                        controller
+                                            .filterSearchFirInventoryItems();
+                                      }
+                                    : null,
+                                child: controller.isScreenLoding.isFalse
+                                    ? Text(
+                                        'Find',
+                                        style: fontStyleForElevatedButtons,
+                                      )
+                                    : loadingProcess,
+                              );
+                            },
+                          ),
+                          GetBuilder<InventoryItemsController>(
+                            builder: (controller) {
+                              return newCurrencyButton(
+                                context,
+                                constraints,
+                                controller,
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  GetX<InventoryItemsController>(
+                    builder: (controller) {
+                      return Container(
+                        width: constraints.maxWidth,
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(15),
+                            bottomRight: Radius.circular(15),
+                            topLeft: Radius.circular(2),
+                            topRight: Radius.circular(2),
+                          ),
+                        ),
+                        child: tableOfScreens(
+                          constraints: constraints,
+                          context: context,
+                          controller: controller,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         },
