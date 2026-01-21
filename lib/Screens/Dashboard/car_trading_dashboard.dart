@@ -535,7 +535,14 @@ class CarTradingDashboard extends StatelessWidget {
                                                     controller.filterSearch();
                                                     controller
                                                         .filterGeneralExpensesSearch();
-                                                    controller.getCashOnHand();
+                                                    controller
+                                                        .getCashOnHandOrBankBalance(
+                                                          'CASH',
+                                                        );
+                                                    controller
+                                                        .getCashOnHandOrBankBalance(
+                                                          'FAB BANK',
+                                                        );
                                                     controller
                                                         .getCapitalsOROutstandingSummary(
                                                           'capitals',
@@ -587,42 +594,72 @@ class CarTradingDashboard extends StatelessWidget {
                           ),
                           GetX<CarTradingDashboardController>(
                             builder: (controller) {
-                              return SizedBox(
-                                height: 200,
-                                width: 300,
-                                child: Column(
-                                  spacing: 10,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: SummaryBox(
-                                        title: 'CASH ON HAND',
-                                        value:
-                                            '${controller.totalNETsForAll.value}',
-                                        icon: Icons.wallet,
-                                        iconColor: const Color(
-                                          0xFFFFE8D9,
-                                        ).withValues(alpha: 0.8),
-                                        textColor: Colors.grey[700],
-                                        showRefreshIcon: false,
-                                      ),
+                              return Row(
+                                spacing: 10,
+                                children: [
+                                  SizedBox(
+                                    height: 200,
+                                    width: 300,
+                                    child: Column(
+                                      spacing: 10,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: SummaryBox(
+                                            title: 'BANK BALANCE',
+                                            value:
+                                                '${controller.totalNETsForBanckBalance.value}',
+                                            icon: Icons.account_balance,
+                                            iconColor: const Color(
+                                              0xFFACBAC4,
+                                            ).withValues(alpha: 0.8),
+                                            textColor: Colors.grey[700],
+                                            showRefreshIcon: false,
+                                          ),
+                                        ),
+                                        const Expanded(child: SizedBox()),
+                                      ],
                                     ),
-                                    Expanded(
-                                      child: SummaryBox(
-                                        title: 'NET PROFIT',
-                                        value:
-                                            '${controller.totalNetProfit.value}',
-                                        icon: Icons.pie_chart,
-                                        iconColor: const Color(
-                                          0xffB4EBE6,
-                                        ).withValues(alpha: 0.8),
-                                        textColor: Colors.green.shade700,
-                                        showRefreshIcon: false,
-                                      ),
+                                  ),
+                                  SizedBox(
+                                    height: 200,
+                                    width: 300,
+                                    child: Column(
+                                      spacing: 10,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: SummaryBox(
+                                            title: 'CASH ON HAND',
+                                            value:
+                                                '${controller.totalNETsForAll.value}',
+                                            icon: Icons.wallet,
+                                            iconColor: const Color(
+                                              0xFFFFE8D9,
+                                            ).withValues(alpha: 0.8),
+                                            textColor: Colors.grey[700],
+                                            showRefreshIcon: false,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: SummaryBox(
+                                            title: 'NET PROFIT',
+                                            value:
+                                                '${controller.totalNetProfit.value}',
+                                            icon: Icons.pie_chart,
+                                            iconColor: const Color(
+                                              0xffB4EBE6,
+                                            ).withValues(alpha: 0.8),
+                                            textColor: Colors.green.shade700,
+                                            showRefreshIcon: false,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               );
                             },
                           ),

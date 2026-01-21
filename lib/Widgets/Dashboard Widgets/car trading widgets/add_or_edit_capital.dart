@@ -178,6 +178,9 @@ Widget tableOfScreens({
         ),
       ),
       DataColumn(
+        label: AutoSizedText(text: 'Account Name', constraints: constraints),
+      ),
+      DataColumn(
         label: AutoSizedText(constraints: constraints, text: 'Comments'),
       ),
       DataColumn(
@@ -250,6 +253,7 @@ DataRow dataRowForTheTable(
       DataCell(
         Text(isGeneralExpenses == false ? itemData.name : itemData.item),
       ),
+      DataCell(Text(itemData.accountName)),
       DataCell(Text(itemData.comment)),
       DataCell(
         textForDataRowInTable(
@@ -313,6 +317,8 @@ IconButton editSection(
       controller.pay.text = itemData.pay.toString();
       controller.receive.text = itemData.receive.toString();
       controller.comments.value.text = itemData.comment;
+      controller.accountName.text = itemData.accountName;
+      controller.accountNameId.value = itemData.accountNameId;
       controller.itemDate.value.text = textToDate(itemData.date);
       itemDialog(
         isGeneralExpenses: isGeneralExpenses,
@@ -346,6 +352,8 @@ ElevatedButton newItemButton(
       controller.pay.text = '0';
       controller.receive.text = '0';
       controller.comments.value.text = '';
+      controller.accountName.clear();
+      controller.accountNameId.value = '';
       controller.itemDate.value.text = textToDate(DateTime.now());
       itemDialog(
         isGeneralExpenses: isGeneralExpenses,

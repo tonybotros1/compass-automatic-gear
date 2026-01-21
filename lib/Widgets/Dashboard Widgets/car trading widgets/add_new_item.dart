@@ -122,6 +122,38 @@ Widget addNewItemOrEdit({
 
             const SizedBox(height: 10),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: CustomDropdown(
+                    textcontroller: controller.accountName.text,
+                    hintText: 'Account Name',
+                    showedSelectedName: 'name',
+                    onChanged: (key, value) {
+                      controller.accountNameId.value = key;
+                      controller.accountName.text = value['name'];
+                    },
+                    onDelete: () {
+                      controller.accountNameId.value = '';
+                      controller.accountName.clear();
+                    },
+                    onOpen: () {
+                      return controller.getNamesOfAccount();
+                    },
+                  ),
+                ),
+                valSectionInTheTable(
+                  controller.listOfValuesController,
+                  constraints,
+                  'CAR_TRADING_CASH_BANK',
+                  'New Account',
+                  'Car trading Cash Bank',
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            Row(
               children: [
                 myTextFormFieldWithBorder(
                   focusNode: controller.focusNodeForitems3,

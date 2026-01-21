@@ -66,6 +66,7 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalReceivesForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAll = RxDouble(0.0);
+  RxDouble totalNETsForBanckBalance = RxDouble(0.0);
   RxDouble totalNetProfit = RxDouble(0.0);
   DateFormat inputFormat = DateFormat("dd-MM-yyyy");
   RxBool isNewStatusSelected = RxBool(false);
@@ -101,6 +102,8 @@ class CarTradingDashboardController extends GetxController {
   TextEditingController note = TextEditingController();
   TextEditingController item = TextEditingController();
   TextEditingController name = TextEditingController();
+  TextEditingController accountName = TextEditingController();
+  RxString accountNameId = RxString('');
   Rx<TextEditingController> itemDate = TextEditingController().obs;
   RxString query = RxString('');
   RxString queryForItems = RxString('');
@@ -175,7 +178,8 @@ class CarTradingDashboardController extends GetxController {
   @override
   void onInit() async {
     connectWebSocket();
-    getCashOnHand();
+    getCashOnHandOrBankBalance('CASH');
+    getCashOnHandOrBankBalance('FAB BANK');
     getCapitalsOROutstandingSummary('capitals');
     getCapitalsOROutstandingSummary('outstanding');
     filterGeneralExpensesSearch();
@@ -406,6 +410,10 @@ class CarTradingDashboardController extends GetxController {
     return await helper.getAllListValues('NAMES_OF_PEOPLE');
   }
 
+  Future<Map<String, dynamic>> getNamesOfAccount() async {
+    return await helper.getAllListValues('CAR_TRADING_CASH_BANK');
+  }
+
   Future<Map<String, dynamic>> getListDetils(String code) async {
     return await helper.getListDetails(code);
   }
@@ -610,6 +618,7 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode({
           "date": isoDate,
           "name": nameId.value,
+          "account_name": accountNameId.value,
           "pay": double.tryParse(pay.text) ?? 0.0,
           "receive": double.tryParse(receive.text) ?? 0.0,
           "comment": comments.value.text,
@@ -696,6 +705,7 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode({
           "date": isoDate,
           "name": nameId.value,
+          "account_name": accountNameId.value,
           "pay": double.tryParse(pay.text) ?? 0.0,
           "receive": double.tryParse(receive.text) ?? 0.0,
           "comment": comments.value.text,
@@ -873,6 +883,7 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode({
           "date": isoDate,
           "item": itemId.value,
+          "account_name": accountNameId.value,
           "pay": double.tryParse(pay.text) ?? 0.0,
           "receive": double.tryParse(receive.text) ?? 0.0,
           "comment": comments.value.text,
@@ -960,6 +971,7 @@ class CarTradingDashboardController extends GetxController {
           "date": isoDate,
           "item": itemId.value,
           "pay": double.tryParse(pay.text) ?? 0.0,
+          "account_name": accountNameId.value,
           "receive": double.tryParse(receive.text) ?? 0.0,
           "comment": comments.value.text,
         }),
@@ -1011,6 +1023,8 @@ class CarTradingDashboardController extends GetxController {
         tradeId: currentTradId.value,
         item: item.text,
         itemId: itemId.value,
+        accountName: accountName.text,
+        accountNameId: accountNameId.value,
         pay: double.tryParse(pay.value.text) ?? 0,
         receive: double.tryParse(receive.value.text) ?? 0,
         comment: comments.value.text,
@@ -1089,6 +1103,7 @@ class CarTradingDashboardController extends GetxController {
             "date": isoDate,
             "comment": item.comment,
             "pay": item.pay,
+            "account_name": accountNameId.value,
             "receive": item.receive,
             "uuid": item.id,
           };
@@ -1172,6 +1187,7 @@ class CarTradingDashboardController extends GetxController {
                   "item": item.item,
                   "item_id": item.itemId,
                   "pay": item.pay,
+                  "account_name": accountNameId.value,
                   "trade_id": item.tradeId,
                   "receive": item.receive,
                   "comment": item.comment,
@@ -1406,24 +1422,30 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> getCashOnHand() async {
+  Future<void> getCashOnHandOrBankBalance(String accountName) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString('accessToken') ?? '';
       final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
 
-      final url = Uri.parse('$backendUrl/car_trading/get_cash_on_hand');
+      final url = Uri.parse(
+        '$backendUrl/car_trading/get_cash_on_hand_or_bank_balance/$accountName',
+      );
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        totalNETsForAll.value = decoded['totals']['final_net'];
+        if (accountName == 'CASH') {
+          totalNETsForAll.value = decoded['totals']['final_net'];
+        } else {
+          totalNETsForBanckBalance.value = decoded['totals']['final_net'];
+        }
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCashOnHand();
+          await getCashOnHandOrBankBalance(accountName);
         } else {
           logout();
         }

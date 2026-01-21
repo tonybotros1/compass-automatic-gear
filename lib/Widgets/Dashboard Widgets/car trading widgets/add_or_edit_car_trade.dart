@@ -200,6 +200,9 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Item'),
       ),
       DataColumn(
+        label: AutoSizedText(constraints: constraints, text: 'Account Name'),
+      ),
+      DataColumn(
         headingRowAlignment: MainAxisAlignment.start,
 
         label: AutoSizedText(constraints: constraints, text: 'Comments'),
@@ -260,6 +263,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(Text(textToDate(itemData.date))),
       DataCell(Text(itemData.item.toString())),
+      DataCell(Text(itemData.accountName.toString())),
       DataCell(Text(itemData.comment.toString())),
       DataCell(
         textForDataRowInTable(
@@ -324,6 +328,8 @@ IconButton editSection(
       controller.itemId.value = itemData.itemId.toString();
       controller.pay.text = itemData.pay.toString();
       controller.receive.text = itemData.receive.toString();
+      controller.accountName.text = itemData.accountName ?? '';
+      controller.accountNameId.value = itemData.accountNameId ?? '';
       controller.comments.value.text = itemData.comment.toString();
       controller.itemDate.value.text = textToDate(itemData.date);
       itemDialog(
@@ -347,6 +353,8 @@ IconButton editSection(
               ),
               item: controller.item.text,
               itemId: controller.itemId.value,
+              accountName: controller.accountName.text,
+              accountNameId: controller.accountNameId.value,
               pay: double.tryParse(controller.pay.value.text) ?? 0,
               receive: double.tryParse(controller.receive.value.text) ?? 0,
               modified: true,
@@ -363,6 +371,8 @@ IconButton editSection(
               ),
               item: controller.item.text,
               itemId: controller.itemId.value,
+              accountName: controller.accountName.text,
+              accountNameId: controller.accountNameId.value,
               pay: double.tryParse(controller.pay.value.text) ?? 0,
               receive: double.tryParse(controller.receive.value.text) ?? 0,
               modified: true,
@@ -389,6 +399,8 @@ ElevatedButton newItemButton(
       controller.itemId.value = '';
       controller.pay.text = '';
       controller.receive.text = '';
+      controller.accountName.clear();
+      controller.accountNameId.value = '';
       controller.comments.value.text = '';
       controller.itemDate.value.text = textToDate(DateTime.now());
       itemDialog(

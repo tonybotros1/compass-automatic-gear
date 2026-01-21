@@ -186,8 +186,8 @@ Widget expandableSummaryTable(
                         child: Text(name, style: cellsTableTextStyle),
                       ),
                       const Expanded(flex: 1, child: SizedBox()),
+                      const Expanded(flex: 1, child: SizedBox()),
                       const Expanded(flex: 3, child: SizedBox()),
-
                       Expanded(child: _cell(paid, color: Colors.red)),
                       Expanded(child: _cell(received, color: Colors.green)),
                       Expanded(
@@ -236,6 +236,13 @@ Widget expandableSummaryTable(
                               flex: 1,
                               child: Text(
                                 textToDate(item.date),
+                                style: cellsTableTextStyle,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Text(
+                                item.accountName,
                                 style: cellsTableTextStyle,
                               ),
                             ),
@@ -292,6 +299,10 @@ Widget tableHeader() {
       children: [
         Expanded(flex: 1, child: Text('Name', style: headerTableTextStyle)),
         Expanded(flex: 1, child: Text('Date', style: headerTableTextStyle)),
+        Expanded(
+          flex: 1,
+          child: Text('Account Name', style: headerTableTextStyle),
+        ),
         Expanded(flex: 3, child: Text('Comment', style: headerTableTextStyle)),
         Expanded(
           child: Text(
@@ -361,6 +372,8 @@ IconButton editSection(
         controller.nameId.value = itemData.nameId;
       }
       controller.pay.text = itemData.pay.toString();
+      controller.accountName.text = itemData.accountName;
+      controller.accountNameId.value = itemData.accountNameId;
       controller.receive.text = itemData.receive.toString();
       controller.comments.value.text = itemData.comment;
       controller.itemDate.value.text = textToDate(itemData.date);
@@ -393,6 +406,8 @@ ElevatedButton newItemButton(
       controller.nameId.value = '';
       controller.item.clear();
       controller.itemId.value = '';
+      controller.accountName.clear();
+      controller.accountNameId.value = '';
       controller.pay.text = '';
       controller.receive.text = '';
       controller.comments.value.text = '';

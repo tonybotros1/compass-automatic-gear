@@ -7,6 +7,8 @@ class CarTradingItemsModel {
   final double? receive;
   final String? companyId;
   final String? comment;
+  final String? accountName;
+  final String? accountNameId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final DateTime? date;
@@ -23,6 +25,8 @@ class CarTradingItemsModel {
     this.receive,
     this.date,
     this.comment,
+    this.accountName,
+    this.accountNameId,
     this.companyId,
     this.createdAt,
     this.updatedAt,
@@ -62,6 +66,12 @@ class CarTradingItemsModel {
       pay: _toDouble(json['pay']),
       tradeId: json['trade_id'] ?? '',
       receive: _toDouble(json['receive']),
+      accountName: json.containsKey('account_name')
+          ? json['account_name'] ?? ''
+          : '',
+      accountNameId: json.containsKey('account_name_id')
+          ? json['account_name_id'] ?? ''
+          : '',
       comment: json['comment'] ?? '',
       companyId: json['company_id'] ?? '',
       date: json['date'] != null && json['date'] != ''

@@ -4,6 +4,8 @@ class CapitalsAndOutstandingModel {
   final String nameId;
   final double pay;
   final double receive;
+  final String accountName;
+  final String accountNameId;
   final String companyId;
   final String comment;
   final DateTime createdAt;
@@ -21,6 +23,8 @@ class CapitalsAndOutstandingModel {
     required this.companyId,
     required this.createdAt,
     required this.updatedAt,
+    required this.accountName,
+    required this.accountNameId,
   });
 
   factory CapitalsAndOutstandingModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +35,12 @@ class CapitalsAndOutstandingModel {
       pay: json['pay'] ?? '',
       receive: json['receive'] ?? '',
       comment: json['comment'] ?? '',
+      accountName: json.containsKey('account_name')
+          ? json['account_name'] ?? ''
+          : '',
+      accountNameId: json.containsKey('account_name_id')
+          ? json['account_name_id'] ?? ''
+          : '',
       companyId: json['company_id'] ?? '',
       date: DateTime.parse(json['date']),
       createdAt: DateTime.parse(json['createdAt']),
