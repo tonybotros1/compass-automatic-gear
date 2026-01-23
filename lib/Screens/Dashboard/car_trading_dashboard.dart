@@ -618,7 +618,19 @@ class CarTradingDashboard extends StatelessWidget {
                                             showRefreshIcon: false,
                                           ),
                                         ),
-                                        const Expanded(child: SizedBox()),
+                                        Expanded(
+                                          child: SummaryBox(
+                                            title: 'TOTAL MONEY',
+                                            value:
+                                                '${controller.totalNETsForBanckBalance.value + controller.totalNETsForAll.value}',
+                                            icon: Icons.trolley,
+                                            iconColor: const Color(
+                                              0xFFD8C9A7,
+                                            ).withValues(alpha: 0.8),
+                                            textColor: const Color(0xFF434E78),
+                                            showRefreshIcon: false,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),

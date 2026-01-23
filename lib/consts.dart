@@ -13,8 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-// String backendTestURI = 'http://172.168.0.69:8000'; //home : 192.168.1.103
-// String webSocketURL = "ws://172.168.0.69:8000/ws"; // mobile : 192.168.43.58 // anaz grandpa: 192.168.1.24 // uncle: 192.168.1.9
+// String backendTestURI = 'http://192.168.1.25:8000'; //home : 192.168.1.103
+// String webSocketURL = "ws://192.168.1.25:8000/ws"; // mobile : 192.168.43.58 // anaz grandpa: 192.168.1.24 // uncle: 192.168.1.9
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";

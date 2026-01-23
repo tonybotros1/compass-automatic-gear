@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/company_variables_controller.dart';
+import '../../../../Widgets/main screen widgets/company_variables_widgets/terms_and_conditions_dialog.dart';
 import '../../../../Widgets/main screen widgets/company_variables_widgets/variables_dialog.dart';
 import '../../../../consts.dart';
 
@@ -407,6 +408,197 @@ class CompanyVariables extends StatelessWidget {
                                         ],
                                       ),
                                     ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Column(
+                        spacing: 20,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          labelBox(
+                            'Upload Header',
+                            onPressed: () {
+                              controller.updateHeaderFooter('header');
+                            },
+                            icon: const Icon(Icons.save),
+                            iconToolTip: 'Save',
+                          ),
+                          InkWell(
+                            onTap: () {
+                              controller.pickImage('header');
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              height: 200,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.blueGrey),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: controller.headerImageURL.value != ''
+                                  ? Image.network(
+                                      controller.headerImageURL.value,
+                                      fit: BoxFit.fitWidth,
+                                      errorBuilder: (context, url, error) =>
+                                          const Icon(Icons.error),
+                                    )
+                                  : controller.headerImageBytes != null
+                                  ? Image.memory(
+                                      controller.headerImageBytes!.value,
+                                      fit: BoxFit.fitWidth,
+                                      errorBuilder: (context, url, error) =>
+                                          const Icon(
+                                            Icons.error,
+                                            color: Colors.red,
+                                          ),
+                                    )
+                                  : const Icon(Icons.image, color: Colors.grey),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Column(
+                        spacing: 20,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          labelBox(
+                            'Upload Footer',
+                            onPressed: () {
+                              controller.updateHeaderFooter('footer');
+                            },
+                            icon: const Icon(Icons.save),
+                            iconToolTip: 'Save',
+                          ),
+                          InkWell(
+                            onTap: () {
+                              controller.pickImage('footer');
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              height: 200,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.blueGrey),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: controller.footerImageURL.value != ''
+                                  ? Image.network(
+                                      controller.footerImageURL.value,
+                                      fit: BoxFit.fitWidth,
+                                      errorBuilder: (context, url, error) =>
+                                          const Icon(Icons.error),
+                                    )
+                                  : controller.footerImageBytes != null
+                                  ? Image.memory(
+                                      controller.footerImageBytes!.value,
+                                      fit: BoxFit.fitWidth,
+                                      errorBuilder: (context, url, error) =>
+                                          const Icon(
+                                            Icons.error,
+                                            color: Colors.red,
+                                          ),
+                                    )
+                                  : const Icon(Icons.image, color: Colors.grey),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 40,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              spacing: 20,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                labelBox(
+                                  'Upload Terms and Conditions AR',
+                                  onPressed: () {
+                                    controller.termsAndConditionsAR.text =
+                                        controller
+                                            .showTermsAndConditionsAR
+                                            .value;
+                                    termsAndConditionsDialog(
+                                      controller: controller,
+                                      termsAndConditions:
+                                          controller.termsAndConditionsAR,
+                                      screenName: 'Terms and Conditions AR',
+                                      onPressed:
+                                          controller
+                                              .updatingTermsAndConditions
+                                              .isFalse
+                                          ? () {
+                                              controller
+                                                  .updateTermsAndConditions(
+                                                    'ar',
+                                                  );
+                                            }
+                                          : null,
+                                    );
+                                  },
+                                ),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.blueGrey),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Text(
+                                    controller.showTermsAndConditionsAR.value,
+                                    style: fontStyleForCheckBoxes,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              spacing: 20,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                labelBox(
+                                  'Upload Terms and Conditions EN',
+                                  onPressed: () {
+                                    controller.termsAndConditionsEN.text =
+                                        controller
+                                            .showTermsAndConditionsEN
+                                            .value;
+                                    termsAndConditionsDialog(
+                                      controller: controller,
+                                      termsAndConditions:
+                                          controller.termsAndConditionsEN,
+                                      screenName: 'Terms and Conditions EN',
+                                      onPressed:
+                                          controller
+                                              .updatingTermsAndConditions
+                                              .isFalse
+                                          ? () {
+                                              controller
+                                                  .updateTermsAndConditions(
+                                                    'en',
+                                                  );
+                                            }
+                                          : null,
+                                    );
+                                  },
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.blueGrey),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Text(
+                                    controller.showTermsAndConditionsEN.value,
+                                    style: fontStyleForCheckBoxes,
                                   ),
                                 ),
                               ],

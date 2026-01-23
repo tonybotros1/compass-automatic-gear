@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:datahubai/consts.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -14,6 +16,9 @@ class CompanyVariablesController extends GetxController {
   TextEditingController taxNumber = TextEditingController();
   RxBool updatingVariables = RxBool(false);
   RxBool updatingInspectionReport = RxBool(false);
+  RxBool updatingTermsAndConditions = RxBool(false);
+  RxBool updatingHeader = RxBool(false);
+  RxBool updatingFooter = RxBool(false);
   double logoSize = 150;
   RxList<String> userRoles = RxList([]);
   RxBool isBreakeAndTireSelected = RxBool(false);
@@ -23,6 +28,16 @@ class CompanyVariablesController extends GetxController {
   RxBool isBatteryPerformaceSelected = RxBool(false);
   RxBool isBodyDamageSelected = RxBool(false);
   RxList<String> inspectionReport = RxList<String>([]);
+  RxString header = RxString('');
+  RxString footer = RxString('');
+  TextEditingController termsAndConditionsEN = TextEditingController();
+  RxString showTermsAndConditionsEN = RxString('');
+  TextEditingController termsAndConditionsAR = TextEditingController();
+  RxString showTermsAndConditionsAR = RxString('');
+  Rx<Uint8List>? headerImageBytes = Uint8List(8).obs;
+  Rx<Uint8List>? footerImageBytes = Uint8List(8).obs;
+  RxString headerImageURL = RxString('');
+  RxString footerImageURL = RxString('');
 
   RxMap<String, String> companyInformation = RxMap({
     'Company Name': '',
@@ -50,6 +65,23 @@ class CompanyVariablesController extends GetxController {
     super.onInit();
   }
 
+  Future<void> pickImage(String type) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.image);
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        if (type == 'header') {
+          headerImageBytes!.value = file.bytes!;
+        } else {
+          footerImageBytes!.value = file.bytes!;
+        }
+      }
+    } catch (e) {
+      // print('Error picking image: $e');
+    }
+  }
+
   String removePercent(String? text) {
     if (text == null) {
       return '';
@@ -74,6 +106,12 @@ class CompanyVariablesController extends GetxController {
         companyVariablesDetails = CompanyVariablesModel.fromJson(
           decoded['company_variables'],
         );
+        headerImageURL.value = companyVariablesDetails.headerImage ?? '';
+        footerImageURL.value = companyVariablesDetails.footerImage ?? '';
+        showTermsAndConditionsAR.value =
+            companyVariablesDetails.termsAndConditionsAR ?? '';
+        showTermsAndConditionsEN.value =
+            companyVariablesDetails.termsAndConditionsEN ?? '';
         companyLogo.value = companyVariablesDetails.companyLogoUrl ?? '';
         companyInformation['Company Name'] =
             companyVariablesDetails.companyName ?? '';
@@ -201,6 +239,116 @@ class CompanyVariablesController extends GetxController {
       updatingInspectionReport.value = false;
     } catch (e) {
       updatingInspectionReport.value = false;
+    }
+  }
+
+  Future<void> updateTermsAndConditions(String type) async {
+    try {
+      updatingTermsAndConditions.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/company_variables/upload_terms_and_conditions/$type',
+      );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "text": type == 'ar'
+              ? termsAndConditionsAR.text
+              : termsAndConditionsEN.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        if (type == 'ar') {
+          showTermsAndConditionsAR.value = termsAndConditionsAR.text;
+        } else {
+          showTermsAndConditionsEN.value = termsAndConditionsEN.text;
+        }
+        Get.back();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateTermsAndConditions(type);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      updatingTermsAndConditions.value = false;
+    } catch (e) {
+      updatingTermsAndConditions.value = false;
+    }
+  }
+
+  Future<void> updateHeaderFooter(String type) async {
+    try {
+      if (type == 'header') {
+        if (headerImageBytes == null) {
+          return;
+        }
+      } else {
+        if (footerImageBytes == null) {
+          return;
+        }
+      }
+      type == 'header'
+          ? updatingHeader.value = true
+          : updatingFooter.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/company_variables/upload_header_footer/$type',
+      );
+      final request = http.MultipartRequest('PATCH', url);
+      request.headers['Authorization'] = 'Bearer $accessToken';
+      request.headers['Content-Type'] = 'application/json';
+      if (type == 'header') {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            headerImageBytes!.value,
+            filename:
+                "company_header_${companyInformation['Company Name']}.png",
+          ),
+        );
+      } else {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            footerImageBytes!.value,
+            filename:
+                "company_footer_${companyInformation['Company Name']}.png",
+          ),
+        );
+      }
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateTermsAndConditions(type);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      type == 'header'
+          ? updatingHeader.value = false
+          : updatingFooter.value = false;
+    } catch (e) {
+      type == 'header'
+          ? updatingHeader.value = false
+          : updatingFooter.value = false;
     }
   }
 

@@ -19,6 +19,10 @@ class CompanyVariablesModel {
   double? vatPercentage;
   double? incentivePercentage;
   String? taxNumber;
+  String? termsAndConditionsEN;
+  String? termsAndConditionsAR;
+  String? headerImage;
+  String? footerImage;
   List<String>? inspectionReport;
 
   CompanyVariablesModel({
@@ -43,6 +47,10 @@ class CompanyVariablesModel {
     this.incentivePercentage,
     this.taxNumber,
     this.inspectionReport,
+    this.termsAndConditionsAR,
+    this.termsAndConditionsEN,
+    this.headerImage,
+    this.footerImage,
   });
 
   CompanyVariablesModel.fromJson(Map<String, dynamic> json) {
@@ -63,7 +71,12 @@ class CompanyVariablesModel {
     industry = json['industry']?.toString();
     companyLogoUrl = json['company_logo_url']?.toString();
     companyLogoPublicId = json['company_logo_public_id']?.toString();
-
+    termsAndConditionsAR = json.containsKey('terms_and_conditions_ar')
+        ? json['terms_and_conditions_ar'] ?? ''
+        : '';
+    termsAndConditionsEN = json.containsKey('terms_and_conditions_en')
+        ? json['terms_and_conditions_en'] ?? ''
+        : '';
     vatPercentage = json.containsKey('vat_percentage')
         ? (json['vat_percentage'] != null)
               ? (json['vat_percentage'] as num).toDouble()
@@ -86,6 +99,12 @@ class CompanyVariablesModel {
             (json['inspection_report'] as List).map((e) => e.toString()),
           )
         : null;
+    headerImage = json.containsKey('header_url')
+        ? json['header_url'] ?? ''
+        : '';
+    footerImage = json.containsKey('footer_url')
+        ? json['footer_url'] ?? ''
+        : '';
 
     // Parse roles list
     if (json['roles_details'] != null) {
