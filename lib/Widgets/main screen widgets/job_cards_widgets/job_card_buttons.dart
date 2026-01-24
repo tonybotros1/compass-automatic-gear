@@ -261,6 +261,22 @@ GetX<JobCardController> creatQuotationButton(
   );
 }
 
+GetX<JobCardController> printInvoice(
+  JobCardController controller,
+  JobCardModel jobData,
+) {
+  return GetX<JobCardController>(
+    builder: (context) {
+      return ClickableHoverText(
+        onTap: () {
+          controller.printJobCard(jobData);
+        },
+        text: controller.printingInvoice.isFalse ? 'Print Invoice' : '•••',
+      );
+    },
+  );
+}
+
 GetX<JobCardController> creatReceiptButton(
   JobCardController controller,
   String jobId,

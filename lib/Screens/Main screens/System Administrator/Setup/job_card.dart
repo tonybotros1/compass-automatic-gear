@@ -1059,6 +1059,10 @@ Future<dynamic> editJobCardDialog(
                                   ),
                                   // point(),
                                   separator(),
+                                  printInvoice(controller, jobData),
+
+                                  point(),
+
                                   creatQuotationButton(controller, jobId),
                                   point(),
                                   creatReceiptButton(controller, jobId),

@@ -9,22 +9,32 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-// String backendTestURI = 'http://192.168.1.25:8000'; //home : 192.168.1.103
-// String webSocketURL = "ws://192.168.1.25:8000/ws"; // mobile : 192.168.43.58 // anaz grandpa: 192.168.1.24 // uncle: 192.168.1.9
+String backendTestURI = 'http://192.168.1.25:8000';
+String webSocketURL = "ws://192.168.1.25:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
 // String webSocketURL = "ws://10.0.2.2:8000/ws";
 
 // ======== production urls ========
-String backendTestURI = 'https://datahubai-backend.onrender.com';
-String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
+// String backendTestURI = 'https://datahubai-backend.onrender.com';
+// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
 
 final formatter = CurrencyInputFormatter();
+
+final NumberFormat qtyFormat = NumberFormat('#,##0');
+final NumberFormat priceFormat = NumberFormat('#,##0.00');
+final NumberFormat currencyFormat = NumberFormat.currency(
+  decimalDigits: 2,
+  symbol: 'AED',
+);
+final NumberFormat percentFormat = NumberFormat('#,##0.##');
 
 IconButton dateRange({
   required BuildContext context,
@@ -37,6 +47,23 @@ IconButton dateRange({
     icon: const Icon(Icons.date_range),
   );
 }
+
+var fontStyleForPDFLable = pw.TextStyle(
+  color: PdfColors.black,
+  fontWeight: pw.FontWeight.bold,
+  fontSize: 8,
+);
+
+var fontStyleForPDFText = const pw.TextStyle(
+  color: PdfColors.black,
+  fontSize: 8,
+);
+
+var fontStyleForPDFTableHeader = pw.TextStyle(
+  color: PdfColors.white,
+  fontSize: 8,
+  fontWeight: pw.FontWeight.bold,
+);
 
 TextStyle fontStyleForTimeSheetsMainInfo = const TextStyle(
   color: Colors.black,

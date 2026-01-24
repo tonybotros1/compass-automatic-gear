@@ -1,11 +1,15 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/countries_controller.dart';
 import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/formatters/currency_input_formatter.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:datahubai/consts.dart';
 import 'package:uuid/uuid.dart';
@@ -115,6 +119,7 @@ class JobCardController extends GetxController {
   RxBool jobCardAdded = RxBool(false);
   RxString curreentJobCardId = RxString('');
   RxBool canAddInternalNotesAndInvoiceItems = RxBool(false);
+  RxBool printingInvoice = RxBool(false);
   final ScrollController scrollController = ScrollController();
   final ScrollController scrollControllerFotTable1 = ScrollController();
   final ScrollController scrollControllerFotTable2 = ScrollController();
@@ -449,6 +454,732 @@ class JobCardController extends GetxController {
       default:
     }
   }
+
+  String formatNum(num? value, NumberFormat formatter) {
+    if (value == null) return '';
+    return formatter.format(value);
+  }
+
+  Future<Uint8List> generateJobCardPdf(JobCardModel job) async {
+    final cairoRegular = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/Cairo-Regular.ttf'),
+    );
+    final cairoBold = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/Cairo-Bold.ttf'),
+    );
+    List totals = calculateTotals();
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(24),
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Container(
+                width: double.infinity,
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.black),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      decoration: const pw.BoxDecoration(
+                        color: PdfColors.black,
+                      ),
+                      child: pw.Text(
+                        'TAX INVOICE - CREDIT',
+                        style: pw.TextStyle(
+                          color: PdfColors.white,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    pw.SizedBox(height: 20),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(16),
+                      child: pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Expanded(
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text(
+                                      'Customer Name:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        job.customerName ?? '',
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // pw.SizedBox(height: 20),
+                                pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text(
+                                      'Address:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        'kdjvadljkvdlbldbvjvlvlbvblvbljvbljbvlbvbvbljvbvbvbbvjbvjlbvabvljabvjlbvjlbvjlabvjbvljabvjlbvjlb',
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text(
+                                      'Customer Phone:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        job.contactNumber ?? '',
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text(
+                                      'Customer TRN:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        '',
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          pw.SizedBox(width: 20),
+                          pw.Expanded(
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text(
+                                      'Invoice NO:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        job.invoiceNumber ?? '',
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                    pw.SizedBox(width: 40),
+                                    pw.Text(
+                                      'LPO:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        job.lpoNumber ?? '',
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text(
+                                      'Date:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        textToDate(job.invoiceDate),
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text(
+                                      'Our Reference:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        job.contactNumber ?? '',
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text(
+                                      'Car Details:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        """${job.carBrandName ?? ''} ${job.carModelName ?? ''}, ${job.year ?? ''}, ${job.colorName ?? ''}
+Plate Number: ${job.cityName ?? ''} ${job.plateNumber ?? ''} ${job.plateCode ?? ''}
+Mileage: ${job.mileageOut ?? ''}
+VIN: ${job.vehicleIdentificationNumber ?? ''}
+                                    """,
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text(
+                                      'Our TRN:',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.SizedBox(width: 10),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        '',
+                                        style: fontStyleForPDFText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    pw.Table(
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(6),
+                        1: const pw.FlexColumnWidth(2),
+                        2: const pw.FlexColumnWidth(2),
+                        3: const pw.FlexColumnWidth(2),
+                        4: const pw.FlexColumnWidth(2),
+                        5: const pw.FlexColumnWidth(2),
+                        6: const pw.FlexColumnWidth(2),
+                      },
+                      children: [
+                        pw.TableRow(
+                          decoration: const pw.BoxDecoration(
+                            color: PdfColors.black,
+                          ),
+                          children: [
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                'Description',
+                                style: fontStyleForPDFTableHeader,
+                              ),
+                            ),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                'Qty',
+                                style: fontStyleForPDFTableHeader,
+                                textAlign: pw.TextAlign.end,
+                              ),
+                            ),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                'Price',
+                                style: fontStyleForPDFTableHeader,
+                                textAlign: pw.TextAlign.end,
+                              ),
+                            ),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                'Total',
+                                style: fontStyleForPDFTableHeader,
+                                textAlign: pw.TextAlign.end,
+                              ),
+                            ),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                'Discount',
+                                style: fontStyleForPDFTableHeader,
+                                textAlign: pw.TextAlign.end,
+                              ),
+                            ),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                'VAT ${currentCountryVAT.value}%',
+                                style: fontStyleForPDFTableHeader,
+                                textAlign: pw.TextAlign.end,
+                              ),
+                            ),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                'Net',
+                                style: fontStyleForPDFTableHeader,
+                                textAlign: pw.TextAlign.end,
+                              ),
+                            ),
+                          ],
+                        ),
+                        ...job.invoiceItemsDetails!.map(
+                          (e) => _buildTableRow(
+                            e.description ?? '',
+                            formatNum(e.quantity, qtyFormat),
+                            formatNum(e.price, priceFormat),
+                            formatNum(e.total, priceFormat),
+                            formatNum(e.discount, percentFormat),
+                            formatNum(e.vat, percentFormat),
+                            formatNum(e.net, priceFormat),
+                          ),
+                        ),
+                        ..._buildEmptyRows(
+                          10 - job.invoiceItemsDetails!.length,
+                        ),
+                      ],
+                    ),
+                    pw.Divider(),
+                    // pw.SizedBox(height: 20),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(16),
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Row(
+                                children: [
+                                  pw.Text(
+                                    'Warranty:',
+                                    style: fontStyleForPDFLable,
+                                  ),
+                                  pw.SizedBox(width: 10),
+                                  pw.Text(
+                                    '[${job.jobWarrantyDays ?? ''}] Days, End on [${textToDate(job.jobWarrantyEndDate, monthNameFirst: true)}]',
+                                    style: fontStyleForPDFText,
+                                  ),
+                                ],
+                              ),
+                              pw.Text(
+                                '*Warranty Includes Gear Box Only.',
+                                style: fontStyleForPDFLable,
+                              ),
+                            ],
+                          ),
+                          pw.Column(
+                            children: [
+                              pw.Text(
+                                'الشركة غير مسؤولة عن اي أعطال تحدث نتيجة تغيير الزيت',
+                                textDirection: pw.TextDirection.rtl,
+                                style: pw.TextStyle(
+                                  font: cairoBold,
+                                  fontSize: 8,
+                                ),
+                              ),
+                              pw.SizedBox(height: 10),
+                              pw.Text(
+                                'The company is not responsible for any\n issue caused by gear oil change:',
+                                style: fontStyleForPDFLable,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    pw.Divider(),
+                    pw.Row(
+                      children: [
+                        pw.Expanded(
+                          flex: 3,
+                          child: pw.Column(
+                            children: [
+                              pw.Container(
+                                decoration: pw.BoxDecoration(
+                                  color: PdfColors.grey200,
+                                  border: pw.Border.all(color: PdfColors.black),
+                                ),
+                                padding: const pw.EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                child: pw.Row(
+                                  mainAxisAlignment:
+                                      pw.MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    pw.Text(
+                                      'Warranty does not cover',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.Text(
+                                      'الضمان لا يشمل',
+                                      textDirection: pw.TextDirection.rtl,
+                                      style: pw.TextStyle(
+                                        font: cairoBold,
+                                        fontSize: 8,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              pw.Padding(
+                                padding: const pw.EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                child: pw.Column(
+                                  children: [
+                                    pw.Row(
+                                      mainAxisAlignment:
+                                          pw.MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        pw.Text(
+                                          'Mixing oil with water',
+                                          style: fontStyleForPDFText,
+                                        ),
+                                        pw.Text(
+                                          'خلط الزيت مع الماء',
+                                          textDirection: pw.TextDirection.rtl,
+                                          style: pw.TextStyle(
+                                            font: cairoRegular,
+                                            fontSize: 8,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    pw.Row(
+                                      mainAxisAlignment:
+                                          pw.MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        pw.Text(
+                                          'Any electrical mallfunctions',
+                                          style: fontStyleForPDFText,
+                                        ),
+                                        pw.Text(
+                                          'أي أعطال كهربائية',
+                                          textDirection: pw.TextDirection.rtl,
+                                          style: pw.TextStyle(
+                                            font: cairoRegular,
+                                            fontSize: 8,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    pw.Row(
+                                      mainAxisAlignment:
+                                          pw.MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        pw.Text(
+                                          'Misuse or alternate of repaired items',
+                                          style: fontStyleForPDFText,
+                                        ),
+                                        pw.Text(
+                                          'سوء الاستخدام أو تعديل القطع التي تم اصلاحها',
+                                          textDirection: pw.TextDirection.rtl,
+                                          style: pw.TextStyle(
+                                            font: cairoRegular,
+                                            fontSize: 8,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        pw.Container(
+                          width: 1,
+                          height: 40,
+                          color: PdfColors.black,
+                          margin: const pw.EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                        pw.Expanded(
+                          child: pw.Padding(
+                            padding: const pw.EdgeInsets.all(8),
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.end,
+                              mainAxisAlignment: pw.MainAxisAlignment.start,
+                              children: [
+                                pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                                  children: [
+                                    pw.Text(
+                                      'Total : ',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.Container(
+                                      width: 60,
+                                      decoration: const pw.BoxDecoration(
+                                        color: PdfColors.grey200,
+                                      ),
+                                      child: pw.Text(
+                                        formatNum(totals[0] ?? 0, priceFormat),
+                                        style: fontStyleForPDFText,
+                                        textAlign: pw.TextAlign.end,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.SizedBox(height: 5),
+                                pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                                  children: [
+                                    pw.Text(
+                                      'Discount : ',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.Container(
+                                      width: 60,
+                                      decoration: const pw.BoxDecoration(
+                                        color: PdfColors.grey200,
+                                      ),
+                                      child: pw.Text(
+                                        formatNum(totals[3] ?? 0, priceFormat),
+                                        style: fontStyleForPDFText,
+                                        textAlign: pw.TextAlign.end,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.SizedBox(height: 5),
+                                pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                                  children: [
+                                    pw.Text(
+                                      'VAT (${currentCountryVAT.value}%) : ',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.Container(
+                                      width: 60,
+                                      decoration: const pw.BoxDecoration(
+                                        color: PdfColors.grey200,
+                                      ),
+                                      child: pw.Text(
+                                        formatNum(totals[1] ?? 0, priceFormat),
+                                        style: fontStyleForPDFText,
+                                        textAlign: pw.TextAlign.end,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.SizedBox(height: 5),
+                                pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                                  children: [
+                                    pw.Text(
+                                      'Net : ',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.Container(
+                                      width: 60,
+                                      decoration: const pw.BoxDecoration(
+                                        color: PdfColors.grey200,
+                                      ),
+                                      child: pw.Text(
+                                        formatNum(totals[2] ?? 0, priceFormat),
+                                        style: fontStyleForPDFText,
+                                        textAlign: pw.TextAlign.end,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    children: [
+                      pw.Text('For Compass AGS', style: fontStyleForPDFLable),
+                      pw.SizedBox(height: 20),
+                      pw.Text('_________________________'),
+                    ],
+                  ),
+                  pw.Column(
+                    children: [
+                      pw.Text(
+                        'Customer Signature',
+                        style: fontStyleForPDFLable,
+                      ),
+                      pw.SizedBox(height: 20),
+                      pw.Text('_________________________'),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    return pdf.save();
+  }
+
+  List<pw.TableRow> _buildEmptyRows(int count) {
+    return List.generate(
+      count > 0 ? count : 0,
+      (_) => pw.TableRow(
+        children: List.generate(
+          7,
+          (_) => pw.Padding(
+            padding: const pw.EdgeInsets.all(8),
+            child: pw.Text(''),
+          ),
+        ),
+      ),
+    );
+  }
+
+  pw.TableRow _buildTableRow(
+    String description,
+    String qty,
+    String price,
+    String total,
+    String discount,
+    String vat,
+    String net,
+  ) {
+    return pw.TableRow(
+      children: [
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(6),
+          child: pw.Text(description, style: fontStyleForPDFText),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(6),
+          child: pw.Text(
+            qty,
+            style: fontStyleForPDFText,
+            textAlign: pw.TextAlign.end,
+          ),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(6),
+          child: pw.Text(
+            price,
+            style: fontStyleForPDFText,
+            textAlign: pw.TextAlign.end,
+          ),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(6),
+          child: pw.Text(
+            total,
+            style: fontStyleForPDFText,
+            textAlign: pw.TextAlign.end,
+          ),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(6),
+          child: pw.Text(
+            discount,
+            style: fontStyleForPDFText,
+            textAlign: pw.TextAlign.end,
+          ),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(6),
+          child: pw.Text(
+            vat,
+            style: fontStyleForPDFText,
+            textAlign: pw.TextAlign.end,
+          ),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(6),
+          child: pw.Text(
+            net,
+            style: fontStyleForPDFText,
+            textAlign: pw.TextAlign.end,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void printJobCard(JobCardModel job) async {
+    final pdfData = await generateJobCardPdf(job);
+
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
+  }
+
+  pw.Widget jobRow(String title, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Row(
+        children: [
+          pw.Expanded(
+            flex: 2,
+            child: pw.Text(
+              "$title:",
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+          pw.Expanded(flex: 3, child: pw.Text(value)),
+        ],
+      ),
+    );
+  }
+
+  void printInvoice() {}
 
   Future<void> addNewJobCard() async {
     try {
@@ -816,7 +1547,9 @@ class JobCardController extends GetxController {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/job_cards/search_engine_for_job_cards_3');
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards/search_engine_for_job_cards_3',
+      );
       final response = await http.post(
         url,
         headers: {
@@ -1414,14 +2147,16 @@ class JobCardController extends GetxController {
     double sumofTotal = 0.0;
     double sumofVAT = 0.0;
     double sumofNET = 0.0;
+    double sumofDiscount = 0.0;
 
     for (var job in allInvoiceItems.where((item) => item.deleted != true)) {
       sumofTotal += job.total ?? 0;
       sumofNET += job.net ?? 0;
       sumofVAT += job.vat ?? 0;
+      sumofDiscount += job.discount ?? 0;
     }
 
-    return [sumofTotal, sumofVAT, sumofNET];
+    return [sumofTotal, sumofVAT, sumofNET, sumofDiscount];
   }
 
   void updateCalculating() {
