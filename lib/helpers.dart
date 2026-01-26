@@ -470,6 +470,40 @@ class Helpers {
     }
   }
 
+   Future<Map<String, dynamic>> getEntityInformationForPrinting(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendTestURI/entity_information/get_entity_information_for_printing/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decode = jsonDecode(response.body);
+        final jsonData = decode['entity_details'];
+        return jsonData ?? {};
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getEntityInformationForPrinting(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+      return {};
+    } catch (e) {
+      return {};
+    }
+  }
+
   Future<Map<String, dynamic>> getBrunches() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();

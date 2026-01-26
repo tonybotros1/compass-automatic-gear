@@ -1059,7 +1059,10 @@ Future<dynamic> editJobCardDialog(
                                   ),
                                   // point(),
                                   separator(),
-                                  printInvoice(controller, jobData),
+                                  printInvoice(controller),
+                                  point(),
+
+                                  printInvoiceWithHeader(controller),
 
                                   point(),
 

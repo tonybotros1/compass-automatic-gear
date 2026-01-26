@@ -19,9 +19,6 @@ Container responsibilities({required CompanyController controller}) {
                 Expanded(
                   child: CustomDropdown(
                     hintText: 'Responsibilities',
-                    items: controller.allRoles.isEmpty
-                        ? {}
-                        : controller.allRoles,
                     showedSelectedName: 'role_name',
 
                     onChanged: (key, value) {
@@ -34,6 +31,13 @@ Container responsibilities({required CompanyController controller}) {
                       )) {
                         controller.roleIDFromList.add(selectedRole);
                       }
+                    },
+                    onDelete: () {
+                        // controller.roleIDFromList.re(selectedRole);
+
+                    },
+                    onOpen: () {
+                      return controller.getAllRoles();
                     },
                   ),
                 ),

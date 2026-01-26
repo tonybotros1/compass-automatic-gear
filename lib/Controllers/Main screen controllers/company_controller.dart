@@ -103,8 +103,8 @@ class CompanyController extends GetxController {
     allCities.assignAll(await helper.getCitiesValues(countryId));
   }
 
-  Future<void> getAllRoles() async {
-    allRoles.assignAll(await helper.getAllRoles());
+  Future<Map<String, dynamic>> getAllRoles() async {
+    return await helper.getAllRoles();
   }
 
   Future<void> getIndustries() async {
@@ -271,7 +271,7 @@ class CompanyController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await updateCompany(companyID,userID);
+          await updateCompany(companyID, userID);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -314,13 +314,14 @@ class CompanyController extends GetxController {
     }
   }
 
-  
-  Future<void> changeCompanyStatus(String companyID,bool status) async {
+  Future<void> changeCompanyStatus(String companyID, bool status) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/companies/change_company_status/$companyID');
+      Uri url = Uri.parse(
+        '$backendUrl/companies/change_company_status/$companyID',
+      );
       final response = await http.patch(
         url,
         headers: {
@@ -346,7 +347,6 @@ class CompanyController extends GetxController {
   }
 
   // =====================================================================================================
-
 
   // this function is to select an image for logo
   Future<void> pickImage() async {
