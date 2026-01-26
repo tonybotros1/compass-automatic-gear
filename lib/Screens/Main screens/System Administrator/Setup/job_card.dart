@@ -1057,15 +1057,9 @@ Future<dynamic> editJobCardDialog(
                                   saveJobButton(
                                     () => controller.addNewJobCard(),
                                   ),
-                                  // point(),
                                   separator(),
-                                  printInvoice(controller),
+                                  printButton(context),
                                   point(),
-
-                                  printInvoiceWithHeader(controller),
-
-                                  point(),
-
                                   creatQuotationButton(controller, jobId),
                                   point(),
                                   creatReceiptButton(controller, jobId),

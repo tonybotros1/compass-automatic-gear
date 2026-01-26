@@ -261,29 +261,56 @@ GetX<JobCardController> creatQuotationButton(
   );
 }
 
-GetX<JobCardController> printInvoice(JobCardController controller) {
-  return GetX<JobCardController>(
-    builder: (context) {
-      return ClickableHoverText(
-        onTap: () {
-          controller.printJobCard(false);
-        },
-        text: controller.printingInvoice.isFalse ? 'Print Invoice' : '•••',
-      );
-    },
-  );
-}
+GetBuilder<JobCardController> printButton(BuildContext context) {
+  return GetBuilder<JobCardController>(
+    builder: (controller) {
+      return PopupMenuButton<String>(
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        offset: const Offset(0, 40),
+        itemBuilder: (context) => const [
+          PopupMenuItem(
+            value: 'print_invoice',
+            child: Text('Print Invoice', style: TextStyle(fontSize: 14)),
+          ),
+          PopupMenuItem(
+            value: 'print_invoice_with_header',
+            child: Text(
+              'Print Invoice With Header',
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+          PopupMenuItem(
+            value: 'print_delevery_note_with_price',
+            child: Text(
+              'Print Delevery Note With Price',
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+          PopupMenuItem(
+            value: 'print_delevery_note_without_price',
+            child: Text(
+              'Print Delevery Note Without Price',
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+        ],
+        onSelected: (value) {
+          switch (value) {
+            case 'print_invoice':
+              controller.printInvoice(false);
+            case 'print_invoice_with_header':
+              controller.printInvoice(true);
+            case 'print_delevery_note_with_price':
+              controller.printDeleveryNote(true);
+            case 'print_delevery_note_without_price':
+              controller.printDeleveryNote(false);
 
-GetX<JobCardController> printInvoiceWithHeader(JobCardController controller) {
-  return GetX<JobCardController>(
-    builder: (context) {
-      return ClickableHoverText(
-        onTap: () {
-          controller.printJobCard(true);
+              break;
+            default:
+          }
         },
-        text: controller.printingInvoice.isFalse
-            ? 'Print Invoice With Header'
-            : '•••',
+        child: const ClickableHoverText(text: 'Print'),
       );
     },
   );

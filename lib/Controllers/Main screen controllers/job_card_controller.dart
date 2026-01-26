@@ -21,6 +21,7 @@ import '../../Models/job cards/job_card_model.dart';
 import '../../Screens/Main screens/System Administrator/Setup/cash_management_receipts.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../Widgets/Mobile widgets/inspection report widgets/inspection_reports_hekpers.dart';
+import '../../Widgets/main screen widgets/job_cards_widgets/print_delivery_note.dart';
 import '../../Widgets/main screen widgets/job_cards_widgets/print_invoice_pdf.dart';
 import '../../helpers.dart';
 import '../Mobile section controllers/cards_screen_controller.dart';
@@ -456,7 +457,10 @@ class JobCardController extends GetxController {
     }
   }
 
-  Future<Uint8List> generateJobCardPdf(bool withHeader) async {
+  // =====================  print functions   =====================
+  // ===================== 1. print invoice   =====================
+
+  Future<Uint8List> generateInvoicedPdf(bool withHeader) async {
     final Font cairoRegular = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Amiri-Regular.ttf'),
     );
@@ -571,7 +575,11 @@ class JobCardController extends GetxController {
                     ),
 
                     pw.SizedBox(height: 20),
-                    buildSignatures(),
+                    buildSignatures(
+                      companyDetails.containsKey('company_name')
+                          ? companyDetails['company_name']
+                          : '',
+                    ),
                   ],
                 ),
               );
@@ -583,8 +591,8 @@ class JobCardController extends GetxController {
     return pdf.save();
   }
 
-  void printJobCard(bool withHeader) async {
-    final pdfData = await generateJobCardPdf(withHeader);
+  void printInvoice(bool withHeader) async {
+    final pdfData = await generateInvoicedPdf(withHeader);
 
     await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
   }
@@ -601,6 +609,169 @@ class JobCardController extends GetxController {
     }
     return chunks;
   }
+
+  // ===================== 1. print Delevery note   =====================
+  void printDeleveryNote(bool withPrice) async {
+    final pdfData = await generateDeleveryNotePdf(withPrice);
+
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
+  }
+
+  Future<Uint8List> generateDeleveryNotePdf(bool withPrice) async {
+    var headerImage = await networkImageToPdf(
+      companyDetails.containsKey('header_url')
+          ? companyDetails['header_url'] ?? ''
+          : '',
+    );
+    var footerImage = await networkImageToPdf(
+      companyDetails.containsKey('footer_url')
+          ? companyDetails['footer_url'] ?? ''
+          : '',
+    );
+    Map customerInformation = {};
+    Map customerAddressInformation = {};
+    if (customerId.isNotEmpty) {
+      customerInformation = await helper.getEntityInformationForPrinting(
+        customerId.value,
+      );
+      List addressinfos = customerInformation.containsKey('entity_address')
+          ? customerInformation['entity_address']
+          : [];
+      customerAddressInformation = addressinfos.firstWhere(
+        (info) => info['isPrimary'] == true,
+      );
+    }
+    List totals = calculateTotals();
+
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(0),
+        header: (context) =>
+            pw.Image(headerImage, height: 115, fit: pw.BoxFit.fitWidth),
+
+        footer: (context) =>
+            pw.Image(footerImage, height: 100, fit: pw.BoxFit.fitWidth),
+        build: (context) {
+          return [
+            ...List.generate(1, (pageIndex) {
+              return pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 10,
+                ),
+
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8),
+                      width: double.infinity,
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border.all(
+                          color: PdfColors.black,
+                          width: 0.5,
+                        ),
+                      ),
+                      child: pw.Column(
+                        children: [
+                          pw.Container(
+                            width: double.infinity,
+                            height: 30,
+                            color: PdfColors.grey200,
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(
+                              'DELIVERY NOTE (INV: ${invoiceCounter.value.text})',
+                              style: fontStyleForPDFLable,
+                            ),
+                          ),
+                          pw.SizedBox(height: 10),
+                          pw.Container(
+                            padding: const pw.EdgeInsets.symmetric(
+                              horizontal: 8,
+                            ),
+                            width: double.infinity,
+                            height: 20,
+                            color: PdfColors.grey200,
+                            alignment: pw.Alignment.centerLeft,
+                            child: pw.Text(
+                              'Customer Details',
+                              style: fontStyleForPDFLable,
+                            ),
+                          ),
+                          buildCustomerInfoSectionForDeliveryNote(
+                            customerName.text,
+                            customerEntityName.text,
+                            customerEntityPhoneNumber.text,
+                            invoiceCounter.value.text,
+                            invoiceDate.value.text,
+                            jobCardDate.value.text,
+                            carBrand.value.text,
+                            carModel.value.text,
+                            plateNumber.text,
+                            companyDetails,
+                            customerInformation,
+                            customerAddressInformation,
+                            withPrice,
+                            totals,
+                            deliveryNotes.text,
+                          ),
+                          pw.Container(
+                            padding: const pw.EdgeInsets.symmetric(
+                              horizontal: 8,
+                            ),
+                            width: double.infinity,
+                            height: 20,
+                            color: PdfColors.grey200,
+                            alignment: pw.Alignment.centerLeft,
+                            child: pw.Text(
+                              'Car Details',
+                              style: fontStyleForPDFLable,
+                            ),
+                          ),
+                          buildIDeliveryNoteTable(
+                            textToDate(jobCardDate.value.text),
+                            carBrand.text,
+                            plateNumber.text,
+                            carModel.text,
+                            year.text,
+                            vin.text,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    pw.SizedBox(height: 20),
+                    buildSignatures(
+                      companyDetails.containsKey('company_name')
+                          ? companyDetails['company_name']
+                          : '',
+                    ),
+                    pw.SizedBox(height: 20),
+
+                    pw.Row(
+                      children: [
+                        pw.Text('Delivery Date', style: fontStyleForPDFLable),
+                        pw.SizedBox(width: 10),
+                        pw.Text(
+                          textToDate(deliveryDate.value.text),
+                          style: fontStyleForPDFText,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ];
+        },
+      ),
+    );
+    return pdf.save();
+  }
+
+  // =====================  End of print functions   =====================
 
   pw.Widget jobRow(String title, String value) {
     return pw.Padding(

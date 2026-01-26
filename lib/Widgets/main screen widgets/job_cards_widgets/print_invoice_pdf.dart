@@ -544,27 +544,27 @@ pw.Widget buildTotalsSection(
       ),
       pw.Padding(
         padding: const pw.EdgeInsets.all(4),
-        child: pw.Text(
-            convertNumberToWords(net),
-          style: fontStyleForPDFLable,
-        ),
+        child: pw.Text(convertNumberToWords(net), style: fontStyleForPDFLable),
       ),
     ],
   );
 }
 
-pw.Widget buildSignatures() {
+pw.Widget buildSignatures(String companyName) {
   return pw.Row(
     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
     children: [
       pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text('For Compass AGS', style: fontStyleForPDFLable),
+          pw.Text('For $companyName', style: fontStyleForPDFLable),
           pw.SizedBox(height: 20),
           pw.Text('_________________________'),
         ],
       ),
       pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+
         children: [
           pw.Text('Customer Signature', style: fontStyleForPDFLable),
           pw.SizedBox(height: 20),
@@ -575,7 +575,6 @@ pw.Widget buildSignatures() {
   );
 }
 
-
 String convertNumberToWords(double number) {
   if (number % 1 == 0) {
     // Whole number, ignore decimals
@@ -583,12 +582,13 @@ String convertNumberToWords(double number) {
   } else {
     // Has decimal, convert integer and decimal separately
     int integerPart = number.floor();
-    int decimalPart = ((number - integerPart) * 100).round(); // up to 2 decimals
+    int decimalPart = ((number - integerPart) * 100)
+        .round(); // up to 2 decimals
     String words = NumberToWord().convert('en-in', integerPart);
     if (decimalPart > 0) {
-      words += ' and ' + NumberToWord().convert('en-in', decimalPart) + ' cents';
+      words +=
+          ' and ${NumberToWord().convert('en-in', decimalPart)}';
     }
     return words;
   }
 }
-
