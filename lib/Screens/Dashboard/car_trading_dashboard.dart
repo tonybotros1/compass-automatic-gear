@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
+import '../../Widgets/Dashboard Widgets/car trading widgets/last_changes_dialog.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_summary_details.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_car_trading.dart';
 import '../../Widgets/my_text_field.dart';
@@ -431,6 +432,21 @@ class CarTradingDashboard extends StatelessWidget {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
+                                      ElevatedButton(
+                                        style: lastChangesButtonStyle,
+                                        onPressed: () {
+                                          controller.setTodayRange(
+                                            controller.fromDateForChanges.value,
+                                            controller.toDateForChanges.value,
+                                          );
+                                          controller.filterLastChangesSearch();
+                                          lastChangesDialog();
+                                        },
+                                        child: Text(
+                                          'Last Changes',
+                                          style: fontStyleForElevatedButtons,
+                                        ),
+                                      ),
                                       Row(
                                         spacing: 10,
                                         children: [

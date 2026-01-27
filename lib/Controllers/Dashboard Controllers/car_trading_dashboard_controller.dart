@@ -12,6 +12,7 @@ import '../../Models/car trading/capitals_outstanding_model.dart';
 import '../../Models/car trading/car_trade_model.dart';
 import '../../Models/car trading/car_trading_items_model.dart';
 import '../../Models/car trading/general_expenses_model.dart';
+import '../../Models/car trading/last_changes_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import '../Main screen controllers/websocket_controller.dart';
@@ -49,6 +50,8 @@ class CarTradingDashboardController extends GetxController {
       RxList<CapitalsAndOutstandingModel>([]);
   final RxList<GeneralExpensesModel> filteredGeneralExpenses =
       RxList<GeneralExpensesModel>([]);
+  final RxList<LastCarTradingChangesModel> lastChanges =
+      RxList<LastCarTradingChangesModel>([]);
   RxInt numberOfCars = RxInt(0);
   RxInt numberOfCapitalsDocs = RxInt(0);
   RxInt numberOfOutstandingDocs = RxInt(0);
@@ -133,11 +136,14 @@ class CarTradingDashboardController extends GetxController {
   RxBool gettingOutstandingSummary = RxBool(false);
   RxBool gettingGeneralExpensesSummary = RxBool(false);
   Rx<TextEditingController> fromDate = TextEditingController().obs;
+  Rx<TextEditingController> fromDateForChanges = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
+  Rx<TextEditingController> toDateForChanges = TextEditingController().obs;
   RxBool carModified = RxBool(false);
   RxBool itemsModified = RxBool(false);
   final Uuid _uuid = const Uuid();
   RxBool searching = RxBool(false);
+  RxBool changesSearching = RxBool(false);
   final ScrollController scrollControllerForTable = ScrollController();
   var buttonLoadingStates = <String, bool>{}.obs;
   final ScrollController scrollControllerForCarInformation = ScrollController();
@@ -174,6 +180,12 @@ class CarTradingDashboardController extends GetxController {
   ]);
 
   final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
+   final selectedRowIndex = (-1).obs;
+
+  void selectRow(int index) {
+    selectedRowIndex.value = index;
+    update();
+  }
 
   @override
   void onInit() async {
@@ -209,14 +221,14 @@ class CarTradingDashboardController extends GetxController {
         filterSearch();
         break;
       case 2:
-        setTodayRange();
+        setTodayRange(fromDate.value, toDate.value);
         isTodaySelected.value = true;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
         filterSearch();
         break;
       case 3:
-        setThisMonthRange();
+        setThisMonthRange(fromDate.value, toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = true;
         isThisYearSelected.value = false;
@@ -224,11 +236,30 @@ class CarTradingDashboardController extends GetxController {
 
         break;
       case 4:
-        setThisYearRange();
+        setThisYearRange(fromDate.value, toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = true;
         filterSearch();
+
+        break;
+      default:
+    }
+  }
+
+  void onChooseForDatePickerForChanges(int i) {
+    switch (i) {
+      case 1:
+        setTodayRange(fromDateForChanges.value, toDateForChanges.value);
+        filterLastChangesSearch();
+        break;
+      case 2:
+        setThisMonthRange(fromDateForChanges.value, toDateForChanges.value);
+        filterLastChangesSearch();
+        break;
+      case 3:
+        setThisYearRange(fromDateForChanges.value, toDateForChanges.value);
+        filterLastChangesSearch();
 
         break;
       default:
@@ -265,33 +296,42 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  void setTodayRange() {
+  void setTodayRange(
+    TextEditingController fromDate,
+    TextEditingController toDate,
+  ) {
     final now = DateTime.now();
 
     final today = DateTime(now.year, now.month, now.day);
 
-    fromDate.value.text = dateFormat.format(today);
-    toDate.value.text = dateFormat.format(today);
+    fromDate.text = dateFormat.format(today);
+    toDate.text = dateFormat.format(today);
   }
 
-  void setThisMonthRange() {
+  void setThisMonthRange(
+    TextEditingController fromDate,
+    TextEditingController toDate,
+  ) {
     final now = DateTime.now();
 
     final firstDayOfMonth = DateTime(now.year, now.month, 1);
     final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
 
-    fromDate.value.text = dateFormat.format(firstDayOfMonth);
-    toDate.value.text = dateFormat.format(lastDayOfMonth);
+    fromDate.text = dateFormat.format(firstDayOfMonth);
+    toDate.text = dateFormat.format(lastDayOfMonth);
   }
 
-  void setThisYearRange() {
+  void setThisYearRange(
+    TextEditingController fromDate,
+    TextEditingController toDate,
+  ) {
     final now = DateTime.now();
 
     final firstDayOfYear = DateTime(now.year, 1, 1);
     final lastDayOfYear = DateTime(now.year, 12, 31);
 
-    fromDate.value.text = dateFormat.format(firstDayOfYear);
-    toDate.value.text = dateFormat.format(lastDayOfYear);
+    fromDate.text = dateFormat.format(firstDayOfYear);
+    toDate.text = dateFormat.format(lastDayOfYear);
   }
 
   // function to manage loading button
@@ -474,6 +514,54 @@ class CarTradingDashboardController extends GetxController {
         await updateGeneralEpenses(id);
         break;
       default:
+    }
+  }
+
+  void filterLastChangesSearch() async {
+    Map body = {};
+    if (fromDateForChanges.value.text.isNotEmpty) {
+      body['from_date'] = convertDateToIson(fromDateForChanges.value.text);
+    }
+    if (toDateForChanges.value.text.isNotEmpty) {
+      body['to_date'] = convertDateToIson(toDateForChanges.value.text);
+    }
+    await getLastChanges(body);
+  }
+
+  Future<void> getLastChanges(Map body) async {
+    try {
+      changesSearching.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/car_trading/get_last_changes');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List changes = decoded['last_changes'] ?? [];
+        lastChanges.assignAll(
+          changes.map((change) => LastCarTradingChangesModel.fromJson(change)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getLastChanges(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      changesSearching.value = false;
+    } catch (e) {
+      changesSearching.value = false;
     }
   }
 

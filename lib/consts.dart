@@ -105,6 +105,12 @@ TextStyle coolTextStyle = TextStyle(
   fontSize: 12,
 );
 
+TextStyle titleCoolTextStyle = const TextStyle(
+  color: Colors.white,
+  fontWeight: FontWeight.bold,
+  fontSize: 16,
+);
+
 final createButton = Container(
   padding: const EdgeInsets.symmetric(horizontal: 12),
   decoration: BoxDecoration(
@@ -474,6 +480,13 @@ var homeButtonStyle = ElevatedButton.styleFrom(
 
 var findButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blueGrey,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+  minimumSize: const Size(100, 40),
+);
+
+var lastChangesButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.orange,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
