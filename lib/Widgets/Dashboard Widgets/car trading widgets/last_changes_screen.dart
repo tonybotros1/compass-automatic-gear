@@ -88,6 +88,16 @@ Widget lastChangesScreen({
                         controller.onChooseForDatePickerForChanges(v);
                       },
                     ),
+                    myTextFormFieldWithBorder(
+                      width: 120,
+                      controller: controller.minAmount.value,
+                      labelText: 'Min Amount',
+                    ),
+                    myTextFormFieldWithBorder(
+                      width: 120,
+                      controller: controller.maxAmount.value,
+                      labelText: 'Max Amount',
+                    ),
                     const Spacer(),
                     GetX<CarTradingDashboardController>(
                       builder: (controller) {
@@ -107,14 +117,7 @@ Widget lastChangesScreen({
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 26),
-                color: const Color(0xff6594B1),
-                height: 50,
-                width: double.infinity,
-                alignment: Alignment.centerLeft,
-                child: Text('LOG', style: titleCoolTextStyle),
-              ),
+
               SizedBox(
                 width: double.infinity,
                 child: GetX<CarTradingDashboardController>(
@@ -128,8 +131,8 @@ Widget lastChangesScreen({
                         DataColumn(label: Text('Brand')),
                         DataColumn(label: Text('Model')),
                         DataColumn(label: Text('Year')),
-                        DataColumn(label: Text('Item')),
                         DataColumn(label: Text('Account')),
+                        DataColumn(label: Text('Item')),
                         DataColumn(label: Text('Description')),
                         DataColumn(label: Text('Paid'), numeric: true),
                         DataColumn(label: Text('Received'), numeric: true),
@@ -189,7 +192,7 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           formatDouble: false,
           text: data.type?.toString().toUpperCase() ?? '',
-          color: data.type == 'car' ? Colors.red : Colors.cyan,
+          color: data.type == 'car' ? Colors.red : Colors.purple,
         ),
       ),
       DataCell(
@@ -206,14 +209,31 @@ DataRow dataRowForTheTable(
           isBold: true,
         ),
       ),
+
+      DataCell(
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: textForDataRowInTable(
+            text: data.accountName ?? '',
+            maxWidth: null,
+            color: data.accountName?.toLowerCase() == 'cash'
+                ? Colors.green
+                : Colors.lightBlue,
+          ),
+        ),
+      ),
       DataCell(
         textForDataRowInTable(text: data.itemName ?? '', maxWidth: null),
       ),
       DataCell(
-        textForDataRowInTable(text: data.accountName ?? '', maxWidth: null),
-      ),
-      DataCell(
-        textForDataRowInTable(text: data.description ?? '', maxWidth: null),
+        textForDataRowInTable(
+          text: data.description == '' ? '-' : data.description ?? '',
+          maxWidth: null,
+        ),
       ),
       DataCell(
         textForDataRowInTable(

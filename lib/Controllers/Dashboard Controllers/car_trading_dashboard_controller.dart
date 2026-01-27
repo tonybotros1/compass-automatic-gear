@@ -139,6 +139,8 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> fromDateForChanges = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
   Rx<TextEditingController> toDateForChanges = TextEditingController().obs;
+  Rx<TextEditingController> minAmount = TextEditingController().obs;
+  Rx<TextEditingController> maxAmount = TextEditingController().obs;
   RxBool carModified = RxBool(false);
   RxBool itemsModified = RxBool(false);
   final Uuid _uuid = const Uuid();
@@ -180,7 +182,7 @@ class CarTradingDashboardController extends GetxController {
   ]);
 
   final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
-   final selectedRowIndex = (-1).obs;
+  final selectedRowIndex = (-1).obs;
 
   void selectRow(int index) {
     selectedRowIndex.value = index;
@@ -524,6 +526,12 @@ class CarTradingDashboardController extends GetxController {
     }
     if (toDateForChanges.value.text.isNotEmpty) {
       body['to_date'] = convertDateToIson(toDateForChanges.value.text);
+    }
+    if (minAmount.value.text.isNotEmpty) {
+      body['min_amount'] = minAmount.value.text;
+    }
+    if (maxAmount.value.text.isNotEmpty) {
+      body['max_amount'] = maxAmount.value.text;
     }
     await getLastChanges(body);
   }
