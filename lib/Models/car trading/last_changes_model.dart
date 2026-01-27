@@ -6,6 +6,9 @@ class LastCarTradingChangesModel {
   double? pay;
   double? receive;
   String? type;
+  DateTime? updatedAt;
+  String? itemName;
+  String? accountName;
   String? id;
 
   LastCarTradingChangesModel({
@@ -17,6 +20,9 @@ class LastCarTradingChangesModel {
     this.id,
     this.type,
     this.year,
+    this.accountName,
+    this.itemName,
+    this.updatedAt,
   });
 
   LastCarTradingChangesModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +36,11 @@ class LastCarTradingChangesModel {
     receive = json.containsKey('receive') ? json['receive'] ?? 0 : 0;
     year = json.containsKey('year') ? json['year'] ?? '' : '';
     id = json.containsKey('_id') ? json['_id'] ?? '' : '';
+    accountName = json.containsKey('account_name')
+        ? json['account_name'] ?? ''
+        : '';
+    itemName = json.containsKey('item_name') ? json['item_name'] ?? '' : '';
+    updatedAt = DateTime.tryParse(json['updatedAt']);
   }
 
   Map<String, dynamic> toJson() {

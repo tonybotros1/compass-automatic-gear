@@ -435,6 +435,7 @@ class CarTradingDashboard extends StatelessWidget {
                                       ElevatedButton(
                                         style: lastChangesButtonStyle,
                                         onPressed: () {
+                                          controller.lastChanges.clear();
                                           controller.setTodayRange(
                                             controller.fromDateForChanges.value,
                                             controller.toDateForChanges.value,

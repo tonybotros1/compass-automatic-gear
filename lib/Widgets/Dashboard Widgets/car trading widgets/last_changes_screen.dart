@@ -123,10 +123,13 @@ Widget lastChangesScreen({
                       showCheckboxColumn: false,
                       rowsPerPage: 20,
                       columns: const [
+                        DataColumn(label: Text('Change Date')),
                         DataColumn(label: Text('Type')),
                         DataColumn(label: Text('Brand')),
                         DataColumn(label: Text('Model')),
                         DataColumn(label: Text('Year')),
+                        DataColumn(label: Text('Item')),
+                        DataColumn(label: Text('Account')),
                         DataColumn(label: Text('Description')),
                         DataColumn(label: Text('Paid'), numeric: true),
                         DataColumn(label: Text('Received'), numeric: true),
@@ -177,6 +180,14 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           formatDouble: false,
+          text: textToDate(data.updatedAt),
+          color: Colors.blueGrey,
+          isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          formatDouble: false,
           text: data.type?.toString().toUpperCase() ?? '',
           color: data.type == 'car' ? Colors.red : Colors.cyan,
         ),
@@ -194,6 +205,12 @@ DataRow dataRowForTheTable(
           color: Colors.teal,
           isBold: true,
         ),
+      ),
+      DataCell(
+        textForDataRowInTable(text: data.itemName ?? '', maxWidth: null),
+      ),
+      DataCell(
+        textForDataRowInTable(text: data.accountName ?? '', maxWidth: null),
       ),
       DataCell(
         textForDataRowInTable(text: data.description ?? '', maxWidth: null),
@@ -232,7 +249,6 @@ class LastChangesTradeDataSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     if (index >= trades.length) return null;
-    
 
     final trade = trades[index];
     final tradeId = trade.id.toString();
