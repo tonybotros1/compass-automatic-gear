@@ -42,8 +42,6 @@ class CarTradingDashboard extends StatelessWidget {
                           GetX<CarTradingDashboardController>(
                             init: CarTradingDashboardController(),
                             builder: (controller) {
-                              bool isModelLoading =
-                                  controller.allModels.isEmpty;
                               return SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: ConstrainedBox(
@@ -114,9 +112,7 @@ class CarTradingDashboard extends StatelessWidget {
                                                 .value
                                                 .text,
                                             hintText: 'Car Model',
-                                            items: isModelLoading
-                                                ? {}
-                                                : controller.allModels,
+
                                             onChanged: (key, value) {
                                               controller
                                                       .carModelFilter
@@ -135,6 +131,14 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .carModelFilterId
                                                       .value =
                                                   '';
+                                            },
+                                            onOpen: () {
+                                              return controller
+                                                  .getModelsByCarBrand(
+                                                    controller
+                                                        .carBrandFilterId
+                                                        .value,
+                                                  );
                                             },
                                           ),
                                           // CustomDropdown(
@@ -435,7 +439,7 @@ class CarTradingDashboard extends StatelessWidget {
                                       ElevatedButton(
                                         style: lastChangesButtonStyle,
                                         onPressed: () {
-                                        controller.clearCangesVariables();
+                                          controller.clearCangesVariables();
                                           lastChangesDialog();
                                         },
                                         child: Text(

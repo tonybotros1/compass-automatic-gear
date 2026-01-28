@@ -12,9 +12,7 @@ Widget addNewCountryOrEdit({
     key: controller.formKeyForAddingNewvalue,
     child: ListView(
       children: [
-        const SizedBox(
-          height: 5,
-        ),
+        const SizedBox(height: 5),
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.countryName,
@@ -22,20 +20,19 @@ Widget addNewCountryOrEdit({
           hintText: 'Enter Name',
           validate: true,
         ),
-        const SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
         Row(
           spacing: 10,
           children: [
             Expanded(
               child: myTextFormFieldWithBorder(
-                  obscureText: false,
-                  controller: controller.countryCode,
-                  labelText: 'Code',
-                  hintText: 'Enter Code',
-                  validate: true,
-                  isEnabled: canEdit),
+                obscureText: false,
+                controller: controller.countryCode,
+                labelText: 'Code',
+                hintText: 'Enter Code',
+                validate: true,
+                isEnabled: canEdit,
+              ),
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
@@ -48,9 +45,7 @@ Widget addNewCountryOrEdit({
             ),
           ],
         ),
-        const SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
         Row(
           spacing: 10,
           children: [
@@ -74,6 +69,24 @@ Widget addNewCountryOrEdit({
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
+                obscureText: false,
+                controller: controller.subunitName,
+                labelText: 'Subunit Name',
+                hintText: 'Enter Subunit Name',
+                validate: true,
+              ),
+            ),
+            Expanded(
+              child: myTextFormFieldWithBorder(
+                obscureText: false,
+                controller: controller.subunitCode,
+                labelText: 'Subunit Code',
+                hintText: 'Enter Subunit Code',
+                validate: true,
+              ),
+            ),
+            Expanded(
+              child: myTextFormFieldWithBorder(
                 isDouble: true,
                 obscureText: false,
                 controller: controller.vat,
@@ -84,49 +97,51 @@ Widget addNewCountryOrEdit({
             ),
           ],
         ),
-        const SizedBox(
-          height: 10,
-        ),
-        GetX<CountriesController>(builder: (controller) {
-          return InkWell(
-            onTap: () {
-              controller.pickImage();
-            },
-            child: Container(
-              height: 155,
-              width: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(
+        const SizedBox(height: 10),
+        GetX<CountriesController>(
+          builder: (controller) {
+            return InkWell(
+              onTap: () {
+                controller.pickImage();
+              },
+              child: Container(
+                height: 155,
+                width: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(
                     style: BorderStyle.solid,
                     color: controller.flagSelectedError.isFalse
                         ? Colors.grey
-                        : Colors.red),
-              ),
-              child: controller.imageBytes.value.isEmpty &&
-                      controller.flagUrl.value.isEmpty
-                  ? const Center(
-                      child: FittedBox(
-                        child: Text(
-                          'No image selected',
-                          style: TextStyle(color: Colors.grey),
+                        : Colors.red,
+                  ),
+                ),
+                child:
+                    controller.imageBytes.value.isEmpty &&
+                        controller.flagUrl.value.isEmpty
+                    ? const Center(
+                        child: FittedBox(
+                          child: Text(
+                            'No image selected',
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         ),
+                      )
+                    : controller.imageBytes.value.isNotEmpty
+                    ? Image.memory(
+                        controller.imageBytes.value,
+                        fit: BoxFit.contain,
+                      )
+                    : Image.network(
+                        controller.flagUrl.value,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, url, error) =>
+                            const Icon(Icons.error),
                       ),
-                    )
-                  : controller.imageBytes.value.isNotEmpty
-                      ? Image.memory(
-                          controller.imageBytes.value,
-                          fit: BoxFit.contain,
-                        )
-                      : Image.network(
-                          controller.flagUrl.value,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, url, error) =>
-                              const Icon(Icons.error),
-                        ),
-            ),
-          );
-        }),
+              ),
+            );
+          },
+        ),
       ],
     ),
   );

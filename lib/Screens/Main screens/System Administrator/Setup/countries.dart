@@ -326,6 +326,8 @@ ElevatedButton editSection(
       controller.countryCode.text = countryData.code;
       controller.currencyName.text = countryData.currencyName;
       controller.currencyCode.text = countryData.currencyCode;
+      controller.subunitName.text = countryData.subunitName;
+      controller.subunitCode.text = countryData.subunitCode;
       controller.vat.text = countryData.vat.toString();
 
       controller.flagUrl.value = countryData.flag;
@@ -362,6 +364,8 @@ ElevatedButton newcountryButton(
       controller.imageBytes.value = Uint8List(0);
       controller.flagUrl.value = '';
       controller.flagSelectedError.value = false;
+      controller.subunitCode.clear();
+      controller.subunitName.clear();
       countriesDialog(
         canEdit: true,
         constraints: constraints,

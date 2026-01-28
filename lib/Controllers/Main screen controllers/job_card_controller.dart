@@ -467,6 +467,9 @@ class JobCardController extends GetxController {
     final Font cairoBold = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Amiri-Bold.ttf'),
     );
+    // var countryCurrency = await helper.getCountryCurrency(companyDetails['']);
+    String countryCurrencyForPDF = companyDetails['currency_code'] ?? '';
+    String subunitNameForPDF = companyDetails['subunit_name'] ?? '';
     var headerImage = await networkImageToPdf(
       companyDetails.containsKey('header_url')
           ? companyDetails['header_url'] ?? ''
@@ -569,6 +572,8 @@ class JobCardController extends GetxController {
                             currentCountryVAT.value.toString(),
                             net,
                             isLastPage,
+                            countryCurrencyForPDF,
+                            subunitNameForPDF,
                           ),
                         ],
                       ),
@@ -592,6 +597,15 @@ class JobCardController extends GetxController {
   }
 
   void printInvoice(bool withHeader) async {
+    Map jobStatus = await getCurrentJobCardStatus(curreentJobCardId.value);
+    String status1 = jobStatus['job_status_1'];
+    if ((status1 != 'Posted')) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Only posted jobs can be print',
+      );
+      return;
+    }
     final pdfData = await generateInvoicedPdf(withHeader);
 
     await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);

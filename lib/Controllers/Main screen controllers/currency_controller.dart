@@ -26,14 +26,13 @@ class CurrencyController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxString companyId = RxString('');
   RxString countryId = RxString('');
-  RxMap allCountries = RxMap({});
+  // RxMap allCountries = RxMap({});
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
 
   @override
   void onInit() {
     connectWebSocket();
-    getCountries();
     getAllCurrencies();
 
     super.onInit();
@@ -79,8 +78,8 @@ class CurrencyController extends GetxController {
     });
   }
 
-  Future<void> getCountries() async {
-    allCountries.assignAll(await helper.getCountries());
+  Future<Map<String, dynamic>> getCountries() async {
+    return await helper.getCountries();
   }
 
   Future<void> getAllCurrencies() async {

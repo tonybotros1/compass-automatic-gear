@@ -21,6 +21,8 @@ class CountriesController extends GetxController {
   TextEditingController cityName = TextEditingController();
   TextEditingController countryCallingCode = TextEditingController();
   TextEditingController currencyName = TextEditingController();
+  TextEditingController subunitName = TextEditingController();
+  TextEditingController subunitCode = TextEditingController();
   TextEditingController currencyCode = TextEditingController();
   TextEditingController vat = TextEditingController();
   RxBool isScreenLoding = RxBool(false);
@@ -48,7 +50,6 @@ class CountriesController extends GetxController {
   void onInit() {
     connectWebSocket();
     getAllCountries();
-
     super.onInit();
   }
 
@@ -155,6 +156,8 @@ class CountriesController extends GetxController {
       request.fields["calling_code"] = countryCallingCode.text;
       request.fields["currency_name"] = currencyName.text;
       request.fields["currency_code"] = currencyCode.text;
+      request.fields["subunit_name"] = subunitName.text;
+      request.fields["subuinit_code"] = subunitCode.text;
       request.fields["vat"] = vat.text;
       request.fields["currency_code"] = currencyCode.text;
       if (imageBytes.value.isNotEmpty) {
@@ -277,6 +280,8 @@ class CountriesController extends GetxController {
       request.fields["calling_code"] = countryCallingCode.text;
       request.fields["currency_name"] = currencyName.text;
       request.fields["currency_code"] = currencyCode.text;
+      request.fields["subunit_name"] = subunitName.text;
+      request.fields["subuinit_code"] = subunitCode.text;
       request.fields["vat"] = vat.text;
       request.fields["currency_code"] = currencyCode.text;
       if (imageBytes.value.isNotEmpty) {

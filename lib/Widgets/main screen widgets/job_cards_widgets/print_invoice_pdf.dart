@@ -95,9 +95,8 @@ pw.Widget buildCustomerInfoSection(
                     title: 'Address:',
                     value:
                         """
-Line: ${customerAddressInformation.containsKey('line') ? customerAddressInformation['line'] ?? '' : ''}
-City: ${customerAddressInformation.containsKey('city') ? customerAddressInformation['city'] ?? '' : ''}
-Country: ${customerAddressInformation.containsKey('country') ? customerAddressInformation['country'] ?? '' : ''}
+${customerAddressInformation.containsKey('line') ? customerAddressInformation['line'] ?? '' : ''}
+${customerAddressInformation.containsKey('city') ? customerAddressInformation['city'] ?? '' : ''}, ${customerAddressInformation.containsKey('country') ? customerAddressInformation['country'] ?? '' : ''}
                                   """,
                   ),
                   _infoRow(title: 'Contact Person:', value: customerEntityName),
@@ -116,20 +115,9 @@ Country: ${customerAddressInformation.containsKey('country') ? customerAddressIn
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Row(
-                    children: [
-                      pw.Expanded(
-                        flex: 2,
-                        child: _infoRow(
-                          title: 'Invoice NO:',
-                          value: invoiceCounter,
-                        ),
-                      ),
-                      pw.Expanded(
-                        child: _infoRow(title: 'LPO:', value: lpoCounter),
-                      ),
-                    ],
-                  ),
+                  _infoRow(title: 'Invoice NO:', value: invoiceCounter),
+                  _infoRow(title: 'LPO:', value: lpoCounter),
+
                   _infoRow(title: 'Date:', value: textToDate(invoiceDate)),
                   _infoRow(
                     title: 'Our Reference:',
@@ -295,6 +283,8 @@ pw.Widget buildTotalsSection(
   String currentCountryVAT,
   double net,
   bool isLastPage,
+  String countryCurrency,
+  String subunitName,
 ) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -544,7 +534,10 @@ pw.Widget buildTotalsSection(
       ),
       pw.Padding(
         padding: const pw.EdgeInsets.all(4),
-        child: pw.Text(convertNumberToWords(net), style: fontStyleForPDFLable),
+        child: pw.Text(
+          '$countryCurrency ${convertNumberToWords(net, subunitName)}',
+          style: fontStyleForPDFLable,
+        ),
       ),
     ],
   );
@@ -575,7 +568,7 @@ pw.Widget buildSignatures(String companyName) {
   );
 }
 
-String convertNumberToWords(double number) {
+String convertNumberToWords(double number, String subunit) {
   if (number % 1 == 0) {
     // Whole number, ignore decimals
     return NumberToWord().convert('en-in', number.toInt());
@@ -587,7 +580,7 @@ String convertNumberToWords(double number) {
     String words = NumberToWord().convert('en-in', integerPart);
     if (decimalPart > 0) {
       words +=
-          ' and ${NumberToWord().convert('en-in', decimalPart)}';
+          ' point ${NumberToWord().convert('en-in', decimalPart)} $subunit';
     }
     return words;
   }

@@ -5,6 +5,8 @@ class Country {
   final String callingCode;
   final String currencyName;
   final String currencyCode;
+  final String subunitName;
+  final String subunitCode;
   final String flag;
   final double vat;
   final bool status;
@@ -20,6 +22,8 @@ class Country {
     required this.currencyCode,
     required this.callingCode,
     required this.vat,
+    required this.subunitCode,
+    required this.subunitName,
     required this.status,
     required this.createdAt,
     required this.updatedAt,
@@ -34,6 +38,12 @@ class Country {
       code: json['code'] ?? '',
       currencyCode: json['currency_code'] ?? '',
       currencyName: json['currency_name'] ?? '',
+      subunitCode: json.containsKey('subunit_code')
+          ? json['subunit_code'] ?? ''
+          : '',
+      subunitName: json.containsKey('subunit_name')
+          ? json['subunit_name'] ?? ''
+          : '',
       vat: json['vat'] ?? 0,
       status: json['status'] ?? true,
       createdAt: DateTime.parse(json['createdAt']),

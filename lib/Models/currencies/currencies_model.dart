@@ -24,7 +24,7 @@ class CurrenciesModel {
     createdAt = json['createdAt'] != null
         ? DateTime.tryParse(json['createdAt'].toString())
         : null;
-    code = json['country_code']?.toString() ?? '';
+    code = json['currency_code']?.toString() ?? '';
     updatedAt = json['updatedAt'] != null
         ? DateTime.tryParse(json['updatedAt'].toString())
         : null;
