@@ -123,6 +123,7 @@ flutter:
     - assets/fonts/Cairo-Bold.ttf
     - assets/fonts/Amiri-Regular.ttf
     - assets/fonts/Amiri-Bold.ttf
+    - assets/fonts/tahoma.ttf
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

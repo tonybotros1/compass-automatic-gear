@@ -38,27 +38,27 @@ Widget tableOfSummaryDetails({required BuildContext context}) {
             columns: const [
               DataColumn(
                 label: Text('CATEGORY'),
-                columnWidth: IntrinsicColumnWidth(flex: 2),
+                columnWidth: IntrinsicColumnWidth(flex: 3),
               ),
               DataColumn(
                 numeric: true,
                 label: Text('COUNT'),
-                columnWidth: IntrinsicColumnWidth(flex: 0.5),
+                columnWidth: IntrinsicColumnWidth(flex: 1),
               ),
               DataColumn(
                 numeric: true,
                 label: Text('PAID'),
-                columnWidth: IntrinsicColumnWidth(flex: .5),
+                columnWidth: IntrinsicColumnWidth(flex: 1),
               ),
               DataColumn(
                 numeric: true,
                 label: Text('RECEIVED'),
-                columnWidth: IntrinsicColumnWidth(flex: .5),
+                columnWidth: IntrinsicColumnWidth(flex: 1),
               ),
               DataColumn(
                 numeric: true,
                 label: Text('NET'),
-                columnWidth: IntrinsicColumnWidth(flex: .5),
+                columnWidth: IntrinsicColumnWidth(flex: 1),
               ),
               DataColumn(
                 label: Text('ACTION'),

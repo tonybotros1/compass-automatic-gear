@@ -460,7 +460,10 @@ class JobCardController extends GetxController {
   // =====================  print functions   =====================
   // ===================== 1. print invoice   =====================
 
-  Future<Uint8List> generateInvoicedPdf(bool withHeader) async {
+  Future<Uint8List> generateInvoicedPdf(
+    bool withHeader,
+    bool isProformaInvoice,
+  ) async {
     final Font cairoRegular = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Amiri-Regular.ttf'),
     );
@@ -557,6 +560,7 @@ class JobCardController extends GetxController {
                             companyDetails,
                             customerInformation,
                             customerAddressInformation,
+                            isProformaInvoice,
                           ),
 
                           buildInvoiceTable(pageItems),
@@ -596,7 +600,7 @@ class JobCardController extends GetxController {
     return pdf.save();
   }
 
-  void printInvoice(bool withHeader) async {
+  void printInvoice(bool withHeader, bool isProformaInvoice) async {
     Map jobStatus = await getCurrentJobCardStatus(curreentJobCardId.value);
     String status1 = jobStatus['job_status_1'];
     if ((status1 != 'Posted')) {
@@ -606,7 +610,7 @@ class JobCardController extends GetxController {
       );
       return;
     }
-    final pdfData = await generateInvoicedPdf(withHeader);
+    final pdfData = await generateInvoicedPdf(withHeader, isProformaInvoice);
 
     await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
   }
@@ -624,7 +628,7 @@ class JobCardController extends GetxController {
     return chunks;
   }
 
-  // ===================== 1. print Delevery note   =====================
+  // ===================== 2. print Delevery note   =====================
   void printDeleveryNote(bool withPrice) async {
     final pdfData = await generateDeleveryNotePdf(withPrice);
 
@@ -783,6 +787,250 @@ class JobCardController extends GetxController {
       ),
     );
     return pdf.save();
+  }
+
+  // ===================== 3. print Job Card   =====================
+  void printJobCard() async {
+    final pdfData = await generateJobCardPdf();
+
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
+  }
+
+  Future<Uint8List> generateJobCardPdf() async {
+    final Font cairoBold = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/tahoma.ttf'),
+    );
+    var headerImage = await networkImageToPdf(
+      companyDetails.containsKey('header_url')
+          ? companyDetails['header_url'] ?? ''
+          : '',
+    );
+    var footerImage = await networkImageToPdf(
+      companyDetails.containsKey('footer_url')
+          ? companyDetails['footer_url'] ?? ''
+          : '',
+    );
+
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.MultiPage(
+        maxPages: 2,
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(0),
+        header: (context) =>
+            pw.Image(headerImage, height: 115, fit: pw.BoxFit.fitWidth),
+
+        footer: (context) =>
+            pw.Image(footerImage, height: 100, fit: pw.BoxFit.fitWidth),
+        build: (context) {
+          return [
+            ...List.generate(1, (pageIndex) {
+              return pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 10,
+                ),
+
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 8),
+                      height: 20,
+                      color: PdfColors.black,
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'JOB CARD',
+                            style: pw.TextStyle(
+                              color: PdfColors.white,
+                              fontWeight: pw.FontWeight.bold,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            'بطاقة عمل وصيانة',
+                            textDirection: pw.TextDirection.rtl,
+                            style: pw.TextStyle(
+                              color: PdfColors.white,
+                              fontSize: 10,
+                              font: cairoBold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    pw.SizedBox(height: 4),
+                    pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Expanded(
+                          child: pdfLine(
+                            isValueExpanded: true,
+                            label: 'Reference No.',
+                            value: jobCardCounter.value.text,
+                          ),
+                        ),
+                        pdfLine(
+                          label: 'Date',
+                          value: textToDate(jobCardDate.value.text),
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 2),
+                    pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Expanded(
+                          child: pdfLine(
+                            isValueExpanded: true,
+                            label: 'Customer Name',
+                            value: customerName.text,
+                          ),
+                        ),
+                        pdfLine(
+                          label: 'Phone',
+                          value: customerEntityPhoneNumber.text,
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 2),
+
+                    pdfLine(
+                      isValueExpanded: true,
+                      label: 'Car Details',
+                      value:
+                          "[${carBrand.text} ${carModel.text}, ${year.text}, ${color.text}], Plate Number: [${plateNumber.text}], Mileage: [${mileageIn.value.text}], VIN: [${vin.text}]",
+                    ),
+                    pw.SizedBox(height: 4),
+                    pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Expanded(
+                          child: pw.Column(
+                            children: [
+                              pw.Container(
+                                width: double.infinity,
+                                padding: const pw.EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                color: PdfColors.grey500,
+                                child: pw.Text(
+                                  'Terms and Conditions',
+                                  style: pw.TextStyle(
+                                    color: PdfColors.white,
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 8,
+                                  ),
+                                ),
+                              ),
+                              pw.Text(
+                                companyDetails.containsKey(
+                                      'terms_and_conditions_en',
+                                    )
+                                    ? """${companyDetails['terms_and_conditions_en'].toString()} """
+                                    : '',
+                                style: fontStyleForPDFText,
+                              ),
+                            ],
+                          ),
+                        ),
+                        pw.SizedBox(width: 2),
+                        pw.Expanded(
+                          child: pw.Column(
+                            children: [
+                              pw.Container(
+                                width: double.infinity,
+                                padding: const pw.EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                color: PdfColors.grey500,
+                                child: pw.Text(
+                                  'الشروط والأحكام',
+                                  textDirection: pw.TextDirection.rtl,
+                                  style: pw.TextStyle(
+                                    color: PdfColors.white,
+                                    fontSize: 8,
+                                    font: cairoBold,
+                                  ),
+                                ),
+                              ),
+                              pw.Text(
+                                companyDetails.containsKey(
+                                      'terms_and_conditions_ar',
+                                    )
+                                    ? """${companyDetails['terms_and_conditions_ar'].toString()} """
+                                    : '',
+                                textDirection: pw.TextDirection.rtl,
+
+                                style: pw.TextStyle(
+                                  color: PdfColors.black,
+                                  fontSize: 8,
+                                  font: cairoBold,
+
+                                  fontFallback: [cairoBold],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ];
+        },
+      ),
+    );
+    return pdf.save();
+  }
+
+  String normalizeText(String text) {
+    return text.replaceAll('’', "'").replaceAll('“', '"').replaceAll('”', '"');
+  }
+
+  String cleanText(String text) {
+    return text
+        .replaceAll('’', "'") // Replace smart apostrophe
+        .replaceAll('‘', "'")
+        .replaceAll('“', '"')
+        .replaceAll('”', '"');
+  }
+
+  pw.Widget pdfLine({
+    required String label,
+    required String value,
+    bool isValueExpanded = false,
+    double valueWidth = 100,
+  }) {
+    var container = pw.Container(
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey),
+      ),
+      width: valueWidth,
+      alignment: pw.Alignment.centerLeft,
+      padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: pw.Text(value, style: fontStyleForPDFText),
+    );
+    return pw.Row(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Container(
+          alignment: pw.Alignment.centerLeft,
+          width: 100,
+          padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          color: PdfColors.grey500,
+          child: pw.Text(label, style: fontStyleForPDFTableHeader),
+        ),
+        pw.SizedBox(width: 2),
+        isValueExpanded ? pw.Expanded(child: container) : container,
+      ],
+    );
   }
 
   // =====================  End of print functions   =====================

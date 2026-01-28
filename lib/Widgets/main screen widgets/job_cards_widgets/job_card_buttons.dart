@@ -294,17 +294,32 @@ GetBuilder<JobCardController> printButton(BuildContext context) {
               style: TextStyle(fontSize: 14),
             ),
           ),
+          PopupMenuItem(
+            value: 'print_proforma_invoice',
+            child: Text(
+              'Print Proforma Invoice',
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+          PopupMenuItem(
+            value: 'print_job_card',
+            child: Text('Print Job Card', style: TextStyle(fontSize: 14)),
+          ),
         ],
         onSelected: (value) {
           switch (value) {
             case 'print_invoice':
-              controller.printInvoice(false);
+              controller.printInvoice(false, false);
             case 'print_invoice_with_header':
-              controller.printInvoice(true);
+              controller.printInvoice(true, false);
             case 'print_delevery_note_with_price':
               controller.printDeleveryNote(true);
             case 'print_delevery_note_without_price':
               controller.printDeleveryNote(false);
+            case 'print_proforma_invoice':
+              controller.printInvoice(true, true);
+            case 'print_job_card':
+              controller.printJobCard();
 
               break;
             default:

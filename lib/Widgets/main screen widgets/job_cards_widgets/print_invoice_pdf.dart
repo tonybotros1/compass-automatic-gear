@@ -65,6 +65,7 @@ pw.Widget buildCustomerInfoSection(
   Map companyDetails,
   Map customerInformation,
   Map customerAddressInformation,
+  bool isProformaInvoice
 ) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -73,7 +74,7 @@ pw.Widget buildCustomerInfoSection(
         padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: const pw.BoxDecoration(color: PdfColors.black),
         child: pw.Text(
-          'TAX INVOICE - ${payType.toUpperCase()}',
+         isProformaInvoice ? 'PROFORMA INVOICE' : 'TAX INVOICE - ${payType.toUpperCase()}',
           style: pw.TextStyle(
             color: PdfColors.white,
             fontWeight: pw.FontWeight.bold,

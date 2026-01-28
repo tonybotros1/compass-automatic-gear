@@ -964,42 +964,83 @@ Widget textForDataRowInTable({
   );
 }
 
+// Container statusBox(
+//   String status, {
+//   hieght = 30.0,
+//   width = 100,
+//   EdgeInsetsGeometry? padding = const EdgeInsets.symmetric(horizontal: 4),
+// }) {
+//   return Container(
+//     alignment: Alignment.centerLeft,
+//     decoration: BoxDecoration(
+//       border: Border.all(color: Colors.grey.shade300, width: 2),
+//       borderRadius: BorderRadius.circular(2),
+//       color: status == 'New' || status == "Active"
+//           ? Colors.green
+//           : status == 'Posted' || status == 'Sold' || status == "Probation"
+//           ? Colors.teal
+//           : status == 'Cancelled' || status == 'R' || status == "Inactive"
+//           ? Colors.red
+//           : status == 'Approved'
+//           ? const Color(0xffD2665A)
+//           : status == 'Ready' || status == 'D'
+//           ? const Color(0xff7886C7)
+//           : status == 'Closed' || status == 'Warranty'
+//           ? Colors.black
+//           : status == 'Returned'
+//           ? Colors.redAccent
+//           : status == 'Draft'
+//           ? Colors.blueGrey
+//           : status == 'JC'
+//           ? Colors.pink.shade800
+//           : status == 'SI'
+//           ? Colors.blue.shade300
+//           : Colors.brown,
+//     ),
+//     height: hieght,
+//     width: width,
+//     padding: padding,
+//     child: Text(status, style: const TextStyle(color: Colors.white)),
+//   );
+// }
+
 Container statusBox(
   String status, {
   hieght = 30.0,
   width = 100,
   EdgeInsetsGeometry? padding = const EdgeInsets.symmetric(horizontal: 4),
+  int alpha = 200,
 }) {
   return Container(
-    alignment: Alignment.centerLeft,
+    // alignment: Alignment.center,
     decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey.shade300, width: 2),
-      borderRadius: BorderRadius.circular(2),
+      // border: Border.all(color: Colors.grey.shade300, width: 2),
+      borderRadius: BorderRadius.circular(5),
       color: status == 'New' || status == "Active"
-          ? Colors.green
+          ? Colors.green.withAlpha(alpha)
           : status == 'Posted' || status == 'Sold' || status == "Probation"
-          ? Colors.teal
+          ? Colors.teal.withAlpha(alpha)
           : status == 'Cancelled' || status == 'R' || status == "Inactive"
-          ? Colors.red
+          ? Colors.red.withAlpha(alpha)
           : status == 'Approved'
-          ? const Color(0xffD2665A)
+          ? const Color(0xffD2665A).withAlpha(alpha)
           : status == 'Ready' || status == 'D'
-          ? const Color(0xff7886C7)
+          ? const Color(0xff7886C7).withAlpha(alpha)
           : status == 'Closed' || status == 'Warranty'
-          ? Colors.black
+          ? Colors.black.withAlpha(alpha)
           : status == 'Returned'
-          ? Colors.redAccent
+          ? Colors.redAccent.withAlpha(alpha)
           : status == 'Draft'
-          ? Colors.blueGrey
+          ? Colors.blueGrey.withAlpha(alpha)
           : status == 'JC'
-          ? Colors.pink.shade800
+          ? Colors.pink.shade800.withAlpha(alpha)
           : status == 'SI'
-          ? Colors.blue.shade300
-          : Colors.brown,
+          ? Colors.blue.shade300.withAlpha(alpha)
+          : Colors.brown.withAlpha(alpha),
     ),
-    height: hieght,
+    // height: hieght,
     width: width,
-    padding: padding,
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     child: Text(status, style: const TextStyle(color: Colors.white)),
   );
 }
