@@ -519,6 +519,14 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
+  void clearCangesVariables() {
+    lastChanges.clear();
+    fromDateForChanges.value.clear();
+    toDateForChanges.value.clear();
+    minAmount.value.clear();
+    maxAmount.value.clear();
+  }
+
   void filterLastChangesSearch() async {
     Map body = {};
     if (fromDateForChanges.value.text.isNotEmpty) {

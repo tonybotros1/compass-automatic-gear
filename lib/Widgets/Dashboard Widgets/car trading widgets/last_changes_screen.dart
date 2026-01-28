@@ -99,6 +99,7 @@ Widget lastChangesScreen({
                       labelText: 'Max Amount',
                     ),
                     const Spacer(),
+
                     GetX<CarTradingDashboardController>(
                       builder: (controller) {
                         return ElevatedButton(
@@ -114,6 +115,20 @@ Widget lastChangesScreen({
                         );
                       },
                     ),
+                    GetBuilder<CarTradingDashboardController>(
+                      builder: (controller) {
+                        return ElevatedButton(
+                          style: clearVariablesButtonStyle,
+                          onPressed: () {
+                            controller.clearCangesVariables();
+                          },
+                          child: Text(
+                            'Clear',
+                            style: fontStyleForElevatedButtons,
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -124,7 +139,7 @@ Widget lastChangesScreen({
                   builder: (controller) {
                     return PaginatedDataTable(
                       showCheckboxColumn: false,
-                      rowsPerPage: 20,
+                      rowsPerPage: 15,
                       columns: const [
                         DataColumn(label: Text('Change Date')),
                         DataColumn(label: Text('Type')),
