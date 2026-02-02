@@ -12,7 +12,6 @@ Widget addNewValueOrEdit({required ListOfValuesController controller}) {
           obscureText: false,
           controller: controller.valueName,
           labelText: 'Value Name',
-          hintText: 'Enter Value name',
           validate: true,
         ),
         const SizedBox(height: 20),

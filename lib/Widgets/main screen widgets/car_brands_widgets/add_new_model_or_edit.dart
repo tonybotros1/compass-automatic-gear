@@ -17,7 +17,6 @@ Widget addNewmodelOrEdit({
           obscureText: false,
           controller: controller.modelName,
           labelText: 'Name',
-          hintText: 'Enter Name',
           validate: true,
         ),
       ],

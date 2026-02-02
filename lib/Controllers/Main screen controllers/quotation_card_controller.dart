@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../../Models/job cards/internal_notes_model.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/quotation cards/quotation_cards_model.dart';
 import '../../Screens/Main screens/System Administrator/Setup/job_card.dart';
+import '../../Widgets/main screen widgets/job_cards_widgets/print_delivery_note.dart';
+import '../../Widgets/main screen widgets/job_cards_widgets/print_invoice_pdf.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import 'car_brands_controller.dart';
@@ -18,6 +21,8 @@ import 'countries_controller.dart';
 import 'job_card_controller.dart';
 import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class QuotationCardController extends GetxController {
   Rx<TextEditingController> quotationCounter = TextEditingController().obs;
@@ -177,7 +182,7 @@ class QuotationCardController extends GetxController {
   void onInit() async {
     super.onInit();
     searchEngine({"today": true});
-    getCompanyDetails();
+    await getCompanyDetails();
     getAllUsers();
   }
 
@@ -743,10 +748,10 @@ class QuotationCardController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List jobs = decoded['quotation_cards'];
-        Map grandTotals = decoded['grand_totals'];
-        allQuotationsTotals.value = grandTotals['grand_total'];
-        allQuotationsVATS.value = grandTotals['grand_vat'];
-        allQuotationsNET.value = grandTotals['grand_net'];
+        Map grandTotals = decoded['grand_totals'] ?? 0;
+        allQuotationsTotals.value = grandTotals['grand_total'] ?? 0;
+        allQuotationsVATS.value = grandTotals['grand_vat'] ?? 0;
+        allQuotationsNET.value = grandTotals['grand_net'] ?? 0;
         allQuotationCards.assignAll(
           jobs.map((job) => QuotationCardsModel.fromJson(job)),
         );
@@ -1003,6 +1008,405 @@ class QuotationCardController extends GetxController {
         content: 'Something went wrong please try again',
       );
     }
+  }
+
+  // ====================== print quotation ========================
+  List<List<T>> chunkList<T>(List<T> list, int chunkSize) {
+    if (chunkSize == 0) {
+      chunkSize = 1;
+    }
+    List<List<T>> chunks = [];
+    for (var i = 0; i < list.length; i += chunkSize) {
+      chunks.add(
+        list.sublist(
+          i,
+          i + chunkSize > list.length ? list.length : i + chunkSize,
+        ),
+      );
+    }
+    return chunks;
+  }
+
+  void printQuotation() async {
+    // Map jobStatus = await getCurrentJobCardStatus(curreentJobCardId.value);
+    // String status1 = jobStatus['job_status_1'];
+    // if ((status1 != 'Posted')) {
+    //   alertMessage(
+    //     context: Get.context!,
+    //     content: 'Only posted jobs can be print',
+    //   );
+    //   return;
+    // }
+    final pdfData = await generateQuotationPdf();
+
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
+  }
+
+  Future<Uint8List> generateQuotationPdf() async {
+    var headerImage = await networkImageToPdf(
+      companyDetails.containsKey('header_url')
+          ? companyDetails['header_url'] ?? ''
+          : '',
+    );
+    var footerImage = await networkImageToPdf(
+      companyDetails.containsKey('footer_url')
+          ? companyDetails['footer_url'] ?? ''
+          : '',
+    );
+    List totals = calculateTotals();
+    double net = totals[2] ?? 0;
+    final rowsPerPage = 12;
+    final chunkedItems = chunkList(
+      allInvoiceItems.where((inv) => inv.deleted != true).toList(),
+      rowsPerPage,
+    );
+    String netInWords = await convertNumberToWords(
+      net,
+      customerCurrencyId.value,
+    );
+
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(0),
+        header: (context) =>
+            pw.Image(headerImage, height: 115, fit: pw.BoxFit.fitWidth),
+        footer: (context) =>
+            pw.Image(footerImage, height: 100, fit: pw.BoxFit.fitWidth),
+        build: (context) {
+          return [
+            ...List.generate(chunkedItems.isEmpty ? 1 : chunkedItems.length, (
+              pageIndex,
+            ) {
+              final isLastPage = pageIndex == chunkedItems.length - 1;
+              final pageItems = chunkedItems.isEmpty
+                  ? <JobCardInvoiceItemsModel>[]
+                  : chunkedItems[pageIndex];
+
+              return pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 10,
+                ),
+
+                child: pw.SizedBox(
+                  width: double.infinity,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.end,
+                        children: [
+                          pw.Text(
+                            'QUOTATION',
+                            style: const pw.TextStyle(
+                              color: PdfColors.red,
+                              fontSize: 20,
+                            ),
+                          ),
+                          pw.Text(
+                            "No. ${quotationCounter.value.text}",
+                            style: const pw.TextStyle(
+                              color: PdfColors.grey,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.Divider(color: PdfColors.red),
+                      pw.SizedBox(height: 10),
+
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Row(
+                            children: [
+                              pw.Text('Date: ', style: fontStyleForPDFLable),
+                              pw.Text(
+                                textToDate(quotationDate.value.text),
+                                style: fontStyleForPDFText,
+                              ),
+                            ],
+                          ),
+                          pw.Row(
+                            children: [
+                              pw.Text(
+                                'Valid Until: ',
+                                style: fontStyleForPDFLable,
+                              ),
+                              pw.Text(
+                                textToDate(validityEndDate.value.text),
+                                style: fontStyleForPDFText,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 10),
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Expanded(
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Text(
+                                  'CUSTOMER DETAILS',
+                                  style: fontStyleForPDFLableGREY,
+                                ),
+                                pw.Divider(
+                                  color: PdfColors.grey,
+                                  thickness: 0.3,
+                                ),
+                                infoRow(
+                                  title: 'Company:',
+                                  value: customerName.text,
+                                ),
+                                infoRow(
+                                  title: 'Name:',
+                                  value: customerEntityName.text,
+                                ),
+
+                                infoRow(
+                                  title: 'Mobile:',
+                                  value: customerEntityPhoneNumber.text,
+                                ),
+                                infoRow(
+                                  title: 'Email:',
+                                  value: customerEntityEmail.text,
+                                ),
+                              ],
+                            ),
+                          ),
+                          pw.SizedBox(width: 20),
+                          pw.Expanded(
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Text(
+                                  'VEHICLE DETAILS',
+                                  style: fontStyleForPDFLableGREY,
+                                ),
+                                pw.Divider(
+                                  color: PdfColors.grey,
+                                  thickness: 0.3,
+                                ),
+                                pw.SizedBox(
+                                  height: 80,
+                                  child: pw.Row(
+                                    children: [
+                                      pw.Container(
+                                        width: 3,
+                                        height: double.infinity,
+                                        decoration: const pw.BoxDecoration(
+                                          color: PdfColors.black,
+                                          borderRadius: pw.BorderRadius.only(
+                                            topLeft: pw.Radius.circular(5),
+                                            bottomLeft: pw.Radius.circular(5),
+                                          ),
+                                        ),
+                                      ),
+                                      pw.Expanded(
+                                        child: pw.Container(
+                                          width: double.infinity,
+                                          padding:
+                                              const pw.EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 10,
+                                              ),
+                                          alignment: pw.Alignment.centerLeft,
+                                          decoration: const pw.BoxDecoration(
+                                            color: PdfColors.grey200,
+                                            borderRadius: pw.BorderRadius.only(
+                                              topRight: pw.Radius.circular(5),
+                                              bottomRight: pw.Radius.circular(
+                                                5,
+                                              ),
+                                            ),
+                                          ),
+                                          child: pw.Column(
+                                            children: [
+                                              infoRow(
+                                                title: 'Plate:',
+                                                value:
+                                                    "${plateNumber.text} ${plateCode.text} ${city.text}",
+                                              ),
+                                              infoRow(
+                                                title: 'Model:',
+                                                value:
+                                                    "${carBrand.text} ${carModel.text} ${year.text}",
+                                              ),
+                                              infoRow(
+                                                title: 'VIN:',
+                                                value: vin.text,
+                                              ),
+                                              infoRow(
+                                                title: 'Mileage:',
+                                                value: mileageIn.value.text,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 10),
+                      buildInvoiceTable(pageItems),
+                      pw.SizedBox(height: 10),
+                      pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text('Notes', style: fontStyleForPDFLableGREY),
+                          pw.Divider(color: PdfColors.grey, thickness: 0.3),
+                          pw.Text(
+                            quotationNotes.text,
+                            style: fontStyleForPDFText,
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 10),
+
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Expanded(
+                            flex: 3,
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Text(
+                                  'CONDITIONS',
+                                  style: fontStyleForPDFLableGREY,
+                                ),
+                                pw.Divider(
+                                  color: PdfColors.grey,
+                                  thickness: 0.3,
+                                ),
+                                pw.Text(
+                                  """- Work will not start until we receive the Purchase Order.
+- Above prices estimated final, however delivery date may differ.
+- Delivery of repaired car is working days.
+- Payment terms as agreement.
+- Warranty: [${quotationWarrentyDays.value.text}] Days. Starts from the car delivery date.""",
+                                  style: fontStyleForPDFText,
+                                ),
+                              ],
+                            ),
+                          ),
+                          pw.SizedBox(width: 20),
+                          pw.Expanded(
+                            child: pw.Column(
+                              children: [
+                                pw.Text(
+                                  'SUMMARY',
+                                  style: fontStyleForPDFLableGREY,
+                                ),
+                                pw.Divider(
+                                  color: PdfColors.grey,
+                                  thickness: 0.3,
+                                ),
+                                pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                                  children: [
+                                    pw.Text(
+                                      'Total : ',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.Container(
+                                      width: 60,
+                                      decoration: const pw.BoxDecoration(
+                                        color: PdfColors.grey200,
+                                      ),
+                                      child: pw.Text(
+                                        isLastPage
+                                            ? formatNum(
+                                                totals[0] ?? 0,
+                                                priceFormat,
+                                              )
+                                            : "",
+                                        style: fontStyleForPDFText,
+                                        textAlign: pw.TextAlign.end,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.SizedBox(height: 5),
+
+                                pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                                  children: [
+                                    pw.Text(
+                                      'VAT ($currentCountryVAT%): ',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.Container(
+                                      width: 60,
+                                      decoration: const pw.BoxDecoration(
+                                        color: PdfColors.grey200,
+                                      ),
+                                      child: pw.Text(
+                                        isLastPage
+                                            ? formatNum(
+                                                totals[1] ?? 0,
+                                                priceFormat,
+                                              )
+                                            : "",
+                                        style: fontStyleForPDFText,
+                                        textAlign: pw.TextAlign.end,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                pw.SizedBox(height: 5),
+
+                                pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                                  children: [
+                                    pw.Text(
+                                      'Net : ',
+                                      style: fontStyleForPDFLable,
+                                    ),
+                                    pw.Container(
+                                      width: 60,
+                                      decoration: const pw.BoxDecoration(
+                                        color: PdfColors.grey200,
+                                      ),
+                                      child: pw.Text(
+                                        isLastPage
+                                            ? formatNum(net, priceFormat)
+                                            : "",
+                                        style: fontStyleForPDFText,
+                                        textAlign: pw.TextAlign.end,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                        child: pw.Text(netInWords, style: fontStyleForPDFLable),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ];
+        },
+      ),
+    );
+    return pdf.save();
   }
 
   // ===================================================================================================================================

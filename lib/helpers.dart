@@ -175,6 +175,46 @@ class Helpers {
     }
   }
 
+   // this function is to ger all roles for drop down menu
+  Future<Map<String, dynamic>> getAllRolesForCurrentCompany() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendUrl/users/get_company_admin_roles',
+      );
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> jsonData = decoded["roles"];
+        Map<String, dynamic> map = {
+          for (var role in jsonData) role['_id']: role,
+        };
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllRolesForCurrentCompany();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+
   // this function is to get all list values by code for drop down menu
   Future<Map<String, dynamic>> getAllListValues(String code) async {
     try {
@@ -456,6 +496,40 @@ class Helpers {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getCurrentCompanyDetails();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+      return {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future<Map<String, dynamic>> getCurrencyNameAndSubunit(String currencyId) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendTestURI/currencies/get_currency_name_subunit_by_id/$currencyId',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decode = jsonDecode(response.body);
+        final jsonData = decode['name_subunit'];
+        return jsonData ?? {};
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getCurrencyNameAndSubunit(currencyId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }

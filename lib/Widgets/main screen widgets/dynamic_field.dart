@@ -51,7 +51,7 @@ Widget dynamicFields({
                     isEnabled: config.fieldConfig?.isEnabled,
                     controller: config.fieldConfig?.textController,
                     labelText: config.fieldConfig?.labelText ?? '',
-                    hintText: config.fieldConfig?.hintText ?? '',
+                    // hintText: config.fieldConfig?.hintText ?? '',
                     validate: config.fieldConfig?.validate ?? false,
                     onChanged: config.fieldConfig?.onChanged,
                   ),

@@ -202,47 +202,41 @@ class QuotationCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
 
                             children: [
-                              Row(
-                                spacing: 10,
-                                children: [
-                                  newQuotationCardButton(
-                                    context,
-                                    constraints,
-                                    controller,
-                                  ),
-                                  CustomSlidingSegmentedControl<int>(
-                                    height: 30,
-                                    initialValue: 1,
-                                    children: const {
-                                      1: Text('ALL'),
-                                      2: Text('TODAY'),
-                                      3: Text('THIS MONTH'),
-                                      4: Text('THIS YEAR'),
-                                    },
-                                    decoration: BoxDecoration(
-                                      color:
-                                          CupertinoColors.lightBackgroundGray,
-                                      borderRadius: BorderRadius.circular(8),
+                              newQuotationCardButton(
+                                context,
+                                constraints,
+                                controller,
+                              ),
+                              CustomSlidingSegmentedControl<int>(
+                                height: 30,
+                                initialValue: 1,
+                                children: const {
+                                  1: Text('ALL'),
+                                  2: Text('TODAY'),
+                                  3: Text('THIS MONTH'),
+                                  4: Text('THIS YEAR'),
+                                },
+                                decoration: BoxDecoration(
+                                  color: CupertinoColors.lightBackgroundGray,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                thumbDecoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(6),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withAlpha(1),
+                                      blurRadius: 4.0,
+                                      spreadRadius: 1.0,
+                                      offset: const Offset(0.0, 2.0),
                                     ),
-                                    thumbDecoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(6),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withAlpha(1),
-                                          blurRadius: 4.0,
-                                          spreadRadius: 1.0,
-                                          offset: const Offset(0.0, 2.0),
-                                        ),
-                                      ],
-                                    ),
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInToLinear,
-                                    onValueChanged: (v) {
-                                      controller.onChooseForDatePicker(v);
-                                    },
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInToLinear,
+                                onValueChanged: (v) {
+                                  controller.onChooseForDatePicker(v);
+                                },
                               ),
 
                               Row(
@@ -771,6 +765,8 @@ Future<dynamic> editQuotationCardDialog(
                             ),
                             // point(),
                             separator(),
+                            printQuotation(quotationId),
+                            point(),
                             creatJobButton(quotationId),
                             point(),
                             internalNotesButton(

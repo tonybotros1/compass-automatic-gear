@@ -127,7 +127,6 @@ Widget customerDetailsSection(
                     width: 250,
                     controller: controller.customerEntityName,
                     labelText: 'Contact Name',
-                    hintText: 'Enter Contact Name',
                     onChanged: (_) {
                       controller.isJobModified.value = true;
                     },
@@ -137,7 +136,6 @@ Widget customerDetailsSection(
                     width: 250,
                     controller: controller.customerEntityPhoneNumber,
                     labelText: 'Contact Number',
-                    hintText: 'Enter Contact Number',
                     onChanged: (_) {
                       controller.isJobModified.value = true;
                     },
@@ -147,7 +145,6 @@ Widget customerDetailsSection(
                     width: 250,
                     controller: controller.customerEntityEmail,
                     labelText: 'Contact Email',
-                    hintText: 'Enter Contact Email',
                     onChanged: (_) {
                       controller.isJobModified.value = true;
                     },
@@ -163,7 +160,6 @@ Widget customerDetailsSection(
                           isnumber: true,
                           controller: controller.customerCreditNumber,
                           labelText: 'Credit Limit',
-                          hintText: 'Enter Credit Limit',
                           onChanged: (_) {
                             controller.isJobModified.value = true;
                           },
@@ -177,7 +173,6 @@ Widget customerDetailsSection(
                           isnumber: true,
                           controller: controller.customerOutstanding,
                           labelText: 'Outstanding',
-                          hintText: 'Enter Outstanding',
                           onChanged: (_) {
                             controller.isJobModified.value = true;
                           },
@@ -299,7 +294,6 @@ Widget customerDetailsSection(
                         isDouble: true,
                         controller: controller.customerCurrencyRate,
                         labelText: 'Rate',
-                        hintText: 'Enter Rate',
                         onChanged: (_) {
                           controller.isJobModified.value = true;
                         },

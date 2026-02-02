@@ -55,6 +55,7 @@ class MyApp extends StatelessWidget {
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
+          headingRowHeight: 40,
         ),
         cardTheme: const CardThemeData(color: Colors.white),
         dialogTheme: const DialogThemeData(

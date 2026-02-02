@@ -924,6 +924,7 @@ Widget editSection(
                   //     ? controller.companyDetails['country_vat'].toString()
                   //     : "";
                   await controller.loadValues(jobData);
+                  controller.getJobItemsSummaryTable(jobId);
                   editJobCardDialog(controller, jobData, jobId, isJob);
                 } finally {
                   controller.setButtonLoading(jobId, false);

@@ -58,11 +58,46 @@ Widget addNewUserAndView({
           validate: true,
         ),
       ),
-      expiryDateAndActiveStatus(
-        controller: controller,
-        context: context,
-        constraints: constraints,
-        date: userExpiryDate.toString(),
+      Row(
+        children: [
+          Expanded(
+            child: expiryDateAndActiveStatus(
+              controller: controller,
+              context: context,
+              constraints: constraints,
+              date: userExpiryDate.toString(),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(right: 10),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade600),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Row(
+              children: [
+                GetX<UsersController>(
+                  builder: (controller) {
+                    return CupertinoCheckbox(
+                      value: controller.isAdmin.value,
+                      onChanged: (v) {
+                        controller.isAdmin.value = v!;
+                      },
+                    );
+                  },
+                ),
+                Text(
+                  'Admin',
+                  style: TextStyle(
+                    color: Colors.grey.shade800,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
 
       Row(

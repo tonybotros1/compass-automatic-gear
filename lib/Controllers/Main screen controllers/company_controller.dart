@@ -32,7 +32,7 @@ class CompanyController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool warningForImage = RxBool(false);
   RxBool addingNewCompanyProcess = RxBool(false);
-  Uint8List? imageBytes = Uint8List(8);
+  Uint8List? imageBytes;
   RxList<MainUserRoles> roleIDFromList = RxList<MainUserRoles>([]);
   RxMap allRoles = RxMap({});
   RxMap allCountries = RxMap({});
@@ -210,6 +210,7 @@ class CompanyController extends GetxController {
         logout();
       }
     } catch (e) {
+      print(e);
       showSnackBar('Alert', 'Something went wrong please try again');
     } finally {
       addingNewCompanyProcess.value = false;

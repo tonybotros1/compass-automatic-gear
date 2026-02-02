@@ -30,7 +30,6 @@ Widget quotationsSection(
                   isEnabled: false,
                   controller: controller.quotationCounter.value,
                   labelText: 'Quotation No.',
-                  hintText: 'Enter Quotation No.',
                 ),
                 myTextFormFieldWithBorder(
                   width: 150,
@@ -48,7 +47,6 @@ Widget quotationsSection(
                   ),
                   controller: controller.quotationDate.value,
                   labelText: 'Quotation Date',
-                  hintText: 'Enter Quotation Date',
                   onChanged: (_) {
                     controller.isQuotationModified.value = true;
                   },
@@ -75,7 +73,6 @@ Widget quotationsSection(
                   isnumber: true,
                   controller: controller.quotationDays.value,
                   labelText: 'Validity',
-                  hintText: '(days)',
                 ),
                 myTextFormFieldWithBorder(
                   width: 150,
@@ -93,7 +90,6 @@ Widget quotationsSection(
                   ),
                   controller: controller.validityEndDate.value,
                   labelText: 'Expiry Date',
-                  hintText: 'Enter Expiry Date',
                   onChanged: (_) {
                     controller.isQuotationModified.value = true;
                   },
@@ -104,7 +100,6 @@ Widget quotationsSection(
               width: 150,
               controller: controller.referenceNumber.value,
               labelText: 'Reference No.',
-              hintText: 'Enter Reference No.',
               onChanged: (_) {
                 controller.isQuotationModified.value = true;
               },
@@ -113,7 +108,6 @@ Widget quotationsSection(
               width: 150,
               controller: controller.deliveryTime.value,
               labelText: 'Delivery Time',
-              hintText: 'Enter Delivery Time',
               onChanged: (_) {
                 controller.isQuotationModified.value = true;
               },
@@ -126,7 +120,6 @@ Widget quotationsSection(
                   isnumber: true,
                   controller: controller.quotationWarrentyDays.value,
                   labelText: 'Warrenty Days',
-                  hintText: 'Enter Warrenty Days',
                   onChanged: (_) {
                     controller.isQuotationModified.value = true;
                   },
@@ -136,7 +129,6 @@ Widget quotationsSection(
                   isnumber: true,
                   controller: controller.quotationWarrentyKM.value,
                   labelText: 'Warrenty KM',
-                  hintText: 'Enter Warrenty KM',
                   onChanged: (_) {
                     controller.isQuotationModified.value = true;
                   },
@@ -146,7 +138,6 @@ Widget quotationsSection(
             myTextFormFieldWithBorder(
               width: constraints.maxWidth / 3.35,
               labelText: 'Quotation Notes',
-              hintText: 'Enter Quotation Notes',
               controller: controller.quotationNotes,
               maxLines: null,
               minLines: 7,

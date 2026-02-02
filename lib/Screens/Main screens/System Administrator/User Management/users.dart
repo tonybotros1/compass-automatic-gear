@@ -90,6 +90,7 @@ class Users extends StatelessWidget {
         controller.pass.clear();
         controller.email.clear();
         controller.primaryBranchIndex.value = -1;
+        controller.isAdmin.value = false;
         controller.selectedRoles.updateAll((key, value) => [value[0], false]);
         controller.selectedBranches.updateAll(
           (key, value) => [value[0], false],
@@ -266,6 +267,7 @@ class Users extends StatelessWidget {
         controller.pass.clear();
         controller.email.text = userData.email;
         controller.name.text = userData.userName;
+        controller.isAdmin.value = userData.isAdmin;
         // Sync roles & branches
         controller.syncSelection(controller.selectedRoles, userData.roles);
 

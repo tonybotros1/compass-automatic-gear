@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:pdf/widgets.dart';
+import 'package:pdf/widgets.dart' hide Center, Text, Widget;
 import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:datahubai/consts.dart';
@@ -18,6 +18,7 @@ import '../../Models/job cards/inspection_report_model.dart';
 import '../../Models/job cards/internal_notes_model.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/job cards/job_card_model.dart';
+import '../../Models/job cards/job_items_summary_table.dart';
 import '../../Screens/Main screens/System Administrator/Setup/cash_management_receipts.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../Widgets/Mobile widgets/inspection report widgets/inspection_reports_hekpers.dart';
@@ -93,6 +94,7 @@ class JobCardController extends GetxController {
   RxString label = RxString('');
   RxBool isScreenLoding = RxBool(false);
   RxBool loadingInvoiceItems = RxBool(false);
+  RxBool loadingJobItemsSummaryTable = RxBool(false);
   final RxList<JobCardModel> allJobCards = RxList<JobCardModel>([]);
   final RxList<JobCardModel> historyJobCards = RxList<JobCardModel>([]);
   final RxList<JobCardInvoiceItemsModel> allInvoiceItems =
@@ -233,6 +235,8 @@ class JobCardController extends GetxController {
   ScrollController scrollerForCarDetails = ScrollController();
   ScrollController scrollerForCustomer = ScrollController();
   ScrollController scrollerForjobSection = ScrollController();
+  RxList<JobItemsSummaryTable> itemsSummaryTableList =
+      RxList<JobItemsSummaryTable>([]);
 
   RxMap allStatus = RxMap({
     '1': {'name': 'New'},
@@ -338,6 +342,14 @@ class JobCardController extends GetxController {
   Future<double> calculateCustomerOutstanding(String customerId) async {
     return await helper.getCustomerOutstanding(customerId);
   }
+
+  List<Widget> jobCardTabs = const [
+    Tab(text: 'Invoice Line'),
+    Tab(text: 'Job Notes'),
+    Tab(text: 'Delivery Notes'),
+    Tab(text: 'Items'),
+    Tab(text: 'Time Sheets'),
+  ];
 
   void onChooseForDatePicker(int i) {
     switch (i) {
@@ -471,7 +483,7 @@ class JobCardController extends GetxController {
       await rootBundle.load('assets/fonts/Amiri-Bold.ttf'),
     );
     // var countryCurrency = await helper.getCountryCurrency(companyDetails['']);
-    String countryCurrencyForPDF = companyDetails['currency_code'] ?? '';
+    String countryCurrencyForPDF = companyDetails['currency_name'] ?? '';
     String subunitNameForPDF = companyDetails['subunit_name'] ?? '';
     var headerImage = await networkImageToPdf(
       companyDetails.containsKey('header_url')
@@ -499,7 +511,14 @@ class JobCardController extends GetxController {
     List totals = calculateTotals();
     double net = totals[2] ?? 0;
     final rowsPerPage = 12;
-    final chunkedItems = chunkList(allInvoiceItems, rowsPerPage);
+    final chunkedItems = chunkList(
+      allInvoiceItems.where((inv) => inv.deleted != true).toList(),
+      rowsPerPage,
+    );
+    String netInWords = await convertNumberToWords(
+      net,
+      customerCurrencyId.value,
+    );
 
     final pdf = pw.Document();
     pdf.addPage(
@@ -515,10 +534,13 @@ class JobCardController extends GetxController {
             : pw.SizedBox(height: 100),
         build: (context) {
           return [
-            ...List.generate(chunkedItems.length, (pageIndex) {
+            ...List.generate(chunkedItems.isEmpty ? 1 : chunkedItems.length, (
+              pageIndex,
+            ) {
               final isLastPage = pageIndex == chunkedItems.length - 1;
-              final pageItems = chunkedItems[pageIndex];
-
+              final pageItems = chunkedItems.isEmpty
+                  ? <JobCardInvoiceItemsModel>[]
+                  : chunkedItems[pageIndex];
               return pw.Padding(
                 padding: const pw.EdgeInsets.symmetric(
                   horizontal: 24,
@@ -578,6 +600,7 @@ class JobCardController extends GetxController {
                             isLastPage,
                             countryCurrencyForPDF,
                             subunitNameForPDF,
+                            netInWords,
                           ),
                         ],
                       ),
@@ -1035,6 +1058,48 @@ class JobCardController extends GetxController {
 
   // =====================  End of print functions   =====================
 
+  Future<void> getJobItemsSummaryTable(String jobId) async {
+    try {
+      loadingJobItemsSummaryTable.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards/get_job_items_summary_table/$jobId',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List summaryTable = decoded['summary_table'];
+        itemsSummaryTableList.assignAll(
+          summaryTable.map((item) => JobItemsSummaryTable.fromJson(item)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getJobItemsSummaryTable(jobId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 500) {
+        final error = 'Server error while getting job card items summary table';
+        alertMessage(
+          title: 'Server Error',
+          context: Get.context!,
+          content: error,
+        );
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      loadingJobItemsSummaryTable.value = false;
+    } catch (e) {
+      loadingJobItemsSummaryTable.value = false;
+    }
+  }
+
   pw.Widget jobRow(String title, String value) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 4),
@@ -1055,17 +1120,24 @@ class JobCardController extends GetxController {
 
   Future<void> addNewJobCard() async {
     try {
-      if (curreentJobCardId.isNotEmpty) {
-        Map jobStatus = await getCurrentJobCardStatus(curreentJobCardId.value);
-        String status1 = jobStatus['job_status_1'];
-        if ((status1 != 'New' && status1 != '') && status1 != 'Draft') {
-          alertMessage(
-            context: Get.context!,
-            content: 'Only new jobs can be edited',
+      if (companyDetails.containsKey('is_admin')
+          ? companyDetails['is_admin'] == false
+          : false) {
+        if (curreentJobCardId.isNotEmpty) {
+          Map jobStatus = await getCurrentJobCardStatus(
+            curreentJobCardId.value,
           );
-          return;
+          String status1 = jobStatus['job_status_1'];
+          if ((status1 != 'New' && status1 != '') && status1 != 'Draft') {
+            alertMessage(
+              context: Get.context!,
+              content: 'Only new jobs can be edited',
+            );
+            return;
+          }
         }
       }
+
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'label': isReturned.isTrue ? 'Returned' : 'Not Returned',
@@ -1435,12 +1507,12 @@ class JobCardController extends GetxController {
         final decoded = jsonDecode(response.body);
         List jobs = decoded['job_cards'];
         Map grandTotals = decoded['grand_totals'];
-        allJobsTotals.value = grandTotals['grand_total'];
-        allJobsVATS.value = grandTotals['grand_vat'];
-        allJobsNET.value = grandTotals['grand_net'];
-        allJobsPaid.value = grandTotals['grand_paid'];
-        allJobsOutstanding.value = grandTotals['grand_outstanding'];
-        numberOfJobs.value = grandTotals['grand_count'];
+        allJobsTotals.value = grandTotals['grand_total'] ?? 0;
+        allJobsVATS.value = grandTotals['grand_vat'] ?? 0;
+        allJobsNET.value = grandTotals['grand_net'] ?? 0;
+        allJobsPaid.value = grandTotals['grand_paid'] ?? 0;
+        allJobsOutstanding.value = grandTotals['grand_outstanding'] ?? 0;
+        numberOfJobs.value = grandTotals['grand_count'] ?? 0;
         allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -2032,6 +2104,16 @@ class JobCardController extends GetxController {
     return [sumofTotal, sumofVAT, sumofNET, sumofDiscount];
   }
 
+  double calculateTotalsForJobItemsSummaryTable() {
+    double sumofNET = 0.0;
+
+    for (var job in itemsSummaryTableList) {
+      sumofNET += job.net ?? 0;
+    }
+
+    return sumofNET;
+  }
+
   void updateCalculating() {
     if (price.text.isEmpty) price.text = '0';
     if (quantity.text.isEmpty) quantity.text = '0';
@@ -2472,6 +2554,17 @@ class JobCardController extends GetxController {
   Future<void> editNewForJobCard(String jobId, String status) async {
     if (jobStatus1.value.isEmpty) {
       alertMessage(context: Get.context!, content: 'Please Save The Job First');
+      return;
+    }
+    if (companyDetails.containsKey('is_admin')
+        ? companyDetails['is_admin'] == true
+        : false) {
+      finishDate.value.text = '';
+      approvalDate.value.text = '';
+      jobStatus2.value = status;
+      jobStatus1.value = status;
+      isJobModified.value = true;
+      await addNewJobCard();
       return;
     }
     Map jobStatus = await getCurrentJobCardStatus(jobId);

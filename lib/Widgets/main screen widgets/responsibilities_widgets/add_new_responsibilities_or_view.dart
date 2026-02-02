@@ -12,7 +12,6 @@ Widget addNewResponsibilityOrView({
         obscureText: false,
         controller: controller.responsibilityName,
         labelText: 'Responsibility Name',
-        hintText: 'Enter Responsibility name',
         keyboardType: TextInputType.name,
         validate: true,
       ),

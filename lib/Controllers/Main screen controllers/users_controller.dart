@@ -18,6 +18,7 @@ class UsersController extends GetxController {
   final FocusNode focusNode = FocusNode();
   RxBool obscureText = RxBool(true);
   RxBool sigupgInProcess = RxBool(false);
+  RxBool isAdmin = RxBool(false);
   var selectedDate = DateTime.now().obs;
   RxString theDate = RxString('');
   List<String> areaName = [];
@@ -161,8 +162,7 @@ class UsersController extends GetxController {
       if (name.text.isEmpty ||
           email.text.isEmpty ||
           pass.text.isEmpty ||
-          selectedRoles.isEmpty ||
-          selectedBranches.isEmpty) {
+          selectedRoles.isEmpty) {
         showSnackBar('Note', 'Please fill all fields');
         return;
       }
@@ -181,6 +181,7 @@ class UsersController extends GetxController {
           "user_name": name.text,
           "email": email.text.toLowerCase(),
           "password": pass.text,
+          'is_admin': isAdmin.value,
           "roles": selectedRoles.entries
               .where((entry) => entry.value[1] == true)
               .map((entry) => entry.value[0])
@@ -254,7 +255,7 @@ class UsersController extends GetxController {
   Future<void> updateUserDetails(String userID) async {
     try {
       if (name.text.isEmpty || email.text.isEmpty || selectedRoles.isEmpty) {
-        showSnackBar('Note', 'Please fill all fields');
+        alertMessage(context: Get.context!, content: 'Please fill all fields');
         return;
       }
       sigupgInProcess.value = true;
@@ -268,6 +269,7 @@ class UsersController extends GetxController {
             .where((entry) => entry.value[1] == true)
             .map((entry) => entry.value[0])
             .toList(),
+        'is_admin': isAdmin.value,
         "branches": selectedBranches.entries
             .where((entry) => entry.value[1] == true)
             .map((entry) => entry.value[0])
@@ -447,10 +449,26 @@ class UsersController extends GetxController {
     return mainScreenController.selectedScreenName.value;
   }
 
+  // Future<void> getRoles() async {
+  //   try {
+  //     isLoading.value = true;
+  //     RxMap rolesMap = RxMap(await helper.getAllRoles());
+  //     Map<String, List<dynamic>> tempSelectedRoles = {};
+  //     for (var role in rolesMap.values) {
+  //       tempSelectedRoles[role['role_name']] = [role["_id"], false];
+  //     }
+  //     selectedRoles.assignAll(tempSelectedRoles);
+  //   } catch (e) {
+  //     isLoading.value = false;
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
+
   Future<void> getRoles() async {
     try {
       isLoading.value = true;
-      RxMap rolesMap = RxMap(await helper.getAllRoles());
+      RxMap rolesMap = RxMap(await helper.getAllRolesForCurrentCompany());
       Map<String, List<dynamic>> tempSelectedRoles = {};
       for (var role in rolesMap.values) {
         tempSelectedRoles[role['role_name']] = [role["_id"], false];

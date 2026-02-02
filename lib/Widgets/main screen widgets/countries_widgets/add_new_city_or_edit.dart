@@ -14,7 +14,6 @@ Widget addNewCityOrEdit({
           obscureText: false,
           controller:  controller.cityCode,
           labelText: 'City Code',
-          hintText: 'Enter City Code',
           validate: true,
           isEnabled: isEnabled
         ),
@@ -25,7 +24,6 @@ Widget addNewCityOrEdit({
           obscureText: false,
           controller:  controller.cityName,
           labelText: 'City Name',
-          hintText: 'Enter City name',
           validate: true,
         ),
       ],

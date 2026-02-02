@@ -18,7 +18,6 @@ Widget addNewBrandOrEdit({
           obscureText: false,
           controller: controller.brandName,
           labelText: 'Name',
-          hintText: 'Enter Name',
           validate: true,
         ),
         const SizedBox(

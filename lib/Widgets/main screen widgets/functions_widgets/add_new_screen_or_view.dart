@@ -14,7 +14,6 @@ Widget addNewScreenOrView({
         obscureText: false,
         controller: controller.screenName,
         labelText: 'Screen Name',
-        hintText: 'Enter Screen name',
         keyboardType: TextInputType.name,
         validate: true,
       ),
@@ -25,7 +24,6 @@ Widget addNewScreenOrView({
         obscureText: false,
         controller: controller.route,
         labelText: 'Route',
-        hintText: 'Enter route name',
         validate: true,
       ),
       const SizedBox(

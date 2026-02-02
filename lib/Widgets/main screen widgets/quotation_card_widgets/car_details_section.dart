@@ -105,7 +105,6 @@ Widget carDetailsSection(
                               width: 115,
                               controller: controller.year,
                               labelText: 'Year',
-                              hintText: 'Enter Year',
                               onChanged: (_) {
                                 controller.isQuotationModified.value = true;
                               },
@@ -156,7 +155,6 @@ Widget carDetailsSection(
                       width: 115,
                       controller: controller.plateNumber,
                       labelText: 'Plate No.',
-                      hintText: 'Enter Plate No.',
                       onChanged: (_) {
                         controller.isQuotationModified.value = true;
                       },
@@ -165,7 +163,6 @@ Widget carDetailsSection(
                       width: 115,
                       controller: controller.plateCode,
                       labelText: 'Code',
-                      hintText: 'Enter Plate Code',
                       isCapitaLetters: true,
                       onChanged: (_) {
                         controller.isQuotationModified.value = true;
@@ -244,7 +241,6 @@ Widget carDetailsSection(
                       width: 240,
                       controller: controller.transmissionType,
                       labelText: 'Transmission Type',
-                      hintText: 'Enter Transmission Type',
                       isCapitaLetters: true,
                       onChanged: (_) {
                         controller.isQuotationModified.value = true;
@@ -283,7 +279,6 @@ Widget carDetailsSection(
                   width: 450,
                   controller: controller.vin,
                   labelText: 'VIN',
-                  hintText: 'Enter VIN',
                   isCapitaLetters: true,
                   onChanged: (_) {
                     controller.isQuotationModified.value = true;
@@ -294,7 +289,6 @@ Widget carDetailsSection(
                   isnumber: true,
                   controller: controller.mileageIn.value,
                   labelText: 'Mileage In',
-                  hintText: 'Enter Mileage In',
                   onChanged: (_) {
                     controller.isQuotationModified.value = true;
                   },

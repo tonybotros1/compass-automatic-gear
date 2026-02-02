@@ -13,7 +13,6 @@ Widget addNewSaleManOrEdit({
       myTextFormFieldWithBorder(
         controller: controller.name,
         labelText: 'Name',
-        hintText: 'Enter Sale Man Name',
         validate: true,
       ),
       const SizedBox(
@@ -23,7 +22,6 @@ Widget addNewSaleManOrEdit({
         isnumber: true,
         controller: controller.target,
         labelText: 'Target',
-        hintText: 'Enter Target',
         validate: true,
       ),
     ],

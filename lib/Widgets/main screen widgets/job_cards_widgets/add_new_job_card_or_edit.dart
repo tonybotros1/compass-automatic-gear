@@ -7,6 +7,7 @@ import '../../my_text_field.dart';
 import '../../text_button.dart';
 import 'car_details_section.dart';
 import 'customer_details_section.dart';
+import 'items_summary_table.dart';
 import 'job_card_section.dart';
 
 Widget addNewJobCardOrEdit({
@@ -100,52 +101,118 @@ Widget addNewJobCardOrEdit({
           ],
         ),
 
-        labelContainer(lable: Text('Notes', style: fontStyle1)),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: containerDecor,
-          child: Row(
-            spacing: 50,
-            children: [
-              Expanded(
-                child: myTextFormFieldWithBorder(
-                  labelText: 'Job Notes',
-                  controller: controller.jobNotes,
-                  maxLines: 3,
-                  onChanged: (_) {
-                    controller.isJobModified.value = true;
-                  },
-                ),
-              ),
-              Expanded(
-                child: myTextFormFieldWithBorder(
-                  labelText: 'Delivery Notes',
-                  controller: controller.deliveryNotes,
-                  maxLines: 3,
-                  onChanged: (_) {
-                    controller.isJobModified.value = true;
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
         const SizedBox(height: 10),
-        labelContainer(
-          lable: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        DefaultTabController(
+          length: controller.jobCardTabs.length,
+          child: Column(
+            // spacing: 10,
             children: [
-              Text('Invoice Items', style: fontStyle1),
-              newinvoiceItemsButton(context, constraints, controller, jobId),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: BoxBorder.fromLTRB(
+                    left: const BorderSide(color: Colors.grey),
+                    right: const BorderSide(color: Colors.grey),
+                    top: const BorderSide(color: Colors.grey),
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(5),
+                    topRight: Radius.circular(5),
+                  ),
+                ),
+                child: TabBar(
+                  unselectedLabelColor: Colors.grey,
+                  tabAlignment: TabAlignment.start,
+                  isScrollable: true,
+                  indicatorColor: mainColor,
+                  labelColor: mainColor,
+                  splashBorderRadius: BorderRadius.circular(5),
+                  dividerColor: Colors.transparent,
+
+                  tabs: controller.jobCardTabs,
+                ),
+              ),
+
+              SizedBox(
+                height: 600,
+                child: TabBarView(
+                  children: [
+                    // TAB 1
+                    SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            width: double.infinity,
+                            child: newinvoiceItemsButton(
+                              context,
+                              constraints,
+                              controller,
+                              jobId,
+                            ),
+                          ),
+                          // labelContainer(
+                          //   lable: Row(
+                          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //     children: [
+                          //       Text('Invoice Items', style: fontStyle1),
+                          //       newinvoiceItemsButton(
+                          //         context,
+                          //         constraints,
+                          //         controller,
+                          //         jobId,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          invoiceItemsSection(
+                            constraints: constraints,
+                            context: context,
+                            jobId: jobId,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Expanded(
+                      child: myTextFormFieldWithBorder(
+                        controller: controller.jobNotes,
+                        hintText: 'Type here...',
+                        maxLines: 25,
+                        onChanged: (_) {
+                          controller.isJobModified.value = true;
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: myTextFormFieldWithBorder(
+                        controller: controller.deliveryNotes,
+                        hintText: 'Type here...',
+                        maxLines: 25,
+                        onChanged: (_) {
+                          controller.isJobModified.value = true;
+                        },
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          itemsSummartTableSection(
+                            constraints: constraints,
+                            context: context,
+                            jobId: jobId,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Center(child: Text('Time Sheets')),
+                  ],
+                ),
+              ),
             ],
-          ),
-        ),
-        SizedBox(
-          height: 250,
-          child: invoiceItemsSection(
-            constraints: constraints,
-            context: context,
-            jobId: jobId,
           ),
         ),
       ],

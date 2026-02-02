@@ -32,7 +32,6 @@ Container customerSection() {
                         obscureText: false,
                         controller: controller.entityName,
                         labelText: 'Name',
-                        hintText: 'Enter Entity Name',
                         validate: true,
                       ),
                       Container(
@@ -71,7 +70,6 @@ Container customerSection() {
                         obscureText: false,
                         controller: controller.creditLimit,
                         labelText: 'Credit Limit',
-                        hintText: 'Enter Credit Limit',
                         validate: true,
                       );
                     },

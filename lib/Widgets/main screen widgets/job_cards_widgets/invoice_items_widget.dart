@@ -52,11 +52,8 @@ Widget tableOfScreens({
         columnSpacing: 5,
         horizontalMargin: horizontalMarginForTable,
         showBottomBorder: true,
-        dataTextStyle: regTextStyle,
-        headingTextStyle: fontStyleForTableHeader,
         sortColumnIndex: controller.sortColumnIndex.value,
         sortAscending: controller.isAscending.value,
-        headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
           DataColumn(
             label: AutoSizedText(constraints: constraints, text: ''),
@@ -96,7 +93,7 @@ Widget tableOfScreens({
           ),
           DataColumn(
             headingRowAlignment: MainAxisAlignment.end,
-            label: AutoSizedText(constraints: constraints, text: 'NET'),
+            label: AutoSizedText(constraints: constraints, text: 'Net'),
           ),
         ],
         rows: [
@@ -227,19 +224,28 @@ DataRow dataRowForTheTable(
       DataCell(
         Align(
           alignment: Alignment.centerRight,
-          child: textForDataRowInTable(text: invoiceItemsData.total.toString()),
+          child: textForDataRowInTable(
+            text: invoiceItemsData.total.toString(),
+            color: Colors.blue,
+          ),
         ),
       ),
       DataCell(
         Align(
           alignment: Alignment.centerRight,
-          child: textForDataRowInTable(text: invoiceItemsData.vat.toString()),
+          child: textForDataRowInTable(
+            text: invoiceItemsData.vat.toString(),
+            color: Colors.green,
+          ),
         ),
       ),
       DataCell(
         Align(
           alignment: Alignment.centerRight,
-          child: textForDataRowInTable(text: invoiceItemsData.net.toString()),
+          child: textForDataRowInTable(
+            text: invoiceItemsData.net.toString(),
+            color: Colors.red,
+          ),
         ),
       ),
     ],

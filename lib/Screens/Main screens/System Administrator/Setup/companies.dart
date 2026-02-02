@@ -362,7 +362,6 @@ ElevatedButton newCompanyButton(
                     controller.address.text.isNotEmpty &&
                     controller.country.text.isNotEmpty &&
                     controller.city.text.isNotEmpty &&
-                    controller.imageBytes!.isNotEmpty &&
                     controller.roleIDFromList.isNotEmpty) {
                   controller.addNewCompany();
                 } else {

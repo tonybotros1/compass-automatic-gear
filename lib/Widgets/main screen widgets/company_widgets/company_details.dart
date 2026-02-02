@@ -24,7 +24,6 @@ Container companyDetails({required CompanyController controller}) {
                 obscureText: false,
                 controller: controller.companyName,
                 labelText: 'Company Name',
-                hintText: 'Enter company name',
                 keyboardType: TextInputType.name,
                 validate: true,
               ),

@@ -5,6 +5,9 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
 import '../../../consts.dart';
 import 'package:number_to_words/number_to_words.dart';
+import 'package:recase/recase.dart';
+
+import '../../../helpers.dart';
 
 String formatNum(num? value, NumberFormat formatter) {
   if (value == null) return '';
@@ -13,7 +16,7 @@ String formatNum(num? value, NumberFormat formatter) {
 
 pw.Widget tableHeaderRow(String title, bool isNumber) {
   return pw.Padding(
-    padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+    padding: const pw.EdgeInsets.symmetric(horizontal: 3, vertical: 2),
     child: pw.Text(
       title,
       style: fontStyleForPDFTableHeader,
@@ -65,7 +68,7 @@ pw.Widget buildCustomerInfoSection(
   Map companyDetails,
   Map customerInformation,
   Map customerAddressInformation,
-  bool isProformaInvoice
+  bool isProformaInvoice,
 ) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -74,7 +77,9 @@ pw.Widget buildCustomerInfoSection(
         padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: const pw.BoxDecoration(color: PdfColors.black),
         child: pw.Text(
-         isProformaInvoice ? 'PROFORMA INVOICE' : 'TAX INVOICE - ${payType.toUpperCase()}',
+          isProformaInvoice
+              ? 'PROFORMA INVOICE'
+              : 'TAX INVOICE - ${payType.toUpperCase()}',
           style: pw.TextStyle(
             color: PdfColors.white,
             fontWeight: pw.FontWeight.bold,
@@ -286,6 +291,7 @@ pw.Widget buildTotalsSection(
   bool isLastPage,
   String countryCurrency,
   String subunitName,
+  String netInWords,
 ) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -535,10 +541,7 @@ pw.Widget buildTotalsSection(
       ),
       pw.Padding(
         padding: const pw.EdgeInsets.all(4),
-        child: pw.Text(
-          '$countryCurrency ${convertNumberToWords(net, subunitName)}',
-          style: fontStyleForPDFLable,
-        ),
+        child: pw.Text(netInWords, style: fontStyleForPDFLable),
       ),
     ],
   );
@@ -569,20 +572,30 @@ pw.Widget buildSignatures(String companyName) {
   );
 }
 
-String convertNumberToWords(double number, String subunit) {
+Future<String> convertNumberToWords(double number, String currencyId) async {
+  Helpers helper = Helpers();
+
+  Map nameAndSubunit = await helper.getCurrencyNameAndSubunit(currencyId);
+  String currency = nameAndSubunit['currency_name'];
+  String subunit = nameAndSubunit['subunit_name'];
+
   if (number % 1 == 0) {
-    // Whole number, ignore decimals
-    return NumberToWord().convert('en-in', number.toInt());
+    String words =
+        'only ${NumberToWord().convert('en-in', number.toInt())} $currency';
+    ReCase rc = ReCase(words);
+
+    return rc.titleCase;
   } else {
-    // Has decimal, convert integer and decimal separately
     int integerPart = number.floor();
-    int decimalPart = ((number - integerPart) * 100)
-        .round(); // up to 2 decimals
-    String words = NumberToWord().convert('en-in', integerPart);
+    int decimalPart = ((number - integerPart) * 100).round();
+    String words =
+        'only ${NumberToWord().convert('en-in', integerPart)} $currency';
     if (decimalPart > 0) {
       words +=
           ' point ${NumberToWord().convert('en-in', decimalPart)} $subunit';
     }
+    ReCase rc = ReCase(words);
+    words = rc.titleCase;
     return words;
   }
 }

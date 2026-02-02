@@ -35,7 +35,7 @@ Widget myTextFormFieldWithBorder({
   void Function(String)? onFieldSubmitted,
   bool? isEnabled = true,
   void Function(PointerDownEvent)? onTapOutside,
-  bool? readOnly
+  bool? readOnly,
 }) {
   return SizedBox(
     width: width,
@@ -120,7 +120,7 @@ Widget myTextFormFieldWithBorder({
               // labelText: labelText,
               alignLabelWithHint: true,
 
-              // hintText: hintText,
+              hintText: hintText,
               labelStyle: TextStyle(
                 color: isEnabled == false
                     ? Colors.grey.shade500

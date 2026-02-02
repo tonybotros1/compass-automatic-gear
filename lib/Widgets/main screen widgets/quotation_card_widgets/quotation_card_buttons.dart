@@ -62,9 +62,7 @@ GetBuilder<QuotationCardController> changeStatusToPostedButton(
   );
 }
 
-GetX<QuotationCardController> saveQuotationButton(
-  void Function() onSave,
-) {
+GetX<QuotationCardController> saveQuotationButton(void Function() onSave) {
   return GetX<QuotationCardController>(
     builder: (controller) {
       return ClickableHoverText(
@@ -135,6 +133,20 @@ GetBuilder<QuotationCardController> creatJobButton(String quotationID) {
               }
             : null,
         text: 'Create Job',
+      );
+    },
+  );
+}
+
+GetBuilder<QuotationCardController> printQuotation(String quotationID) {
+  return GetBuilder<QuotationCardController>(
+    builder: (controller) {
+      return ClickableHoverText(
+        // style: creatJobOrQuotationButtonStyle,
+        onTap: () async {
+          controller.printQuotation();
+        },
+        text: 'Print',
       );
     },
   );

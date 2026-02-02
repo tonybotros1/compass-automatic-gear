@@ -13,7 +13,6 @@ Widget addNewinvoiceItemsOrEdit({
         obscureText: false,
         controller: controller.name,
         labelText: 'Name',
-        hintText: 'Enter Name',
       ),
 
       const SizedBox(height: 10),
@@ -22,7 +21,6 @@ Widget addNewinvoiceItemsOrEdit({
         obscureText: false,
         controller: controller.price,
         labelText: 'Price',
-        hintText: 'Enter Price',
       ),
       const SizedBox(height: 10),
       myTextFormFieldWithBorder(
@@ -30,7 +28,6 @@ Widget addNewinvoiceItemsOrEdit({
         obscureText: false,
         controller: controller.description,
         labelText: 'Description',
-        hintText: 'Enter Description',
       ),
     ],
   );

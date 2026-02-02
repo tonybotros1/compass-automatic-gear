@@ -245,7 +245,6 @@ Widget contactDetails({
                           horizontal: 20, vertical: 2.5),
                       child: myTextFormFieldWithBorder(
                         labelText: 'Name',
-                        hintText: 'Enter your name here',
                         controller: controller.userName,
                         validate: true,
                         obscureText: false,
@@ -258,7 +257,6 @@ Widget contactDetails({
                           horizontal: 20, vertical: 2.5),
                       child: myTextFormFieldWithBorder(
                         labelText: 'Phone Number',
-                        hintText: 'Enter your phone number here',
                         controller: controller.phoneNumber,
                         validate: true,
                         obscureText: false,
@@ -275,7 +273,6 @@ Widget contactDetails({
                           horizontal: 20, vertical: 2.5),
                       child: myTextFormFieldWithBorder(
                         labelText: 'Email',
-                        hintText: 'Enter a valid email here',
                         controller: controller.email,
                         validate: true,
                         obscureText: false,
@@ -288,7 +285,6 @@ Widget contactDetails({
                             horizontal: 20, vertical: 2.5),
                         child: myTextFormFieldWithBorder(
                             labelText: 'Password',
-                            hintText: 'Enter your password here',
                             controller: controller.password,
                             validate: true,
                             obscureText: controller.obscureText.value,
@@ -307,7 +303,6 @@ Widget contactDetails({
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 2.5),
                 child: myTextFormFieldWithBorder(
                   labelText: 'Address',
-                  hintText: 'Enter your company address',
                   controller: controller.address,
                   validate: true,
                   obscureText: false,
@@ -442,7 +437,6 @@ Widget companyDetails({required RegisterScreenController controller}) {
                           horizontal: 20, vertical: 5),
                       child: myTextFormFieldWithBorder(
                         labelText: 'Company Name',
-                        hintText: 'Enter your company name here',
                         controller: controller.companyName,
                         validate: true,
                         obscureText: false,

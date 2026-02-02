@@ -4,6 +4,7 @@ class UsersModel {
   final String email;
   final String primaryBranch;
   bool status;
+  final bool isAdmin;
   final List<String> roles;
   final List<String> branches;
   final DateTime expiryDate;
@@ -21,6 +22,7 @@ class UsersModel {
     required this.updatedAt,
     required this.userName,
     required this.branches,
+    required this.isAdmin,
   });
 
   factory UsersModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class UsersModel {
       primaryBranch: json.containsKey('primary_branch')
           ? json['primary_branch'] ?? ''
           : '',
+      isAdmin: json.containsKey('is_admin') ? json['is_admin'] ?? false : false,
       branches: json['branches'].cast<String>(),
       status: json['status'],
       expiryDate: DateTime.parse(json['expiry_date']),
