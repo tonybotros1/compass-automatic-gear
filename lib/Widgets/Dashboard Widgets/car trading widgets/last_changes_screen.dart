@@ -211,14 +211,20 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
-        textForDataRowInTable(formatDouble: false, text: data.brandName ?? ''),
-      ),
-      DataCell(
-        textForDataRowInTable(text: data.modelName ?? '', formatDouble: false),
+        textForDataRowInTable(
+          formatDouble: false,
+          text: data.brandName?.toString() ?? '',
+        ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.year ?? '',
+          text: data.modelName?.toString() ?? '',
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.year?.toString() ?? '',
           formatDouble: false,
           color: Colors.teal,
           isBold: true,
@@ -227,18 +233,23 @@ DataRow dataRowForTheTable(
 
       DataCell(
         coolTextBox(
-          text: data.accountName ?? '',
+          text: data.accountName?.toString() ?? '',
           color: data.accountName?.toLowerCase() == 'cash'
               ? Colors.green
               : Colors.lightBlue,
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: data.itemName ?? '', maxWidth: null),
+        textForDataRowInTable(
+          text: data.itemName?.toString() ?? '',
+          maxWidth: null,
+        ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.description == '' ? '-' : data.description ?? '',
+          text: data.description == ''
+              ? '-'
+              : data.description?.toString() ?? '',
           maxWidth: null,
         ),
       ),

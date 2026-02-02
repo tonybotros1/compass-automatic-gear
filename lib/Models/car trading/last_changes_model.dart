@@ -26,20 +26,26 @@ class LastCarTradingChangesModel {
   });
 
   LastCarTradingChangesModel.fromJson(Map<String, dynamic> json) {
-    brandName = json.containsKey('brand_name') ? json['brand_name'] ?? '' : '';
-    modelName = json.containsKey('model_name') ? json['model_name'] ?? '' : '';
+    brandName = json.containsKey('brand_name')
+        ? json['brand_name']?.toString() ?? ''
+        : '';
+    modelName = json.containsKey('model_name')
+        ? json['model_name']?.toString() ?? ''
+        : '';
     description = json.containsKey('description')
-        ? json['description'] ?? ''
+        ? json['description']?.toString() ?? ''
         : '';
     pay = json.containsKey('pay') ? json['pay'] ?? 0 : 0;
-    type = json.containsKey('type') ? json['type'] : '';
+    type = json.containsKey('type') ? json['type']?.toString() : '';
     receive = json.containsKey('receive') ? json['receive'] ?? 0 : 0;
-    year = json.containsKey('year') ? json['year'] ?? '' : '';
-    id = json.containsKey('_id') ? json['_id'] ?? '' : '';
+    year = json.containsKey('year') ? json['year']?.toString() ?? '' : '';
+    id = json.containsKey('_id') ? json['_id']?.toString() ?? '' : '';
     accountName = json.containsKey('account_name')
-        ? json['account_name'] ?? ''
+        ? json['account_name']?.toString() ?? ''
         : '';
-    itemName = json.containsKey('item_name') ? json['item_name'] ?? '' : '';
+    itemName = json.containsKey('item_name')
+        ? json['item_name']?.toString() ?? ''
+        : '';
     updatedAt = DateTime.tryParse(json['updatedAt']);
   }
 
