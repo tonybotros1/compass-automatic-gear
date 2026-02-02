@@ -143,13 +143,20 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
-        textForDataRowInTable(
+        coolTextBox(
           text: invoiceItemsData.itemCode ?? '',
-          formatDouble: false,
+
           color: invoiceItemsData.itemCode?.toLowerCase() == 'direct purchase'
               ? Colors.green
-              : Colors.pink,
+              : Colors.blue,
         ),
+        // textForDataRowInTable(
+        //   text: invoiceItemsData.itemCode ?? '',
+        //   formatDouble: false,
+        //   color: invoiceItemsData.itemCode?.toLowerCase() == 'direct purchase'
+        //       ? Colors.green
+        //       : Colors.pink,
+        // ),
       ),
       DataCell(Text(invoiceItemsData.itemName ?? '')),
       DataCell(

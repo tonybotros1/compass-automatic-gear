@@ -36,6 +36,22 @@ final NumberFormat currencyFormat = NumberFormat.currency(
 );
 final NumberFormat percentFormat = NumberFormat('#,##0.##');
 
+Container coolTextBox({required String text, Color color = Colors.black}) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: Colors.grey.shade200,
+      borderRadius: BorderRadius.circular(5),
+    ),
+    child: textForDataRowInTable(
+      text: text,
+      maxWidth: null,
+      color: color,
+      formatDouble: false,
+    ),
+  );
+}
+
 IconButton dateRange({
   required BuildContext context,
   required TextEditingController date,
@@ -238,6 +254,16 @@ var new2ButtonStyle = ElevatedButton.styleFrom(
   textStyle: fontStyleForElevatedButtons,
   padding: paddingForButtons,
   backgroundColor: Colors.grey.shade300,
+  foregroundColor: Colors.green,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+  minimumSize: const Size(40, 40),
+);
+
+var new3ButtonStyle = ElevatedButton.styleFrom(
+  alignment: Alignment.centerLeft,
+  textStyle: fontStyleForElevatedButtons,
+  padding: paddingForButtons,
+  backgroundColor: Colors.white,
   foregroundColor: Colors.green,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(40, 40),

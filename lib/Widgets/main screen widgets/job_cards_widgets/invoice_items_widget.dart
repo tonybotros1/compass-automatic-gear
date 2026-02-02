@@ -346,7 +346,7 @@ ElevatedButton newinvoiceItemsButton(
               },
       );
     },
-    style: new2ButtonStyle,
+    style: newButtonStyle,
     child: const Text(
       'New item',
       style: TextStyle(fontWeight: FontWeight.bold),

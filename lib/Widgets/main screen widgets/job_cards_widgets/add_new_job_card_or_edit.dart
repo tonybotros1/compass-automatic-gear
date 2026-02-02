@@ -135,7 +135,7 @@ Widget addNewJobCardOrEdit({
               ),
 
               SizedBox(
-                height: 600,
+                height: 300,
                 child: TabBarView(
                   children: [
                     // TAB 1
@@ -143,15 +143,21 @@ Widget addNewJobCardOrEdit({
                       child: Column(
                         children: [
                           Container(
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
+                              color: Colors.white,
                               border: Border.all(color: Colors.grey),
                             ),
-                            width: double.infinity,
-                            child: newinvoiceItemsButton(
-                              context,
-                              constraints,
-                              controller,
-                              jobId,
+                            child: Row(
+                              children: [
+                                newinvoiceItemsButton(
+                                  context,
+                                  constraints,
+                                  controller,
+                                  jobId,
+                                ),
+                                const Spacer(),
+                              ],
                             ),
                           ),
                           // labelContainer(
@@ -177,25 +183,23 @@ Widget addNewJobCardOrEdit({
                       ),
                     ),
 
-                    Expanded(
-                      child: myTextFormFieldWithBorder(
-                        controller: controller.jobNotes,
-                        hintText: 'Type here...',
-                        maxLines: 25,
-                        onChanged: (_) {
-                          controller.isJobModified.value = true;
-                        },
-                      ),
+                    myTextFormFieldWithBorder(
+                      width: double.infinity,
+                      controller: controller.jobNotes,
+                      hintText: 'Type here...',
+                      maxLines: 10,
+                      onChanged: (_) {
+                        controller.isJobModified.value = true;
+                      },
                     ),
-                    Expanded(
-                      child: myTextFormFieldWithBorder(
-                        controller: controller.deliveryNotes,
-                        hintText: 'Type here...',
-                        maxLines: 25,
-                        onChanged: (_) {
-                          controller.isJobModified.value = true;
-                        },
-                      ),
+                    myTextFormFieldWithBorder(
+                      width: double.infinity,
+                      controller: controller.deliveryNotes,
+                      hintText: 'Type here...',
+                      maxLines: 10,
+                      onChanged: (_) {
+                        controller.isJobModified.value = true;
+                      },
                     ),
                     SingleChildScrollView(
                       child: Column(

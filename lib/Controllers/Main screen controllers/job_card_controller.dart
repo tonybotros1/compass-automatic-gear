@@ -2172,6 +2172,7 @@ class JobCardController extends GetxController {
     } else {
       isSales.value = true;
     }
+    itemsSummaryTableList.clear();
     customerBranch.text = companyDetails['current_user_branch_name'] ?? '';
     customerBranchId.value = companyDetails['current_user_branch_id'] ?? '';
     isReturned.value = false;
