@@ -925,6 +925,7 @@ Widget editSection(
                   //     : "";
                   await controller.loadValues(jobData);
                   controller.getJobItemsSummaryTable(jobId);
+                  controller.getTimeSheetsSummaryForJobCard(jobId);
                   editJobCardDialog(controller, jobData, jobId, isJob);
                 } finally {
                   controller.setButtonLoading(jobId, false);
@@ -1054,7 +1055,6 @@ Future<dynamic> editJobCardDialog(
                                 spacing: 10,
                                 children: [
                                   separator(),
-
                                   saveJobButton(
                                     () => controller.addNewJobCard(),
                                   ),

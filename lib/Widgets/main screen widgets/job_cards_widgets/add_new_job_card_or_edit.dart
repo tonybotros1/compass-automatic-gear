@@ -9,6 +9,7 @@ import 'car_details_section.dart';
 import 'customer_details_section.dart';
 import 'items_summary_table.dart';
 import 'job_card_section.dart';
+import 'time_sheets_summary_table.dart';
 
 Widget addNewJobCardOrEdit({
   required BoxConstraints constraints,
@@ -212,7 +213,17 @@ Widget addNewJobCardOrEdit({
                         ],
                       ),
                     ),
-                    const Center(child: Text('Time Sheets')),
+                    SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          timeSheetsSummaryTable(
+                            constraints: constraints,
+                            context: context,
+                            jobId: jobId,
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

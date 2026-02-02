@@ -19,6 +19,7 @@ import '../../Models/job cards/internal_notes_model.dart';
 import '../../Models/job cards/job_card_invoice_items_model.dart';
 import '../../Models/job cards/job_card_model.dart';
 import '../../Models/job cards/job_items_summary_table.dart';
+import '../../Models/job cards/time_sheets_summary_for_job_card.dart';
 import '../../Screens/Main screens/System Administrator/Setup/cash_management_receipts.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../Widgets/Mobile widgets/inspection report widgets/inspection_reports_hekpers.dart';
@@ -95,6 +96,7 @@ class JobCardController extends GetxController {
   RxBool isScreenLoding = RxBool(false);
   RxBool loadingInvoiceItems = RxBool(false);
   RxBool loadingJobItemsSummaryTable = RxBool(false);
+  RxBool loadingTimeSheetsSummary = RxBool(false);
   final RxList<JobCardModel> allJobCards = RxList<JobCardModel>([]);
   final RxList<JobCardModel> historyJobCards = RxList<JobCardModel>([]);
   final RxList<JobCardInvoiceItemsModel> allInvoiceItems =
@@ -237,6 +239,8 @@ class JobCardController extends GetxController {
   ScrollController scrollerForjobSection = ScrollController();
   RxList<JobItemsSummaryTable> itemsSummaryTableList =
       RxList<JobItemsSummaryTable>([]);
+  RxList<TimeSheetsSummaryForJobCard> timeSheetsSummaryTable =
+      RxList<TimeSheetsSummaryForJobCard>([]);
 
   RxMap allStatus = RxMap({
     '1': {'name': 'New'},
@@ -1100,6 +1104,50 @@ class JobCardController extends GetxController {
     }
   }
 
+  Future<void> getTimeSheetsSummaryForJobCard(String jobId) async {
+    try {
+      loadingTimeSheetsSummary.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards/get_time_sheets_table_summary/$jobId',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List summaryTable = decoded['time_sheets_summary'];
+        timeSheetsSummaryTable.assignAll(
+          summaryTable.map(
+            (item) => TimeSheetsSummaryForJobCard.fromJson(item),
+          ),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getTimeSheetsSummaryForJobCard(jobId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 500) {
+        final error = 'Server error while getting job card items summary table';
+        alertMessage(
+          title: 'Server Error',
+          context: Get.context!,
+          content: error,
+        );
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      loadingTimeSheetsSummary.value = false;
+    } catch (e) {
+      loadingTimeSheetsSummary.value = false;
+    }
+  }
+
   pw.Widget jobRow(String title, String value) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 4),
@@ -1530,54 +1578,6 @@ class JobCardController extends GetxController {
       isScreenLoding.value = false;
     }
   }
-
-  // Future<void> searchEngine(
-  //   Map<String, dynamic> body, {
-  //   bool isNextPage = false,
-  // }) async {
-  //   try {
-  //     isScreenLoding.value = true;
-
-  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     var accessToken = '${prefs.getString('accessToken')}';
-  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-  //     Uri url = Uri.parse('$backendUrl/job_cards/search_engine_2');
-  //     final response = await http.post(
-  //       url,
-  //       headers: {
-  //         'Authorization': 'Bearer $accessToken',
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: jsonEncode(body),
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final decoded = jsonDecode(response.body);
-  //       List jobs = decoded['job_cards'];
-  //       Map grandTotals = decoded['grand_totals'];
-  //       allJobsTotals.value = grandTotals['grand_total'];
-  //       allJobsVATS.value = grandTotals['grand_vat'];
-  //       allJobsNET.value = grandTotals['grand_net'];
-  //       allJobsPaid.value = grandTotals['grand_paid'];
-  //       allJobsOutstanding.value = grandTotals['grand_outstanding'];
-  //       // print(jobs[0]);
-  //       numberOfJobs.value = jobs.length;
-  //       allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
-  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-  //       final refreshed = await helper.refreshAccessToken(refreshToken);
-  //       if (refreshed == RefreshResult.success) {
-  //         await searchEngine(body);
-  //       } else if (refreshed == RefreshResult.invalidToken) {
-  //         logout();
-  //       }
-  //     } else if (response.statusCode == 401) {
-  //       logout();
-  //     }
-
-  //     isScreenLoding.value = false;
-  //   } catch (e) {
-  //     isScreenLoding.value = false;
-  //   }
-  // }
 
   void addNewInvoiceItem() {
     final String uniqueId = _uuid.v4();
@@ -2112,6 +2112,16 @@ class JobCardController extends GetxController {
     }
 
     return sumofNET;
+  }
+
+  double calculateTotalHoursForTimeSheetsSummary() {
+    double sumofHours = 0.0;
+
+    for (var job in timeSheetsSummaryTable) {
+      sumofHours += job.timeInHours ?? 0;
+    }
+
+    return sumofHours;
   }
 
   void updateCalculating() {
