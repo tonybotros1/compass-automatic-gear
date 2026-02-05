@@ -182,7 +182,7 @@ class TimeSheetsController extends GetxController {
   Future getAllTechnicians() async {
     isScreenLodingForTechnicians.value = true;
     allTechnician.assignAll(
-      await helper.getAllEmployeesByDepartment('Time Sheets'),
+      await helper.getAllListValues('TIME_SHEET'),
     );
     isScreenLodingForTechnicians.value = false;
   }

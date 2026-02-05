@@ -124,14 +124,14 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: textToDate(invoiceItemsData.startDate),
+          text: textToDate(invoiceItemsData.startDate, withTime: true),
           color: Colors.green,
           formatDouble: false,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: textToDate(invoiceItemsData.endDate),
+          text: textToDate(invoiceItemsData.endDate, withTime: true),
           color: Colors.blueGrey,
           formatDouble: false,
         ),

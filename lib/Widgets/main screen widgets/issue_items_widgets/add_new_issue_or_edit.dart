@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import '../../../Models/job cards/job_card_model.dart';
 import '../../../consts.dart';
 import 'details_table.dart';
+import '../../main screen widgets/add_new_values_button.dart';
 
 Widget addNewIssueOrEdit({
   required BoxConstraints constraints,
@@ -371,6 +372,7 @@ Widget addNewIssueOrEdit({
                                   ],
                                 ),
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   spacing: 10,
                                   children: [
                                     FocusTraversalOrder(
@@ -415,7 +417,7 @@ Widget addNewIssueOrEdit({
                                         return CustomDropdown(
                                           textcontroller:
                                               controller.receivedBy.value.text,
-                                          hintText: 'Received By',
+                                          hintText: 'Issue To',
                                           showedSelectedName: 'name',
                                           width: 400,
                                           onChanged: (key, value) {
@@ -433,10 +435,17 @@ Widget addNewIssueOrEdit({
                                           },
                                           onOpen: () {
                                             return controller
-                                                .getEmployeesByDepartment();
+                                                .getISSUERECEIVEPEOPLE();
                                           },
                                         );
                                       },
+                                    ),
+                                    valSectionInTheTable(
+                                      controller.listOfValuesController,
+                                      constraints,
+                                      'ISSUE_RECEIVE_PEOPLE',
+                                      'New Value',
+                                      'People',
                                     ),
                                   ],
                                 ),

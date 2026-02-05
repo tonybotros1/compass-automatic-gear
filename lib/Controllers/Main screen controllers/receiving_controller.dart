@@ -130,8 +130,8 @@ class ReceivingController extends GetxController {
     return await helper.getCurrencies();
   }
 
-  Future<Map<String, dynamic>> getEmployeesByDepartment() async {
-    return await helper.getAllEmployeesByDepartment('Receiving');
+  Future<Map<String, dynamic>> getISSUERECEIVEPEOPLE() async {
+    return await helper.getAllListValues('ISSUE_RECEIVE_PEOPLE');
   }
 
   Future getCurrentReceivingStatus(String id) async {

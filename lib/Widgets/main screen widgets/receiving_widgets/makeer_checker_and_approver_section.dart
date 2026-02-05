@@ -1,11 +1,9 @@
-import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/employees.dart';
 import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import '../../main screen widgets/add_new_values_button.dart';
 import '../../../Controllers/Main screen controllers/receiving_controller.dart';
-import 'add_new_value_for_screen_button.dart';
 
 Container makerCheckerAndApproverSection(
   BuildContext context,
@@ -40,18 +38,16 @@ Container makerCheckerAndApproverSection(
                       controller.isReceivingModified.value = true;
                     },
                     onOpen: () {
-                      return controller.getEmployeesByDepartment();
+                      return controller.getISSUERECEIVEPEOPLE();
                     },
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    addNewValueToScreenButtonDialog(
-                      screenName: '🌿 Employees',
-                      widget: const Employees(),
-                    );
-                  },
-                  icon: const Icon(Icons.add),
+                valSectionInTheTable(
+                  controller.listOfValuesController,
+                  constraints,
+                  'ISSUE_RECEIVE_PEOPLE',
+                  'New Value',
+                  'People',
                 ),
               ],
             ),
@@ -75,19 +71,26 @@ Container makerCheckerAndApproverSection(
                       controller.isReceivingModified.value = true;
                     },
                     onOpen: () {
-                      return controller.getEmployeesByDepartment();
+                      return controller.getISSUERECEIVEPEOPLE();
                     },
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    addNewValueToScreenButtonDialog(
-                      screenName: '🌿 Employees',
-                      widget: const Employees(),
-                    );
-                  },
-                  icon: const Icon(Icons.add),
+                valSectionInTheTable(
+                  controller.listOfValuesController,
+                  constraints,
+                  'ISSUE_RECEIVE_PEOPLE',
+                  'New Value',
+                  'People',
                 ),
+                // IconButton(
+                //   onPressed: () {
+                //     addNewValueToScreenButtonDialog(
+                //       screenName: '🌿 Employees',
+                //       widget: const Employees(),
+                //     );
+                //   },
+                //   icon: const Icon(Icons.add),
+                // ),
               ],
             ),
             Row(
@@ -109,18 +112,16 @@ Container makerCheckerAndApproverSection(
                       controller.isReceivingModified.value = true;
                     },
                     onOpen: () {
-                      return controller.getEmployeesByDepartment();
+                      return controller.getISSUERECEIVEPEOPLE();
                     },
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    addNewValueToScreenButtonDialog(
-                      screenName: '🌿 Employees',
-                      widget: const Employees(),
-                    );
-                  },
-                  icon: const Icon(Icons.add),
+                valSectionInTheTable(
+                  controller.listOfValuesController,
+                  constraints,
+                  'ISSUE_RECEIVE_PEOPLE',
+                  'New Value',
+                  'People',
                 ),
               ],
             ),

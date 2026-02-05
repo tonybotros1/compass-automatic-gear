@@ -12,6 +12,7 @@ import '../../Models/issuing/issung_model.dart';
 import '../../Models/job cards/job_card_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
+import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
 
 class IssueItemsController extends GetxController {
@@ -120,7 +121,9 @@ class IssueItemsController extends GetxController {
   TextEditingController codeFilter = TextEditingController();
   TextEditingController numberFilter = TextEditingController();
   TextEditingController nameFilter = TextEditingController();
-
+  ListOfValuesController listOfValuesController = Get.put(
+    ListOfValuesController(),
+  );
   @override
   void onInit() async {
     searchEngine({"today": true});
@@ -141,8 +144,8 @@ class IssueItemsController extends GetxController {
     return await helper.getAllListValues('ISSUE_TYPES');
   }
 
-  Future<Map<String, dynamic>> getEmployeesByDepartment() async {
-    return await helper.getAllEmployeesByDepartment('Issueing');
+  Future<Map<String, dynamic>> getISSUERECEIVEPEOPLE() async {
+    return await helper.getAllListValues('ISSUE_RECEIVE_PEOPLE');
   }
 
   Future getCurrentIssuingStatus(String id) async {

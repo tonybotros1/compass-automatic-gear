@@ -173,6 +173,9 @@ class TimeSheets extends StatelessWidget {
                                     child: Container(
                                       padding: const EdgeInsets.all(20),
                                       decoration: BoxDecoration(
+                                        color: i % 2 == 0
+                                            ? coolColor
+                                            : Colors.white,
                                         border: Border.all(
                                           color: Colors.grey.shade300,
                                         ),
@@ -286,9 +289,14 @@ class TimeSheets extends StatelessWidget {
                                           ),
                                           Container(
                                             decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: Colors.grey,
+                                              ),
                                               borderRadius:
                                                   BorderRadius.circular(15),
-                                              color: Colors.grey.shade200,
+                                              color: i % 2 == 0
+                                                  ? Colors.white
+                                                  : coolColor,
                                             ),
                                             padding: const EdgeInsets.symmetric(
                                               vertical: 8,
@@ -296,7 +304,9 @@ class TimeSheets extends StatelessWidget {
                                             ),
 
                                             child: Text(
-                                              isPaused ? 'Paused' : 'Running',
+                                              isPaused
+                                                  ? 'Paused'.toUpperCase()
+                                                  : 'Running'.toUpperCase(),
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,
@@ -317,7 +327,13 @@ class TimeSheets extends StatelessWidget {
                                                     8,
                                                   ),
                                                   decoration: BoxDecoration(
-                                                    color: Colors.grey.shade200,
+                                                    border: Border.all(
+                                                      color: Colors.grey,
+                                                    ),
+
+                                                    color: i % 2 == 0
+                                                        ? Colors.white
+                                                        : coolColor,
                                                     shape: BoxShape.circle,
                                                   ),
                                                   child: IconButton(
@@ -352,7 +368,13 @@ class TimeSheets extends StatelessWidget {
                                                     8,
                                                   ),
                                                   decoration: BoxDecoration(
-                                                    color: Colors.grey.shade200,
+                                                    border: Border.all(
+                                                      color: Colors.grey,
+                                                    ),
+
+                                                    color: i % 2 == 0
+                                                        ? Colors.white
+                                                        : coolColor,
                                                     shape: BoxShape.circle,
                                                   ),
                                                   child: IconButton(
@@ -387,83 +409,6 @@ class TimeSheets extends StatelessWidget {
       ),
     );
   }
-
-  // var crossAxisCount =
-  //                           (MediaQuery.of(context).size.width ~/ 250).clamp(
-  //                             1,
-  //                             5,
-  //                           );
-
-  // GridView.count(
-  //                               crossAxisCount: crossAxisCount,
-  //                               childAspectRatio: 1.3,
-  //                               // padding: EdgeInsets.all(20.w),
-  //                               crossAxisSpacing: 40,
-  //                               mainAxisSpacing: 40,
-  //                               children: List.generate(
-  //                                 controller.allTimeSheets.length,
-  //                                 (index) {
-  //                                   double cardWidth =
-  //                                       constraints.maxWidth / crossAxisCount;
-  //                                   final sheet =
-  //                                       controller.allTimeSheets[index];
-  //                                   String sheetEmployeeName =
-  //                                       sheet.employeeName ?? '';
-  //                                   String brand = sheet.brandName.toString();
-  //                                   String model = sheet.modelName.toString();
-  //                                   String plateNumber = sheet.plateNumber
-  //                                       .toString();
-  //                                   String color = sheet.color.toString();
-  //                                   String logo = sheet.logo.toString();
-  //                                   String sheetTimeTask =
-  //                                       '${sheet.taskEnName ?? ''}  -  ${sheet.taskArName ?? ''}';
-  //                                   final cardColor =
-  //                                       cardColors[index % cardColors.length];
-  //                                   final d =
-  //                                       controller.sheetDurations[sheet.id] ??
-  //                                       const Duration();
-  //                                   final h = d.inHours;
-  //                                   final m = d.inMinutes % 60;
-  //                                   final s = d.inSeconds % 60;
-  //                                   final periods =
-  //                                       sheet.activePeriods
-  //                                           as List<ActivePeriods>;
-  //                                   bool isPaused =
-  //                                       periods.isNotEmpty &&
-  //                                       periods.last.to != null;
-
-  //                                   return
-  //                                   EmployeeTaskCard(
-  //                                     cardWidth: cardWidth,
-  //                                     brand: brand,
-  //                                     model: model,
-  //                                     plateNumber: plateNumber,
-  //                                     color: color,
-  //                                     logo: logo,
-  //                                     isPaused: isPaused,
-  //                                     totalWorkTime:
-  //                                         '$h:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}',
-  //                                     name: sheetEmployeeName,
-  //                                     task: sheetTimeTask,
-  //                                     statusColor: cardColor,
-  //                                     startedAt: textToDate(
-  //                                       sheet.startDate,
-  //                                       withTime: true,
-  //                                       monthNameFirst: true,
-  //                                     ),
-  //                                     onContinue: () {
-  //                                       controller.continueFunction(sheet.id);
-  //                                     },
-  //                                     onFinish: () {
-  //                                       controller.finishFunction(sheet.id);
-  //                                     },
-  //                                     onPause: () {
-  //                                       controller.pauseFunction(sheet.id);
-  //                                     },
-  //                                   );
-  //                                 },
-  //                               ),
-  //                             );
 
   Expanded headerBoxLine({
     int? flex,
@@ -549,254 +494,3 @@ class TimeSheets extends StatelessWidget {
     );
   }
 }
-
-// class EmployeeTaskCard extends StatefulWidget {
-//   final String name;
-//   final String brand;
-//   final String model;
-//   final String plateNumber;
-//   final String color;
-//   final String task;
-//   final Color statusColor;
-//   final String startedAt;
-//   final String logo;
-//   final String totalWorkTime;
-//   final VoidCallback onPause;
-//   final VoidCallback onContinue;
-//   final VoidCallback onFinish;
-//   final bool isPaused;
-//   final double cardWidth;
-
-//   const EmployeeTaskCard({
-//     super.key,
-//     required this.name,
-//     required this.startedAt,
-//     required this.cardWidth,
-//     required this.brand,
-//     required this.model,
-//     required this.plateNumber,
-//     required this.color,
-//     required this.logo,
-//     required this.task,
-//     required this.totalWorkTime,
-//     required this.onPause,
-//     required this.isPaused,
-//     required this.onContinue,
-//     required this.onFinish,
-//     this.statusColor = Colors.blue,
-//   });
-
-//   @override
-//   State<EmployeeTaskCard> createState() => _EmployeeTaskCardState();
-// }
-
-// class _EmployeeTaskCardState extends State<EmployeeTaskCard> {
-//   bool _isHovered = false;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final colorScheme = Theme.of(context).colorScheme;
-//     bool isPaused = widget.isPaused;
-
-//     final double baseWidth = 300.0; // Your reference width
-//     final double scaleFactor = widget.cardWidth / baseWidth;
-
-//     double scaledFont(double size) => size * scaleFactor.clamp(0.8, 1.2);
-//     double scaledPadding(double size) => size * scaleFactor.clamp(0.8, 1.5);
-
-//     return MouseRegion(
-//       cursor: SystemMouseCursors.click,
-//       onEnter: (_) => setState(() => _isHovered = true),
-//       onExit: (_) => setState(() => _isHovered = false),
-//       child: AnimatedScale(
-//         scale: _isHovered ? 1.03 : 1.0,
-//         duration: const Duration(milliseconds: 200),
-//         child: Stack(
-//           children: [
-//             Card(
-//               color: widget.statusColor,
-//               elevation: _isHovered ? 8.0 : 4.0,
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(12.0),
-//               ),
-//               child: Padding(
-//                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.center,
-//                   children: [
-//                     Row(
-//                       spacing: 10,
-//                       children: [
-//                         carLogo(widget.logo),
-//                         Expanded(
-//                           child: Column(
-//                             crossAxisAlignment: CrossAxisAlignment.start,
-//                             spacing: 4,
-//                             children: [
-//                               Text(
-//                                 '${widget.brand} ${widget.model}',
-//                                 style: TextStyle(
-//                                   color: Colors.grey.shade800,
-//                                   fontWeight: FontWeight.bold,
-//                                   fontSize: scaledFont(14),
-//                                 ),
-//                               ),
-//                               Text(
-//                                 '${widget.plateNumber} - ${widget.color}',
-//                                 style: TextStyle(
-//                                   color: Colors.grey.shade700,
-//                                   fontWeight: FontWeight.bold,
-//                                   fontSize: scaledFont(12),
-//                                 ),
-//                               ),
-//                             ],
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                     SizedBox(height: scaledPadding(20)),
-//                     Text(
-//                       textAlign: TextAlign.center,
-//                       widget.name,
-//                       style: TextStyle(
-//                         fontWeight: FontWeight.bold,
-//                         color: colorForNameInCards,
-//                         fontSize: scaledFont(14),
-//                       ),
-//                     ),
-//                     const Divider(),
-//                     Expanded(
-//                       child: SingleChildScrollView(
-//                         child: Column(
-//                           spacing: 20,
-//                           crossAxisAlignment: CrossAxisAlignment.center,
-//                           children: [
-//                             Text(
-//                               widget.task.isNotEmpty
-//                                   ? widget.task
-//                                   : 'Not currently working',
-//                               overflow: TextOverflow.ellipsis,
-//                               style: TextStyle(
-//                                 fontWeight: FontWeight.bold,
-//                                 fontSize: scaledFont(12),
-//                                 color: Colors.grey.shade800,
-//                               ),
-//                             ),
-//                             Text(
-//                               widget.startedAt.isNotEmpty
-//                                   ? widget.startedAt
-//                                   : 'N/A',
-//                               maxLines: 1,
-//                               overflow: TextOverflow.ellipsis,
-//                               style: TextStyle(
-//                                 fontWeight: FontWeight.bold,
-//                                 fontSize: scaledFont(12),
-//                                 color: Colors.grey.shade900,
-//                               ),
-//                             ),
-//                             // _buildInfoRow(
-//                             //   context,
-//                             //   label: 'Started at:',
-//                             //   value: widget.startedAt.isNotEmpty
-//                             //       ? widget.startedAt
-//                             //       : 'N/A',
-//                             // ),
-//                           ],
-//                         ),
-//                       ),
-//                     ),
-//                     Padding(
-//                       padding: const EdgeInsets.all(8.0),
-//                       child: Row(
-//                         // mainAxisAlignment: MainAxisAlignment.end,
-//                         children: [
-//                           Text(
-//                             widget.totalWorkTime,
-//                             style: TextStyle(
-//                               fontSize: scaledFont(12),
-//                               fontWeight: FontWeight.bold,
-//                               color: Colors.grey.shade700,
-//                             ),
-//                           ),
-//                           const Spacer(),
-//                           TextButton.icon(
-//                             onPressed: () {
-//                               setState(() => isPaused = !isPaused);
-//                               if (isPaused) {
-//                                 widget.onPause();
-//                               } else {
-//                                 widget.onContinue();
-//                               }
-//                             },
-//                             icon: Icon(
-//                               isPaused ? Icons.play_arrow : Icons.pause,
-//                               size: scaledFont(16),
-//                             ),
-//                             label: Text(
-//                               isPaused ? 'Continue' : 'Pause',
-//                               style: TextStyle(
-//                                 fontSize: scaledFont(12),
-//                                 fontWeight: FontWeight.bold,
-//                               ),
-//                             ),
-//                             style: TextButton.styleFrom(
-//                               foregroundColor: colorScheme.primary,
-//                               padding: EdgeInsets.zero,
-//                               minimumSize: const Size(0, 0),
-//                             ),
-//                           ),
-//                           const SizedBox(width: 5),
-//                           TextButton.icon(
-//                             onPressed: widget.onFinish,
-//                             icon: Icon(
-//                               Icons.check_circle_outline,
-//                               size: scaledFont(16),
-//                             ),
-//                             label: Text(
-//                               'Finish',
-//                               style: TextStyle(
-//                                 fontSize: scaledFont(12),
-//                                 fontWeight: FontWeight.bold,
-//                               ),
-//                             ),
-//                             style: TextButton.styleFrom(
-//                               padding: EdgeInsets.zero,
-//                               minimumSize: const Size(0, 0),
-//                               foregroundColor: Colors.green.shade700,
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//             isPaused
-//                 ? Positioned(
-//                     top: 10,
-//                     right: 10,
-//                     child: Container(
-//                       height: 50,
-//                       width: 50,
-//                       decoration: BoxDecoration(
-//                         // color: Colors.black.withValues(alpha: 200),
-//                         color: Colors.orange.shade200,
-//                         // borderRadius: BorderRadius.circular(12),
-//                         shape: BoxShape.circle,
-//                       ),
-//                       alignment: Alignment.center,
-//                       child: const Icon(
-//                         Icons.pause,
-//                         size: 30,
-//                         color: Colors.white,
-//                       ),
-//                     ),
-//                   )
-//                 : const SizedBox(),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }

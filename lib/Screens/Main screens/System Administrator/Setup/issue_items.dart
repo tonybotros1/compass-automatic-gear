@@ -79,7 +79,7 @@ class IssueItems extends StatelessWidget {
                                     textcontroller:
                                         controller.receivedByFilter.value.text,
                                     showedSelectedName: 'name',
-                                    hintText: 'Received By',
+                                    hintText: 'Issue To',
                                     onChanged: (key, value) async {
                                       controller.receivedByFilter.value.text =
                                           value['name'];
@@ -90,8 +90,7 @@ class IssueItems extends StatelessWidget {
                                       controller.receivedByIdFilter.value = '';
                                     },
                                     onOpen: () {
-                                      return controller
-                                          .getEmployeesByDepartment();
+                                      return controller.getISSUERECEIVEPEOPLE();
                                     },
                                   ),
                                   CustomDropdown(
