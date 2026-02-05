@@ -697,6 +697,7 @@ class CarTradingDashboard extends StatelessWidget {
                     const SliverToBoxAdapter(child: SizedBox(height: 10)),
                     SliverToBoxAdapter(
                       child: Container(
+                        height: constraints.maxHeight / 1.6,
                         constraints: const BoxConstraints(minHeight: 300),
                         padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(

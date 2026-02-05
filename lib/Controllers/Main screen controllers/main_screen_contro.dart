@@ -23,6 +23,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/menus_functions_roles/favourite_screen_model.dart';
 import '../../Models/screen_tree_model.dart';
 import '../../Screens/Dashboard/car_trading_dashboard.dart';
+import '../../Screens/Dashboard/job_cards_dashboard.dart';
 import '../../Screens/Dashboard/trading_dashboard.dart';
 import '../../Screens/Main screens/System Administrator/Setup/AP_payment_type.dart';
 import '../../Screens/Main screens/System Administrator/Setup/ap_invoices.dart';
@@ -226,6 +227,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Converters());
       case '/dataMigration':
         return const SizedBox(child: DataMigration());
+      case '/jobCardDashboard':
+        return const SizedBox(child: JobCardsDashboard());
 
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));

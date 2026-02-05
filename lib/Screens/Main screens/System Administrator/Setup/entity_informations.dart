@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/entity%20information/entity_information_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -160,7 +161,7 @@ class EntityInformations extends StatelessWidget {
                     GetX<EntityInformationsController>(
                       builder: (controller) {
                         return Container(
-                          padding: const EdgeInsets.all(2),
+                          // padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
                             borderRadius: const BorderRadius.only(
@@ -172,6 +173,10 @@ class EntityInformations extends StatelessWidget {
                           ),
                           child: SizedBox(
                             width: constraints.maxWidth,
+                            height: constraints.maxHeight * 6 / 7,
+
+                            // constraints.maxHeight -
+                            // (constraints.maxHeight / 7),
                             child: tableOfScreens(
                               constraints: constraints,
                               context: context,
@@ -197,16 +202,14 @@ Widget tableOfScreens({
   required BuildContext context,
   required EntityInformationsController controller,
 }) {
-  return PaginatedDataTable(
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
+  return PaginatedDataTable2(
+    border: TableBorder.symmetric(
+      inside: BorderSide(color: Colors.grey.shade200, width: 0.5),
+    ),
+    autoRowsToHeight: true,
     horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
-    rowsPerPage: controller.allEntities.length <= 12
-        ? 12
-        : controller.allEntities.length >= 30
-        ? 30
-        : controller.allEntities.length,
+    showFirstLastButtons: true,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
     columns: [
@@ -226,6 +229,9 @@ Widget tableOfScreens({
       DataColumn(
         label: AutoSizedText(text: 'Phone', constraints: constraints),
       ),
+      DataColumn(
+        label: AutoSizedText(text: 'Contact Person', constraints: constraints),
+      ),
     ],
     source: CardDataSource(
       cards: controller.allEntities.isEmpty ? [] : controller.allEntities,
@@ -242,10 +248,18 @@ DataRow dataRowForTheTable(
   BoxConstraints constraints,
   String entityId,
   EntityInformationsController controller,
+  int index,
 ) {
   final addresses = entityData.entityAddress;
+  final isEvenRow = index % 2 == 0;
 
   return DataRow(
+    color: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.grey.shade400;
+      }
+      return isEvenRow ? Colors.white : Colors.grey.shade100;
+    }),
     cells: [
       DataCell(
         Row(
@@ -297,6 +311,16 @@ DataRow dataRowForTheTable(
           formatDouble: false,
           text: entityData.entityPhone!
               .map((phoneData) => phoneData.number ?? '')
+              .take(2)
+              .join('/'),
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: 300,
+          formatDouble: false,
+          text: entityData.entityPhone!
+              .map((phoneData) => phoneData.name ?? '')
               .take(2)
               .join('/'),
         ),
@@ -524,6 +548,7 @@ class CardDataSource extends DataTableSource {
       constraints,
       cardId,
       controller,
+      index,
     );
   }
 

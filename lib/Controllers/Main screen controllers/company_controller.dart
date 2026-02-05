@@ -210,7 +210,6 @@ class CompanyController extends GetxController {
         logout();
       }
     } catch (e) {
-      print(e);
       showSnackBar('Alert', 'Something went wrong please try again');
     } finally {
       addingNewCompanyProcess.value = false;

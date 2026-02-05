@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Controllers/Main screen controllers/websocket_controller.dart';
@@ -41,20 +42,41 @@ class MyApp extends StatelessWidget {
       title: 'DataHub AI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        textTheme: GoogleFonts.robotoMonoTextTheme(Theme.of(context).textTheme)
+            .apply(bodyColor: Colors.black, displayColor: Colors.black)
+            .copyWith(
+              bodyLarge: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),
+              bodyMedium: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),
+              bodySmall: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),
+              titleLarge: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),
+              titleMedium: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),
+              titleSmall: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),
+              labelLarge: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),
+            ),
         dataTableTheme: DataTableThemeData(
           headingRowColor: WidgetStatePropertyAll(coolColor),
           dividerThickness: 0.3,
-          headingTextStyle: TextStyle(
+          headingTextStyle: GoogleFonts.robotoMono(
             color: Colors.grey[700],
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
+          // TextStyle(
+          //   color: Colors.grey[700],
+          //   fontWeight: FontWeight.bold,
+          //   fontSize: 12,
+          // ),
           // 5. **Default Text Style for Data**
-          dataTextStyle: TextStyle(
-            color: Colors.grey.shade800,
+          dataTextStyle:GoogleFonts.robotoMono(
+            color: Colors.grey[700],
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
+          //  TextStyle(
+          //   color: Colors.grey.shade800,
+          //   fontWeight: FontWeight.bold,
+          //   fontSize: 12,
+          // ),
           headingRowHeight: 40,
         ),
         cardTheme: const CardThemeData(color: Colors.white),

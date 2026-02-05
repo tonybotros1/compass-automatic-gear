@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/formatters/currency_input_formatter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -15,16 +16,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-// String backendTestURI = 'http://172.168.0.69:8000';
-// String webSocketURL = "ws://172.168.0.69:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://172.168.0.69:8000';
+String webSocketURL = "ws://172.168.0.69:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
 // String webSocketURL = "ws://10.0.2.2:8000/ws";
 
 // ======== production urls ========
-String backendTestURI = 'https://datahubai-backend.onrender.com';
-String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
+// String backendTestURI = 'https://datahubai-backend.onrender.com';
+// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
 
 final formatter = CurrencyInputFormatter();
 
@@ -36,7 +37,11 @@ final NumberFormat currencyFormat = NumberFormat.currency(
 );
 final NumberFormat percentFormat = NumberFormat('#,##0.##');
 
-Container coolTextBox({required String text, Color color = Colors.black}) {
+Container coolTextBox({
+  required String text,
+  Color color = Colors.black,
+  bool formatDouble = false,
+}) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: BoxDecoration(
@@ -47,7 +52,7 @@ Container coolTextBox({required String text, Color color = Colors.black}) {
       text: text,
       maxWidth: null,
       color: color,
-      formatDouble: false,
+      formatDouble: formatDouble,
     ),
   );
 }
@@ -963,9 +968,10 @@ Widget textForDataRowInTable({
   double? maxWidth = 150,
   Color? color,
   bool isBold = false,
-  double? fontSize,
+  double? fontSize = 12,
   bool isSelectable = true,
   bool formatDouble = true,
+  TextStyle? style,
 }) {
   String formattedText = text;
 
@@ -982,22 +988,39 @@ Widget textForDataRowInTable({
         ? SelectableText(
             formattedText,
             // maxLines: 1,
-            style: TextStyle(
-              fontSize: fontSize,
-              overflow: TextOverflow.ellipsis,
-              color: color,
-              fontWeight: isBold ? FontWeight.bold : null,
-            ),
+            style:
+                style ??
+                GoogleFonts.robotoMono(
+                  fontSize: fontSize,
+                  // overflow: TextOverflow.ellipsis,
+                  color: color,
+                  fontWeight: isBold ? FontWeight.bold : null,
+                ),
+            // TextStyle(
+            //   fontFamily: '',
+            //   fontSize: fontSize,
+            //   overflow: TextOverflow.ellipsis,
+            //   color: color,
+            //   fontWeight: isBold ? FontWeight.bold : null,
+            // ),
           )
         : Text(
             formattedText,
             // maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: fontSize,
-              color: color,
-              fontWeight: isBold ? FontWeight.bold : null,
-            ),
+
+            style:
+                style ??
+                GoogleFonts.robotoMono(
+                  fontSize: fontSize,
+                  color: color,
+                  fontWeight: isBold ? FontWeight.bold : null,
+                ),
+            // TextStyle(
+            //   fontSize: fontSize,
+            //   color: color,
+            //   fontWeight: isBold ? FontWeight.bold : null,
+            // ),
           ),
   );
 }
@@ -1041,11 +1064,11 @@ Widget textForDataRowInTable({
 //     child: Text(status, style: const TextStyle(color: Colors.white)),
 //   );
 // }
-
+int alpha = 200;
 Container statusBox(
   String status, {
   hieght = 30.0,
-  width = 100,
+  double? width,
   EdgeInsetsGeometry? padding = const EdgeInsets.symmetric(horizontal: 4),
   int alpha = 200,
 }) {
@@ -1079,7 +1102,10 @@ Container statusBox(
     // height: hieght,
     width: width,
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-    child: Text(status, style: const TextStyle(color: Colors.white)),
+    child: Text(
+      status,
+      style: const TextStyle(color: Colors.white, fontSize: 12),
+    ),
   );
 }
 
@@ -1486,6 +1512,8 @@ bool normalizeDate(String input, TextEditingController date) {
     }
     return true;
   }
+
+  
 
   // 2) جرب الصيغ بدون فاصل (سبعة أو ثمانية أرقام)
   final noSepPattern = RegExp(r'^(\d{1,2})(\d{1,2})(\d{4})$');

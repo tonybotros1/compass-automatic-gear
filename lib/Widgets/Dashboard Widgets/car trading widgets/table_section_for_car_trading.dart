@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
@@ -31,10 +32,14 @@ Widget tableOfCarTrades({
             fontSize: 12,
           ),
         ),
-        child: PaginatedDataTable(
-          controller: controller.scrollControllerForTable,
+        child: PaginatedDataTable2(
+          border: TableBorder.symmetric(
+            inside: BorderSide(color: Colors.grey.shade200, width: 0.5),
+          ),
+          // controller: controller.scrollControllerForTable,
           headingRowHeight: 45,
-          showEmptyRows: true,
+          // showEmptyRows: true,
+          autoRowsToHeight: true,
           dividerThickness: .3,
           showFirstLastButtons: true,
           rowsPerPage: controller.numberOfCars.value <= 8
@@ -44,10 +49,10 @@ Widget tableOfCarTrades({
               : controller.numberOfCars.value,
           showCheckboxColumn: false,
           horizontalMargin: horizontalMarginForTable,
-          dataRowMaxHeight: 40,
-          dataRowMinHeight: 30,
+          // dataRowMaxHeight: 40,
+          // dataRowMinHeight: 30,
           columnSpacing: 5,
-          headingRowColor: const WidgetStatePropertyAll(Color(0xffF4F5F8)),
+          // headingRowColor: const WidgetStatePropertyAll(Color(0xffF4F5F8)),
           columns: const [
             DataColumn(label: Text('')),
             DataColumn(label: Text('Brand')),
@@ -85,15 +90,15 @@ DataRow dataRowForTheTable(
   BoxConstraints constraints,
   String tradeId,
   CarTradingDashboardController controller,
-  index,
+  int index,
 ) {
-  // final isEvenRow = index % 2 == 0;
+  final isEvenRow = index % 2 == 0;
   return DataRow(
     color: WidgetStateProperty.resolveWith<Color?>((states) {
       if (states.contains(WidgetState.selected)) {
         return Colors.grey.shade400;
       }
-      return Colors.white;
+      return isEvenRow ? Colors.white : Colors.grey.shade100;
     }),
     cells: [
       DataCell(editSection(tradeData: tradeData, id: tradeId)),

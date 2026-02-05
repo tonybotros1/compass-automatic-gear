@@ -21,7 +21,7 @@ class MenuModel {
     return MenuModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
-      routeName: json['route_name'] ?? '',
+      routeName: json.containsKey('route_name') ? json['route_name'] ?? '' : '',
       code: json['code'] ?? '',
       children: json["children"],
       createdAt: DateTime.parse(json['createdAt']),

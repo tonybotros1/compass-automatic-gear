@@ -1,4 +1,5 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/job%20cards/job_card_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -200,7 +201,7 @@ class JobCard extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     myTextFormFieldWithBorder(
-                                      width: 110,
+                                      width: 120,
                                       controller: controller.fromDate.value,
                                       labelText: 'From Date',
                                       onFieldSubmitted: (_) async {
@@ -217,7 +218,7 @@ class JobCard extends StatelessWidget {
                                       },
                                     ),
                                     myTextFormFieldWithBorder(
-                                      width: 110,
+                                      width: 120,
                                       controller: controller.toDate.value,
                                       labelText: 'To Date',
                                       onFieldSubmitted: (_) async {
@@ -528,7 +529,7 @@ class JobCard extends StatelessWidget {
                     GetX<JobCardController>(
                       builder: (controller) {
                         return Container(
-                          padding: const EdgeInsets.all(2),
+                          // padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
                             borderRadius: const BorderRadius.only(
@@ -540,7 +541,8 @@ class JobCard extends StatelessWidget {
                           ),
                           child: SizedBox(
                             width: constraints.maxWidth,
-                            child: tableOfScreens(
+                            height: constraints.maxHeight * 3 / 4,
+                            child: tableOfScreensForMainJobCards(
                               showHistoryButton: true,
                               scrollController:
                                   controller.scrollControllerFotTable1,
@@ -595,7 +597,7 @@ class JobCard extends StatelessWidget {
   }
 }
 
-Widget tableOfScreens({
+Widget tableOfScreensForMainJobCards({
   required BoxConstraints constraints,
   required BuildContext context,
   required JobCardController controller,
@@ -604,138 +606,166 @@ Widget tableOfScreens({
   required bool showHistoryButton,
 }) {
   bool isJobsLoading = data.isEmpty;
-
   return DataTableTheme(
     data: DataTableThemeData(
-      // headingTextStyle: fontStyleForTableHeader,
-      // dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
-          return Colors.yellow;
+          return Colors.grey.shade300;
         }
         return null;
       }),
     ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      controller: scrollController,
-      child: PaginatedDataTable(
-        controller: scrollController,
-        rowsPerPage: controller.numberOfJobs.value <= 12
-            ? 12
-            : controller.numberOfJobs.value >= 30
-            ? 30
-            : controller.numberOfJobs.value,
-
-        showCheckboxColumn: false,
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
-        headingRowHeight: 70,
-        columnSpacing: 5,
-        showFirstLastButtons: true,
-        horizontalMargin: 5,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        // headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-        columns: [
-          const DataColumn(
-            label: SizedBox(),
-            // onSort: controller.onSort,
-          ),
-          const DataColumn(
-            label: SizedBox(),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'Type'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'Number'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'Date'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'Status'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, 'Invoice', 'Number'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'Date'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'LPO Number'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, 'Car', 'Brand'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'Model'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, 'Plate', 'Number'),
-            // onSort: controller.onSort,
-          ),
-          // DataColumn(label: columnForTable(constraints, '', 'Code')
-          //     // onSort: controller.onSort,
-          //     ),
-          // DataColumn(label: columnForTable(constraints, '', 'City')
-          //     // onSort: controller.onSort,
-          //     ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'Customer Name'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'Branch'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: columnForTable(constraints, '', 'VIN'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: columnForTable(constraints, '', 'Totals'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: columnForTable(constraints, '', 'VAT'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: columnForTable(constraints, '', 'NET'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: columnForTable(constraints, '', 'Paid'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: columnForTable(constraints, '', 'Outstanding'),
-            // onSort: controller.onSort,
-          ),
-        ],
-        source: CardDataSource(
-          cards: isJobsLoading ? [] : data,
-          context: context,
-          constraints: constraints,
-          controller: controller,
+    child: PaginatedDataTable2(
+      border: TableBorder.symmetric(
+        inside: BorderSide(color: Colors.grey.shade200, width: 0.5),
+      ),
+      smRatio: 0.67,
+      lmRatio: 3,
+      autoRowsToHeight: true,
+      // minWidth: 2000,
+      showCheckboxColumn: false,
+      headingRowHeight: 60,
+      columnSpacing: 5,
+      showFirstLastButtons: true,
+      horizontalMargin: 5,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      columns: [
+        const DataColumn2(
+          size: ColumnSize.S,
+          label: SizedBox(),
+          // onSort: controller.onSort,
         ),
+        const DataColumn2(
+          size: ColumnSize.S,
+          label: SizedBox(),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.S,
+          label: columnForTable(constraints, '', 'Type'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, '', 'Number'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, '', 'Date'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, '', 'Status'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, 'Invoice', 'Number'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, '', 'Date'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, '', 'LPO Number'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, 'Car', 'Brand'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, '', 'Model'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, 'Plate', 'Number'),
+          // onSort: controller.onSort,
+        ),
+        // DataColumn(label: columnForTable(constraints, '', 'Code')
+        //     // onSort: controller.onSort,
+        //     ),
+        // DataColumn(label: columnForTable(constraints, '', 'City')
+        //     // onSort: controller.onSort,
+        //     ),
+        DataColumn2(
+          // size: ColumnSize.L
+          size: ColumnSize.L,
+
+          label: columnForTable(constraints, '', 'Customer Name'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          label: columnForTable(constraints, '', 'Branch'),
+          // onSort: controller.onSort,
+        ),
+        // DataColumn2(
+        //   size: ColumnSize.L,
+
+        //   label: columnForTable(constraints, '', 'VIN'),
+        //   // onSort: controller.onSort,
+        // ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          numeric: true,
+          label: columnForTable(constraints, '', 'Totals'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          numeric: true,
+          label: columnForTable(constraints, '', 'VAT'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          numeric: true,
+          label: columnForTable(constraints, '', 'NET'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          numeric: true,
+          label: columnForTable(constraints, '', 'Paid'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+
+          numeric: true,
+          label: columnForTable(constraints, '', 'Outstanding'),
+          // onSort: controller.onSort,
+        ),
+      ],
+      source: CardDataSource(
+        cards: isJobsLoading ? [] : data,
+        context: context,
+        constraints: constraints,
+        controller: controller,
       ),
     ),
   );
@@ -766,7 +796,7 @@ DataRow dataRowForTheTable(
   int index,
 ) {
   final isEvenRow = index % 2 == 0;
-  return DataRow(
+  return DataRow2(
     // onSelectChanged: (_) {},
     // selected: true,
     color: WidgetStateProperty.resolveWith<Color?>((states) {
@@ -799,7 +829,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: jobData.jobNumber ?? "",
+          text: jobData.jobNumber ?? "-",
           formatDouble: false,
         ),
       ),
@@ -807,7 +837,7 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: jobData.jobNumber != ''
               ? textToDate(jobData.jobDate ?? "")
-              : '',
+              : '-',
         ),
       ),
       DataCell(
@@ -818,43 +848,45 @@ DataRow dataRowForTheTable(
                     : 'Warranty')
               : (jobData.jobStatus2 ?? ''),
           hieght: 35,
-          width: 100,
+          // width: 100,
           padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),
 
       DataCell(
         textForDataRowInTable(
-          text: jobData.invoiceNumber ?? '',
+          text: jobData.invoiceNumber ?? '-',
           formatDouble: false,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: jobData.invoiceNumber != ''
+          text: jobData.invoiceNumber != '-'
               ? textToDate(jobData.invoiceDate)
               : '',
         ),
       ),
-      DataCell(SelectableText(jobData.lpoNumber ?? '', maxLines: 1)),
-      DataCell(textForDataRowInTable(text: jobData.carBrandName ?? '')),
-      DataCell(textForDataRowInTable(text: jobData.carModelName ?? '')),
-      DataCell(SelectableText(jobData.plateNumber ?? '', maxLines: 1)),
-      DataCell(
-        textForDataRowInTable(maxWidth: null, text: jobData.customerName ?? ''),
-      ),
-      DataCell(
-        textForDataRowInTable(maxWidth: null, text: jobData.branchName ?? ''),
-      ),
+      DataCell(SelectableText(jobData.lpoNumber ?? '-', maxLines: 1)),
+      DataCell(textForDataRowInTable(text: jobData.carBrandName ?? '-')),
+      DataCell(textForDataRowInTable(text: jobData.carModelName ?? '-')),
+      DataCell(SelectableText(jobData.plateNumber ?? '-', maxLines: 1)),
       DataCell(
         textForDataRowInTable(
-          text: jobData.vehicleIdentificationNumber ?? '',
           maxWidth: null,
-          isBold: true,
-          color: Colors.deepPurple,
-          formatDouble: false,
+          text: jobData.customerName ?? '-',
         ),
       ),
+      DataCell(
+        textForDataRowInTable(maxWidth: null, text: jobData.branchName ?? '-'),
+      ),
+      // DataCell(
+      //   textForDataRowInTable(
+      //     text: jobData.vehicleIdentificationNumber ?? '-',
+      //     maxWidth: null,
+      //     isBold: true,
+      //     formatDouble: false,
+      //   ),
+      // ),
       DataCell(
         textForDataRowInTable(
           color: Colors.green,
