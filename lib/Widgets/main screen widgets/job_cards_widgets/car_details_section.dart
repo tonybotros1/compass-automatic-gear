@@ -93,11 +93,13 @@ Widget carDetailsSection(
                                   );
                                 },
                               ),
-                              valSectionInTheTableForBrands(
-                                controller.carBrandsController,
-                                controller.carBrandId.value,
-                                constraints,
-                                'New Model',
+                              ExcludeFocus(
+                                child: valSectionInTheTableForBrands(
+                                  controller.carBrandsController,
+                                  controller.carBrandId.value,
+                                  constraints,
+                                  'New Model',
+                                ),
                               ),
                             ],
                           ),
@@ -105,7 +107,12 @@ Widget carDetailsSection(
                             spacing: 10,
                             children: [
                               myTextFormFieldWithBorder(
-                                focusNode: controller.focusNodeForCardDetails4,
+                                focusNode: controller.focusNodeForCardDetails3,
+
+                                onFieldSubmitted: (_) {
+                                  controller.focusNodeForCardDetails4
+                                      .requestFocus();
+                                },
                                 width: 115,
                                 controller: controller.year,
                                 labelText: 'Year',
@@ -118,9 +125,9 @@ Widget carDetailsSection(
                                 children: [
                                   CustomDropdown(
                                     focusNode:
-                                        controller.focusNodeForCardDetails3,
-                                    nextFocusNode:
                                         controller.focusNodeForCardDetails4,
+                                    nextFocusNode:
+                                        controller.focusNodeForCardDetails5,
                                     width: 200,
                                     showedSelectedName: 'name',
                                     textcontroller: controller.color.text,
@@ -139,12 +146,14 @@ Widget carDetailsSection(
                                       return controller.getColors();
                                     },
                                   ),
-                                  valSectionInTheTable(
-                                    controller.listOfValuesController,
-                                    constraints,
-                                    'COLORS',
-                                    'New Color',
-                                    'Colors',
+                                  ExcludeFocus(
+                                    child: valSectionInTheTable(
+                                      controller.listOfValuesController,
+                                      constraints,
+                                      'COLORS',
+                                      'New Color',
+                                      'Colors',
+                                    ),
                                   ),
                                 ],
                               ),
@@ -165,6 +174,8 @@ Widget carDetailsSection(
                     children: [
                       myTextFormFieldWithBorder(
                         focusNode: controller.focusNodeForCardDetails5,
+                        onFieldSubmitted: (_) =>
+                            controller.focusNodeForCardDetails6.requestFocus(),
                         width: 115,
                         controller: controller.plateNumber,
                         labelText: 'Plate No.',
@@ -174,7 +185,8 @@ Widget carDetailsSection(
                       ),
                       myTextFormFieldWithBorder(
                         focusNode: controller.focusNodeForCardDetails6,
-                        // nextFocusNode: controller.focusNodeForCardDetails7,
+                        onFieldSubmitted: (_) =>
+                            controller.focusNodeForCardDetails7.requestFocus(),
                         width: 115,
                         isCapitaLetters: true,
                         controller: controller.plateCode,
@@ -239,11 +251,13 @@ Widget carDetailsSection(
                               );
                             },
                           ),
-                          valSectionInTheTableForCountries(
-                            controller.countriesController,
-                            controller.countryId.value,
-                            constraints,
-                            'New City',
+                          ExcludeFocus(
+                            child: valSectionInTheTableForCountries(
+                              controller.countriesController,
+                              controller.countryId.value,
+                              constraints,
+                              'New City',
+                            ),
                           ),
                         ],
                       ),
@@ -255,6 +269,8 @@ Widget carDetailsSection(
                     children: [
                       myTextFormFieldWithBorder(
                         focusNode: controller.focusNodeForCardDetails9,
+                        onFieldSubmitted: (_) =>
+                            controller.focusNodeForCardDetails10.requestFocus(),
                         width: 240,
                         controller: controller.transmissionType,
                         labelText: 'Transmission Type',
@@ -285,17 +301,21 @@ Widget carDetailsSection(
                           return controller.getEngineTypes();
                         },
                       ),
-                      valSectionInTheTable(
-                        controller.listOfValuesController,
-                        constraints,
-                        'ENGINE_TYPES',
-                        'New Engine Type',
-                        'Engine Type',
+                      ExcludeFocus(
+                        child: valSectionInTheTable(
+                          controller.listOfValuesController,
+                          constraints,
+                          'ENGINE_TYPES',
+                          'New Engine Type',
+                          'Engine Type',
+                        ),
                       ),
                     ],
                   ),
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCardDetails11,
+                    onFieldSubmitted: (_) =>
+                        controller.focusNodeForCardDetails12.requestFocus(),
                     width: 450,
                     controller: controller.vin,
                     labelText: 'VIN',
@@ -309,6 +329,8 @@ Widget carDetailsSection(
                     children: [
                       myTextFormFieldWithBorder(
                         focusNode: controller.focusNodeForCardDetails12,
+                        onFieldSubmitted: (_) =>
+                            controller.focusNodeForCardDetails13.requestFocus(),
                         width: 105,
                         isnumber: true,
                         controller: controller.mileageIn.value,
@@ -325,6 +347,8 @@ Widget carDetailsSection(
                       ),
                       myTextFormFieldWithBorder(
                         focusNode: controller.focusNodeForCardDetails13,
+                        onFieldSubmitted: (_) =>
+                            controller.focusNodeForCardDetails14.requestFocus(),
                         width: 105,
                         isnumber: true,
                         controller: controller.mileageOut.value,
@@ -347,6 +371,9 @@ Widget carDetailsSection(
                       ),
                       myTextFormFieldWithBorder(
                         focusNode: controller.focusNodeForCardDetails14,
+                        onFieldSubmitted: (_) => controller
+                            .focusNodeForCustomerDetails1
+                            .requestFocus(),
                         width: 105,
                         isnumber: true,
                         controller: controller.minTestKms.value,

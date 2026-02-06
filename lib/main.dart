@@ -15,7 +15,6 @@ import 'Screens/Auth Screens/register_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
 import 'Screens/mobile Screens/main_screen_fro_mobile.dart';
 import 'Widgets/main screen widgets/job_cards_widgets/image_gallery_viewer.dart';
-import 'consts.dart';
 import 'security.dart';
 // import 'package:web/web.dart' as web;
 
@@ -54,7 +53,7 @@ class MyApp extends StatelessWidget {
               labelLarge: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),
             ),
         dataTableTheme: DataTableThemeData(
-          headingRowColor: WidgetStatePropertyAll(coolColor),
+          headingRowColor: const WidgetStatePropertyAll(Color(0xffE1E5EA)),
           dividerThickness: 0.3,
           headingTextStyle: GoogleFonts.robotoMono(
             color: Colors.grey[700],
@@ -67,7 +66,7 @@ class MyApp extends StatelessWidget {
           //   fontSize: 12,
           // ),
           // 5. **Default Text Style for Data**
-          dataTextStyle:GoogleFonts.robotoMono(
+          dataTextStyle: GoogleFonts.robotoMono(
             color: Colors.grey[700],
             fontWeight: FontWeight.bold,
             fontSize: 12,

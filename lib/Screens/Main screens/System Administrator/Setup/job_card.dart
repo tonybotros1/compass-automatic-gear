@@ -622,7 +622,6 @@ Widget tableOfScreensForMainJobCards({
       smRatio: 0.67,
       lmRatio: 3,
       autoRowsToHeight: true,
-      // minWidth: 2000,
       showCheckboxColumn: false,
       headingRowHeight: 60,
       columnSpacing: 5,

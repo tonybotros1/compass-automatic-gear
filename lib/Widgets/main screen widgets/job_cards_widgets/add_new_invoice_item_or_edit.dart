@@ -37,6 +37,9 @@ Widget addNewinvoiceItemsOrEdit({
                         Expanded(
                           child: myTextFormFieldWithBorder(
                             focusNode: controller.focusNodeForItemsDetails1,
+                            onFieldSubmitted: (_) => controller
+                                .focusNodeForItemsDetails2
+                                .requestFocus(),
                             isnumber: true,
                             controller: controller.lineNumber,
                             labelText: 'Line Number',
@@ -73,11 +76,13 @@ Widget addNewinvoiceItemsOrEdit({
                             },
                           ),
                         ),
-                        newValueButton(
-                          constraints,
-                          'New Item',
-                          'Invoice Items',
-                          const InvoiceItems(),
+                        ExcludeFocus(
+                          child: newValueButton(
+                            constraints,
+                            'New Item',
+                            'Invoice Items',
+                            const InvoiceItems(),
+                          ),
                         ),
                       ],
                     ),

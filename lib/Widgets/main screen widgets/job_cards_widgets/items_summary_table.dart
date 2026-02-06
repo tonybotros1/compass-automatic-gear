@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/job_card_controller.dart';
@@ -19,14 +20,11 @@ Widget itemsSummartTableSection({
           return const Center(child: CircularProgressIndicator());
         }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: tableOfScreens(
-            constraints: constraints,
-            context: context,
-            controller: controller,
-            jobId: jobId,
-          ),
+        return tableOfScreens(
+          constraints: constraints,
+          context: context,
+          controller: controller,
+          jobId: jobId,
         );
       },
     ),
@@ -41,81 +39,76 @@ Widget tableOfScreens({
 }) {
   double totalNet = controller.calculateTotalsForJobItemsSummaryTable();
 
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: SizedBox(
-      width: constraints.maxWidth - 17,
-      child: DataTable(
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
-        columnSpacing: 5,
-        horizontalMargin: horizontalMarginForTable,
-        showBottomBorder: true,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        columns: [
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Invoice No.'),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Issue Date'),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Item Code'),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Item Name'),
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'Quantity'),
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'Price'),
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'Total'),
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'VAT'),
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'Net'),
-          ),
-        ],
-        rows: [
-          ...controller.itemsSummaryTableList.map<DataRow>((invoiceItems) {
-            return dataRowForTheTable(
-              invoiceItems,
-              context,
-              constraints,
-              controller,
-              jobId,
-            );
-          }),
-          DataRow(
-            selected: true,
-            cells: [
-              const DataCell(Text('')),
-              const DataCell(Text('')),
-              const DataCell(Text('')),
-              const DataCell(Text('')),
-              const DataCell(Text('')),
+  return SizedBox(
+    width: constraints.maxWidth - 17,
+    child: DataTable2(
+      columnSpacing: 5,
+      horizontalMargin: horizontalMarginForTable,
+      showBottomBorder: true,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      columns: [
+        DataColumn(
+          label: AutoSizedText(constraints: constraints, text: 'Invoice No.'),
+        ),
+        DataColumn(
+          label: AutoSizedText(constraints: constraints, text: 'Issue Date'),
+        ),
+        DataColumn(
+          label: AutoSizedText(constraints: constraints, text: 'Item Code'),
+        ),
+        DataColumn(
+          label: AutoSizedText(constraints: constraints, text: 'Item Name'),
+        ),
+        DataColumn(
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'Quantity'),
+        ),
+        DataColumn(
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'Price'),
+        ),
+        DataColumn(
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'Total'),
+        ),
+        DataColumn(
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'VAT'),
+        ),
+        DataColumn(
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'Net'),
+        ),
+      ],
+      rows: [
+        ...controller.itemsSummaryTableList.map<DataRow>((invoiceItems) {
+          return dataRowForTheTable(
+            invoiceItems,
+            context,
+            constraints,
+            controller,
+            jobId,
+          );
+        }),
+        DataRow(
+          selected: true,
+          cells: [
+            const DataCell(Text('')),
+            const DataCell(Text('')),
+            const DataCell(Text('')),
+            const DataCell(Text('')),
+            const DataCell(Text('')),
 
-              const DataCell(Text('')),
-              const DataCell(Text('')),
-              const DataCell(Text('Totals')),
-              DataCell(
-                textForDataRowInTable(text: '$totalNet', color: Colors.red),
-              ),
-            ],
-          ),
-        ],
-      ),
+            const DataCell(Text('')),
+            const DataCell(Text('')),
+            const DataCell(Text('Totals')),
+            DataCell(
+              textForDataRowInTable(text: '$totalNet', color: Colors.red),
+            ),
+          ],
+        ),
+      ],
     ),
   );
 }

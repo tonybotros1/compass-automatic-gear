@@ -14,6 +14,7 @@ Widget valSectionInTheTable(
   BoxConstraints constraints,
   String code,
   String tooltip,
+
   String screenName, {
   bool isEnabled = true,
 }) {

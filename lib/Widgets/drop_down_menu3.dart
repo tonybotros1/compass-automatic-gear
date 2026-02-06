@@ -1,7 +1,6 @@
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 // import 'package:get/get.dart';
-
 // import '../consts.dart';
 
 // class DropdownController extends GetxController {
@@ -25,6 +24,9 @@
 //   FocusNode? nextFocusNode = FocusNode();
 //   final RxBool isDropdownOpen = false.obs;
 
+//   /// ✅ New reactive variable for loading state
+//   RxBool isLoading = false.obs;
+
 //   @override
 //   void onClose() {
 //     query.value.dispose();
@@ -35,7 +37,6 @@
 //   }
 
 //   void assignValues(String controller, String showedName) {
-//     // textControllerValue.value = textcontroller;
 //     textController.value = controller;
 //     showedSelectedName.value = showedName;
 //   }
@@ -60,20 +61,34 @@
 //     required Widget Function(BuildContext, String, dynamic) itemBuilder,
 //     void Function(String, dynamic)? onChanged,
 //     required LayerLink layerLink,
-//   }) {
+//     Future<Map<String, dynamic>> Function()? onOpen, // ✅ new optional callback
+//   }) async {
 //     if (overlayEntry != null) return;
-//     isDropdownOpen.value = true;
+//     // isDropdownOpen.value = true;
 
-//     // Initialize items and query
-//     allItems = items;
-//     filteredItems.assignAll(items);
+//     // ✅ Fetch items if onOpen is provided
+//     if (onOpen != null) {
+//       // print("yes");
+//       // isLoading.value = true;
+//       // try {
+//       //   filteredItems.assignAll(await onOpen());
+//       // } catch (e) {
+//       //   filteredItems.clear();
+//       // } finally {
+//       //   isLoading.value = false;
+//       // }
+//     } else {
+//       allItems = items;
+//       filteredItems.assignAll(items);
+//     }
+
 //     query.value.text = searchQuery.value;
 //     _arrowNavStarted = false;
-//     // Measure button and screen
+
 //     final renderBox = buttonKey.currentContext!.findRenderObject() as RenderBox;
 //     final fieldOffset = renderBox.localToGlobal(Offset.zero);
 //     final fieldSize = renderBox.size;
-//     final screenSize = MediaQuery.of(context).size;
+//     final screenSize = Get.size;
 //     const double margin = 8.0;
 //     final spaceBelow =
 //         screenSize.height - fieldOffset.dy - fieldSize.height - margin;
@@ -88,15 +103,12 @@
 //     overlayEntry = OverlayEntry(
 //       builder: (ctx) => Stack(
 //         children: [
-//           // Dismiss on outside tap
 //           Positioned.fill(
 //             child: GestureDetector(
 //               onTap: hideDropdown,
 //               child: Container(color: Colors.transparent),
 //             ),
 //           ),
-
-//           // Positioning anchor
 //           CompositedTransformFollower(
 //             link: layerLink,
 //             showWhenUnlinked: false,
@@ -104,8 +116,6 @@
 //             followerAnchor: showAbove
 //                 ? Alignment.bottomLeft
 //                 : Alignment.topLeft,
-
-//             // Keyboard listener wraps the dropdown
 //             child: Focus(
 //               focusNode: overlayFocusNode,
 //               onKeyEvent: (node, event) {
@@ -119,11 +129,18 @@
 //                   } else if (event.logicalKey == LogicalKeyboardKey.enter) {
 //                     _selectHighlightedItem(onChanged);
 //                     return KeyEventResult.handled;
+//                   } else if (event.logicalKey == LogicalKeyboardKey.tab) {
+//                     if (nextFocusNode != null) {
+//                       hideDropdown();
+//                       FocusScope.of(context).requestFocus(nextFocusNode);
+//                       isValid.refresh();
+//                     }
 //                   }
 //                 }
 //                 return KeyEventResult.ignored;
 //               },
 //               child: Material(
+//                 color: Colors.white,
 //                 elevation: 4,
 //                 borderRadius: BorderRadius.circular(5),
 //                 child: ConstrainedBox(
@@ -134,13 +151,13 @@
 //                   child: Column(
 //                     mainAxisSize: MainAxisSize.min,
 //                     children: [
-//                       // Search field
 //                       Padding(
 //                         padding: const EdgeInsets.all(8.0),
 //                         child: SizedBox(
 //                           height: textFieldHeight,
 //                           child: TextField(
 //                             autofocus: true,
+
 //                             focusNode: searchFocusNode,
 //                             controller: query.value,
 //                             onChanged: (q) {
@@ -162,6 +179,12 @@
 //                               border: OutlineInputBorder(
 //                                 borderRadius: BorderRadius.circular(5),
 //                               ),
+//                               focusedBorder: const OutlineInputBorder(
+//                                 borderSide: BorderSide(
+//                                   color: Colors.blue,
+//                                   width: 2,
+//                                 ),
+//                               ),
 //                               contentPadding: const EdgeInsets.symmetric(
 //                                 vertical: 8,
 //                                 horizontal: 10,
@@ -170,10 +193,15 @@
 //                           ),
 //                         ),
 //                       ),
-
-//                       // Results list
+//                       // ✅ Loading spinner or results list
 //                       Obx(() {
-//                         if (filteredItems.isEmpty) {
+//                         if (isLoading.isTrue) {
+//                           return Padding(
+//                             padding: const EdgeInsets.all(16),
+//                             child: Center(child: loadingProcess),
+//                           );
+//                         }
+//                         if (filteredItems.isEmpty && isLoading.isFalse) {
 //                           return const Padding(
 //                             padding: EdgeInsets.all(8),
 //                             child: Text(
@@ -210,9 +238,9 @@
 //                                       hideDropdown();
 //                                       onChanged?.call(key, val);
 //                                       if (nextFocusNode != null) {
-//                                         FocusScope.of(context).requestFocus(
-//                                           nextFocusNode,
-//                                         ); // ينتقل للي بعدو
+//                                         FocusScope.of(
+//                                           context,
+//                                         ).requestFocus(nextFocusNode);
 //                                       }
 //                                     },
 //                                     child: Obx(
@@ -239,10 +267,13 @@
 //       ),
 //     );
 
-//     Overlay.of(Get.overlayContext!).insert(overlayEntry!);
+//     // Overlay.of(Get.overlayContext!).insert(overlayEntry!);
+//     // searchFocusNode.requestFocus();
+//     final overlayState = Overlay.of(context);
+
+//     overlayState.insert(overlayEntry!);
 //     searchFocusNode.requestFocus();
 
-//     // initial highlight & reset arrow flag
 //     WidgetsBinding.instance.addPostFrameCallback((_) {
 //       _arrowNavStarted = false;
 //       String? initialKey;
@@ -252,7 +283,9 @@
 //       } else if (textController.value.isNotEmpty) {
 //         initialKey = _findKeyByTextValue();
 //       }
-//       highlightedKey.value = initialKey ?? filteredItems.keys.first;
+//       if (filteredItems.isNotEmpty) {
+//         highlightedKey.value = initialKey ?? filteredItems.keys.first;
+//       }
 //     });
 //   }
 
@@ -283,7 +316,6 @@
 //   void _moveHighlight(int direction) {
 //     if (filteredItems.isEmpty) return;
 //     final keys = filteredItems.keys.toList();
-
 //     int currentIndex;
 //     if (!_arrowNavStarted) {
 //       currentIndex = -1;
@@ -291,33 +323,15 @@
 //     } else {
 //       currentIndex = keys.indexOf(highlightedKey.value);
 //     }
-
 //     if (currentIndex == -1) {
 //       highlightedKey.value = keys.first;
 //     } else {
 //       int newIndex = (currentIndex + direction).clamp(0, keys.length - 1);
 //       highlightedKey.value = keys[newIndex];
 //     }
-
 //     _scrollToHighlightedItem();
 //   }
 
-//   // void _scrollToHighlightedItem() {
-//   //   final keys = filteredItems.keys.toList();
-//   //   int index = keys.indexOf(highlightedKey.value);
-//   //   if (index != -1 && scrollController.hasClients) {
-//   //     const double itemHeight = 48.0;
-//   //     double scrollOffset = index * itemHeight;
-//   //     double maxScroll = scrollController.position.maxScrollExtent;
-//   //     double targetOffset = scrollOffset.clamp(0.0, maxScroll);
-
-//   //     scrollController.animateTo(
-//   //       targetOffset,
-//   //       duration: const Duration(milliseconds: 200),
-//   //       curve: Curves.easeInOut,
-//   //     );
-//   //   }
-//   // }
 //   void _scrollToHighlightedItem() {
 //     final key = _itemKeys[highlightedKey.value];
 //     if (key?.currentContext != null) {
@@ -325,7 +339,7 @@
 //         key!.currentContext!,
 //         duration: const Duration(milliseconds: 200),
 //         curve: Curves.easeInOut,
-//         alignment: 0.5, // centers it; tweak 0.0→top, 1.0→bottom
+//         alignment: 0.5,
 //       );
 //     }
 //   }
@@ -373,9 +387,7 @@
 //         ),
 //       );
 //     }
-
 //     String? newHighlightKey;
-
 //     if (selectedKey.value.isNotEmpty &&
 //         filteredItems.containsKey(selectedKey.value)) {
 //       newHighlightKey = selectedKey.value;
@@ -384,7 +396,6 @@
 //     } else if (filteredItems.isNotEmpty) {
 //       newHighlightKey = filteredItems.keys.first;
 //     }
-
 //     highlightedKey.value = newHighlightKey ?? '';
 //   }
 
@@ -419,10 +430,11 @@
 //   final FocusNode? focusNode;
 //   final FocusNode? nextFocusNode;
 //   final void Function()? onDelete;
+//   final Future<Map<String, dynamic>> Function()? onOpen; // ✅ added callback
 
 //   CustomDropdown({
 //     super.key,
-//     required this.items,
+//     this.items = const {},
 //     this.itemBuilder,
 //     this.textcontroller = '',
 //     this.onChanged,
@@ -439,20 +451,34 @@
 //     this.validator,
 //     this.showedResult,
 //     this.onDelete,
+//     this.onOpen, // ✅ added
 //   });
 
 //   final GlobalKey buttonKey = GlobalKey();
 //   final DropdownController controller = DropdownController();
-//   // final RxString textControllerValue = RxString('');
-//   // Define a LayerLink to bind the target and follower.
 //   final LayerLink _layerLink = LayerLink();
 
 //   @override
 //   Widget build(BuildContext context) {
+//     // BoxDecoration defaultEnabledDecoration = BoxDecoration(
+//     //   color: Colors.white,
+//     //   border: Border.all(
+//     //     color: controller.isValid.value ? Colors.grey : Colors.red,
+//     //   ),
+//     //   borderRadius: BorderRadius.circular(5),
+//     // );
+//     focusNode?.addListener(() {
+//       controller.isValid.refresh();
+//     });
 //     BoxDecoration defaultEnabledDecoration = BoxDecoration(
-//       color: Colors.grey.shade200,
+//       color: Colors.white,
 //       border: Border.all(
-//         color: controller.isValid.value ? Colors.grey : Colors.red,
+//         color: focusNode?.hasFocus == true
+//             ? Colors.blue
+//             : controller.isValid.value
+//             ? Colors.grey
+//             : Colors.red,
+//         width: focusNode?.hasFocus == true ? 2 : 1,
 //       ),
 //       borderRadius: BorderRadius.circular(5),
 //     );
@@ -461,31 +487,36 @@
 //       border: Border.all(color: Colors.grey.shade400),
 //       borderRadius: BorderRadius.circular(5),
 //     );
-
 //     TextStyle defaultDisabledTextStyle = const TextStyle(
 //       color: Colors.grey,
 //       fontSize: 16,
 //     );
 
 //     controller.assignValues(textcontroller, showedSelectedName);
-
-//     // textControllerValue.value = textcontroller;
-//     // controller.textController.value = textcontroller;
-//     // controller.showedSelectedName.value = showedSelectedName;
 //     controller.nextFocusNode = nextFocusNode;
-//     bool isEnabled = items.isEmpty ? false : enabled ?? true;
+//     bool isEnabled = enabled ?? true;
 
 //     return SizedBox(
 //       width: width,
 //       child: FormField<dynamic>(
 //         validator: (value) {
 //           if (validator == true) {
-//             if (value == null || value.isEmpty) {
-//               return "    Please Select an Option";
+//             // if textcontroller has a value, accept it as valid automatically
+//             if (controller.textController.value.isNotEmpty) {
+//               return null;
 //             }
+
+//             // if user selected a value, it's valid
+//             if (controller.selectedKey.isNotEmpty) {
+//               return null;
+//             }
+
+//             // otherwise invalid
+//             return "    Please Select an Option";
 //           }
 //           return null;
 //         },
+
 //         builder: (FormFieldState<dynamic> state) {
 //           if (state.hasError) {
 //             controller.isValid.value = false;
@@ -493,7 +524,6 @@
 //           return Column(
 //             crossAxisAlignment: CrossAxisAlignment.start,
 //             children: [
-//               // Wrap the dropdown button with CompositedTransformTarget.
 //               CompositedTransformTarget(
 //                 link: _layerLink,
 //                 child: FocusableActionDetector(
@@ -510,58 +540,76 @@
 //                       onInvoke: (intent) {
 //                         if (isEnabled) {
 //                           if (controller.isDropdownOpen.isFalse) {
-//                             // إذا المينيو مسكر افتحو
 //                             controller.showDropdown(
 //                               context,
 //                               buttonKey,
 //                               items,
-//                               itemBuilder: itemBuilder == null
-//                                   ? (context, key, value) {
-//                                       return Container(
-//                                         alignment: Alignment.centerLeft,
-//                                         padding: const EdgeInsets.symmetric(
-//                                           horizontal: 12,
-//                                           vertical: 4,
-//                                         ),
-//                                         child: Text(value[showedSelectedName]),
-//                                       );
-//                                     }
-//                                   : itemBuilder!,
+//                               itemBuilder:
+//                                   itemBuilder ??
+//                                   (context, key, value) {
+//                                     return Container(
+//                                       alignment: Alignment.centerLeft,
+//                                       padding: const EdgeInsets.symmetric(
+//                                         horizontal: 12,
+//                                         vertical: 4,
+//                                       ),
+//                                       child: Text(value[showedSelectedName]),
+//                                     );
+//                                   },
 //                               onChanged: (key, value) {
 //                                 controller.textController.value = '';
 //                                 controller.selectedKey.value = key;
 //                                 controller.selectedValue.value = value;
 //                                 controller.isValid.value = true;
 //                                 controller.hideDropdown();
-//                                 state.didChange(value);
+//                                 state.didChange(key);
 //                                 onChanged?.call(key, value);
 //                                 if (nextFocusNode != null) {
-//                                   FocusScope.of(context).requestFocus(
-//                                     nextFocusNode,
-//                                   ); // ينتقل للي بعدو
+//                                   FocusScope.of(
+//                                     context,
+//                                   ).requestFocus(nextFocusNode);
 //                                 }
-
-//                                 // FocusScope.of(context).nextFocus();
 //                               },
 //                               layerLink: _layerLink,
+//                               onOpen: onOpen, // ✅ call the callback
 //                             );
+//                             if (onOpen != null) {
+//                               controller.isLoading.value =
+//                                   true; // start loading
+
+//                               onOpen!()
+//                                   .then((fetchedItems) {
+//                                     controller.allItems = fetchedItems;
+//                                     controller.filteredItems.assignAll(
+//                                       fetchedItems,
+//                                     );
+
+//                                     // Set initial highlight
+//                                     controller.highlightedKey.value =
+//                                         fetchedItems.isNotEmpty
+//                                         ? fetchedItems.keys.first
+//                                         : '';
+//                                     controller.isLoading.value =
+//                                         false; // stop loading
+//                                   })
+//                                   .catchError((e) {
+//                                     controller.isLoading.value =
+//                                         false; // stop loading even on error
+//                                   });
+//                             }
 //                           } else {
-//                             // إذا المينيو مفتوح سكروا وانتقل
 //                             controller.hideDropdown();
 //                             if (nextFocusNode != null) {
 //                               FocusScope.of(
 //                                 context,
-//                               ).requestFocus(nextFocusNode); // ينتقل للي بعدو
+//                               ).requestFocus(nextFocusNode);
+//                               controller.isValid.refresh();
 //                             }
 //                           }
-//                         } else {
-//                           if (nextFocusNode != null) {
-//                             FocusScope.of(
-//                               context,
-//                             ).requestFocus(nextFocusNode); // ينتقل للي بعدو
-//                           }
+//                         } else if (nextFocusNode != null) {
+//                           FocusScope.of(context).requestFocus(nextFocusNode);
+//                           controller.isValid.refresh();
 //                         }
-
 //                         return null;
 //                       },
 //                     ),
@@ -571,52 +619,72 @@
 //                     onTap: isEnabled
 //                         ? () {
 //                             if (controller.isDropdownOpen.isFalse) {
-//                               // إذا المينيو مسكر افتحو
+//                               // 1️⃣ Open dropdown immediately with current items
 //                               controller.showDropdown(
 //                                 context,
 //                                 buttonKey,
-//                                 items,
-//                                 itemBuilder: itemBuilder == null
-//                                     ? (context, key, value) {
-//                                         return Container(
-//                                           alignment: Alignment.centerLeft,
-//                                           padding: const EdgeInsets.symmetric(
-//                                             horizontal: 12,
-//                                             vertical: 4,
-//                                           ),
-//                                           child: Text(
-//                                             value[showedSelectedName],
-//                                           ),
-//                                         );
-//                                       }
-//                                     : itemBuilder!,
+//                                 items, // can be empty initially
+//                                 itemBuilder:
+//                                     itemBuilder ??
+//                                     (c, k, v) {
+//                                       return Container(
+//                                         alignment: Alignment.centerLeft,
+//                                         padding: const EdgeInsets.symmetric(
+//                                           horizontal: 12,
+//                                           vertical: 4,
+//                                         ),
+//                                         child: Text(v[showedSelectedName]),
+//                                       );
+//                                     },
 //                                 onChanged: (key, value) {
 //                                   controller.textController.value = '';
 //                                   controller.selectedKey.value = key;
 //                                   controller.selectedValue.value = value;
 //                                   controller.isValid.value = true;
-//                                   controller.hideDropdown();
-//                                   state.didChange(value);
-//                                   onChanged?.call(key, value);
+
+//                                   state.didChange(key); // ✔ IMPORTANT
+//                                   onChanged?.call(key, value); // callback
+
 //                                   if (nextFocusNode != null) {
-//                                     FocusScope.of(context).requestFocus(
-//                                       nextFocusNode,
-//                                     ); // ينتقل للي بعدو
+//                                     FocusScope.of(
+//                                       context,
+//                                     ).requestFocus(nextFocusNode);
 //                                   }
 //                                 },
 //                                 layerLink: _layerLink,
 //                               );
-//                             } else {
-//                               // إذا المينيو مفتوح سكروا وانتقل
-//                               controller.hideDropdown();
-//                               if (nextFocusNode != null) {
-//                                 FocusScope.of(
-//                                   context,
-//                                 ).requestFocus(nextFocusNode); // ينتقل للي بعدو
+
+//                               // 2️⃣ Fetch data asynchronously
+//                               if (onOpen != null) {
+//                                 controller.isLoading.value =
+//                                     true; // start loading
+
+//                                 onOpen!()
+//                                     .then((fetchedItems) {
+//                                       controller.allItems = fetchedItems;
+//                                       controller.filteredItems.assignAll(
+//                                         fetchedItems,
+//                                       );
+
+//                                       // Set initial highlight
+//                                       controller.highlightedKey.value =
+//                                           fetchedItems.isNotEmpty
+//                                           ? fetchedItems.keys.first
+//                                           : '';
+//                                       controller.isLoading.value =
+//                                           false; // stop loading
+//                                     })
+//                                     .catchError((e) {
+//                                       controller.isLoading.value =
+//                                           false; // stop loading even on error
+//                                     });
 //                               }
+//                             } else {
+//                               controller.hideDropdown();
 //                             }
 //                           }
 //                         : null,
+
 //                     child: Obx(() {
 //                       return Column(
 //                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -663,8 +731,9 @@
 //                                                     : showedSelectedName
 //                                                           .isNotEmpty
 //                                                     ? controller
-//                                                           .selectedValue[showedSelectedName]
-//                                                           .toString()
+//                                                               .selectedValue[showedSelectedName]
+//                                                               ?.toString() ??
+//                                                           ''
 //                                                     : ''
 //                                               : controller.textController.value,
 //                                           style: isEnabled
@@ -688,7 +757,6 @@
 //                                           overflow: TextOverflow.ellipsis,
 //                                         ),
 //                                 ),
-
 //                                 Icon(
 //                                   Icons.arrow_drop_down,
 //                                   color: isEnabled ? Colors.black : Colors.grey,
@@ -705,9 +773,9 @@
 //                                       controller.selectedKey.value = '';
 //                                       controller.selectedValue.value = {};
 //                                       controller.textController.value = '';
-//                                       // state.didChange(null);
 //                                       controller.isValid.value = true;
-//                                       onDelete?.call(); // notify parent
+//                                       state.didChange(null);
+//                                       onDelete?.call();
 //                                     },
 //                                   ),
 //                               ],
@@ -742,27 +810,25 @@ import '../consts.dart';
 
 class DropdownController extends GetxController {
   OverlayEntry? overlayEntry;
-  RxString selectedKey = "".obs;
-  RxMap selectedValue = {}.obs;
-  RxString searchQuery = "".obs;
+  final RxString selectedKey = "".obs;
+  final RxMap selectedValue = {}.obs;
+  final RxString searchQuery = "".obs;
   Map allItems = {};
-  RxMap filteredItems = {}.obs;
-  RxBool isValid = true.obs;
-  Rx<TextEditingController> query = TextEditingController().obs;
-  RxString textController = RxString('');
-  RxString showedSelectedName = RxString('');
-  FocusNode overlayFocusNode = FocusNode();
-  FocusNode searchFocusNode = FocusNode();
-  ScrollController scrollController = ScrollController();
-  RxString highlightedKey = RxString('');
+  final RxMap filteredItems = {}.obs;
+  final RxBool isValid = true.obs;
+  final Rx<TextEditingController> query = TextEditingController().obs;
+  final RxString textController = RxString('');
+  final RxString showedSelectedName = RxString('');
+  final FocusNode overlayFocusNode = FocusNode();
+  final FocusNode searchFocusNode = FocusNode();
+  final ScrollController scrollController = ScrollController();
+  final RxString highlightedKey = RxString('');
   final Map<String, GlobalKey> _itemKeys = {};
   bool _arrowNavStarted = false;
-  final FocusNode focusNode = FocusNode();
-  FocusNode? nextFocusNode = FocusNode();
+  FocusNode? nextFocusNode;
+  FocusNode? fieldFocusNode;
   final RxBool isDropdownOpen = false.obs;
-
-  /// ✅ New reactive variable for loading state
-  RxBool isLoading = false.obs;
+  final RxBool isLoading = false.obs;
 
   @override
   void onClose() {
@@ -798,31 +864,31 @@ class DropdownController extends GetxController {
     required Widget Function(BuildContext, String, dynamic) itemBuilder,
     void Function(String, dynamic)? onChanged,
     required LayerLink layerLink,
-    Future<Map<String, dynamic>> Function()? onOpen, // ✅ new optional callback
+    Future<Map<String, dynamic>> Function()? onOpen,
+    FocusNode? fieldFocusNode,
   }) async {
     if (overlayEntry != null) return;
-    // isDropdownOpen.value = true;
 
-    // ✅ Fetch items if onOpen is provided
-    if (onOpen != null) {
-      // print("yes");
-      // isLoading.value = true;
-      // try {
-      //   filteredItems.assignAll(await onOpen());
-      // } catch (e) {
-      //   filteredItems.clear();
-      // } finally {
-      //   isLoading.value = false;
-      // }
-    } else {
+    final buttonContext = buttonKey.currentContext;
+    if (buttonContext == null) return;
+
+    final overlayState = Overlay.of(context);
+
+    isDropdownOpen.value = true;
+    this.fieldFocusNode = fieldFocusNode;
+
+    if (onOpen == null) {
       allItems = items;
       filteredItems.assignAll(items);
+    } else {
+      isLoading.value = true;
+      filteredItems.clear();
     }
 
     query.value.text = searchQuery.value;
     _arrowNavStarted = false;
 
-    final renderBox = buttonKey.currentContext!.findRenderObject() as RenderBox;
+    final renderBox = buttonContext.findRenderObject() as RenderBox;
     final fieldOffset = renderBox.localToGlobal(Offset.zero);
     final fieldSize = renderBox.size;
     final screenSize = Get.size;
@@ -842,7 +908,7 @@ class DropdownController extends GetxController {
         children: [
           Positioned.fill(
             child: GestureDetector(
-              onTap: hideDropdown,
+              onTap: () => hideDropdown(restoreFocus: true),
               child: Container(color: Colors.transparent),
             ),
           ),
@@ -856,23 +922,44 @@ class DropdownController extends GetxController {
             child: Focus(
               focusNode: overlayFocusNode,
               onKeyEvent: (node, event) {
-                if (event is KeyDownEvent) {
-                  if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                    _moveHighlight(1);
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                    _moveHighlight(-1);
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.enter) {
-                    _selectHighlightedItem(onChanged);
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.tab) {
-                    if (nextFocusNode != null) {
-                      hideDropdown();
-                      FocusScope.of(context).requestFocus(nextFocusNode);
-                      isValid.refresh();
-                    }
+                if (event is! KeyDownEvent) return KeyEventResult.ignored;
+
+                if (event.logicalKey == LogicalKeyboardKey.escape) {
+                  hideDropdown(restoreFocus: true);
+                  return KeyEventResult.handled;
+                }
+
+                if (event.logicalKey == LogicalKeyboardKey.tab) {
+                  hideDropdown();
+
+                  final isShiftPressed =
+                      HardwareKeyboard.instance.logicalKeysPressed.contains(
+                        LogicalKeyboardKey.shiftLeft,
+                      ) ||
+                      HardwareKeyboard.instance.logicalKeysPressed.contains(
+                        LogicalKeyboardKey.shiftRight,
+                      );
+
+                  if (isShiftPressed) {
+                    FocusScope.of(context).previousFocus();
+                  } else if (nextFocusNode?.canRequestFocus == true) {
+                    FocusScope.of(context).requestFocus(nextFocusNode);
+                  } else {
+                    FocusScope.of(context).nextFocus();
                   }
+
+                  return KeyEventResult.handled;
+                }
+
+                if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                  _moveHighlight(1);
+                  return KeyEventResult.handled;
+                } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                  _moveHighlight(-1);
+                  return KeyEventResult.handled;
+                } else if (event.logicalKey == LogicalKeyboardKey.enter) {
+                  _selectHighlightedItem(onChanged);
+                  return KeyEventResult.handled;
                 }
                 return KeyEventResult.ignored;
               },
@@ -893,8 +980,7 @@ class DropdownController extends GetxController {
                         child: SizedBox(
                           height: textFieldHeight,
                           child: TextField(
-                            autofocus: true,
-
+                            autofocus: false,
                             focusNode: searchFocusNode,
                             controller: query.value,
                             onChanged: (q) {
@@ -904,14 +990,16 @@ class DropdownController extends GetxController {
                             decoration: InputDecoration(
                               hintText: 'Search…',
                               hintStyle: textFieldFontStyle,
-                              suffixIcon: IconButton(
-                                focusNode: FocusNode(skipTraversal: true),
-                                icon: const Icon(Icons.close, size: 20),
-                                onPressed: () {
-                                  searchQuery.value = '';
-                                  query.value.clear();
-                                  filterItems(itemBuilder);
-                                },
+                              suffixIcon: Focus(
+                                skipTraversal: true,
+                                child: IconButton(
+                                  icon: const Icon(Icons.close, size: 20),
+                                  onPressed: () {
+                                    searchQuery.value = '';
+                                    query.value.clear();
+                                    filterItems(itemBuilder);
+                                  },
+                                ),
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
@@ -930,7 +1018,6 @@ class DropdownController extends GetxController {
                           ),
                         ),
                       ),
-                      // ✅ Loading spinner or results list
                       Obx(() {
                         if (isLoading.isTrue) {
                           return Padding(
@@ -974,7 +1061,8 @@ class DropdownController extends GetxController {
                                       isValid.value = true;
                                       hideDropdown();
                                       onChanged?.call(key, val);
-                                      if (nextFocusNode != null) {
+                                      if (nextFocusNode?.canRequestFocus ==
+                                          true) {
                                         FocusScope.of(
                                           context,
                                         ).requestFocus(nextFocusNode);
@@ -1004,26 +1092,40 @@ class DropdownController extends GetxController {
       ),
     );
 
-    // Overlay.of(Get.overlayContext!).insert(overlayEntry!);
-    // searchFocusNode.requestFocus();
-    final overlayState = Overlay.of(context);
-
     overlayState.insert(overlayEntry!);
-    searchFocusNode.requestFocus();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _arrowNavStarted = false;
-      String? initialKey;
-      if (selectedKey.value.isNotEmpty &&
-          filteredItems.containsKey(selectedKey.value)) {
-        initialKey = selectedKey.value;
-      } else if (textController.value.isNotEmpty) {
-        initialKey = _findKeyByTextValue();
+      if (searchFocusNode.canRequestFocus) {
+        searchFocusNode.requestFocus();
       }
-      if (filteredItems.isNotEmpty) {
-        highlightedKey.value = initialKey ?? filteredItems.keys.first;
-      }
+      _setInitialHighlight();
     });
+
+    if (onOpen != null) {
+      try {
+        final fetchedItems = await onOpen();
+        allItems = fetchedItems;
+        filteredItems.assignAll(fetchedItems);
+      } finally {
+        isLoading.value = false;
+      }
+      _setInitialHighlight();
+    }
+  }
+
+  void _setInitialHighlight() {
+    String? initialKey;
+    if (selectedKey.value.isNotEmpty &&
+        filteredItems.containsKey(selectedKey.value)) {
+      initialKey = selectedKey.value;
+    } else if (textController.value.isNotEmpty) {
+      initialKey = _findKeyByTextValue();
+    }
+    if (filteredItems.isNotEmpty) {
+      highlightedKey.value = initialKey ?? filteredItems.keys.first;
+    } else {
+      highlightedKey.value = '';
+    }
   }
 
   String? _findKeyByTextValue() {
@@ -1096,12 +1198,15 @@ class DropdownController extends GetxController {
     }
   }
 
-  void hideDropdown() {
+  void hideDropdown({bool restoreFocus = false}) {
     query.value.clear();
     overlayEntry?.remove();
     overlayEntry = null;
     highlightedKey.value = '';
     isDropdownOpen.value = false;
+    if (restoreFocus && fieldFocusNode?.canRequestFocus == true) {
+      fieldFocusNode!.requestFocus();
+    }
   }
 
   void filterItems(Widget Function(BuildContext, String, dynamic) itemBuilder) {
@@ -1124,16 +1229,7 @@ class DropdownController extends GetxController {
         ),
       );
     }
-    String? newHighlightKey;
-    if (selectedKey.value.isNotEmpty &&
-        filteredItems.containsKey(selectedKey.value)) {
-      newHighlightKey = selectedKey.value;
-    } else if (textController.value.isNotEmpty) {
-      newHighlightKey = _findKeyByTextValue();
-    } else if (filteredItems.isNotEmpty) {
-      newHighlightKey = filteredItems.keys.first;
-    }
-    highlightedKey.value = newHighlightKey ?? '';
+    _setInitialHighlight();
   }
 
   void validateSelection() {
@@ -1149,7 +1245,7 @@ class DropdownController extends GetxController {
   }
 }
 
-class CustomDropdown extends StatelessWidget {
+class CustomDropdown extends StatefulWidget {
   final Map items;
   final String hintText;
   final BoxDecoration? dropdownDecoration;
@@ -1167,9 +1263,9 @@ class CustomDropdown extends StatelessWidget {
   final FocusNode? focusNode;
   final FocusNode? nextFocusNode;
   final void Function()? onDelete;
-  final Future<Map<String, dynamic>> Function()? onOpen; // ✅ added callback
+  final Future<Map<String, dynamic>> Function()? onOpen;
 
-  CustomDropdown({
+  const CustomDropdown({
     super.key,
     this.items = const {},
     this.itemBuilder,
@@ -1188,37 +1284,44 @@ class CustomDropdown extends StatelessWidget {
     this.validator,
     this.showedResult,
     this.onDelete,
-    this.onOpen, // ✅ added
+    this.onOpen,
   });
 
+  @override
+  State<CustomDropdown> createState() => _CustomDropdownState();
+}
+
+class _CustomDropdownState extends State<CustomDropdown> {
   final GlobalKey buttonKey = GlobalKey();
-  final DropdownController controller = DropdownController();
   final LayerLink _layerLink = LayerLink();
+  late final DropdownController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = DropdownController();
+  }
+
+  @override
+  void dispose() {
+    controller.onClose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     // BoxDecoration defaultEnabledDecoration = BoxDecoration(
     //   color: Colors.white,
     //   border: Border.all(
-    //     color: controller.isValid.value ? Colors.grey : Colors.red,
+    //     color: widget.focusNode?.hasFocus == true
+    //         ? Colors.blue
+    //         : controller.isValid.value
+    //         ? Colors.grey
+    //         : Colors.red,
+    //     width: widget.focusNode?.hasFocus == true ? 2 : 1,
     //   ),
     //   borderRadius: BorderRadius.circular(5),
     // );
-    focusNode?.addListener(() {
-      controller.isValid.refresh();
-    });
-    BoxDecoration defaultEnabledDecoration = BoxDecoration(
-      color: Colors.white,
-      border: Border.all(
-        color: focusNode?.hasFocus == true
-            ? Colors.blue
-            : controller.isValid.value
-            ? Colors.grey
-            : Colors.red,
-        width: focusNode?.hasFocus == true ? 2 : 1,
-      ),
-      borderRadius: BorderRadius.circular(5),
-    );
 
     BoxDecoration defaultDisabledDecoration = BoxDecoration(
       border: Border.all(color: Colors.grey.shade400),
@@ -1229,31 +1332,25 @@ class CustomDropdown extends StatelessWidget {
       fontSize: 16,
     );
 
-    controller.assignValues(textcontroller, showedSelectedName);
-    controller.nextFocusNode = nextFocusNode;
-    bool isEnabled = enabled ?? true;
+    controller.assignValues(widget.textcontroller, widget.showedSelectedName);
+    controller.nextFocusNode = widget.nextFocusNode;
+    bool isEnabled = widget.enabled ?? true;
 
     return SizedBox(
-      width: width,
+      width: widget.width,
       child: FormField<dynamic>(
         validator: (value) {
-          if (validator == true) {
-            // if textcontroller has a value, accept it as valid automatically
+          if (widget.validator == true) {
             if (controller.textController.value.isNotEmpty) {
               return null;
             }
-
-            // if user selected a value, it's valid
             if (controller.selectedKey.isNotEmpty) {
               return null;
             }
-
-            // otherwise invalid
             return "    Please Select an Option";
           }
           return null;
         },
-
         builder: (FormFieldState<dynamic> state) {
           if (state.hasError) {
             controller.isValid.value = false;
@@ -1264,12 +1361,15 @@ class CustomDropdown extends StatelessWidget {
               CompositedTransformTarget(
                 link: _layerLink,
                 child: FocusableActionDetector(
-                  focusNode: focusNode,
+                  focusNode: widget.focusNode,
                   autofocus: false,
+                  onFocusChange: (_) => controller.isValid.refresh(),
                   shortcuts: {
-                    LogicalKeySet(LogicalKeyboardKey.tab):
-                        const ActivateIntent(),
                     LogicalKeySet(LogicalKeyboardKey.enter):
+                        const ActivateIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.space):
+                        const ActivateIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.arrowDown):
                         const ActivateIntent(),
                   },
                   actions: {
@@ -1277,12 +1377,13 @@ class CustomDropdown extends StatelessWidget {
                       onInvoke: (intent) {
                         if (isEnabled) {
                           if (controller.isDropdownOpen.isFalse) {
+                            widget.focusNode?.requestFocus();
                             controller.showDropdown(
                               context,
                               buttonKey,
-                              items,
+                              widget.items,
                               itemBuilder:
-                                  itemBuilder ??
+                                  widget.itemBuilder ??
                                   (context, key, value) {
                                     return Container(
                                       alignment: Alignment.centerLeft,
@@ -1290,7 +1391,9 @@ class CustomDropdown extends StatelessWidget {
                                         horizontal: 12,
                                         vertical: 4,
                                       ),
-                                      child: Text(value[showedSelectedName]),
+                                      child: Text(
+                                        value[widget.showedSelectedName],
+                                      ),
                                     );
                                   },
                               onChanged: (key, value) {
@@ -1300,51 +1403,32 @@ class CustomDropdown extends StatelessWidget {
                                 controller.isValid.value = true;
                                 controller.hideDropdown();
                                 state.didChange(key);
-                                onChanged?.call(key, value);
-                                if (nextFocusNode != null) {
+                                widget.onChanged?.call(key, value);
+                                if (widget.nextFocusNode?.canRequestFocus ==
+                                    true) {
                                   FocusScope.of(
                                     context,
-                                  ).requestFocus(nextFocusNode);
+                                  ).requestFocus(widget.nextFocusNode);
                                 }
                               },
                               layerLink: _layerLink,
-                              onOpen: onOpen, // ✅ call the callback
+                              onOpen: widget.onOpen,
+                              fieldFocusNode: widget.focusNode,
                             );
-                            if (onOpen != null) {
-                              controller.isLoading.value =
-                                  true; // start loading
-
-                              onOpen!()
-                                  .then((fetchedItems) {
-                                    controller.allItems = fetchedItems;
-                                    controller.filteredItems.assignAll(
-                                      fetchedItems,
-                                    );
-
-                                    // Set initial highlight
-                                    controller.highlightedKey.value =
-                                        fetchedItems.isNotEmpty
-                                        ? fetchedItems.keys.first
-                                        : '';
-                                    controller.isLoading.value =
-                                        false; // stop loading
-                                  })
-                                  .catchError((e) {
-                                    controller.isLoading.value =
-                                        false; // stop loading even on error
-                                  });
-                            }
                           } else {
-                            controller.hideDropdown();
-                            if (nextFocusNode != null) {
+                            controller.hideDropdown(restoreFocus: true);
+                            if (widget.nextFocusNode?.canRequestFocus == true) {
                               FocusScope.of(
                                 context,
-                              ).requestFocus(nextFocusNode);
+                              ).requestFocus(widget.nextFocusNode);
                               controller.isValid.refresh();
                             }
                           }
-                        } else if (nextFocusNode != null) {
-                          FocusScope.of(context).requestFocus(nextFocusNode);
+                        } else if (widget.nextFocusNode?.canRequestFocus ==
+                            true) {
+                          FocusScope.of(
+                            context,
+                          ).requestFocus(widget.nextFocusNode);
                           controller.isValid.refresh();
                         }
                         return null;
@@ -1355,14 +1439,14 @@ class CustomDropdown extends StatelessWidget {
                     key: buttonKey,
                     onTap: isEnabled
                         ? () {
+                            widget.focusNode?.requestFocus();
                             if (controller.isDropdownOpen.isFalse) {
-                              // 1️⃣ Open dropdown immediately with current items
                               controller.showDropdown(
                                 context,
                                 buttonKey,
-                                items, // can be empty initially
+                                widget.items,
                                 itemBuilder:
-                                    itemBuilder ??
+                                    widget.itemBuilder ??
                                     (c, k, v) {
                                       return Container(
                                         alignment: Alignment.centerLeft,
@@ -1370,7 +1454,9 @@ class CustomDropdown extends StatelessWidget {
                                           horizontal: 12,
                                           vertical: 4,
                                         ),
-                                        child: Text(v[showedSelectedName]),
+                                        child: Text(
+                                          v[widget.showedSelectedName],
+                                        ),
                                       );
                                     },
                                 onChanged: (key, value) {
@@ -1378,51 +1464,24 @@ class CustomDropdown extends StatelessWidget {
                                   controller.selectedKey.value = key;
                                   controller.selectedValue.value = value;
                                   controller.isValid.value = true;
-
-                                  state.didChange(key); // ✔ IMPORTANT
-                                  onChanged?.call(key, value); // callback
-
-                                  if (nextFocusNode != null) {
+                                  state.didChange(key);
+                                  widget.onChanged?.call(key, value);
+                                  if (widget.nextFocusNode?.canRequestFocus ==
+                                      true) {
                                     FocusScope.of(
                                       context,
-                                    ).requestFocus(nextFocusNode);
+                                    ).requestFocus(widget.nextFocusNode);
                                   }
                                 },
                                 layerLink: _layerLink,
+                                onOpen: widget.onOpen,
+                                fieldFocusNode: widget.focusNode,
                               );
-
-                              // 2️⃣ Fetch data asynchronously
-                              if (onOpen != null) {
-                                controller.isLoading.value =
-                                    true; // start loading
-
-                                onOpen!()
-                                    .then((fetchedItems) {
-                                      controller.allItems = fetchedItems;
-                                      controller.filteredItems.assignAll(
-                                        fetchedItems,
-                                      );
-
-                                      // Set initial highlight
-                                      controller.highlightedKey.value =
-                                          fetchedItems.isNotEmpty
-                                          ? fetchedItems.keys.first
-                                          : '';
-                                      controller.isLoading.value =
-                                          false; // stop loading
-                                    })
-                                    .catchError((e) {
-                                      controller.isLoading.value =
-                                          false; // stop loading even on error
-                                    });
-                              }
                             } else {
-                              controller.hideDropdown();
-                              
+                              controller.hideDropdown(restoreFocus: true);
                             }
                           }
                         : null,
-
                     child: Obx(() {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1430,7 +1489,7 @@ class CustomDropdown extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(left: 2),
                             child: Text(
-                              hintText,
+                              widget.hintText,
                               style: textFieldLabelStyle,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -1445,17 +1504,32 @@ class CustomDropdown extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(5),
                                   )
                                 : isEnabled
-                                ? (dropdownDecoration ??
-                                      (defaultEnabledDecoration))
-                                : (disabledDecoration ??
+                                ? (widget.dropdownDecoration ??
+                                      BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(
+                                          color:
+                                              widget.focusNode?.hasFocus == true
+                                              ? Colors.blue
+                                              : controller.isValid.value
+                                              ? Colors.grey
+                                              : Colors.red,
+                                          width:
+                                              widget.focusNode?.hasFocus == true
+                                              ? 2
+                                              : 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ))
+                                : (widget.disabledDecoration ??
                                       defaultDisabledDecoration),
                             child: Row(
                               children: [
                                 Expanded(
                                   child:
-                                      showedResult != null &&
+                                      widget.showedResult != null &&
                                           controller.selectedKey.isNotEmpty
-                                      ? showedResult!(
+                                      ? widget.showedResult!(
                                           controller.selectedKey.value,
                                           controller.selectedValue,
                                         )
@@ -1466,16 +1540,18 @@ class CustomDropdown extends StatelessWidget {
                                                   .isEmpty
                                               ? controller.selectedKey.isEmpty
                                                     ? ''
-                                                    : showedSelectedName
+                                                    : widget
+                                                          .showedSelectedName
                                                           .isNotEmpty
                                                     ? controller
-                                                              .selectedValue[showedSelectedName]
+                                                              .selectedValue[widget
+                                                                  .showedSelectedName]
                                                               ?.toString() ??
                                                           ''
                                                     : ''
                                               : controller.textController.value,
                                           style: isEnabled
-                                              ? (enabledTextStyle ??
+                                              ? (widget.enabledTextStyle ??
                                                     (controller
                                                                 .textController
                                                                 .value
@@ -1490,7 +1566,7 @@ class CustomDropdown extends StatelessWidget {
                                                                 .shade700,
                                                           )
                                                         : textFieldFontStyle))
-                                              : (disabledTextStyle ??
+                                              : (widget.disabledTextStyle ??
                                                     defaultDisabledTextStyle),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -1501,20 +1577,23 @@ class CustomDropdown extends StatelessWidget {
                                 ),
                                 if (controller.selectedKey.isNotEmpty ||
                                     controller.textController.value.isNotEmpty)
-                                  InkWell(
-                                    child: const Icon(
-                                      Icons.clear,
-                                      size: 18,
-                                      color: Colors.red,
+                                  ExcludeFocus(
+                                    child: InkWell(
+                                      focusNode: FocusNode(canRequestFocus: false),
+                                      child: const Icon(
+                                        Icons.clear,
+                                        size: 18,
+                                        color: Colors.red,
+                                      ),
+                                      onTap: () {
+                                        controller.selectedKey.value = '';
+                                        controller.selectedValue.value = {};
+                                        controller.textController.value = '';
+                                        controller.isValid.value = true;
+                                        state.didChange(null);
+                                        widget.onDelete?.call();
+                                      },
                                     ),
-                                    onTap: () {
-                                      controller.selectedKey.value = '';
-                                      controller.selectedValue.value = {};
-                                      controller.textController.value = '';
-                                      controller.isValid.value = true;
-                                      state.didChange(null);
-                                      onDelete?.call();
-                                    },
                                   ),
                               ],
                             ),

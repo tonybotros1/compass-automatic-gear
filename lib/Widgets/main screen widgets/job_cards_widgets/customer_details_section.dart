@@ -32,98 +32,55 @@ Widget customerDetailsSection(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
                 children: [
-                  // SizedBox(
-                  //   width: 300,
-                  //   child: SearchChoices.single(
-                  //     items: controller.customers.map((customer) {
-                  //       return DropdownMenuItem(
-                  //         value: customer['id'],
-                  //         child: Text(customer['name']),
-                  //       );
-                  //     }).toList(),
-                  //     value: controller.selectedCustomerId,
-                  //     hint: "Select a Customer",
-                  //     searchHint: "Search by name",
-                  //     isExpanded: true,
-                  //     onChanged: (value) {
-                  //       controller.selectedCustomerId = value;
-                  //     },
-                  //     onTap: () {
-                  //       print('skjnvlkv');
-                  //     },
-
-                  //     searchFn: (String keyword, items) {
-                  //       List<int> ret = [];
-                  //       if (keyword.isNotEmpty) {
-                  //         keyword.toLowerCase();
-                  //         for (int i = 0; i < items.length; i++) {
-                  //           if (items[i].child.data.toLowerCase().contains(
-                  //             keyword,
-                  //           )) {
-                  //             ret.add(i);
-                  //           }
-                  //         }
-                  //       } else {
-                  //         ret = List<int>.generate(items.length, (i) => i);
-                  //       }
-                  //       return ret;
-                  //     },
-
-                  //     // Styling the dialog for better UX
-                  //     closeButton: "Close",
-                  //     doneButton: "Done",
-                  //     displayClearIcon: true,
-                  //     icon: const Icon(Icons.arrow_drop_down),
-                  //   ),
-                  // ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Focus(
-                        child: CustomDropdown(
-                          width: Get.width / 3.7,
-                          focusNode: controller.focusNodeForCustomerDetails1,
-                          nextFocusNode:
-                              controller.focusNodeForCustomerDetails2,
-                          showedSelectedName: 'entity_name',
-                          textcontroller: controller.customerName.text,
-                          hintText: 'Customer',
-                          onChanged: (key, value) {
-                            controller.customerName.text = value['entity_name'];
-                            controller.onSelectForCustomers(key, value);
-                            controller.customerId.value = key;
-                            controller.isJobModified.value = true;
-                            controller.jobWarrentyDays.value.text =
-                                value.containsKey('warranty_days')
-                                ? value['warranty_days'].toString()
-                                : '0';
-                          },
-                          onDelete: () {
-                            controller.customerName.clear();
-                            controller.customerEntityPhoneNumber.clear();
-                            controller.customerEntityName.clear();
-                            controller.customerEntityEmail.clear();
-                            controller.customerCreditNumber.clear();
-                            controller.customerSaleManId.value = "";
-                            controller.customerSaleMan.value = "";
-                            controller.customerId.value = "";
-                            controller.isJobModified.value = true;
-                          },
-                          onOpen: () {
-                            return controller.getAllCustomers();
-                          },
-                        ),
+                      CustomDropdown(
+                        width: Get.width / 3.7,
+                        focusNode: controller.focusNodeForCustomerDetails1,
+                        nextFocusNode: controller.focusNodeForCustomerDetails2,
+                        showedSelectedName: 'entity_name',
+                        textcontroller: controller.customerName.text,
+                        hintText: 'Customer',
+                        onChanged: (key, value) {
+                          controller.customerName.text = value['entity_name'];
+                          controller.onSelectForCustomers(key, value);
+                          controller.customerId.value = key;
+                          controller.isJobModified.value = true;
+                          controller.jobWarrentyDays.value.text =
+                              value.containsKey('warranty_days')
+                              ? value['warranty_days'].toString()
+                              : '0';
+                        },
+                        onDelete: () {
+                          controller.customerName.clear();
+                          controller.customerEntityPhoneNumber.clear();
+                          controller.customerEntityName.clear();
+                          controller.customerEntityEmail.clear();
+                          controller.customerCreditNumber.clear();
+                          controller.customerSaleManId.value = "";
+                          controller.customerSaleMan.value = "";
+                          controller.customerId.value = "";
+                          controller.isJobModified.value = true;
+                        },
+                        onOpen: () {
+                          return controller.getAllCustomers();
+                        },
                       ),
-                      newValueButton(
-                        constraints,
-                        'Add New Customer',
-                        'Entity Information',
-                        const EntityInformations(),
+                      ExcludeFocus(
+                        child: newValueButton(
+                          constraints,
+                          'Add New Customer',
+                          'Entity Information',
+                          const EntityInformations(),
+                        ),
                       ),
                     ],
                   ),
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCustomerDetails2,
+                    onFieldSubmitted: (_) =>
+                        controller.focusNodeForCustomerDetails3.requestFocus(),
                     width: 250,
                     controller: controller.customerEntityName,
                     labelText: 'Contact Name',
@@ -133,6 +90,8 @@ Widget customerDetailsSection(
                   ),
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCustomerDetails3,
+                    onFieldSubmitted: (_) =>
+                        controller.focusNodeForCustomerDetails4.requestFocus(),
                     width: 250,
                     controller: controller.customerEntityPhoneNumber,
                     labelText: 'Contact Number',
@@ -142,6 +101,8 @@ Widget customerDetailsSection(
                   ),
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForCustomerDetails4,
+                    onFieldSubmitted: (_) =>
+                        controller.focusNodeForCustomerDetails5.requestFocus(),
                     width: 250,
                     controller: controller.customerEntityEmail,
                     labelText: 'Contact Email',
@@ -152,38 +113,31 @@ Widget customerDetailsSection(
                   Row(
                     spacing: 10,
                     children: [
-                      FocusTraversalOrder(
-                        order: const NumericFocusOrder(4),
-                        child: myTextFormFieldWithBorder(
-                          width: 120,
-                          isEnabled: false,
-                          isnumber: true,
-                          controller: controller.customerCreditNumber,
-                          labelText: 'Credit Limit',
-                          onChanged: (_) {
-                            controller.isJobModified.value = true;
-                          },
-                        ),
+                      myTextFormFieldWithBorder(
+                        width: 120,
+                        isEnabled: false,
+                        isnumber: true,
+                        controller: controller.customerCreditNumber,
+                        labelText: 'Credit Limit',
+                        onChanged: (_) {
+                          controller.isJobModified.value = true;
+                        },
                       ),
-                      FocusTraversalOrder(
-                        order: const NumericFocusOrder(5),
-                        child: myTextFormFieldWithBorder(
-                          width: 120,
-                          isEnabled: false,
-                          isnumber: true,
-                          controller: controller.customerOutstanding,
-                          labelText: 'Outstanding',
-                          onChanged: (_) {
-                            controller.isJobModified.value = true;
-                          },
-                        ),
+                      myTextFormFieldWithBorder(
+                        width: 120,
+                        isEnabled: false,
+                        isnumber: true,
+                        controller: controller.customerOutstanding,
+                        labelText: 'Outstanding',
+                        onChanged: (_) {
+                          controller.isJobModified.value = true;
+                        },
                       ),
                     ],
                   ),
-                  FocusTraversalOrder(
-                    order: const NumericFocusOrder(6),
-                    child: Focus(
-                      child: Row(
+                  Column(
+                    children: [
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           CustomDropdown(
@@ -209,22 +163,24 @@ Widget customerDetailsSection(
                               return controller.getSalesMan();
                             },
                           ),
-                          newValueButton(
-                            constraints,
-                            'Add New Salesman',
-                            'Salesman',
-                            const SalesMan(),
+                          ExcludeFocus(
+                            child: newValueButton(
+                              constraints,
+                              'Add New Salesman',
+                              'Salesman',
+                              const SalesMan(),
+                            ),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       CustomDropdown(
                         focusNode: controller.focusNodeForCustomerDetails6,
-                        // nextFocusNode: controller.focusNodeForCustomerDetails7,
+                        nextFocusNode: controller.focusNodeForCustomerDetails7,
                         width: 320,
                         showedSelectedName: 'name',
                         textcontroller: controller.customerBranch.text,
@@ -243,11 +199,13 @@ Widget customerDetailsSection(
                           return controller.getBranches();
                         },
                       ),
-                      newValueButton(
-                        constraints,
-                        'Add New Branch',
-                        'Branches',
-                        const Branches(),
+                      ExcludeFocus(
+                        child: newValueButton(
+                          constraints,
+                          'Add New Branch',
+                          'Branches',
+                          const Branches(),
+                        ),
                       ),
                     ],
                   ),
@@ -257,7 +215,7 @@ Widget customerDetailsSection(
                       CustomDropdown(
                         focusNode: controller.focusNodeForCustomerDetails7,
 
-                        // nextFocusNode: controller.focusNodeForCustomerDetails8,
+                        nextFocusNode: controller.focusNodeForCustomerDetails8,
                         width: 170,
                         textcontroller: controller.customerCurrency.value.text,
                         hintText: 'Currency',
@@ -280,11 +238,13 @@ Widget customerDetailsSection(
                           return controller.getCurrencies();
                         },
                       ),
-                      newValueButton(
-                        constraints,
-                        'Add New Currency',
-                        'Currencies',
-                        const Currency(),
+                      ExcludeFocus(
+                        child: newValueButton(
+                          constraints,
+                          'Add New Currency',
+                          'Currencies',
+                          const Currency(),
+                        ),
                       ),
                       const SizedBox(width: 10),
 
@@ -299,54 +259,58 @@ Widget customerDetailsSection(
                         },
                       ),
                       const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 2),
-                            child: Text(
-                              'Payment Type',
-                              style: textFieldLabelStyle,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            height: 35,
-                            width: 150,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: Colors.grey),
-                              color: Colors.white,
-                            ),
-                            child: RadioGroup<String>(
-                              groupValue: controller.payType.value,
-                              onChanged: (value) {
-                                if (value != null) {
-                                  controller.selectCashOrCredit(value);
-                                }
-                              },
-                              child: Row(
-                                spacing: 5,
-                                children: [
-                                  CupertinoRadio<String>(
-                                    value: 'Cash',
-                                    fillColor: mainColor,
-                                    activeColor: Colors.grey.shade300,
-                                    inactiveColor: Colors.grey.shade300,
-                                  ),
-                                  Text('Cash', style: textFieldFontStyle),
-                                  CupertinoRadio<String>(
-                                    value: 'Credit',
-                                    fillColor: mainColor,
-                                    activeColor: Colors.grey.shade300,
-                                    inactiveColor: Colors.grey.shade300,
-                                  ),
-                                  Text('Credit', style: textFieldFontStyle),
-                                ],
+                      ExcludeFocus(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 2),
+                              child: Text(
+                                'Payment Type',
+                                style: textFieldLabelStyle,
                               ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                              ),
+                              height: 35,
+                              width: 150,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: Colors.grey),
+                                color: Colors.white,
+                              ),
+                              child: RadioGroup<String>(
+                                groupValue: controller.payType.value,
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    controller.selectCashOrCredit(value);
+                                  }
+                                },
+                                child: Row(
+                                  spacing: 5,
+                                  children: [
+                                    CupertinoRadio<String>(
+                                      value: 'Cash',
+                                      fillColor: mainColor,
+                                      activeColor: Colors.grey.shade300,
+                                      inactiveColor: Colors.grey.shade300,
+                                    ),
+                                    Text('Cash', style: textFieldFontStyle),
+                                    CupertinoRadio<String>(
+                                      value: 'Credit',
+                                      fillColor: mainColor,
+                                      activeColor: Colors.grey.shade300,
+                                      inactiveColor: Colors.grey.shade300,
+                                    ),
+                                    Text('Credit', style: textFieldFontStyle),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

@@ -231,6 +231,7 @@ class JobCardController extends GetxController {
   final FocusNode focusNodeForItemsDetails1 = FocusNode();
   final FocusNode focusNodeForItemsDetails2 = FocusNode();
   final FocusNode focusNodeForItemsDetails3 = FocusNode();
+  final FocusNode noFocusNode = FocusNode(canRequestFocus: false);
 
   RxBool isReturned = RxBool(false);
   RxBool isSales = RxBool(false);
@@ -354,6 +355,19 @@ class JobCardController extends GetxController {
     Tab(text: 'Items'),
     Tab(text: 'Time Sheets'),
   ];
+
+  final List<Map<String, dynamic>> items = [
+    {'name': 'New', '_id': '12345678'},
+    {'name': 'Posted'},
+    {'name': 'Cancelled'},
+    {'name': 'Ready'},
+    {'name': 'Approved'},
+    {'name': 'Draft'},
+  ];
+
+  // String? selectedValue;
+  String? selectedValue;
+  final TextEditingController textEditingController = TextEditingController();
 
   void onChooseForDatePicker(int i) {
     switch (i) {

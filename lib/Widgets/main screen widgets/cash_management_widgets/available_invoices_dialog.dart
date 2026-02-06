@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/cahs_management_base_controller.dart';
 import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/base_model_for_receipts_and_payments.dart';
 import 'package:flutter/material.dart';
@@ -43,19 +44,13 @@ Widget tableOfScreens<T extends CashManagementBaseController>({
   required T controller,
   required bool isPayment,
 }) {
-  return DataTable(
+  return DataTable2(
+    lmRatio: 4,
     checkboxHorizontalMargin: 2,
     showCheckboxColumn: true,
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
     columnSpacing: 5,
     horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
-
-    headingRowColor: WidgetStateProperty.all(Colors.grey[300]),
-
     onSelectAll: (allSelected) {
       if (allSelected != null) {
         isPayment
@@ -65,20 +60,26 @@ Widget tableOfScreens<T extends CashManagementBaseController>({
     },
 
     columns: [
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Invoice Number'),
       ),
-      DataColumn(
-        label: AutoSizedText(constraints: constraints, text: 'Note'),
-      ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Invoice Date'),
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.L,
+        label: AutoSizedText(constraints: constraints, text: 'Note'),
+      ),
+
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Invoice Amount'),
         numeric: true,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(
           constraints: constraints,
           text: 'Outstanding Amount',
@@ -147,6 +148,12 @@ DataRow dataRowForTheTable<
   final isSelected = receiptData.isSelected;
 
   return DataRow(
+    color: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.yellow;
+      }
+      return index % 2 != 0 ? coolColor : Colors.white;
+    }),
     // each row reflects its own selection flag
     selected: isSelected,
     onSelectChanged: (value) {
@@ -158,8 +165,8 @@ DataRow dataRowForTheTable<
     },
     cells: [
       DataCell(Text(receiptData.invoiceNumber)),
-      DataCell(Text(receiptData.notes)),
       DataCell(Text(textToDate(receiptData.invoiceDate))),
+      DataCell(Text(receiptData.notes)),
       DataCell(
         Align(
           alignment: Alignment.centerRight,

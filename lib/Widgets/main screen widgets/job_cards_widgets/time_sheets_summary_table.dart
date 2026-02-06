@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/job_card_controller.dart';
@@ -19,14 +20,11 @@ Widget timeSheetsSummaryTable({
           return const Center(child: CircularProgressIndicator());
         }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: tableOfScreens(
-            constraints: constraints,
-            context: context,
-            controller: controller,
-            jobId: jobId,
-          ),
+        return tableOfScreens(
+          constraints: constraints,
+          context: context,
+          controller: controller,
+          jobId: jobId,
         );
       },
     ),
@@ -41,60 +39,55 @@ Widget tableOfScreens({
 }) {
   double totalHours = controller.calculateTotalHoursForTimeSheetsSummary();
 
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: SizedBox(
-      width: constraints.maxWidth - 17,
-      child: DataTable(
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
-        columnSpacing: 5,
-        horizontalMargin: horizontalMarginForTable,
-        showBottomBorder: true,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        columns: [
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Task'),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Name'),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Start Date'),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'End Date'),
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'Hours'),
-          ),
-        ],
-        rows: [
-          ...controller.timeSheetsSummaryTable.map<DataRow>((invoiceItems) {
-            return dataRowForTheTable(
-              invoiceItems,
-              context,
-              constraints,
-              controller,
-              jobId,
-            );
-          }),
-          DataRow(
-            selected: true,
-            cells: [
-              const DataCell(Text('')),
-              const DataCell(Text('')),
-              const DataCell(Text('')),
-              const DataCell(Text('Totals')),
-              DataCell(
-                textForDataRowInTable(text: '$totalHours', color: Colors.red),
-              ),
-            ],
-          ),
-        ],
-      ),
+  return SizedBox(
+    width: constraints.maxWidth - 17,
+    child: DataTable2(
+      columnSpacing: 5,
+      horizontalMargin: horizontalMarginForTable,
+      showBottomBorder: true,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      columns: [
+        DataColumn(
+          label: AutoSizedText(constraints: constraints, text: 'Task'),
+        ),
+        DataColumn(
+          label: AutoSizedText(constraints: constraints, text: 'Name'),
+        ),
+        DataColumn(
+          label: AutoSizedText(constraints: constraints, text: 'Start Date'),
+        ),
+        DataColumn(
+          label: AutoSizedText(constraints: constraints, text: 'End Date'),
+        ),
+        DataColumn(
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'Hours'),
+        ),
+      ],
+      rows: [
+        ...controller.timeSheetsSummaryTable.map<DataRow>((invoiceItems) {
+          return dataRowForTheTable(
+            invoiceItems,
+            context,
+            constraints,
+            controller,
+            jobId,
+          );
+        }),
+        DataRow(
+          selected: true,
+          cells: [
+            const DataCell(Text('')),
+            const DataCell(Text('')),
+            const DataCell(Text('')),
+            const DataCell(Text('Totals')),
+            DataCell(
+              textForDataRowInTable(text: '$totalHours', color: Colors.red),
+            ),
+          ],
+        ),
+      ],
     ),
   );
 }

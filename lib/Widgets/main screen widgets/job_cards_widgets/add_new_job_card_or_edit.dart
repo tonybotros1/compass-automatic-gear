@@ -140,48 +140,48 @@ Widget addNewJobCardOrEdit({
                 child: TabBarView(
                   children: [
                     // TAB 1
-                    SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: Colors.grey),
-                            ),
-                            child: Row(
-                              children: [
-                                newinvoiceItemsButton(
-                                  context,
-                                  constraints,
-                                  controller,
-                                  jobId,
-                                ),
-                                const Spacer(),
-                              ],
-                            ),
+                    Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.grey),
                           ),
-                          // labelContainer(
-                          //   lable: Row(
-                          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //     children: [
-                          //       Text('Invoice Items', style: fontStyle1),
-                          //       newinvoiceItemsButton(
-                          //         context,
-                          //         constraints,
-                          //         controller,
-                          //         jobId,
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-                          invoiceItemsSection(
+                          child: Row(
+                            children: [
+                              newinvoiceItemsButton(
+                                context,
+                                constraints,
+                                controller,
+                                jobId,
+                              ),
+                              const Spacer(),
+                            ],
+                          ),
+                        ),
+                        // labelContainer(
+                        //   lable: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //     children: [
+                        //       Text('Invoice Items', style: fontStyle1),
+                        //       newinvoiceItemsButton(
+                        //         context,
+                        //         constraints,
+                        //         controller,
+                        //         jobId,
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
+                        Expanded(
+                          child: invoiceItemsSection(
                             constraints: constraints,
                             context: context,
                             jobId: jobId,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
 
                     myTextFormFieldWithBorder(
@@ -202,27 +202,15 @@ Widget addNewJobCardOrEdit({
                         controller.isJobModified.value = true;
                       },
                     ),
-                    SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          itemsSummartTableSection(
-                            constraints: constraints,
-                            context: context,
-                            jobId: jobId,
-                          ),
-                        ],
-                      ),
+                    itemsSummartTableSection(
+                      constraints: constraints,
+                      context: context,
+                      jobId: jobId,
                     ),
-                    SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          timeSheetsSummaryTable(
-                            constraints: constraints,
-                            context: context,
-                            jobId: jobId,
-                          ),
-                        ],
-                      ),
+                    timeSheetsSummaryTable(
+                      constraints: constraints,
+                      context: context,
+                      jobId: jobId,
                     ),
                   ],
                 ),
