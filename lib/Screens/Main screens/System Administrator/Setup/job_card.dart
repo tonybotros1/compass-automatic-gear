@@ -868,7 +868,12 @@ DataRow dataRowForTheTable(
       DataCell(SelectableText(jobData.lpoNumber ?? '-', maxLines: 1)),
       DataCell(textForDataRowInTable(text: jobData.carBrandName ?? '-')),
       DataCell(textForDataRowInTable(text: jobData.carModelName ?? '-')),
-      DataCell(SelectableText(jobData.plateNumber ?? '-', maxLines: 1)),
+      DataCell(
+        SelectableText(
+          "${jobData.plateNumber ?? ''} - ${jobData.plateCode ?? ''}",
+          maxLines: 1,
+        ),
+      ),
       DataCell(
         textForDataRowInTable(
           maxWidth: null,
