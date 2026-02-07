@@ -48,7 +48,7 @@ class EntityInformationsController extends GetxController {
   RxBool isScreenLoding = RxBool(false);
   final RxList<EntityInformationModel> allEntities =
       RxList<EntityInformationModel>([]);
-  
+
   RxBool addingNewEntity = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
@@ -74,6 +74,7 @@ class EntityInformationsController extends GetxController {
   var buttonLoadingStates = <String, bool>{}.obs;
   WebSocketService ws = Get.find<WebSocketService>();
   RxBool lpoReq = RxBool(false);
+  RxDouble countOfEntities = RxDouble(0);
 
   @override
   void onInit() {
@@ -206,7 +207,7 @@ class EntityInformationsController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List entities = decoded['entities'];
-
+        countOfEntities.value =decoded['count']['grand_count'];
         allEntities.assignAll(
           entities.map((ent) => EntityInformationModel.fromJson(ent)),
         );
@@ -876,6 +877,4 @@ class EntityInformationsController extends GetxController {
     int comparison = value1.compareTo(value2);
     return ascending ? comparison : -comparison; // Reverse if descending
   }
-
- 
 }

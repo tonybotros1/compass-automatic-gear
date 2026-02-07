@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
+import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
+import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/my_text_field.dart';
@@ -133,34 +135,33 @@ class EntityInformations extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 20),
-
-                    // GetX<EntityInformationsController>(
-                    //   init: EntityInformationsController(),
-                    //   builder: (controller) {
-                    //     return searchBar(
-                    //       onChanged: (_) {
-                    //         controller.filterEntities();
-                    //       },
-                    //       onPressedForClearSearch: () {
-                    //         controller.search.value.clear();
-                    //         controller.filterEntities();
-                    //       },
-                    //       search: controller.search,
-                    //       constraints: constraints,
-                    //       context: context,
-                    //       title: 'Search for entities',
-                    //       button: newContactButton(
-                    //         context,
-                    //         constraints,
-                    //         controller,
-                    //       ),
-                    //     );
-                    //   },
-                    // ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: GetX<EntityInformationsController>(
+                        builder: (controller) {
+                          return SizedBox(
+                            height: 100,
+                            child: dynamicBoxesLine(
+                              dynamicConfigs: [
+                                DynamicBoxesLineModel(
+                                  isFormated: false,
+                                  width: 300,
+                                  label: 'NUMBER OF ENTITIES',
+                                  value: '${controller.countOfEntities.value}',
+                                  valueColor: mainColor,
+                                  icon: Icons.numbers,
+                                  iconColor: mainColorWithAlpha,
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                     GetX<EntityInformationsController>(
                       builder: (controller) {
                         return Container(
+                          height: constraints.maxHeight * 0.8,
                           // padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),

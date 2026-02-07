@@ -1,11 +1,13 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/ar_receipts_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/cash_management_receipts_controller.dart';
-import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
+import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
+import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/cash_management_widgets/receipt_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
@@ -296,44 +298,31 @@ class CashManagementReceipt extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<CashManagementReceiptsController>(
                       builder: (controller) {
-                        return Container(
+                        return SizedBox(
+                          height: 100,
+
                           // padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(color: Colors.grey),
-                            // color: Colors.grey.shade600,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Row(
-                                  spacing: 1,
-                                  children: [
-                                    customBox(
-                                      title: 'NUMBER OF RECEIPTS',
-                                      value: textForDataRowInTable(
-                                        fontSize: 16,
-                                        color: mainColor,
-                                        isBold: true,
-                                        text:
-                                            '${controller.numberOfReceipts.value}',
-                                        formatDouble: false,
-                                      ),
-                                    ),
-                                    customBox(
-                                      title: 'RECEIVED',
-                                      value: textForDataRowInTable(
-                                        fontSize: 16,
-                                        color: Colors.green,
-                                        isBold: true,
-                                        text:
-                                            '${controller.totalReceiptsReceived.value}',
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                          child: dynamicBoxesLine(
+                            dynamicConfigs: [
+                              DynamicBoxesLineModel(
+                                isFormated: false,
+                                width: 300,
+
+                                label: 'NUMBER OF RECEIPTS',
+                                value: '${controller.numberOfReceipts.value}',
+                                valueColor: Colors.blue,
+                                icon: Icons.numbers,
+                                iconColor: Colors.blue.shade100,
                               ),
-                              const Expanded(child: SizedBox()),
+                              DynamicBoxesLineModel(
+                                icon: Icons.monetization_on_outlined,
+                                iconColor: Colors.green.shade100,
+                                width: 300,
+                                label: 'RECEIVED',
+                                value:
+                                    '${controller.totalReceiptsReceived.value}',
+                                valueColor: Colors.green,
+                              ),
                             ],
                           ),
                         );
@@ -355,6 +344,7 @@ class CashManagementReceipt extends StatelessWidget {
                       builder: (controller) {
                         return SizedBox(
                           width: constraints.maxWidth,
+                          height: constraints.maxHeight * 0.75,
                           child: tableOfScreensForCashManagement(
                             constraints: constraints,
                             context: context,
@@ -394,79 +384,71 @@ Widget tableOfScreensForCashManagement({
         return null;
       }),
     ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      controller: scrollController,
-      child: PaginatedDataTable(
-        controller: scrollController,
-        showFirstLastButtons: true,
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
-        columnSpacing: 5,
-        rowsPerPage: 10,
-        horizontalMargin: horizontalMarginForTable,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        columns: [
-          const DataColumn(
-            label: SizedBox(),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              text: 'Receipt Number',
-              constraints: constraints,
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Status'),
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Receipt Date',
-            ),
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Customer Name',
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Receipt Type',
-            ),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Account'),
-          ),
-
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Cheque Number',
-            ),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Cheque Date'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'Received'),
-            // onSort: controller.onSort,
-          ),
-        ],
-        source: CardDataSource(
-          cards: areReceiptsLoading ? [] : data,
-          context: context,
-          constraints: constraints,
-          controller: controller,
+    child: PaginatedDataTable2(
+      showFirstLastButtons: true,
+      autoRowsToHeight: true,
+      columnSpacing: 5,
+      lmRatio: 2.5,
+      horizontalMargin: horizontalMarginForTable,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      columns: [
+        const DataColumn2(
+          size: ColumnSize.S,
+          label: SizedBox(),
+          // onSort: controller.onSort,
         ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(
+            text: 'Receipt Number',
+            constraints: constraints,
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Status'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Receipt Date'),
+        ),
+        DataColumn2(
+          size: ColumnSize.L,
+          label: AutoSizedText(constraints: constraints, text: 'Customer Name'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Receipt Type'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Account'),
+        ),
+
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Cheque Number'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Cheque Date'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'Received'),
+          // onSort: controller.onSort,
+        ),
+      ],
+      source: CardDataSource(
+        cards: areReceiptsLoading ? [] : data,
+        context: context,
+        constraints: constraints,
+        controller: controller,
       ),
     ),
   );

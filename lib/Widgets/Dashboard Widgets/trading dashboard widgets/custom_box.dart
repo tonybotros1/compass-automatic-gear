@@ -8,6 +8,7 @@ Widget customBox({
   Widget? addValue,
   Widget? refresh,
   int? flex,
+  double? titleFontSize,
 }) {
   final container = Container(
     width: width,
@@ -33,7 +34,7 @@ Widget customBox({
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: titleFontSize ?? 12,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey.shade700,
                       ),

@@ -732,6 +732,8 @@ class SummaryBox extends StatelessWidget {
   final Color iconColor;
   final bool showRefreshIcon;
   final void Function()? onPressedForRefreshIcon;
+  final bool? isFormated;
+  final double? width;
   const SummaryBox({
     super.key,
     required this.title,
@@ -741,11 +743,14 @@ class SummaryBox extends StatelessWidget {
     required this.textColor,
     required this.showRefreshIcon,
     this.onPressedForRefreshIcon,
+    this.isFormated,
+    this.width,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: width,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
         border: Border.all(color: Colors.grey.shade300),
@@ -790,6 +795,7 @@ class SummaryBox extends StatelessWidget {
                       color: textColor,
                       text: value,
                       maxWidth: null,
+                      formatDouble: isFormated ?? true,
                     ),
                   ),
                 ],

@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
-import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
+import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
+import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/job_card_buttons.dart';
@@ -461,71 +462,137 @@ class JobCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: GetX<JobCardController>(
                         builder: (controller) {
-                          return Row(
-                            spacing: 10,
-                            children: [
-                              customBox(
-                                title: 'NUMBER OF JOBS',
-                                value: Text(
-                                  '${controller.numberOfJobs.value}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: mainColor,
-                                    fontSize: 16,
-                                  ),
+                          return SizedBox(
+                            height: 100,
+
+                            // padding: const EdgeInsets.all(4),
+                            child: dynamicBoxesLine(
+                              dynamicConfigs: [
+                                DynamicBoxesLineModel(
+                                  isFormated: false,
+                                  width: 300,
+                                  label: 'NUMBER OF JOBS',
+                                  value: '${controller.numberOfJobs.value}',
+                                  valueColor: mainColor,
+                                  icon: Icons.numbers,
+                                  iconColor: mainColorWithAlpha,
                                 ),
-                              ),
-                              customBox(
-                                title: 'TOTALS',
-                                value: textForDataRowInTable(
-                                  fontSize: 16,
-                                  color: Colors.green,
-                                  isBold: true,
-                                  text: '${controller.allJobsTotals.value}',
+                                DynamicBoxesLineModel(
+                                  icon: Icons.monetization_on_outlined,
+                                  iconColor: Colors.green.shade100,
+                                  width: 300,
+                                  label: 'TOTAL AMOUNT',
+                                  value: '${controller.allJobsTotals.value}',
+                                  valueColor: Colors.green,
                                 ),
-                              ),
-                              customBox(
-                                title: 'VATS',
-                                value: textForDataRowInTable(
-                                  fontSize: 16,
-                                  color: Colors.red,
-                                  isBold: true,
-                                  text: '${controller.allJobsVATS.value}',
+                                DynamicBoxesLineModel(
+                                  icon: Icons.text_fields_rounded,
+                                  iconColor: Colors.blue.shade100,
+                                  width: 300,
+                                  label: 'VAT AMOUNT',
+                                  value: '${controller.allJobsVATS.value}',
+                                  valueColor: Colors.blue,
                                 ),
-                              ),
-                              customBox(
-                                title: 'NETS',
-                                value: textForDataRowInTable(
-                                  fontSize: 16,
-                                  color: Colors.blueGrey,
-                                  isBold: true,
-                                  text: '${controller.allJobsNET.value}',
+                                DynamicBoxesLineModel(
+                                  icon: Icons.monetization_on_outlined,
+                                  iconColor: Colors.blueGrey.shade100,
+                                  width: 300,
+                                  label: 'NET AMOUNT',
+                                  value: '${controller.allJobsNET.value}',
+                                  valueColor: Colors.blueGrey,
                                 ),
-                              ),
-                              customBox(
-                                title: 'PAID',
-                                value: textForDataRowInTable(
-                                  fontSize: 16,
-                                  color: Colors.orange,
-                                  isBold: true,
-                                  text: '${controller.allJobsPaid.value}',
+                                DynamicBoxesLineModel(
+                                  icon: Icons.monetization_on_outlined,
+                                  iconColor: Colors.orange.shade100,
+                                  width: 300,
+                                  label: 'PAID AMOUNT',
+                                  value: '${controller.allJobsVATS.value}',
+                                  valueColor: Colors.orange,
                                 ),
-                              ),
-                              customBox(
-                                title: 'OUTSTANDING',
-                                value: textForDataRowInTable(
-                                  fontSize: 16,
-                                  color: Colors.blue,
-                                  isBold: true,
-                                  text:
+                                DynamicBoxesLineModel(
+                                  icon: Icons.monetization_on_outlined,
+                                  iconColor: Colors.red.shade100,
+                                  width: 300,
+                                  label: 'OUTSTANDING AMOUNT',
+                                  value:
                                       '${controller.allJobsOutstanding.value}',
+                                  valueColor: Colors.red,
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           );
                         },
                       ),
                     ),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(vertical: 8),
+                    //   child: GetX<JobCardController>(
+                    //     builder: (controller) {
+                    //       return Row(
+                    //         spacing: 10,
+                    //         children: [
+                    //           customBox(
+                    //             title: 'NUMBER OF JOBS',
+                    //             value: Text(
+                    //               '${controller.numberOfJobs.value}',
+                    //               style: TextStyle(
+                    //                 fontWeight: FontWeight.bold,
+                    //                 color: mainColor,
+                    //                 fontSize: 16,
+                    //               ),
+                    //             ),
+                    //           ),
+                    //           customBox(
+                    //             title: 'TOTALS',
+                    //             value: textForDataRowInTable(
+                    //               fontSize: 16,
+                    //               color: Colors.green,
+                    //               isBold: true,
+                    //               text: '${controller.allJobsTotals.value}',
+                    //             ),
+                    //           ),
+                    //           customBox(
+                    //             title: 'VATS',
+                    //             value: textForDataRowInTable(
+                    //               fontSize: 16,
+                    //               color: Colors.red,
+                    //               isBold: true,
+                    //               text: '${controller.allJobsVATS.value}',
+                    //             ),
+                    //           ),
+                    //           customBox(
+                    //             title: 'NETS',
+                    //             value: textForDataRowInTable(
+                    //               fontSize: 16,
+                    //               color: Colors.blueGrey,
+                    //               isBold: true,
+                    //               text: '${controller.allJobsNET.value}',
+                    //             ),
+                    //           ),
+                    //           customBox(
+                    //             title: 'PAID',
+                    //             value: textForDataRowInTable(
+                    //               fontSize: 16,
+                    //               color: Colors.orange,
+                    //               isBold: true,
+                    //               text: '${controller.allJobsPaid.value}',
+                    //             ),
+                    //           ),
+                    //           customBox(
+                    //             title: 'OUTSTANDING',
+                    //             value: textForDataRowInTable(
+                    //               fontSize: 16,
+                    //               color: Colors.blue,
+                    //               isBold: true,
+                    //               text:
+                    //                   '${controller.allJobsOutstanding.value}',
+                    //             ),
+                    //           ),
+                    //         ],
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
                     GetX<JobCardController>(
                       builder: (controller) {
                         return Container(
@@ -900,7 +967,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          color: Colors.red,
+          color: Colors.blue,
           isBold: true,
           text: (jobData.vat.toString()),
         ),
@@ -921,7 +988,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          color: Colors.blue,
+          color: Colors.red,
           isBold: true,
           text: (jobData.finlOutstanding.toString()),
         ),

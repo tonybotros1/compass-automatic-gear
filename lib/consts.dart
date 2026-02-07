@@ -695,6 +695,7 @@ var textStyleForInspectionHints = TextStyle(
 );
 
 var mainColor = const Color(0xff005f95);
+var mainColorWithAlpha = const Color(0xff005f95).withAlpha(100);
 var secColor = const Color(0xff9ab0bf);
 var coolColor = const Color(0xffF4F5F8);
 var containerColor = const Color(0xffF5F5F5);
@@ -1512,8 +1513,6 @@ bool normalizeDate(String input, TextEditingController date) {
     }
     return true;
   }
-
-  
 
   // 2) جرب الصيغ بدون فاصل (سبعة أو ثمانية أرقام)
   final noSepPattern = RegExp(r'^(\d{1,2})(\d{1,2})(\d{4})$');
