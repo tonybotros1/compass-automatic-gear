@@ -208,15 +208,15 @@ class CashManagementReceipt extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
                             children: [
+                              newReceiptButton(
+                                context,
+                                constraints,
+                                controller,
+                              ),
                               Row(
                                 spacing: 10,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  newReceiptButton(
-                                    context,
-                                    constraints,
-                                    controller,
-                                  ),
                                   CustomSlidingSegmentedControl<int>(
                                     height: 30,
                                     initialValue: 1,
@@ -296,38 +296,46 @@ class CashManagementReceipt extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<CashManagementReceiptsController>(
                       builder: (controller) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                spacing: 10,
-                                children: [
-                                  customBox(
-                                    title: 'NUMBER OF RECEIPTS',
-                                    value: textForDataRowInTable(
-                                      fontSize: 16,
-                                      color: mainColor,
-                                      isBold: true,
-                                      text:
-                                          '${controller.numberOfReceipts.value}',
-                                      formatDouble: false,
+                        return Container(
+                          // padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(color: Colors.grey),
+                            // color: Colors.grey.shade600,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  spacing: 1,
+                                  children: [
+                                    customBox(
+                                      title: 'NUMBER OF RECEIPTS',
+                                      value: textForDataRowInTable(
+                                        fontSize: 16,
+                                        color: mainColor,
+                                        isBold: true,
+                                        text:
+                                            '${controller.numberOfReceipts.value}',
+                                        formatDouble: false,
+                                      ),
                                     ),
-                                  ),
-                                  customBox(
-                                    title: 'RECEIVED',
-                                    value: textForDataRowInTable(
-                                      fontSize: 16,
-                                      color: Colors.green,
-                                      isBold: true,
-                                      text:
-                                          '${controller.totalReceiptsReceived.value}',
+                                    customBox(
+                                      title: 'RECEIVED',
+                                      value: textForDataRowInTable(
+                                        fontSize: 16,
+                                        color: Colors.green,
+                                        isBold: true,
+                                        text:
+                                            '${controller.totalReceiptsReceived.value}',
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            const Expanded(child: SizedBox()),
-                          ],
+                              const Expanded(child: SizedBox()),
+                            ],
+                          ),
                         );
                       },
                     ),

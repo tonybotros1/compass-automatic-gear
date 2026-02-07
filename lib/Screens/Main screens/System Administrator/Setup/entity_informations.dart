@@ -206,6 +206,7 @@ Widget tableOfScreens({
     border: TableBorder.symmetric(
       inside: BorderSide(color: Colors.grey.shade200, width: 0.5),
     ),
+    lmRatio: 3,
     autoRowsToHeight: true,
     horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
@@ -214,23 +215,42 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     columns: [
       const DataColumn(label: Text('')),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.L,
         label: AutoSizedText(text: 'Name', constraints: constraints),
         onSort: controller.onSort,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(text: 'Type', constraints: constraints),
+        onSort: controller.onSort,
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(
+          text: 'Customer / Vendor',
+          constraints: constraints,
+        ),
+        onSort: controller.onSort,
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(text: 'Country', constraints: constraints),
         onSort: controller.onSort,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(text: 'City', constraints: constraints),
         onSort: controller.onSort,
       ),
-      DataColumn(
-        label: AutoSizedText(text: 'Phone', constraints: constraints),
-      ),
-      DataColumn(
+
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(text: 'Contact Person', constraints: constraints),
+      ),
+      DataColumn2(
+        size: ColumnSize.L,
+        label: AutoSizedText(text: 'Phone', constraints: constraints),
       ),
     ],
     source: CardDataSource(
@@ -283,6 +303,20 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           maxWidth: null,
           formatDouble: false,
+          text: entityData.entityStatus ?? '',
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: null,
+          formatDouble: false,
+          text: entityData.entityCode!.map((i) => i).toString(),
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: null,
+          formatDouble: false,
           text: (addresses != null && addresses.isNotEmpty)
               ? addresses
                     .where((address) => address.isPrimary == true)
@@ -305,12 +339,13 @@ DataRow dataRowForTheTable(
               : "",
         ),
       ),
+
       DataCell(
         textForDataRowInTable(
           maxWidth: 300,
           formatDouble: false,
           text: entityData.entityPhone!
-              .map((phoneData) => phoneData.number ?? '')
+              .map((phoneData) => phoneData.name ?? '')
               .take(2)
               .join('/'),
         ),
@@ -320,7 +355,7 @@ DataRow dataRowForTheTable(
           maxWidth: 300,
           formatDouble: false,
           text: entityData.entityPhone!
-              .map((phoneData) => phoneData.name ?? '')
+              .map((phoneData) => phoneData.number ?? '')
               .take(2)
               .join('/'),
         ),

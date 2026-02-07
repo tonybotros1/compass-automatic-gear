@@ -7,6 +7,7 @@ import '../../my_text_field.dart';
 
 Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
   return Container(
+    width: double.infinity,
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     child: GetX<CashManagementReceiptsController>(

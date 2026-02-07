@@ -43,7 +43,7 @@ Widget accountInformations<T extends CashManagementBaseController>(
                         controller.receiptType.text = value['name'];
                         controller.isReceiptModified.value = true;
                       }
-                      if (value['name'] == 'Cheque') {
+                      if (value['name'].toLowerCase() == 'cheque') {
                         controller.isChequeSelected.value = true;
                         controller.chequeDate.text = textToDate(
                           DateTime.now().toString(),
@@ -75,7 +75,7 @@ Widget accountInformations<T extends CashManagementBaseController>(
                       return controller.getReceiptsAndPaymentsTypes();
                     },
                   );
-                }
+                },
               ),
               // const SizedBox(height: 10),
               Row(
@@ -199,7 +199,7 @@ Widget accountInformations<T extends CashManagementBaseController>(
                       return controller.getAllAccounts();
                     },
                   );
-                }
+                },
               ),
               Row(
                 spacing: 10,

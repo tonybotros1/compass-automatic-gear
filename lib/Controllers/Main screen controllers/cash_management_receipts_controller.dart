@@ -29,7 +29,8 @@ class CashManagementReceiptsController extends CashManagementBaseController {
 
   @override
   void onInit() async {
-    searchEngineForReceipts({'today': true});
+    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
+    filterSearch();
     super.onInit();
   }
 
@@ -63,7 +64,8 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         isYearSelected.value = false;
         isMonthSelected.value = false;
         isDaySelected.value = true;
-        searchEngineForReceipts({"today": true});
+        filterSearch();
+        // searchEngineForReceipts({"today": true});
         break;
       case 3:
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -74,7 +76,8 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         isYearSelected.value = false;
         isMonthSelected.value = true;
         isDaySelected.value = false;
-        searchEngineForReceipts({"this_month": true});
+        filterSearch();
+        // searchEngineForReceipts({"this_month": true});
         break;
       case 4:
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -84,7 +87,8 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         isYearSelected.value = true;
         isMonthSelected.value = false;
         isDaySelected.value = false;
-        searchEngineForReceipts({"this_year": true});
+        filterSearch();
+        // searchEngineForReceipts({"this_year": true});
         break;
       default:
     }
@@ -429,15 +433,15 @@ class CashManagementReceiptsController extends CashManagementBaseController {
     if (statusFilter.value.text.isNotEmpty) {
       body["status"] = statusFilter.value.text;
     }
-    if (isTodaySelected.isTrue) {
-      body["today"] = true;
-    }
-    if (isThisMonthSelected.isTrue) {
-      body["this_month"] = true;
-    }
-    if (isThisYearSelected.isTrue) {
-      body["this_year"] = true;
-    }
+    // if (isTodaySelected.isTrue) {
+    //   body["today"] = true;
+    // }
+    // if (isThisMonthSelected.isTrue) {
+    //   body["this_month"] = true;
+    // }
+    // if (isThisYearSelected.isTrue) {
+    //   body["this_year"] = true;
+    // }
     if (fromDate.value.text.isNotEmpty) {
       body["from_date"] = convertDateToIson(fromDate.value.text);
     }
@@ -473,8 +477,8 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         List recs = decoded['receipts'];
         Map grandTotals = decoded['grand_totals'];
         totalReceiptsReceived.value = grandTotals['grand_received'];
+        numberOfReceipts.value = grandTotals['grand_count'];
         allReceipts.assignAll(recs.map((rec) => ARReceiptsModel.fromJson(rec)));
-        numberOfReceipts.value = allReceipts.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
