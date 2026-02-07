@@ -161,7 +161,6 @@ class EntityInformations extends StatelessWidget {
                     GetX<EntityInformationsController>(
                       builder: (controller) {
                         return Container(
-                          height: constraints.maxHeight * 0.8,
                           // padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
@@ -174,7 +173,7 @@ class EntityInformations extends StatelessWidget {
                           ),
                           child: SizedBox(
                             width: constraints.maxWidth,
-                            height: constraints.maxHeight * 6 / 7,
+                            height: constraints.maxHeight * 0.8,
 
                             // constraints.maxHeight -
                             // (constraints.maxHeight / 7),
