@@ -122,7 +122,7 @@ DataRow dataRowForTheTable(
           isBold: true,
         ),
       ),
-      DataCell(statusBox(tradeData.status.toString(), width: 100, hieght: 35)),
+      DataCell(statusBox(tradeData.status.toString(), hieght: 35)),
       DataCell(
         textForDataRowInTable(
           text: tradeData.colorIn.toString(),

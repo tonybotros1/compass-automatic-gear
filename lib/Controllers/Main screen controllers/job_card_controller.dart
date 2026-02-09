@@ -243,7 +243,10 @@ class JobCardController extends GetxController {
   RxList<TimeSheetsSummaryForJobCard> timeSheetsSummaryTable =
       RxList<TimeSheetsSummaryForJobCard>([]);
   RxInt initDatePickerValue = RxInt(2);
-  RxInt initPickersValue = RxInt(1);
+  // RxInt initPickersValue = RxInt(1);
+  RxInt initStatusPickersValue = RxInt(1);
+  RxInt initLabelPickersValue = RxInt(1);
+  RxInt initTypePickersValue = RxInt(1);
 
   RxMap allStatus = RxMap({
     '1': {'name': 'New'},
@@ -267,13 +270,6 @@ class JobCardController extends GetxController {
   void onInit() async {
     super.onInit();
     setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
-    isAllSelected.value = false;
-    isTodaySelected.value = true;
-    isThisMonthSelected.value = false;
-    isThisYearSelected.value = false;
-    isYearSelected.value = false;
-    isMonthSelected.value = false;
-    isDaySelected.value = true;
     filterSearch();
     await getCompanyDetails();
     jobWarrentyEndDate.value.addListener(() {
@@ -375,7 +371,6 @@ class JobCardController extends GetxController {
     switch (i) {
       case 1:
         initDatePickerValue.value = 1;
-        initPickersValue.value = 1;
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
@@ -385,7 +380,6 @@ class JobCardController extends GetxController {
         break;
       case 2:
         initDatePickerValue.value = 2;
-        initPickersValue.value = 2;
         setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = true;
@@ -398,7 +392,6 @@ class JobCardController extends GetxController {
         break;
       case 3:
         initDatePickerValue.value = 3;
-        initPickersValue.value = 3;
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = false;
@@ -411,7 +404,6 @@ class JobCardController extends GetxController {
         break;
       case 4:
         initDatePickerValue.value = 4;
-        initPickersValue.value = 4;
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
@@ -428,30 +420,37 @@ class JobCardController extends GetxController {
   void onChooseForStatusPicker(int i) {
     switch (i) {
       case 1:
+        initStatusPickersValue.value = 1;
         statusFilter.value.clear();
         filterSearch();
         break;
       case 2:
+        initStatusPickersValue.value = 2;
         statusFilter.value.text = 'New';
         filterSearch();
         break;
       case 3:
+        initStatusPickersValue.value = 3;
         statusFilter.value.text = 'Posted';
         filterSearch();
         break;
       case 4:
+        initStatusPickersValue.value = 4;
         statusFilter.value.text = 'Cancelled';
         filterSearch();
         break;
       case 5:
+        initStatusPickersValue.value = 5;
         statusFilter.value.text = 'Approved';
         filterSearch();
         break;
       case 6:
+        initStatusPickersValue.value = 6;
         statusFilter.value.text = 'Ready';
         filterSearch();
         break;
       case 7:
+        initStatusPickersValue.value = 7;
         statusFilter.value.text = 'Draft';
         filterSearch();
         break;
@@ -462,14 +461,17 @@ class JobCardController extends GetxController {
   void onChooseForTypePicker(int i) {
     switch (i) {
       case 1:
+        initTypePickersValue.value = 1;
         typeFilter.value.clear();
         filterSearch();
         break;
       case 2:
+        initTypePickersValue.value = 2;
         typeFilter.value.text = 'JOB';
         filterSearch();
         break;
       case 3:
+        initTypePickersValue.value = 3;
         typeFilter.value.text = 'SALE';
         filterSearch();
         break;
@@ -481,14 +483,17 @@ class JobCardController extends GetxController {
   void onChooseForLabelPicker(int i) {
     switch (i) {
       case 1:
+        initLabelPickersValue.value = 1;
         lableFilter.value.clear();
         filterSearch();
         break;
       case 2:
+        initLabelPickersValue.value = 2;
         lableFilter.value.text = 'Returned';
         filterSearch();
         break;
       case 3:
+        initLabelPickersValue.value = 3;
         lableFilter.value.text = 'Not Returned';
         filterSearch();
         break;
@@ -2787,7 +2792,9 @@ class JobCardController extends GetxController {
   }
 
   void clearAllFilters() {
-    initPickersValue.value = 1;
+    initLabelPickersValue.value = 1;
+    initStatusPickersValue.value = 1;
+    initTypePickersValue.value = 1;
     initDatePickerValue.value = 1;
     lableFilter.value.clear();
     lpoFilter.value.clear();

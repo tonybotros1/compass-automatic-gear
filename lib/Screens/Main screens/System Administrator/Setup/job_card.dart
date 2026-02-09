@@ -317,7 +317,7 @@ class JobCard extends StatelessWidget {
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
                                       initialValue:
-                                          controller.initPickersValue.value,
+                                          controller.initStatusPickersValue.value,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('NEW'),
@@ -356,7 +356,7 @@ class JobCard extends StatelessWidget {
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
                                       initialValue:
-                                          controller.initPickersValue.value,
+                                          controller.initTypePickersValue.value,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('JOBS'),
@@ -391,7 +391,7 @@ class JobCard extends StatelessWidget {
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
                                       initialValue:
-                                          controller.initPickersValue.value,
+                                          controller.initLabelPickersValue.value,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('RETURNED'),
